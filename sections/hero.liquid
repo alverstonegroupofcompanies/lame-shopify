@@ -108,6 +108,7 @@
   assign mobile_widths_array = mobile_widths | split: ', '
 
   assign fetch_priority = 'auto'
+  assign hero_fallback_asset = 'hero-cosmetic-girl.png'
 
   if section.index == 1
     assign fetch_priority = 'high'
@@ -327,7 +328,15 @@
   {{ media_slot_2 }}
 
   {% if media_count == 0 %}
-    {{ 'hero-apparel-1' | placeholder_svg_tag: 'hero__media' }}
+    <img
+      src="{{ hero_fallback_asset | asset_url }}"
+      alt="Cosmetic hero banner"
+      class="hero__media hero__media--fallback"
+      width="1920"
+      height="1080"
+      loading="lazy"
+      data-testid="hero-fallback-image"
+    >
   {%- endif -%}
 {% endcapture %}
 
@@ -359,7 +368,15 @@
     }}
   {% endif %}
   {% if media_count == 0 %}
-    {{ 'hero-apparel-1' | placeholder_svg_tag: 'hero__media' }}
+    <img
+      src="{{ hero_fallback_asset | asset_url }}"
+      alt=""
+      class="hero__media hero__media--fallback"
+      width="1920"
+      height="1080"
+      loading="lazy"
+      aria-hidden="true"
+    >
   {% endif %}
 {% endcapture %}
 
@@ -443,7 +460,15 @@
             }}
         {% endif %}
         {% if media_count == 0 %}
-          {{ 'hero-apparel-1' | placeholder_svg_tag: 'hero__media' }}
+          <img
+            src="{{ hero_fallback_asset | asset_url }}"
+            alt=""
+            class="hero__media hero__media--fallback"
+            width="1920"
+            height="1080"
+            loading="lazy"
+            aria-hidden="true"
+          >
         {% endif %}
       {% endif %}
     {% endif %}
@@ -627,6 +652,11 @@
     z-index: var(--layer-base);
   }
 
+  .hero__media-grid img.hero__media {
+    animation: hero-cosmetic-float 14s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+
   /* Mobile/Desktop media visibility */
 
   .hero__media-wrapper--mobile {
@@ -742,6 +772,16 @@
         right: 0;
         left: auto;
       }
+    }
+  }
+
+  @keyframes hero-cosmetic-float {
+    0% {
+      transform: scale(1) translateY(0);
+    }
+
+    100% {
+      transform: scale(1.06) translateY(-8px);
     }
   }
 {% endstylesheet %}
