@@ -4419,9 +4419,11 @@ button.shopify-payment-button__button--unbranded:hover {
 #header-component .header-menu .menu-list__link {
   position: relative;
   border-radius: 999px;
-  letter-spacing: 0.06em;
-  font-size: 0.8rem;
+  font-family: var(--font-heading--family);
+  letter-spacing: 0.045em;
+  font-size: 0.86rem;
   font-weight: 600;
+  border: 1px solid transparent;
 }
 
 #header-component .header-menu .menu-list__link .menu-list__link-title {
@@ -4444,14 +4446,23 @@ button.shopify-payment-button__button--unbranded:hover {
 #header-component .header-menu .menu-list__link:hover,
 #header-component .header-menu .menu-list__link:focus-visible,
 #header-component .header-menu .menu-list__link.menu-list__link--active {
-  background-color: rgb(var(--brand-gold) / 0.09);
+  background-color: transparent;
 }
 
 #header-component .header-menu .menu-list__link:hover::before,
 #header-component .header-menu .menu-list__link:focus-visible::before,
 #header-component .header-menu .menu-list__link.menu-list__link--active::before {
-  transform: scaleX(1);
-  opacity: 1;
+  transform: scaleX(0.9);
+  opacity: 0.85;
+}
+
+#header-component .header-menu .menu-list__link.menu-list__link--active {
+  border-color: rgb(var(--brand-gold) / 0.55);
+  box-shadow: inset 0 0 0 1px rgb(var(--brand-gold) / 0.12);
+}
+
+#header-component .header-menu .menu-list__link.menu-list__link--active::before {
+  opacity: 0;
 }
 
 #header-component .header__icon svg,
@@ -4466,6 +4477,17 @@ button.shopify-payment-button__button--unbranded:hover {
 #header-component .localization-selector {
   border-radius: 999px;
   padding: 0.3rem 0.55rem;
+}
+
+/* Ensure profile/account icon uses same gold tone as other navbar icons. */
+#header-component .account-button .account-button__icon,
+#header-component .account-button .account-button__icon * {
+  color: rgb(var(--brand-gold));
+  stroke: currentColor;
+}
+
+#header-component .account-button shopify-account {
+  --shopify-account-color-text: rgb(var(--brand-gold));
 }
 
 @media screen and (max-width: 749px) {
@@ -4491,6 +4513,24 @@ button.shopify-payment-button__button--unbranded:hover {
 .shopify-section:has([data-testid='product-list']) .button--secondary {
   border-color: rgb(var(--brand-gold) / 0.85);
   color: rgb(var(--brand-gold-strong));
+}
+
+/* Hero carousel: keep CTA minimal and clean. */
+.shopify-section:has([data-testid='hero-slideshow']) .button {
+  min-height: 2.35rem;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+@media screen and (max-width: 749px) {
+  .shopify-section:has([data-testid='hero-slideshow']) .button {
+    min-height: 2.1rem;
+    padding: 0.42rem 0.82rem;
+    font-size: 0.72rem;
+  }
 }
 
 .shopify-section:has([data-testid='product-list']) .section-resource-list__header {
