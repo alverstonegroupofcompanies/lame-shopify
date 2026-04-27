@@ -4393,15 +4393,21 @@ button.shopify-payment-button__button--unbranded:hover {
 }
 
 #header-component .header__row {
-  background: linear-gradient(180deg, rgb(var(--brand-ink) / 0.9), rgb(10 10 10 / 0.86));
-  border-bottom: 1px solid rgb(var(--brand-gold) / 0.35);
+  background: linear-gradient(180deg, rgb(var(--brand-ink) / 0.92), rgb(10 10 10 / 0.88));
+  border-bottom: 1px solid rgb(var(--brand-gold) / 0.28);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 0.16);
+}
+
+#header-component .header__columns {
+  min-height: 68px;
 }
 
 #header-component .header-menu .menu-list__link,
 #header-component .header-actions__action,
 #header-component .localization-selector {
   color: rgb(var(--brand-gold));
-  transition: color 220ms ease, opacity 220ms ease;
+  transition: color 220ms ease, opacity 220ms ease, background-color 220ms ease, transform 220ms ease;
 }
 
 #header-component .header-menu .menu-list__link:hover,
@@ -4410,8 +4416,42 @@ button.shopify-payment-button__button--unbranded:hover {
   color: rgb(var(--brand-gold-strong));
 }
 
-#header-component .menu-list__link::after {
-  background-color: rgb(var(--brand-gold) / 0.8);
+#header-component .header-menu .menu-list__link {
+  position: relative;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+#header-component .header-menu .menu-list__link .menu-list__link-title {
+  padding-inline: 0.7rem;
+}
+
+#header-component .header-menu .menu-list__link::before {
+  content: '';
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.2rem;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgb(var(--brand-gold) / 0), rgb(var(--brand-gold) / 0.85), rgb(var(--brand-gold) / 0));
+  transform: scaleX(0.35);
+  opacity: 0;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+#header-component .header-menu .menu-list__link:hover,
+#header-component .header-menu .menu-list__link:focus-visible,
+#header-component .header-menu .menu-list__link.menu-list__link--active {
+  background-color: rgb(var(--brand-gold) / 0.09);
+}
+
+#header-component .header-menu .menu-list__link:hover::before,
+#header-component .header-menu .menu-list__link:focus-visible::before,
+#header-component .header-menu .menu-list__link.menu-list__link--active::before {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 #header-component .header__icon svg,
@@ -4419,6 +4459,19 @@ button.shopify-payment-button__button--unbranded:hover {
 #header-component .svg-wrapper svg,
 #header-component .svg-wrapper path {
   stroke: rgb(var(--brand-gold));
+  fill: rgb(var(--brand-gold));
+}
+
+#header-component .header-actions__action,
+#header-component .localization-selector {
+  border-radius: 999px;
+  padding: 0.3rem 0.55rem;
+}
+
+@media screen and (max-width: 749px) {
+  #header-component .header__columns {
+    min-height: 58px;
+  }
 }
 
 /* Homepage polish with subtle warm accents */
