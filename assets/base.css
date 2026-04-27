@@ -4385,7 +4385,7 @@ button.shopify-payment-button__button--unbranded:hover {
   opacity: 0.72;
 }
 
-/* Gold brand theme (logo-matching) for navbar + homepage accents */
+/* Lame theme overrides (clean block; variable-driven only) */
 :root {
   --brand-gold: 212 175 55;
   --brand-gold-strong: 193 151 31;
@@ -4399,6 +4399,7 @@ button.shopify-payment-button__button--unbranded:hover {
   --font-accent--family: 'Belleza', sans-serif;
 }
 
+/* Navbar */
 #header-component .header__row {
   background: linear-gradient(180deg, rgb(var(--brand-ink) / 0.92), rgb(10 10 10 / 0.88));
   border-bottom: 1px solid rgb(var(--brand-gold) / 0.28);
@@ -4414,22 +4415,15 @@ button.shopify-payment-button__button--unbranded:hover {
 #header-component .header-actions__action,
 #header-component .localization-selector {
   color: rgb(var(--brand-gold));
-  transition: color 220ms ease, opacity 220ms ease, background-color 220ms ease, transform 220ms ease;
-}
-
-#header-component .header-menu .menu-list__link:hover,
-#header-component .header-actions__action:hover,
-#header-component .localization-selector:hover {
-  color: rgb(var(--brand-gold-strong));
+  transition: color 220ms ease, opacity 220ms ease;
 }
 
 #header-component .header-menu .menu-list__link {
   position: relative;
-  border-radius: 0;
   font-family: var(--lame-font-menu);
-  letter-spacing: 0.032em;
   font-size: 0.78rem;
   font-weight: 400;
+  letter-spacing: 0.032em;
   border-bottom: 1.5px solid transparent;
 }
 
@@ -4437,59 +4431,26 @@ button.shopify-payment-button__button--unbranded:hover {
   padding-inline: 0.3rem;
 }
 
-#header-component .header-menu .menu-list__link::before {
-  content: '';
-  position: absolute;
-  left: 0.3rem;
-  right: 0.3rem;
-  bottom: 0.05rem;
-  height: 1.5px;
-  background: linear-gradient(90deg, rgb(var(--brand-gold) / 0), rgb(var(--brand-gold) / 0.85), rgb(var(--brand-gold) / 0));
-  transform: scaleX(0.35);
-  opacity: 0;
-  transition: transform 220ms ease, opacity 220ms ease;
+#header-component .header-menu .menu-list__link.menu-list__link--active {
+  border-bottom-color: rgb(var(--brand-gold) / 0.65);
 }
 
 #header-component .header-menu .menu-list__link:hover,
 #header-component .header-menu .menu-list__link:focus-visible,
-#header-component .header-menu .menu-list__link.menu-list__link--active {
-  background-color: transparent;
-}
-
-#header-component .header-menu .menu-list__link:hover::before,
-#header-component .header-menu .menu-list__link:focus-visible::before,
-#header-component .header-menu .menu-list__link.menu-list__link--active::before {
-  transform: scaleX(0.9);
-  opacity: 0.85;
-}
-
-#header-component .header-menu .menu-list__link.menu-list__link--active {
-  border-bottom-color: rgb(var(--brand-gold) / 0.62);
-}
-
-#header-component .header-menu .menu-list__link.menu-list__link--active::before {
-  opacity: 0;
+#header-component .header-actions__action:hover,
+#header-component .localization-selector:hover {
+  color: rgb(var(--brand-gold-strong));
 }
 
 #header-component .header__icon svg,
 #header-component .header__icon path,
 #header-component .svg-wrapper svg,
-#header-component .svg-wrapper path {
-  stroke: rgb(var(--brand-gold));
-  fill: rgb(var(--brand-gold));
-}
-
-#header-component .header-actions__action,
-#header-component .localization-selector {
-  border-radius: 999px;
-  padding: 0.3rem 0.55rem;
-}
-
-/* Ensure profile/account icon uses same gold tone as other navbar icons. */
+#header-component .svg-wrapper path,
 #header-component .account-button .account-button__icon,
 #header-component .account-button .account-button__icon * {
   color: rgb(var(--brand-gold));
   stroke: currentColor;
+  fill: currentColor;
 }
 
 #header-component .account-button shopify-account {
@@ -4502,118 +4463,76 @@ button.shopify-payment-button__button--unbranded:hover {
   }
 }
 
-/* Homepage polish with subtle warm accents */
-.shopify-section:has([data-testid='hero-slideshow']),
-.shopify-section:has([data-testid='product-list']) {
-  --brand-soft-gold-border: rgb(var(--brand-gold) / 0.22);
-}
-
-.shopify-section:has([data-testid='hero-slideshow']) .button--primary,
-.shopify-section:has([data-testid='product-list']) .button--primary {
-  background: linear-gradient(135deg, rgb(var(--brand-gold)), rgb(var(--brand-gold-strong)));
-  border-color: rgb(var(--brand-gold));
-  color: #fff;
-}
-
-.shopify-section:has([data-testid='hero-slideshow']) .button--secondary,
-.shopify-section:has([data-testid='product-list']) .button--secondary {
-  border-color: rgb(var(--brand-gold) / 0.85);
-  color: rgb(var(--brand-gold-strong));
-}
-
-/* Desktop-only cap so hero carousel does not become too tall. */
+/* Hero */
 @media screen and (min-width: 750px) {
   .shopify-section:has([data-testid='hero-slideshow']) .slideshow-section {
     --slide-min-height-desktop: min(72vh, 680px);
   }
 }
 
-/* Hero carousel: keep CTA minimal and clean. */
 .shopify-section:has([data-testid='hero-slideshow']) .button {
-  min-height: 2.35rem;
-  padding: 0.5rem 0.95rem;
-  font-size: 0.78rem;
+  min-height: 2.3rem;
+  padding: 0.48rem 0.92rem;
+  font-size: 0.76rem;
   letter-spacing: 0.04em;
   border-radius: 999px;
   text-transform: uppercase;
 }
 
-@media screen and (max-width: 749px) {
-  .shopify-section:has([data-testid='hero-slideshow']) .button {
-    min-height: 2.1rem;
-    padding: 0.42rem 0.82rem;
-    font-size: 0.72rem;
+/* Featured products on homepage */
+.template-index .shopify-section:has([data-testid='product-list']) .section-resource-list__header {
+  border-bottom-color: rgb(var(--brand-gold) / 0.22);
+}
+
+.template-index .shopify-section:has([data-testid='product-list']) .product-grid {
+  --product-grid-gap: 12px;
+}
+
+@media screen and (min-width: 750px) {
+  .template-index .shopify-section:has([data-testid='product-list']) .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .template-index .shopify-section:has([data-testid='product-list']) .product-grid__item:nth-child(n + 4) {
+    display: none;
   }
 }
 
-.shopify-section:has([data-testid='product-list']) .section-resource-list__header {
-  border-bottom-color: var(--brand-soft-gold-border);
-}
-
-.shopify-section:has([data-testid='product-list']) :is(.product-card, .product-grid__card) :is(h4, .h4),
-.shopify-section:has([data-testid='product-list']) product-price {
-  color: rgb(var(--brand-gold-strong));
-}
-
-/* Keep homepage product listing compact and neatly aligned. */
-.shopify-section:has([data-testid='product-list']) .product-grid {
-  --product-grid-gap: 12px;
-  align-items: stretch;
-}
-
-.shopify-section:has([data-testid='product-list']) .product-grid__card {
-  gap: 0.375rem;
-}
-
-.shopify-section:has([data-testid='product-list']) .product-card__content {
+.template-index .shopify-section:has([data-testid='product-list']) .product-card__content {
   border-radius: 12px;
-  border: 1px solid rgb(var(--color-border-rgb) / 0.35);
-  background: linear-gradient(180deg, rgb(var(--color-background-rgb) / 1), rgb(var(--color-background-rgb) / 0.97));
-  box-shadow: 0 8px 20px rgb(var(--color-shadow-rgb) / 0.1);
-}
-
-.shopify-section:has([data-testid='product-list']) :is(.product-card, .resource-list__item):hover .product-card__content {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgb(var(--color-shadow-rgb) / 0.14);
-}
-
-.shopify-section:has([data-testid='product-list']) .card-gallery {
-  aspect-ratio: 1 / 1;
-  background: rgb(var(--color-foreground-rgb) / 0.02);
-}
-
-.shopify-section:has([data-testid='product-list']) .product-grid__item {
-  border: 0;
-}
-
-.shopify-section:has([data-testid='product-list']) :is(.product-card, .product-grid__card) :is(h4, .h4) {
-  display: -webkit-box;
-  margin-top: 0.15rem;
-  margin-bottom: 0.2rem;
-  line-height: 1.35;
-  color: rgb(var(--color-foreground-rgb) / 0.9);
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  border: 1px solid rgb(var(--color-border-rgb) / 0.25);
+  background: rgb(var(--color-background-rgb));
+  box-shadow: 0 6px 16px rgb(var(--color-shadow-rgb) / 0.08);
   overflow: hidden;
 }
 
-.shopify-section:has([data-testid='product-list']) product-price {
-  font-weight: 600;
-  font-size: 0.84rem;
-  color: rgb(var(--brand-gold-strong));
+.template-index .shopify-section:has([data-testid='product-list']) .card-gallery {
+  aspect-ratio: 1 / 1;
+  background: rgb(var(--color-foreground-rgb) / 0.015);
+  border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.18);
 }
 
-@media screen and (max-width: 749px) {
-  .shopify-section:has([data-testid='product-list']) .product-grid {
-    --product-grid-gap: 10px;
-  }
+.template-index .shopify-section:has([data-testid='product-list']) .product-grid__card > :not(.card-gallery) {
+  padding-inline: 0.7rem;
+}
 
-  .shopify-section:has([data-testid='product-list']) .product-card__content {
-    border-radius: 10px;
-  }
+.template-index .shopify-section:has([data-testid='product-list']) quick-add-component {
+  display: none;
+}
 
-  .shopify-section:has([data-testid='product-list']) .card-gallery {
-    aspect-ratio: 1 / 1;
-  }
+.template-index .shopify-section:has([data-testid='product-list']) :is(.product-card, .product-grid__card) :is(h4, .h4) {
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.15rem 0 0.2rem;
+  line-height: 1.35;
+}
+
+.template-index .shopify-section:has([data-testid='product-list']) product-price {
+  color: rgb(var(--brand-gold-strong));
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding-bottom: 0.7rem;
 }
