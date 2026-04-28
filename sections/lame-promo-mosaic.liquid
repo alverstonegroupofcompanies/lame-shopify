@@ -2,7 +2,7 @@
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
   <div class="lame-promo-mosaic spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     <div class="lame-promo-mosaic__layout">
-      <a class="lame-promo-mosaic__left-card" href="{{ section.settings.left_link | default: routes.collections_url }}">
+      <a class="lame-promo-mosaic__left-card" href="{{ section.settings.left_link | default: routes.collections_url }}" data-lame-reveal>
         <div class="lame-promo-mosaic__left-media">
           {% if section.settings.left_image %}
             {{
@@ -24,12 +24,12 @@
         </div>
       </a>
 
-      <div class="lame-promo-mosaic__right-panel">
+      <div class="lame-promo-mosaic__right-panel" data-lame-reveal data-lame-delay="1">
         <a class="lame-promo-mosaic__heading-card" href="{{ section.settings.right_heading_link | default: routes.collections_url }}">
           <p>{{ section.settings.right_heading }}</p>
         </a>
         <div class="lame-promo-mosaic__tiles">
-          <a class="lame-promo-mosaic__tile" href="{{ section.settings.tile_1_link | default: routes.collections_url }}">
+          <a class="lame-promo-mosaic__tile" href="{{ section.settings.tile_1_link | default: routes.collections_url }}" data-lame-reveal data-lame-delay="2">
             {% if section.settings.tile_1_image %}
               {{
                 section.settings.tile_1_image
@@ -44,7 +44,7 @@
               {{ 'collection-1' | placeholder_svg_tag: 'lame-promo-mosaic__image placeholder-svg' }}
             {% endif %}
           </a>
-          <a class="lame-promo-mosaic__tile" href="{{ section.settings.tile_2_link | default: routes.collections_url }}">
+          <a class="lame-promo-mosaic__tile" href="{{ section.settings.tile_2_link | default: routes.collections_url }}" data-lame-reveal data-lame-delay="3">
             {% if section.settings.tile_2_image %}
               {{
                 section.settings.tile_2_image
@@ -64,6 +64,31 @@
     </div>
   </div>
 </section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    const revealNodes = section.querySelectorAll('[data-lame-reveal]');
+    if (!revealNodes.length) return;
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.18, rootMargin: '0px 0px -10% 0px' }
+      );
+      revealNodes.forEach((node) => observer.observe(node));
+    } else {
+      revealNodes.forEach((node) => node.classList.add('is-visible'));
+    }
+  })();
+</script>
 
 {% stylesheet %}
   .lame-promo-mosaic__layout {
@@ -85,6 +110,7 @@
     background: #f2e7e1;
     overflow: hidden;
     display: block;
+    transition: transform 220ms ease, box-shadow 220ms ease;
   }
 
   .lame-promo-mosaic__left-media {
@@ -150,12 +176,23 @@
     aspect-ratio: 1.3 / 1;
     overflow: hidden;
     background: rgb(255 255 255 / 0.5);
+    transition: transform 220ms ease, box-shadow 220ms ease;
   }
 
   .lame-promo-mosaic__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 300ms ease;
+  }
+
+  .lame-promo-mosaic :is(.lame-promo-mosaic__left-card, .lame-promo-mosaic__tile):is(:hover, :focus-visible) {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgb(18 18 18 / 0.1);
+  }
+
+  .lame-promo-mosaic :is(.lame-promo-mosaic__left-card, .lame-promo-mosaic__tile):is(:hover, :focus-visible) .lame-promo-mosaic__image {
+    transform: scale(1.03);
   }
 
   @media screen and (min-width: 750px) {

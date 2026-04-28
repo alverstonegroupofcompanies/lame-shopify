@@ -4722,3 +4722,92 @@ body {
 .footer-content :is(a, p, li, span) {
   color: rgb(255 255 255 / 0.84);
 }
+
+/* Homepage premium subtle motion */
+.template-index {
+  --lame-motion-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --lame-motion-duration: 650ms;
+  --lame-motion-duration-slow: 1100ms;
+  --lame-motion-distance: 18px;
+}
+
+.template-index [data-lame-reveal] {
+  opacity: 0;
+  transform: translateY(var(--lame-motion-distance));
+  transition: opacity var(--lame-motion-duration) var(--lame-motion-ease),
+    transform var(--lame-motion-duration) var(--lame-motion-ease);
+  will-change: transform, opacity;
+}
+
+.template-index [data-lame-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.template-index [data-lame-reveal][data-lame-delay='1'] {
+  transition-delay: 80ms;
+}
+
+.template-index [data-lame-reveal][data-lame-delay='2'] {
+  transition-delay: 160ms;
+}
+
+.template-index [data-lame-reveal][data-lame-delay='3'] {
+  transition-delay: 240ms;
+}
+
+.template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > * {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: lameHeroContentIn var(--lame-motion-duration) var(--lame-motion-ease) forwards;
+}
+
+.template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > *:nth-child(2) {
+  animation-delay: 110ms;
+}
+
+.template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > *:nth-child(3) {
+  animation-delay: 200ms;
+}
+
+.template-index .shopify-section:has([data-testid='hero-slideshow']) :is(.slide__media img, .slide__media video) {
+  animation: lameHeroMediaDrift var(--lame-motion-duration-slow) var(--lame-motion-ease) both;
+  transform-origin: center;
+}
+
+@keyframes lameHeroContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lameHeroMediaDrift {
+  from {
+    opacity: 0.92;
+    transform: scale(1.015);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-index [data-lame-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > *,
+  .template-index .shopify-section:has([data-testid='hero-slideshow']) :is(.slide__media img, .slide__media video) {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
