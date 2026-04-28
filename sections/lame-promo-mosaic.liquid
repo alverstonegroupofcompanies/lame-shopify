@@ -1,66 +1,35 @@
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
   <div class="lame-promo-mosaic spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    <div class="lame-promo-mosaic__layout">
-      <a class="lame-promo-mosaic__left-card" href="{{ section.settings.left_link | default: routes.collections_url }}" data-lame-reveal>
-        <div class="lame-promo-mosaic__left-media">
-          {% if section.settings.left_image %}
+    <div class="lame-promo-mosaic__grid">
+      {% for i in (1..7) %}
+        {% liquid
+          assign image_key = 'image_' | append: i
+          assign link_key = 'link_' | append: i
+          assign tile_image = section.settings[image_key]
+          assign tile_link = section.settings[link_key]
+        %}
+        <a
+          class="lame-promo-mosaic__tile"
+          href="{{ tile_link | default: routes.collections_url }}"
+          data-lame-reveal
+          data-lame-delay="{{ forloop.index0 | modulo: 3 }}"
+        >
+          {% if tile_image %}
             {{
-              section.settings.left_image
-              | image_url: width: 900
+              tile_image
+              | image_url: width: 1200
               | image_tag:
                 class: 'lame-promo-mosaic__image',
                 loading: 'lazy',
-                widths: '320,480,640,900',
-                sizes: '(min-width: 990px) 24vw, 88vw'
+                widths: '300,480,720,960,1200',
+                sizes: '(min-width: 1200px) 28vw, (min-width: 750px) 45vw, 90vw'
             }}
           {% else %}
             {{ 'image' | placeholder_svg_tag: 'lame-promo-mosaic__image placeholder-svg' }}
           {% endif %}
-        </div>
-        <div class="lame-promo-mosaic__left-content">
-          <p class="lame-promo-mosaic__eyebrow">{{ section.settings.left_eyebrow }}</p>
-          <h3 class="lame-promo-mosaic__title">{{ section.settings.left_title }}</h3>
-        </div>
-      </a>
-
-      <div class="lame-promo-mosaic__right-panel" data-lame-reveal data-lame-delay="1">
-        <a class="lame-promo-mosaic__heading-card" href="{{ section.settings.right_heading_link | default: routes.collections_url }}">
-          <p>{{ section.settings.right_heading }}</p>
         </a>
-        <div class="lame-promo-mosaic__tiles">
-          <a class="lame-promo-mosaic__tile" href="{{ section.settings.tile_1_link | default: routes.collections_url }}" data-lame-reveal data-lame-delay="2">
-            {% if section.settings.tile_1_image %}
-              {{
-                section.settings.tile_1_image
-                | image_url: width: 700
-                | image_tag:
-                  class: 'lame-promo-mosaic__image',
-                  loading: 'lazy',
-                  widths: '260,420,560,700',
-                  sizes: '(min-width: 990px) 17vw, 42vw'
-              }}
-            {% else %}
-              {{ 'collection-1' | placeholder_svg_tag: 'lame-promo-mosaic__image placeholder-svg' }}
-            {% endif %}
-          </a>
-          <a class="lame-promo-mosaic__tile" href="{{ section.settings.tile_2_link | default: routes.collections_url }}" data-lame-reveal data-lame-delay="3">
-            {% if section.settings.tile_2_image %}
-              {{
-                section.settings.tile_2_image
-                | image_url: width: 700
-                | image_tag:
-                  class: 'lame-promo-mosaic__image',
-                  loading: 'lazy',
-                  widths: '260,420,560,700',
-                  sizes: '(min-width: 990px) 17vw, 42vw'
-              }}
-            {% else %}
-              {{ 'collection-2' | placeholder_svg_tag: 'lame-promo-mosaic__image placeholder-svg' }}
-            {% endif %}
-          </a>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -91,92 +60,26 @@
 </script>
 
 {% stylesheet %}
-  .lame-promo-mosaic__layout {
+  .lame-promo-mosaic {
+    max-width: var(--page-width);
+    margin-inline: auto;
+  }
+
+  .lame-promo-mosaic__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 0.7rem;
+    gap: 0.75rem;
   }
 
-  .lame-promo-mosaic__left-card,
-  .lame-promo-mosaic__heading-card,
   .lame-promo-mosaic__tile {
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: rgb(var(--brand-gold) / 0.08);
+    border: 1px solid rgb(var(--brand-gold) / 0.35);
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
     text-decoration: none;
     color: inherit;
-  }
-
-  .lame-promo-mosaic__left-card {
-    position: relative;
-    min-height: clamp(210px, 28vw, 300px);
-    background: #f2e7e1;
-    overflow: hidden;
-    display: block;
-    transition: transform 220ms ease, box-shadow 220ms ease;
-  }
-
-  .lame-promo-mosaic__left-media {
-    position: absolute;
-    inset: 0;
-  }
-
-  .lame-promo-mosaic__left-content {
-    position: relative;
-    z-index: 1;
-    padding: 1rem 0.9rem;
-    max-width: 14rem;
-    background: linear-gradient(90deg, rgb(255 255 255 / 0.78) 0%, rgb(255 255 255 / 0.05) 100%);
-    min-height: 100%;
-  }
-
-  .lame-promo-mosaic__eyebrow {
-    margin: 0 0 0.2rem;
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #7f6d67;
-  }
-
-  .lame-promo-mosaic__title {
-    margin: 0;
-    font-size: clamp(0.9rem, 1.7vw, 1.15rem);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #2f241f;
-  }
-
-  .lame-promo-mosaic__right-panel {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    background: #f3deda;
-    padding: 0.7rem;
-    gap: 0.55rem;
-  }
-
-  .lame-promo-mosaic__heading-card {
-    text-align: center;
-    padding: 0.5rem;
-    background: rgb(255 255 255 / 0.4);
-  }
-
-  .lame-promo-mosaic__heading-card p {
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.13em;
-    font-size: 0.58rem;
-    color: #6f5750;
-  }
-
-  .lame-promo-mosaic__tiles {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-  }
-
-  .lame-promo-mosaic__tile {
-    display: block;
-    aspect-ratio: 1.3 / 1;
-    overflow: hidden;
-    background: rgb(255 255 255 / 0.5);
-    transition: transform 220ms ease, box-shadow 220ms ease;
   }
 
   .lame-promo-mosaic__image {
@@ -186,19 +89,25 @@
     transition: transform 300ms ease;
   }
 
-  .lame-promo-mosaic :is(.lame-promo-mosaic__left-card, .lame-promo-mosaic__tile):is(:hover, :focus-visible) {
+  .lame-promo-mosaic .lame-promo-mosaic__tile:is(:hover, :focus-visible) {
     transform: translateY(-3px);
     box-shadow: 0 12px 24px rgb(18 18 18 / 0.1);
+    border-color: rgb(var(--brand-gold) / 0.62);
   }
 
-  .lame-promo-mosaic :is(.lame-promo-mosaic__left-card, .lame-promo-mosaic__tile):is(:hover, :focus-visible) .lame-promo-mosaic__image {
+  .lame-promo-mosaic .lame-promo-mosaic__tile:is(:hover, :focus-visible) .lame-promo-mosaic__image {
     transform: scale(1.03);
   }
 
   @media screen and (min-width: 750px) {
-    .lame-promo-mosaic__layout {
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.45fr);
-      gap: 0.75rem;
+    .lame-promo-mosaic__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-promo-mosaic__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 {% endstylesheet %}
@@ -223,59 +132,20 @@
       "label": "Color scheme",
       "default": "scheme-1"
     },
-    {
-      "type": "text",
-      "id": "left_eyebrow",
-      "label": "Left card eyebrow",
-      "default": "Lame Skin Edit"
-    },
-    {
-      "type": "text",
-      "id": "left_title",
-      "label": "Left card title",
-      "default": "Face Cream"
-    },
-    {
-      "type": "image_picker",
-      "id": "left_image",
-      "label": "Left card image"
-    },
-    {
-      "type": "url",
-      "id": "left_link",
-      "label": "Left card link"
-    },
-    {
-      "type": "text",
-      "id": "right_heading",
-      "label": "Right panel heading",
-      "default": "Save 30% - Indulge In Luxury"
-    },
-    {
-      "type": "url",
-      "id": "right_heading_link",
-      "label": "Right heading link"
-    },
-    {
-      "type": "image_picker",
-      "id": "tile_1_image",
-      "label": "Tile image 1"
-    },
-    {
-      "type": "url",
-      "id": "tile_1_link",
-      "label": "Tile 1 link"
-    },
-    {
-      "type": "image_picker",
-      "id": "tile_2_image",
-      "label": "Tile image 2"
-    },
-    {
-      "type": "url",
-      "id": "tile_2_link",
-      "label": "Tile 2 link"
-    },
+    { "type": "image_picker", "id": "image_1", "label": "Image 1" },
+    { "type": "url", "id": "link_1", "label": "Image 1 link" },
+    { "type": "image_picker", "id": "image_2", "label": "Image 2" },
+    { "type": "url", "id": "link_2", "label": "Image 2 link" },
+    { "type": "image_picker", "id": "image_3", "label": "Image 3" },
+    { "type": "url", "id": "link_3", "label": "Image 3 link" },
+    { "type": "image_picker", "id": "image_4", "label": "Image 4" },
+    { "type": "url", "id": "link_4", "label": "Image 4 link" },
+    { "type": "image_picker", "id": "image_5", "label": "Image 5" },
+    { "type": "url", "id": "link_5", "label": "Image 5 link" },
+    { "type": "image_picker", "id": "image_6", "label": "Image 6" },
+    { "type": "url", "id": "link_6", "label": "Image 6 link" },
+    { "type": "image_picker", "id": "image_7", "label": "Image 7" },
+    { "type": "url", "id": "link_7", "label": "Image 7 link" },
     {
       "type": "range",
       "id": "padding-block-start",
