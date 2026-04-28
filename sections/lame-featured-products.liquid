@@ -1,0 +1,221 @@
+{% liquid
+  assign featured_collection = collections[section.settings.collection]
+  if featured_collection == blank
+    assign featured_collection = collections.all
+  endif
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
+  <div class="lame-featured-products spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    <header class="lame-featured-products__header">
+      <h2 class="lame-featured-products__title">{{ section.settings.heading }}</h2>
+      {% if section.settings.subheading != blank %}
+        <p class="lame-featured-products__subtitle">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </header>
+
+    <ul class="lame-featured-products__grid" role="list">
+      {% for product in featured_collection.products limit: section.settings.products_to_show %}
+        <li class="lame-featured-products__item">
+          <a href="{{ product.url }}" class="lame-featured-products__card">
+            <div class="lame-featured-products__image-wrap">
+              {% if product.featured_media %}
+                {{
+                  product.featured_media
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'lame-featured-products__image',
+                    loading: 'lazy',
+                    widths: '240,360,480,720,900',
+                    sizes: '(min-width: 990px) 20vw, (min-width: 750px) 28vw, 46vw'
+                }}
+              {% else %}
+                {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-featured-products__image placeholder-svg' }}
+              {% endif %}
+            </div>
+
+            <div class="lame-featured-products__content">
+              <h3 class="lame-featured-products__product-title">{{ product.title }}</h3>
+              <p class="lame-featured-products__price">
+                {% render 'price', product_resource: product, show_sale_price_first: true %}
+              </p>
+            </div>
+          </a>
+        </li>
+      {% else %}
+        {% for i in (1..section.settings.products_to_show) %}
+          <li class="lame-featured-products__item">
+            <div class="lame-featured-products__card">
+              <div class="lame-featured-products__image-wrap">
+                {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-featured-products__image placeholder-svg' }}
+              </div>
+              <div class="lame-featured-products__content">
+                <h3 class="lame-featured-products__product-title">{{ 'Product title' }}</h3>
+                <p class="lame-featured-products__price">{{ '$0.00' }}</p>
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-featured-products__header {
+    text-align: center;
+    margin-bottom: var(--padding-lg);
+  }
+
+  .lame-featured-products__title {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    line-height: 1.2;
+  }
+
+  .lame-featured-products__subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: rgb(var(--color-foreground-rgb) / 0.62);
+  }
+
+  .lame-featured-products__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .lame-featured-products__item {
+    min-width: 0;
+  }
+
+  .lame-featured-products__card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid rgb(var(--color-border-rgb) / 0.16);
+    background: rgb(var(--color-background-rgb));
+    padding: 0.55rem;
+    transition: border-color 180ms ease;
+  }
+
+  .lame-featured-products__card:hover {
+    border-color: rgb(var(--color-foreground-rgb) / 0.28);
+  }
+
+  .lame-featured-products__image-wrap {
+    aspect-ratio: 1 / 1.12;
+    background: rgb(var(--color-foreground-rgb) / 0.03);
+    display: grid;
+    place-items: center;
+  }
+
+  .lame-featured-products__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .lame-featured-products__content {
+    padding-top: 0.42rem;
+    text-align: center;
+  }
+
+  .lame-featured-products__product-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+
+  .lame-featured-products__price {
+    margin: 0;
+    font-size: 0.68rem;
+    color: rgb(var(--color-foreground-rgb) / 0.82);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-featured-products__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Lame Featured Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Featured Products"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Get the skin you want now."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 3,
+      "max": 9,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lame Featured Products"
+    }
+  ]
+}
+{% endschema %}
