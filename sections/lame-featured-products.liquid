@@ -15,7 +15,14 @@
       {% endif %}
     </header>
 
-    <ul class="lame-featured-products__grid" role="list">
+    <div class="lame-featured-products__carousel-wrap">
+      <button class="lame-featured-products__arrow lame-featured-products__arrow--prev" type="button" aria-label="Previous products" data-arrow="prev">
+        <span aria-hidden="true">&#8249;</span>
+      </button>
+      <button class="lame-featured-products__arrow lame-featured-products__arrow--next" type="button" aria-label="Next products" data-arrow="next">
+        <span aria-hidden="true">&#8250;</span>
+      </button>
+      <ul class="lame-featured-products__grid" role="list" data-featured-track>
       {% for product in featured_collection.products limit: section.settings.products_to_show %}
         <li class="lame-featured-products__item">
           <a href="{{ product.url }}" class="lame-featured-products__card">
@@ -58,9 +65,34 @@
           </li>
         {% endfor %}
       {% endfor %}
-    </ul>
+      </ul>
+    </div>
   </div>
 </section>
+
+<script>
+  (() => {
+    const section = document.currentScript?.closest('.shopify-section') || document.currentScript?.parentElement;
+    if (!section) return;
+    const track = section.querySelector('[data-featured-track]');
+    if (!track) return;
+    const prev = section.querySelector('[data-arrow=\"prev\"]');
+    const next = section.querySelector('[data-arrow=\"next\"]');
+    if (!prev || !next) return;
+
+    const scrollByCard = (direction) => {
+      const card = track.querySelector('.lame-featured-products__item');
+      if (!card) return;
+      const styles = getComputedStyle(track);
+      const gap = parseFloat(styles.columnGap || styles.gap || '0');
+      const amount = card.clientWidth + gap;
+      track.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    };
+
+    prev.addEventListener('click', () => scrollByCard(-1));
+    next.addEventListener('click', () => scrollByCard(1));
+  })();
+</script>
 
 {% stylesheet %}
   .lame-featured-products__header {
@@ -84,17 +116,32 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .lame-featured-products__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-featured-products__carousel-wrap {
+    position: relative;
+    padding-inline: 2rem;
   }
 
   .lame-featured-products__item {
-    min-width: 0;
+    min-width: calc((100% - 12px) / 2);
+    scroll-snap-align: start;
+    display: flex;
   }
 
   .lame-featured-products__card {
     display: block;
+    width: 100%;
+    height: 100%;
     text-decoration: none;
     color: inherit;
     border: 1px solid rgb(var(--color-border-rgb) / 0.16);
@@ -123,6 +170,7 @@
   .lame-featured-products__content {
     padding-top: 0.42rem;
     text-align: center;
+    min-height: 58px;
   }
 
   .lame-featured-products__product-title {
@@ -137,10 +185,37 @@
     color: rgb(var(--color-foreground-rgb) / 0.82);
   }
 
+  .lame-featured-products__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid rgb(var(--color-border-rgb) / 0.3);
+    background: rgb(var(--color-background-rgb));
+    color: rgb(var(--color-foreground-rgb) / 0.8);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .lame-featured-products__arrow--prev {
+    left: 0;
+  }
+
+  .lame-featured-products__arrow--next {
+    right: 0;
+  }
+
   @media screen and (min-width: 750px) {
     .lame-featured-products__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
+    }
+
+    .lame-featured-products__item {
+      min-width: calc((100% - 28px) / 3);
     }
   }
 {% endstylesheet %}
