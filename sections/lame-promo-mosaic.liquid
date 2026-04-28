@@ -1,6 +1,11 @@
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
   <div class="lame-promo-mosaic spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {% if section.settings.heading != blank %}
+      <header class="lame-promo-mosaic__header" data-lame-reveal>
+        <h2 class="lame-promo-mosaic__title">{{ section.settings.heading }}</h2>
+      </header>
+    {% endif %}
     <div class="lame-promo-mosaic__grid">
       {% for block in section.blocks %}
         {% liquid
@@ -60,8 +65,22 @@
 
 {% stylesheet %}
   .lame-promo-mosaic {
-    max-width: var(--page-width);
-    margin-inline: auto;
+    width: 100%;
+  }
+
+  .lame-promo-mosaic__header {
+    text-align: center;
+    margin-bottom: clamp(0.65rem, 1.6vw, 1rem);
+  }
+
+  .lame-promo-mosaic__title {
+    margin: 0;
+    color: rgb(var(--brand-gold));
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1rem, 2.1vw, 1.42rem);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    line-height: 1.15;
   }
 
   .lame-promo-mosaic__grid {
@@ -130,6 +149,12 @@
       "id": "color_scheme",
       "label": "Color scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Signature Collection"
     },
     {
       "type": "range",
