@@ -72,13 +72,29 @@
 
 <script>
   (() => {
-    const section = document.currentScript?.closest('.shopify-section') || document.currentScript?.parentElement;
+    const section = document.getElementById('shopify-section-{{ section.id }}');
     if (!section) return;
     const track = section.querySelector('[data-featured-track]');
     if (!track) return;
     const prev = section.querySelector('[data-arrow=\"prev\"]');
     const next = section.querySelector('[data-arrow=\"next\"]');
     if (!prev || !next) return;
+
+    const updateArrows = () => {
+      const maxScrollLeft = Math.max(0, track.scrollWidth - track.clientWidth);
+      const hasOverflow = maxScrollLeft > 1;
+      prev.hidden = !hasOverflow;
+      next.hidden = !hasOverflow;
+      if (!hasOverflow) {
+        prev.disabled = true;
+        next.disabled = true;
+        return;
+      }
+
+      const current = track.scrollLeft;
+      prev.disabled = current <= 1;
+      next.disabled = current >= maxScrollLeft - 1;
+    };
 
     const scrollByCard = (direction) => {
       const card = track.querySelector('.lame-featured-products__item');
@@ -91,6 +107,9 @@
 
     prev.addEventListener('click', () => scrollByCard(-1));
     next.addEventListener('click', () => scrollByCard(1));
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    setTimeout(updateArrows, 0);
   })();
 </script>
 
@@ -199,6 +218,12 @@
     justify-content: center;
     cursor: pointer;
     z-index: 2;
+  }
+
+  .lame-featured-products__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
   }
 
   .lame-featured-products__arrow--prev {
