@@ -1,170 +1,151 @@
-
-
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-<div
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
->
+<footer class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
   {% liquid
-    assign total_blocks = section.blocks.size
-
-    # Grid layout calculations
-    assign grid_columns = total_blocks | at_most: 4
-
-    # Calculate last row counts using modulo arithmetic
-    # last_row_count = (total_blocks - 1) % N + 1
-    assign last_row_count = total_blocks | minus: 1 | modulo: 4 | plus: 1
-    assign tablet_last_row_count = total_blocks | minus: 1 | modulo: 2 | plus: 1
-
-    # Check if there are orphaned elements (single item in last row)
-    assign has_isolated_grid_item_desktop = false
-    assign has_isolated_grid_item_tablet = false
-
-    if total_blocks > 4 and last_row_count == 1
-      assign has_isolated_grid_item_desktop = true
-    endif
-
-    if total_blocks == 5
-      assign has_isolated_grid_item_tablet = true
-    endif
-  %}
-  <div
-    class="
-      footer-content
-      spacing-style
-      {% if has_isolated_grid_item_desktop %}footer-content--isolated-grid-item-desktop{% endif %}
-      {% if has_isolated_grid_item_tablet %}footer-content--isolated-grid-item-tablet{% endif %}
-    "
-    style="
-      {%  render 'spacing-style', settings: section.settings %}
-      --footer-gap: {{ section.settings.gap }}px;
-      --grid-columns: {{ grid_columns }};
-      --last-row-count: {{ last_row_count }};
-      --tablet-last-row-count: {{ tablet_last_row_count }};
-    "
-  >
-    {% content_for 'blocks' %}
-  </div>
-
-  {% liquid
-    assign category_menu = linklists[section.settings.category_menu]
+    assign categories_menu = linklists[section.settings.categories_menu]
     assign quick_links_menu = linklists[section.settings.quick_links_menu]
-    assign support_menu = linklists[section.settings.support_menu]
   %}
 
-  {% if section.settings.show_detailed_footer %}
-    <div class="footer-detailed">
-      {% if section.settings.detailed_footer_heading != blank %}
-        <div class="footer-detailed__intro">
-          <h3 class="footer-detailed__title">{{ section.settings.detailed_footer_heading }}</h3>
-          {% if section.settings.detailed_footer_text != blank %}
-            <p class="footer-detailed__text">{{ section.settings.detailed_footer_text }}</p>
-          {% endif %}
-        </div>
-      {% endif %}
+  <div class="footer-rich spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    <div class="footer-rich__top">
+      <div class="footer-rich__brand">
+        {% if section.settings.logo != blank %}
+          {{
+            section.settings.logo
+            | image_url: width: 320
+            | image_tag:
+              class: 'footer-rich__logo',
+              loading: 'lazy',
+              widths: '120,180,240,320',
+              sizes: '180px'
+          }}
+        {% else %}
+          <h2 class="footer-rich__brand-name">{{ section.settings.brand_name }}</h2>
+        {% endif %}
 
-      <div class="footer-detailed__grid">
-        <div class="footer-detailed__column">
-          <h4 class="footer-detailed__heading">{{ section.settings.categories_heading | default: 'Categories' }}</h4>
-          {% if category_menu != blank and category_menu.links.size > 0 %}
-            <ul class="footer-detailed__list" role="list">
-              {% for link in category_menu.links %}
+        {% if section.settings.about_text != blank %}
+          <div class="footer-rich__about rte">{{ section.settings.about_text }}</div>
+        {% endif %}
+      </div>
+
+      <div class="footer-rich__nav-columns">
+        <div class="footer-rich__column">
+          <h3 class="footer-rich__heading">{{ section.settings.categories_heading }}</h3>
+          {% if categories_menu != blank and categories_menu.links.size > 0 %}
+            <ul class="footer-rich__links" role="list">
+              {% for link in categories_menu.links %}
                 <li><a href="{{ link.url }}">{{ link.title }}</a></li>
               {% endfor %}
             </ul>
           {% else %}
-            <p class="footer-detailed__placeholder">{{ section.settings.categories_empty_text }}</p>
+            <p class="footer-rich__placeholder">{{ section.settings.categories_empty_text }}</p>
           {% endif %}
         </div>
 
-        <div class="footer-detailed__column">
-          <h4 class="footer-detailed__heading">{{ section.settings.quick_links_heading | default: 'Quick links' }}</h4>
+        <div class="footer-rich__column">
+          <h3 class="footer-rich__heading">{{ section.settings.quick_links_heading }}</h3>
           {% if quick_links_menu != blank and quick_links_menu.links.size > 0 %}
-            <ul class="footer-detailed__list" role="list">
+            <ul class="footer-rich__links" role="list">
               {% for link in quick_links_menu.links %}
                 <li><a href="{{ link.url }}">{{ link.title }}</a></li>
               {% endfor %}
             </ul>
           {% else %}
-            <p class="footer-detailed__placeholder">{{ section.settings.quick_links_empty_text }}</p>
+            <p class="footer-rich__placeholder">{{ section.settings.quick_links_empty_text }}</p>
           {% endif %}
         </div>
 
-        <div class="footer-detailed__column">
-          <h4 class="footer-detailed__heading">{{ section.settings.support_heading | default: 'Support' }}</h4>
-          {% if support_menu != blank and support_menu.links.size > 0 %}
-            <ul class="footer-detailed__list" role="list">
-              {% for link in support_menu.links %}
-                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        <div class="footer-rich__column">
+          <h3 class="footer-rich__heading">{{ section.settings.social_heading }}</h3>
+          {% if section.blocks.size > 0 %}
+            <ul class="footer-rich__links footer-rich__links--social" role="list">
+              {% for block in section.blocks %}
+                {% if block.type == 'social_link' and block.settings.url != blank %}
+                  <li {{ block.shopify_attributes }}>
+                    <a href="{{ block.settings.url }}" {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                      {{ block.settings.label }}
+                    </a>
+                  </li>
+                {% endif %}
               {% endfor %}
             </ul>
           {% else %}
-            <p class="footer-detailed__placeholder">{{ section.settings.support_empty_text }}</p>
-          {% endif %}
-        </div>
-
-        <div class="footer-detailed__column">
-          <h4 class="footer-detailed__heading">{{ section.settings.contact_heading | default: 'Contact' }}</h4>
-          {% if section.settings.contact_text != blank %}
-            <div class="footer-detailed__contact rte">{{ section.settings.contact_text }}</div>
-          {% else %}
-            <p class="footer-detailed__placeholder">{{ section.settings.contact_empty_text }}</p>
+            <p class="footer-rich__placeholder">{{ section.settings.social_empty_text }}</p>
           {% endif %}
         </div>
       </div>
     </div>
-  {% endif %}
-</div>
+
+    <div class="footer-rich__info">
+      <div class="footer-rich__info-item">
+        <h4>{{ section.settings.hours_heading }}</h4>
+        <div class="rte">{{ section.settings.working_hours }}</div>
+      </div>
+      <div class="footer-rich__info-item">
+        <h4>{{ section.settings.address_heading }}</h4>
+        <div class="rte">{{ section.settings.shop_address }}</div>
+      </div>
+      <div class="footer-rich__info-item">
+        <h4>{{ section.settings.contact_heading }}</h4>
+        <div class="rte">{{ section.settings.contact_details }}</div>
+      </div>
+    </div>
+
+    <div class="footer-rich__bottom">
+      <p>{{ section.settings.copyright_text }}</p>
+    </div>
+  </div>
+</footer>
 
 {% stylesheet %}
-  .footer-content {
-    contain: content;
-    content-visibility: auto;
+  .footer-rich {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--footer-gap);
-    align-items: start;
+    gap: 1.25rem;
   }
 
-  .footer-content .menu__heading__default {
-    font-weight: var(--font-heading--weight);
-  }
-
-  .footer-detailed {
-    margin-top: clamp(1.2rem, 3vw, 2rem);
-    padding-top: clamp(1rem, 2.2vw, 1.4rem);
-    border-top: 1px solid rgb(var(--color-border-rgb) / 0.22);
-  }
-
-  .footer-detailed__intro {
-    margin-bottom: 1rem;
-  }
-
-  .footer-detailed__title {
-    margin: 0;
-    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
-    letter-spacing: 0.02em;
-  }
-
-  .footer-detailed__text {
-    margin: 0.35rem 0 0;
-    color: rgb(var(--color-foreground-rgb) / 0.72);
-    max-width: 72ch;
-  }
-
-  .footer-detailed__grid {
+  .footer-rich__top {
     display: grid;
-    grid-template-columns: 1fr;
     gap: 1.2rem;
   }
 
-  .footer-detailed__heading {
-    margin: 0 0 0.5rem;
-    font-size: 0.95rem;
-    letter-spacing: 0.03em;
+  .footer-rich__brand {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .footer-rich__logo {
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    display: block;
+  }
+
+  .footer-rich__brand-name {
+    margin: 0;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+  }
+
+  .footer-rich__about {
+    color: rgb(var(--color-foreground-rgb) / 0.8);
+  }
+
+  .footer-rich__about p {
+    margin: 0;
+  }
+
+  .footer-rich__nav-columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .footer-rich__heading {
+    margin: 0 0 0.55rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
-  .footer-detailed__list {
+  .footer-rich__links {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -172,121 +153,71 @@
     gap: 0.42rem;
   }
 
-  .footer-detailed__list a {
+  .footer-rich__links a {
     text-decoration: none;
     color: rgb(var(--color-foreground-rgb) / 0.86);
-    transition: color 160ms ease;
   }
 
-  .footer-detailed__list a:is(:hover, :focus-visible) {
-    color: rgb(var(--color-foreground-rgb));
+  .footer-rich__links a:is(:hover, :focus-visible) {
     text-decoration: underline;
     text-underline-offset: 2px;
   }
 
-  .footer-detailed__contact {
-    color: rgb(var(--color-foreground-rgb) / 0.84);
-  }
-
-  .footer-detailed__contact p {
-    margin: 0 0 0.45rem;
-  }
-
-  .footer-detailed__placeholder {
+  .footer-rich__placeholder {
     margin: 0;
     color: rgb(var(--color-foreground-rgb) / 0.58);
     font-size: 0.9rem;
   }
 
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    .footer-content {
-      grid-template-columns: repeat(min(var(--grid-columns), 3), 1fr);
-      grid-auto-flow: row;
-    }
-
-    .footer-content[style*='--grid-columns: 4'] {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .footer-content--isolated-grid-item-tablet > :last-child {
-      grid-column: 1 / -1;
-    }
-
-    .footer-detailed__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.4rem;
-    }
+  .footer-rich__info {
+    border-top: 1px solid rgb(var(--color-border-rgb) / 0.22);
+    border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.22);
+    padding: 0.95rem 0;
+    display: grid;
+    gap: 0.85rem;
   }
 
-  @media screen and (min-width: 990px) {
-    .footer-content {
-      grid-template-columns: repeat(var(--grid-columns), 1fr);
+  .footer-rich__info-item h4 {
+    margin: 0 0 0.3rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .footer-rich__info-item :is(p, a) {
+    margin: 0;
+    color: rgb(var(--color-foreground-rgb) / 0.86);
+  }
+
+  .footer-rich__bottom p {
+    margin: 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: rgb(var(--color-foreground-rgb) / 0.7);
+  }
+
+  @media screen and (min-width: 750px) {
+    .footer-rich__top {
+      grid-template-columns: 1.1fr 2fr;
+      gap: 1.6rem;
     }
 
-    /* Single item centered */
-    .footer-content[style*='--grid-columns: 1'] {
-      justify-items: center;
+    .footer-rich__nav-columns {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.4rem;
     }
 
-    .footer-content--isolated-grid-item-desktop > :last-child {
-      grid-column: 1 / -1;
-    }
-
-    .footer-detailed__grid {
-      grid-template-columns: 1.15fr 1fr 1fr 1.2fr;
-      gap: 1.8rem;
+    .footer-rich__info {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
     }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:names.footer",
+  "name": "Lame Editable Footer",
   "class": "section-wrapper",
-  "blocks": [
-    {
-      "type": "_divider"
-    },
-    {
-      "type": "@app"
-    },
-    {
-      "type": "button"
-    },
-    {
-      "type": "follow-on-shop"
-    },
-    {
-      "type": "group"
-    },
-    {
-      "type": "icon"
-    },
-    {
-      "type": "image"
-    },
-    {
-      "type": "menu"
-    },
-    {
-      "type": "payment-icons"
-    },
-    {
-      "type": "text"
-    },
-    {
-      "type": "logo"
-    },
-    {
-      "type": "jumbo-text"
-    },
-    {
-      "type": "social-links"
-    },
-    {
-      "type": "email-signup"
-    }
-  ],
   "enabled_on": {
     "groups": ["footer"]
   },
@@ -294,79 +225,58 @@
     {
       "type": "select",
       "id": "section_width",
-      "label": "t:settings.width",
+      "label": "Section width",
       "options": [
-        {
-          "value": "page-width",
-          "label": "t:options.page"
-        },
-        {
-          "value": "full-width",
-          "label": "t:options.full"
-        }
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
       ],
       "default": "page-width"
     },
     {
-      "type": "range",
-      "id": "gap",
-      "label": "t:settings.gap",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
       "type": "color_scheme",
       "id": "color_scheme",
-      "label": "t:settings.color_scheme",
+      "label": "Color scheme",
       "default": "scheme-1"
     },
     {
-      "type": "header",
-      "content": "Detailed footer"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_detailed_footer",
-      "label": "Show detailed footer row",
-      "default": true
-    },
-    {
       "type": "text",
-      "id": "detailed_footer_heading",
-      "label": "Detailed footer heading",
-      "default": "Explore Lame Beauty"
+      "id": "brand_name",
+      "label": "Brand name (fallback)",
+      "default": "Lame Beauty Care"
     },
     {
-      "type": "text",
-      "id": "detailed_footer_text",
-      "label": "Detailed footer subtext",
-      "default": "Browse curated categories, helpful links, and support resources."
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Company logo"
+    },
+    {
+      "type": "richtext",
+      "id": "about_text",
+      "label": "About text",
+      "default": "<p>Premium cosmetic essentials designed for healthy skin and everyday confidence.</p>"
     },
     {
       "type": "text",
       "id": "categories_heading",
-      "label": "Categories column heading",
+      "label": "Categories heading",
       "default": "Categories"
     },
     {
       "type": "link_list",
-      "id": "category_menu",
+      "id": "categories_menu",
       "label": "Categories menu"
     },
     {
       "type": "text",
       "id": "categories_empty_text",
-      "label": "Categories empty-state text",
-      "default": "Assign a Categories menu in footer settings."
+      "label": "Categories empty text",
+      "default": "Assign a categories menu."
     },
     {
       "type": "text",
       "id": "quick_links_heading",
-      "label": "Quick links column heading",
-      "default": "Quick links"
+      "label": "Quick links heading",
+      "default": "Quick Links"
     },
     {
       "type": "link_list",
@@ -376,185 +286,150 @@
     {
       "type": "text",
       "id": "quick_links_empty_text",
-      "label": "Quick links empty-state text",
-      "default": "Assign a Quick Links menu in footer settings."
+      "label": "Quick links empty text",
+      "default": "Assign a quick links menu."
     },
     {
       "type": "text",
-      "id": "support_heading",
-      "label": "Support column heading",
-      "default": "Support"
-    },
-    {
-      "type": "link_list",
-      "id": "support_menu",
-      "label": "Support menu"
+      "id": "social_heading",
+      "label": "Social heading",
+      "default": "Social Sites"
     },
     {
       "type": "text",
-      "id": "support_empty_text",
-      "label": "Support empty-state text",
-      "default": "Assign a Support menu in footer settings."
+      "id": "social_empty_text",
+      "label": "Social empty text",
+      "default": "Add social links blocks."
+    },
+    {
+      "type": "text",
+      "id": "hours_heading",
+      "label": "Working hours heading",
+      "default": "Working Hours"
+    },
+    {
+      "type": "richtext",
+      "id": "working_hours",
+      "label": "Working hours",
+      "default": "<p>Mon - Sat: 10:00 AM - 7:00 PM</p><p>Sunday: Closed</p>"
+    },
+    {
+      "type": "text",
+      "id": "address_heading",
+      "label": "Address heading",
+      "default": "Shop Address"
+    },
+    {
+      "type": "richtext",
+      "id": "shop_address",
+      "label": "Shop address",
+      "default": "<p>123 Beauty Street, City Name, State 000000</p>"
     },
     {
       "type": "text",
       "id": "contact_heading",
-      "label": "Contact column heading",
-      "default": "Contact"
+      "label": "Contact heading",
+      "default": "Contact Us"
     },
     {
       "type": "richtext",
-      "id": "contact_text",
+      "id": "contact_details",
       "label": "Contact details",
-      "default": "<p>Email: care@example.com</p><p>Phone: +91 90000 00000</p><p>Mon-Sat: 10 AM - 7 PM</p>"
+      "default": "<p>Phone: +91 90000 00000</p><p>Email: support@example.com</p>"
     },
     {
       "type": "text",
-      "id": "contact_empty_text",
-      "label": "Contact empty-state text",
-      "default": "Add contact details from footer settings."
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "default": "© 2026 Lame Beauty Care. All rights reserved."
     },
     {
       "type": "header",
-      "content": "t:content.padding"
+      "content": "Padding"
     },
     {
       "type": "range",
       "id": "padding-block-start",
-      "label": "t:settings.top",
+      "label": "Top padding",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 120,
+      "step": 4,
       "unit": "px",
-      "default": 20
+      "default": 36
     },
     {
       "type": "range",
       "id": "padding-block-end",
-      "label": "t:settings.bottom",
+      "label": "Bottom padding",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 120,
+      "step": 4,
       "unit": "px",
-      "default": 20
+      "default": 28
+    }
+  ],
+  "blocks": [
+    {
+      "type": "social_link",
+      "name": "Social link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Platform name",
+          "default": "Instagram"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open in new tab",
+          "default": true
+        }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "t:names.footer",
-      "category": "t:categories.footer",
+      "name": "Lame Editable Footer",
       "settings": {
-        "gap": 20,
-        "color_scheme": "scheme-1",
-        "padding-block-start": 36,
-        "padding-block-end": 36
+        "brand_name": "Lame Beauty Care",
+        "categories_heading": "Categories",
+        "quick_links_heading": "Quick Links",
+        "social_heading": "Social Sites",
+        "hours_heading": "Working Hours",
+        "address_heading": "Shop Address",
+        "contact_heading": "Contact Us",
+        "copyright_text": "© 2026 Lame Beauty Care. All rights reserved."
       },
       "blocks": {
-        "social-sites": {
-          "type": "group",
+        "social_instagram": {
+          "type": "social_link",
           "settings": {
-            "content_direction": "column",
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "flex-start",
-            "gap": 12,
-            "width": "fill",
-            "inherit_color_scheme": true
-          },
-          "blocks": {
-            "social-heading": {
-              "type": "text",
-              "settings": {
-                "text": "Social Sites",
-                "width": "100%",
-                "alignment": "left",
-                "type_preset": "h3"
-              }
-            },
-            "social-links": {
-              "type": "social-links",
-              "settings": {}
-            }
-          },
-          "block_order": ["social-heading", "social-links"]
-        },
-        "quick-categories": {
-          "type": "menu",
-          "settings": {
-            "heading": "Quick Categories",
-            "menu": "main-menu",
-            "menu_spacing": 10,
-            "show_as_accordion": false,
-            "inherit_color_scheme": true,
-            "heading_preset": "h3",
-            "link_preset": "paragraph"
+            "label": "Instagram",
+            "url": "https://instagram.com"
           }
         },
-        "menu-items": {
-          "type": "menu",
+        "social_facebook": {
+          "type": "social_link",
           "settings": {
-            "heading": "Menu Items",
-            "menu": "main-menu",
-            "menu_spacing": 10,
-            "show_as_accordion": false,
-            "inherit_color_scheme": true,
-            "heading_preset": "h3",
-            "link_preset": "paragraph"
+            "label": "Facebook",
+            "url": "https://facebook.com"
+          }
+        },
+        "social_youtube": {
+          "type": "social_link",
+          "settings": {
+            "label": "YouTube",
+            "url": "https://youtube.com"
           }
         }
       },
-      "block_order": ["social-sites", "quick-categories", "menu-items"]
-    },
-    {
-      "name": "t:names.footer",
-      "category": "t:categories.footer",
-      "settings": {
-        "gap": 20,
-        "color_scheme": "scheme-1",
-        "padding-block-start": 36,
-        "padding-block-end": 36
-      },
-      "blocks": {
-        "newsletter-group": {
-          "type": "group",
-          "settings": {
-            "content_direction": "column",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "flex-start",
-            "vertical_alignment": "center",
-            "gap": 6,
-            "width": "fill",
-            "inherit_color_scheme": true
-          },
-          "blocks": {
-            "newsletter-heading": {
-              "type": "text",
-              "settings": {
-                "text": "t:html_defaults.join_our_email_list",
-                "width": "100%",
-                "alignment": "left",
-                "type_preset": "h3"
-              }
-            },
-            "newsletter-text": {
-              "type": "text",
-              "settings": {
-                "text": "t:html_defaults.get_exclusive_deals_and_early_access_to_new_products",
-                "width": "100%",
-                "alignment": "left",
-                "type_preset": "rte"
-              }
-            }
-          },
-          "block_order": ["newsletter-heading", "newsletter-text"]
-        },
-        "newsletter-form": {
-          "type": "email-signup",
-          "settings": {
-            "width": "fill"
-          }
-        }
-      },
-      "block_order": ["newsletter-group", "newsletter-form"]
+      "block_order": ["social_instagram", "social_facebook", "social_youtube"]
     }
   ]
 }
