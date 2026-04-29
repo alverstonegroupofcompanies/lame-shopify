@@ -16,10 +16,10 @@
     </header>
 
     <div class="lame-featured-products__carousel-wrap">
-      <button class="lame-featured-products__arrow lame-featured-products__arrow--prev" type="button" aria-label="Previous products" data-arrow="prev">
+      <button class="lame-featured-products__arrow lame-featured-products__arrow--prev" type="button" aria-label="{{ section.settings.prev_products_label }}" data-arrow="prev">
         <span aria-hidden="true">&#8249;</span>
       </button>
-      <button class="lame-featured-products__arrow lame-featured-products__arrow--next" type="button" aria-label="Next products" data-arrow="next">
+      <button class="lame-featured-products__arrow lame-featured-products__arrow--next" type="button" aria-label="{{ section.settings.next_products_label }}" data-arrow="next">
         <span aria-hidden="true">&#8250;</span>
       </button>
       <ul class="lame-featured-products__grid" role="list" data-featured-track>
@@ -53,12 +53,12 @@
                 <button
                   type="submit"
                   class="lame-featured-products__quick-add"
-                  aria-label="Add {{ product.title | escape }} to cart"
+                  aria-label="{{ section.settings.add_to_cart_label }} {{ product.title | escape }}"
                   {% unless product.available %}
                     disabled
                   {% endunless %}
                 >
-                  <span class="visually-hidden">Add to cart</span>
+                  <span class="visually-hidden">{{ section.settings.add_to_cart_label }}</span>
                   <svg aria-hidden="true" viewBox="0 0 20 20" focusable="false">
                     <path d="M3.5 6.8h13l-1.2 8.1a1.4 1.4 0 0 1-1.38 1.19H6.1a1.4 1.4 0 0 1-1.38-1.19L3.5 6.8Z"></path>
                     <path d="M7.2 6.7V5.4a2.8 2.8 0 0 1 5.6 0v1.3"></path>
@@ -85,8 +85,8 @@
                 {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-featured-products__image placeholder-svg' }}
               </div>
               <div class="lame-featured-products__content">
-                <h3 class="lame-featured-products__product-title">{{ 'Product title' }}</h3>
-                <p class="lame-featured-products__price">{{ '$0.00' }}</p>
+                <h3 class="lame-featured-products__product-title">{{ section.settings.placeholder_product_title }}</h3>
+                <p class="lame-featured-products__price">{{ section.settings.placeholder_product_price }}</p>
               </div>
             </div>
           </li>
@@ -160,19 +160,25 @@
 {% stylesheet %}
   .lame-featured-products__header {
     text-align: center;
-    margin-bottom: var(--padding-lg);
+    margin-bottom: var(--padding-md);
   }
 
   .lame-featured-products__title {
     margin: 0;
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
-    line-height: 1.2;
+    color: rgb(var(--brand-gold));
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    line-height: 1.15;
   }
 
   .lame-featured-products__subtitle {
     margin: 0.35rem 0 0;
     font-size: 0.78rem;
-    color: rgb(var(--color-foreground-rgb) / 0.62);
+    color: rgb(var(--color-foreground-rgb) / 0.65);
+    max-width: 42ch;
+    margin-inline: auto;
   }
 
   .lame-featured-products__grid {
@@ -248,6 +254,10 @@
     margin: 0 0 0.2rem;
     font-size: 0.72rem;
     line-height: 1.25;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: rgb(var(--color-foreground-rgb));
   }
 
   .lame-featured-products__product-title a {
@@ -382,6 +392,40 @@
       "id": "subheading",
       "label": "Subheading",
       "default": "Get the skin you want now."
+    },
+    {
+      "type": "header",
+      "content": "Labels"
+    },
+    {
+      "type": "text",
+      "id": "prev_products_label",
+      "label": "Previous button label",
+      "default": "Previous products"
+    },
+    {
+      "type": "text",
+      "id": "next_products_label",
+      "label": "Next button label",
+      "default": "Next products"
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_label",
+      "label": "Add to cart label",
+      "default": "Add to cart"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_product_title",
+      "label": "Placeholder product title",
+      "default": "Product title"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_product_price",
+      "label": "Placeholder product price",
+      "default": "$0.00"
     },
     {
       "type": "collection",
