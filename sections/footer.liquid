@@ -44,6 +44,75 @@
   >
     {% content_for 'blocks' %}
   </div>
+
+  {% liquid
+    assign category_menu = linklists[section.settings.category_menu]
+    assign quick_links_menu = linklists[section.settings.quick_links_menu]
+    assign support_menu = linklists[section.settings.support_menu]
+  %}
+
+  {% if section.settings.show_detailed_footer %}
+    <div class="footer-detailed">
+      {% if section.settings.detailed_footer_heading != blank %}
+        <div class="footer-detailed__intro">
+          <h3 class="footer-detailed__title">{{ section.settings.detailed_footer_heading }}</h3>
+          {% if section.settings.detailed_footer_text != blank %}
+            <p class="footer-detailed__text">{{ section.settings.detailed_footer_text }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="footer-detailed__grid">
+        <div class="footer-detailed__column">
+          <h4 class="footer-detailed__heading">{{ section.settings.categories_heading | default: 'Categories' }}</h4>
+          {% if category_menu != blank and category_menu.links.size > 0 %}
+            <ul class="footer-detailed__list" role="list">
+              {% for link in category_menu.links %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="footer-detailed__placeholder">Assign a Categories menu in footer settings.</p>
+          {% endif %}
+        </div>
+
+        <div class="footer-detailed__column">
+          <h4 class="footer-detailed__heading">{{ section.settings.quick_links_heading | default: 'Quick links' }}</h4>
+          {% if quick_links_menu != blank and quick_links_menu.links.size > 0 %}
+            <ul class="footer-detailed__list" role="list">
+              {% for link in quick_links_menu.links %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="footer-detailed__placeholder">Assign a Quick Links menu in footer settings.</p>
+          {% endif %}
+        </div>
+
+        <div class="footer-detailed__column">
+          <h4 class="footer-detailed__heading">{{ section.settings.support_heading | default: 'Support' }}</h4>
+          {% if support_menu != blank and support_menu.links.size > 0 %}
+            <ul class="footer-detailed__list" role="list">
+              {% for link in support_menu.links %}
+                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="footer-detailed__placeholder">Assign a Support menu in footer settings.</p>
+          {% endif %}
+        </div>
+
+        <div class="footer-detailed__column">
+          <h4 class="footer-detailed__heading">{{ section.settings.contact_heading | default: 'Contact' }}</h4>
+          {% if section.settings.contact_text != blank %}
+            <div class="footer-detailed__contact rte">{{ section.settings.contact_text }}</div>
+          {% else %}
+            <p class="footer-detailed__placeholder">Add contact details from footer settings.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
 
 {% stylesheet %}
@@ -60,6 +129,75 @@
     font-weight: var(--font-heading--weight);
   }
 
+  .footer-detailed {
+    margin-top: clamp(1.2rem, 3vw, 2rem);
+    padding-top: clamp(1rem, 2.2vw, 1.4rem);
+    border-top: 1px solid rgb(var(--color-border-rgb) / 0.22);
+  }
+
+  .footer-detailed__intro {
+    margin-bottom: 1rem;
+  }
+
+  .footer-detailed__title {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+    letter-spacing: 0.02em;
+  }
+
+  .footer-detailed__text {
+    margin: 0.35rem 0 0;
+    color: rgb(var(--color-foreground-rgb) / 0.72);
+    max-width: 72ch;
+  }
+
+  .footer-detailed__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .footer-detailed__heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .footer-detailed__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.42rem;
+  }
+
+  .footer-detailed__list a {
+    text-decoration: none;
+    color: rgb(var(--color-foreground-rgb) / 0.86);
+    transition: color 160ms ease;
+  }
+
+  .footer-detailed__list a:is(:hover, :focus-visible) {
+    color: rgb(var(--color-foreground-rgb));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .footer-detailed__contact {
+    color: rgb(var(--color-foreground-rgb) / 0.84);
+  }
+
+  .footer-detailed__contact p {
+    margin: 0 0 0.45rem;
+  }
+
+  .footer-detailed__placeholder {
+    margin: 0;
+    color: rgb(var(--color-foreground-rgb) / 0.58);
+    font-size: 0.9rem;
+  }
+
   @media screen and (min-width: 750px) and (max-width: 989px) {
     .footer-content {
       grid-template-columns: repeat(min(var(--grid-columns), 3), 1fr);
@@ -72,6 +210,11 @@
 
     .footer-content--isolated-grid-item-tablet > :last-child {
       grid-column: 1 / -1;
+    }
+
+    .footer-detailed__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.4rem;
     }
   }
 
@@ -87,6 +230,11 @@
 
     .footer-content--isolated-grid-item-desktop > :last-child {
       grid-column: 1 / -1;
+    }
+
+    .footer-detailed__grid {
+      grid-template-columns: 1.15fr 1fr 1fr 1.2fr;
+      gap: 1.8rem;
     }
   }
 {% endstylesheet %}
@@ -174,6 +322,73 @@
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Detailed footer"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_detailed_footer",
+      "label": "Show detailed footer row",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "detailed_footer_heading",
+      "label": "Detailed footer heading",
+      "default": "Explore Lame Beauty"
+    },
+    {
+      "type": "text",
+      "id": "detailed_footer_text",
+      "label": "Detailed footer subtext",
+      "default": "Browse curated categories, helpful links, and support resources."
+    },
+    {
+      "type": "text",
+      "id": "categories_heading",
+      "label": "Categories column heading",
+      "default": "Categories"
+    },
+    {
+      "type": "link_list",
+      "id": "category_menu",
+      "label": "Categories menu"
+    },
+    {
+      "type": "text",
+      "id": "quick_links_heading",
+      "label": "Quick links column heading",
+      "default": "Quick links"
+    },
+    {
+      "type": "link_list",
+      "id": "quick_links_menu",
+      "label": "Quick links menu"
+    },
+    {
+      "type": "text",
+      "id": "support_heading",
+      "label": "Support column heading",
+      "default": "Support"
+    },
+    {
+      "type": "link_list",
+      "id": "support_menu",
+      "label": "Support menu"
+    },
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Contact column heading",
+      "default": "Contact"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_text",
+      "label": "Contact details",
+      "default": "<p>Email: care@example.com</p><p>Phone: +91 90000 00000</p><p>Mon-Sat: 10 AM - 7 PM</p>"
     },
     {
       "type": "header",
