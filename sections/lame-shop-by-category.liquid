@@ -1,0 +1,254 @@
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
+  <div class="lame-shop-cat spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+      <header class="lame-shop-cat__header">
+        {% if section.settings.heading != blank %}
+          <h2 class="lame-shop-cat__title">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="lame-shop-cat__subtitle">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    <ul class="lame-shop-cat__grid" role="list">
+      {% for block in section.blocks %}
+        {% liquid
+          assign coll = block.settings.collection
+          assign tile_title = block.settings.title | default: coll.title
+          assign tile_url = block.settings.link | default: coll.url
+          assign tile_image = block.settings.image | default: coll.featured_image
+        %}
+        {% if coll == blank %}
+          {% if request.design_mode %}
+            <li class="lame-shop-cat__item" {{ block.shopify_attributes }}>
+              <div class="lame-shop-cat__tile lame-shop-cat__tile--placeholder">
+                <span class="lame-shop-cat__placeholder-label">Select a collection</span>
+              </div>
+            </li>
+          {% endif %}
+          {% continue %}
+        {% endif %}
+
+        <li class="lame-shop-cat__item" {{ block.shopify_attributes }}>
+          <a class="lame-shop-cat__tile" href="{{ tile_url }}">
+            <div class="lame-shop-cat__media">
+              {% if tile_image %}
+                {{
+                  tile_image
+                  | image_url: width: 800
+                  | image_tag:
+                    class: 'lame-shop-cat__image',
+                    loading: 'lazy',
+                    widths: '200,360,480,640,800',
+                    sizes: '(min-width: 990px) 18vw, (min-width: 750px) 28vw, 44vw'
+                }}
+              {% else %}
+                {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lame-shop-cat__image placeholder-svg' }}
+              {% endif %}
+            </div>
+            <span class="lame-shop-cat__label">{{ tile_title }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-shop-cat__header {
+    text-align: center;
+    margin-bottom: var(--padding-md);
+  }
+
+  .lame-shop-cat__title {
+    margin: 0;
+    color: rgb(var(--brand-gold));
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  .lame-shop-cat__subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: rgb(var(--color-foreground-rgb) / 0.65);
+    max-width: 42ch;
+    margin-inline: auto;
+  }
+
+  .lame-shop-cat__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .lame-shop-cat__tile {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid rgb(var(--brand-gold) / 0.32);
+    border-radius: var(--lame-radius-card, 10px);
+    overflow: hidden;
+    background: rgb(var(--color-background-rgb));
+    box-shadow: var(--lame-shadow-soft);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .lame-shop-cat__tile:is(:hover, :focus-visible) {
+    transform: translateY(-2px);
+    border-color: rgb(var(--brand-gold) / 0.55);
+    box-shadow: 0 10px 22px rgb(18 18 18 / 0.08);
+  }
+
+  .lame-shop-cat__media {
+    aspect-ratio: 4 / 3;
+    background: rgb(var(--brand-gold) / 0.06);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .lame-shop-cat__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lame-shop-cat__label {
+    padding: 0.55rem 0.5rem;
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb));
+    font-weight: 600;
+  }
+
+  .lame-shop-cat__tile--placeholder {
+    min-height: 140px;
+    align-items: center;
+    justify-content: center;
+    border-style: dashed;
+    color: rgb(var(--color-foreground-rgb) / 0.45);
+    font-size: 0.75rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-shop-cat__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-shop-cat__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Lame Shop by category",
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Choose a collection to browse products."
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title override"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image override"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link override"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lame Shop by category",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ]
+}
+{% endschema %}
