@@ -2,7 +2,7 @@
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
   <div class="lame-shop-cat spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
-      <header class="lame-shop-cat__header">
+      <header class="lame-shop-cat__header" data-lame-reveal>
         {% if section.settings.heading != blank %}
           <h2 class="lame-shop-cat__title">{{ section.settings.heading }}</h2>
         {% endif %}
@@ -31,7 +31,12 @@
           {% continue %}
         {% endif %}
 
-        <li class="lame-shop-cat__item" {{ block.shopify_attributes }}>
+        <li
+          class="lame-shop-cat__item"
+          data-lame-reveal
+          data-lame-delay="{{ forloop.index0 | modulo: 4 }}"
+          {{ block.shopify_attributes }}
+        >
           <a class="lame-shop-cat__tile" href="{{ tile_url }}">
             <div class="lame-shop-cat__media">
               {% if tile_image %}
@@ -55,6 +60,31 @@
     </ul>
   </div>
 </section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    const revealNodes = section.querySelectorAll('[data-lame-reveal]');
+    if (!revealNodes.length) return;
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.18, rootMargin: '0px 0px -8% 0px' }
+      );
+      revealNodes.forEach((node) => observer.observe(node));
+    } else {
+      revealNodes.forEach((node) => node.classList.add('is-visible'));
+    }
+  })();
+</script>
 
 {% stylesheet %}
   .lame-shop-cat__header {
