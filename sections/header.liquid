@@ -811,34 +811,34 @@
   /* not ideal but we need to duplicate these styles for when touch comes into play
     We could avoid the duplication using js to set the data-menu-style attribute on small screens instead of using @media queries */
   #header-component[data-menu-style='drawer'] .header__columns {
-    --header-template-columns: var(--header-mobile-bookend) var(--header-mobile-bookend) 1fr
-      var(--header-mobile-bookend) var(--header-mobile-bookend);
+    --header-template-columns: 1fr auto auto auto auto;
 
-    grid-template-areas: 'leftA leftB center rightA rightB';
+    grid-template-areas: 'logoArea drawerArea searchArea accountArea actionsArea';
     grid-column: span 3;
-    column-gap: 0;
+    column-gap: var(--gap-xs);
     align-items: center;
     padding-block: 0;
-    padding-inline: 0 var(--padding-3xs);
+    padding-inline: var(--padding-md);
 
     .header-logo {
-      grid-area: center;
+      grid-area: logoArea;
+      justify-self: start;
     }
 
-    &:not(:has(header-actions)) .search-action {
-      grid-area: leftB;
-    }
-
-    &:not(:has(shopify-account)) .search-action {
-      grid-area: rightA;
+    .header__drawer {
+      grid-area: drawerArea;
     }
 
     .search-action {
-      grid-area: leftB;
+      grid-area: searchArea;
+    }
+
+    shopify-account {
+      grid-area: accountArea;
     }
 
     header-actions {
-      grid-area: rightB;
+      grid-area: actionsArea;
     }
   }
 

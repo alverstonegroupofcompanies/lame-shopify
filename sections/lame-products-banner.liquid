@@ -1,0 +1,146 @@
+{% liquid
+  assign message_html = section.settings.message
+  if message_html == blank and collection != blank
+    assign collection_title_escaped = collection.title | escape
+    assign message_html = '<p>' | append: collection_title_escaped | append: '</p>'
+  endif
+%}
+
+{% if message_html != blank %}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    class="lame-products-banner spacing-style color-{{ section.settings.color_scheme }}"
+    style="{% render 'spacing-style', settings: section.settings %}"
+    {{ section.shopify_attributes }}
+  >
+    <div
+      class="lame-products-banner__inner section section--{{ section.settings.section_width }} lame-products-banner__inner--{{ section.settings.text_alignment }}"
+    >
+      <div class="lame-products-banner__content rte">
+        {{ message_html }}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .lame-products-banner {
+    --lame-products-banner-font-size: clamp(0.8125rem, 2.5vw, 0.9375rem);
+
+    width: 100%;
+  }
+
+  .lame-products-banner__inner {
+    display: flex;
+    padding-inline: var(--page-margin);
+  }
+
+  .lame-products-banner__inner--left {
+    justify-content: flex-start;
+    text-align: start;
+  }
+
+  .lame-products-banner__inner--center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .lame-products-banner__inner--right {
+    justify-content: flex-end;
+    text-align: end;
+  }
+
+  .lame-products-banner__content {
+    margin: 0;
+    max-width: 65ch;
+    font-size: var(--lame-products-banner-font-size);
+    line-height: 1.4;
+  }
+
+  .lame-products-banner__content :is(p, h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+    font-size: inherit;
+    font-weight: var(--font-heading--weight);
+  }
+
+  .lame-products-banner__content a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Products banner (compact)",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["collection", "product"]
+  },
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "message",
+      "label": "Banner text",
+      "info": "On collection pages, if empty, the collection title is used."
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-2"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    }
+  ],
+  "presets": [
+    {
+      "name": "Products banner (compact)",
+      "category": "t:categories.banners"
+    }
+  ]
+}
+{% endschema %}

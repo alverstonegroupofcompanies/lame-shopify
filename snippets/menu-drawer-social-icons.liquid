@@ -1,0 +1,122 @@
+{%- doc -%}
+  Social icons for the mobile menu drawer. URLs are set on the header menu block (drawer_* settings).
+
+  @param {object} block - Header menu block
+  @param {linklist} [linklist] - Main menu linklist (for animation stagger index)
+{%- enddoc -%}
+
+{% liquid
+  assign social_animation_index = 2
+  if linklist != blank and linklist.links.size > 0
+    assign social_animation_index = linklist.links.size | plus: 2
+  endif
+
+  assign social_keys = 'facebook_url,instagram_url,youtube_url,tiktok_url,twitter_url,threads_url,linkedin_url,bluesky_url,snapchat_url,pinterest_url,tumblr_url,vimeo_url,custom_url' | split: ','
+  assign drawer_has_social = false
+  for link_key in social_keys
+    assign drawer_setting_key = 'drawer_' | append: link_key
+    if block.settings[drawer_setting_key] != blank
+      assign drawer_has_social = true
+      break
+    endif
+  endfor
+%}
+
+{% if drawer_has_social %}
+  <div
+    class="menu-drawer__social menu-drawer__animated-element"
+    style="--menu-drawer-animation-index: {{ social_animation_index }};"
+  >
+    <div class="menu-drawer__social-inner social-icons__wrapper">
+      {% for link_key in social_keys %}
+        {% liquid
+          assign drawer_setting_key = 'drawer_' | append: link_key
+          assign link_url = block.settings[drawer_setting_key]
+          assign render_icon = true
+
+          if link_url != blank
+            case link_key
+              when 'facebook_url'
+                assign platform = 'facebook'
+              when 'instagram_url'
+                assign platform = 'instagram'
+              when 'youtube_url'
+                assign platform = 'youtube'
+              when 'tiktok_url'
+                assign platform = 'tiktok'
+              when 'twitter_url'
+                assign platform = 'twitter'
+              when 'threads_url'
+                assign platform = 'threads'
+              when 'linkedin_url'
+                assign platform = 'linkedin'
+              when 'bluesky_url'
+                assign platform = 'bluesky'
+              when 'snapchat_url'
+                assign platform = 'snapchat'
+              when 'pinterest_url'
+                assign platform = 'pinterest'
+              when 'tumblr_url'
+                assign platform = 'tumblr'
+              when 'vimeo_url'
+                assign platform = 'vimeo'
+              when 'custom_url'
+                assign platform = link_url | split: '//' | last | remove: 'www.' | split: '.' | first
+                case platform
+                  when 'x'
+                    assign platform = 'twitter'
+                  else
+                    assign render_icon = false
+                endcase
+            endcase
+
+            assign url_parts = link_url | split: '//' | last | split: '/'
+            assign has_profile = false
+
+            if url_parts.size > 1 and url_parts[1] != ''
+              assign has_profile = true
+            endif
+
+            unless render_icon
+              assign has_profile = true
+            endunless
+          endif
+        %}
+
+        {% if link_url != blank %}
+          {% if request.design_mode or has_profile %}
+            <div
+              class="social-icons__icon-wrapper{% unless has_profile %} social-icons__icon-wrapper--disabled{% endunless %}"
+            >
+              <a
+                href="{{ link_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="{{ platform | capitalize }}"
+                {% unless has_profile %}
+                  {% if request.design_mode %}
+                    onclick="return false;"
+                    aria-disabled="true"
+                  {% endif %}
+                {% endunless %}
+              >
+                <span class="social-icons__icon-label">{{ platform | capitalize }}</span>
+                {% if render_icon %}
+                  <svg
+                    class="social-icons__icon icon-default"
+                    aria-hidden="true"
+                    focusable="false"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                  >
+                    {%- render 'icon', icon: platform -%}
+                  </svg>
+                {% endif %}
+              </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
