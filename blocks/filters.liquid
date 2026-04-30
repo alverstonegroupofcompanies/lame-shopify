@@ -507,35 +507,160 @@
 {% endif %}
 
 {% stylesheet %}
-  .all-products-page .facets.facets-controls-wrapper {
-    border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.18);
-    padding-bottom: 10px;
-    margin-bottom: 8px;
+  .uniform-products-page,
+  .all-products-page {
+    --premium-toolbar-radius: 999px;
+    --premium-toolbar-border: rgb(var(--color-border-rgb) / 0.22);
+    --premium-toolbar-border-strong: rgb(var(--color-border-rgb) / 0.4);
+    --premium-toolbar-surface: rgb(var(--color-background-rgb) / 0.94);
+    --premium-toolbar-text: rgb(var(--color-foreground-rgb) / 0.82);
+    --premium-toolbar-accent: rgb(var(--brand-gold) / 0.56);
   }
 
+  .uniform-products-page .facets.facets-controls-wrapper,
+  .all-products-page .facets.facets-controls-wrapper {
+    border-top: 1px solid var(--premium-toolbar-border);
+    border-bottom: 1px solid var(--premium-toolbar-border);
+    padding-block: 12px;
+    margin-bottom: 16px;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--color-background-rgb) / 0.96) 0%,
+      rgb(var(--color-background-rgb) / 0.9) 100%
+    );
+  }
+
+  .uniform-products-page .facets--horizontal .facets__summary,
+  .uniform-products-page .products-count-wrapper,
+  .uniform-products-page .sorting-filter .select,
   .all-products-page .facets--horizontal .facets__summary,
   .all-products-page .products-count-wrapper,
   .all-products-page .sorting-filter .select {
-    font-size: 0.9rem;
-    letter-spacing: 0.01em;
+    font-size: 0.89rem;
+    letter-spacing: 0.015em;
+    color: var(--premium-toolbar-text);
   }
 
+  .uniform-products-page .facets__filters-wrapper,
   .all-products-page .facets__filters-wrapper {
     gap: 10px;
   }
 
+  .uniform-products-page .facets--horizontal .facets__summary,
+  .all-products-page .facets--horizontal .facets__summary {
+    border: 1px solid var(--premium-toolbar-border);
+    border-radius: var(--premium-toolbar-radius);
+    min-height: 38px;
+    padding-inline: 14px;
+    background: var(--premium-toolbar-surface);
+    transition: border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+  }
+
+  .uniform-products-page .facets--horizontal .facets__summary:hover,
+  .uniform-products-page .facets--horizontal .facets__panel[open] .facets__summary,
+  .all-products-page .facets--horizontal .facets__summary:hover,
+  .all-products-page .facets--horizontal .facets__panel[open] .facets__summary {
+    border-color: var(--premium-toolbar-border-strong);
+    color: rgb(var(--color-foreground-rgb));
+  }
+
+  .uniform-products-page .sorting-filter-component .select,
+  .uniform-products-page .sorting-filter .select,
   .all-products-page .sorting-filter-component .select,
   .all-products-page .sorting-filter .select {
-    border-radius: 999px;
-    border: 1px solid rgb(var(--color-border-rgb) / 0.3);
-    padding-inline: 10px;
-    min-height: 36px;
+    border-radius: var(--premium-toolbar-radius);
+    border: 1px solid var(--premium-toolbar-border);
+    padding-inline: 14px;
+    min-height: 38px;
+    background: var(--premium-toolbar-surface);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .uniform-products-page .sorting-filter-component .select:hover,
+  .uniform-products-page .sorting-filter .select:hover,
+  .all-products-page .sorting-filter-component .select:hover,
+  .all-products-page .sorting-filter .select:hover {
+    border-color: var(--premium-toolbar-border-strong);
+  }
+
+  .uniform-products-page .facets-horizontal-remove--active::before,
+  .all-products-page .facets-horizontal-remove--active::before {
+    border-inline-start-color: var(--premium-toolbar-border);
+  }
+
+  .uniform-products-page .facets__clear-all-link--horizontal,
+  .all-products-page .facets__clear-all-link--horizontal {
+    color: var(--premium-toolbar-text);
+  }
+
+  .uniform-products-page .facets__clear-all-link--horizontal:hover,
+  .all-products-page .facets__clear-all-link--horizontal:hover {
+    color: rgb(var(--brand-gold));
+  }
+
+  .uniform-products-page .facets-toggle,
+  .all-products-page .facets-toggle {
+    border-top: 1px solid var(--premium-toolbar-border);
+    border-bottom: 1px solid var(--premium-toolbar-border);
     background: rgb(var(--color-background-rgb));
   }
 
-  .all-products-page .facets-toggle {
-    border-top: 1px solid rgb(var(--color-border-rgb) / 0.12);
-    border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.12);
+  .uniform-products-page .facets-toggle__button,
+  .all-products-page .facets-toggle__button {
+    border: 1px solid var(--premium-toolbar-border);
+    border-radius: var(--premium-toolbar-radius);
+    min-height: 38px;
+    padding-inline: 14px;
+  }
+
+  .uniform-products-page .facets-toggle__button:focus-visible,
+  .uniform-products-page .sorting-filter-component .select:focus-visible,
+  .all-products-page .facets-toggle__button:focus-visible,
+  .all-products-page .sorting-filter-component .select:focus-visible {
+    outline: 2px solid var(--premium-toolbar-accent);
+    outline-offset: 2px;
+  }
+
+  .uniform-products-page .facets__drawer-actions,
+  .all-products-page .facets__drawer-actions {
+    border-top: 1px solid var(--premium-toolbar-border);
+    background-color: rgb(var(--color-background-rgb));
+  }
+
+  .uniform-products-page .facets__clear-all,
+  .all-products-page .facets__clear-all {
+    border-radius: 999px;
+  }
+
+  .uniform-products-page .facets__see-results,
+  .all-products-page .facets__see-results {
+    border-radius: 999px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .uniform-products-page .facets-toggle,
+    .all-products-page .facets-toggle {
+      margin-bottom: 10px;
+      padding-inline: 10px;
+    }
+
+    .uniform-products-page .facets-mobile-wrapper,
+    .all-products-page .facets-mobile-wrapper {
+      gap: 10px;
+    }
+
+    .uniform-products-page .facets-toggle__button,
+    .all-products-page .facets-toggle__button {
+      font-size: 0.84rem;
+      min-height: 36px;
+      padding-inline: 12px;
+    }
+
+    .uniform-products-page .sorting-filter-component .select,
+    .all-products-page .sorting-filter-component .select {
+      min-height: 36px;
+      font-size: 0.84rem;
+    }
   }
 
   .facets-block-wrapper {

@@ -169,10 +169,45 @@
 </div>
 
 {% stylesheet %}
+  .uniform-products-page,
+  .all-products-page {
+    --premium-surface: rgb(var(--color-background-rgb));
+    --premium-surface-muted: rgb(var(--color-background-rgb) / 0.9);
+    --premium-border-soft: rgb(var(--color-border-rgb) / 0.24);
+    --premium-border-strong: rgb(var(--color-border-rgb) / 0.42);
+    --premium-accent: rgb(var(--brand-gold) / 0.56);
+    --premium-card-radius: 16px;
+    --premium-media-radius: 12px;
+    --premium-card-shadow: 0 10px 24px rgb(17 17 17 / 0.06);
+    --premium-card-shadow-hover: 0 16px 34px rgb(17 17 17 / 0.12);
+  }
+
+  .premium-products-shell .main-collection-grid {
+    position: relative;
+  }
+
+  .premium-products-shell .main-collection-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-top: 1px solid var(--premium-border-soft);
+    pointer-events: none;
+  }
+
+  .premium-products-shell .main-collection-grid__empty {
+    border: 1px solid var(--premium-border-soft);
+    border-radius: var(--premium-card-radius);
+    background: linear-gradient(
+      180deg,
+      rgb(var(--color-background-rgb) / 0.95) 0%,
+      rgb(var(--color-background-rgb) / 0.88) 100%
+    );
+  }
+
   .uniform-products-page .product-grid,
   .all-products-page .product-grid {
     --product-grid-gap-mobile: 18px 12px;
-    --product-grid-gap-desktop: 24px 16px;
+    --product-grid-gap-desktop: 28px 16px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
   }
@@ -294,29 +329,40 @@
     box-sizing: border-box;
     width: 100%;
     height: 100%;
-    border: 1px solid rgb(var(--color-border-rgb) / 0.32);
-    border-radius: 16px;
+    border: 1px solid var(--premium-border-soft);
+    border-radius: var(--premium-card-radius);
     background: linear-gradient(
       180deg,
-      rgb(var(--color-background-rgb) / 1) 0%,
-      rgb(var(--color-background-rgb) / 0.96) 100%
+      var(--premium-surface) 0%,
+      var(--premium-surface-muted) 100%
     );
-    box-shadow: 0 10px 20px rgb(17 17 17 / 0.05);
-    padding: 0.55rem 0.55rem 0.8rem;
+    box-shadow: var(--premium-card-shadow);
+    padding: 0.6rem 0.6rem 0.85rem;
     transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
   }
 
   .uniform-products-page .product-grid__item:is(:hover, :focus-within) .product-grid__card,
   .all-products-page .product-grid__item:is(:hover, :focus-within) .product-grid__card {
     transform: translateY(-3px);
-    border-color: rgb(var(--brand-gold) / 0.45);
-    box-shadow: 0 16px 30px rgb(17 17 17 / 0.1);
+    border-color: var(--premium-accent);
+    box-shadow: var(--premium-card-shadow-hover);
   }
 
   .uniform-products-page .product-grid__item .card-gallery,
   .all-products-page .product-grid__item .card-gallery {
-    border-radius: 12px;
+    border-radius: var(--premium-media-radius);
     background: rgb(var(--color-background-secondary-rgb, var(--color-background-rgb)) / 0.65);
+    overflow: hidden;
+  }
+
+  .uniform-products-page .product-grid__item .product-media img,
+  .all-products-page .product-grid__item .product-media img {
+    transition: transform 360ms ease;
+  }
+
+  .uniform-products-page .product-grid__item:is(:hover, :focus-within) .product-media img,
+  .all-products-page .product-grid__item:is(:hover, :focus-within) .product-media img {
+    transform: scale(1.03);
   }
 
   .uniform-products-page .product-grid__item .product-title,
@@ -341,10 +387,35 @@
     color: rgb(var(--color-foreground-rgb) / 0.5);
   }
 
+  .uniform-products-page .product-grid__item a:focus-visible,
+  .all-products-page .product-grid__item a:focus-visible {
+    outline: 2px solid var(--premium-accent);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  .uniform-products-page .pagination,
+  .all-products-page .pagination {
+    margin-top: var(--padding-2xl);
+    border-top: 1px solid var(--premium-border-soft);
+    padding-top: var(--padding-lg);
+  }
+
+  .uniform-products-page .pagination__link--current,
+  .all-products-page .pagination__link--current {
+    background: rgb(var(--color-foreground-rgb));
+    color: rgb(var(--color-background-rgb));
+  }
+
   @media screen and (max-width: 749px) {
+    .uniform-products-page,
+    .all-products-page {
+      --premium-card-radius: 13px;
+      --premium-media-radius: 10px;
+    }
+
     .uniform-products-page .product-grid__card,
     .all-products-page .product-grid__card {
-      border-radius: 13px;
       padding: 0.45rem 0.45rem 0.65rem;
     }
 
