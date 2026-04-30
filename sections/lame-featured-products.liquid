@@ -138,6 +138,30 @@
     window.addEventListener('resize', updateArrows);
     setTimeout(updateArrows, 0);
 
+    const quickAddForms = section.querySelectorAll('.lame-featured-products__quick-add-form');
+    quickAddForms.forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton?.disabled) return;
+
+        const formData = new FormData(form);
+        try {
+          if (submitButton) submitButton.disabled = true;
+          await fetch('{{ routes.cart_add_url }}.js', {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formData,
+          });
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+        } catch (error) {
+          console.error('Quick add failed', error);
+        } finally {
+          if (submitButton) submitButton.disabled = false;
+        }
+      });
+    });
+
     if ('IntersectionObserver' in window) {
       const revealNodes = section.querySelectorAll('[data-lame-reveal]');
       const observer = new IntersectionObserver(
@@ -221,11 +245,11 @@
     padding: 0.45rem;
     transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
     position: relative;
+    overflow: hidden;
   }
 
   .lame-featured-products__card:hover {
     border-color: rgb(var(--color-foreground-rgb) / 0.28);
-    transform: translateY(-3px);
     box-shadow: 0 12px 24px rgb(16 16 16 / 0.08);
   }
 
@@ -235,6 +259,7 @@
     display: grid;
     place-items: center;
     position: relative;
+    overflow: hidden;
   }
 
   .lame-featured-products__image {
@@ -245,7 +270,7 @@
   }
 
   .lame-featured-products__item:is(:hover, :focus-within) .lame-featured-products__image {
-    transform: scale(1.025);
+    transform: none;
   }
 
   .lame-featured-products__content {
