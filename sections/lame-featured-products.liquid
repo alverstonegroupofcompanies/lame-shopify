@@ -64,6 +64,7 @@
                     <path d="M7.2 6.7V5.4a2.8 2.8 0 0 1 5.6 0v1.3"></path>
                   </svg>
                 </button>
+                <span class="lame-featured-products__quick-add-status" aria-live="polite"></span>
               </form>
             {% endif %}
 
@@ -143,19 +144,68 @@
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const submitButton = form.querySelector('button[type="submit"]');
+        const statusNode = form.querySelector('.lame-featured-products__quick-add-status');
         if (submitButton?.disabled) return;
 
         const formData = new FormData(form);
+        const cartItemsComponents = document.querySelectorAll('cart-items-component');
+        const sectionIds = [];
+        cartItemsComponents.forEach((item) => {
+          if (item instanceof HTMLElement && item.dataset.sectionId) {
+            sectionIds.push(item.dataset.sectionId);
+          }
+        });
+        if (sectionIds.length) {
+          formData.append('sections', sectionIds.join(','));
+          formData.append('sections_url', window.location.pathname);
+        }
+
+        const showStatus = (text, statusClass) => {
+          if (!(statusNode instanceof HTMLElement)) return;
+          statusNode.textContent = text;
+          statusNode.classList.remove('is-success', 'is-error', 'is-visible');
+          statusNode.classList.add(statusClass, 'is-visible');
+          window.setTimeout(() => {
+            statusNode.classList.remove('is-visible');
+          }, 1700);
+        };
+
         try {
           if (submitButton) submitButton.disabled = true;
-          await fetch('{{ routes.cart_add_url }}.js', {
+          const addResponse = await fetch('{{ routes.cart_add_url }}.js', {
             method: 'POST',
             headers: { Accept: 'application/json' },
             body: formData,
           });
-          document.dispatchEvent(new CustomEvent('cart:updated'));
+          const addData = await addResponse.json();
+          if (!addResponse.ok || addData?.status) {
+            throw new Error(addData?.message || 'Unable to add item to cart.');
+          }
+
+          const cartResponse = await fetch('{{ routes.cart_url }}.js', {
+            headers: { Accept: 'application/json' },
+          });
+          const cartData = await cartResponse.json();
+
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: {
+                resource: cartData,
+                sourceId: section.id,
+                data: {
+                  source: 'featured-products-quick-add',
+                  itemCount: Number(formData.get('quantity')) || 1,
+                  sections: addData?.sections || {},
+                },
+              },
+            })
+          );
+
+          showStatus('Added to cart', 'is-success');
         } catch (error) {
           console.error('Quick add failed', error);
+          showStatus('Could not add', 'is-error');
         } finally {
           if (submitButton) submitButton.disabled = false;
         }
@@ -303,6 +353,38 @@
     right: 0.78rem;
     top: 0.78rem;
     z-index: 3;
+  }
+
+  .lame-featured-products__quick-add-status {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    background: rgb(var(--color-background-rgb));
+    border: 1px solid rgb(var(--color-border-rgb) / 0.32);
+    color: rgb(var(--color-foreground-rgb) / 0.9);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.42rem;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-3px);
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .lame-featured-products__quick-add-status.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .lame-featured-products__quick-add-status.is-success {
+    border-color: rgb(var(--brand-gold) / 0.5);
+  }
+
+  .lame-featured-products__quick-add-status.is-error {
+    border-color: rgb(180 45 45 / 0.55);
+    color: rgb(150 35 35);
   }
 
   .lame-featured-products__quick-add {
