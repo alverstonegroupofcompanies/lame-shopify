@@ -187,20 +187,35 @@
 
     .product-information--redesign .media-gallery--grid .media-gallery__grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: clamp(10px, 1vw, 14px);
+      align-items: start;
     }
 
-    .product-information--redesign .media-gallery--grid .media-gallery__grid > li:nth-child(n + 3) {
-      display: none;
+    .product-information--redesign .media-gallery--grid .media-gallery__grid > li:first-child {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
+    .product-information--redesign .media-gallery--grid .media-gallery__grid > li:not(:first-child) {
+      grid-row: 2;
+      cursor: pointer;
     }
 
     .product-information--redesign .media-gallery--grid .product-media-container {
       margin: 0;
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
       background: #fff;
       border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    }
+
+    .product-information--redesign .media-gallery--grid .media-gallery__grid > li:first-child .product-media {
+      min-height: min(560px, 52vw);
+    }
+
+    .product-information--redesign .media-gallery--grid .media-gallery__grid > li:not(:first-child) .product-media {
+      min-height: 92px;
     }
 
     /* Position when there is no media */

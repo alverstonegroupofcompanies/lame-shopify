@@ -241,6 +241,27 @@
 
 <script>
   (() => {
+    const sectionRoot = document.querySelector('#shopify-section-{{ section.id }}');
+    if (!sectionRoot) return;
+
+    const galleryList = sectionRoot.querySelector('.media-gallery--grid .media-gallery__grid');
+    if (!galleryList) return;
+
+    galleryList.addEventListener('click', (event) => {
+      if (window.matchMedia('(max-width: 749px)').matches) return;
+
+      if (event.target.closest('.product-media-container__zoom-button')) return;
+
+      const clickedItem = event.target.closest('li');
+      if (!clickedItem || clickedItem === galleryList.firstElementChild) return;
+
+      galleryList.insertBefore(clickedItem, galleryList.firstElementChild);
+    });
+  })();
+</script>
+
+<script>
+  (() => {
     const root = document.querySelector('#shopify-section-{{ section.id }} [data-product-tabs]');
     if (!root) return;
 
