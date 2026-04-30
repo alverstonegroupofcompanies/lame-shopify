@@ -78,7 +78,7 @@
 
 <div class="section-background color-{{ settings.color_scheme }}"></div>
 <div
-  class="product-information section section--{{ content_width }} spacing-style color-{{ settings.color_scheme }} relative"
+  class="product-information product-information--redesign section section--{{ content_width }} spacing-style color-{{ settings.color_scheme }} relative"
   style="{% render 'spacing-style', settings: settings %} --gap: {{ settings.gap }}px;"
   data-testid="product-information"
 >
@@ -93,7 +93,7 @@
     {% assign render_order_array = render_order | split: ',' %}
     {% capture media %}
       <div
-        class="product-information__media"
+        class="product-information__media product-information__media-shell"
         data-testid="product-information-media"
       >
         {{ media_gallery }}
@@ -113,6 +113,10 @@
 </div>
 
 {% stylesheet %}
+  .product-information--redesign {
+    --product-card-radius: 16px;
+  }
+
   .product-information {
     gap: var(--gap) 0;
   }
@@ -135,6 +139,11 @@
     min-width: 100%;
   }
 
+  .product-information--redesign .product-information__media-shell {
+    border-radius: var(--product-card-radius);
+    overflow: clip;
+  }
+
   .product-information__media .product-media-gallery__placeholder-image {
     width: 100%;
     height: 100%;
@@ -142,6 +151,10 @@
 
   /* Mobile styles */
   @media screen and (max-width: 749px) {
+    .product-information--redesign {
+      --product-card-radius: 12px;
+    }
+
     .product-information__media {
       grid-column: 1 / -1;
     }

@@ -4,7 +4,7 @@
 <div
   id="ProductInformation-{{ section.id }}"
   class="
-    product-details
+    product-details product-details--redesign
     {% if block_settings.sticky_details_desktop %} sticky-content--desktop{% endif %}
     {% if block_settings.height == 'fill' -%} full-height--desktop{% endif -%}
   "
@@ -48,6 +48,56 @@
     justify-content: center;
   }
 
+  .product-details--redesign > .group-block {
+    background: color-mix(in srgb, var(--color-background) 94%, rgb(var(--color-foreground-rgb) / 0.03));
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.09);
+    border-radius: 16px;
+    padding: clamp(16px, 1.5vw, 24px);
+    box-shadow: 0 10px 30px rgb(var(--color-foreground-rgb) / 0.05);
+  }
+
+  .product-details--redesign h1 {
+    margin: 0;
+    font-size: clamp(1.55rem, 2.1vw, 2rem);
+    line-height: 1.2;
+  }
+
+  .product-details--redesign .rating-wrapper {
+    padding-top: 2px;
+  }
+
+  .product-details--redesign product-price .price {
+    font-size: 1.1rem;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .product-details--redesign .variant-picker {
+    padding: 0;
+  }
+
+  .product-details--redesign .variant-option {
+    margin-top: var(--margin-xs);
+  }
+
+  .product-details--redesign .variant-option--buttons label {
+    border-radius: 999px;
+    min-height: 2.25rem;
+    padding-inline: 0.85rem;
+  }
+
+  .product-details--redesign .product-form-buttons {
+    row-gap: var(--gap-sm);
+  }
+
+  .product-details--redesign .quantity-selector {
+    border-radius: 999px;
+  }
+
+  .product-details--redesign .add-to-cart-button,
+  .product-details--redesign .shopify-payment-button__button {
+    border-radius: 999px;
+  }
+
   @media screen and (min-width: 750px) {
     .product-details > .group-block {
       height: min-content;
@@ -61,6 +111,13 @@
 
     .full-height--desktop .group-block {
       align-self: var(--details-position, 'flex-start');
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-details--redesign > .group-block {
+      border-radius: 12px;
+      padding: 14px;
     }
   }
 {% endstylesheet %}

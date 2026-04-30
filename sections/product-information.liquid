@@ -176,7 +176,182 @@
   additional_blocks: additional_blocks
 %}
 
+{% liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign rating_value = product.metafields.reviews.rating.value.rating
+  assign rating_count = product.metafields.reviews.rating_count.value | default: product.metafields.reviews.rating_count
+%}
+
+<div class="product-tabs-wrap section section--page-width color-{{ section.settings.color_scheme }}">
+  <div class="product-tabs" data-product-tabs>
+    <div class="product-tabs__list" role="tablist" aria-label="Product details tabs">
+      <button class="product-tabs__tab is-active" type="button" role="tab" aria-selected="true" aria-controls="ProductTabPanel-{{ section.id }}-description" id="ProductTab-{{ section.id }}-description" data-tab-target="description">
+        {{ section.settings.tab_title_description }}
+      </button>
+      <button class="product-tabs__tab" type="button" role="tab" aria-selected="false" aria-controls="ProductTabPanel-{{ section.id }}-additional" id="ProductTab-{{ section.id }}-additional" data-tab-target="additional" tabindex="-1">
+        {{ section.settings.tab_title_additional }}
+      </button>
+      <button class="product-tabs__tab" type="button" role="tab" aria-selected="false" aria-controls="ProductTabPanel-{{ section.id }}-review" id="ProductTab-{{ section.id }}-review" data-tab-target="review" tabindex="-1">
+        {{ section.settings.tab_title_review }}
+      </button>
+    </div>
+    <div class="product-tabs__panels">
+      <section class="product-tabs__panel is-active rte" id="ProductTabPanel-{{ section.id }}-description" role="tabpanel" aria-labelledby="ProductTab-{{ section.id }}-description" data-tab-panel="description">
+        {% if product.description != blank %}
+          {{ product.description }}
+        {% else %}
+          {{ section.settings.tab_description_fallback }}
+        {% endif %}
+      </section>
+      <section class="product-tabs__panel" id="ProductTabPanel-{{ section.id }}-additional" role="tabpanel" aria-labelledby="ProductTab-{{ section.id }}-additional" data-tab-panel="additional" hidden>
+        <table class="product-attributes-table">
+          <tbody>
+            {% if product.type != blank %}
+              <tr><th>{{ section.settings.attr_label_type }}</th><td>{{ product.type }}</td></tr>
+            {% endif %}
+            {% if current_variant.sku != blank %}
+              <tr><th>{{ section.settings.attr_label_sku }}</th><td>{{ current_variant.sku }}</td></tr>
+            {% endif %}
+            {% if product.vendor != blank %}
+              <tr><th>{{ section.settings.attr_label_vendor }}</th><td>{{ product.vendor }}</td></tr>
+            {% endif %}
+            <tr><th>{{ section.settings.attr_label_availability }}</th><td>{% if current_variant.available %}{{ section.settings.availability_in_stock }}{% else %}{{ section.settings.availability_out_of_stock }}{% endif %}</td></tr>
+          </tbody>
+        </table>
+        {% if section.settings.tab_additional_fallback != blank %}
+          <div class="product-tabs__fallback rte">{{ section.settings.tab_additional_fallback }}</div>
+        {% endif %}
+      </section>
+      <section class="product-tabs__panel" id="ProductTabPanel-{{ section.id }}-review" role="tabpanel" aria-labelledby="ProductTab-{{ section.id }}-review" data-tab-panel="review" hidden>
+        {% if rating_value != blank %}
+          <p class="product-review-summary">
+            {{ rating_value | round: 1 }}/5
+            {% if rating_count != blank %}({{ rating_count }} {{ section.settings.reviews_count_label }}){% endif %}
+          </p>
+        {% endif %}
+        {% if section.settings.tab_review_fallback != blank %}
+          <div class="rte">{{ section.settings.tab_review_fallback }}</div>
+        {% elsif rating_value == blank %}
+          <p>{{ section.settings.reviews_empty_label }}</p>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const root = document.querySelector('#shopify-section-{{ section.id }} [data-product-tabs]');
+    if (!root) return;
+
+    const tabs = Array.from(root.querySelectorAll('[data-tab-target]'));
+    const panels = Array.from(root.querySelectorAll('[data-tab-panel]'));
+
+    const activateTab = (tab) => {
+      const target = tab.dataset.tabTarget;
+      tabs.forEach((item) => {
+        const active = item === tab;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+        item.tabIndex = active ? 0 : -1;
+      });
+
+      panels.forEach((panel) => {
+        const active = panel.dataset.tabPanel === target;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+    };
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activateTab(tab));
+      tab.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+        event.preventDefault();
+        const nextIndex = event.key === 'ArrowRight' ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
+        tabs[nextIndex].focus();
+        activateTab(tabs[nextIndex]);
+      });
+    });
+  })();
+</script>
+
 {% stylesheet %}
+  .product-tabs-wrap {
+    margin-top: clamp(28px, 4vw, 44px);
+  }
+
+  .product-tabs {
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+    border-radius: 16px;
+    background: var(--color-background);
+    overflow: hidden;
+  }
+
+  .product-tabs__list {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    background: color-mix(in srgb, var(--color-background) 92%, rgb(var(--color-foreground-rgb) / 0.03));
+    padding: 0 10px;
+  }
+
+  .product-tabs__tab {
+    padding: 14px 16px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .product-tabs__tab.is-active {
+    color: var(--color-foreground);
+    border-color: var(--color-primary);
+  }
+
+  .product-tabs__panels {
+    padding: clamp(14px, 2vw, 20px);
+  }
+
+  .product-tabs__panel {
+    display: none;
+  }
+
+  .product-tabs__panel.is-active {
+    display: block;
+  }
+
+  .product-attributes-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .product-attributes-table th,
+  .product-attributes-table td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    font-size: var(--font-paragraph-small--size);
+  }
+
+  .product-attributes-table th {
+    width: 40%;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+    font-weight: var(--font-weight-medium);
+  }
+
+  .product-review-summary {
+    font-size: var(--font-h6--size);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--margin-xs);
+  }
+
+  .product-tabs__fallback {
+    margin-top: var(--margin-sm);
+  }
+
   .product-information .product-details {
     align-self: start;
   }
@@ -203,11 +378,9 @@
     transform: translateX(-50%) translateY(calc(100% + 40px));
     z-index: calc(var(--layer-sticky) - 1); /* Below sticky header */
     display: block;
-    width: 600px;
-    border-radius: calc(
-      var(--style-border-radius-buttons-primary) + min(var(--padding-sm), var(--style-border-radius-buttons-primary))
-    );
-    box-shadow: var(--shadow-popover);
+    width: min(92vw, 640px);
+    border-radius: 999px;
+    box-shadow: 0 14px 34px rgb(var(--color-foreground-rgb) / 0.12);
     padding: var(--padding-sm);
     /* Layout styling */
     display: flex;
@@ -308,7 +481,7 @@
       bottom: 0;
       width: 100%;
       max-width: none;
-      border-radius: 0;
+      border-radius: 16px 16px 0 0;
 
       &::before {
         --border: 1px;
@@ -376,6 +549,33 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+  }
+
+  @media screen and (max-width: 749px) {
+    .product-tabs {
+      border-radius: 12px;
+    }
+
+    .product-tabs__list {
+      overflow-x: auto;
+      scrollbar-width: thin;
+      padding: 0 4px;
+    }
+
+    .product-tabs__tab {
+      white-space: nowrap;
+      padding: 12px 10px;
+    }
+  }
+
+  .product-recommendations .section-resource-list__content h3 {
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+  }
+
+  .product-recommendations .resource-list__item .product-card {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.09);
   }
 {% endstylesheet %}
 
@@ -461,6 +661,94 @@
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Product tabs"
+    },
+    {
+      "type": "text",
+      "id": "tab_title_description",
+      "label": "Description tab title",
+      "default": "Description"
+    },
+    {
+      "type": "text",
+      "id": "tab_title_additional",
+      "label": "Additional tab title",
+      "default": "Additional Information"
+    },
+    {
+      "type": "text",
+      "id": "tab_title_review",
+      "label": "Review tab title",
+      "default": "Review"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_description_fallback",
+      "label": "Description fallback content",
+      "default": "<p>Add product description content.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_additional_fallback",
+      "label": "Additional information fallback content",
+      "default": "<p>Add additional details for materials, ingredients, or specifications.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "tab_review_fallback",
+      "label": "Review fallback content",
+      "default": "<p>Customer reviews will appear here.</p>"
+    },
+    {
+      "type": "text",
+      "id": "attr_label_type",
+      "label": "Attribute label: Type",
+      "default": "Skin Type"
+    },
+    {
+      "type": "text",
+      "id": "attr_label_sku",
+      "label": "Attribute label: SKU",
+      "default": "SKU"
+    },
+    {
+      "type": "text",
+      "id": "attr_label_vendor",
+      "label": "Attribute label: Vendor",
+      "default": "Brand"
+    },
+    {
+      "type": "text",
+      "id": "attr_label_availability",
+      "label": "Attribute label: Availability",
+      "default": "Availability"
+    },
+    {
+      "type": "text",
+      "id": "availability_in_stock",
+      "label": "Availability in stock text",
+      "default": "In stock"
+    },
+    {
+      "type": "text",
+      "id": "availability_out_of_stock",
+      "label": "Availability out of stock text",
+      "default": "Out of stock"
+    },
+    {
+      "type": "text",
+      "id": "reviews_count_label",
+      "label": "Reviews count label",
+      "default": "reviews"
+    },
+    {
+      "type": "text",
+      "id": "reviews_empty_label",
+      "label": "No review text",
+      "default": "No reviews yet."
     },
     {
       "type": "header",
