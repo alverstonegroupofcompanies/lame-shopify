@@ -115,6 +115,7 @@
 {% stylesheet %}
   .product-information--redesign {
     --product-card-radius: 16px;
+    --product-hero-gap: clamp(18px, 2.2vw, 28px);
   }
 
   .product-information {
@@ -166,8 +167,40 @@
 
   /* Desktop styles */
   @media screen and (min-width: 750px) {
-    .product-information__grid {
+    .product-information--redesign .product-information__grid {
       grid-column: 2;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: var(--product-hero-gap);
+      align-items: start;
+    }
+
+    .product-information--redesign .product-information__media,
+    .product-information--redesign .product-details {
+      padding: 0;
+    }
+
+    .product-information--redesign .product-information__media-shell {
+      background: color-mix(in srgb, var(--color-background) 95%, rgb(var(--color-foreground-rgb) / 0.03));
+      border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+      padding: clamp(10px, 1vw, 14px);
+    }
+
+    .product-information--redesign .media-gallery--grid .media-gallery__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(10px, 1vw, 14px);
+    }
+
+    .product-information--redesign .media-gallery--grid .media-gallery__grid > li:nth-child(n + 3) {
+      display: none;
+    }
+
+    .product-information--redesign .media-gallery--grid .product-media-container {
+      margin: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
     }
 
     /* Position when there is no media */
@@ -310,6 +343,10 @@
       ).product-information--media-right {
       grid-template-columns: 1fr 2fr;
     }
+
+    .product-information--redesign .product-information__grid {
+      grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr);
+    }
   }
 
   .product-information__grid--limit-details .product-details > .group-block {
@@ -326,5 +363,18 @@
   /* If the header is sticky, make product details content stick underneath the header */
   body:has(#header-group #header-component[data-sticky-state='active']) .product-details.sticky-content--desktop {
     --sticky-header-offset: var(--header-height);
+  }
+
+  @media screen and (min-width: 750px) {
+    .product-information--redesign .product-information__grid:not(.product-information--media-none) {
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) !important;
+      gap: var(--product-hero-gap);
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .product-information--redesign .product-information__grid:not(.product-information--media-none) {
+      grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr) !important;
+    }
   }
 {% endstylesheet %}
