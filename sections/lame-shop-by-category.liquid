@@ -1,6 +1,7 @@
 {% liquid
-  assign cat_tile_width = section.settings.category_tile_width | default: 120
+  assign cat_tile_width = section.settings.category_tile_width | default: 170
   assign cat_gap = 10
+  assign heading_align = section.settings.heading_alignment | default: 'left'
   if section.settings.auto_slide == true
     assign shop_cat_auto_slide = true
   elsif section.settings.auto_slide == false
@@ -24,7 +25,7 @@
     data-pause-auto-slide-on-hover="{% if shop_cat_pause_hover %}true{% else %}false{% endif %}"
   >
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
-      <header class="lame-shop-cat__header" data-lame-reveal>
+      <header class="lame-shop-cat__header lame-shop-cat__header--align-{{ heading_align }}" data-lame-reveal>
         {% if section.settings.heading != blank %}
           <h2 class="lame-shop-cat__title">{{ section.settings.heading }}</h2>
         {% endif %}
@@ -34,6 +35,7 @@
       </header>
     {% endif %}
 
+    <div class="lame-shop-cat__carousel-wrap">
     <div
       class="lame-shop-cat__viewport"
       style="--lame-cat-tile-width: {{ cat_tile_width }}px; --lame-cat-gap: {{ cat_gap }}px;"
@@ -42,6 +44,7 @@
       {% for block in section.blocks %}
         {% liquid
           assign coll = block.settings.collection
+          assign tile_caption = block.settings.caption
           if block.settings.title != blank
             assign tile_title = block.settings.title
           else
@@ -63,9 +66,8 @@
             <li class="lame-shop-cat__item" {{ block.shopify_attributes }}>
               <div class="lame-shop-cat__tile lame-shop-cat__tile--placeholder">
                 <div class="lame-shop-cat__media lame-shop-cat__media--placeholder">
-                  <span class="lame-shop-cat__label-overlay">
-                    <span class="lame-shop-cat__label">{{ section.settings.placeholder_collection_text }}</span>
-                  </span>
+                  <span class="lame-shop-cat__media-shade" aria-hidden="true"></span>
+                  <span class="lame-shop-cat__title-on-image">{{ section.settings.placeholder_collection_text }}</span>
                 </div>
               </div>
             </li>
@@ -94,14 +96,38 @@
               {% else %}
                 {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lame-shop-cat__image lame-shop-cat__placeholder-svg placeholder-svg' }}
               {% endif %}
-              <span class="lame-shop-cat__label-overlay">
-                <span class="lame-shop-cat__label">{{ tile_title }}</span>
-              </span>
+              <span class="lame-shop-cat__media-shade" aria-hidden="true"></span>
+              <span class="lame-shop-cat__title-on-image">{{ tile_title }}</span>
             </div>
           </a>
+          {% if tile_caption != blank %}
+            <p class="lame-shop-cat__caption">{{ tile_caption }}</p>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>
+    </div>
+      <div class="lame-shop-cat__controls" data-shop-cat-controls hidden>
+        <button
+          class="lame-shop-cat__ctrl-arrow lame-shop-cat__ctrl-arrow--prev"
+          type="button"
+          aria-label="{{ section.settings.prev_category_label }}"
+          data-arrow="prev"
+        >
+          <span aria-hidden="true">&#8249;</span>
+        </button>
+        <div class="lame-shop-cat__progress-track" aria-hidden="true">
+          <div class="lame-shop-cat__progress-fill" data-shop-cat-progress-fill></div>
+        </div>
+        <button
+          class="lame-shop-cat__ctrl-arrow lame-shop-cat__ctrl-arrow--next"
+          type="button"
+          aria-label="{{ section.settings.next_category_label }}"
+          data-arrow="next"
+        >
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+      </div>
     </div>
   </div>
 </section>
