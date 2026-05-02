@@ -66,11 +66,27 @@
 
     <div class="lcc__wrap">
       {% if lcc_valid_tiles > 0 %}
-      <div
-        class="lcc__view"
-        style="--lcc-w: {{ w }}px; --lcc-gap: {{ gap }}px; --lcc-ar: {{ ar }};"
-      >
-        <ul class="lcc__track" role="list" data-lcc-track>
+      <div class="lcc__carousel-wrap">
+        {% if show_arrows %}
+          <button
+            class="lcc__arrow lcc__arrow--prev"
+            type="button"
+            data-lcc-prev
+            aria-label="{{ section.settings.prev_label }}"
+            hidden
+          >
+            {% if section.settings.prev_text != blank %}
+              <span class="lcc__arrow-text">{{ section.settings.prev_text }}</span>
+            {% else %}
+              <span aria-hidden="true">&#8249;</span>
+            {% endif %}
+          </button>
+        {% endif %}
+        <div
+          class="lcc__view"
+          style="--lcc-w: {{ w }}px; --lcc-gap: {{ gap }}px; --lcc-ar: {{ ar }};"
+        >
+          <ul class="lcc__track" role="list" data-lcc-track>
           {% for block in section.blocks %}
             {% liquid
               assign coll = block.settings.collection
@@ -141,34 +157,28 @@
             </li>
           {% endfor %}
         </ul>
-      </div>
-
-      <div
-        class="lcc__bar{% unless show_arrows %} lcc__bar--only{% endunless %}"
-        data-lcc-bar
-        hidden
-      >
-        {% if show_arrows %}
-          <button class="lcc__btn" type="button" data-lcc-prev aria-label="{{ section.settings.prev_label }}">
-            {% if section.settings.prev_text != blank %}
-              <span class="lcc__btntext">{{ section.settings.prev_text }}</span>
-            {% else %}
-              <span aria-hidden="true">&#8249;</span>
-            {% endif %}
-          </button>
-        {% endif %}
-        <div class="lcc__prog" aria-hidden="true">
-          <div class="lcc__fill" data-lcc-fill></div>
         </div>
         {% if show_arrows %}
-          <button class="lcc__btn" type="button" data-lcc-next aria-label="{{ section.settings.next_label }}">
+          <button
+            class="lcc__arrow lcc__arrow--next"
+            type="button"
+            data-lcc-next
+            aria-label="{{ section.settings.next_label }}"
+            hidden
+          >
             {% if section.settings.next_text != blank %}
-              <span class="lcc__btntext">{{ section.settings.next_text }}</span>
+              <span class="lcc__arrow-text">{{ section.settings.next_text }}</span>
             {% else %}
               <span aria-hidden="true">&#8250;</span>
             {% endif %}
           </button>
         {% endif %}
+      </div>
+
+      <div class="lcc__bar lcc__bar--only" data-lcc-bar hidden>
+        <div class="lcc__prog" aria-hidden="true">
+          <div class="lcc__fill" data-lcc-fill></div>
+        </div>
       </div>
       {% elsif request.design_mode %}
         <div
@@ -217,26 +227,46 @@
     const track = sec.querySelector('[data-lcc-track]');
     const bar = sec.querySelector('[data-lcc-bar]');
     const fill = sec.querySelector('[data-lcc-fill]');
-    const prev = sec.querySelector('[data-lcc-prev]');
-    const next = sec.querySelector('[data-lcc-next]');
+    const prevBtns = sec.querySelectorAll('[data-lcc-prev]');
+    const nextBtns = sec.querySelectorAll('[data-lcc-next]');
     if (!root || !track || track.querySelectorAll('.lcc__item').length === 0) return;
 
     const EPS = 4;
+
+    const setArrowVisibility = (overflow) => {
+      prevBtns.forEach((btn) => {
+        btn.hidden = !overflow;
+      });
+      nextBtns.forEach((btn) => {
+        btn.hidden = !overflow;
+      });
+    };
 
     const chrome = () => {
       const max = Math.max(0, track.scrollWidth - track.clientWidth);
       const overflow = max > EPS;
       if (bar) bar.hidden = !overflow;
+      setArrowVisibility(overflow);
       if (!overflow) {
         if (fill) fill.style.width = '0%';
-        if (prev) prev.disabled = true;
-        if (next) next.disabled = true;
+        prevBtns.forEach((b) => {
+          b.disabled = true;
+        });
+        nextBtns.forEach((b) => {
+          b.disabled = true;
+        });
         return;
       }
       const pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
       if (fill) fill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
-      if (prev) prev.disabled = track.scrollLeft <= EPS;
-      if (next) next.disabled = track.scrollLeft >= max - EPS;
+      const atStart = track.scrollLeft <= EPS;
+      const atEnd = track.scrollLeft >= max - EPS;
+      prevBtns.forEach((b) => {
+        b.disabled = atStart;
+      });
+      nextBtns.forEach((b) => {
+        b.disabled = atEnd;
+      });
     };
 
     const scrollCard = (dir) => {
@@ -246,8 +276,8 @@
       track.scrollBy({ left: dir * (item.offsetWidth + g), behavior: 'smooth' });
     };
 
-    if (prev) prev.addEventListener('click', () => scrollCard(-1));
-    if (next) next.addEventListener('click', () => scrollCard(1));
+    prevBtns.forEach((btn) => btn.addEventListener('click', () => scrollCard(-1)));
+    nextBtns.forEach((btn) => btn.addEventListener('click', () => scrollCard(1)));
     track.addEventListener('scroll', chrome, { passive: true });
 
     const auto = root.dataset.lccAuto === 'true';
@@ -391,6 +421,64 @@
   .lcc__wrap {
     max-width: 1200px;
     margin-inline: auto;
+  }
+
+  .lcc__carousel-wrap {
+    position: relative;
+    padding-inline: clamp(1.75rem, 4.5vw, 2.75rem);
+  }
+
+  .lcc__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(var(--brand-gold) / 0.38);
+    border-radius: 999px;
+    background: rgb(var(--color-background-rgb));
+    color: rgb(var(--color-foreground-rgb));
+    cursor: pointer;
+    transition: border-color 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+    box-shadow: 0 4px 14px rgb(18 18 18 / 0.06);
+  }
+
+  .lcc__arrow:hover:not(:disabled) {
+    border-color: rgb(var(--brand-gold) / 0.58);
+    box-shadow: 0 6px 18px rgb(18 18 18 / 0.1);
+  }
+
+  .lcc__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .lcc__arrow--prev {
+    left: 0;
+  }
+
+  .lcc__arrow--next {
+    right: 0;
+  }
+
+  .lcc__arrow-text {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-inline: 0.35rem;
+  }
+
+  .lcc__arrow:has(.lcc__arrow-text) {
+    width: auto;
+    min-width: 2rem;
+    padding-inline: 0.45rem;
   }
 
   .lcc__view {
@@ -570,46 +658,6 @@
     border-radius: inherit;
     background: rgb(var(--brand-gold));
     transition: width 140ms ease-out;
-  }
-
-  .lcc__btn {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    border: 1px solid rgb(var(--brand-gold) / 0.35);
-    border-radius: 999px;
-    background: rgb(var(--color-background-rgb));
-    color: rgb(var(--color-foreground-rgb));
-    cursor: pointer;
-    transition: border-color 180ms ease, opacity 180ms ease;
-  }
-
-  .lcc__btn:hover:not(:disabled) {
-    border-color: rgb(var(--brand-gold) / 0.55);
-  }
-
-  .lcc__btn:disabled {
-    opacity: 0.35;
-    cursor: default;
-  }
-
-  .lcc__btntext {
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    padding-inline: 0.45rem;
-  }
-
-  .lcc__btn:has(.lcc__btntext) {
-    width: auto;
-    min-width: 2rem;
-    padding-inline: 0.5rem;
   }
 {% endstylesheet %}
 
