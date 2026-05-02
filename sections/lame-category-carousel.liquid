@@ -76,9 +76,10 @@
             {% if lcc_valid_tiles < 2 %}hidden{% endif %}
           >
             {% if section.settings.prev_text != blank %}
+              {% render 'lcc-chevron-icon', direction: 'prev' %}
               <span class="lcc__arrow-text">{{ section.settings.prev_text }}</span>
             {% else %}
-              <span aria-hidden="true">&#8249;</span>
+              {% render 'lcc-chevron-icon', direction: 'prev' %}
             {% endif %}
           </button>
         {% endif %}
@@ -168,8 +169,9 @@
           >
             {% if section.settings.next_text != blank %}
               <span class="lcc__arrow-text">{{ section.settings.next_text }}</span>
+              {% render 'lcc-chevron-icon', direction: 'next' %}
             {% else %}
-              <span aria-hidden="true">&#8250;</span>
+              {% render 'lcc-chevron-icon', direction: 'next' %}
             {% endif %}
           </button>
         {% endif %}
@@ -183,11 +185,16 @@
             data-lcc-prev
             aria-label="{{ section.settings.prev_label }}"
           >
-            {% if section.settings.prev_text != blank %}
-              {{ section.settings.prev_text }}
-            {% else %}
-              {{ section.settings.prev_label }}
-            {% endif %}
+            <span class="lcc__nav-row-inner">
+              {% render 'lcc-chevron-icon', direction: 'prev' %}
+              <span class="lcc__nav-row-label">
+                {% if section.settings.prev_text != blank %}
+                  {{ section.settings.prev_text }}
+                {% else %}
+                  {{ section.settings.prev_label }}
+                {% endif %}
+              </span>
+            </span>
           </button>
           <button
             class="lcc__nav-row-btn"
@@ -195,11 +202,16 @@
             data-lcc-next
             aria-label="{{ section.settings.next_label }}"
           >
-            {% if section.settings.next_text != blank %}
-              {{ section.settings.next_text }}
-            {% else %}
-              {{ section.settings.next_label }}
-            {% endif %}
+            <span class="lcc__nav-row-inner">
+              <span class="lcc__nav-row-label">
+                {% if section.settings.next_text != blank %}
+                  {{ section.settings.next_text }}
+                {% else %}
+                  {{ section.settings.next_label }}
+                {% endif %}
+              </span>
+              {% render 'lcc-chevron-icon', direction: 'next' %}
+            </span>
           </button>
         </div>
       {% endif %}
@@ -483,6 +495,13 @@
     overflow: visible;
   }
 
+  .lcc__icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    flex-shrink: 0;
+    display: block;
+  }
+
   .lcc__arrow {
     position: absolute;
     top: 50%;
@@ -494,6 +513,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.28rem;
     border: 1px solid rgb(var(--brand-gold) / 0.38);
     border-radius: 999px;
     background: rgb(var(--color-background-rgb));
@@ -547,6 +567,18 @@
     gap: 0.65rem 1rem;
     margin-top: 0.85rem;
     padding-inline: 0.25rem;
+  }
+
+  .lcc__nav-row-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .lcc__nav-row-btn .lcc__icon {
+    width: 0.72rem;
+    height: 0.72rem;
   }
 
   .lcc__nav-row-btn {
