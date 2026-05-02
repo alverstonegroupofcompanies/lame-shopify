@@ -229,26 +229,29 @@
     const fill = sec.querySelector('[data-lcc-fill]');
     const prevBtns = sec.querySelectorAll('[data-lcc-prev]');
     const nextBtns = sec.querySelectorAll('[data-lcc-next]');
-    if (!root || !track || track.querySelectorAll('.lcc__item').length === 0) return;
+    const items = track.querySelectorAll('.lcc__item');
+    if (!root || !track || items.length === 0) return;
 
     const EPS = 4;
 
-    const setArrowVisibility = (overflow) => {
+    const syncArrows = (overflow, itemCount) => {
+      if (prevBtns.length === 0) return;
+      if (itemCount < 2) {
+        prevBtns.forEach((btn) => {
+          btn.hidden = true;
+        });
+        nextBtns.forEach((btn) => {
+          btn.hidden = true;
+        });
+        return;
+      }
       prevBtns.forEach((btn) => {
-        btn.hidden = !overflow;
+        btn.hidden = false;
       });
       nextBtns.forEach((btn) => {
-        btn.hidden = !overflow;
+        btn.hidden = false;
       });
-    };
-
-    const chrome = () => {
-      const max = Math.max(0, track.scrollWidth - track.clientWidth);
-      const overflow = max > EPS;
-      if (bar) bar.hidden = !overflow;
-      setArrowVisibility(overflow);
       if (!overflow) {
-        if (fill) fill.style.width = '0%';
         prevBtns.forEach((b) => {
           b.disabled = true;
         });
@@ -257,8 +260,7 @@
         });
         return;
       }
-      const pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
-      if (fill) fill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      const max = Math.max(0, track.scrollWidth - track.clientWidth);
       const atStart = track.scrollLeft <= EPS;
       const atEnd = track.scrollLeft >= max - EPS;
       prevBtns.forEach((b) => {
@@ -267,6 +269,21 @@
       nextBtns.forEach((b) => {
         b.disabled = atEnd;
       });
+    };
+
+    const chrome = () => {
+      const itemCount = track.querySelectorAll('.lcc__item').length;
+      const max = Math.max(0, track.scrollWidth - track.clientWidth);
+      const overflow = max > EPS;
+      if (bar) bar.hidden = !overflow;
+      if (fill && !overflow) fill.style.width = '0%';
+      if (!overflow) {
+        syncArrows(false, itemCount);
+        return;
+      }
+      const pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
+      if (fill) fill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      syncArrows(true, itemCount);
     };
 
     const scrollCard = (dir) => {
@@ -373,7 +390,12 @@
       }
     });
 
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => chrome());
+    });
+
     setTimeout(chrome, 0);
+    setTimeout(chrome, 150);
   })();
 </script>
 
