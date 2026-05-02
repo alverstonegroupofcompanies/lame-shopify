@@ -949,11 +949,9 @@ body:has(header-component[transparent]) .content-for-layout > .shopify-section:f
   margin-top: calc(var(--header-group-height) * -1);
 }
 
-/* Hero / homepage slideshow: do not tuck under the nav (negative margin only applies to .hero-wrapper today; slideshow is separate) */
+/* Hero: do not tuck under the nav — absolute media ignores inner spacing offset, so pull-up hides the banner behind the bar */
 body:has(.header[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child,
-body:has(header-component[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child,
-body:has(.header[transparent]) .content-for-layout > .shopify-section:first-child:has(.slideshow-section),
-body:has(header-component[transparent]) .content-for-layout > .shopify-section:first-child:has(.slideshow-section) {
+body:has(header-component[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child {
   margin-top: 0;
   /* max() avoids zero offset when --header-group-height is unset or briefly wrong before JS runs */
   padding-top: max(
@@ -4547,12 +4545,7 @@ body {
   }
 }
 
-/* Homepage hero: full width, full image visible (contain), desktop capped to viewport below header */
-.shopify-section:has(.slideshow-section--viewport-hero) {
-  width: 100%;
-  max-width: none;
-}
-
+/* Homepage hero: full width, height follows media (natural aspect ratio) */
 .shopify-section:has(.slideshow-section--viewport-hero) .slideshow-section--viewport-hero {
   width: 100%;
   max-width: none;
@@ -4611,34 +4604,6 @@ body {
   height: auto;
   display: block;
   object-fit: contain;
-}
-
-@media screen and (min-width: 750px) {
-  /* Fit entire banner in the visible area: full width, scale down height if needed */
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide > .slide__image-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-height: calc(100svh - var(--header-group-height, 80px) - 1.5rem);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container :is(img, .slide__image) {
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: calc(100svh - var(--header-group-height, 80px) - 1.5rem);
-    object-fit: contain;
-    object-position: center center;
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container .slide__video {
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    max-height: calc(100svh - var(--header-group-height, 80px) - 1.5rem);
-    object-fit: contain;
-  }
 }
 
 /* Overlay content still fills the slide when media sets slide height */
