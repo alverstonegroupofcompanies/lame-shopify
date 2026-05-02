@@ -1,0 +1,401 @@
+{%- liquid
+  assign promo_count = 0
+  for block in section.blocks
+    assign line = block.settings.text | strip_html | strip
+    if line != blank
+      assign promo_count = promo_count | plus: 1
+    endif
+  endfor
+
+  assign promo_n = promo_count
+  if promo_n < 1
+    assign promo_n = 1
+  endif
+-%}
+
+{%- if promo_count > 0 or request.design_mode -%}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <aside
+    class="lame-promo-top-bar spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} {% if promo_count < 2 %}lame-promo-top-bar--single{% endif %}"
+    style="
+      {% render 'spacing-padding', settings: section.settings %}
+      --promo-slide-sec: {{ section.settings.slide_seconds }};
+      --promo-dur: calc({{ promo_n }} * {{ section.settings.slide_seconds }} * 1s);
+      --promo-n: {{ promo_n }};
+    "
+    data-promo-count="{{ promo_n }}"
+  >
+    <div class="lame-promo-top-bar__inner">
+      {%- if section.settings.show_badge and section.settings.badge_text != blank -%}
+        <span class="lame-promo-top-bar__badge" aria-hidden="true">{{ section.settings.badge_text }}</span>
+      {%- endif -%}
+
+      <div
+        class="lame-promo-top-bar__rotator"
+        id="LamePromoRotator-{{ section.id }}"
+        data-promo-n="{% if promo_count < 1 %}1{% else %}{{ promo_count }}{% endif %}"
+        role="region"
+        aria-label="{{ section.settings.accessibility_label | escape }}"
+      >
+        {%- if promo_count == 0 and request.design_mode -%}
+          <p class="lame-promo-top-bar__placeholder">Add one or more promo lines in the sidebar. Multiple lines fade in and out in rotation.</p>
+        {%- else -%}
+          {% content_for 'blocks' %}
+        {%- endif -%}
+      </div>
+    </div>
+  </aside>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-promo-top-bar {
+    --lame-promo-badge-bg: rgb(var(--brand-gold));
+    --lame-promo-badge-fg: #0a0a0c;
+    border-block-end: 1px solid rgb(var(--color-border-rgb) / 0.35);
+    position: relative;
+  }
+
+  .lame-promo-top-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.65rem, 2.5vw, 1.1rem);
+    flex-wrap: wrap;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .lame-promo-top-bar__badge {
+    flex-shrink: 0;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.55rem;
+    border-radius: 3px;
+    background: var(--lame-promo-badge-bg);
+    color: var(--lame-promo-badge-fg);
+    line-height: 1;
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.12);
+    animation: lame-promo-badge-pop 2.8s ease-in-out infinite;
+  }
+
+  @keyframes lame-promo-badge-pop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    12% {
+      transform: scale(1.06);
+    }
+    24% {
+      transform: scale(1);
+    }
+  }
+
+  .lame-promo-top-bar__rotator {
+    position: relative;
+    min-height: 1.35em;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template: [stack] auto / [stack] minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    max-width: min(52rem, 100%);
+    --promo-dur: calc(var(--promo-n, 1) * var(--promo-slide-sec, 5) * 1s);
+  }
+
+  .lame-promo-top-bar__rotator > * {
+    grid-area: stack;
+  }
+
+  .lame-promo-top-bar__placeholder {
+    margin: 0;
+    font-size: 0.8125rem;
+    opacity: 0.65;
+    text-align: center;
+  }
+
+  .lame-promo-top-bar__caption {
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    opacity: 0;
+    animation: lame-promo-fade-cycle var(--promo-dur) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .lame-promo-top-bar__caption-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .lame-promo-top-bar__caption-link:hover,
+  .lame-promo-top-bar__caption-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .lame-promo-top-bar__caption-text {
+    font-size: clamp(0.75rem, 1.35vw, 0.875rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.35;
+  }
+
+  .lame-promo-top-bar__caption-text :first-child {
+    margin: 0;
+  }
+
+  @keyframes lame-promo-fade-cycle {
+    0% {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.97);
+    }
+    5% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    28% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    36% {
+      opacity: 0;
+      transform: translateY(-0.45rem) scale(0.97);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-0.45rem) scale(0.97);
+    }
+  }
+
+  .lame-promo-top-bar--single .lame-promo-top-bar__caption {
+    animation: lame-promo-soft-in 1.1s ease-out forwards;
+  }
+
+  @keyframes lame-promo-soft-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.35rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered delays for 2–6 rotating captions */
+  .lame-promo-top-bar__rotator[data-promo-n='2'] > .lame-promo-top-bar__caption:nth-child(2) {
+    animation-delay: calc(var(--promo-dur) * -1 / 2);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='3'] > .lame-promo-top-bar__caption:nth-child(2) {
+    animation-delay: calc(var(--promo-dur) * -1 / 3);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='3'] > .lame-promo-top-bar__caption:nth-child(3) {
+    animation-delay: calc(var(--promo-dur) * -2 / 3);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='4'] > .lame-promo-top-bar__caption:nth-child(2) {
+    animation-delay: calc(var(--promo-dur) * -1 / 4);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='4'] > .lame-promo-top-bar__caption:nth-child(3) {
+    animation-delay: calc(var(--promo-dur) * -2 / 4);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='4'] > .lame-promo-top-bar__caption:nth-child(4) {
+    animation-delay: calc(var(--promo-dur) * -3 / 4);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(2) {
+    animation-delay: calc(var(--promo-dur) * -1 / 5);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(3) {
+    animation-delay: calc(var(--promo-dur) * -2 / 5);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(4) {
+    animation-delay: calc(var(--promo-dur) * -3 / 5);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(5) {
+    animation-delay: calc(var(--promo-dur) * -4 / 5);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(2) {
+    animation-delay: calc(var(--promo-dur) * -1 / 6);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(3) {
+    animation-delay: calc(var(--promo-dur) * -2 / 6);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(4) {
+    animation-delay: calc(var(--promo-dur) * -3 / 6);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(5) {
+    animation-delay: calc(var(--promo-dur) * -4 / 6);
+  }
+
+  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(6) {
+    animation-delay: calc(var(--promo-dur) * -5 / 6);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lame-promo-top-bar__badge {
+      animation: none;
+    }
+
+    .lame-promo-top-bar__caption {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .lame-promo-top-bar__rotator > .lame-promo-top-bar__caption:not(:first-of-type) {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Super deal top bar",
+  "tag": "section",
+  "class": "lame-promo-top-bar-section",
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "_lame-promo-caption"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "slide_seconds",
+      "label": "Seconds per caption",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 5,
+      "unit": "s"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badge",
+      "label": "Show deal badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge text",
+      "default": "Super deal"
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Region label (screen readers)",
+      "default": "Promotions and offers"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Super deal top bar",
+      "blocks": {
+        "deal_1": {
+          "type": "_lame-promo-caption",
+          "settings": {
+            "text": "<strong>20% off</strong> your first order — use code <strong>WELCOME20</strong>"
+          }
+        },
+        "deal_2": {
+          "type": "_lame-promo-caption",
+          "settings": {
+            "text": "Free shipping on orders over <strong>$75</strong>"
+          }
+        },
+        "deal_3": {
+          "type": "_lame-promo-caption",
+          "settings": {
+            "text": "New arrivals weekly — <strong>shop the drop</strong>"
+          }
+        }
+      },
+      "block_order": ["deal_1", "deal_2", "deal_3"]
+    }
+  ]
+}
+{% endschema %}
