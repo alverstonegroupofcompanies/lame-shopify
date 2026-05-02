@@ -199,16 +199,37 @@
   }
 {% endstyle %}
 
+{% liquid
+  assign ai_prods_on_collection = false
+  if template.name == 'collection' and collection != blank
+    assign ai_prods_on_collection = true
+    assign ai_prods_list = collection.products
+  else
+    assign ai_prods_list = collections.all.products
+  endif
+
+  assign ai_use_collection_title = block.settings.use_collection_title | default: true
+  assign ai_show_header = false
+  assign ai_heading_text = ''
+  if ai_prods_on_collection and ai_use_collection_title
+    assign ai_show_header = true
+    assign ai_heading_text = collection.title
+  elsif block.settings.heading != blank
+    assign ai_show_header = true
+    assign ai_heading_text = block.settings.heading
+  endif
+%}
+
 <products-grid-{{ ai_gen_id }} class="ai-products-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
-  {% if block.settings.heading != blank %}
+  {% if ai_show_header %}
     <div class="ai-products-grid__header-{{ ai_gen_id }}">
-      <h2 class="ai-products-grid__title-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+      <h2 class="ai-products-grid__title-{{ ai_gen_id }}">{{ ai_heading_text }}</h2>
     </div>
   {% endif %}
 
-  {% if collections.all.products.size > 0 %}
+  {% if ai_prods_list.size > 0 %}
     <div class="ai-products-grid__container-{{ ai_gen_id }}">
-      {% for product in collections.all.products limit: block.settings.products_limit %}
+      {% for product in ai_prods_list limit: block.settings.products_limit %}
         {% liquid
           assign variant = product.selected_or_first_available_variant
           assign card_form_id = 'OurProducts-ProductForm-' | append: product.id | append: '-' | append: block.id
@@ -322,7 +343,11 @@
   {% else %}
     <div class="ai-products-grid__empty-{{ ai_gen_id }}">
       {{ 'product-1' | placeholder_svg_tag }}
-      <p>No products available yet. Add products to your store to display them here.</p>
+      {% if ai_prods_on_collection %}
+        <p>{{ block.settings.empty_collection_text }}</p>
+      {% else %}
+        <p>No products available yet. Add products to your store to display them here.</p>
+      {% endif %}
     </div>
   {% endif %}
 </products-grid-{{ ai_gen_id }}>
@@ -474,7 +499,21 @@
       "type": "inline_richtext",
       "id": "heading",
       "label": "Heading",
-      "default": "Our Products"
+      "default": "Our Products",
+      "info": "On collection pages, you can use the collection name instead (see below)."
+    },
+    {
+      "type": "checkbox",
+      "id": "use_collection_title",
+      "label": "On collection pages, use collection name as heading",
+      "default": true,
+      "info": "Lists only that collection’s products (e.g. Wellness). Turn off to always use the heading above."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "empty_collection_text",
+      "label": "Empty collection message",
+      "default": "No products to show. They may be out of stock or not published to this collection."
     },
     {
       "type": "range",
