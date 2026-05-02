@@ -57,7 +57,14 @@
             assign selected_variant = product.selected_or_first_available_variant
           %}
           <div class="lame-featured-products__card">
-            <a href="{{ product.url }}" class="lame-featured-products__media-link" aria-label="{{ product.title | escape }}">
+            <a
+              href="{{ product.url }}"
+              class="lame-featured-products__card-link"
+              aria-label="{{ product.title | escape }}"
+            >
+              <span class="visually-hidden">{{ product.title }}</span>
+            </a>
+            <div class="lame-featured-products__media-block">
               <div class="lame-featured-products__image-wrap">
                 {% if product.featured_media %}
                   {{
@@ -73,7 +80,7 @@
                   {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-featured-products__image placeholder-svg' }}
                 {% endif %}
               </div>
-            </a>
+            </div>
             {% if selected_variant %}
               <form method="post" action="{{ routes.cart_add_url }}" class="lame-featured-products__quick-add-form">
                 <input type="hidden" name="id" value="{{ selected_variant.id }}">
@@ -98,7 +105,7 @@
 
             <div class="lame-featured-products__content">
               <h3 class="lame-featured-products__product-title">
-                <a href="{{ product.url }}">{{ product.title }}</a>
+                {{ product.title }}
               </h3>
               <p class="lame-featured-products__price">
                 {% render 'price', product_resource: product, show_sale_price_first: true %}
@@ -353,6 +360,7 @@
     padding-top: 0.42rem;
     text-align: center;
     min-height: 58px;
+    pointer-events: none;
   }
 
   .lame-featured-products__product-title {
@@ -365,13 +373,16 @@
     color: rgb(var(--color-foreground-rgb));
   }
 
-  .lame-featured-products__product-title a {
-    color: inherit;
-    text-decoration: none;
+  .lame-featured-products__card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
   }
 
-  .lame-featured-products__media-link {
+  .lame-featured-products__media-block {
     display: block;
+    position: relative;
+    z-index: 1;
   }
 
   .lame-featured-products__quick-add-form {
@@ -379,6 +390,7 @@
     right: 0.78rem;
     top: 0.78rem;
     z-index: 3;
+    pointer-events: auto;
   }
 
   .lame-featured-products__quick-add-status {

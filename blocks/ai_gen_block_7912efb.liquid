@@ -85,6 +85,14 @@
     opacity: 0.3;
   }
 
+  .ai-product-card__image-link-{{ ai_gen_id }} {
+    position: absolute;
+    inset: 0;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
   .ai-product-card__content-{{ ai_gen_id }} {
     padding: {{ block.settings.card_padding }}px;
     display: flex;
@@ -217,20 +225,26 @@
         %}
         <div class="ai-product-card-{{ ai_gen_id }}" data-product-id="{{ product.id }}">
           <div class="ai-product-card__image-wrapper-{{ ai_gen_id }}">
-            {% if product.featured_image %}
-              <img
-                src="{{ product.featured_image | image_url: width: 600 }}"
-                alt="{{ product.featured_image.alt | escape }}"
-                class="ai-product-card__image-{{ ai_gen_id }}"
-                loading="lazy"
-                width="600"
-                height="600"
-              >
-            {% else %}
-              <div class="ai-product-card__placeholder-{{ ai_gen_id }}">
-                {{ 'product-1' | placeholder_svg_tag }}
-              </div>
-            {% endif %}
+            <a
+              href="{{ product.url }}"
+              class="ai-product-card__image-link-{{ ai_gen_id }}"
+              aria-label="{{ product.title | escape }}"
+            >
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | image_url: width: 600 }}"
+                  alt="{{ product.featured_image.alt | escape }}"
+                  class="ai-product-card__image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                >
+              {% else %}
+                <div class="ai-product-card__placeholder-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </a>
           </div>
 
           <div class="ai-product-card__content-{{ ai_gen_id }}">

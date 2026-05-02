@@ -16,9 +16,21 @@
       {% for block in section.blocks %}
         {% liquid
           assign coll = block.settings.collection
-          assign tile_title = block.settings.title | default: coll.title
-          assign tile_url = block.settings.link | default: coll.url
-          assign tile_image = block.settings.image | default: coll.featured_image
+          if block.settings.title != blank
+            assign tile_title = block.settings.title
+          else
+            assign tile_title = coll.title
+          endif
+          if block.settings.link != blank
+            assign tile_url = block.settings.link
+          else
+            assign tile_url = coll.url
+          endif
+          if block.settings.image != blank
+            assign tile_image = block.settings.image
+          else
+            assign tile_image = coll.featured_image
+          endif
         %}
         {% if coll == blank %}
           {% if request.design_mode %}
@@ -273,7 +285,8 @@
         {
           "type": "url",
           "id": "link",
-          "label": "Link override"
+          "label": "Link override",
+          "info": "Leave empty to use the selected collection page (recommended). Only set this if you need a custom destination URL."
         }
       ]
     }
