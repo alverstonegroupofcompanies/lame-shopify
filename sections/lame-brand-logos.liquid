@@ -6,6 +6,7 @@
       {% render 'spacing-padding', settings: section.settings %}
       --brand-logo-height: {{ section.settings.logo_height }}px;
       --brand-logo-gap: {{ section.settings.logo_gap }}px;
+      --brand-header-gap: clamp(0.85rem, 2.2vw, 1.35rem);
     "
   >
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
@@ -64,9 +65,16 @@
 </section>
 
 {% stylesheet %}
+  .lame-brand-logos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--brand-header-gap, clamp(0.85rem, 2.2vw, 1.35rem));
+  }
+
   .lame-brand-logos__header {
     text-align: center;
-    margin-bottom: var(--padding-md);
+    margin-bottom: 0;
   }
 
   .lame-brand-logos__title {
