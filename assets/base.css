@@ -22,8 +22,6 @@ body.template-index {
 }
 
 :root {
-  /* Uniform vertical gap between main template sections (flex row-gap on .content-for-layout) */
-  --content-section-row-gap: clamp(2.25rem, 5vw, 3.75rem);
   --hover-lift-amount: 4px;
   --hover-scale-amount: 1.03;
   --hover-subtle-zoom-amount: 1.015;
@@ -328,7 +326,7 @@ p:empty {
   flex: 1;
   display: flex;
   flex-direction: column;
-  row-gap: var(--content-section-row-gap);
+  row-gap: var(--content-section-row-gap, clamp(0.75rem, 2vw, 1.75rem));
 }
 
 .content-for-layout > .shopify-section:last-child {
@@ -4545,77 +4543,28 @@ body {
   }
 }
 
-/* Homepage / viewport hero slideshow — width + height tied to viewport */
-.shopify-section:has(.slideshow-section--viewport-hero) .slideshow-section--viewport-hero {
-  width: 100%;
-  max-width: none;
-  box-sizing: border-box;
-}
-
-.shopify-section:has(.slideshow-section--viewport-hero) slideshow-component {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Mobile: screen-fit height (explicit height so absolute .slide__image-container can fill) */
-@media screen and (max-width: 749px) {
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slides {
-    min-height: clamp(280px, 52svh, 85svh);
-    height: clamp(280px, 52svh, 85svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide {
-    min-height: clamp(280px, 52svh, 85svh);
-    height: clamp(280px, 52svh, 85svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) :is(slideshow-component, slideshow-container) {
-    min-height: clamp(280px, 52svh, 85svh);
-    height: clamp(280px, 52svh, 85svh);
-  }
-}
-
-/* Desktop */
+/* Hero */
 @media screen and (min-width: 750px) {
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slides {
-    min-height: clamp(320px, 42svh, 72svh);
-    height: clamp(320px, 42svh, 72svh);
-    --slide-min-height-desktop: clamp(320px, 42svh, 72svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide {
-    min-height: clamp(320px, 42svh, 72svh);
-    height: clamp(320px, 42svh, 72svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) :is(slideshow-component, slideshow-container) {
-    min-height: clamp(320px, 42svh, 72svh);
-    height: clamp(320px, 42svh, 72svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) .slideshow-section--viewport-hero {
+  .shopify-section:has([data-testid='hero-slideshow']) .slideshow-section {
+    --slide-min-height-desktop: clamp(300px, 40vh, 420px);
+    height: clamp(300px, 40vh, 420px);
+    max-height: 420px;
     overflow: hidden;
   }
 
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container,
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container :is(img, .slide__image, .slide__video, .slide__video-poster) {
+  .shopify-section:has([data-testid='hero-slideshow']) :is(slideshow-component, slideshow-container, slideshow-slides, slideshow-slide) {
     height: 100%;
-    width: 100%;
+    max-height: 100%;
+  }
+
+  .shopify-section:has([data-testid='hero-slideshow']) .slide__image-container,
+  .shopify-section:has([data-testid='hero-slideshow']) .slide__image-container img {
+    height: 100%;
     object-fit: cover;
-    object-position: center center;
   }
 }
 
-@media screen and (max-width: 749px) {
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container,
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container :is(img, .slide__image, .slide__video, .slide__video-poster) {
-    width: 100%;
-    object-fit: cover;
-    object-position: center center;
-  }
-}
-
-.shopify-section:has(.slideshow-section--viewport-hero) .button {
+.shopify-section:has([data-testid='hero-slideshow']) .button {
   min-height: 2.05rem;
   min-width: 190px;
   padding: 0.44rem 1.15rem;
@@ -4630,7 +4579,7 @@ body {
 }
 
 /* Hero content polish - elegant left-aligned cosmetic look */
-.shopify-section:has(.slideshow-section--viewport-hero) .slide__content {
+.shopify-section:has([data-testid='hero-slideshow']) .slide__content {
   max-width: min(500px, 88%);
   padding: clamp(0.95rem, 1.7vw, 1.3rem);
   border-radius: 8px;
@@ -4639,7 +4588,7 @@ body {
   backdrop-filter: blur(2px);
 }
 
-.shopify-section:has(.slideshow-section--viewport-hero) .slide__content :is(h1, h2, h3) {
+.shopify-section:has([data-testid='hero-slideshow']) .slide__content :is(h1, h2, h3) {
   margin: 0 0 0.4rem;
   font-family: var(--lame-font-display);
   color: rgb(35 35 42);
@@ -4649,7 +4598,7 @@ body {
   text-wrap: balance;
 }
 
-.shopify-section:has(.slideshow-section--viewport-hero) .slide__content p {
+.shopify-section:has([data-testid='hero-slideshow']) .slide__content p {
   margin: 0 0 0.72rem;
   max-width: 38ch;
   color: rgb(52 52 58 / 0.8);
@@ -4657,32 +4606,32 @@ body {
   line-height: 1.42;
 }
 
-.shopify-section:has(.slideshow-section--viewport-hero) .button {
+.shopify-section:has([data-testid='hero-slideshow']) .button {
   width: fit-content;
   justify-content: flex-start;
 }
 
 @media screen and (max-width: 749px) {
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__content {
+  .shopify-section:has([data-testid='hero-slideshow']) .slide__content {
     max-width: 90%;
     padding: 0.5rem 0.56rem;
     border-radius: 6px;
   }
 
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__content :is(h1, h2, h3) {
+  .shopify-section:has([data-testid='hero-slideshow']) .slide__content :is(h1, h2, h3) {
     font-size: clamp(0.92rem, 5.2vw, 1.2rem);
     margin-bottom: 0.2rem;
     line-height: 1.06;
   }
 
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__content p {
+  .shopify-section:has([data-testid='hero-slideshow']) .slide__content p {
     font-size: 0.68rem;
     margin-bottom: 0.34rem;
     line-height: 1.28;
     max-width: 30ch;
   }
 
-  .shopify-section:has(.slideshow-section--viewport-hero) .button {
+  .shopify-section:has([data-testid='hero-slideshow']) .button {
     width: fit-content;
     min-height: 1.48rem;
     min-width: 104px;
@@ -4908,21 +4857,21 @@ body {
   transition-delay: 240ms;
 }
 
-.template-index .shopify-section:has(.slideshow-section--viewport-hero) .slide__content > * {
+.template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > * {
   opacity: 0;
   transform: translateY(14px);
   animation: lameHeroContentIn var(--lame-motion-duration) var(--lame-motion-ease) forwards;
 }
 
-.template-index .shopify-section:has(.slideshow-section--viewport-hero) .slide__content > *:nth-child(2) {
+.template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > *:nth-child(2) {
   animation-delay: 110ms;
 }
 
-.template-index .shopify-section:has(.slideshow-section--viewport-hero) .slide__content > *:nth-child(3) {
+.template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > *:nth-child(3) {
   animation-delay: 200ms;
 }
 
-.template-index .shopify-section:has(.slideshow-section--viewport-hero) :is(.slide__media img, .slide__media video) {
+.template-index .shopify-section:has([data-testid='hero-slideshow']) :is(.slide__media img, .slide__media video) {
   animation: lameHeroMediaDrift var(--lame-motion-duration-slow) var(--lame-motion-ease) both;
   transform-origin: center;
 }
@@ -4956,8 +4905,8 @@ body {
     transition: none !important;
   }
 
-  .template-index .shopify-section:has(.slideshow-section--viewport-hero) .slide__content > *,
-  .template-index .shopify-section:has(.slideshow-section--viewport-hero) :is(.slide__media img, .slide__media video) {
+  .template-index .shopify-section:has([data-testid='hero-slideshow']) .slide__content > *,
+  .template-index .shopify-section:has([data-testid='hero-slideshow']) :is(.slide__media img, .slide__media video) {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
