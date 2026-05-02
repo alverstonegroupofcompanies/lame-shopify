@@ -1,6 +1,28 @@
+{% liquid
+  assign cat_tile_width = section.settings.category_tile_width | default: 140
+  assign cat_gap = 10
+  if section.settings.auto_slide == true
+    assign shop_cat_auto_slide = true
+  elsif section.settings.auto_slide == false
+    assign shop_cat_auto_slide = false
+  else
+    assign shop_cat_auto_slide = true
+  endif
+  if section.settings.pause_auto_slide_on_hover == false
+    assign shop_cat_pause_hover = false
+  else
+    assign shop_cat_pause_hover = true
+  endif
+%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
-  <div class="lame-shop-cat spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+  <div
+    class="lame-shop-cat spacing-style"
+    style="{% render 'spacing-padding', settings: section.settings %}"
+    data-auto-slide="{% if shop_cat_auto_slide %}true{% else %}false{% endif %}"
+    data-auto-slide-interval="{{ section.settings.auto_slide_interval | default: 5 }}"
+    data-pause-auto-slide-on-hover="{% if shop_cat_pause_hover %}true{% else %}false{% endif %}"
+  >
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
       <header class="lame-shop-cat__header" data-lame-reveal>
         {% if section.settings.heading != blank %}
@@ -12,7 +34,11 @@
       </header>
     {% endif %}
 
-    <ul class="lame-shop-cat__grid" role="list">
+    <div
+      class="lame-shop-cat__viewport"
+      style="--lame-cat-tile-width: {{ cat_tile_width }}px; --lame-cat-gap: {{ cat_gap }}px;"
+    >
+    <ul class="lame-shop-cat__track" role="list" data-lame-shop-cat-track>
       {% for block in section.blocks %}
         {% liquid
           assign coll = block.settings.collection
@@ -58,8 +84,8 @@
                   | image_tag:
                     class: 'lame-shop-cat__image',
                     loading: 'lazy',
-                    widths: '200,360,480,640,800',
-                    sizes: '(min-width: 990px) 18vw, (min-width: 750px) 28vw, 44vw'
+                    widths: '120,200,360,480,640,800',
+                    sizes: '(max-width: 749px) 38vw, {{ cat_tile_width }}px'
                 }}
               {% else %}
                 {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lame-shop-cat__image placeholder-svg' }}
@@ -70,6 +96,7 @@
         </li>
       {% endfor %}
     </ul>
+    </div>
   </div>
 </section>
 
@@ -98,6 +125,109 @@
   })();
 </script>
 
+<script>
+  (() => {
+    const sectionEl = document.getElementById('shopify-section-{{ section.id }}');
+    if (!sectionEl) return;
+
+    const root = sectionEl.querySelector('.lame-shop-cat');
+    const track = sectionEl.querySelector('[data-lame-shop-cat-track]');
+    if (!root || !track) return;
+
+    const autoSlide = root.dataset.autoSlide === 'true';
+    const intervalSec = Math.max(3, parseInt(root.dataset.autoSlideInterval || '5', 10));
+    const pauseOnHover = root.dataset.pauseAutoSlideOnHover !== 'false';
+
+    if (!autoSlide) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let timerId = null;
+    let isPaused = false;
+    let isInView = false;
+
+    const getStepPx = () => {
+      const first = track.querySelector('.lame-shop-cat__item');
+      if (!first) return 0;
+      const styles = window.getComputedStyle(track);
+      const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0;
+      return first.offsetWidth + gap;
+    };
+
+    const step = () => {
+      if (isPaused || !isInView) return;
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= 4) return;
+
+      const amount = getStepPx();
+      if (amount <= 0) return;
+
+      if (track.scrollLeft + track.clientWidth >= maxScroll - 3) {
+        track.scrollTo({ left: 0, behavior: 'auto' });
+      } else {
+        track.scrollBy({ left: amount, behavior: 'smooth' });
+      }
+    };
+
+    const start = () => {
+      stop();
+      timerId = window.setInterval(step, intervalSec * 1000);
+    };
+
+    const stop = () => {
+      if (timerId != null) {
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+    };
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            isInView = entry.isIntersecting;
+            if (!isInView) {
+              stop();
+            } else if (!timerId) {
+              start();
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px' }
+      );
+      io.observe(sectionEl);
+    }
+
+    if (pauseOnHover) {
+      track.addEventListener('mouseenter', () => {
+        isPaused = true;
+      });
+      track.addEventListener('mouseleave', () => {
+        isPaused = false;
+      });
+      track.addEventListener('focusin', () => {
+        isPaused = true;
+      });
+      track.addEventListener('focusout', () => {
+        isPaused = false;
+      });
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      isInView = true;
+      start();
+    }
+
+    window.addEventListener('resize', () => {
+      if (track.scrollWidth - track.clientWidth <= 4) {
+        stop();
+      } else if (!timerId && isInView) {
+        start();
+      }
+    });
+  })();
+</script>
+
 {% stylesheet %}
   .lame-shop-cat__header {
     text-align: center;
@@ -122,15 +252,36 @@
     margin-inline: auto;
   }
 
-  .lame-shop-cat__grid {
+  .lame-shop-cat__viewport {
+    max-width: 1080px;
+    margin-inline: auto;
+  }
+
+  .lame-shop-cat__track {
     list-style: none;
     margin: 0;
     padding: 0;
-    max-width: 1080px;
-    margin-inline: auto;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--lame-cat-gap, 10px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lame-shop-cat__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-shop-cat__item {
+    flex: 0 0 var(--lame-cat-tile-width, 140px);
+    width: var(--lame-cat-tile-width, 140px);
+    max-width: min(var(--lame-cat-tile-width, 140px), calc(100vw - 2.5rem));
+    min-width: 0;
+    scroll-snap-align: start;
   }
 
   .lame-shop-cat__tile {
@@ -168,9 +319,9 @@
   }
 
   .lame-shop-cat__label {
-    padding: 0.75rem 0.65rem;
+    padding: 0.45rem 0.4rem;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: rgb(var(--color-foreground-rgb));
@@ -178,7 +329,7 @@
   }
 
   .lame-shop-cat__tile--placeholder {
-    min-height: 140px;
+    min-height: 120px;
     align-items: center;
     justify-content: center;
     border-style: dashed;
@@ -188,19 +339,6 @@
     text-align: center;
   }
 
-  @media screen and (min-width: 750px) {
-    .lame-shop-cat__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1rem;
-    }
-  }
-
-  @media screen and (min-width: 990px) {
-    .lame-shop-cat__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 1rem;
-    }
-  }
 {% endstylesheet %}
 
 {% schema %}
@@ -240,6 +378,42 @@
       "id": "placeholder_collection_text",
       "label": "Placeholder text when no collection selected",
       "default": "Select a collection"
+    },
+    {
+      "type": "header",
+      "content": "Category carousel"
+    },
+    {
+      "type": "range",
+      "id": "category_tile_width",
+      "label": "Category tile width",
+      "min": 110,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 140
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_slide",
+      "label": "Auto-advance carousel",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "auto_slide_interval",
+      "label": "Auto-advance interval",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_auto_slide_on_hover",
+      "label": "Pause auto-advance on hover or keyboard focus",
+      "default": true
     },
     {
       "type": "range",
