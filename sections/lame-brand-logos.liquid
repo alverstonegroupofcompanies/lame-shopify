@@ -6,8 +6,6 @@
       {% render 'spacing-padding', settings: section.settings %}
       --brand-logo-height: {{ section.settings.logo_height }}px;
       --brand-logo-gap: {{ section.settings.logo_gap }}px;
-      --brand-logo-speed: {{ section.settings.scroll_speed }}s;
-      --brand-logo-direction: {{ section.settings.scroll_direction }};
     "
   >
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
@@ -21,48 +19,42 @@
       </header>
     {% endif %}
 
-    <div class="lame-brand-logos__track-outer">
-      <div class="lame-brand-logos__track">
-        {% for i in (1..2) %}
-          <div class="lame-brand-logos__group" aria-hidden="{% if i == 2 %}true{% else %}false{% endif %}">
-            {% for block in section.blocks %}
-              {% assign logo_image = block.settings.image %}
-              {% assign logo_alt = block.settings.alt | default: shop.name %}
-              <div class="lame-brand-logos__item" {{ block.shopify_attributes }}>
-                {% if logo_image %}
-                  {% if block.settings.link != blank %}
-                    <a href="{{ block.settings.link }}" class="lame-brand-logos__logo-link">
-                      {{
-                        logo_image
-                        | image_url: width: 480
-                        | image_tag:
-                          class: 'lame-brand-logos__logo-image',
-                          loading: 'lazy',
-                          widths: '140,200,280,360,480',
-                          sizes: '(min-width: 990px) 180px, (min-width: 750px) 140px, 110px',
-                          alt: logo_alt
-                      }}
-                    </a>
-                  {% else %}
-                    {{
-                      logo_image
-                      | image_url: width: 480
-                      | image_tag:
-                        class: 'lame-brand-logos__logo-image',
-                        loading: 'lazy',
-                        widths: '140,200,280,360,480',
-                        sizes: '(min-width: 990px) 180px, (min-width: 750px) 140px, 110px',
-                        alt: logo_alt
-                    }}
-                  {% endif %}
-                {% elsif request.design_mode %}
-                  <div class="lame-brand-logos__placeholder">Add Logo</div>
-                {% endif %}
-              </div>
-            {% endfor %}
-          </div>
-        {% endfor %}
-      </div>
+    <div class="lame-brand-logos__row">
+      {% for block in section.blocks %}
+        {% assign logo_image = block.settings.image %}
+        {% assign logo_alt = block.settings.alt | default: shop.name %}
+        <div class="lame-brand-logos__item" {{ block.shopify_attributes }}>
+          {% if logo_image %}
+            {% if block.settings.link != blank %}
+              <a href="{{ block.settings.link }}" class="lame-brand-logos__logo-link">
+                {{
+                  logo_image
+                  | image_url: width: 480
+                  | image_tag:
+                    class: 'lame-brand-logos__logo-image',
+                    loading: 'lazy',
+                    widths: '140,200,280,360,480',
+                    sizes: '(min-width: 990px) 180px, (min-width: 750px) 140px, 110px',
+                    alt: logo_alt
+                }}
+              </a>
+            {% else %}
+              {{
+                logo_image
+                | image_url: width: 480
+                | image_tag:
+                  class: 'lame-brand-logos__logo-image',
+                  loading: 'lazy',
+                  widths: '140,200,280,360,480',
+                  sizes: '(min-width: 990px) 180px, (min-width: 750px) 140px, 110px',
+                  alt: logo_alt
+              }}
+            {% endif %}
+          {% elsif request.design_mode %}
+            <div class="lame-brand-logos__placeholder">Add Logo</div>
+          {% endif %}
+        </div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -91,22 +83,15 @@
     margin-inline: auto;
   }
 
-  .lame-brand-logos__track-outer {
-    overflow: hidden;
-    mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
-  }
-
-  .lame-brand-logos__track {
+  .lame-brand-logos__row {
     display: flex;
-    width: max-content;
-    gap: var(--brand-logo-gap);
-  }
-
-  .lame-brand-logos__group {
-    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: var(--brand-logo-gap);
-    min-width: max-content;
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
   }
 
   .lame-brand-logos__item {
@@ -151,22 +136,6 @@
     letter-spacing: 0.04em;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .lame-brand-logos__track {
-      animation: lame-brand-logos-loop var(--brand-logo-speed) linear infinite var(--brand-logo-direction);
-    }
-
-    .lame-brand-logos__track-outer:hover .lame-brand-logos__track {
-      animation-play-state: paused;
-    }
-  }
-
-  @keyframes lame-brand-logos-loop {
-    to {
-      transform: translateX(calc(-50% - (var(--brand-logo-gap) / 2)));
-    }
-  }
-
   @media screen and (max-width: 749px) {
     .lame-brand-logos {
       --brand-logo-height: calc(var(--brand-logo-height) * 0.8);
@@ -209,26 +178,6 @@
       "step": 2,
       "unit": "px",
       "default": 28
-    },
-    {
-      "type": "range",
-      "id": "scroll_speed",
-      "label": "Scroll speed",
-      "min": 10,
-      "max": 120,
-      "step": 2,
-      "unit": "s",
-      "default": 36
-    },
-    {
-      "type": "select",
-      "id": "scroll_direction",
-      "label": "Scroll direction",
-      "options": [
-        { "value": "normal", "label": "Right to left" },
-        { "value": "reverse", "label": "Left to right" }
-      ],
-      "default": "normal"
     },
     {
       "type": "select",
@@ -294,8 +243,6 @@
     {
       "name": "Lame Brand Logos",
       "blocks": [
-        { "type": "brand" },
-        { "type": "brand" },
         { "type": "brand" },
         { "type": "brand" },
         { "type": "brand" }
