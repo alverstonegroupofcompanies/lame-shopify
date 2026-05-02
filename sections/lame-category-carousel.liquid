@@ -78,10 +78,9 @@
               else
                 assign ttitle = coll.title
               endif
-              if block.settings.link != blank
+              assign turl = coll.url
+              if coll == blank and block.settings.link != blank
                 assign turl = block.settings.link
-              else
-                assign turl = coll.url
               endif
               if block.settings.image != blank
                 assign timg = block.settings.image
@@ -370,7 +369,8 @@
     margin-inline: auto;
   }
 
-  .lcc__title {
+  /* Match lame-featured-products / lame-promo-mosaic section headings; beat theme h2 defaults */
+  .lcc .lcc__head .lcc__title {
     margin: 0;
     color: rgb(var(--brand-gold));
     font-family: var(--lame-font-display, var(--font-heading--family));
@@ -830,7 +830,8 @@
         {
           "type": "url",
           "id": "link",
-          "label": "Link override"
+          "label": "Custom link (optional)",
+          "info": "When a collection is selected, the tile always links to that collection page so only those products show. Use this only if the block has no collection."
         },
         {
           "type": "text",
