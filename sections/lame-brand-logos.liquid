@@ -23,6 +23,10 @@
       {% for block in section.blocks %}
         {% assign logo_image = block.settings.image %}
         {% assign logo_alt = block.settings.alt | default: shop.name %}
+        {% comment %} Skip empty slots on the storefront so the grid stays a clean 3-per-row {% endcomment %}
+        {% if logo_image == blank and request.design_mode == false %}
+          {% continue %}
+        {% endif %}
         <div class="lame-brand-logos__item" {{ block.shopify_attributes }}>
           {% if logo_image %}
             {% if block.settings.link != blank %}
@@ -33,8 +37,8 @@
                   | image_tag:
                     class: 'lame-brand-logos__logo-image',
                     loading: 'lazy',
-                    widths: '140,200,280,360,480',
-                    sizes: '(min-width: 990px) 180px, (min-width: 750px) 140px, 110px',
+                    widths: '120,160,200,280,360,480',
+                    sizes: '(min-width: 750px) 28vw, 30vw',
                     alt: logo_alt
                 }}
               </a>
@@ -45,8 +49,8 @@
                 | image_tag:
                   class: 'lame-brand-logos__logo-image',
                   loading: 'lazy',
-                  widths: '140,200,280,360,480',
-                  sizes: '(min-width: 990px) 180px, (min-width: 750px) 140px, 110px',
+                  widths: '120,160,200,280,360,480',
+                  sizes: '(min-width: 750px) 28vw, 30vw',
                   alt: logo_alt
               }}
             {% endif %}
@@ -86,20 +90,28 @@
   .lame-brand-logos__row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    justify-items: center;
+    justify-items: stretch;
     align-items: center;
     gap: var(--brand-logo-gap);
+    row-gap: clamp(12px, 2.5vw, var(--brand-logo-gap));
     width: 100%;
-    max-width: 960px;
+    max-width: min(920px, 100%);
     margin-inline: auto;
+    padding-inline: clamp(0px, 2vw, 8px);
   }
 
   .lame-brand-logos__item {
     width: 100%;
-    max-width: min(220px, 100%);
+    max-width: none;
+    min-height: var(--brand-logo-height);
     height: var(--brand-logo-height);
     display: grid;
     place-items: center;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgb(var(--color-background-rgb) / 0.5);
+    border: 1px solid rgb(var(--color-border-rgb) / 0.15);
+    box-sizing: border-box;
   }
 
   .lame-brand-logos__logo-link {
@@ -139,11 +151,16 @@
 
   @media screen and (max-width: 749px) {
     .lame-brand-logos__row {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(8px, 2.5vw, 16px);
     }
 
     .lame-brand-logos {
-      --brand-logo-height: calc(var(--brand-logo-height) * 0.8);
+      --brand-logo-height: clamp(36px, 11vw, calc(var(--brand-logo-height) * 0.55));
+    }
+
+    .lame-brand-logos__item {
+      padding: 6px 4px;
     }
   }
 {% endstylesheet %}
