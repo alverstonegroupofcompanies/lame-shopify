@@ -1,5 +1,5 @@
 {% liquid
-  assign cat_tile_width = section.settings.category_tile_width | default: 140
+  assign cat_tile_width = section.settings.category_tile_width | default: 120
   assign cat_gap = 10
   if section.settings.auto_slide == true
     assign shop_cat_auto_slide = true
@@ -62,7 +62,11 @@
           {% if request.design_mode %}
             <li class="lame-shop-cat__item" {{ block.shopify_attributes }}>
               <div class="lame-shop-cat__tile lame-shop-cat__tile--placeholder">
-                <span class="lame-shop-cat__placeholder-label">{{ section.settings.placeholder_collection_text }}</span>
+                <div class="lame-shop-cat__media lame-shop-cat__media--placeholder">
+                  <span class="lame-shop-cat__label-overlay">
+                    <span class="lame-shop-cat__label">{{ section.settings.placeholder_collection_text }}</span>
+                  </span>
+                </div>
               </div>
             </li>
           {% endif %}
@@ -85,13 +89,15 @@
                     class: 'lame-shop-cat__image',
                     loading: 'lazy',
                     widths: '120,200,360,480,640,800',
-                    sizes: '(max-width: 749px) 38vw, {{ cat_tile_width }}px'
+                    sizes: '(max-width: 749px) min(42vw, {{ cat_tile_width | times: 2 }}px), {{ cat_tile_width }}px'
                 }}
               {% else %}
-                {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lame-shop-cat__image placeholder-svg' }}
+                {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lame-shop-cat__image lame-shop-cat__placeholder-svg placeholder-svg' }}
               {% endif %}
+              <span class="lame-shop-cat__label-overlay">
+                <span class="lame-shop-cat__label">{{ tile_title }}</span>
+              </span>
             </div>
-            <span class="lame-shop-cat__label">{{ tile_title }}</span>
           </a>
         </li>
       {% endfor %}
@@ -277,16 +283,15 @@
   }
 
   .lame-shop-cat__item {
-    flex: 0 0 var(--lame-cat-tile-width, 140px);
-    width: var(--lame-cat-tile-width, 140px);
-    max-width: min(var(--lame-cat-tile-width, 140px), calc(100vw - 2.5rem));
+    flex: 0 0 var(--lame-cat-tile-width, 120px);
+    width: var(--lame-cat-tile-width, 120px);
+    max-width: min(var(--lame-cat-tile-width, 120px), calc(100vw - 2.5rem));
     min-width: 0;
     scroll-snap-align: start;
   }
 
   .lame-shop-cat__tile {
-    display: flex;
-    flex-direction: column;
+    display: block;
     height: 100%;
     text-decoration: none;
     color: inherit;
@@ -305,38 +310,62 @@
   }
 
   .lame-shop-cat__media {
-    aspect-ratio: 1 / 1;
+    position: relative;
+    aspect-ratio: 4 / 3;
     background: rgb(var(--brand-gold) / 0.06);
-    display: grid;
-    place-items: center;
     overflow: hidden;
   }
 
+  .lame-shop-cat__media--placeholder {
+    background: rgb(var(--brand-gold) / 0.08);
+  }
+
   .lame-shop-cat__image {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
+  .lame-shop-cat__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.35;
+  }
+
+  .lame-shop-cat__label-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 1;
+    padding: 0.5rem 0.45rem 0.55rem;
+    box-sizing: border-box;
+    background: linear-gradient(
+      to top,
+      rgb(0 0 0 / 0.78) 0%,
+      rgb(0 0 0 / 0.45) 55%,
+      transparent 100%
+    );
+  }
+
   .lame-shop-cat__label {
-    padding: 0.45rem 0.4rem;
+    display: block;
+    width: 100%;
     text-align: center;
-    font-size: 0.68rem;
+    font-size: 0.64rem;
+    line-height: 1.25;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgb(var(--color-foreground-rgb));
+    color: #fff;
     font-weight: 600;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
   }
 
   .lame-shop-cat__tile--placeholder {
-    min-height: 120px;
-    align-items: center;
-    justify-content: center;
     border-style: dashed;
-    color: rgb(var(--color-foreground-rgb) / 0.45);
-    font-size: 0.75rem;
-    padding: 1rem;
-    text-align: center;
   }
 
 {% endstylesheet %}
@@ -391,7 +420,7 @@
       "max": 200,
       "step": 5,
       "unit": "px",
-      "default": 140
+      "default": 120
     },
     {
       "type": "checkbox",
