@@ -1,0 +1,1037 @@
+{% liquid
+  assign w = section.settings.category_tile_width | default: 155
+  assign gap = 10
+  assign align = section.settings.heading_alignment | default: 'left'
+  case section.settings.tile_shape
+    when 'standard'
+      assign ar = '4 / 3'
+    when 'cinema'
+      assign ar = '16 / 9'
+    when 'square'
+      assign ar = '1 / 1'
+    else
+      assign ar = '3 / 2'
+  endcase
+  assign show_sub = section.settings.show_subheading | default: false
+  assign show_cap = section.settings.show_tile_captions | default: false
+  assign show_on_img = section.settings.show_title_on_image | default: true
+  assign show_arrows = section.settings.show_carousel_arrows | default: true
+  assign show_header = false
+  if section.settings.heading != blank
+    assign show_header = true
+  elsif show_sub and section.settings.subheading != blank
+    assign show_header = true
+  endif
+  if section.settings.auto_slide == false
+    assign aut = false
+  else
+    assign aut = true
+  endif
+  if section.settings.pause_auto_slide_on_hover == false
+    assign pause_h = false
+  else
+    assign pause_h = true
+  endif
+  assign lcc_valid_tiles = 0
+  for block in section.blocks
+    assign lcc_coll_ck = block.settings.collection
+    if lcc_coll_ck != blank
+      if request.design_mode or lcc_coll_ck.handle != 'all'
+        assign lcc_valid_tiles = lcc_valid_tiles | plus: 1
+      endif
+    endif
+  endfor
+%}
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
+  <div
+    class="lcc spacing-style"
+    style="{% render 'spacing-padding', settings: section.settings %}"
+    data-lcc-root
+    data-lcc-auto="{% if aut %}true{% else %}false{% endif %}"
+    data-lcc-interval="{{ section.settings.auto_slide_interval | default: 5 }}"
+    data-lcc-step="{{ section.settings.auto_advance_step | default: 'screen' }}"
+    data-lcc-pause-hover="{% if pause_h %}true{% else %}false{% endif %}"
+  >
+    {% if show_header %}
+      <header class="lcc__head lcc__head--{{ align }}" data-lcc-reveal>
+        {% if section.settings.heading != blank %}
+          <h2 class="lcc__title">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if show_sub and section.settings.subheading != blank %}
+          <p class="lcc__sub">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    <div class="lcc__wrap">
+      {% if lcc_valid_tiles > 0 %}
+      <div class="lcc__carousel-wrap">
+        {% if show_arrows %}
+          <button
+            class="lcc__arrow lcc__arrow--prev"
+            type="button"
+            data-lcc-prev
+            aria-label="{{ section.settings.prev_label }}"
+            {% if lcc_valid_tiles < 2 %}hidden{% endif %}
+          >
+            {% if section.settings.prev_text != blank %}
+              {% render 'lcc-chevron-icon', direction: 'prev' %}
+              <span class="lcc__arrow-text">{{ section.settings.prev_text }}</span>
+            {% else %}
+              {% render 'lcc-chevron-icon', direction: 'prev' %}
+            {% endif %}
+          </button>
+        {% endif %}
+        <div
+          class="lcc__view"
+          style="--lcc-w: {{ w }}px; --lcc-gap: {{ gap }}px; --lcc-ar: {{ ar }};"
+        >
+          <ul class="lcc__track" role="list" data-lcc-track>
+          {% for block in section.blocks %}
+            {% liquid
+              assign coll = block.settings.collection
+              assign cap = block.settings.caption
+              if block.settings.title != blank
+                assign ttitle = block.settings.title
+              else
+                assign ttitle = coll.title
+              endif
+              if block.settings.image != blank
+                assign timg = block.settings.image
+              else
+                assign timg = coll.featured_image
+              endif
+            %}
+            {% if coll == blank %}
+              {% if request.design_mode %}
+                <li class="lcc__item" {{ block.shopify_attributes }}>
+                  <div class="lcc__card lcc__card--ph">
+                    <div class="lcc__media lcc__media--ph">
+                      <span class="lcc__shade" aria-hidden="true"></span>
+                      {% if show_on_img %}
+                        <span class="lcc__name">{{ section.settings.placeholder_text }}</span>
+                      {% else %}
+                        <span class="visually-hidden">{{ section.settings.placeholder_text }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </li>
+              {% endif %}
+              {% continue %}
+            {% endif %}
+            {% if coll.handle == 'all' and request.design_mode == false %}
+              {% continue %}
+            {% endif %}
+
+            <li class="lcc__item" data-lcc-reveal data-lcc-delay="{{ forloop.index0 | modulo: 4 }}" {{ block.shopify_attributes }}>
+              <a
+                class="lcc__card"
+                href="{{ coll.url }}"
+                {% unless show_on_img %}
+                  aria-label="{{ ttitle | escape }}"
+                {% endunless %}
+              >
+                <div class="lcc__media">
+                  {% if timg %}
+                    {{
+                      timg
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'lcc__img',
+                        loading: 'lazy',
+                        widths: '120,200,360,480,640,800,900',
+                        sizes: '(max-width: 749px) min(45vw, {{ w | times: 2 }}px), {{ w }}px'
+                    }}
+                  {% else %}
+                    {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lcc__img lcc__phsvg placeholder-svg' }}
+                  {% endif %}
+                  <span class="lcc__shade" aria-hidden="true"></span>
+                  {% if show_on_img %}
+                    <span class="lcc__name">{{ ttitle }}</span>
+                  {% endif %}
+                </div>
+              </a>
+              {% if show_cap and cap != blank %}
+                <p class="lcc__cap">{{ cap }}</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        </div>
+        {% if show_arrows %}
+          <button
+            class="lcc__arrow lcc__arrow--next"
+            type="button"
+            data-lcc-next
+            aria-label="{{ section.settings.next_label }}"
+            {% if lcc_valid_tiles < 2 %}hidden{% endif %}
+          >
+            {% if section.settings.next_text != blank %}
+              <span class="lcc__arrow-text">{{ section.settings.next_text }}</span>
+              {% render 'lcc-chevron-icon', direction: 'next' %}
+            {% else %}
+              {% render 'lcc-chevron-icon', direction: 'next' %}
+            {% endif %}
+          </button>
+        {% endif %}
+      </div>
+
+      {% if show_arrows and lcc_valid_tiles > 1 %}
+        <div class="lcc__nav-row" data-lcc-nav-row>
+          <button
+            class="lcc__nav-row-btn"
+            type="button"
+            data-lcc-prev
+            aria-label="{{ section.settings.prev_label }}"
+          >
+            <span class="lcc__nav-row-inner">
+              {% render 'lcc-chevron-icon', direction: 'prev' %}
+              <span class="lcc__nav-row-label">
+                {% if section.settings.prev_text != blank %}
+                  {{ section.settings.prev_text }}
+                {% else %}
+                  {{ section.settings.prev_label }}
+                {% endif %}
+              </span>
+            </span>
+          </button>
+          <button
+            class="lcc__nav-row-btn"
+            type="button"
+            data-lcc-next
+            aria-label="{{ section.settings.next_label }}"
+          >
+            <span class="lcc__nav-row-inner">
+              <span class="lcc__nav-row-label">
+                {% if section.settings.next_text != blank %}
+                  {{ section.settings.next_text }}
+                {% else %}
+                  {{ section.settings.next_label }}
+                {% endif %}
+              </span>
+              {% render 'lcc-chevron-icon', direction: 'next' %}
+            </span>
+          </button>
+        </div>
+      {% endif %}
+
+      <div class="lcc__bar lcc__bar--only" data-lcc-bar hidden>
+        <div class="lcc__prog" aria-hidden="true">
+          <div class="lcc__fill" data-lcc-fill></div>
+        </div>
+      </div>
+      {% elsif request.design_mode %}
+        <div
+          class="lcc__view lcc__view--empty"
+          style="--lcc-w: {{ w }}px; --lcc-gap: {{ gap }}px; --lcc-ar: {{ ar }};"
+        >
+          <div class="lcc__hint" {{ section.shopify_attributes }}>
+            <p class="lcc__hint-title">{{ section.settings.editor_hint_heading | default: 'No categories visible' }}</p>
+            <p class="lcc__hint-body">{{ section.settings.editor_empty_hint | default: 'Add Category blocks and choose a collection for each.' }}</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const el = document.getElementById('shopify-section-{{ section.id }}');
+    if (!el) return;
+    const nodes = el.querySelectorAll('[data-lcc-reveal]');
+    if (!nodes.length) return;
+    if ('IntersectionObserver' in window) {
+      const o = new IntersectionObserver(
+        (ents, ob) => {
+          ents.forEach((e) => {
+            if (!e.isIntersecting) return;
+            e.target.classList.add('is-visible');
+            ob.unobserve(e.target);
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+      );
+      nodes.forEach((n) => o.observe(n));
+    } else {
+      nodes.forEach((n) => n.classList.add('is-visible'));
+    }
+  })();
+</script>
+
+<script>
+  (() => {
+    const sec = document.getElementById('shopify-section-{{ section.id }}');
+    if (!sec) return;
+    const root = sec.querySelector('[data-lcc-root]');
+    const track = sec.querySelector('[data-lcc-track]');
+    const bar = sec.querySelector('[data-lcc-bar]');
+    const fill = sec.querySelector('[data-lcc-fill]');
+    const prevBtns = sec.querySelectorAll('[data-lcc-prev]');
+    const nextBtns = sec.querySelectorAll('[data-lcc-next]');
+    const navRow = sec.querySelector('[data-lcc-nav-row]');
+    const items = track.querySelectorAll('.lcc__item');
+    if (!root || !track || items.length === 0) return;
+
+    const EPS = 4;
+
+    const syncArrows = (overflow, itemCount) => {
+      if (navRow) navRow.hidden = itemCount < 2;
+      if (prevBtns.length === 0) return;
+      if (itemCount < 2) {
+        prevBtns.forEach((btn) => {
+          btn.hidden = true;
+        });
+        nextBtns.forEach((btn) => {
+          btn.hidden = true;
+        });
+        return;
+      }
+      prevBtns.forEach((btn) => {
+        btn.hidden = false;
+      });
+      nextBtns.forEach((btn) => {
+        btn.hidden = false;
+      });
+      if (!overflow) {
+        prevBtns.forEach((b) => {
+          b.disabled = true;
+        });
+        nextBtns.forEach((b) => {
+          b.disabled = true;
+        });
+        return;
+      }
+      const max = Math.max(0, track.scrollWidth - track.clientWidth);
+      const atStart = track.scrollLeft <= EPS;
+      const atEnd = track.scrollLeft >= max - EPS;
+      prevBtns.forEach((b) => {
+        b.disabled = atStart;
+      });
+      nextBtns.forEach((b) => {
+        b.disabled = atEnd;
+      });
+    };
+
+    const chrome = () => {
+      const itemCount = track.querySelectorAll('.lcc__item').length;
+      const max = Math.max(0, track.scrollWidth - track.clientWidth);
+      const overflow = max > EPS;
+      if (bar) bar.hidden = !overflow;
+      if (fill && !overflow) fill.style.width = '0%';
+      if (!overflow) {
+        syncArrows(false, itemCount);
+        return;
+      }
+      const pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
+      if (fill) fill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      syncArrows(true, itemCount);
+    };
+
+    const scrollCard = (dir) => {
+      const item = track.querySelector('.lcc__item');
+      if (!item) return;
+      const g = parseFloat(getComputedStyle(track).gap || '0') || 0;
+      track.scrollBy({ left: dir * (item.offsetWidth + g), behavior: 'smooth' });
+    };
+
+    prevBtns.forEach((btn) => btn.addEventListener('click', () => scrollCard(-1)));
+    nextBtns.forEach((btn) => btn.addEventListener('click', () => scrollCard(1)));
+    track.addEventListener('scroll', chrome, { passive: true });
+
+    const auto = root.dataset.lccAuto === 'true';
+    const iv = Math.max(3, parseInt(root.dataset.lccInterval || '5', 10));
+    const stepMode = root.dataset.lccStep || 'screen';
+    const pauseHover = root.dataset.lccPauseHover !== 'false';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let tmr = null;
+    let paused = false;
+    let inview = false;
+
+    const stepPx = () => {
+      const it = track.querySelector('.lcc__item');
+      if (!it) return 0;
+      const g = parseFloat(getComputedStyle(track).gap || '0') || 0;
+      return it.offsetWidth + g;
+    };
+
+    const tick = () => {
+      if (paused || !inview) return;
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= EPS) return;
+
+      let amt = 0;
+      if (stepMode === 'screen') {
+        const rem = Math.max(0, maxScroll - track.scrollLeft);
+        amt = Math.min(track.clientWidth, rem);
+        if (amt < EPS) amt = stepPx();
+      } else {
+        amt = stepPx();
+      }
+      if (amt <= 0) return;
+
+      if (track.scrollLeft + track.clientWidth >= maxScroll - 3) {
+        track.scrollTo({ left: 0, behavior: 'auto' });
+      } else {
+        track.scrollBy({ left: amt, behavior: 'smooth' });
+      }
+      chrome();
+    };
+
+    const start = () => {
+      stop();
+      tmr = window.setInterval(tick, iv * 1000);
+    };
+    const stop = () => {
+      if (tmr != null) {
+        window.clearInterval(tmr);
+        tmr = null;
+      }
+    };
+
+    if (auto && !reduce) {
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              inview = e.isIntersecting;
+              if (!inview) stop();
+              else if (!tmr) start();
+            });
+          },
+          { threshold: 0.12 }
+        );
+        io.observe(sec);
+      }
+      if (pauseHover) {
+        track.addEventListener('mouseenter', () => {
+          paused = true;
+        });
+        track.addEventListener('mouseleave', () => {
+          paused = false;
+        });
+        track.addEventListener('focusin', () => {
+          paused = true;
+        });
+        track.addEventListener('focusout', () => {
+          paused = false;
+        });
+      }
+      if (!('IntersectionObserver' in window)) {
+        inview = true;
+        start();
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      chrome();
+      if (auto && !reduce) {
+        if (track.scrollWidth - track.clientWidth <= EPS) stop();
+        else if (!tmr && inview) start();
+      }
+    });
+
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => chrome());
+    });
+
+    setTimeout(chrome, 0);
+    setTimeout(chrome, 150);
+  })();
+</script>
+
+{% stylesheet %}
+  .lcc__head {
+    margin-bottom: var(--padding-md);
+  }
+
+  .lcc__head--left {
+    text-align: left;
+  }
+
+  .lcc__head--left .lcc__sub {
+    margin-inline: 0;
+    max-width: none;
+  }
+
+  .lcc__head--center {
+    text-align: center;
+  }
+
+  .lcc__head--center .lcc__sub {
+    max-width: 42ch;
+    margin-inline: auto;
+  }
+
+  /* Match lame-featured-products headings; section id beats global h2 / color-scheme cascade */
+  #shopify-section-{{ section.id }} .lcc__head .lcc__title {
+    margin: 0;
+    color: rgb(212 175 55);
+    color: rgb(var(--brand-gold));
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  .lcc__sub {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: rgb(var(--color-foreground-rgb) / 0.65);
+  }
+
+  .lcc__wrap {
+    max-width: 1200px;
+    margin-inline: auto;
+    overflow: visible;
+  }
+
+  .lcc__carousel-wrap {
+    position: relative;
+    padding-inline: clamp(1.75rem, 4.5vw, 2.75rem);
+    overflow: visible;
+  }
+
+  .lcc__icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .lcc__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.28rem;
+    border: 1px solid rgb(var(--brand-gold) / 0.38);
+    border-radius: 999px;
+    background: rgb(var(--color-background-rgb));
+    color: rgb(var(--color-foreground-rgb));
+    cursor: pointer;
+    transition: border-color 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+    box-shadow: 0 4px 14px rgb(18 18 18 / 0.06);
+  }
+
+  .lcc__arrow:hover:not(:disabled) {
+    border-color: rgb(var(--brand-gold) / 0.58);
+    box-shadow: 0 6px 18px rgb(18 18 18 / 0.1);
+  }
+
+  .lcc__arrow:disabled {
+    opacity: 0.88;
+    cursor: default;
+    border-color: rgb(var(--brand-gold) / 0.22);
+    box-shadow: none;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .lcc__arrow--prev {
+    left: 0;
+  }
+
+  .lcc__arrow--next {
+    right: 0;
+  }
+
+  .lcc__arrow-text {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-inline: 0.35rem;
+  }
+
+  .lcc__arrow:has(.lcc__arrow-text) {
+    width: auto;
+    min-width: 2rem;
+    padding-inline: 0.45rem;
+  }
+
+  .lcc__nav-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.65rem 1rem;
+    margin-top: 0.85rem;
+    padding-inline: 0.25rem;
+  }
+
+  .lcc__nav-row-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .lcc__nav-row-btn .lcc__icon {
+    width: 0.72rem;
+    height: 0.72rem;
+  }
+
+  .lcc__nav-row-btn {
+    flex: 0 1 auto;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid rgb(var(--brand-gold) / 0.42);
+    border-radius: 999px;
+    background: rgb(var(--color-background-rgb));
+    color: rgb(var(--color-foreground-rgb));
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+    box-shadow: 0 2px 10px rgb(18 18 18 / 0.05);
+  }
+
+  .lcc__nav-row-btn:hover:not(:disabled) {
+    border-color: rgb(var(--brand-gold) / 0.62);
+    box-shadow: 0 4px 14px rgb(18 18 18 / 0.08);
+  }
+
+  .lcc__nav-row-btn:disabled {
+    opacity: 0.88;
+    cursor: default;
+    border-color: rgb(var(--brand-gold) / 0.22);
+    box-shadow: none;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .lcc__view {
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .lcc__hint {
+    max-width: 36rem;
+    margin-inline: auto;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    border: 1px dashed rgb(var(--brand-gold) / 0.5);
+    border-radius: var(--lame-radius-card, 10px);
+    background: rgb(var(--brand-gold) / 0.07);
+  }
+
+  .lcc__hint-title {
+    margin: 0 0 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--brand-gold));
+  }
+
+  .lcc__hint-body {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: rgb(var(--color-foreground-rgb) / 0.75);
+  }
+
+  .lcc__track {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-flow: row nowrap;
+    gap: var(--lcc-gap, 10px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    align-items: stretch;
+  }
+
+  .lcc__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lcc__item {
+    flex: 0 0 var(--lcc-w, 155px);
+    width: var(--lcc-w, 155px);
+    max-width: min(var(--lcc-w, 155px), calc(100vw - 2rem));
+    min-width: 0;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lcc__card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid rgb(var(--brand-gold) / 0.32);
+    border-radius: var(--lame-radius-card, 10px);
+    overflow: hidden;
+    background: rgb(var(--color-background-rgb));
+    box-shadow: var(--lame-shadow-soft);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .lcc__card:is(:hover, :focus-visible) {
+    transform: translateY(-2px);
+    border-color: rgb(var(--brand-gold) / 0.55);
+    box-shadow: 0 10px 22px rgb(18 18 18 / 0.08);
+  }
+
+  .lcc__card--ph {
+    border-style: dashed;
+  }
+
+  .lcc__media {
+    position: relative;
+    aspect-ratio: var(--lcc-ar, 3 / 2);
+    background: rgb(var(--brand-gold) / 0.06);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .lcc__media--ph {
+    background: rgb(var(--brand-gold) / 0.08);
+  }
+
+  .lcc__img {
+    position: relative;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lcc__phsvg {
+    opacity: 0.35;
+  }
+
+  .lcc__shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(165deg, rgb(0 0 0 / 0.4) 0%, rgb(0 0 0 / 0.6) 100%);
+  }
+
+  .lcc__name {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: clamp(0.65rem, 2.2vw, 0.9rem);
+    line-height: 1.2;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.55);
+    pointer-events: none;
+  }
+
+  .lcc__cap {
+    margin: 0.4rem 0 0;
+    text-align: center;
+    font-size: 0.68rem;
+    line-height: 1.3;
+    color: rgb(var(--color-foreground-rgb) / 0.82);
+  }
+
+  .lcc__bar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.9rem;
+    padding-inline: 0.1rem;
+  }
+
+  .lcc__bar[hidden] {
+    display: none !important;
+  }
+
+  .lcc__bar--only .lcc__prog {
+    flex: 1;
+  }
+
+  .lcc__prog {
+    flex: 1;
+    min-width: 0;
+    height: 4px;
+    border-radius: 999px;
+    background: rgb(var(--color-foreground-rgb) / 0.12);
+    overflow: hidden;
+  }
+
+  .lcc__fill {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: rgb(var(--brand-gold));
+    transition: width 140ms ease-out;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Shop categories",
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Browse by category"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Choose a collection to browse products."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subheading",
+      "label": "Show subheading",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Carousel"
+    },
+    {
+      "type": "select",
+      "id": "tile_shape",
+      "label": "Tile shape",
+      "options": [
+        { "value": "wide", "label": "Rectangle (3:2)" },
+        { "value": "standard", "label": "4:3" },
+        { "value": "cinema", "label": "16:9" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "cinema"
+    },
+    {
+      "type": "range",
+      "id": "category_tile_width",
+      "label": "Tile width",
+      "min": 120,
+      "max": 220,
+      "step": 5,
+      "unit": "px",
+      "default": 155
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title_on_image",
+      "label": "Show category name on image",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tile_captions",
+      "label": "Show caption under tile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_slide",
+      "label": "Auto-advance",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "auto_slide_interval",
+      "label": "Auto-advance interval",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "auto_advance_step",
+      "label": "Auto-advance distance",
+      "options": [
+        { "value": "card", "label": "One tile" },
+        { "value": "screen", "label": "One screen width" }
+      ],
+      "default": "screen"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_auto_slide_on_hover",
+      "label": "Pause auto-advance on hover or focus",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_carousel_arrows",
+      "label": "Show arrow buttons",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "prev_label",
+      "label": "Previous (accessibility label)",
+      "default": "Previous categories"
+    },
+    {
+      "type": "text",
+      "id": "next_label",
+      "label": "Next (accessibility label)",
+      "default": "Next categories"
+    },
+    {
+      "type": "text",
+      "id": "prev_text",
+      "label": "Previous button visible text",
+      "info": "Optional; leave empty for ‹"
+    },
+    {
+      "type": "text",
+      "id": "next_text",
+      "label": "Next button visible text",
+      "info": "Optional; leave empty for ›"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_text",
+      "label": "Placeholder when no collection",
+      "default": "Select a collection"
+    },
+    {
+      "type": "header",
+      "content": "Theme editor: empty carousel"
+    },
+    {
+      "type": "paragraph",
+      "content": "If no block has a valid collection, customers see nothing here. In the theme editor you will see a dashed box with the message below so you can fix blocks."
+    },
+    {
+      "type": "text",
+      "id": "editor_hint_heading",
+      "label": "Empty state title (editor only)",
+      "default": "No categories visible"
+    },
+    {
+      "type": "textarea",
+      "id": "editor_empty_hint",
+      "label": "Empty state message (editor only)",
+      "default": "Add Category blocks and pick a collection for each. Handles in the theme JSON must match collections in this store. Publish the homepage template from your theme code if the section disappeared after editing online."
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 44
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Required. Each tile links to this collection’s page only. Avoid “All products” here—that lists the full catalog; those tiles are hidden on the storefront."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title override"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image override"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link (optional)",
+          "info": "Ignored when a collection is set—the storefront always uses that collection’s URL. Use only when this block has no collection selected."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption under tile"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop categories",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ]
+}
+{% endschema %}
