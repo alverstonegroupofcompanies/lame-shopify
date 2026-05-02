@@ -1,5 +1,10 @@
 import { Component } from '@theme/component';
-import { onDocumentLoaded, changeMetaThemeColor, setHeaderMenuStyle } from '@theme/utilities';
+import {
+  onDocumentLoaded,
+  changeMetaThemeColor,
+  setHeaderMenuStyle,
+  calculateHeaderGroupHeight,
+} from '@theme/utilities';
 
 /**
  * @typedef {Object} HeaderComponentRefs
@@ -224,20 +229,12 @@ onDocumentLoaded(() => {
 
   // Update header group height on resize of any child
   if (headerGroup) {
-    const resizeObserver = new ResizeObserver((entries) => {
-      const headerGroupHeight = entries.reduce((totalHeight, entry) => {
-        if (
-          entry.target !== header ||
-          (header.hasAttribute('transparent') && header.parentElement?.nextElementSibling)
-        ) {
-          return totalHeight + (entry.borderBoxSize[0]?.blockSize ?? 0);
-        }
-        return totalHeight;
-      }, 0);
-      // The initial height is calculated using the .offsetHeight property, which returns an integer.
-      // We round to the nearest integer to avoid unnecessaary reflows.
-      const roundedHeaderGroupHeight = Math.round(headerGroupHeight);
-      document.body.style.setProperty('--header-group-height', `${roundedHeaderGroupHeight}px`);
+    const resizeObserver = new ResizeObserver(() => {
+      const headerGroupHeight = calculateHeaderGroupHeight(
+        header instanceof HTMLElement ? header : undefined,
+        headerGroup
+      );
+      document.body.style.setProperty('--header-group-height', `${Math.round(headerGroupHeight)}px`);
     });
 
     if (header instanceof HTMLElement) {

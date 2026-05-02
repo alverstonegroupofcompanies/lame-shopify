@@ -319,6 +319,7 @@ p:empty {
   flex: 1;
   display: flex;
   flex-direction: column;
+  row-gap: var(--content-section-row-gap, clamp(0.75rem, 2vw, 1.75rem));
 }
 
 .content-for-layout > .shopify-section:last-child {
@@ -934,26 +935,34 @@ summary::-webkit-details-marker {
 }
 
 /* When header is transparent, pull the first main content section up to sit under the floating header */
-body:has(.header[transparent]) .content-for-layout > .shopify-section:first-child {
+body:has(.header[transparent]) .content-for-layout > .shopify-section:first-child,
+body:has(header-component[transparent]) .content-for-layout > .shopify-section:first-child {
   margin-top: calc(var(--header-group-height) * -1);
 }
 
 /* Hero: do not tuck under the nav — absolute media ignores inner spacing offset, so pull-up hides the banner behind the bar */
-body:has(.header[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child {
+body:has(.header[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child,
+body:has(header-component[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child {
   margin-top: 0;
-  padding-top: var(--header-group-height, 0px);
+  /* max() avoids zero offset when --header-group-height is unset or briefly wrong before JS runs */
+  padding-top: max(
+    var(--header-group-height, 0px),
+    var(--header-height, 60px)
+  );
   width: 100%;
   max-width: none;
   box-sizing: border-box;
 }
 
-body:has(.header[transparent]) #header-group > .header-section {
+body:has(.header[transparent]) #header-group > .header-section,
+body:has(header-component[transparent]) #header-group > .header-section {
   z-index: var(--layer-sticky);
 }
 
 /* All other header group content should be beneath the floating header,
 but above the rest of the page content */
-body:has(.header[transparent]) #header-group > *:not(.header-section) {
+body:has(.header[transparent]) #header-group > *:not(.header-section),
+body:has(header-component[transparent]) #header-group > *:not(.header-section) {
   z-index: calc(var(--layer-sticky) - 1);
 }
 
