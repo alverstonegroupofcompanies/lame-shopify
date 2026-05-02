@@ -164,15 +164,54 @@
 
     const root = sectionEl.querySelector('.lame-shop-cat');
     const track = sectionEl.querySelector('[data-lame-shop-cat-track]');
+    const controls = sectionEl.querySelector('[data-shop-cat-controls]');
+    const progressFill = sectionEl.querySelector('[data-shop-cat-progress-fill]');
+    const prevBtn = sectionEl.querySelector('[data-arrow="prev"]');
+    const nextBtn = sectionEl.querySelector('[data-arrow="next"]');
+
     if (!root || !track) return;
+
+    const EPS = 4;
+
+    const updateCarouselChrome = () => {
+      const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+      const hasOverflow = maxScroll > EPS;
+
+      if (controls) {
+        controls.hidden = !hasOverflow;
+      }
+
+      if (!hasOverflow) {
+        if (progressFill) progressFill.style.width = '0%';
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+      }
+
+      const pct = maxScroll > 0 ? (track.scrollLeft / maxScroll) * 100 : 0;
+      if (progressFill) {
+        progressFill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      }
+      if (prevBtn) prevBtn.disabled = track.scrollLeft <= EPS;
+      if (nextBtn) nextBtn.disabled = track.scrollLeft >= maxScroll - EPS;
+    };
+
+    const scrollByCard = (direction) => {
+      const card = track.querySelector('.lame-shop-cat__item');
+      if (!card) return;
+      const styles = window.getComputedStyle(track);
+      const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0;
+      track.scrollBy({ left: direction * (card.offsetWidth + gap), behavior: 'smooth' });
+    };
+
+    if (prevBtn) prevBtn.addEventListener('click', () => scrollByCard(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => scrollByCard(1));
+    track.addEventListener('scroll', updateCarouselChrome, { passive: true });
 
     const autoSlide = root.dataset.autoSlide === 'true';
     const intervalSec = Math.max(3, parseInt(root.dataset.autoSlideInterval || '5', 10));
     const pauseOnHover = root.dataset.pauseAutoSlideOnHover !== 'false';
-
-    if (!autoSlide) return;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let timerId = null;
     let isPaused = false;
@@ -189,7 +228,7 @@
     const step = () => {
       if (isPaused || !isInView) return;
       const maxScroll = track.scrollWidth - track.clientWidth;
-      if (maxScroll <= 4) return;
+      if (maxScroll <= EPS) return;
 
       const amount = getStepPx();
       if (amount <= 0) return;
@@ -199,6 +238,7 @@
       } else {
         track.scrollBy({ left: amount, behavior: 'smooth' });
       }
+      updateCarouselChrome();
     };
 
     const start = () => {
@@ -213,50 +253,57 @@
       }
     };
 
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            isInView = entry.isIntersecting;
-            if (!isInView) {
-              stop();
-            } else if (!timerId) {
-              start();
-            }
-          });
-        },
-        { threshold: 0.12, rootMargin: '0px' }
-      );
-      io.observe(sectionEl);
-    }
+    if (autoSlide && !reducedMotion) {
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              isInView = entry.isIntersecting;
+              if (!isInView) {
+                stop();
+              } else if (!timerId) {
+                start();
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px' }
+        );
+        io.observe(sectionEl);
+      }
 
-    if (pauseOnHover) {
-      track.addEventListener('mouseenter', () => {
-        isPaused = true;
-      });
-      track.addEventListener('mouseleave', () => {
-        isPaused = false;
-      });
-      track.addEventListener('focusin', () => {
-        isPaused = true;
-      });
-      track.addEventListener('focusout', () => {
-        isPaused = false;
-      });
-    }
+      if (pauseOnHover) {
+        track.addEventListener('mouseenter', () => {
+          isPaused = true;
+        });
+        track.addEventListener('mouseleave', () => {
+          isPaused = false;
+        });
+        track.addEventListener('focusin', () => {
+          isPaused = true;
+        });
+        track.addEventListener('focusout', () => {
+          isPaused = false;
+        });
+      }
 
-    if (!('IntersectionObserver' in window)) {
-      isInView = true;
-      start();
+      if (!('IntersectionObserver' in window)) {
+        isInView = true;
+        start();
+      }
     }
 
     window.addEventListener('resize', () => {
-      if (track.scrollWidth - track.clientWidth <= 4) {
-        stop();
-      } else if (!timerId && isInView) {
-        start();
+      updateCarouselChrome();
+      if (autoSlide && !reducedMotion) {
+        if (track.scrollWidth - track.clientWidth <= EPS) {
+          stop();
+        } else if (!timerId && isInView) {
+          start();
+        }
       }
     });
+
+    setTimeout(updateCarouselChrome, 0);
   })();
 </script>
 
