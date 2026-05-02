@@ -949,9 +949,11 @@ body:has(header-component[transparent]) .content-for-layout > .shopify-section:f
   margin-top: calc(var(--header-group-height) * -1);
 }
 
-/* Hero: do not tuck under the nav — absolute media ignores inner spacing offset, so pull-up hides the banner behind the bar */
+/* Hero / homepage slideshow: do not tuck under the nav (negative margin only applies to .hero-wrapper today; slideshow is separate) */
 body:has(.header[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child,
-body:has(header-component[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child {
+body:has(header-component[transparent]) .content-for-layout > .shopify-section.hero-wrapper:first-child,
+body:has(.header[transparent]) .content-for-layout > .shopify-section:first-child:has(.slideshow-section),
+body:has(header-component[transparent]) .content-for-layout > .shopify-section:first-child:has(.slideshow-section) {
   margin-top: 0;
   /* max() avoids zero offset when --header-group-height is unset or briefly wrong before JS runs */
   padding-top: max(
