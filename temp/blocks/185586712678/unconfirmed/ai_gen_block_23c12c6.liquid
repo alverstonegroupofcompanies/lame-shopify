@@ -1,0 +1,447 @@
+{% doc %}
+  @prompt
+    add a neat shop by category section, 7 cards image only, auto slide one row
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-category-carousel-{{ ai_gen_id }} {
+    width: 100%;
+    display: block;
+    overflow: hidden;
+    padding: 40px 0;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-category-carousel__container-{{ ai_gen_id }} {
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .ai-category-carousel__header-{{ ai_gen_id }} {
+    text-align: {{ block.settings.heading_alignment }};
+    margin-bottom: 32px;
+  }
+
+  .ai-category-carousel__heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0;
+  }
+
+  .ai-category-carousel__track-wrapper-{{ ai_gen_id }} {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ai-category-carousel__track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    transition: transform 0.5s ease;
+  }
+
+  .ai-category-carousel__card-{{ ai_gen_id }} {
+    flex: 0 0 calc((100% - ({{ block.settings.card_gap }}px * 6)) / 7);
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+    border-radius: {{ block.settings.card_border_radius }}px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-category-carousel__card-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+  }
+
+  .ai-category-carousel__card-link-{{ ai_gen_id }} {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  .ai-category-carousel__image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-category-carousel__placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+  }
+
+  .ai-category-carousel__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-category-carousel__overlay-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .ai-category-carousel__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_title_size }}px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-category-carousel__card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - ({{ block.settings.card_gap }}px * 3)) / 4);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-category-carousel__card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - ({{ block.settings.card_gap }}px * 2)) / 3);
+    }
+
+    .ai-category-carousel__heading-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.heading_size }}px * 0.7);
+    }
+  }
+{% endstyle %}
+
+<category-carousel-{{ ai_gen_id }} class="ai-category-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-category-carousel__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <div class="ai-category-carousel__header-{{ ai_gen_id }}">
+        <h2 class="ai-category-carousel__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+      </div>
+    {% endif %}
+
+    <div class="ai-category-carousel__track-wrapper-{{ ai_gen_id }}">
+      <div class="ai-category-carousel__track-{{ ai_gen_id }}">
+        {% for i in (1..7) %}
+          {% liquid
+            assign collection_key = 'collection_' | append: i
+            assign collection = block.settings[collection_key]
+          %}
+
+          <div class="ai-category-carousel__card-{{ ai_gen_id }}">
+            {% if collection != blank %}
+              <a href="{{ collection.url }}" class="ai-category-carousel__card-link-{{ ai_gen_id }}">
+                <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
+                  {% if collection.image %}
+                    <img
+                      src="{{ collection.image | image_url: width: 400 }}"
+                      alt="{{ collection.title | escape }}"
+                      class="ai-category-carousel__image-{{ ai_gen_id }}"
+                      loading="lazy"
+                      width="400"
+                      height="400"
+                    >
+                  {% elsif collection.products.first and collection.products.first.featured_image %}
+                    <img
+                      src="{{ collection.products.first.featured_image | image_url: width: 400 }}"
+                      alt="{{ collection.title | escape }}"
+                      class="ai-category-carousel__image-{{ ai_gen_id }}"
+                      loading="lazy"
+                      width="400"
+                      height="400"
+                    >
+                  {% else %}
+                    <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
+                      {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                    </div>
+                  {% endif %}
+                  <div class="ai-category-carousel__overlay-{{ ai_gen_id }}">
+                    <h3 class="ai-category-carousel__title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+                  </div>
+                </div>
+              </a>
+            {% else %}
+              <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
+                <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                </div>
+                <div class="ai-category-carousel__overlay-{{ ai_gen_id }}">
+                  <h3 class="ai-category-carousel__title-{{ ai_gen_id }}">Category {{ i }}</h3>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</category-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CategoryCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = this.querySelector('.ai-category-carousel__track-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-category-carousel__card-{{ ai_gen_id }}');
+        this.currentIndex = 0;
+        this.autoSlideInterval = null;
+        this.autoSlideDelay = {{ block.settings.auto_slide_speed | times: 1000 }};
+      }
+
+      connectedCallback() {
+        if (this.cards.length > 0) {
+          this.cloneCards();
+          this.startAutoSlide();
+          this.setupHoverPause();
+        }
+      }
+
+      cloneCards() {
+        const cardsArray = Array.from(this.cards);
+        cardsArray.forEach(card => {
+          const clone = card.cloneNode(true);
+          this.track.appendChild(clone);
+        });
+      }
+
+      startAutoSlide() {
+        this.autoSlideInterval = setInterval(() => {
+          this.slideNext();
+        }, this.autoSlideDelay);
+      }
+
+      stopAutoSlide() {
+        if (this.autoSlideInterval) {
+          clearInterval(this.autoSlideInterval);
+          this.autoSlideInterval = null;
+        }
+      }
+
+      setupHoverPause() {
+        this.addEventListener('mouseenter', () => {
+          this.stopAutoSlide();
+        });
+
+        this.addEventListener('mouseleave', () => {
+          this.startAutoSlide();
+        });
+      }
+
+      slideNext() {
+        this.currentIndex++;
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.card_gap }};
+        const offset = (cardWidth + gap) * this.currentIndex;
+
+        this.track.style.transform = `translateX(-${offset}px)`;
+
+        if (this.currentIndex >= this.cards.length) {
+          setTimeout(() => {
+            this.track.style.transition = 'none';
+            this.currentIndex = 0;
+            this.track.style.transform = 'translateX(0)';
+            setTimeout(() => {
+              this.track.style.transition = 'transform 0.5s ease';
+            }, 50);
+          }, 500);
+        }
+      }
+
+      disconnectedCallback() {
+        this.stopAutoSlide();
+      }
+    }
+
+    customElements.define('category-carousel-{{ ai_gen_id }}', CategoryCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Shop by category",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card spacing",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Auto slide"
+    },
+    {
+      "type": "range",
+      "id": "auto_slide_speed",
+      "label": "Slide speed",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Card title size",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop by category"
+    }
+  ]
+}
+{% endschema %}
