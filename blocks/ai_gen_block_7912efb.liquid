@@ -136,6 +136,35 @@
     font-size: {{ block.settings.button_text_size }}px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    line-height: 1.2;
+  }
+
+  .ai-product-card__button-inner-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+  }
+
+  .ai-product-card__button-icon-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ai-product-card__button-icon-{{ ai_gen_id }} svg {
+    width: 1.35em;
+    height: 1.35em;
+    display: block;
+  }
+
+  .ai-product-card__button--display-text-{{ ai_gen_id }} .ai-product-card__button-icon-{{ ai_gen_id }} {
+    display: none;
   }
 
   .ai-product-card__button-{{ ai_gen_id }}:hover {
@@ -172,7 +201,21 @@
   {% if collections.all.products.size > 0 %}
     <div class="ai-products-grid__container-{{ ai_gen_id }}">
       {% for product in collections.all.products limit: block.settings.products_limit %}
-        <div class="ai-product-card-{{ ai_gen_id }}">
+        {% liquid
+          assign variant = product.selected_or_first_available_variant
+          assign card_form_id = 'OurProducts-ProductForm-' | append: product.id | append: '-' | append: block.id
+          assign card_form_class = 'ai-product-card__form-' | append: ai_gen_id
+          assign atc_display = block.settings.add_to_cart_display | default: 'text'
+          assign qty_default = 1
+          if variant.quantity_rule.min
+            assign qty_default = variant.quantity_rule.min
+          endif
+          assign button_label_plain = block.settings.button_text | strip_html | strip
+          if button_label_plain == blank
+            assign button_label_plain = 'Add to cart'
+          endif
+        %}
+        <div class="ai-product-card-{{ ai_gen_id }}" data-product-id="{{ product.id }}">
           <div class="ai-product-card__image-wrapper-{{ ai_gen_id }}">
             {% if product.featured_image %}
               <img
@@ -206,28 +249,55 @@
               {% endif %}
             </div>
 
-            {% form 'product', product, class: 'ai-product-card__form-' | append: ai_gen_id %}
-              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-              
+            {% form 'product', product, id: card_form_id, class: card_form_class, data-type: 'add-to-cart-form' %}
+              <input type="hidden" name="id" value="{{ variant.id }}">
+              <input type="hidden" name="quantity" value="{{ qty_default }}">
+
               {% if product.available %}
                 <button
                   type="submit"
-                  class="ai-product-card__button-{{ ai_gen_id }}"
-                  {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
-                >
-                  {% if product.selected_or_first_available_variant.available %}
-                    {{ block.settings.button_text }}
-                  {% else %}
-                    {{ block.settings.sold_out_text }}
+                  class="ai-product-card__button-{{ ai_gen_id }} ai-product-card__button--display-{{ atc_display }}-{{ ai_gen_id }}"
+                  {% unless variant.available %}disabled{% endunless %}
+                  {% if atc_display == 'icon_only' %}
+                    aria-label="{% if variant.available %}{{ button_label_plain | escape }}{% else %}{{ block.settings.sold_out_text | strip_html | strip | escape }}{% endif %}"
                   {% endif %}
+                >
+                  <span class="ai-product-card__button-inner-{{ ai_gen_id }}">
+                    {% if atc_display != 'text' %}
+                      <span class="ai-product-card__button-icon-{{ ai_gen_id }}" aria-hidden="true">
+                        {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+                      </span>
+                    {% endif %}
+                    {% if atc_display != 'icon_only' %}
+                      <span class="ai-product-card__button-label-{{ ai_gen_id }}">
+                        {% if variant.available %}
+                          {{ block.settings.button_text }}
+                        {% else %}
+                          {{ block.settings.sold_out_text }}
+                        {% endif %}
+                      </span>
+                    {% endif %}
+                  </span>
                 </button>
               {% else %}
                 <button
                   type="button"
-                  class="ai-product-card__button-{{ ai_gen_id }}"
+                  class="ai-product-card__button-{{ ai_gen_id }} ai-product-card__button--display-{{ atc_display }}-{{ ai_gen_id }}"
                   disabled
+                  {% if atc_display == 'icon_only' %}
+                    aria-label="{{ block.settings.sold_out_text | strip_html | strip | escape }}"
+                  {% endif %}
                 >
-                  {{ block.settings.sold_out_text }}
+                  <span class="ai-product-card__button-inner-{{ ai_gen_id }}">
+                    {% if atc_display != 'text' %}
+                      <span class="ai-product-card__button-icon-{{ ai_gen_id }}" aria-hidden="true">
+                        {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+                      </span>
+                    {% endif %}
+                    {% if atc_display != 'icon_only' %}
+                      <span class="ai-product-card__button-label-{{ ai_gen_id }}">{{ block.settings.sold_out_text }}</span>
+                    {% endif %}
+                  </span>
                 </button>
               {% endif %}
             {% endform %}
@@ -246,12 +316,8 @@
 <script>
   (function() {
     class ProductsGrid{{ ai_gen_id }} extends HTMLElement {
-      constructor() {
-        super();
-      }
-
       connectedCallback() {
-        this.forms = this.querySelectorAll('.ai-product-card__form-{{ ai_gen_id }}');
+        this.forms = this.querySelectorAll('form[data-type="add-to-cart-form"]');
         this.setupFormHandlers();
       }
 
@@ -265,41 +331,115 @@
         event.preventDefault();
         const form = event.target;
         const button = form.querySelector('.ai-product-card__button-{{ ai_gen_id }}');
-        const originalText = button.textContent;
+        if (!button || button.disabled) return;
+
+        const originalInner = button.innerHTML;
+        const originalAria = button.getAttribute('aria-label');
+
+        const restoreMarkup = () => {
+          button.innerHTML = originalInner;
+          if (originalAria != null) {
+            button.setAttribute('aria-label', originalAria);
+          } else {
+            button.removeAttribute('aria-label');
+          }
+        };
+
+        let labelEl = button.querySelector('.ai-product-card__button-label-{{ ai_gen_id }}');
 
         button.disabled = true;
-        button.textContent = 'Adding...';
+        if (labelEl) {
+          labelEl.textContent = 'Adding...';
+        }
+        if (button.hasAttribute('aria-label')) {
+          button.setAttribute('aria-label', 'Adding...');
+        }
 
         const formData = new FormData(form);
+        const variantId = formData.get('id');
+        const qty = Number(formData.get('quantity')) || 1;
+        const cardEl = form.closest('.ai-product-card-{{ ai_gen_id }}');
+        const productId =
+          (cardEl && cardEl.dataset && cardEl.dataset.productId) || '';
 
         fetch('/cart/add.js', {
           method: 'POST',
-          body: formData
+          body: formData,
+          headers: {
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
         })
-        .then(response => response.json())
-        .then(data => {
-          button.textContent = 'Added!';
-          
-          setTimeout(() => {
+          .then((response) =>
+            response.json().then((data) => ({
+              ok: response.ok,
+              data,
+            }))
+          )
+          .then(({ ok, data }) => {
+            labelEl = button.querySelector('.ai-product-card__button-label-{{ ai_gen_id }}');
+
+            const fail = (msg) => {
+              if (labelEl) {
+                labelEl.textContent = msg;
+              } else if (button.hasAttribute('aria-label')) {
+                button.setAttribute('aria-label', msg);
+              }
+              button.disabled = false;
+              setTimeout(() => {
+                restoreMarkup();
+              }, 2500);
+            };
+
+            if (!ok || (data && data.status)) {
+              const msg =
+                (data && data.description && String(data.description)) ||
+                (data && data.message && String(data.message)) ||
+                'Could not add to cart';
+              fail(msg);
+              return;
+            }
+
+            if (labelEl) {
+              labelEl.textContent = 'Added!';
+            }
+            if (button.hasAttribute('aria-label')) {
+              button.setAttribute('aria-label', 'Added to cart');
+            }
+
+            document.dispatchEvent(
+              new CustomEvent('cart:update', {
+                bubbles: true,
+                detail: {
+                  resource: data,
+                  sourceId: variantId ? String(variantId) : '',
+                  data: {
+                    source: 'product-form-component',
+                    itemCount: qty,
+                    productId: productId ? String(productId) : undefined,
+                    variantId: variantId ? String(variantId) : undefined,
+                  },
+                },
+              })
+            );
+
+            setTimeout(() => {
+              button.disabled = false;
+              restoreMarkup();
+            }, 2000);
+          })
+          .catch((error) => {
+            console.error('Our products add to cart:', error);
+            labelEl = button.querySelector('.ai-product-card__button-label-{{ ai_gen_id }}');
+            if (labelEl) {
+              labelEl.textContent = 'Error – try again';
+            }
+            if (button.hasAttribute('aria-label')) {
+              button.setAttribute('aria-label', 'Error – try again');
+            }
             button.disabled = false;
-            button.textContent = originalText;
-          }, 2000);
-
-          if (window.theme && window.theme.cart) {
-            window.theme.cart.refresh();
-          }
-
-          document.dispatchEvent(new CustomEvent('cart:refresh'));
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          button.disabled = false;
-          button.textContent = 'Error - Try again';
-          
-          setTimeout(() => {
-            button.textContent = originalText;
-          }, 2000);
-        });
+            setTimeout(restoreMarkup, 2000);
+          });
       }
     }
 
@@ -342,6 +482,26 @@
       "id": "sold_out_text",
       "label": "Sold out text",
       "default": "Sold Out"
+    },
+    {
+      "type": "select",
+      "id": "add_to_cart_display",
+      "label": "Add to cart display",
+      "options": [
+        {
+          "value": "text",
+          "label": "Text"
+        },
+        {
+          "value": "icon_only",
+          "label": "Icon only"
+        },
+        {
+          "value": "text_and_icon",
+          "label": "Text and icon"
+        }
+      ],
+      "default": "text"
     },
     {
       "type": "header",
