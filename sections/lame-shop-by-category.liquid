@@ -2,6 +2,28 @@
   assign cat_tile_width = section.settings.category_tile_width | default: 170
   assign cat_gap = 10
   assign heading_align = section.settings.heading_alignment | default: 'left'
+  case section.settings.tile_shape
+    when 'standard'
+      assign tile_aspect = '4 / 3'
+    when 'cinema'
+      assign tile_aspect = '16 / 9'
+    when 'square'
+      assign tile_aspect = '1 / 1'
+    when 'wide'
+      assign tile_aspect = '3 / 2'
+    else
+      assign tile_aspect = '3 / 2'
+  endcase
+  assign show_subheading = section.settings.show_subheading | default: false
+  assign show_tile_captions = section.settings.show_tile_captions | default: false
+  assign show_title_on_image = section.settings.show_title_on_image | default: false
+  assign show_carousel_arrows = section.settings.show_carousel_arrows | default: true
+  assign show_head_area = false
+  if section.settings.heading != blank
+    assign show_head_area = true
+  elsif show_subheading and section.settings.subheading != blank
+    assign show_head_area = true
+  endif
   if section.settings.auto_slide == true
     assign shop_cat_auto_slide = true
   elsif section.settings.auto_slide == false
@@ -22,14 +44,15 @@
     style="{% render 'spacing-padding', settings: section.settings %}"
     data-auto-slide="{% if shop_cat_auto_slide %}true{% else %}false{% endif %}"
     data-auto-slide-interval="{{ section.settings.auto_slide_interval | default: 5 }}"
+    data-auto-slide-step="{{ section.settings.auto_advance_step | default: 'screen' }}"
     data-pause-auto-slide-on-hover="{% if shop_cat_pause_hover %}true{% else %}false{% endif %}"
   >
-    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+    {% if show_head_area %}
       <header class="lame-shop-cat__header lame-shop-cat__header--align-{{ heading_align }}" data-lame-reveal>
         {% if section.settings.heading != blank %}
           <h2 class="lame-shop-cat__title">{{ section.settings.heading }}</h2>
         {% endif %}
-        {% if section.settings.subheading != blank %}
+        {% if show_subheading and section.settings.subheading != blank %}
           <p class="lame-shop-cat__subtitle">{{ section.settings.subheading }}</p>
         {% endif %}
       </header>
@@ -38,7 +61,7 @@
     <div class="lame-shop-cat__carousel-wrap">
     <div
       class="lame-shop-cat__viewport"
-      style="--lame-cat-tile-width: {{ cat_tile_width }}px; --lame-cat-gap: {{ cat_gap }}px;"
+      style="--lame-cat-tile-width: {{ cat_tile_width }}px; --lame-cat-gap: {{ cat_gap }}px; --lame-cat-aspect: {{ tile_aspect }};"
     >
     <ul class="lame-shop-cat__track" role="list" data-lame-shop-cat-track>
       {% for block in section.blocks %}
@@ -67,7 +90,11 @@
               <div class="lame-shop-cat__tile lame-shop-cat__tile--placeholder">
                 <div class="lame-shop-cat__media lame-shop-cat__media--placeholder">
                   <span class="lame-shop-cat__media-shade" aria-hidden="true"></span>
-                  <span class="lame-shop-cat__title-on-image">{{ section.settings.placeholder_collection_text }}</span>
+                  {% if show_title_on_image %}
+                    <span class="lame-shop-cat__title-on-image">{{ section.settings.placeholder_collection_text }}</span>
+                  {% elsif request.design_mode %}
+                    <span class="visually-hidden">{{ section.settings.placeholder_collection_text }}</span>
+                  {% endif %}
                 </div>
               </div>
             </li>
@@ -81,7 +108,7 @@
           data-lame-delay="{{ forloop.index0 | modulo: 4 }}"
           {{ block.shopify_attributes }}
         >
-          <a class="lame-shop-cat__tile" href="{{ tile_url }}">
+          <a class="lame-shop-cat__tile" href="{{ tile_url }}"{% unless show_title_on_image %} aria-label="{{ tile_title | escape }}"{% endunless %}>
             <div class="lame-shop-cat__media">
               {% if tile_image %}
                 {{
@@ -97,36 +124,54 @@
                 {{ 'detailed-apparel-1' | placeholder_svg_tag: 'lame-shop-cat__image lame-shop-cat__placeholder-svg placeholder-svg' }}
               {% endif %}
               <span class="lame-shop-cat__media-shade" aria-hidden="true"></span>
-              <span class="lame-shop-cat__title-on-image">{{ tile_title }}</span>
+              {% if show_title_on_image %}
+                <span class="lame-shop-cat__title-on-image">{{ tile_title }}</span>
+              {% endif %}
             </div>
           </a>
-          {% if tile_caption != blank %}
+          {% if show_tile_captions and tile_caption != blank %}
             <p class="lame-shop-cat__caption">{{ tile_caption }}</p>
           {% endif %}
         </li>
       {% endfor %}
     </ul>
     </div>
-      <div class="lame-shop-cat__controls" data-shop-cat-controls hidden>
-        <button
-          class="lame-shop-cat__ctrl-arrow lame-shop-cat__ctrl-arrow--prev"
-          type="button"
-          aria-label="{{ section.settings.prev_category_label }}"
-          data-arrow="prev"
-        >
-          <span aria-hidden="true">&#8249;</span>
-        </button>
+      <div
+        class="lame-shop-cat__controls{% unless show_carousel_arrows %} lame-shop-cat__controls--progress-only{% endunless %}"
+        data-shop-cat-controls
+        hidden
+      >
+        {% if show_carousel_arrows %}
+          <button
+            class="lame-shop-cat__ctrl-arrow lame-shop-cat__ctrl-arrow--prev"
+            type="button"
+            aria-label="{{ section.settings.prev_category_label }}"
+            data-arrow="prev"
+          >
+            {% if section.settings.prev_arrow_visible_text != blank %}
+              <span class="lame-shop-cat__ctrl-arrow-text">{{ section.settings.prev_arrow_visible_text }}</span>
+            {% else %}
+              <span aria-hidden="true">&#8249;</span>
+            {% endif %}
+          </button>
+        {% endif %}
         <div class="lame-shop-cat__progress-track" aria-hidden="true">
           <div class="lame-shop-cat__progress-fill" data-shop-cat-progress-fill></div>
         </div>
-        <button
-          class="lame-shop-cat__ctrl-arrow lame-shop-cat__ctrl-arrow--next"
-          type="button"
-          aria-label="{{ section.settings.next_category_label }}"
-          data-arrow="next"
-        >
-          <span aria-hidden="true">&#8250;</span>
-        </button>
+        {% if show_carousel_arrows %}
+          <button
+            class="lame-shop-cat__ctrl-arrow lame-shop-cat__ctrl-arrow--next"
+            type="button"
+            aria-label="{{ section.settings.next_category_label }}"
+            data-arrow="next"
+          >
+            {% if section.settings.next_arrow_visible_text != blank %}
+              <span class="lame-shop-cat__ctrl-arrow-text">{{ section.settings.next_arrow_visible_text }}</span>
+            {% else %}
+              <span aria-hidden="true">&#8250;</span>
+            {% endif %}
+          </button>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -212,6 +257,7 @@
     const intervalSec = Math.max(3, parseInt(root.dataset.autoSlideInterval || '5', 10));
     const pauseOnHover = root.dataset.pauseAutoSlideOnHover !== 'false';
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const autoSlideStep = root.dataset.autoSlideStep || 'screen';
 
     let timerId = null;
     let isPaused = false;
@@ -230,7 +276,16 @@
       const maxScroll = track.scrollWidth - track.clientWidth;
       if (maxScroll <= EPS) return;
 
-      const amount = getStepPx();
+      let amount = 0;
+      if (autoSlideStep === 'screen') {
+        const remaining = Math.max(0, maxScroll - track.scrollLeft);
+        amount = Math.min(track.clientWidth, remaining);
+        if (amount < EPS) {
+          amount = getStepPx();
+        }
+      } else {
+        amount = getStepPx();
+      }
       if (amount <= 0) return;
 
       if (track.scrollLeft + track.clientWidth >= maxScroll - 3) {
@@ -407,7 +462,7 @@
 
   .lame-shop-cat__media {
     position: relative;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: var(--lame-cat-aspect, 3 / 2);
     background: rgb(var(--brand-gold) / 0.06);
     overflow: hidden;
     isolation: isolate;
@@ -476,10 +531,34 @@
 
   .lame-shop-cat__controls {
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.75rem;
     margin-top: 0.85rem;
     padding-inline: 0.15rem;
+  }
+
+  .lame-shop-cat__controls--progress-only {
+    justify-content: stretch;
+  }
+
+  .lame-shop-cat__controls--progress-only .lame-shop-cat__progress-track {
+    flex: 1;
+  }
+
+  .lame-shop-cat__ctrl-arrow-text {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .lame-shop-cat__ctrl-arrow:has(.lame-shop-cat__ctrl-arrow-text) {
+    width: auto;
+    min-width: 2rem;
+    padding-inline: 0.55rem;
   }
 
   .lame-shop-cat__controls[hidden] {
@@ -567,6 +646,12 @@
       "default": "Choose a collection to browse products."
     },
     {
+      "type": "checkbox",
+      "id": "show_subheading",
+      "label": "Show subheading",
+      "default": false
+    },
+    {
       "type": "select",
       "id": "heading_alignment",
       "label": "Heading alignment",
@@ -599,6 +684,31 @@
       "content": "Category carousel"
     },
     {
+      "type": "select",
+      "id": "tile_shape",
+      "label": "Tile shape",
+      "options": [
+        { "value": "wide", "label": "Landscape rectangle (3:2)" },
+        { "value": "standard", "label": "Standard (4:3)" },
+        { "value": "cinema", "label": "Wide (16:9)" },
+        { "value": "square", "label": "Square (1:1)" }
+      ],
+      "default": "wide"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title_on_image",
+      "label": "Show category title on image",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tile_captions",
+      "label": "Show captions under tiles",
+      "default": false,
+      "info": "Requires caption text on each category block."
+    },
+    {
       "type": "range",
       "id": "category_tile_width",
       "label": "Category tile width",
@@ -625,10 +735,39 @@
       "default": 5
     },
     {
+      "type": "select",
+      "id": "auto_advance_step",
+      "label": "Auto-advance distance",
+      "options": [
+        { "value": "card", "label": "One card" },
+        { "value": "screen", "label": "One screen width" }
+      ],
+      "default": "screen",
+      "info": "Screen width advances more categories per interval so the full row is easier to browse."
+    },
+    {
       "type": "checkbox",
       "id": "pause_auto_slide_on_hover",
       "label": "Pause auto-advance on hover or keyboard focus",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_carousel_arrows",
+      "label": "Show previous / next arrow buttons",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "prev_arrow_visible_text",
+      "label": "Previous button visible text",
+      "info": "Optional. Leave empty for the ‹ symbol only."
+    },
+    {
+      "type": "text",
+      "id": "next_arrow_visible_text",
+      "label": "Next button visible text",
+      "info": "Optional. Leave empty for the › symbol only."
     },
     {
       "type": "range",
