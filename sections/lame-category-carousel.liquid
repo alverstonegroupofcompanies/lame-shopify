@@ -36,7 +36,9 @@
   for block in section.blocks
     assign lcc_coll_ck = block.settings.collection
     if lcc_coll_ck != blank
-      assign lcc_valid_tiles = lcc_valid_tiles | plus: 1
+      if request.design_mode or lcc_coll_ck.handle != 'all'
+        assign lcc_valid_tiles = lcc_valid_tiles | plus: 1
+      endif
     endif
   endfor
 %}
@@ -103,6 +105,9 @@
                   </div>
                 </li>
               {% endif %}
+              {% continue %}
+            {% endif %}
+            {% if coll.handle == 'all' and request.design_mode == false %}
               {% continue %}
             {% endif %}
 
@@ -815,7 +820,7 @@
           "type": "collection",
           "id": "collection",
           "label": "Collection",
-          "info": "Required. Without a collection, this block is hidden on the storefront."
+          "info": "Required. Each tile links to this collection’s page only. Avoid “All products” here—that lists the full catalog; those tiles are hidden on the storefront."
         },
         {
           "type": "text",
