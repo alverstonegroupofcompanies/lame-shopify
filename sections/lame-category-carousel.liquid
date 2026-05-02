@@ -32,6 +32,13 @@
   else
     assign pause_h = true
   endif
+  assign lcc_valid_tiles = 0
+  for block in section.blocks
+    assign lcc_coll_ck = block.settings.collection
+    if lcc_coll_ck != blank
+      assign lcc_valid_tiles = lcc_valid_tiles | plus: 1
+    endif
+  endfor
 %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
@@ -56,6 +63,7 @@
     {% endif %}
 
     <div class="lcc__wrap">
+      {% if lcc_valid_tiles > 0 %}
       <div
         class="lcc__view"
         style="--lcc-w: {{ w }}px; --lcc-gap: {{ gap }}px; --lcc-ar: {{ ar }};"
@@ -162,6 +170,17 @@
           </button>
         {% endif %}
       </div>
+      {% elsif request.design_mode %}
+        <div
+          class="lcc__view lcc__view--empty"
+          style="--lcc-w: {{ w }}px; --lcc-gap: {{ gap }}px; --lcc-ar: {{ ar }};"
+        >
+          <div class="lcc__hint" {{ section.shopify_attributes }}>
+            <p class="lcc__hint-title">{{ section.settings.editor_hint_heading | default: 'No categories visible' }}</p>
+            <p class="lcc__hint-body">{{ section.settings.editor_empty_hint | default: 'Add Category blocks and choose a collection for each.' }}</p>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -200,7 +219,7 @@
     const fill = sec.querySelector('[data-lcc-fill]');
     const prev = sec.querySelector('[data-lcc-prev]');
     const next = sec.querySelector('[data-lcc-next]');
-    if (!root || !track) return;
+    if (!root || !track || track.querySelectorAll('.lcc__item').length === 0) return;
 
     const EPS = 4;
 
@@ -375,6 +394,32 @@
   .lcc__view {
     margin-inline: auto;
     width: 100%;
+  }
+
+  .lcc__hint {
+    max-width: 36rem;
+    margin-inline: auto;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    border: 1px dashed rgb(var(--brand-gold) / 0.5);
+    border-radius: var(--lame-radius-card, 10px);
+    background: rgb(var(--brand-gold) / 0.07);
+  }
+
+  .lcc__hint-title {
+    margin: 0 0 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--brand-gold));
+  }
+
+  .lcc__hint-body {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: rgb(var(--color-foreground-rgb) / 0.75);
   }
 
   .lcc__track {
@@ -721,6 +766,26 @@
       "default": "Select a collection"
     },
     {
+      "type": "header",
+      "content": "Theme editor: empty carousel"
+    },
+    {
+      "type": "paragraph",
+      "content": "If no block has a valid collection, customers see nothing here. In the theme editor you will see a dashed box with the message below so you can fix blocks."
+    },
+    {
+      "type": "text",
+      "id": "editor_hint_heading",
+      "label": "Empty state title (editor only)",
+      "default": "No categories visible"
+    },
+    {
+      "type": "textarea",
+      "id": "editor_empty_hint",
+      "label": "Empty state message (editor only)",
+      "default": "Add Category blocks and pick a collection for each. Handles in the theme JSON must match collections in this store. Publish the homepage template from your theme code if the section disappeared after editing online."
+    },
+    {
       "type": "range",
       "id": "padding-block-start",
       "label": "Top padding",
@@ -749,7 +814,8 @@
         {
           "type": "collection",
           "id": "collection",
-          "label": "Collection"
+          "label": "Collection",
+          "info": "Required. Without a collection, this block is hidden on the storefront."
         },
         {
           "type": "text",
