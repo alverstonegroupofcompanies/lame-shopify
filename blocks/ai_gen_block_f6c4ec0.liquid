@@ -35,6 +35,64 @@
     position: relative;
   }
 
+  .ai-category-carousel__nav-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 4;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid {{ block.settings.heading_color }};
+    border-radius: 999px;
+    background: {{ block.settings.background_color }};
+    color: {{ block.settings.heading_color }};
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ai-category-carousel__nav-{{ ai_gen_id }}:hover:not(:disabled) {
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
+  }
+
+  .ai-category-carousel__nav-{{ ai_gen_id }}:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .ai-category-carousel__nav-{{ ai_gen_id }} .lcc__icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    display: block;
+  }
+
+  .ai-category-carousel__nav--prev-{{ ai_gen_id }} {
+    left: 0.5rem;
+  }
+
+  .ai-category-carousel__nav--next-{{ ai_gen_id }} {
+    right: 0.5rem;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-category-carousel__nav-{{ ai_gen_id }} {
+      width: 2.1rem;
+      height: 2.1rem;
+    }
+
+    .ai-category-carousel__nav--prev-{{ ai_gen_id }} {
+      left: 0.25rem;
+    }
+
+    .ai-category-carousel__nav--next-{{ ai_gen_id }} {
+      right: 0.25rem;
+    }
+  }
+
   .ai-category-carousel__track-{{ ai_gen_id }} {
     display: flex;
     gap: {{ block.settings.card_gap }}px;
@@ -132,6 +190,24 @@
     {% endif %}
 
     <div class="ai-category-carousel__track-wrapper-{{ ai_gen_id }}">
+      {% unless block.settings.show_navigation_arrows == false %}
+        <button
+          type="button"
+          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--prev-{{ ai_gen_id }}"
+          aria-label="Previous categories"
+          data-ai-carousel-prev
+        >
+          {% render 'lcc-chevron-icon', direction: 'prev' %}
+        </button>
+        <button
+          type="button"
+          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--next-{{ ai_gen_id }}"
+          aria-label="Next categories"
+          data-ai-carousel-next
+        >
+          {% render 'lcc-chevron-icon', direction: 'next' %}
+        </button>
+      {% endunless %}
       <div class="ai-category-carousel__track-{{ ai_gen_id }}">
         {% for i in (1..7) %}
           {% liquid
@@ -205,7 +281,52 @@
           this.cloneCards();
           this.startAutoSlide();
           this.setupHoverPause();
+          this.setupNavButtons();
         }
+      }
+
+      setupNavButtons() {
+        const prev = this.querySelector('[data-ai-carousel-prev]');
+        const next = this.querySelector('[data-ai-carousel-next]');
+        if (prev) {
+          prev.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.slidePrev();
+            this.restartAutoSlide();
+          });
+        }
+        if (next) {
+          next.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.slideNext();
+            this.restartAutoSlide();
+          });
+        }
+      }
+
+      restartAutoSlide() {
+        this.stopAutoSlide();
+        this.startAutoSlide();
+      }
+
+      stepPx() {
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.card_gap }};
+        return cardWidth + gap;
+      }
+
+      slidePrev() {
+        if (this.cards.length === 0) return;
+        if (this.currentIndex <= 0) {
+          this.currentIndex = this.cards.length - 1;
+        } else {
+          this.currentIndex--;
+        }
+        const offset = this.stepPx() * this.currentIndex;
+        this.track.style.transition = 'transform 0.5s ease';
+        this.track.style.transform = `translateX(-${offset}px)`;
       }
 
       cloneCards() {
@@ -241,10 +362,8 @@
 
       slideNext() {
         this.currentIndex++;
-        const cardWidth = this.cards[0].offsetWidth;
-        const gap = {{ block.settings.card_gap }};
-        const offset = (cardWidth + gap) * this.currentIndex;
-
+        const offset = this.stepPx() * this.currentIndex;
+        this.track.style.transition = 'transform 0.5s ease';
         this.track.style.transform = `translateX(-${offset}px)`;
 
         if (this.currentIndex >= this.cards.length) {
@@ -409,6 +528,12 @@
       "step": 1,
       "unit": "s",
       "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation_arrows",
+      "label": "Show previous / next arrows",
+      "default": true
     },
     {
       "type": "header",
