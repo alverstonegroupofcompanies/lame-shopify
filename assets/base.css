@@ -4545,7 +4545,7 @@ body {
   }
 }
 
-/* Homepage / viewport hero slideshow — width + height tied to viewport */
+/* Homepage hero: full width, height follows media (natural aspect ratio) */
 .shopify-section:has(.slideshow-section--viewport-hero) .slideshow-section--viewport-hero {
   width: 100%;
   max-width: none;
@@ -4557,62 +4557,66 @@ body {
   max-width: 100%;
 }
 
-/* Mobile: screen-fit height (explicit height so absolute .slide__image-container can fill) */
-@media screen and (max-width: 749px) {
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slides {
-    min-height: clamp(280px, 52svh, 85svh);
-    height: clamp(280px, 52svh, 85svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide {
-    min-height: clamp(280px, 52svh, 85svh);
-    height: clamp(280px, 52svh, 85svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) :is(slideshow-component, slideshow-container) {
-    min-height: clamp(280px, 52svh, 85svh);
-    height: clamp(280px, 52svh, 85svh);
-  }
+.shopify-section:has(.slideshow-section--viewport-hero) :is(slideshow-component, slideshow-container, slideshow-slides) {
+  height: auto;
+  min-height: 0;
 }
 
-/* Desktop */
+.shopify-section:has(.slideshow-section--viewport-hero) slideshow-slides {
+  min-height: 0 !important;
+  align-items: flex-start;
+}
+
 @media screen and (min-width: 750px) {
   .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slides {
-    min-height: clamp(320px, 42svh, 72svh);
-    height: clamp(320px, 42svh, 72svh);
-    --slide-min-height-desktop: clamp(320px, 42svh, 72svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide {
-    min-height: clamp(320px, 42svh, 72svh);
-    height: clamp(320px, 42svh, 72svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) :is(slideshow-component, slideshow-container) {
-    min-height: clamp(320px, 42svh, 72svh);
-    height: clamp(320px, 42svh, 72svh);
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) .slideshow-section--viewport-hero {
-    overflow: hidden;
-  }
-
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container,
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container :is(img, .slide__image, .slide__video, .slide__video-poster) {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    object-position: center center;
+    min-height: 0 !important;
   }
 }
 
-@media screen and (max-width: 749px) {
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container,
-  .shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container :is(img, .slide__image, .slide__video, .slide__video-poster) {
-    width: 100%;
-    object-fit: cover;
-    object-position: center center;
-  }
+.shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  align-self: flex-start;
+}
+
+/* In-flow image area so slide height = intrinsic media height */
+.shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide > .slide__image-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  display: block;
+}
+
+.shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container :is(img, .slide__image, .slide__video-poster) {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.shopify-section:has(.slideshow-section--viewport-hero) .slide__image-container .slide__video {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Overlay content still fills the slide when media sets slide height */
+.shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide > .slide__content {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+  pointer-events: none;
+}
+
+.shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide > .slide__content a,
+.shopify-section:has(.slideshow-section--viewport-hero) slideshow-slide > .slide__content button {
+  pointer-events: auto;
 }
 
 .shopify-section:has(.slideshow-section--viewport-hero) .button {
