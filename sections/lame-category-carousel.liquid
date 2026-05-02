@@ -1,5 +1,5 @@
 {% liquid
-  assign w = section.settings.category_tile_width | default: 180
+  assign w = section.settings.category_tile_width | default: 155
   assign gap = 10
   assign align = section.settings.heading_alignment | default: 'left'
   case section.settings.tile_shape
@@ -80,10 +80,6 @@
               else
                 assign ttitle = coll.title
               endif
-              assign turl = coll.url
-              if coll == blank and block.settings.link != blank
-                assign turl = block.settings.link
-              endif
               if block.settings.image != blank
                 assign timg = block.settings.image
               else
@@ -114,7 +110,7 @@
             <li class="lcc__item" data-lcc-reveal data-lcc-delay="{{ forloop.index0 | modulo: 4 }}" {{ block.shopify_attributes }}>
               <a
                 class="lcc__card"
-                href="{{ turl }}"
+                href="{{ coll.url }}"
                 {% unless show_on_img %}
                   aria-label="{{ ttitle | escape }}"
                 {% endunless %}
@@ -374,9 +370,10 @@
     margin-inline: auto;
   }
 
-  /* Match lame-featured-products / lame-promo-mosaic section headings; beat theme h2 defaults */
-  .lcc .lcc__head .lcc__title {
+  /* Match lame-featured-products headings; section id beats global h2 / color-scheme cascade */
+  #shopify-section-{{ section.id }} .lcc__head .lcc__title {
     margin: 0;
+    color: rgb(212 175 55);
     color: rgb(var(--brand-gold));
     font-family: var(--lame-font-display, var(--font-heading--family));
     font-size: clamp(1rem, 2vw, 1.35rem);
@@ -448,9 +445,9 @@
   }
 
   .lcc__item {
-    flex: 0 0 var(--lcc-w, 180px);
-    width: var(--lcc-w, 180px);
-    max-width: min(var(--lcc-w, 180px), calc(100vw - 2rem));
+    flex: 0 0 var(--lcc-w, 155px);
+    width: var(--lcc-w, 155px);
+    max-width: min(var(--lcc-w, 155px), calc(100vw - 2rem));
     min-width: 0;
     scroll-snap-align: start;
     display: flex;
@@ -678,7 +675,7 @@
         { "value": "cinema", "label": "16:9" },
         { "value": "square", "label": "Square" }
       ],
-      "default": "wide"
+      "default": "cinema"
     },
     {
       "type": "range",
@@ -688,7 +685,7 @@
       "max": 220,
       "step": 5,
       "unit": "px",
-      "default": 180
+      "default": 155
     },
     {
       "type": "checkbox",
@@ -836,7 +833,7 @@
           "type": "url",
           "id": "link",
           "label": "Custom link (optional)",
-          "info": "When a collection is selected, the tile always links to that collection page so only those products show. Use this only if the block has no collection."
+          "info": "Ignored when a collection is set—the storefront always uses that collection’s URL. Use only when this block has no collection selected."
         },
         {
           "type": "text",
