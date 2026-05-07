@@ -213,7 +213,8 @@
     gap: 12px;
   }
 
-  .ai-products-grid__pager-btn-{{ ai_gen_id }} {
+  .ai-products-grid__pager-btn-{{ ai_gen_id }},
+  .ai-products-grid__pager-link-{{ ai_gen_id }} {
     width: 42px;
     height: 42px;
     border-radius: 999px;
@@ -245,11 +246,10 @@
 
 {% liquid
   assign ai_prods_on_collection = false
+  assign ai_prods_list = ''
   if template.name == 'collection' and collection != blank
     assign ai_prods_on_collection = true
     assign ai_prods_list = collection.products
-  else
-    assign ai_prods_list = collections.all.products
   endif
 
   assign ai_use_collection_title = block.settings.use_collection_title | default: true
@@ -265,17 +265,18 @@
   assign ai_chunk_size = block.settings.products_limit | default: 12
 %}
 
-<products-grid-{{ ai_gen_id }} id="our-products-{{ ai_gen_id }}" class="ai-products-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<products-grid-{{ ai_gen_id }} class="ai-products-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   {% if ai_show_header %}
     <div class="ai-products-grid__header-{{ ai_gen_id }}">
       <h2 class="ai-products-grid__title-{{ ai_gen_id }}">{{ ai_heading_text }}</h2>
     </div>
   {% endif %}
 
-  {% if ai_prods_list.size > 0 %}
-    {% paginate ai_prods_list by ai_chunk_size %}
-      <div class="ai-products-grid__container-{{ ai_gen_id }}">
-        {% for product in ai_prods_list %}
+  {% if ai_prods_on_collection %}
+  {% paginate collection.products by ai_chunk_size %}
+  {% if paginate.items.size > 0 %}
+    <div class="ai-products-grid__container-{{ ai_gen_id }}">
+      {% for product in paginate.items %}
         {% liquid
           assign variant = product.selected_or_first_available_variant
           assign card_form_id = 'OurProducts-ProductForm-' | append: product.id | append: '-' | append: block.id
@@ -290,7 +291,11 @@
             assign button_label_plain = 'Add to cart'
           endif
         %}
-        <div class="ai-product-card-{{ ai_gen_id }}" data-product-id="{{ product.id }}">
+        <div
+          class="ai-product-card-{{ ai_gen_id }}"
+          data-product-id="{{ product.id }}"
+          data-card-index="{{ forloop.index }}"
+        >
           <div class="ai-product-card__image-wrapper-{{ ai_gen_id }}">
             <a
               href="{{ product.url }}"
@@ -384,54 +389,52 @@
             {% endform %}
           </div>
         </div>
-        {% endfor %}
+      {% endfor %}
+    </div>
+    {% if paginate.pages > 1 %}
+      <div class="ai-products-grid__pager-{{ ai_gen_id }}" data-products-pager>
+        {% if paginate.previous %}
+          <a
+            href="{{ paginate.previous.url }}"
+            class="ai-products-grid__pager-link-{{ ai_gen_id }}"
+            aria-label="Show previous products"
+          >
+            &#8249;
+          </a>
+        {% else %}
+          <button
+            type="button"
+            class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+            disabled
+            aria-label="Show previous products"
+          >
+            &#8249;
+          </button>
+        {% endif %}
+        <p class="ai-products-grid__pager-label-{{ ai_gen_id }}">
+          {{ paginate.current_offset | plus: 1 }}-{{ paginate.current_offset | plus: paginate.page_size | at_most: paginate.items }} of
+          {{ paginate.items }}
+        </p>
+        {% if paginate.next %}
+          <a
+            href="{{ paginate.next.url }}"
+            class="ai-products-grid__pager-link-{{ ai_gen_id }}"
+            aria-label="Show next products"
+          >
+            &#8250;
+          </a>
+        {% else %}
+          <button
+            type="button"
+            class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+            disabled
+            aria-label="Show next products"
+          >
+            &#8250;
+          </button>
+        {% endif %}
       </div>
-      {% if paginate.pages > 1 %}
-        <div class="ai-products-grid__pager-{{ ai_gen_id }}">
-          {% if paginate.previous %}
-            <a
-              href="{{ paginate.previous.url }}#our-products-{{ ai_gen_id }}"
-              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-              aria-label="Show previous products"
-            >
-              &#8249;
-            </a>
-          {% else %}
-            <button
-              type="button"
-              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-              disabled
-              aria-label="No previous products"
-            >
-              &#8249;
-            </button>
-          {% endif %}
-          <p class="ai-products-grid__pager-label-{{ ai_gen_id }}">
-            {{ paginate.current_offset | plus: 1 }}-{{ paginate.current_offset | plus: paginate.page_size | at_most: paginate.items }}
-            of
-            {{ paginate.items }}
-          </p>
-          {% if paginate.next %}
-            <a
-              href="{{ paginate.next.url }}#our-products-{{ ai_gen_id }}"
-              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-              aria-label="Show next products"
-            >
-              &#8250;
-            </a>
-          {% else %}
-            <button
-              type="button"
-              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-              disabled
-              aria-label="No more products"
-            >
-              &#8250;
-            </button>
-          {% endif %}
-        </div>
-      {% endif %}
-    {% endpaginate %}
+    {% endif %}
   {% else %}
     <div class="ai-products-grid__empty-{{ ai_gen_id }}">
       {{ 'product-1' | placeholder_svg_tag }}
@@ -440,6 +443,13 @@
       {% else %}
         <p>No products available yet. Add products to your store to display them here.</p>
       {% endif %}
+    </div>
+  {% endif %}
+  {% endpaginate %}
+  {% else %}
+    <div class="ai-products-grid__empty-{{ ai_gen_id }}">
+      {{ 'product-1' | placeholder_svg_tag }}
+      <p>No products available yet. Add products to your store to display them here.</p>
     </div>
   {% endif %}
 </products-grid-{{ ai_gen_id }}>
