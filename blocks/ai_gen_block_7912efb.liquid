@@ -226,6 +226,7 @@
     cursor: pointer;
     font-size: 20px;
     line-height: 1;
+    text-decoration: none;
   }
 
   .ai-products-grid__pager-btn-{{ ai_gen_id }}:disabled {
@@ -264,7 +265,7 @@
   assign ai_chunk_size = block.settings.products_limit | default: 12
 %}
 
-<products-grid-{{ ai_gen_id }} class="ai-products-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<products-grid-{{ ai_gen_id }} id="our-products-{{ ai_gen_id }}" class="ai-products-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   {% if ai_show_header %}
     <div class="ai-products-grid__header-{{ ai_gen_id }}">
       <h2 class="ai-products-grid__title-{{ ai_gen_id }}">{{ ai_heading_text }}</h2>
@@ -272,13 +273,9 @@
   {% endif %}
 
   {% if ai_prods_list.size > 0 %}
-    <div
-      class="ai-products-grid__container-{{ ai_gen_id }}"
-      data-products-grid
-      data-chunk-size="{{ ai_chunk_size }}"
-      data-total-products="{{ ai_prods_list.size }}"
-    >
-      {% for product in ai_prods_list %}
+    {% paginate ai_prods_list by ai_chunk_size %}
+      <div class="ai-products-grid__container-{{ ai_gen_id }}">
+        {% for product in ai_prods_list %}
         {% liquid
           assign variant = product.selected_or_first_available_variant
           assign card_form_id = 'OurProducts-ProductForm-' | append: product.id | append: '-' | append: block.id
@@ -293,12 +290,7 @@
             assign button_label_plain = 'Add to cart'
           endif
         %}
-        <div
-          class="ai-product-card-{{ ai_gen_id }}"
-          data-product-id="{{ product.id }}"
-          data-card-index="{{ forloop.index }}"
-          {% if forloop.index > ai_chunk_size %}hidden{% endif %}
-        >
+        <div class="ai-product-card-{{ ai_gen_id }}" data-product-id="{{ product.id }}">
           <div class="ai-product-card__image-wrapper-{{ ai_gen_id }}">
             <a
               href="{{ product.url }}"
@@ -392,29 +384,54 @@
             {% endform %}
           </div>
         </div>
-      {% endfor %}
-    </div>
-    {% if ai_prods_list.size > ai_chunk_size %}
-      <div class="ai-products-grid__pager-{{ ai_gen_id }}" data-products-pager>
-        <button
-          type="button"
-          class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-          data-pager-prev
-          aria-label="Show previous products"
-        >
-          &#8249;
-        </button>
-        <p class="ai-products-grid__pager-label-{{ ai_gen_id }}" data-pager-label></p>
-        <button
-          type="button"
-          class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-          data-pager-next
-          aria-label="Show next products"
-        >
-          &#8250;
-        </button>
+        {% endfor %}
       </div>
-    {% endif %}
+      {% if paginate.pages > 1 %}
+        <div class="ai-products-grid__pager-{{ ai_gen_id }}">
+          {% if paginate.previous %}
+            <a
+              href="{{ paginate.previous.url }}#our-products-{{ ai_gen_id }}"
+              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+              aria-label="Show previous products"
+            >
+              &#8249;
+            </a>
+          {% else %}
+            <button
+              type="button"
+              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+              disabled
+              aria-label="No previous products"
+            >
+              &#8249;
+            </button>
+          {% endif %}
+          <p class="ai-products-grid__pager-label-{{ ai_gen_id }}">
+            {{ paginate.current_offset | plus: 1 }}-{{ paginate.current_offset | plus: paginate.page_size | at_most: paginate.items }}
+            of
+            {{ paginate.items }}
+          </p>
+          {% if paginate.next %}
+            <a
+              href="{{ paginate.next.url }}#our-products-{{ ai_gen_id }}"
+              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+              aria-label="Show next products"
+            >
+              &#8250;
+            </a>
+          {% else %}
+            <button
+              type="button"
+              class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+              disabled
+              aria-label="No more products"
+            >
+              &#8250;
+            </button>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endpaginate %}
   {% else %}
     <div class="ai-products-grid__empty-{{ ai_gen_id }}">
       {{ 'product-1' | placeholder_svg_tag }}
@@ -432,53 +449,13 @@
     class ProductsGrid{{ ai_gen_id }} extends HTMLElement {
       connectedCallback() {
         this.forms = this.querySelectorAll('form[data-type="add-to-cart-form"]');
-        this.grid = this.querySelector('[data-products-grid]');
-        this.cards = this.grid ? Array.from(this.grid.querySelectorAll('[data-card-index]')) : [];
-        this.chunkSize = this.grid ? Number(this.grid.dataset.chunkSize) || 12 : 12;
-        this.currentPage = 1;
-        this.totalPages = this.cards.length > 0 ? Math.ceil(this.cards.length / this.chunkSize) : 1;
-        this.prevButton = this.querySelector('[data-pager-prev]');
-        this.nextButton = this.querySelector('[data-pager-next]');
-        this.pageLabel = this.querySelector('[data-pager-label]');
         this.setupFormHandlers();
-        this.setupPager();
       }
 
       setupFormHandlers() {
         this.forms.forEach((form) => {
           form.addEventListener('submit', this.handleAddToCart.bind(this));
         });
-      }
-
-      setupPager() {
-        if (!this.grid || this.cards.length <= this.chunkSize) return;
-
-        this.prevButton?.addEventListener('click', () => this.goToPage(this.currentPage - 1));
-        this.nextButton?.addEventListener('click', () => this.goToPage(this.currentPage + 1));
-        this.goToPage(1);
-      }
-
-      goToPage(page) {
-        if (!this.cards.length) return;
-
-        const safePage = Math.max(1, Math.min(page, this.totalPages));
-        this.currentPage = safePage;
-
-        const start = (safePage - 1) * this.chunkSize + 1;
-        const end = safePage * this.chunkSize;
-
-        this.cards.forEach((card) => {
-          const idx = Number(card.dataset.cardIndex) || 0;
-          card.hidden = idx < start || idx > end;
-        });
-
-        if (this.pageLabel) {
-          const visibleEnd = Math.min(end, this.cards.length);
-          this.pageLabel.textContent = `${start}-${visibleEnd} of ${this.cards.length}`;
-        }
-
-        if (this.prevButton) this.prevButton.disabled = safePage <= 1;
-        if (this.nextButton) this.nextButton.disabled = safePage >= this.totalPages;
       }
 
       handleAddToCart(event) {
