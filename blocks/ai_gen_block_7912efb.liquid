@@ -226,11 +226,14 @@
     cursor: pointer;
     font-size: 20px;
     line-height: 1;
+    text-decoration: none;
   }
 
-  .ai-products-grid__pager-btn-{{ ai_gen_id }}:disabled {
+  .ai-products-grid__pager-btn-{{ ai_gen_id }}:disabled,
+  .ai-products-grid__pager-btn-{{ ai_gen_id }}[aria-disabled='true'] {
     opacity: 0.4;
     cursor: not-allowed;
+    pointer-events: none;
   }
 
   .ai-products-grid__pager-label-{{ ai_gen_id }} {
@@ -272,13 +275,171 @@
   {% endif %}
 
   {% if ai_prods_list.size > 0 %}
-    <div
-      class="ai-products-grid__container-{{ ai_gen_id }}"
-      data-products-grid
-      data-chunk-size="{{ ai_chunk_size }}"
-      data-total-products="{{ ai_prods_list.size }}"
-    >
-      {% for product in ai_prods_list %}
+    {% if ai_prods_on_collection %}
+      {% paginate ai_prods_list by ai_chunk_size %}
+        <div class="ai-products-grid__container-{{ ai_gen_id }}">
+          {% for product in ai_prods_list %}
+            {% liquid
+              assign variant = product.selected_or_first_available_variant
+              assign card_form_id = 'OurProducts-ProductForm-' | append: product.id | append: '-' | append: block.id
+              assign card_form_class = 'ai-product-card__form-' | append: ai_gen_id
+              assign atc_display = block.settings.add_to_cart_display | default: 'text'
+              assign qty_default = 1
+              if variant.quantity_rule.min
+                assign qty_default = variant.quantity_rule.min
+              endif
+              assign button_label_plain = block.settings.button_text | strip_html | strip
+              if button_label_plain == blank
+                assign button_label_plain = 'Add to cart'
+              endif
+            %}
+            <div
+              class="ai-product-card-{{ ai_gen_id }}"
+              data-product-id="{{ product.id }}"
+              data-card-index="{{ forloop.index }}"
+            >
+              <div class="ai-product-card__image-wrapper-{{ ai_gen_id }}">
+                <a
+                  href="{{ product.url }}"
+                  class="ai-product-card__image-link-{{ ai_gen_id }}"
+                  aria-label="{{ product.title | escape }}"
+                >
+                  {% if product.featured_image %}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 600 }}"
+                      alt="{{ product.featured_image.alt | escape }}"
+                      class="ai-product-card__image-{{ ai_gen_id }}"
+                      loading="lazy"
+                      width="600"
+                      height="600"
+                    >
+                  {% else %}
+                    <div class="ai-product-card__placeholder-{{ ai_gen_id }}">
+                      {{ 'product-1' | placeholder_svg_tag }}
+                    </div>
+                  {% endif %}
+                </a>
+              </div>
+
+              <div class="ai-product-card__content-{{ ai_gen_id }}">
+                <h3 class="ai-product-card__title-{{ ai_gen_id }}">
+                  <a href="{{ product.url }}" class="ai-product-card__title-link-{{ ai_gen_id }}">
+                    {{ product.title }}
+                  </a>
+                </h3>
+
+                <div class="ai-product-card__price-{{ ai_gen_id }}">
+                  {{ product.price | money }}
+                  {% if product.compare_at_price > product.price %}
+                    <span class="ai-product-card__price--compare-{{ ai_gen_id }}">
+                      {{ product.compare_at_price | money }}
+                    </span>
+                  {% endif %}
+                </div>
+
+                {% form 'product', product, id: card_form_id, class: card_form_class, data-type: 'add-to-cart-form' %}
+                  <input type="hidden" name="id" value="{{ variant.id }}">
+                  <input type="hidden" name="quantity" value="{{ qty_default }}">
+
+                  {% if product.available %}
+                    <button
+                      type="submit"
+                      class="ai-product-card__button-{{ ai_gen_id }} ai-product-card__button--display-{{ atc_display }}-{{ ai_gen_id }}"
+                      {% unless variant.available %}disabled{% endunless %}
+                      {% if atc_display == 'icon_only' %}
+                        aria-label="{% if variant.available %}{{ button_label_plain | escape }}{% else %}{{ block.settings.sold_out_text | strip_html | strip | escape }}{% endif %}"
+                      {% endif %}
+                    >
+                      <span class="ai-product-card__button-inner-{{ ai_gen_id }}">
+                        {% if atc_display != 'text' %}
+                          <span class="ai-product-card__button-icon-{{ ai_gen_id }}" aria-hidden="true">
+                            {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+                          </span>
+                        {% endif %}
+                        {% if atc_display != 'icon_only' %}
+                          <span class="ai-product-card__button-label-{{ ai_gen_id }}">
+                            {% if variant.available %}
+                              {{ block.settings.button_text }}
+                            {% else %}
+                              {{ block.settings.sold_out_text }}
+                            {% endif %}
+                          </span>
+                        {% endif %}
+                      </span>
+                    </button>
+                  {% else %}
+                    <button
+                      type="button"
+                      class="ai-product-card__button-{{ ai_gen_id }} ai-product-card__button--display-{{ atc_display }}-{{ ai_gen_id }}"
+                      disabled
+                      {% if atc_display == 'icon_only' %}
+                        aria-label="{{ block.settings.sold_out_text | strip_html | strip | escape }}"
+                      {% endif %}
+                    >
+                      <span class="ai-product-card__button-inner-{{ ai_gen_id }}">
+                        {% if atc_display != 'text' %}
+                          <span class="ai-product-card__button-icon-{{ ai_gen_id }}" aria-hidden="true">
+                            {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
+                          </span>
+                        {% endif %}
+                        {% if atc_display != 'icon_only' %}
+                          <span class="ai-product-card__button-label-{{ ai_gen_id }}">{{ block.settings.sold_out_text }}</span>
+                        {% endif %}
+                      </span>
+                    </button>
+                  {% endif %}
+                {% endform %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if paginate.pages > 1 %}
+          <div class="ai-products-grid__pager-{{ ai_gen_id }}">
+            {% if paginate.previous %}
+              <a
+                href="{{ paginate.previous.url }}"
+                class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+                aria-label="Show previous products"
+              >
+                &#8249;
+              </a>
+            {% else %}
+              <button
+                type="button"
+                class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+                aria-label="Show previous products"
+                aria-disabled="true"
+                disabled
+              >
+                &#8249;
+              </button>
+            {% endif %}
+            <p class="ai-products-grid__pager-label-{{ ai_gen_id }}">{{ paginate.current_page }} / {{ paginate.pages }}</p>
+            {% if paginate.next %}
+              <a
+                href="{{ paginate.next.url }}"
+                class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+                aria-label="Show next products"
+              >
+                &#8250;
+              </a>
+            {% else %}
+              <button
+                type="button"
+                class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
+                aria-label="Show next products"
+                aria-disabled="true"
+                disabled
+              >
+                &#8250;
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endpaginate %}
+    {% else %}
+      <div class="ai-products-grid__container-{{ ai_gen_id }}">
+        {% for product in ai_prods_list limit: ai_chunk_size %}
         {% liquid
           assign variant = product.selected_or_first_available_variant
           assign card_form_id = 'OurProducts-ProductForm-' | append: product.id | append: '-' | append: block.id
@@ -297,7 +458,6 @@
           class="ai-product-card-{{ ai_gen_id }}"
           data-product-id="{{ product.id }}"
           data-card-index="{{ forloop.index }}"
-          {% if forloop.index > ai_chunk_size %}hidden{% endif %}
         >
           <div class="ai-product-card__image-wrapper-{{ ai_gen_id }}">
             <a
@@ -393,26 +553,6 @@
           </div>
         </div>
       {% endfor %}
-    </div>
-    {% if ai_prods_list.size > ai_chunk_size %}
-      <div class="ai-products-grid__pager-{{ ai_gen_id }}" data-products-pager>
-        <button
-          type="button"
-          class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-          data-pager-prev
-          aria-label="Show previous products"
-        >
-          &#8249;
-        </button>
-        <p class="ai-products-grid__pager-label-{{ ai_gen_id }}" data-pager-label></p>
-        <button
-          type="button"
-          class="ai-products-grid__pager-btn-{{ ai_gen_id }}"
-          data-pager-next
-          aria-label="Show next products"
-        >
-          &#8250;
-        </button>
       </div>
     {% endif %}
   {% else %}
@@ -432,53 +572,13 @@
     class ProductsGrid{{ ai_gen_id }} extends HTMLElement {
       connectedCallback() {
         this.forms = this.querySelectorAll('form[data-type="add-to-cart-form"]');
-        this.grid = this.querySelector('[data-products-grid]');
-        this.cards = this.grid ? Array.from(this.grid.querySelectorAll('[data-card-index]')) : [];
-        this.chunkSize = this.grid ? Number(this.grid.dataset.chunkSize) || 12 : 12;
-        this.currentPage = 1;
-        this.totalPages = this.cards.length > 0 ? Math.ceil(this.cards.length / this.chunkSize) : 1;
-        this.prevButton = this.querySelector('[data-pager-prev]');
-        this.nextButton = this.querySelector('[data-pager-next]');
-        this.pageLabel = this.querySelector('[data-pager-label]');
         this.setupFormHandlers();
-        this.setupPager();
       }
 
       setupFormHandlers() {
         this.forms.forEach((form) => {
           form.addEventListener('submit', this.handleAddToCart.bind(this));
         });
-      }
-
-      setupPager() {
-        if (!this.grid || this.cards.length <= this.chunkSize) return;
-
-        this.prevButton?.addEventListener('click', () => this.goToPage(this.currentPage - 1));
-        this.nextButton?.addEventListener('click', () => this.goToPage(this.currentPage + 1));
-        this.goToPage(1);
-      }
-
-      goToPage(page) {
-        if (!this.cards.length) return;
-
-        const safePage = Math.max(1, Math.min(page, this.totalPages));
-        this.currentPage = safePage;
-
-        const start = (safePage - 1) * this.chunkSize + 1;
-        const end = safePage * this.chunkSize;
-
-        this.cards.forEach((card) => {
-          const idx = Number(card.dataset.cardIndex) || 0;
-          card.hidden = idx < start || idx > end;
-        });
-
-        if (this.pageLabel) {
-          const visibleEnd = Math.min(end, this.cards.length);
-          this.pageLabel.textContent = `${start}-${visibleEnd} of ${this.cards.length}`;
-        }
-
-        if (this.prevButton) this.prevButton.disabled = safePage <= 1;
-        if (this.nextButton) this.nextButton.disabled = safePage >= this.totalPages;
       }
 
       handleAddToCart(event) {
