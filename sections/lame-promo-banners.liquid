@@ -1,0 +1,233 @@
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-promo-banners"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-promo-banners__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    <ul class="lame-promo-banners__grid" role="list">
+      {% for block in section.blocks %}
+        <li class="lame-promo-banners__item" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 3 }}" {{ block.shopify_attributes }}>
+          <a class="lame-promo-banners__card" href="{{ block.settings.link | default: '#' }}">
+            <div class="lame-promo-banners__media">
+              {% if block.settings.image != blank %}
+                {{
+                  block.settings.image
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'lame-promo-banners__image',
+                    loading: 'lazy',
+                    widths: '300,480,600,900',
+                    sizes: '(min-width: 990px) 31vw, (min-width: 750px) 46vw, 92vw',
+                    alt: block.settings.image.alt | default: block.settings.heading | escape
+                }}
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'lame-promo-banners__image placeholder-svg' }}
+              {% endif %}
+            </div>
+            <div class="lame-promo-banners__content">
+              {% if block.settings.heading != blank %}
+                <h3 class="lame-promo-banners__heading">{{ block.settings.heading }}</h3>
+              {% endif %}
+              {% if block.settings.subtext != blank %}
+                <p class="lame-promo-banners__subtext">{{ block.settings.subtext }}</p>
+              {% endif %}
+              {% if block.settings.button_label != blank %}
+                <span class="lame-promo-banners__button">{{ block.settings.button_label }}</span>
+              {% endif %}
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-promo-banners__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .lame-promo-banners__card {
+    display: grid;
+    grid-template-columns: 1fr;
+    text-decoration: none;
+    color: inherit;
+    background: #f3f3f3;
+    border: 1px solid rgb(0 0 0 / 0.08);
+    overflow: hidden;
+    min-height: 150px;
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+
+  .lame-promo-banners__card:hover {
+    box-shadow: 0 10px 22px rgb(0 0 0 / 0.08);
+    transform: translateY(-2px);
+  }
+
+  .lame-promo-banners__media {
+    min-height: 120px;
+    background: #ececec;
+  }
+
+  .lame-promo-banners__image {
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .lame-promo-banners__content {
+    padding: 0.9rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lame-promo-banners__heading {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: #111;
+  }
+
+  .lame-promo-banners__subtext {
+    margin: 0;
+    font-size: 0.78rem;
+    color: rgb(0 0 0 / 0.6);
+  }
+
+  .lame-promo-banners__button {
+    display: inline-flex;
+    width: fit-content;
+    margin-top: 0.25rem;
+    padding: 0.35rem 0.7rem;
+    background: #e67e22;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-promo-banners__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .lame-promo-banners__card {
+      grid-template-columns: 0.95fr 1.05fr;
+      min-height: 130px;
+    }
+
+    .lame-promo-banners__media {
+      min-height: 100%;
+    }
+
+    .lame-promo-banners__image {
+      min-height: 100%;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    const nodes = section.querySelectorAll('[data-lame-reveal]');
+    if (!nodes.length) return;
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.12 }
+      );
+      nodes.forEach((node) => observer.observe(node));
+    } else {
+      nodes.forEach((node) => node.classList.add('is-visible'));
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Promo banners row",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "banner",
+      "name": "Promo banner",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Promo heading" },
+        { "type": "text", "id": "subtext", "label": "Subtext" },
+        { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop now" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo banners row",
+      "blocks": [
+        { "type": "banner" },
+        { "type": "banner" },
+        { "type": "banner" }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
