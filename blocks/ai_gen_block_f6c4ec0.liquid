@@ -40,22 +40,24 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 4;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: var(--slideshow-controls-size, 3.5rem);
+    height: var(--slideshow-controls-size, 3.5rem);
     padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid {{ block.settings.heading_color }};
-    border-radius: 999px;
-    background: {{ block.settings.background_color }};
-    color: {{ block.settings.heading_color }};
+    aspect-ratio: 1 / 1;
+    border: 1px solid rgb(0 0 0 / 0.08);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.88);
+    color: #111;
     cursor: pointer;
     box-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
-    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   }
 
   .ai-category-carousel__nav-{{ ai_gen_id }}:hover:not(:disabled) {
+    background: rgb(255 255 255 / 0.96);
     box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
   }
 
@@ -64,9 +66,10 @@
     cursor: default;
   }
 
-  .ai-category-carousel__nav-{{ ai_gen_id }} .lcc__icon {
-    width: 0.95rem;
-    height: 0.95rem;
+  .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper,
+  .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper svg {
+    width: var(--slideshow-controls-icon, 2rem);
+    height: var(--slideshow-controls-icon, 2rem);
     display: block;
   }
 
@@ -80,8 +83,14 @@
 
   @media screen and (max-width: 749px) {
     .ai-category-carousel__nav-{{ ai_gen_id }} {
-      width: 2.1rem;
-      height: 2.1rem;
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+
+    .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper,
+    .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper svg {
+      width: 1.5rem;
+      height: 1.5rem;
     }
 
     .ai-category-carousel__nav--prev-{{ ai_gen_id }} {
@@ -193,11 +202,13 @@
       {% unless block.settings.show_navigation_arrows == false %}
         <button
           type="button"
-          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--prev-{{ ai_gen_id }}"
+          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--prev-{{ ai_gen_id }} flip-x"
           aria-label="Previous categories"
           data-ai-carousel-prev
         >
-          {% render 'lcc-chevron-icon', direction: 'prev' %}
+          <span class="svg-wrapper icon-arrow">
+            {{- 'icon-arrow.svg' | inline_asset_content -}}
+          </span>
         </button>
         <button
           type="button"
@@ -205,7 +216,9 @@
           aria-label="Next categories"
           data-ai-carousel-next
         >
-          {% render 'lcc-chevron-icon', direction: 'next' %}
+          <span class="svg-wrapper icon-arrow">
+            {{- 'icon-arrow.svg' | inline_asset_content -}}
+          </span>
         </button>
       {% endunless %}
       <div class="ai-category-carousel__track-{{ ai_gen_id }}">
