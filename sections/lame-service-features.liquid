@@ -1,0 +1,231 @@
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-service-features">
+  <div
+    class="lame-service-features__wrap spacing-style"
+    style="{% render 'spacing-padding', settings: section.settings %} --lame-service-bg: {{ section.settings.bar_background }};"
+  >
+    <ul class="lame-service-features__grid" role="list">
+      {% for block in section.blocks %}
+        <li class="lame-service-features__item" {{ block.shopify_attributes }}>
+          <div class="lame-service-features__icon" aria-hidden="true">
+            {% case block.settings.icon %}
+              {% when 'shipping' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h11v8H3zM14 10h4l3 3v3h-7v-6z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg>
+              {% when 'guarantee' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l8 3v6c0 4.4-3.4 7.4-8 9-4.6-1.6-8-4.6-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+              {% when 'support' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14a8 8 0 0116 0v2a2 2 0 01-2 2h-1v-3H7v3H6a2 2 0 01-2-2v-2z"/><path d="M9 19h6"/></svg>
+              {% when 'payment' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>
+              {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/></svg>
+            {% endcase %}
+          </div>
+          {% if block.settings.title != blank %}
+            <h3 class="lame-service-features__title">{{ block.settings.title }}</h3>
+          {% endif %}
+          {% if block.settings.text != blank %}
+            <p class="lame-service-features__text">{{ block.settings.text }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-service-features__wrap {
+    background: var(--lame-service-bg, #f0f0f0);
+    border-block: 1px solid rgb(0 0 0 / 0.06);
+  }
+
+  .lame-service-features__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .lame-service-features__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    text-align: left;
+  }
+
+  .lame-service-features__icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    color: #111;
+  }
+
+  .lame-service-features__icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .lame-service-features__title {
+    margin: 0 0 4px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #111;
+  }
+
+  .lame-service-features__text {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: rgb(0 0 0 / 0.55);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-service-features__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px 32px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-service-features__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .lame-service-features__item {
+      grid-template-columns: 1fr;
+      text-align: center;
+      justify-items: center;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Service features bar",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "bar_background",
+      "label": "Bar background",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "shipping", "label": "Shipping" },
+            { "value": "guarantee", "label": "Guarantee" },
+            { "value": "support", "label": "Support" },
+            { "value": "payment", "label": "Payment" }
+          ],
+          "default": "shipping"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Free worldwide shipping"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "On orders over $75"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Service features bar",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "shipping",
+            "title": "Free Worldwide Shipping",
+            "text": "On qualifying orders"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "guarantee",
+            "title": "Money Back Guarantee",
+            "text": "30-day returns"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "support",
+            "title": "24/7 Customer Support",
+            "text": "We are here to help"
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "payment",
+            "title": "Secure Online Payment",
+            "text": "Protected checkout"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

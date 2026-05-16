@@ -1,0 +1,74 @@
+{%- doc -%}
+  Compact product card for Lame homepage sections.
+
+  @param {product} product
+  @param {string} [card_class] - Extra BEM modifier class on root
+  @param {boolean} [show_badge] - Sale discount badge
+  @param {boolean} [show_vendor] - Product vendor as category line
+  @param {boolean} [show_rating] - Decorative star row
+  @param {string} [image_sizes] - sizes attribute for image
+{%- enddoc -%}
+
+{%- liquid
+  assign card_class = card_class | default: ''
+  assign show_badge = show_badge | default: true
+  assign show_vendor = show_vendor | default: true
+  assign show_rating = show_rating | default: true
+  assign image_sizes = image_sizes | default: '(min-width: 990px) 18vw, (min-width: 750px) 28vw, 44vw'
+
+  assign selected_variant = product.selected_or_first_available_variant
+  assign compare_at_price = selected_variant.compare_at_price
+  assign price = selected_variant.price
+  assign show_compare_price = false
+  assign discount_percent = 0
+
+  if compare_at_price > price and compare_at_price > 0
+    assign show_compare_price = true
+    assign discount_amount = compare_at_price | minus: price
+    assign discount_percent = discount_amount | times: 100.0 | divided_by: compare_at_price | round
+  endif
+-%}
+
+<article class="lame-product-card {{ card_class }}">
+  <a href="{{ product.url }}" class="lame-product-card__media-link" aria-label="{{ product.title | escape }}">
+    <div class="lame-product-card__media">
+      {% if product.featured_media %}
+        {{
+          product.featured_media
+          | image_url: width: 900
+          | image_tag:
+            class: 'lame-product-card__image',
+            loading: 'lazy',
+            widths: '200,300,400,600,900',
+            sizes: image_sizes
+        }}
+      {% else %}
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-product-card__image placeholder-svg' }}
+      {% endif %}
+
+      {% if show_badge and show_compare_price and discount_percent > 0 %}
+        <span class="lame-product-card__badge">-{{ discount_percent }}%</span>
+      {% endif %}
+    </div>
+  </a>
+
+  <div class="lame-product-card__body">
+    {% if show_vendor and product.vendor != blank %}
+      <p class="lame-product-card__vendor">{{ product.vendor }}</p>
+    {% endif %}
+
+    <h3 class="lame-product-card__title">
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    </h3>
+
+    {% if show_rating %}
+      <p class="lame-product-card__rating" aria-hidden="true">
+        <span class="lame-product-card__stars">★★★★★</span>
+      </p>
+    {% endif %}
+
+    <p class="lame-product-card__price">
+      {% render 'price', product_resource: product, show_sale_price_first: true %}
+    </p>
+  </div>
+</article>
