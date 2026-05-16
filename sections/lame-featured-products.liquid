@@ -3,39 +3,11 @@
   if featured_collection == blank
     assign featured_collection = collections.all
   endif
-  assign cols_mobile = section.settings.cards_per_row_mobile | default: 2
-  assign cols_tablet = section.settings.cards_per_row_tablet | default: 3
-  assign cols_desktop = section.settings.cards_per_row_desktop | default: 3
-  assign gap_m = 10
-  assign gap_t = 12
-  assign gap_d = 14
-  assign gap_total_m = cols_mobile | minus: 1 | times: gap_m
-  assign gap_total_t = cols_tablet | minus: 1 | times: gap_t
-  assign gap_total_d = cols_desktop | minus: 1 | times: gap_d
 %}
-
-{% style %}
-  #shopify-section-{{ section.id }} .lame-featured-products__grid {
-    grid-auto-columns: calc((100% - {{ gap_total_m }}px) / {{ cols_mobile }});
-    gap: {{ gap_m }}px;
-  }
-  @media screen and (min-width: 750px) {
-    #shopify-section-{{ section.id }} .lame-featured-products__grid {
-      grid-auto-columns: calc((100% - {{ gap_total_t }}px) / {{ cols_tablet }});
-      gap: {{ gap_t }}px;
-    }
-  }
-  @media screen and (min-width: 990px) {
-    #shopify-section-{{ section.id }} .lame-featured-products__grid {
-      grid-auto-columns: calc((100% - {{ gap_total_d }}px) / {{ cols_desktop }});
-      gap: {{ gap_d }}px;
-    }
-  }
-{% endstyle %}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
-  <div class="lame-featured-products spacing-style{% if section.settings.compact_card_layout %} lame-featured-products--compact{% endif %}" style="{% render 'spacing-padding', settings: section.settings %}">
+  <div class="lame-featured-products spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     <header class="lame-featured-products__header" data-lame-reveal>
       <h2 class="lame-featured-products__title">{{ section.settings.heading }}</h2>
       {% if section.settings.subheading != blank %}
@@ -57,14 +29,7 @@
             assign selected_variant = product.selected_or_first_available_variant
           %}
           <div class="lame-featured-products__card">
-            <a
-              href="{{ product.url }}"
-              class="lame-featured-products__card-link"
-              aria-label="{{ product.title | escape }}"
-            >
-              <span class="visually-hidden">{{ product.title }}</span>
-            </a>
-            <div class="lame-featured-products__media-block">
+            <a href="{{ product.url }}" class="lame-featured-products__media-link" aria-label="{{ product.title | escape }}">
               <div class="lame-featured-products__image-wrap">
                 {% if product.featured_media %}
                   {{
@@ -73,14 +38,14 @@
                     | image_tag:
                       class: 'lame-featured-products__image',
                       loading: 'lazy',
-                      widths: '180,240,360,480,720,900',
-                      sizes: '(min-width: 990px) calc((100vw - 6rem) / {{ cols_desktop }}), (min-width: 750px) calc((100vw - 4rem) / {{ cols_tablet }}), calc((100vw - 2rem) / {{ cols_mobile }})'
+                      widths: '240,360,480,720,900',
+                      sizes: '(min-width: 1200px) 14vw, (min-width: 990px) 17vw, (min-width: 750px) 23vw, 36vw'
                   }}
                 {% else %}
                   {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-featured-products__image placeholder-svg' }}
                 {% endif %}
               </div>
-            </div>
+            </a>
             {% if selected_variant %}
               <form method="post" action="{{ routes.cart_add_url }}" class="lame-featured-products__quick-add-form">
                 <input type="hidden" name="id" value="{{ selected_variant.id }}">
@@ -105,7 +70,7 @@
 
             <div class="lame-featured-products__content">
               <h3 class="lame-featured-products__product-title">
-                {{ product.title }}
+                <a href="{{ product.url }}">{{ product.title }}</a>
               </h3>
               <p class="lame-featured-products__price">
                 {% render 'price', product_resource: product, show_sale_price_first: true %}
@@ -296,6 +261,8 @@
     padding: 0;
     display: grid;
     grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 12px) / 2);
+    gap: 12px;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
@@ -360,7 +327,6 @@
     padding-top: 0.42rem;
     text-align: center;
     min-height: 58px;
-    pointer-events: none;
   }
 
   .lame-featured-products__product-title {
@@ -373,16 +339,13 @@
     color: rgb(var(--color-foreground-rgb));
   }
 
-  .lame-featured-products__card-link {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
+  .lame-featured-products__product-title a {
+    color: inherit;
+    text-decoration: none;
   }
 
-  .lame-featured-products__media-block {
+  .lame-featured-products__media-link {
     display: block;
-    position: relative;
-    z-index: 1;
   }
 
   .lame-featured-products__quick-add-form {
@@ -390,7 +353,6 @@
     right: 0.78rem;
     top: 0.78rem;
     z-index: 3;
-    pointer-events: auto;
   }
 
   .lame-featured-products__quick-add-status {
@@ -502,46 +464,21 @@
     right: 0;
   }
 
-  .lame-featured-products--compact .lame-featured-products__card {
-    padding: 0.32rem;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__image-wrap {
-    aspect-ratio: 1 / 1;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__content {
-    padding-top: 0.32rem;
-    min-height: 46px;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__product-title {
-    font-size: 0.64rem;
-    margin: 0 0 0.12rem;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__price {
-    font-size: 0.6rem;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__quick-add-form {
-    right: 0.55rem;
-    top: 0.55rem;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__quick-add {
-    width: 1.65rem;
-    height: 1.65rem;
-  }
-
-  .lame-featured-products--compact .lame-featured-products__quick-add svg {
-    width: 0.88rem;
-    height: 0.88rem;
-  }
-
   @media screen and (min-width: 750px) {
     .lame-featured-products__carousel-wrap {
       padding-inline: 2rem;
+    }
+
+    .lame-featured-products__grid {
+      grid-auto-columns: calc((100% - 28px) / 3);
+      gap: 14px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-featured-products__grid {
+      grid-auto-columns: calc((100% - 32px) / 3);
+      gap: 16px;
     }
   }
 
@@ -616,44 +553,6 @@
       "max": 9,
       "step": 1,
       "default": 6
-    },
-    {
-      "type": "header",
-      "content": "Carousel layout"
-    },
-    {
-      "type": "range",
-      "id": "cards_per_row_mobile",
-      "label": "Cards per row (mobile)",
-      "min": 1,
-      "max": 4,
-      "step": 1,
-      "default": 2
-    },
-    {
-      "type": "range",
-      "id": "cards_per_row_tablet",
-      "label": "Cards per row (tablet)",
-      "min": 2,
-      "max": 5,
-      "step": 1,
-      "default": 3
-    },
-    {
-      "type": "range",
-      "id": "cards_per_row_desktop",
-      "label": "Cards per row (desktop)",
-      "min": 2,
-      "max": 5,
-      "step": 1,
-      "default": 3
-    },
-    {
-      "type": "checkbox",
-      "id": "compact_card_layout",
-      "label": "Compact cards",
-      "info": "Smaller padding, type, and quick-add button for a denser grid.",
-      "default": false
     },
     {
       "type": "select",

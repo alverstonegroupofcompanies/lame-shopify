@@ -1,0 +1,319 @@
+{% liquid
+  assign banner_image = section.settings.image
+
+  if banner_image == blank and collection.metafields.custom.collection_banner != blank
+    assign banner_image = collection.metafields.custom.collection_banner.value
+  endif
+
+  assign banner_alt = section.settings.image_alt
+  if banner_alt == blank and banner_image != blank
+    assign banner_alt = banner_image.alt
+  endif
+  if banner_alt == blank and collection != blank
+    assign banner_alt = collection.title
+  endif
+
+  assign show_heading = false
+  if section.settings.show_heading and collection != blank
+    assign show_heading = true
+  endif
+
+  assign banner_image_style = 'object-position: ' | append: section.settings.image_position | append: ';'
+%}
+
+{% if banner_image != blank or request.design_mode %}
+  <div class="lame-collection-banner section-wrapper" {{ section.shopify_attributes }}>
+    <div class="lame-collection-banner__frame section section--{{ section.settings.section_width }}">
+      <div
+        class="lame-collection-banner__media spacing-style"
+        style="{% render 'spacing-style', settings: section.settings %}"
+      >
+        {% if banner_image != blank %}
+          {{
+            banner_image
+            | image_url: width: 2400
+            | image_tag:
+              class: 'lame-collection-banner__image',
+              loading: 'eager',
+              fetchpriority: 'high',
+              widths: '600, 900, 1200, 1800, 2400',
+              sizes: '(min-width: 1200px) 1200px, 100vw',
+              alt: banner_alt,
+              style: banner_image_style
+          }}
+        {% elsif request.design_mode %}
+          <div class="lame-collection-banner__placeholder" role="presentation">
+            {{ 'collection-apparel-2' | placeholder_svg_tag: 'lame-collection-banner__placeholder-svg' }}
+            <p class="lame-collection-banner__placeholder-text">
+              Upload a banner for this collection (recommended 1200 × 250 px)
+            </p>
+          </div>
+        {% endif %}
+
+        {% if section.settings.show_overlay %}
+          <div
+            class="lame-collection-banner__overlay"
+            style="--lame-collection-banner-overlay: {{ section.settings.overlay_color }}; --lame-collection-banner-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"
+          ></div>
+        {% endif %}
+
+        {% if show_heading %}
+          <div class="lame-collection-banner__content lame-collection-banner__content--{{ section.settings.text_alignment }}">
+            <h1
+              class="lame-collection-banner__heading"
+              style="color: {{ section.settings.heading_color }};"
+            >
+              {{ collection.title }}
+            </h1>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .lame-collection-banner {
+    width: 100%;
+  }
+
+  .lame-collection-banner__frame {
+    padding-inline: var(--page-margin);
+  }
+
+  .lame-collection-banner__media {
+    --lame-collection-banner-ratio: 20.833%; /* 250 / 1200 */
+
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    overflow: hidden;
+    border-radius: var(--lame-collection-banner-radius, 0);
+  }
+
+  .lame-collection-banner__media::before {
+    content: '';
+    display: block;
+    padding-top: var(--lame-collection-banner-ratio);
+  }
+
+  .lame-collection-banner__image,
+  .lame-collection-banner__placeholder,
+  .lame-collection-banner__overlay,
+  .lame-collection-banner__content {
+    position: absolute;
+    inset: 0;
+  }
+
+  .lame-collection-banner__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lame-collection-banner__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+  }
+
+  .lame-collection-banner__placeholder-svg {
+    width: min(60%, 280px);
+    height: auto;
+    opacity: 0.35;
+  }
+
+  .lame-collection-banner__placeholder-text {
+    margin: 0;
+    padding-inline: 16px;
+    font-size: 0.875rem;
+    text-align: center;
+    opacity: 0.75;
+  }
+
+  .lame-collection-banner__overlay {
+    background: var(--lame-collection-banner-overlay, #000);
+    opacity: var(--lame-collection-banner-overlay-opacity, 0.25);
+    pointer-events: none;
+  }
+
+  .lame-collection-banner__content {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    pointer-events: none;
+  }
+
+  .lame-collection-banner__content--left {
+    justify-content: flex-start;
+    text-align: start;
+  }
+
+  .lame-collection-banner__content--center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .lame-collection-banner__content--right {
+    justify-content: flex-end;
+    text-align: end;
+  }
+
+  .lame-collection-banner__heading {
+    margin: 0;
+    max-width: 28ch;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    line-height: 1.15;
+    text-shadow: 0 1px 12px rgb(0 0 0 / 35%);
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-collection-banner__content {
+      padding: 12px 16px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection page banner",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Collection-only banner (not the homepage). Recommended size: 1200 × 250 px. Open each collection in the theme editor preview, then set its image here—each collection keeps its own banner."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "info": "Leave blank to use the collection title."
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image focal point",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "top center", "label": "Top" },
+        { "value": "bottom center", "label": "Bottom" },
+        { "value": "left center", "label": "Left" },
+        { "value": "right center", "label": "Right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "header",
+      "content": "Optional heading"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show collection title on banner",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center",
+      "visible_if": "{{ section.settings.show_heading }}"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#ffffff",
+      "visible_if": "{{ section.settings.show_heading }}"
+    },
+    {
+      "type": "header",
+      "content": "Overlay"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show color overlay",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000",
+      "visible_if": "{{ section.settings.show_overlay }}"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 25,
+      "visible_if": "{{ section.settings.show_overlay }}"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection page banner",
+      "category": "Banners"
+    }
+  ]
+}
+{% endschema %}
