@@ -6,6 +6,8 @@
   assign max_discount = discount_target | plus: discount_tolerance
   assign products_limit = section.settings.products_to_show
   assign products_shown = 0
+  assign filter_mode = section.settings.filter_mode | default: 'all'
+  assign product_source = section.settings.product_source | default: 'collection'
 %}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -51,7 +53,25 @@
     </header>
 
     <ul class="lame-flash-deal__grid" role="list">
-      {% if deal_collection != blank %}
+      {% if product_source == 'manual' %}
+        {% for block in section.blocks %}
+          {% if products_shown >= products_limit %}
+            {% break %}
+          {% endif %}
+          {% if block.type != 'product' or block.settings.product == blank %}
+            {% continue %}
+          {% endif %}
+
+          {% assign product = block.settings.product %}
+          {% render 'lame-flash-deal-product',
+            product: product,
+            badge_label: section.settings.badge_label,
+            reveal_delay: products_shown | modulo: 2,
+            block_attributes: block.shopify_attributes
+          %}
+          {% assign products_shown = products_shown | plus: 1 %}
+        {% endfor %}
+      {% elsif deal_collection != blank %}
         {% for product in deal_collection.products %}
           {% if products_shown >= products_limit %}
             {% break %}
@@ -61,12 +81,19 @@
             assign selected_variant = product.selected_or_first_available_variant
             assign compare_at = selected_variant.compare_at_price
             assign price = selected_variant.price
-            assign qualifies = false
+            assign qualifies = true
 
-            if compare_at > price
-              assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
-              if discount_percent >= min_discount and discount_percent <= max_discount
-                assign qualifies = true
+            if filter_mode == 'on_sale' or filter_mode == 'compare_at_range'
+              assign qualifies = false
+              if compare_at > price
+                if filter_mode == 'on_sale'
+                  assign qualifies = true
+                else
+                  assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
+                  if discount_percent >= min_discount and discount_percent <= max_discount
+                    assign qualifies = true
+                  endif
+                endif
               endif
             endif
           %}
@@ -75,16 +102,11 @@
             {% continue %}
           {% endunless %}
 
-          <li class="lame-flash-deal__item" data-lame-reveal data-lame-delay="{{ products_shown | modulo: 2 }}">
-            {% render 'lame-home-product-card',
-              product: product,
-              card_style: 'flash',
-              badge_text: section.settings.badge_label,
-              show_sale_badge: false,
-              show_type: false,
-              show_rating: false
-            %}
-          </li>
+          {% render 'lame-flash-deal-product',
+            product: product,
+            badge_label: section.settings.badge_label,
+            reveal_delay: products_shown | modulo: 2
+          %}
           {% assign products_shown = products_shown | plus: 1 %}
         {% endfor %}
       {% endif %}
@@ -116,10 +138,10 @@
 
   .lame-flash-deal__title {
     margin: 0 0 0.85rem;
-    font-size: clamp(1rem, 2vw, 1.25rem);
-    font-weight: 600;
+    font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+    font-weight: 700;
     letter-spacing: 0.02em;
-    color: #111;
+    color: rgb(var(--brand-ink));
     text-transform: capitalize;
   }
 
@@ -132,10 +154,10 @@
 
   .lame-flash-deal__countdown-label {
     margin: 0;
-    font-size: 0.7rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(0 0 0 / 0.5);
+    color: rgb(0 0 0 / 0.78);
   }
 
   .lame-flash-deal__countdown-units {
@@ -162,16 +184,16 @@
   .lame-flash-deal__unit small {
     display: block;
     margin-top: 0.2rem;
-    font-size: 0.6rem;
+    font-size: 0.6875rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgb(0 0 0 / 0.45);
+    color: rgb(0 0 0 / 0.72);
   }
 
   .lame-flash-deal__sep {
     font-size: 1.2rem;
     font-weight: 700;
-    color: rgb(0 0 0 / 0.35);
+    color: rgb(0 0 0 / 0.55);
     line-height: 1;
     padding-bottom: 0.85rem;
   }
@@ -202,9 +224,9 @@
 
   .lame-flash-deal__empty p {
     margin: 0;
-    font-size: 0.8rem;
-    color: rgb(0 0 0 / 0.5);
-    line-height: 1.4;
+    font-size: 0.875rem;
+    color: rgb(0 0 0 / 0.78);
+    line-height: 1.45;
   }
 
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media {
@@ -218,7 +240,7 @@
     left: 0.4rem;
     right: auto;
     background: #c41e3a;
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     padding: 0.28rem 0.45rem;
     border-radius: 2px;
     text-transform: uppercase;
@@ -304,10 +326,32 @@
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Flash Deal" },
     {
+      "type": "select",
+      "id": "product_source",
+      "label": "Products to show",
+      "options": [
+        { "value": "collection", "label": "From a collection" },
+        { "value": "manual", "label": "Hand-picked products (blocks below)" }
+      ],
+      "default": "collection"
+    },
+    {
       "type": "collection",
       "id": "collection",
-      "label": "Flash deal collection",
-      "info": "Only products with compare-at pricing (~10% off) in this collection are shown."
+      "label": "Collection",
+      "info": "Create a collection (e.g. “Sale” or “Discount”) and add your deal products. Shopify Admin → Discounts does not feed this section automatically."
+    },
+    {
+      "type": "select",
+      "id": "filter_mode",
+      "label": "Collection filter",
+      "options": [
+        { "value": "all", "label": "All products in collection" },
+        { "value": "on_sale", "label": "Only products with compare-at price (any % off)" },
+        { "value": "compare_at_range", "label": "Only products near target discount %" }
+      ],
+      "default": "all",
+      "info": "Use “All products” when products use Shopify automatic discounts (no compare-at price)."
     },
     {
       "type": "range",
@@ -327,12 +371,12 @@
     {
       "type": "range",
       "id": "discount_percent",
-      "label": "Required discount (%)",
+      "label": "Target discount (%)",
       "min": 5,
       "max": 30,
       "step": 1,
       "default": 10,
-      "info": "Products must be on sale near this percentage (see tolerance)."
+      "info": "Used only when collection filter is “near target discount %”."
     },
     {
       "type": "range",
@@ -341,13 +385,14 @@
       "min": 0,
       "max": 5,
       "step": 1,
-      "default": 2
+      "default": 2,
+      "info": "Used only when collection filter is “near target discount %”."
     },
     {
       "type": "text",
       "id": "empty_text",
       "label": "Empty state text",
-      "default": "Choose a collection and add products with compare-at price set to ~10% off."
+      "default": "Select a collection with products, or add product blocks. Theme editor → Flash deal → Collection."
     },
     { "type": "header", "content": "24-hour countdown" },
     { "type": "checkbox", "id": "show_countdown", "label": "Show countdown", "default": true },
@@ -413,6 +458,28 @@
       "default": 32
     }
   ],
-  "presets": [{ "name": "Flash deal", "category": "Products" }]
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Flash deal",
+      "category": "Products",
+      "settings": {
+        "product_source": "collection",
+        "filter_mode": "all"
+      }
+    }
+  ]
 }
 {% endschema %}

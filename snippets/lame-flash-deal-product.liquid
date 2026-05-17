@@ -1,0 +1,33 @@
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign compare_at = selected_variant.compare_at_price
+  assign price = selected_variant.price
+  assign on_sale = false
+  assign card_badge = ''
+
+  if compare_at > price
+    assign on_sale = true
+    assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
+    assign card_badge = discount_percent | append: '% OFF'
+  elsif badge_label != blank
+    assign card_badge = badge_label
+  endif
+-%}
+
+<li
+  class="lame-flash-deal__item"
+  data-lame-reveal
+  {% if reveal_delay != blank %}
+    data-lame-delay="{{ reveal_delay }}"
+  {% endif %}
+  {{ block_attributes }}
+>
+  {% render 'lame-home-product-card',
+    product: product,
+    card_style: 'flash',
+    badge_text: card_badge,
+    show_sale_badge: false,
+    show_type: false,
+    show_rating: false
+  %}
+</li>
