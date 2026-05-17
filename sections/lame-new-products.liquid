@@ -33,7 +33,9 @@
             card_style: 'grid',
             show_sale_badge: section.settings.show_sale_badge,
             show_type: section.settings.show_vendor,
-            show_rating: section.settings.show_rating
+            show_rating: section.settings.show_rating,
+            show_add_to_cart: section.settings.show_add_to_cart,
+            add_to_cart_label: section.settings.add_to_cart_label
           %}
         </li>
       {% else %}
@@ -100,6 +102,8 @@
   }
 
   .lame-new-products .lame-home-product-card--grid {
+    display: flex;
+    flex-direction: column;
     border: 1px solid rgb(0 0 0 / 0.1);
     background: #fff;
     height: 100%;
@@ -111,8 +115,67 @@
   }
 
   .lame-new-products .lame-home-product-card--grid .lame-home-product-card__body {
-    padding: 0.65rem 0.55rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.65rem 0.5rem 0.7rem;
     text-align: center;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-form {
+    margin-top: auto;
+    padding-top: 0.45rem;
+    position: relative;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc {
+    width: 100%;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    color: rgb(var(--brand-gold-readable));
+    background: #fff;
+    border: 1px solid rgb(var(--brand-gold-readable) / 0.55);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc:hover:not(:disabled) {
+    background: rgb(var(--brand-gold-readable));
+    color: #fff;
+    border-color: rgb(var(--brand-gold-readable));
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.2rem);
+    font-size: 0.625rem;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status.is-visible {
+    opacity: 1;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status.is-success {
+    color: #0a9f4f;
+  }
+
+  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status.is-error {
+    color: #b42318;
   }
 
   .lame-new-products .lame-home-product-card--grid .lame-home-product-card__type {
@@ -181,6 +244,68 @@
     } else {
       nodes.forEach((node) => node.classList.add('is-visible'));
     }
+
+    section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        const status = form.querySelector('.lame-home-product-card__atc-status');
+        if (button?.disabled) return;
+
+        const formData = new FormData(form);
+        const cartItemsComponents = document.querySelectorAll('cart-items-component');
+        const sectionIds = [];
+        cartItemsComponents.forEach((item) => {
+          if (item instanceof HTMLElement && item.dataset.sectionId) {
+            sectionIds.push(item.dataset.sectionId);
+          }
+        });
+        if (sectionIds.length) {
+          formData.append('sections', sectionIds.join(','));
+          formData.append('sections_url', window.location.pathname);
+        }
+
+        const showStatus = (text, className) => {
+          if (!(status instanceof HTMLElement)) return;
+          status.textContent = text;
+          status.classList.remove('is-success', 'is-error', 'is-visible');
+          status.classList.add(className, 'is-visible');
+          window.setTimeout(() => status.classList.remove('is-visible'), 1800);
+        };
+
+        try {
+          if (button) button.disabled = true;
+          const response = await fetch('{{ routes.cart_add_url }}.js', {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formData,
+          });
+          const data = await response.json();
+          if (!response.ok || data?.status) {
+            throw new Error(data?.message || 'Unable to add to cart');
+          }
+
+          const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
+          const cartData = await cartResponse.json();
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: {
+                resource: cartData,
+                sourceId: '{{ section.id }}',
+                data: { source: 'lame-new-products', itemCount: 1, sections: data?.sections || {} },
+              },
+            })
+          );
+          showStatus('Added', 'is-success');
+        } catch (error) {
+          console.error(error);
+          showStatus('Could not add', 'is-error');
+        } finally {
+          if (button && !button.hasAttribute('data-sold-out')) button.disabled = false;
+        }
+      });
+    });
   })();
 </script>
 
@@ -206,6 +331,13 @@
     { "type": "checkbox", "id": "show_sale_badge", "label": "Show sale badge", "default": true },
     { "type": "checkbox", "id": "show_vendor", "label": "Show product type", "default": true },
     { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
+    { "type": "checkbox", "id": "show_add_to_cart", "label": "Show add to cart button", "default": true },
+    {
+      "type": "text",
+      "id": "add_to_cart_label",
+      "label": "Add to cart button label",
+      "default": "Add to cart"
+    },
     { "type": "text", "id": "placeholder_title", "label": "Placeholder title", "default": "Product title" },
     { "type": "text", "id": "placeholder_price", "label": "Placeholder price", "default": "$0.00" },
     {

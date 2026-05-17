@@ -33,12 +33,12 @@
               <a href="{{ block.settings.link }}" class="lame-brand-logos__logo-link">
                 {{
                   logo_image
-                  | image_url: width: 480
+                  | image_url: width: 640
                   | image_tag:
                     class: 'lame-brand-logos__logo-image',
                     loading: 'lazy',
-                    widths: '120,160,200,280,360,480',
-                    sizes: '(min-width: 750px) 20vw, 28vw',
+                    widths: '160,240,320,400,520,640',
+                    sizes: '(min-width: 750px) 280px, 30vw',
                     alt: logo_alt
                 }}
               </a>
@@ -46,12 +46,12 @@
               <span class="lame-brand-logos__logo-wrap">
                 {{
                   logo_image
-                  | image_url: width: 480
+                  | image_url: width: 640
                   | image_tag:
                     class: 'lame-brand-logos__logo-image',
                     loading: 'lazy',
-                    widths: '120,160,200,280,360,480',
-                    sizes: '(min-width: 750px) 20vw, 28vw',
+                    widths: '160,240,320,400,520,640',
+                    sizes: '(min-width: 750px) 280px, 30vw',
                     alt: logo_alt
                 }}
               </span>
@@ -73,7 +73,7 @@
 
   .lame-brand-logos__header {
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: clamp(1rem, 2.5vw, 1.35rem);
   }
 
   .lame-brand-logos__title {
@@ -102,20 +102,21 @@
     align-items: center;
     gap: var(--brand-logo-gap);
     width: 100%;
-    max-width: min(640px, 100%);
+    max-width: min(960px, 100%);
     margin-inline: auto;
-    padding-inline: clamp(4px, 2vw, 12px);
+    padding-inline: clamp(8px, 3vw, 24px);
   }
 
   .lame-brand-logos__item {
     width: 100%;
     max-width: 100%;
+    min-height: var(--brand-logo-height);
     height: var(--brand-logo-height);
     max-height: var(--brand-logo-height);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 4px;
+    padding: clamp(6px, 1.2vw, 12px) clamp(8px, 2vw, 16px);
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -162,15 +163,22 @@
 
   @media screen and (max-width: 749px) {
     .lame-brand-logos__row {
-      gap: clamp(6px, 2vw, var(--brand-logo-gap));
+      gap: clamp(10px, 3vw, var(--brand-logo-gap));
+      max-width: 100%;
     }
 
     .lame-brand-logos {
-      --brand-logo-height: min(var(--brand-logo-height), clamp(32px, 9vw, 44px));
+      --brand-logo-height: max(var(--brand-logo-height), clamp(52px, 14vw, 68px));
     }
 
     .lame-brand-logos__item {
-      padding: 2px;
+      padding: 6px 8px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-brand-logos__row {
+      max-width: min(1040px, 100%);
     }
   }
 {% endstylesheet %}
@@ -201,21 +209,21 @@
       "type": "range",
       "id": "logo_height",
       "label": "Logo height",
-      "min": 24,
-      "max": 120,
-      "step": 2,
+      "min": 40,
+      "max": 160,
+      "step": 4,
       "unit": "px",
-      "default": 44
+      "default": 76
     },
     {
       "type": "range",
       "id": "logo_gap",
       "label": "Gap between logos",
-      "min": 8,
-      "max": 72,
-      "step": 2,
+      "min": 12,
+      "max": 96,
+      "step": 4,
       "unit": "px",
-      "default": 16
+      "default": 32
     },
     {
       "type": "select",

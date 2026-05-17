@@ -3,6 +3,8 @@
   assign show_sale_badge = show_sale_badge | default: true
   assign show_type = show_type | default: true
   assign show_rating = show_rating | default: true
+  assign show_add_to_cart = show_add_to_cart | default: false
+  assign add_to_cart_label = add_to_cart_label | default: 'Add to cart'
   assign sold_out_label = sold_out_label | default: 'Sold out'
 
   assign selected_variant = product.selected_or_first_available_variant
@@ -82,8 +84,33 @@
       {% render 'price', product_resource: product, show_sale_price_first: true %}
     </p>
 
-    {% unless product.available %}
+    {% if show_add_to_cart and selected_variant %}
+      <form
+        method="post"
+        action="{{ routes.cart_add_url }}"
+        class="lame-home-product-card__atc-form"
+        data-lame-home-atc
+      >
+        <input type="hidden" name="id" value="{{ selected_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button
+          type="submit"
+          class="lame-home-product-card__atc"
+          {% unless product.available %}
+            disabled
+            data-sold-out
+          {% endunless %}
+        >
+          {% if product.available %}
+            {{ add_to_cart_label }}
+          {% else %}
+            {{ sold_out_label }}
+          {% endif %}
+        </button>
+        <span class="lame-home-product-card__atc-status" aria-live="polite"></span>
+      </form>
+    {% elsif product.available == false %}
       <p class="lame-home-product-card__sold-out">{{ sold_out_label }}</p>
-    {% endunless %}
+    {% endif %}
   </div>
 </article>
