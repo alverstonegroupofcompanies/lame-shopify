@@ -13,6 +13,13 @@
     assign on_sale = true
     assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
   endif
+
+  assign show_badge = false
+  if badge_text != blank
+    assign show_badge = true
+  elsif show_sale_badge and on_sale
+    assign show_badge = true
+  endif
 -%}
 
 <article class="lame-home-product-card lame-home-product-card--{{ card_style }}">
@@ -33,8 +40,14 @@
         {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
       {% endif %}
 
-      {% if show_sale_badge and on_sale %}
-        <span class="lame-home-product-card__badge">-{{ discount_percent }}%</span>
+      {% if show_badge %}
+        <span class="lame-home-product-card__badge">
+          {%- if badge_text != blank -%}
+            {{ badge_text }}
+          {%- else -%}
+            -{{ discount_percent }}%
+          {%- endif -%}
+        </span>
       {% endif %}
     </div>
   </a>

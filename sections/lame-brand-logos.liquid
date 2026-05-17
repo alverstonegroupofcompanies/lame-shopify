@@ -38,21 +38,23 @@
                     class: 'lame-brand-logos__logo-image',
                     loading: 'lazy',
                     widths: '120,160,200,280,360,480',
-                    sizes: '(min-width: 750px) 28vw, 30vw',
+                    sizes: '(min-width: 750px) 20vw, 28vw',
                     alt: logo_alt
                 }}
               </a>
             {% else %}
-              {{
-                logo_image
-                | image_url: width: 480
-                | image_tag:
-                  class: 'lame-brand-logos__logo-image',
-                  loading: 'lazy',
-                  widths: '120,160,200,280,360,480',
-                  sizes: '(min-width: 750px) 28vw, 30vw',
-                  alt: logo_alt
-              }}
+              <span class="lame-brand-logos__logo-wrap">
+                {{
+                  logo_image
+                  | image_url: width: 480
+                  | image_tag:
+                    class: 'lame-brand-logos__logo-image',
+                    loading: 'lazy',
+                    widths: '120,160,200,280,360,480',
+                    sizes: '(min-width: 750px) 20vw, 28vw',
+                    alt: logo_alt
+                }}
+              </span>
             {% endif %}
           {% elsif request.design_mode %}
             <div class="lame-brand-logos__placeholder">Add Logo</div>
@@ -64,70 +66,79 @@
 </section>
 
 {% stylesheet %}
+  .lame-brand-logos {
+    width: 100%;
+    overflow: hidden;
+  }
+
   .lame-brand-logos__header {
     text-align: center;
-    margin-bottom: var(--padding-md);
+    margin-bottom: 0.5rem;
   }
 
   .lame-brand-logos__title {
     margin: 0;
     color: rgb(var(--brand-gold));
     font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-size: clamp(0.82rem, 1.6vw, 1.05rem);
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    line-height: 1.15;
+    line-height: 1.2;
   }
 
   .lame-brand-logos__subtitle {
-    margin: 0.35rem 0 0;
-    font-size: 0.78rem;
+    margin: 0.25rem 0 0;
+    font-size: 0.72rem;
+    line-height: 1.35;
     color: rgb(var(--color-foreground-rgb) / 0.65);
-    max-width: 60ch;
+    max-width: 42ch;
     margin-inline: auto;
   }
 
   .lame-brand-logos__row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    justify-items: stretch;
+    justify-items: center;
     align-items: center;
     gap: var(--brand-logo-gap);
-    row-gap: clamp(12px, 2.5vw, var(--brand-logo-gap));
     width: 100%;
-    max-width: min(920px, 100%);
+    max-width: min(640px, 100%);
     margin-inline: auto;
-    padding-inline: clamp(0px, 2vw, 8px);
+    padding-inline: clamp(4px, 2vw, 12px);
   }
 
   .lame-brand-logos__item {
     width: 100%;
-    max-width: none;
-    min-height: var(--brand-logo-height);
+    max-width: 100%;
     height: var(--brand-logo-height);
-    display: grid;
-    place-items: center;
-    padding: 4px 6px;
-    border: none;
-    border-radius: 0;
-    background: transparent;
+    max-height: var(--brand-logo-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+    overflow: hidden;
     box-sizing: border-box;
   }
 
-  .lame-brand-logos__logo-link {
-    display: inline-flex;
+  .lame-brand-logos__logo-link,
+  .lame-brand-logos__logo-wrap {
+    display: flex;
     width: 100%;
     height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     align-items: center;
     justify-content: center;
   }
 
   .lame-brand-logos__logo-image {
+    display: block;
     max-width: 100%;
     max-height: 100%;
     width: auto;
     height: auto;
     object-fit: contain;
+    object-position: center;
     filter: saturate(0.95);
     opacity: 0.95;
     transition: opacity 180ms ease;
@@ -151,19 +162,24 @@
 
   @media screen and (max-width: 749px) {
     .lame-brand-logos__row {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(8px, 2.5vw, 16px);
+      gap: clamp(6px, 2vw, var(--brand-logo-gap));
     }
 
     .lame-brand-logos {
-      --brand-logo-height: clamp(36px, 11vw, calc(var(--brand-logo-height) * 0.55));
+      --brand-logo-height: min(var(--brand-logo-height), clamp(32px, 9vw, 44px));
     }
 
     .lame-brand-logos__item {
-      padding: 4px 2px;
+      padding: 2px;
     }
   }
 {% endstylesheet %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    flex-grow: 0;
+  }
+{% endstyle %}
 
 {% schema %}
 {
@@ -189,7 +205,7 @@
       "max": 120,
       "step": 2,
       "unit": "px",
-      "default": 52
+      "default": 44
     },
     {
       "type": "range",
@@ -199,7 +215,7 @@
       "max": 72,
       "step": 2,
       "unit": "px",
-      "default": 28
+      "default": 16
     },
     {
       "type": "select",
@@ -225,7 +241,7 @@
       "max": 96,
       "step": 4,
       "unit": "px",
-      "default": 24
+      "default": 16
     },
     {
       "type": "range",
@@ -235,7 +251,7 @@
       "max": 96,
       "step": 4,
       "unit": "px",
-      "default": 24
+      "default": 20
     }
   ],
   "blocks": [
