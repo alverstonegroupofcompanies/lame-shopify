@@ -26,26 +26,21 @@
     <ul class="lame-new-products__grid" role="list">
       {% for product in new_collection.products limit: section.settings.products_to_show %}
         <li class="lame-new-products__item" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 5 }}">
-          {% render 'lame-home-product-card',
-            product: product,
-            card_style: 'grid',
-            show_sale_badge: section.settings.show_sale_badge,
-            show_type: section.settings.show_vendor,
-            show_rating: section.settings.show_rating,
-            show_add_to_cart: section.settings.show_add_to_cart,
-            add_to_cart_label: section.settings.add_to_cart_label
-          %}
+          {% render 'lame-home-product-card', product: product, card_style: 'arrival' %}
         </li>
       {% else %}
         {% for i in (1..section.settings.products_to_show) %}
           <li class="lame-new-products__item" data-lame-reveal>
-            <article class="lame-home-product-card lame-home-product-card--grid">
-              <div class="lame-home-product-card__media">
-                {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
-              </div>
+            <article class="lame-home-product-card lame-home-product-card--arrival">
+              <a href="#" class="lame-home-product-card__media-link">
+                <div class="lame-home-product-card__media">
+                  {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
+                </div>
+              </a>
               <div class="lame-home-product-card__body">
-                <h3 class="lame-home-product-card__title">{{ section.settings.placeholder_title }}</h3>
-                <p class="lame-home-product-card__price">{{ section.settings.placeholder_price }}</p>
+                <h3 class="lame-home-product-card__title">
+                  <a href="#">{{ section.settings.placeholder_title }}</a>
+                </h3>
               </div>
             </article>
           </li>
@@ -83,117 +78,59 @@
     min-width: 0;
   }
 
-  .lame-new-products .lame-home-product-card--grid {
+  .lame-new-products .lame-home-product-card--arrival {
     display: flex;
     flex-direction: column;
-    border: 1px solid rgb(0 0 0 / 0.1);
-    background: #fff;
     height: 100%;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__media {
-    aspect-ratio: 1 / 1;
-    background: #f7f7f7;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: 0.65rem 0.5rem 0.7rem;
-    text-align: center;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-form {
-    margin-top: auto;
-    padding-top: 0.45rem;
-    position: relative;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc {
-    width: 100%;
-    padding: 0.45rem 0.5rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
-    color: rgb(var(--brand-gold-readable));
+    border: 1px solid rgb(0 0 0 / 0.08);
+    border-radius: 8px;
     background: #fff;
-    border: 1px solid rgb(var(--brand-gold-readable) / 0.55);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.04);
   }
 
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc:hover:not(:disabled) {
-    background: rgb(var(--brand-gold-readable));
-    color: #fff;
-    border-color: rgb(var(--brand-gold-readable));
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media {
+    aspect-ratio: 1 / 1;
+    background: #fff;
   }
 
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
   }
 
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(100% + 0.2rem);
-    font-size: 0.625rem;
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__body {
+    padding: 0.65rem 0.5rem 0.75rem;
     text-align: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
+    background: #fff;
   }
 
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status.is-visible {
-    opacity: 1;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status.is-success {
-    color: #0a9f4f;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__atc-status.is-error {
-    color: #b42318;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__type {
-    font-size: 0.75rem;
-    color: rgb(0 0 0 / 0.72);
-    margin: 0 0 0.2rem;
-    text-transform: capitalize;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__title {
-    font-size: 0.9375rem;
-    margin: 0 0 0.25rem;
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title {
+    margin: 0;
+    font-size: 0.875rem;
     line-height: 1.35;
     font-weight: 600;
     color: rgb(var(--brand-ink));
   }
 
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__rating {
-    justify-content: center;
-    margin-bottom: 0.2rem;
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title a {
+    color: inherit;
+    text-decoration: none;
   }
 
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__star {
-    color: #d49200;
-    font-size: 0.8125rem;
-  }
-
-  .lame-new-products .lame-home-product-card--grid .lame-home-product-card__price {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: rgb(var(--brand-ink));
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title a:hover {
+    color: rgb(var(--brand-gold-readable));
   }
 
   @media screen and (min-width: 750px) {
     .lame-new-products__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title {
+      font-size: 0.9375rem;
     }
   }
 
@@ -226,79 +163,17 @@
     } else {
       nodes.forEach((node) => node.classList.add('is-visible'));
     }
-
-    section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const button = form.querySelector('button[type="submit"]');
-        const status = form.querySelector('.lame-home-product-card__atc-status');
-        if (button?.disabled) return;
-
-        const formData = new FormData(form);
-        const cartItemsComponents = document.querySelectorAll('cart-items-component');
-        const sectionIds = [];
-        cartItemsComponents.forEach((item) => {
-          if (item instanceof HTMLElement && item.dataset.sectionId) {
-            sectionIds.push(item.dataset.sectionId);
-          }
-        });
-        if (sectionIds.length) {
-          formData.append('sections', sectionIds.join(','));
-          formData.append('sections_url', window.location.pathname);
-        }
-
-        const showStatus = (text, className) => {
-          if (!(status instanceof HTMLElement)) return;
-          status.textContent = text;
-          status.classList.remove('is-success', 'is-error', 'is-visible');
-          status.classList.add(className, 'is-visible');
-          window.setTimeout(() => status.classList.remove('is-visible'), 1800);
-        };
-
-        try {
-          if (button) button.disabled = true;
-          const response = await fetch('{{ routes.cart_add_url }}.js', {
-            method: 'POST',
-            headers: { Accept: 'application/json' },
-            body: formData,
-          });
-          const data = await response.json();
-          if (!response.ok || data?.status) {
-            throw new Error(data?.message || 'Unable to add to cart');
-          }
-
-          const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
-          const cartData = await cartResponse.json();
-          document.dispatchEvent(
-            new CustomEvent('cart:update', {
-              bubbles: true,
-              detail: {
-                resource: cartData,
-                sourceId: '{{ section.id }}',
-                data: { source: 'lame-new-products', itemCount: 1, sections: data?.sections || {} },
-              },
-            })
-          );
-          showStatus('Added', 'is-success');
-        } catch (error) {
-          console.error(error);
-          showStatus('Could not add', 'is-error');
-        } finally {
-          if (button && !button.hasAttribute('data-sold-out')) button.disabled = false;
-        }
-      });
-    });
   })();
 </script>
 
 {% schema %}
 {
-  "name": "New products grid",
+  "name": "New arrivals grid",
   "tag": "section",
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index"] },
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "New Products" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals" },
     { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View all" },
     { "type": "collection", "id": "collection", "label": "Collection" },
     {
@@ -310,18 +185,7 @@
       "step": 1,
       "default": 5
     },
-    { "type": "checkbox", "id": "show_sale_badge", "label": "Show sale badge", "default": true },
-    { "type": "checkbox", "id": "show_vendor", "label": "Show product type", "default": true },
-    { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
-    { "type": "checkbox", "id": "show_add_to_cart", "label": "Show add to cart button", "default": true },
-    {
-      "type": "text",
-      "id": "add_to_cart_label",
-      "label": "Add to cart button label",
-      "default": "Add to cart"
-    },
     { "type": "text", "id": "placeholder_title", "label": "Placeholder title", "default": "Product title" },
-    { "type": "text", "id": "placeholder_price", "label": "Placeholder price", "default": "$0.00" },
     {
       "type": "select",
       "id": "section_width",
@@ -359,7 +223,6 @@
       "default": 40
     }
   ],
-  "presets": [{ "name": "New products grid", "category": "Products" }]
+  "presets": [{ "name": "New arrivals grid", "category": "Products" }]
 }
 {% endschema %}
-

@@ -22,6 +22,11 @@
   elsif show_sale_badge and on_sale
     assign show_badge = true
   endif
+
+  assign is_arrival_card = false
+  if card_style == 'arrival'
+    assign is_arrival_card = true
+  endif
 -%}
 
 <article class="lame-home-product-card lame-home-product-card--{{ card_style }}">
@@ -32,6 +37,9 @@
           if card_style == 'flash'
             assign card_image_widths = '120,180,240,320,400'
             assign card_image_sizes = '(min-width: 750px) 200px, 42vw'
+          elsif card_style == 'arrival'
+            assign card_image_widths = '240,360,480,600,900'
+            assign card_image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw'
           else
             assign card_image_widths = '240,360,480,600,900'
             assign card_image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw'
@@ -51,7 +59,7 @@
         {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
       {% endif %}
 
-      {% if show_badge %}
+      {% if show_badge and is_arrival_card == false %}
         <span class="lame-home-product-card__badge">
           {%- if badge_text != blank -%}
             {{ badge_text }}
@@ -64,6 +72,11 @@
   </a>
 
   <div class="lame-home-product-card__body">
+    {% if is_arrival_card %}
+      <h3 class="lame-home-product-card__title">
+        <a href="{{ product.url }}">{{ product.title }}</a>
+      </h3>
+    {% else %}
     {% if show_type and product.type != blank %}
       <p class="lame-home-product-card__type">{{ product.type }}</p>
     {% endif %}
@@ -111,6 +124,7 @@
       </form>
     {% elsif product.available == false %}
       <p class="lame-home-product-card__sold-out">{{ sold_out_label }}</p>
+    {% endif %}
     {% endif %}
   </div>
 </article>
