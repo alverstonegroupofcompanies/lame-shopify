@@ -1,18 +1,31 @@
 {%- liquid
-  assign slide_count = 0
+  assign desktop_slide_count = 0
+  assign mobile_slide_count = 0
+
   for block in section.blocks
-    if block.settings.image != blank
-      assign slide_count = slide_count | plus: 1
+    if block.type == 'slide' and block.settings.image != blank
+      assign desktop_slide_count = desktop_slide_count | plus: 1
+    endif
+    if block.type == 'mobile_slide' and block.settings.image != blank
+      assign mobile_slide_count = mobile_slide_count | plus: 1
     endif
   endfor
 
-  assign show_arrows = false
-  if slide_count > 1
-    assign show_arrows = true
+  assign mobile_fallback = section.settings.mobile_fallback_desktop
+  assign show_mobile_desktop_fallback = false
+  if mobile_slide_count == 0 and mobile_fallback and desktop_slide_count > 0
+    assign show_mobile_desktop_fallback = true
+  endif
+
+  assign has_mobile_carousel = false
+  if mobile_slide_count > 0 or show_mobile_desktop_fallback
+    assign has_mobile_carousel = true
   endif
 
   assign hero_height = section.settings.banner_height
+  assign hero_height_mobile = section.settings.banner_height_mobile | default: 'medium'
   assign slideshow_slide_size = hero_height
+
   case hero_height
     when 'full_screen'
       assign lame_hero_h = '100svh'
@@ -28,97 +41,92 @@
       assign lame_hero_h = '280px'
       assign lame_hero_h_desktop = '440px'
   endcase
-  assign slideshow_class = 'lame-home-hero__carousel'
-  if slide_count == 1
-    assign slideshow_class = slideshow_class | append: ' slideshow--single-media'
+
+  case hero_height_mobile
+    when 'full_screen'
+      assign lame_hero_h_mobile = '100svh'
+    when 'small'
+      assign lame_hero_h_mobile = '180px'
+    when 'medium'
+      assign lame_hero_h_mobile = '220px'
+    when 'large'
+      assign lame_hero_h_mobile = '280px'
+    else
+      assign lame_hero_h_mobile = '220px'
+  endcase
+
+  assign show_section = false
+  if desktop_slide_count > 0 or has_mobile_carousel or request.design_mode
+    assign show_section = true
+  endif
+
+  assign mobile_block_type = 'mobile_slide'
+  if show_mobile_desktop_fallback
+    assign mobile_block_type = 'slide'
   endif
 -%}
 
-{%- if slide_count > 0 or request.design_mode -%}
+{%- if show_section -%}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--full-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }}"
+    class="section section--full-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
     data-testid="hero-slideshow"
-    style="--lame-hero-height: {{ lame_hero_h }}; --lame-hero-height-desktop: {{ lame_hero_h_desktop }};"
+    style="--lame-hero-height: {{ lame_hero_h }}; --lame-hero-height-desktop: {{ lame_hero_h_desktop }}; --lame-hero-height-mobile: {{ lame_hero_h_mobile }};"
     {{ section.shopify_attributes }}
   >
     <div
       class="lame-home-hero__slideshow spacing-style disable-section-top-offset"
       style="{% render 'spacing-padding', settings: section.settings %}"
     >
-      {%- if slide_count == 0 and request.design_mode -%}
+      {%- if desktop_slide_count == 0 and mobile_slide_count == 0 and request.design_mode -%}
         <div class="lame-home-hero__placeholder">
-          <p>Add at least one slide with a banner image. Add two or more slides to enable arrow navigation.</p>
+          <p>
+            Add <strong>Desktop slide</strong> blocks for large screens and <strong>Mobile slide</strong> blocks for
+            phones. Desktop banners are hidden on mobile when mobile slides exist.
+          </p>
         </div>
       {%- else -%}
         <h2 class="visually-hidden">{{ section.settings.accessibility_label | escape }}</h2>
-        {% capture slides %}
-          {%- assign slide_index = 0 -%}
-          {%- for block in section.blocks -%}
-            {%- if block.settings.image == blank -%}
-              {%- continue -%}
-            {%- endif -%}
-            {%- liquid
-              assign slide_loading = 'lazy'
-              assign slide_fetchpriority = 'auto'
-              if slide_index == 0
-                assign slide_loading = 'eager'
-                assign slide_fetchpriority = 'high'
-              endif
-            -%}
-            {%- capture slide_children -%}
-              <div class="slide__image-container">
-                {%- if block.settings.link != blank -%}
-                  <a
-                    href="{{ block.settings.link }}"
-                    class="lame-home-hero__slide-link"
-                    {% if block.settings.open_in_new_tab %}
-                      target="_blank" rel="noopener"
-                    {% endif %}
-                  >
-                {%- endif -%}
-                {{
-                  block.settings.image
-                  | image_url: width: 3840
-                  | image_tag:
-                    class: 'slide__image',
-                    loading: slide_loading,
-                    fetchpriority: slide_fetchpriority,
-                    widths: '832, 1200, 1600, 1920, 2560, 3840',
-                    sizes: '100vw',
-                    alt: block.settings.image.alt | default: section.settings.accessibility_label | escape
-                }}
-                {%- if block.settings.link != blank -%}
-                  </a>
-                {%- endif -%}
-              </div>
-            {%- endcapture -%}
-            {% render 'slideshow-slide',
-              index: slide_index,
-              children: slide_children,
-              attributes: block.shopify_attributes,
-              slide_size: slideshow_slide_size,
-              media_fit: 'cover',
-              navigate_to_slide: false
-            %}
-            {%- assign slide_index = slide_index | plus: 1 -%}
-          {%- endfor -%}
-        {% endcapture %}
 
-        <div class="slideshow-section lame-home-hero__frame">
-          {% render 'slideshow',
-            class: slideshow_class,
-            slides: slides,
-            slide_count: slide_count,
-            slide_size: slideshow_slide_size,
-            show_arrows: show_arrows,
-            icon_style: 'arrow',
-            icon_shape: 'circle',
-            arrows_position: 'center',
+        {%- if desktop_slide_count > 0 -%}
+          {%- liquid
+            assign desktop_prioritize_loading = true
+            if has_mobile_carousel
+              assign desktop_prioritize_loading = false
+            endif
+          -%}
+          {% render 'lame-home-hero-slideshow',
+            section: section,
+            block_type: 'slide',
+            carousel_modifier: 'desktop',
+            accessibility_label: section.settings.accessibility_label,
+            slideshow_slide_size: slideshow_slide_size,
             autoplay: section.settings.autoplay,
-            autoplay_speed: section.settings.autoplay_speed
+            autoplay_speed: section.settings.autoplay_speed,
+            prioritize_first_slide: desktop_prioritize_loading
           %}
-        </div>
+        {%- elsif request.design_mode -%}
+          <div class="lame-home-hero__placeholder lame-home-hero__placeholder--desktop">
+            <p>Add desktop slides with images for screens 750px and wider.</p>
+          </div>
+        {%- endif -%}
+
+        {%- if has_mobile_carousel -%}
+          {% render 'lame-home-hero-slideshow',
+            section: section,
+            block_type: mobile_block_type,
+            carousel_modifier: 'mobile',
+            accessibility_label: section.settings.accessibility_label,
+            slideshow_slide_size: slideshow_slide_size,
+            autoplay: section.settings.autoplay,
+            autoplay_speed: section.settings.autoplay_speed,
+            prioritize_first_slide: true
+          %}
+        {%- elsif request.design_mode -%}
+          <div class="lame-home-hero__placeholder lame-home-hero__placeholder--mobile">
+            <p>Add mobile slides for screens under 750px, or enable “Use desktop slides on mobile”.</p>
+          </div>
+        {%- endif -%}
       {%- endif -%}
     </div>
   </section>
@@ -128,8 +136,9 @@
   .lame-home-hero {
     --lame-hero-height: 100svh;
     --lame-hero-height-desktop: 100svh;
+    --lame-hero-height-mobile: 220px;
     --lame-hero-height-offset: 0px;
-    --lame-hero-display-height: var(--lame-hero-height);
+    --lame-hero-display-height: var(--lame-hero-height-mobile);
     width: 100%;
     max-width: none;
   }
@@ -160,13 +169,37 @@
   }
 
   .lame-home-hero--full_screen {
-    --lame-hero-display-height: calc(var(--lame-hero-height) - var(--lame-hero-height-offset, 0px));
+    --lame-hero-display-height: calc(var(--lame-hero-height-mobile) - var(--lame-hero-height-offset, 0px));
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-home-hero--mobile-full_screen {
+      --lame-hero-display-height: calc(var(--lame-hero-height-mobile) - var(--lame-hero-height-offset, 0px));
+    }
   }
 
   .lame-home-hero__slideshow {
     width: 100%;
     max-width: none;
     padding-inline: 0;
+    position: relative;
+  }
+
+  /* Mobile: show mobile carousel only */
+  .lame-home-hero__frame--desktop {
+    display: none;
+  }
+
+  .lame-home-hero__frame--mobile {
+    display: block;
+  }
+
+  .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
+    display: block;
+  }
+
+  .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--mobile {
+    display: none;
   }
 
   .lame-home-hero__carousel slideshow-component {
@@ -190,12 +223,24 @@
   }
 
   @media screen and (min-width: 750px) {
+    .lame-home-hero {
+      --lame-hero-display-height: var(--lame-hero-height);
+    }
+
     .lame-home-hero:not(.lame-home-hero--full_screen) {
       --lame-hero-display-height: var(--lame-hero-height-desktop);
     }
 
     .lame-home-hero--full_screen {
       --lame-hero-display-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
+    }
+
+    .lame-home-hero__frame--desktop {
+      display: block;
+    }
+
+    .lame-home-hero__frame--mobile {
+      display: none;
     }
   }
 
@@ -323,6 +368,29 @@
     font-size: 0.9rem;
   }
 
+  @media screen and (min-width: 750px) {
+    .lame-home-hero__placeholder--mobile {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-home-hero__placeholder--desktop {
+      display: none;
+    }
+  }
+
+  /* Theme editor: preview both desktop and mobile carousels */
+  .shopify-design-mode .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop,
+  .shopify-design-mode .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile {
+    display: block;
+  }
+
+  .shopify-design-mode .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile {
+    margin-top: 0.75rem;
+    outline: 1px dashed rgb(0 0 0 / 0.15);
+    outline-offset: 4px;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -330,7 +398,7 @@
   "name": "Home hero banner",
   "tag": "section",
   "class": "section-wrapper",
-  "max_blocks": 8,
+  "max_blocks": 16,
   "enabled_on": {
     "templates": ["index"]
   },
@@ -342,9 +410,13 @@
       "default": "Homepage hero banner"
     },
     {
+      "type": "header",
+      "content": "Desktop banners"
+    },
+    {
       "type": "select",
       "id": "banner_height",
-      "label": "Banner height",
+      "label": "Desktop banner height",
       "options": [
         { "value": "full_screen", "label": "Full screen" },
         { "value": "large", "label": "Large" },
@@ -352,6 +424,34 @@
         { "value": "small", "label": "Small" }
       ],
       "default": "full_screen"
+    },
+    {
+      "type": "header",
+      "content": "Mobile banners"
+    },
+    {
+      "type": "select",
+      "id": "banner_height_mobile",
+      "label": "Mobile banner height",
+      "options": [
+        { "value": "full_screen", "label": "Full screen" },
+        { "value": "large", "label": "Large" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "small", "label": "Small" }
+      ],
+      "default": "medium",
+      "info": "Recommended: Medium or Large for mobile-friendly crops."
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_fallback_desktop",
+      "label": "Use desktop slides on mobile if no mobile slides",
+      "default": false,
+      "info": "When off, mobile shows only Mobile slide blocks."
+    },
+    {
+      "type": "header",
+      "content": "Slideshow"
     },
     {
       "type": "checkbox",
@@ -399,13 +499,36 @@
   "blocks": [
     {
       "type": "slide",
-      "name": "Slide",
+      "name": "Desktop slide",
       "settings": [
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Image",
-          "info": "Required. Add at least one slide image."
+          "label": "Desktop image",
+          "info": "Shown on screens 750px and wider. Hidden on mobile when mobile slides are added."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Image link"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "mobile_slide",
+      "name": "Mobile slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Mobile image",
+          "info": "Shown only on screens under 750px. Use portrait or square crops (e.g. 1080×1350px)."
         },
         {
           "type": "url",
@@ -427,7 +550,9 @@
       "category": "Banners",
       "blocks": [
         { "type": "slide" },
-        { "type": "slide" }
+        { "type": "slide" },
+        { "type": "mobile_slide" },
+        { "type": "mobile_slide" }
       ]
     }
   ]
