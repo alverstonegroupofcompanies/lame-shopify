@@ -1,0 +1,538 @@
+{% doc %}
+  @prompt
+    add a section tat keep loops with offers and sales for cosmetics but shoulnt overflow outside must be inside the view area
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-cosmetics-offers-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    overflow: hidden;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.padding }}px 0;
+  }
+
+  .ai-cosmetics-offers__wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .ai-cosmetics-offers__track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.gap }}px;
+    animation: ai-cosmetics-scroll-{{ ai_gen_id }} {{ block.settings.animation_speed }}s linear infinite;
+    will-change: transform;
+  }
+
+  .ai-cosmetics-offers__track-{{ ai_gen_id }}:hover {
+    animation-play-state: paused;
+  }
+
+  .ai-cosmetics-offers__item-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: {{ block.settings.item_padding }}px {{ block.settings.item_padding | times: 1.5 }}px;
+    background-color: {{ block.settings.item_background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    white-space: nowrap;
+  }
+
+  .ai-cosmetics-offers__icon-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-cosmetics-offers__icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    fill: {{ block.settings.icon_color }};
+  }
+
+  .ai-cosmetics-offers__text-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    font-weight: {{ block.settings.text_weight }};
+  }
+
+  .ai-cosmetics-offers__highlight-{{ ai_gen_id }} {
+    color: {{ block.settings.highlight_color }};
+    font-weight: 700;
+  }
+
+  @keyframes ai-cosmetics-scroll-{{ ai_gen_id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-cosmetics-offers-{{ ai_gen_id }} {
+      width: 100%;
+    }
+
+    .ai-cosmetics-offers__text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+
+    .ai-cosmetics-offers__icon-{{ ai_gen_id }} {
+      width: {{ block.settings.icon_size | times: 0.8 }}px;
+      height: {{ block.settings.icon_size | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<cosmetics-offers-{{ ai_gen_id }} class="ai-cosmetics-offers-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-cosmetics-offers__wrapper-{{ ai_gen_id }}">
+    <div class="ai-cosmetics-offers__track-{{ ai_gen_id }}">
+      {% liquid
+        assign offers = ''
+        if block.settings.offer_1 != blank
+          assign offers = offers | append: block.settings.offer_1 | append: '||'
+        endif
+        if block.settings.offer_2 != blank
+          assign offers = offers | append: block.settings.offer_2 | append: '||'
+        endif
+        if block.settings.offer_3 != blank
+          assign offers = offers | append: block.settings.offer_3 | append: '||'
+        endif
+        if block.settings.offer_4 != blank
+          assign offers = offers | append: block.settings.offer_4 | append: '||'
+        endif
+        if block.settings.offer_5 != blank
+          assign offers = offers | append: block.settings.offer_5 | append: '||'
+        endif
+        if block.settings.offer_6 != blank
+          assign offers = offers | append: block.settings.offer_6
+        endif
+
+        assign offers_array = offers | split: '||'
+      %}
+
+      {% if offers_array.size > 0 %}
+        {% for i in (1..2) %}
+          {% for offer in offers_array %}
+            {% if offer != blank %}
+              <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+                <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+                  {% if block.settings.icon_type == 'sparkle' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+                    </svg>
+                  {% elsif block.settings.icon_type == 'star' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                  {% elsif block.settings.icon_type == 'tag' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                      <circle cx="7" cy="7" r="1"/>
+                    </svg>
+                  {% elsif block.settings.icon_type == 'gift' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="8" width="18" height="4" rx="1"/>
+                      <path d="M12 8v13"/>
+                      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+                      <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+                    </svg>
+                  {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+                    </svg>
+                  {% endif %}
+                </div>
+                <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+                  {{ offer }}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      {% else %}
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            <span class="ai-cosmetics-offers__highlight-{{ ai_gen_id }}">50% OFF</span> on all skincare products
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="8" width="18" height="4" rx="1"/>
+              <path d="M12 8v13"/>
+              <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+              <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            Free gift with every purchase over ₹2000
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            New arrivals: <span class="ai-cosmetics-offers__highlight-{{ ai_gen_id }}">Premium makeup collection</span>
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <circle cx="7" cy="7" r="1"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            Limited time: Buy 2 Get 1 Free on lipsticks
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            <span class="ai-cosmetics-offers__highlight-{{ ai_gen_id }}">Free shipping</span> on orders above ₹1500
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            <span class="ai-cosmetics-offers__highlight-{{ ai_gen_id }}">50% OFF</span> on all skincare products
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="8" width="18" height="4" rx="1"/>
+              <path d="M12 8v13"/>
+              <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+              <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            Free gift with every purchase over ₹2000
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            New arrivals: <span class="ai-cosmetics-offers__highlight-{{ ai_gen_id }}">Premium makeup collection</span>
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <circle cx="7" cy="7" r="1"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            Limited time: Buy 2 Get 1 Free on lipsticks
+          </div>
+        </div>
+        <div class="ai-cosmetics-offers__item-{{ ai_gen_id }}">
+          <div class="ai-cosmetics-offers__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z"/>
+            </svg>
+          </div>
+          <div class="ai-cosmetics-offers__text-{{ ai_gen_id }}">
+            <span class="ai-cosmetics-offers__highlight-{{ ai_gen_id }}">Free shipping</span> on orders above ₹1500
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</cosmetics-offers-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CosmeticsOffers{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-cosmetics-offers__track-{{ ai_gen_id }}');
+        this.setupAccessibility();
+      }
+
+      setupAccessibility() {
+        if (this.track) {
+          this.track.setAttribute('role', 'marquee');
+          this.track.setAttribute('aria-live', 'off');
+        }
+      }
+    }
+
+    customElements.define('cosmetics-offers-{{ ai_gen_id }}', CosmeticsOffers{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Cosmetics offers loop",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Offers"
+    },
+    {
+      "type": "richtext",
+      "id": "offer_1",
+      "label": "Offer 1",
+      "default": "<p><strong>50% OFF</strong> on all skincare products</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "offer_2",
+      "label": "Offer 2",
+      "default": "<p>Free gift with every purchase over ₹2000</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "offer_3",
+      "label": "Offer 3",
+      "default": "<p>New arrivals: <strong>Premium makeup collection</strong></p>"
+    },
+    {
+      "type": "richtext",
+      "id": "offer_4",
+      "label": "Offer 4",
+      "default": "<p>Limited time: Buy 2 Get 1 Free on lipsticks</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "offer_5",
+      "label": "Offer 5",
+      "default": "<p><strong>Free shipping</strong> on orders above ₹1500</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "offer_6",
+      "label": "Offer 6"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "icon_type",
+      "label": "Icon type",
+      "options": [
+        {
+          "value": "sparkle",
+          "label": "Sparkle"
+        },
+        {
+          "value": "star",
+          "label": "Star"
+        },
+        {
+          "value": "tag",
+          "label": "Tag"
+        },
+        {
+          "value": "gift",
+          "label": "Gift"
+        }
+      ],
+      "default": "sparkle"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "text_weight",
+      "label": "Text weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "item_padding",
+      "label": "Item padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "label": "Animation speed",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "s",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between items",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Vertical padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#faf6e9"
+    },
+    {
+      "type": "color",
+      "id": "item_background_color",
+      "label": "Item background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight text",
+      "default": "#c9a227"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon",
+      "default": "#c9a227"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#c9a227"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cosmetics offers loop"
+    }
+  ]
+}
+{% endschema %}
