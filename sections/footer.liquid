@@ -356,11 +356,27 @@
   .footer-premium {
     --footer-font-display: 'Cormorant Garamond', Georgia, serif;
     --footer-font-body: 'Jost', var(--font-body--family), sans-serif;
-    --footer-gold: rgb(var(--brand-gold, 212 175 55));
-    --footer-gold-soft: rgb(var(--brand-gold, 212 175 55) / 0.22);
+    --footer-gold: rgb(var(--brand-gold-readable, 109 86 22));
+    --footer-gold-bright: rgb(var(--brand-gold-strong, 193 151 31));
+    --footer-gold-soft: rgb(var(--brand-gold, 212 175 55) / 0.28);
+    --footer-icon-bg: rgb(var(--brand-gold, 212 175 55) / 0.12);
+    --footer-text: rgb(var(--color-foreground-rgb));
+    --footer-text-muted: rgb(var(--color-foreground-rgb) / 0.88);
+    --footer-text-subtle: rgb(var(--color-foreground-rgb) / 0.72);
+    --footer-icon-size: 0.875rem;
+    --footer-icon-box: 1.375rem;
     font-family: var(--footer-font-body);
+    color: var(--footer-text);
     border-top: 1px solid var(--footer-gold-soft);
     background: linear-gradient(180deg, rgb(var(--color-background-rgb)) 0%, rgb(var(--color-background-rgb) / 0.97) 100%);
+  }
+
+  .footer-premium .footer-icon-svg,
+  .footer-premium svg.footer-icon-svg {
+    width: var(--footer-icon-size);
+    height: var(--footer-icon-size);
+    display: block;
+    flex-shrink: 0;
   }
 
   .footer-premium__inner {
@@ -403,9 +419,9 @@
   .footer-premium__about {
     margin: 0;
     max-width: 36ch;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     line-height: 1.6;
-    color: rgb(var(--color-foreground-rgb) / 0.78);
+    color: var(--footer-text-muted);
   }
 
   .footer-premium__about p {
@@ -425,38 +441,45 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.35rem;
-    height: 2.35rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 999px;
     border: 1px solid var(--footer-gold-soft);
-    background: rgb(var(--color-background-rgb) / 0.6);
+    background: var(--footer-icon-bg);
     color: var(--footer-gold);
-    transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+    transition: background 200ms ease, border-color 200ms ease, color 200ms ease, transform 200ms ease;
   }
 
   .footer-premium__social-link:hover {
     background: var(--footer-gold);
     border-color: var(--footer-gold);
-    color: #111;
-    transform: translateY(-2px);
+    color: rgb(var(--color-background-rgb));
+    transform: translateY(-1px);
   }
 
   .footer-premium__social-link svg {
-    width: 1.05rem;
-    height: 1.05rem;
+    width: 0.95rem;
+    height: 0.95rem;
     fill: currentColor;
+    display: block;
   }
 
   .footer-premium__heading {
-    margin: 0 0 0.85rem;
+    margin: 0 0 0.75rem;
     font-family: var(--footer-font-display);
-    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+    font-size: clamp(1.05rem, 1.8vw, 1.28rem);
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     text-transform: none;
-    color: inherit;
+    color: var(--footer-text);
     position: relative;
     padding-bottom: 0.45rem;
+  }
+
+  .footer-premium__heading--icon {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
   .footer-premium__heading::after {
@@ -466,7 +489,31 @@
     bottom: 0;
     width: 2rem;
     height: 1px;
-    background: var(--footer-gold);
+    background: var(--footer-gold-bright);
+  }
+
+  .footer-premium__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--footer-icon-box);
+    height: var(--footer-icon-box);
+    border-radius: 6px;
+    background: var(--footer-icon-bg);
+    color: var(--footer-gold);
+    line-height: 0;
+  }
+
+  .footer-premium__heading .footer-premium__icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 5px;
+  }
+
+  .footer-premium__heading .footer-premium__icon .footer-icon-svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
   }
 
   .footer-premium__links {
@@ -474,26 +521,47 @@
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.5rem;
+    gap: 0.35rem;
   }
 
-  .footer-premium__links a {
+  .footer-premium__link-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: fit-content;
+    max-width: 100%;
     text-decoration: none;
-    font-size: 0.88rem;
-    letter-spacing: 0.02em;
-    color: rgb(var(--color-foreground-rgb) / 0.82);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    color: var(--footer-text-muted);
     transition: color 180ms ease;
   }
 
-  .footer-premium__links a:is(:hover, :focus-visible) {
+  .footer-premium__link-row span:last-child {
+    min-width: 0;
+  }
+
+  .footer-premium__link-row:is(:hover, :focus-visible) {
     color: var(--footer-gold);
+  }
+
+  .footer-premium__link-row .footer-premium__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 4px;
+  }
+
+  .footer-premium__link-row .footer-premium__icon .footer-icon-svg {
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .footer-premium__newsletter-text {
     margin: 0 0 0.85rem;
-    font-size: 0.88rem;
+    font-size: 0.875rem;
     line-height: 1.5;
-    color: rgb(var(--color-foreground-rgb) / 0.72);
+    color: var(--footer-text-muted);
     max-width: 32ch;
   }
 
@@ -505,11 +573,24 @@
   .footer-premium__newsletter-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    align-items: center;
+    gap: 0.35rem;
     border: 1px solid var(--footer-gold-soft);
     border-radius: 999px;
-    padding: 0.28rem;
+    padding: 0.28rem 0.35rem 0.28rem 0.5rem;
     background: rgb(var(--color-background-rgb) / 0.55);
+  }
+
+  .footer-premium__icon--input {
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+    color: var(--footer-gold);
+  }
+
+  .footer-premium__icon--input .footer-icon-svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
   }
 
   .footer-premium__newsletter-input {
@@ -531,18 +612,34 @@
 
   .footer-premium__newsletter-btn {
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     border: none;
     border-radius: 999px;
-    padding: 0.55rem 1.1rem;
+    padding: 0.5rem 0.95rem;
     font-family: var(--footer-font-body);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     cursor: pointer;
-    background: linear-gradient(135deg, var(--footer-gold), rgb(var(--brand-gold-strong, 193 151 31)));
-    color: #111;
+    background: linear-gradient(135deg, var(--footer-gold-bright), var(--footer-gold));
+    color: rgb(var(--color-background-rgb));
     transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .footer-premium__icon--btn {
+    width: auto;
+    height: auto;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  .footer-premium__icon--btn .footer-icon-svg {
+    width: 0.6875rem;
+    height: 0.6875rem;
   }
 
   .footer-premium__newsletter-btn:hover {
@@ -560,7 +657,7 @@
   }
 
   .footer-premium__newsletter-message--success {
-    color: rgb(var(--color-foreground-rgb) / 0.85);
+    color: var(--footer-text-muted);
   }
 
   .footer-premium__mid {
@@ -603,24 +700,46 @@
     padding: 1.5rem;
     text-align: center;
     text-decoration: none;
-    color: rgb(var(--color-foreground-rgb) / 0.75);
-    font-size: 0.9rem;
+    color: var(--footer-text-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
   }
 
-  .footer-premium__map-pin {
-    font-size: 1.75rem;
+  .footer-premium__icon--map {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--footer-icon-bg);
+    color: var(--footer-gold);
+  }
+
+  .footer-premium__icon--map .footer-icon-svg {
+    width: 1rem;
+    height: 1rem;
   }
 
   .footer-premium__directions {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-size: 0.82rem;
-    letter-spacing: 0.04em;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     text-decoration: none;
     color: var(--footer-gold);
     font-weight: 600;
+  }
+
+  .footer-premium__icon--inline {
+    width: auto;
+    height: auto;
+    padding: 0;
+    background: transparent;
+  }
+
+  .footer-premium__icon--inline .footer-icon-svg {
+    width: 0.75rem;
+    height: 0.75rem;
   }
 
   .footer-premium__directions:hover {
@@ -633,19 +752,36 @@
     gap: 1rem;
   }
 
+  .footer-premium__contact-title,
   .footer-premium__contact-card h4 {
-    margin: 0 0 0.45rem;
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     font-family: var(--footer-font-display);
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-weight: 500;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
+    color: var(--footer-text);
+  }
+
+  .footer-premium__contact-title .footer-premium__icon,
+  .footer-premium__contact-card h4 .footer-premium__icon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .footer-premium__contact-title .footer-premium__icon .footer-icon-svg,
+  .footer-premium__contact-card h4 .footer-premium__icon .footer-icon-svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
   }
 
   .footer-premium__contact-card :is(p, a) {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 0.875rem;
     line-height: 1.55;
-    color: rgb(var(--color-foreground-rgb) / 0.82);
+    color: var(--footer-text-muted);
   }
 
   .footer-premium__contact-list {
@@ -658,10 +794,11 @@
 
   .footer-premium__contact-label {
     display: block;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(var(--color-foreground-rgb) / 0.5);
+    color: var(--footer-text-subtle);
     margin-bottom: 0.15rem;
   }
 
@@ -676,14 +813,31 @@
 
   .footer-premium__trust {
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
     text-align: center;
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(var(--color-foreground-rgb) / 0.55);
-    padding: 0.5rem 0;
+    color: var(--footer-text-subtle);
+    padding: 0.55rem 0;
     border-top: 1px solid var(--footer-gold-soft);
     border-bottom: 1px solid var(--footer-gold-soft);
+  }
+
+  .footer-premium__icon--trust {
+    width: 1.25rem;
+    height: 1.25rem;
+    background: transparent;
+  }
+
+  .footer-premium__icon--trust .footer-icon-svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    color: var(--footer-gold);
   }
 
   .footer-premium__bottom {
@@ -696,8 +850,10 @@
 
   .footer-premium__copyright {
     margin: 0;
-    font-size: 0.8rem;
-    color: rgb(var(--color-foreground-rgb) / 0.62);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--footer-text-subtle);
+    max-width: 52ch;
   }
 
   .footer-premium__policies {
@@ -710,10 +866,11 @@
     gap: 0.35rem 1rem;
   }
 
-  .footer-premium__policies a {
-    font-size: 0.78rem;
+  .footer-premium__policies a,
+  .footer-premium__policies .footer-premium__link-row {
+    font-size: 0.8125rem;
     text-decoration: none;
-    color: rgb(var(--color-foreground-rgb) / 0.65);
+    color: var(--footer-text-subtle);
   }
 
   .footer-premium__policies a:hover {
@@ -724,7 +881,71 @@
     .footer-premium__main {
       grid-template-columns: 1.15fr repeat(3, minmax(0, 1fr));
       align-items: start;
-    }
+    }  "copyright_text": "© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.\nLAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.",
+        "show_policy_links": true,
+    <div class="footer-premium__bottom">
+      <p class="footer-premium__copyright">{{ section.settings.copyright_text }}</p>
+      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
+      {% if section.settings.show_policy_links %}
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "default": "© 2026 Lame Beauty Care. All rights reserved."
+      "default": "© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.\nLAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.",
+      "info": "Use a new line for a second line (brand disclaimer)."
+    },
+    {
+      "type": "checkbox",
+Updated the footer copyright section with your new text.
+
+Footer bottom now shows:
+© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.
+LAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.
+
+Files updated
+sections/footer-group.json — live footer settings
+sections/footer.liquid — default text and line-break support for a second line
+You can still edit this under Customize → Footer → Copyright text in the theme editor. Use Enter for a new line if you want two lines.
+
+footer icon looks oversized fix it, align properly and use icons better theme colors all shud be readable
+
+Icon styles are missing from the footer CSS, so SVGs render at default size. Adding icon sizing, alignment, and improved theme colors for readability.
+
+    --footer-font-body: 'Jost', var(--font-body--family), sans-serif;
+    --footer-gold: rgb(var(--brand-gold, 212 175 55));
+    --footer-gold-soft: rgb(var(--brand-gold, 212 175 55) / 0.22);
+    --footer-gold: rgb(var(--brand-gold-readable, 109 86 22));
+    max-width: 36ch;
+    font-size: 0.92rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    width: 2rem;
+  .footer-premium__heading {
+    margin: 0 0 0.85rem;
+    margin: 0 0 0.75rem;
+    font-family: var(--footer-font-display);
+    margin: 0 0 0.85rem;
+    font-size: 0.88rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+<svg class="footer-icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+<svg class="footer-icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  {%- case icon_name -%}
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  .footer-premium__newsletter-message--success {
+    color: rgb(var(--color-foreground-rgb) / 0.85);
+    color: var(--footer-text-muted);
+  }
+
+
+
+
 
     .footer-premium__mid {
       grid-template-columns: 1.1fr 1fr;
