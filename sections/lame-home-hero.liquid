@@ -12,7 +12,12 @@
   endif
 
   assign hero_height = section.settings.banner_height
+  assign slideshow_slide_size = hero_height
   case hero_height
+    when 'full_screen'
+      assign lame_hero_h = '100svh'
+      assign lame_hero_h_desktop = '100svh'
+      assign slideshow_slide_size = 'large'
     when 'small'
       assign lame_hero_h = '200px'
       assign lame_hero_h_desktop = '300px'
@@ -38,7 +43,7 @@
     {{ section.shopify_attributes }}
   >
     <div
-      class="lame-home-hero__slideshow spacing-style"
+      class="lame-home-hero__slideshow spacing-style disable-section-top-offset"
       style="{% render 'spacing-padding', settings: section.settings %}"
     >
       {%- if slide_count == 0 and request.design_mode -%}
@@ -92,7 +97,7 @@
               index: slide_index,
               children: slide_children,
               attributes: block.shopify_attributes,
-              slide_size: hero_height,
+              slide_size: slideshow_slide_size,
               media_fit: 'contain',
               navigate_to_slide: false
             %}
@@ -105,7 +110,7 @@
             class: slideshow_class,
             slides: slides,
             slide_count: slide_count,
-            slide_size: hero_height,
+            slide_size: slideshow_slide_size,
             show_arrows: show_arrows,
             icon_style: 'arrow',
             icon_shape: 'circle',
@@ -121,43 +126,76 @@
 
 {% stylesheet %}
   .lame-home-hero {
-    --lame-hero-height: 280px;
-    --lame-hero-height-desktop: 440px;
+    --lame-hero-height: 100svh;
+    --lame-hero-height-desktop: 100svh;
+    --lame-hero-height-offset: 0px;
+    --lame-hero-display-height: var(--lame-hero-height);
     width: 100%;
+    max-width: none;
+  }
+
+  body:has(> #header-group > .header-section > #header-component)
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero):first-child
+    .lame-home-hero--full_screen {
+    --lame-hero-height-offset: var(--header-group-height, 0px);
+  }
+
+  body:has(.header[transparent]) .content-for-layout > .shopify-section:has(.lame-home-hero):first-child,
+  body:has(header-component[transparent]) .content-for-layout > .shopify-section:has(.lame-home-hero):first-child {
+    margin-top: calc(var(--header-group-height, 0px) * -1);
+    width: 100%;
+    max-width: none;
+  }
+
+  body:has(.header[transparent])
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero):first-child
+    .lame-home-hero--full_screen,
+  body:has(header-component[transparent])
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero):first-child
+    .lame-home-hero--full_screen {
+    --lame-hero-height-offset: 0px;
+  }
+
+  .lame-home-hero--full_screen {
+    --lame-hero-display-height: calc(var(--lame-hero-height) - var(--lame-hero-height-offset, 0px));
   }
 
   .lame-home-hero__slideshow {
     width: 100%;
+    max-width: none;
     padding-inline: 0;
   }
 
   .lame-home-hero__carousel slideshow-component {
-    --slide-min-height: var(--lame-hero-height) !important;
-    --slide-min-height-desktop: var(--lame-hero-height-desktop) !important;
+    --slide-min-height: var(--lame-hero-display-height) !important;
+    --slide-min-height-desktop: var(--lame-hero-display-height) !important;
   }
 
   .lame-home-hero__frame,
   .lame-home-hero__carousel slideshow-component,
   .lame-home-hero__carousel slideshow-container,
   .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-height);
-    max-height: var(--lame-hero-height);
-    min-height: var(--lame-hero-height);
+    height: var(--lame-hero-display-height);
+    max-height: var(--lame-hero-display-height);
+    min-height: var(--lame-hero-display-height);
   }
 
   .lame-home-hero__frame {
     width: 100%;
+    max-width: none;
     overflow: hidden;
   }
 
   @media screen and (min-width: 750px) {
-    .lame-home-hero__frame,
-    .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero__carousel slideshow-slides {
-      height: var(--lame-hero-height-desktop);
-      max-height: var(--lame-hero-height-desktop);
-      min-height: var(--lame-hero-height-desktop);
+    .lame-home-hero:not(.lame-home-hero--full_screen) {
+      --lame-hero-display-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--full_screen {
+      --lame-hero-display-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
     }
   }
 
@@ -272,8 +310,8 @@
   }
 
   .lame-home-hero__placeholder {
-    height: var(--lame-hero-height);
-    min-height: var(--lame-hero-height);
+    height: var(--lame-hero-display-height);
+    min-height: var(--lame-hero-display-height);
     display: grid;
     place-items: center;
     padding: 2rem;
@@ -283,12 +321,6 @@
     font-size: 0.9rem;
   }
 
-  @media screen and (min-width: 750px) {
-    .lame-home-hero__placeholder {
-      height: var(--lame-hero-height-desktop);
-      min-height: var(--lame-hero-height-desktop);
-    }
-  }
 {% endstylesheet %}
 
 {% schema %}
@@ -312,11 +344,12 @@
       "id": "banner_height",
       "label": "Banner height",
       "options": [
-        { "value": "medium", "label": "Medium" },
+        { "value": "full_screen", "label": "Full screen" },
         { "value": "large", "label": "Large" },
+        { "value": "medium", "label": "Medium" },
         { "value": "small", "label": "Small" }
       ],
-      "default": "large"
+      "default": "full_screen"
     },
     {
       "type": "checkbox",
