@@ -1,0 +1,271 @@
+{% liquid
+  assign bestseller_collection = collections[section.settings.collection]
+  if bestseller_collection == blank
+    assign bestseller_collection = collections.all
+  endif
+
+  assign view_all_url = bestseller_collection.url
+  if bestseller_collection == blank
+    assign view_all_url = routes.all_products_collection_url
+  endif
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-best-sellers"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-product-carousel lame-best-sellers__carousel spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {% if section.settings.heading != blank %}
+      <header class="lame-product-carousel__header">
+        <h2 class="lame-product-carousel__title">{{ section.settings.heading }}</h2>
+        {% if section.settings.subheading != blank %}
+          <p class="lame-product-carousel__subtitle">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    <div class="lame-product-carousel__viewport">
+      <button
+        type="button"
+        class="lame-product-carousel__arrow lame-product-carousel__arrow--prev flip-x"
+        data-carousel-prev
+        aria-label="{{ section.settings.prev_label }}"
+        hidden
+      >
+        <span class="svg-wrapper icon-arrow">
+          {{- 'icon-arrow.svg' | inline_asset_content -}}
+        </span>
+      </button>
+      <button
+        type="button"
+        class="lame-product-carousel__arrow lame-product-carousel__arrow--next"
+        data-carousel-next
+        aria-label="{{ section.settings.next_label }}"
+        hidden
+      >
+        <span class="svg-wrapper icon-arrow">
+          {{- 'icon-arrow.svg' | inline_asset_content -}}
+        </span>
+      </button>
+
+      <ul class="lame-product-carousel__track" role="list" data-product-carousel-track>
+        {% for product in bestseller_collection.products limit: section.settings.products_to_show %}
+          <li class="lame-product-carousel__item">
+            {% render 'lame-carousel-product-card',
+              product: product,
+              show_offer_badge: section.settings.show_offer_badge,
+              offer_badge_text: section.settings.offer_badge_text,
+              add_to_cart_label: section.settings.add_to_cart_label,
+              sold_out_label: section.settings.sold_out_label
+            %}
+          </li>
+        {% else %}
+          {% for i in (1..section.settings.products_to_show) %}
+            <li class="lame-product-carousel__item">
+              <article class="lame-carousel-card">
+                <div class="lame-carousel-card__media">
+                  {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-carousel-card__image placeholder-svg' }}
+                </div>
+                <h3 class="lame-carousel-card__title">{{ section.settings.placeholder_title }}</h3>
+                <p class="lame-carousel-card__price-row">
+                  <span class="lame-carousel-card__price-current">{{ section.settings.placeholder_price }}</span>
+                </p>
+                <button type="button" class="lame-carousel-card__atc" disabled>{{ section.settings.add_to_cart_label }}</button>
+              </article>
+            </li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% if section.settings.view_all_label != blank %}
+      <p class="lame-product-carousel__view-all">
+        <a href="{{ view_all_url }}">{{ section.settings.view_all_label }}</a>
+      </p>
+    {% endif %}
+  </div>
+</section>
+
+{% render 'lame-product-carousel-styles',
+  accent_color: section.settings.accent_color,
+  discount_color: section.settings.discount_color
+%}
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+
+    const track = section.querySelector('[data-product-carousel-track]');
+    const prev = section.querySelector('[data-carousel-prev]');
+    const next = section.querySelector('[data-carousel-next]');
+    if (!track || !prev || !next) return;
+
+    const updateArrows = () => {
+      const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+      const hasOverflow = maxScroll > 1;
+      prev.hidden = !hasOverflow;
+      next.hidden = !hasOverflow;
+      if (!hasOverflow) {
+        prev.disabled = true;
+        next.disabled = true;
+        return;
+      }
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= maxScroll - 1;
+    };
+
+    const scrollByCard = (direction) => {
+      const card = track.querySelector('.lame-product-carousel__item');
+      if (!card) return;
+      const styles = getComputedStyle(track);
+      const gap = parseFloat(styles.columnGap || styles.gap || '0');
+      track.scrollBy({ left: direction * (card.clientWidth + gap), behavior: 'smooth' });
+    };
+
+    prev.addEventListener('click', () => scrollByCard(-1));
+    next.addEventListener('click', () => scrollByCard(1));
+    track.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    setTimeout(updateArrows, 0);
+
+    section.querySelectorAll('[data-lame-carousel-atc]').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        const status = form.querySelector('.lame-carousel-card__atc-status');
+        if (button?.disabled) return;
+
+        const formData = new FormData(form);
+        const cartItemsComponents = document.querySelectorAll('cart-items-component');
+        const sectionIds = [];
+        cartItemsComponents.forEach((item) => {
+          if (item instanceof HTMLElement && item.dataset.sectionId) {
+            sectionIds.push(item.dataset.sectionId);
+          }
+        });
+        if (sectionIds.length) {
+          formData.append('sections', sectionIds.join(','));
+          formData.append('sections_url', window.location.pathname);
+        }
+
+        const showStatus = (text, className) => {
+          if (!(status instanceof HTMLElement)) return;
+          status.textContent = text;
+          status.classList.remove('is-success', 'is-error', 'is-visible');
+          status.classList.add(className, 'is-visible');
+          window.setTimeout(() => status.classList.remove('is-visible'), 1800);
+        };
+
+        try {
+          if (button) button.disabled = true;
+          const response = await fetch('{{ routes.cart_add_url }}.js', {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formData,
+          });
+          const data = await response.json();
+          if (!response.ok || data?.status) {
+            throw new Error(data?.message || 'Unable to add to cart');
+          }
+
+          const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
+          const cartData = await cartResponse.json();
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: {
+                resource: cartData,
+                sourceId: '{{ section.id }}',
+                data: { source: 'lame-product-carousel', itemCount: 1, sections: data?.sections || {} },
+              },
+            })
+          );
+          showStatus('Added to cart', 'is-success');
+        } catch (error) {
+          console.error(error);
+          showStatus('Could not add', 'is-error');
+        } finally {
+          if (button && !button.hasAttribute('data-sold-out')) button.disabled = false;
+        }
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Best sellers",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The Best Sellers" },
+    { "type": "text", "id": "subheading", "label": "Subheading" },
+    { "type": "text", "id": "view_all_label", "label": "View all label" },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    { "type": "checkbox", "id": "show_offer_badge", "label": "Show offer badge on image", "default": true },
+    {
+      "type": "text",
+      "id": "offer_badge_text",
+      "label": "Offer badge text (all cards)",
+      "info": "Leave blank to show discount % when on sale"
+    },
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to Cart" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold Out" },
+    { "type": "text", "id": "prev_label", "label": "Previous arrow label", "default": "Previous products" },
+    { "type": "text", "id": "next_label", "label": "Next arrow label", "default": "Next products" },
+    { "type": "text", "id": "placeholder_title", "label": "Placeholder title", "default": "Product title" },
+    { "type": "text", "id": "placeholder_price", "label": "Placeholder price", "default": "$0.00" },
+    { "type": "color", "id": "accent_color", "label": "Accent color (buttons & badges)", "default": "#7b2cbf" },
+    { "type": "color", "id": "discount_color", "label": "Discount text color", "default": "#0a9f4f" },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    }
+  ],
+  "presets": [{ "name": "Best sellers", "category": "Products" }]
+}
+{% endschema %}

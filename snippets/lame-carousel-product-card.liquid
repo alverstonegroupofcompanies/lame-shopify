@@ -1,0 +1,80 @@
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign compare_at = selected_variant.compare_at_price
+  assign price_amount = selected_variant.price
+  assign on_sale = false
+  if compare_at > price_amount
+    assign on_sale = true
+    assign discount_percent = compare_at | minus: price_amount | times: 100 | divided_by: compare_at
+  endif
+
+  assign add_label = add_to_cart_label | default: 'Add to Cart'
+  assign sold_label = sold_out_label | default: 'Sold Out'
+-%}
+
+<article class="lame-carousel-card">
+  <div class="lame-carousel-card__media">
+    <a href="{{ product.url }}" class="lame-carousel-card__media-link" aria-label="{{ product.title | escape }}">
+      {% if product.featured_media %}
+        {{
+          product.featured_media
+          | image_url: width: 600
+          | image_tag:
+            class: 'lame-carousel-card__image',
+            loading: 'lazy',
+            widths: '200,300,400,500,600',
+            sizes: '(min-width: 990px) 18vw, (min-width: 750px) 28vw, 42vw',
+            alt: product.featured_media.alt | default: product.title | escape
+        }}
+      {% else %}
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-carousel-card__image placeholder-svg' }}
+      {% endif %}
+    </a>
+
+    {% if show_offer_badge %}
+      {% if offer_badge_text != blank %}
+        <span class="lame-carousel-card__offer">{{ offer_badge_text }}</span>
+      {% elsif on_sale %}
+        <span class="lame-carousel-card__offer">{{ discount_percent }}% off</span>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <h3 class="lame-carousel-card__title">
+    <a href="{{ product.url }}">{{ product.title }}</a>
+  </h3>
+
+  <p class="lame-carousel-card__price-row">
+    <span class="lame-carousel-card__price-current">{{ price_amount | money }}</span>
+    {%- if on_sale -%}
+      <span class="lame-carousel-card__price-compare"><s>{{ compare_at | money }}</s></span>
+      <span class="lame-carousel-card__price-off">{{ discount_percent }}% off</span>
+    {%- endif -%}
+  </p>
+
+  {% if selected_variant %}
+    <form
+      method="post"
+      action="{{ routes.cart_add_url }}"
+      class="lame-carousel-card__atc-form"
+      data-lame-carousel-atc
+    >
+      <input type="hidden" name="id" value="{{ selected_variant.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button
+        type="submit"
+        class="lame-carousel-card__atc"
+        {% unless product.available %}
+          disabled
+        {% endunless %}
+      >
+        {% if product.available %}
+          {{ add_label }}
+        {% else %}
+          {{ sold_label }}
+        {% endif %}
+      </button>
+      <span class="lame-carousel-card__atc-status" aria-live="polite"></span>
+    </form>
+  {% endif %}
+</article>

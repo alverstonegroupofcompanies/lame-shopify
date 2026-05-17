@@ -1,0 +1,289 @@
+{% stylesheet %}
+  .lame-product-carousel {
+    --lame-carousel-accent: {{ accent_color | default: '#7b2cbf' }};
+    --lame-carousel-discount: {{ discount_color | default: '#0a9f4f' }};
+    --lame-carousel-gap: 12px;
+  }
+
+  .lame-product-carousel__header {
+    text-align: center;
+    margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  .lame-product-carousel__title {
+    margin: 0;
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #111;
+    line-height: 1.2;
+  }
+
+  .lame-product-carousel__subtitle {
+    margin: 0.45rem 0 0;
+    font-size: 0.85rem;
+    color: rgb(0 0 0 / 0.55);
+  }
+
+  .lame-product-carousel__viewport {
+    position: relative;
+  }
+
+  .lame-product-carousel__track {
+    list-style: none;
+    margin: 0;
+    padding: 0 2.25rem 0 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - var(--lame-carousel-gap)) / 2);
+    gap: var(--lame-carousel-gap);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .lame-product-carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-product-carousel__item {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .lame-product-carousel__arrow {
+    position: absolute;
+    top: 38%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgb(0 0 0 / 0.1);
+    background: #fff;
+    color: rgb(0 0 0 / 0.65);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .lame-product-carousel__arrow:disabled,
+  .lame-product-carousel__arrow[hidden] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .lame-product-carousel__arrow--prev {
+    left: -0.35rem;
+    display: none;
+  }
+
+  .lame-product-carousel__arrow--next {
+    right: 0;
+  }
+
+  .lame-product-carousel__arrow .svg-wrapper,
+  .lame-product-carousel__arrow .svg-wrapper svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+  }
+
+  .lame-carousel-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .lame-carousel-card__media {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: #f8f8f8;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .lame-carousel-card__media-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-carousel-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .lame-carousel-card__offer {
+    position: absolute;
+    left: 0.35rem;
+    bottom: 0.35rem;
+    max-width: calc(100% - 0.7rem);
+    padding: 0.2rem 0.45rem;
+    font-size: 0.58rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--lame-carousel-accent);
+    background: #fff;
+    border: 1px solid var(--lame-carousel-accent);
+    border-radius: 999px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lame-carousel-card__title {
+    margin: 0.5rem 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: #111;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.7em;
+  }
+
+  .lame-carousel-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .lame-carousel-card__title a:hover {
+    color: var(--lame-carousel-accent);
+  }
+
+  .lame-carousel-card__price-row {
+    margin: 0 0 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.4rem;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .lame-carousel-card__price-current {
+    font-weight: 700;
+    color: #111;
+  }
+
+  .lame-carousel-card__price-compare {
+    color: rgb(0 0 0 / 0.45);
+    font-size: 0.65rem;
+  }
+
+  .lame-carousel-card__price-off {
+    font-weight: 700;
+    color: var(--lame-carousel-discount);
+    font-size: 0.68rem;
+  }
+
+  .lame-carousel-card__atc-form {
+    margin-top: auto;
+    position: relative;
+  }
+
+  .lame-carousel-card__atc {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--lame-carousel-accent);
+    background: #fff;
+    border: 1px solid var(--lame-carousel-accent);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .lame-carousel-card__atc:hover:not(:disabled) {
+    background: var(--lame-carousel-accent);
+    color: #fff;
+  }
+
+  .lame-carousel-card__atc:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .lame-carousel-card__atc-status {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.25rem);
+    font-size: 0.62rem;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .lame-carousel-card__atc-status.is-visible {
+    opacity: 1;
+  }
+
+  .lame-carousel-card__atc-status.is-success {
+    color: var(--lame-carousel-discount);
+  }
+
+  .lame-carousel-card__atc-status.is-error {
+    color: #b42318;
+  }
+
+  .lame-product-carousel__view-all {
+    margin: 1rem 0 0;
+    text-align: center;
+    font-size: 0.78rem;
+  }
+
+  .lame-product-carousel__view-all a {
+    color: rgb(0 0 0 / 0.6);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-product-carousel {
+      --lame-carousel-gap: 14px;
+    }
+
+    .lame-product-carousel__track {
+      grid-auto-columns: calc((100% - var(--lame-carousel-gap) * 2) / 3);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-product-carousel {
+      --lame-carousel-gap: 16px;
+    }
+
+    .lame-product-carousel__track {
+      grid-auto-columns: calc((100% - var(--lame-carousel-gap) * 4) / 5);
+      padding-right: 2.5rem;
+    }
+
+    .lame-carousel-card__title {
+      font-size: 0.74rem;
+    }
+
+    .lame-carousel-card__price-row {
+      font-size: 0.74rem;
+    }
+
+    .lame-carousel-card__atc {
+      font-size: 0.7rem;
+    }
+  }
+{% endstylesheet %}
