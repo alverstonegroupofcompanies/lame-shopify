@@ -1,215 +1,753 @@
-<div class="section-background color-{{ section.settings.color_scheme }}"></div>
-<footer class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}">
-  {% liquid
-    assign categories_menu = linklists[section.settings.categories_menu]
-    assign quick_links_menu = linklists[section.settings.quick_links_menu]
-  %}
+{%- liquid
+  assign categories_menu = linklists[section.settings.categories_menu]
+  assign quick_links_menu = linklists[section.settings.quick_links_menu]
+  assign use_collection_links = false
+  if categories_menu == blank or categories_menu.links.size == 0
+    assign use_collection_links = true
+  endif
 
-  <div class="footer-rich spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
-    <div class="footer-rich__top">
-      <div class="footer-rich__brand">
+  assign phone_href = section.settings.phone | strip
+  if phone_href != blank
+    assign phone_href = phone_href | remove: ' ' | remove: '-' | remove: '(' | remove: ')'
+  endif
+
+  assign map_query = section.settings.map_query | default: 'Lamstone Healthcare Mangalapuram Kerala' | url_encode
+  assign directions_url = section.settings.map_directions_url
+  if directions_url == blank
+    assign directions_url = 'https://www.google.com/maps/search/?api=1&query=' | append: map_query
+  endif
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<footer
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} footer-premium"
+  id="footer-{{ section.id }}"
+>
+  {% if section.settings.show_footer_image %}
+    <div class="footer-premium__visual" aria-hidden="true">
+      {% if section.settings.footer_image != blank %}
+        {{
+          section.settings.footer_image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'footer-premium__visual-img',
+            loading: 'lazy',
+            widths: '600,900,1200,1600,2000,2400',
+            sizes: '100vw',
+            alt: ''
+        }}
+      {% else %}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'footer-premium__visual-placeholder' }}
+      {% endif %}
+      <span
+        class="footer-premium__visual-overlay"
+        style="--footer-visual-overlay: {{ section.settings.footer_image_overlay | divided_by: 100.0 }};"
+      ></span>
+    </div>
+  {% endif %}
+
+  <div class="footer-premium__inner spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    <div class="footer-premium__main">
+      <div class="footer-premium__brand">
         {% if section.settings.logo != blank %}
-          {{
-            section.settings.logo
-            | image_url: width: 320
-            | image_tag:
-              class: 'footer-rich__logo',
-              loading: 'lazy',
-              widths: '120,180,240,320',
-              sizes: '180px'
-          }}
-        {% else %}
-          <h2 class="footer-rich__brand-name">{{ section.settings.brand_name }}</h2>
+          <a href="{{ routes.root_url }}" class="footer-premium__logo-link">
+            {{
+              section.settings.logo
+              | image_url: width: 360
+              | image_tag:
+                class: 'footer-premium__logo',
+                loading: 'lazy',
+                widths: '120,180,240,360',
+                sizes: '200px',
+                alt: section.settings.brand_name | default: shop.name
+            }}
+          </a>
+        {% elsif section.settings.brand_name != blank %}
+          <a href="{{ routes.root_url }}" class="footer-premium__brand-name">{{ section.settings.brand_name }}</a>
         {% endif %}
 
         {% if section.settings.about_text != blank %}
-          <div class="footer-rich__about rte">{{ section.settings.about_text }}</div>
+          <div class="footer-premium__about rte">{{ section.settings.about_text }}</div>
+        {% endif %}
+
+        {% if section.blocks.size > 0 %}
+          <ul class="footer-premium__social" role="list">
+            {% for block in section.blocks %}
+              {% if block.type == 'social_link' and block.settings.url != blank %}
+                <li {{ block.shopify_attributes }}>
+                  <a
+                    href="{{ block.settings.url }}"
+                    class="footer-premium__social-link"
+                    aria-label="{{ block.settings.label | escape }}"
+                    {% if block.settings.open_in_new_tab %}
+                      target="_blank" rel="noopener noreferrer"
+                    {% endif %}
+                  >
+                    {% render 'footer-social-icon', platform: block.settings.platform %}
+                    <span class="visually-hidden">{{ block.settings.label }}</span>
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
         {% endif %}
       </div>
 
-      <div class="footer-rich__nav-columns">
-        <div class="footer-rich__column">
-          <h3 class="footer-rich__heading">{{ section.settings.categories_heading }}</h3>
-          {% if categories_menu != blank and categories_menu.links.size > 0 %}
-            <ul class="footer-rich__links" role="list">
-              {% for link in categories_menu.links %}
-                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-              {% endfor %}
-            </ul>
+      <div class="footer-premium__column">
+        <h3 class="footer-premium__heading footer-premium__heading--icon">
+          <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'grid' %}</span>
+          {{ section.settings.categories_heading }}
+        </h3>
+        <ul class="footer-premium__links" role="list">
+          {% if use_collection_links %}
+            {% for collection in collections limit: 12 %}
+              {% unless collection.handle == 'frontpage' %}
+                <li>
+                  <a href="{{ collection.url }}" class="footer-premium__link-row">
+                    <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'grid' %}</span>
+                    <span>{{ collection.title }}</span>
+                  </a>
+                </li>
+              {% endunless %}
+            {% endfor %}
+            {% if collections.size == 0 %}
+              <li>
+                <a href="{{ routes.all_products_collection_url }}" class="footer-premium__link-row">
+                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'grid' %}</span>
+                  <span>Shop all</span>
+                </a>
+              </li>
+            {% endif %}
           {% else %}
-            <p class="footer-rich__placeholder">{{ section.settings.categories_empty_text }}</p>
+            {% for link in categories_menu.links %}
+              <li>
+                <a href="{{ link.url }}" class="footer-premium__link-row">
+                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-link-icon', link: link %}</span>
+                  <span>{{ link.title }}</span>
+                </a>
+              </li>
+            {% endfor %}
           {% endif %}
-        </div>
+        </ul>
+      </div>
 
-        <div class="footer-rich__column">
-          <h3 class="footer-rich__heading">{{ section.settings.quick_links_heading }}</h3>
+      <div class="footer-premium__column">
+        <h3 class="footer-premium__heading footer-premium__heading--icon">
+          <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'arrow' %}</span>
+          {{ section.settings.quick_links_heading }}
+        </h3>
+        <ul class="footer-premium__links" role="list">
           {% if quick_links_menu != blank and quick_links_menu.links.size > 0 %}
-            <ul class="footer-rich__links" role="list">
-              {% for link in quick_links_menu.links %}
-                <li><a href="{{ link.url }}">{{ link.title }}</a></li>
-              {% endfor %}
-            </ul>
+            {% for link in quick_links_menu.links %}
+              <li>
+                <a href="{{ link.url }}" class="footer-premium__link-row">
+                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-link-icon', link: link %}</span>
+                  <span>{{ link.title }}</span>
+                </a>
+              </li>
+            {% endfor %}
           {% else %}
-            <p class="footer-rich__placeholder">{{ section.settings.quick_links_empty_text }}</p>
+            <li>
+              <a href="{{ routes.root_url }}" class="footer-premium__link-row">
+                <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'home' %}</span>
+                <span>Home</span>
+              </a>
+            </li>
+            <li>
+              <a href="{{ routes.all_products_collection_url }}" class="footer-premium__link-row">
+                <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'grid' %}</span>
+                <span>All products</span>
+              </a>
+            </li>
+            {% if pages.contact %}
+              <li>
+                <a href="{{ pages.contact.url }}" class="footer-premium__link-row">
+                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'email' %}</span>
+                  <span>Contact</span>
+                </a>
+              </li>
+            {% endif %}
+            <li>
+              <a href="{{ routes.search_url }}" class="footer-premium__link-row">
+                <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'search' %}</span>
+                <span>Search</span>
+              </a>
+            </li>
+            <li>
+              <a href="{{ routes.account_url }}" class="footer-premium__link-row">
+                <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'account' %}</span>
+                <span>My account</span>
+              </a>
+            </li>
           {% endif %}
-        </div>
+        </ul>
+      </div>
 
-        <div class="footer-rich__column">
-          <h3 class="footer-rich__heading">{{ section.settings.social_heading }}</h3>
-          {% if section.blocks.size > 0 %}
-            <ul class="footer-rich__links footer-rich__links--social" role="list">
-              {% for block in section.blocks %}
-                {% if block.type == 'social_link' and block.settings.url != blank %}
-                  <li {{ block.shopify_attributes }}>
-                    <a href="{{ block.settings.url }}" {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                      {{ block.settings.label }}
-                    </a>
-                  </li>
+      {% if section.settings.show_newsletter %}
+        <div class="footer-premium__newsletter">
+          <h3 class="footer-premium__heading footer-premium__heading--icon">
+            <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'mail' %}</span>
+            {{ section.settings.newsletter_heading }}
+          </h3>
+          {% if section.settings.newsletter_text != blank %}
+            <p class="footer-premium__newsletter-text">{{ section.settings.newsletter_text }}</p>
+          {% endif %}
+          {%- form 'customer', class: 'footer-premium__newsletter-form' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <label class="visually-hidden" for="FooterNewsletterEmail-{{ section.id }}">
+              {{ 'blocks.email_signup.label' | t }}
+            </label>
+            <div class="footer-premium__newsletter-row">
+              <span class="footer-premium__icon footer-premium__icon--input" aria-hidden="true">
+                {% render 'footer-icon', name: 'email' %}
+              </span>
+              <input
+                id="FooterNewsletterEmail-{{ section.id }}"
+                class="footer-premium__newsletter-input"
+                type="email"
+                name="contact[email]"
+                value="{{ form.email }}"
+                placeholder="{{ section.settings.newsletter_placeholder }}"
+                autocomplete="email"
+                autocorrect="off"
+                autocapitalize="off"
+                required
+                {% if form.errors %}
+                  aria-invalid="true"
                 {% endif %}
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p class="footer-rich__placeholder">{{ section.settings.social_empty_text }}</p>
-          {% endif %}
+              >
+              <button type="submit" class="footer-premium__newsletter-btn">
+                <span>{{ section.settings.newsletter_button }}</span>
+                <span class="footer-premium__icon footer-premium__icon--btn" aria-hidden="true">
+                  {% render 'footer-icon', name: 'send' %}
+                </span>
+              </button>
+            </div>
+            {%- if form.errors -%}
+              <p class="footer-premium__newsletter-message footer-premium__newsletter-message--error">
+                {{ form.errors.translated_fields.email | capitalize }}
+                {{ form.errors.messages.email }}
+              </p>
+            {%- endif -%}
+            {%- if form.posted_successfully? -%}
+              <p class="footer-premium__newsletter-message footer-premium__newsletter-message--success">
+                {% if section.settings.newsletter_success != blank %}
+                  {{ section.settings.newsletter_success }}
+                {% else %}
+                  {{ 'blocks.email_signup.success' | t }}
+                {% endif %}
+              </p>
+            {%- endif -%}
+          {%- endform -%}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="footer-premium__mid">
+      {% if section.settings.show_map %}
+        <div class="footer-premium__map-wrap">
+          <h3 class="footer-premium__heading footer-premium__heading--icon">
+            <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'map-pin' %}</span>
+            {{ section.settings.map_heading }}
+          </h3>
+          <div class="footer-premium__map">
+            {% if section.settings.map_embed_url != blank %}
+              <iframe
+                title="{{ section.settings.map_heading | escape }}"
+                src="{{ section.settings.map_embed_url }}"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
+            {% else %}
+              <a
+                class="footer-premium__map-fallback"
+                href="{{ directions_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="footer-premium__icon footer-premium__icon--map" aria-hidden="true">
+                  {% render 'footer-icon', name: 'map-pin' %}
+                </span>
+                <span>{{ section.settings.map_fallback_text }}</span>
+              </a>
+            {% endif %}
+          </div>
+          <a class="footer-premium__directions" href="{{ directions_url }}" target="_blank" rel="noopener noreferrer">
+            {{ section.settings.map_directions_label }}
+            <span class="footer-premium__icon footer-premium__icon--inline" aria-hidden="true">
+              {% render 'footer-icon', name: 'external' %}
+            </span>
+          </a>
+        </div>
+      {% endif %}
+
+      <div class="footer-premium__contact-grid">
+        <div class="footer-premium__contact-card">
+          <h4 class="footer-premium__contact-title">
+            <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'clock' %}</span>
+            {{ section.settings.hours_heading }}
+          </h4>
+          <div class="rte">{{ section.settings.working_hours }}</div>
+        </div>
+        <div class="footer-premium__contact-card">
+          <h4 class="footer-premium__contact-title">
+            <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'location' %}</span>
+            {{ section.settings.address_heading }}
+          </h4>
+          <div class="rte">{{ section.settings.shop_address }}</div>
+        </div>
+        <div class="footer-premium__contact-card">
+          <h4 class="footer-premium__contact-title">
+            <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'phone' %}</span>
+            {{ section.settings.contact_heading }}
+          </h4>
+          <ul class="footer-premium__contact-list" role="list">
+            {% if section.settings.phone != blank %}
+              <li>
+                <span class="footer-premium__contact-label">Phone</span>
+                <a href="tel:{{ phone_href }}">{{ section.settings.phone }}</a>
+              </li>
+            {% endif %}
+            {% if section.settings.email != blank %}
+              <li>
+                <span class="footer-premium__contact-label">Email</span>
+                <a href="mailto:{{ section.settings.email | strip }}">{{ section.settings.email }}</a>
+              </li>
+            {% endif %}
+            {% if section.settings.contact_details != blank %}
+              <li class="footer-premium__contact-extra rte">{{ section.settings.contact_details }}</li>
+            {% endif %}
+          </ul>
         </div>
       </div>
     </div>
 
-    <div class="footer-rich__info">
-      <div class="footer-rich__info-item">
-        <h4>{{ section.settings.hours_heading }}</h4>
-        <div class="rte">{{ section.settings.working_hours }}</div>
-      </div>
-      <div class="footer-rich__info-item">
-        <h4>{{ section.settings.address_heading }}</h4>
-        <div class="rte">{{ section.settings.shop_address }}</div>
-      </div>
-      <div class="footer-rich__info-item">
-        <h4>{{ section.settings.contact_heading }}</h4>
-        <div class="rte">{{ section.settings.contact_details }}</div>
-      </div>
-    </div>
+    {% if section.settings.trust_badges != blank %}
+      <p class="footer-premium__trust">
+        <span class="footer-premium__icon footer-premium__icon--trust" aria-hidden="true">
+          {% render 'footer-icon', name: 'sparkle' %}
+        </span>
+        {{ section.settings.trust_badges }}
+      </p>
+    {% endif %}
 
-    <div class="footer-rich__bottom">
-      <p>{{ section.settings.copyright_text }}</p>
+    <div class="footer-premium__bottom">
+      <p class="footer-premium__copyright">{{ section.settings.copyright_text }}</p>
+      {% if section.settings.show_policy_links %}
+        <ul class="footer-premium__policies" role="list">
+          {% for policy in shop.policies %}
+            {% if policy != blank %}
+              <li>
+                <a href="{{ policy.url }}" class="footer-premium__link-row footer-premium__link-row--policy">
+                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'arrow' %}</span>
+                  <span>{{ policy.title }}</span>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
     </div>
   </div>
 </footer>
 
 {% stylesheet %}
-  .footer-rich {
-    display: grid;
-    gap: 1.25rem;
+  .footer-premium {
+    --footer-font-display: 'Cormorant Garamond', Georgia, serif;
+    --footer-font-body: 'Jost', var(--font-body--family), sans-serif;
+    --footer-gold: rgb(var(--brand-gold, 212 175 55));
+    --footer-gold-soft: rgb(var(--brand-gold, 212 175 55) / 0.22);
+    font-family: var(--footer-font-body);
+    border-top: 1px solid var(--footer-gold-soft);
+    background: linear-gradient(180deg, rgb(var(--color-background-rgb)) 0%, rgb(var(--color-background-rgb) / 0.97) 100%);
   }
 
-  .footer-rich__top {
+  .footer-premium__inner {
     display: grid;
-    gap: 1.2rem;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
   }
 
-  .footer-rich__brand {
+  .footer-premium__main {
     display: grid;
-    gap: 0.7rem;
+    gap: clamp(1.25rem, 2.5vw, 2rem);
   }
 
-  .footer-rich__logo {
+  .footer-premium__brand {
+    display: grid;
+    gap: 0.85rem;
+    align-content: start;
+  }
+
+  .footer-premium__logo-link {
+    display: inline-block;
+    line-height: 0;
+  }
+
+  .footer-premium__logo {
     width: 100%;
-    max-width: 180px;
+    max-width: 200px;
     height: auto;
     display: block;
   }
 
-  .footer-rich__brand-name {
+  .footer-premium__brand-name {
+    font-family: var(--footer-font-display);
+    font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .footer-premium__about {
     margin: 0;
-    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    max-width: 36ch;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: rgb(var(--color-foreground-rgb) / 0.78);
   }
 
-  .footer-rich__about {
-    color: rgb(var(--color-foreground-rgb) / 0.8);
-  }
-
-  .footer-rich__about p {
+  .footer-premium__about p {
     margin: 0;
   }
 
-  .footer-rich__nav-columns {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .footer-premium__social {
+    list-style: none;
+    margin: 0.15rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
-  .footer-rich__heading {
-    margin: 0 0 0.55rem;
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  .footer-premium__social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 999px;
+    border: 1px solid var(--footer-gold-soft);
+    background: rgb(var(--color-background-rgb) / 0.6);
+    color: var(--footer-gold);
+    transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
   }
 
-  .footer-rich__links {
+  .footer-premium__social-link:hover {
+    background: var(--footer-gold);
+    border-color: var(--footer-gold);
+    color: #111;
+    transform: translateY(-2px);
+  }
+
+  .footer-premium__social-link svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: currentColor;
+  }
+
+  .footer-premium__heading {
+    margin: 0 0 0.85rem;
+    font-family: var(--footer-font-display);
+    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: inherit;
+    position: relative;
+    padding-bottom: 0.45rem;
+  }
+
+  .footer-premium__heading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 2rem;
+    height: 1px;
+    background: var(--footer-gold);
+  }
+
+  .footer-premium__links {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.42rem;
+    gap: 0.5rem;
   }
 
-  .footer-rich__links a {
+  .footer-premium__links a {
     text-decoration: none;
-    color: rgb(var(--color-foreground-rgb) / 0.86);
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+    color: rgb(var(--color-foreground-rgb) / 0.82);
+    transition: color 180ms ease;
   }
 
-  .footer-rich__links a:is(:hover, :focus-visible) {
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  .footer-premium__links a:is(:hover, :focus-visible) {
+    color: var(--footer-gold);
   }
 
-  .footer-rich__placeholder {
+  .footer-premium__newsletter-text {
+    margin: 0 0 0.85rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: rgb(var(--color-foreground-rgb) / 0.72);
+    max-width: 32ch;
+  }
+
+  .footer-premium__newsletter-form {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .footer-premium__newsletter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    border: 1px solid var(--footer-gold-soft);
+    border-radius: 999px;
+    padding: 0.28rem;
+    background: rgb(var(--color-background-rgb) / 0.55);
+  }
+
+  .footer-premium__newsletter-input {
+    flex: 1 1 10rem;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 0.55rem 0.85rem;
+    font-family: var(--footer-font-body);
+    font-size: 0.86rem;
+    color: inherit;
+  }
+
+  .footer-premium__newsletter-input:focus-visible {
+    outline: 2px solid var(--footer-gold);
+    outline-offset: 2px;
+    border-radius: 999px;
+  }
+
+  .footer-premium__newsletter-btn {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 999px;
+    padding: 0.55rem 1.1rem;
+    font-family: var(--footer-font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--footer-gold), rgb(var(--brand-gold-strong, 193 151 31)));
+    color: #111;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .footer-premium__newsletter-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  .footer-premium__newsletter-message {
     margin: 0;
-    color: rgb(var(--color-foreground-rgb) / 0.58);
+    font-size: 0.82rem;
+  }
+
+  .footer-premium__newsletter-message--error {
+    color: #b42318;
+  }
+
+  .footer-premium__newsletter-message--success {
+    color: rgb(var(--color-foreground-rgb) / 0.85);
+  }
+
+  .footer-premium__mid {
+    display: grid;
+    gap: 1.25rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--footer-gold-soft);
+  }
+
+  .footer-premium__map-wrap {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .footer-premium__map {
+    position: relative;
+    width: 100%;
+    min-height: 220px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--footer-gold-soft);
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+
+  .footer-premium__map iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .footer-premium__map-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 220px;
+    padding: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: rgb(var(--color-foreground-rgb) / 0.75);
     font-size: 0.9rem;
   }
 
-  .footer-rich__info {
-    border-top: 1px solid rgb(var(--color-border-rgb) / 0.22);
-    border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.22);
-    padding: 0.95rem 0;
-    display: grid;
-    gap: 0.85rem;
+  .footer-premium__map-pin {
+    font-size: 1.75rem;
   }
 
-  .footer-rich__info-item h4 {
-    margin: 0 0 0.3rem;
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
+  .footer-premium__directions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    text-decoration: none;
+    color: var(--footer-gold);
+    font-weight: 600;
   }
 
-  .footer-rich__info-item :is(p, a) {
+  .footer-premium__directions:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .footer-premium__contact-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .footer-premium__contact-card h4 {
+    margin: 0 0 0.45rem;
+    font-family: var(--footer-font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .footer-premium__contact-card :is(p, a) {
     margin: 0;
-    color: rgb(var(--color-foreground-rgb) / 0.86);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: rgb(var(--color-foreground-rgb) / 0.82);
   }
 
-  .footer-rich__bottom p {
+  .footer-premium__contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .footer-premium__contact-label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb) / 0.5);
+    margin-bottom: 0.15rem;
+  }
+
+  .footer-premium__contact-list a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .footer-premium__contact-list a:hover {
+    color: var(--footer-gold);
+  }
+
+  .footer-premium__trust {
     margin: 0;
     text-align: center;
-    font-size: 0.82rem;
-    color: rgb(var(--color-foreground-rgb) / 0.7);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--footer-gold-soft);
+    border-bottom: 1px solid var(--footer-gold-soft);
+  }
+
+  .footer-premium__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    text-align: center;
+  }
+
+  .footer-premium__copyright {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgb(var(--color-foreground-rgb) / 0.62);
+  }
+
+  .footer-premium__policies {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 1rem;
+  }
+
+  .footer-premium__policies a {
+    font-size: 0.78rem;
+    text-decoration: none;
+    color: rgb(var(--color-foreground-rgb) / 0.65);
+  }
+
+  .footer-premium__policies a:hover {
+    color: var(--footer-gold);
   }
 
   @media screen and (min-width: 750px) {
-    .footer-rich__top {
-      grid-template-columns: 1.1fr 2fr;
-      gap: 1.6rem;
+    .footer-premium__main {
+      grid-template-columns: 1.15fr repeat(3, minmax(0, 1fr));
+      align-items: start;
     }
 
-    .footer-rich__nav-columns {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.4rem;
+    .footer-premium__mid {
+      grid-template-columns: 1.1fr 1fr;
+      gap: 1.75rem;
+      align-items: start;
     }
 
-    .footer-rich__info {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1rem;
+    .footer-premium__map {
+      min-height: 260px;
+    }
+
+    .footer-premium__contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .footer-premium__bottom {
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: start;
+    }
+
+    .footer-premium__policies {
+      justify-content: flex-end;
     }
   }
 {% endstylesheet %}
@@ -236,7 +774,11 @@
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "Color scheme",
-      "default": "scheme-1"
+      "default": "scheme-golden"
+    },
+    {
+      "type": "header",
+      "content": "Brand"
     },
     {
       "type": "text",
@@ -253,95 +795,194 @@
       "type": "richtext",
       "id": "about_text",
       "label": "About text",
-      "default": "<p>Premium cosmetic essentials designed for healthy skin and everyday confidence.</p>"
+      "default": "<p>Premium cosmetic essentials crafted for radiant skin, confident beauty, and everyday self-care rituals.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
     },
     {
       "type": "text",
       "id": "categories_heading",
       "label": "Categories heading",
-      "default": "Categories"
+      "default": "Shop by category"
     },
     {
       "type": "link_list",
       "id": "categories_menu",
-      "label": "Categories menu"
-    },
-    {
-      "type": "text",
-      "id": "categories_empty_text",
-      "label": "Categories empty text",
-      "default": "Assign a categories menu."
+      "label": "Categories menu",
+      "info": "Leave empty to list all collections automatically."
     },
     {
       "type": "text",
       "id": "quick_links_heading",
       "label": "Quick links heading",
-      "default": "Quick Links"
+      "default": "Explore"
     },
     {
       "type": "link_list",
       "id": "quick_links_menu",
-      "label": "Quick links menu"
+      "label": "Quick links menu",
+      "info": "Leave empty for default store links and collections."
+    },
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show newsletter signup",
+      "default": true
     },
     {
       "type": "text",
-      "id": "quick_links_empty_text",
-      "label": "Quick links empty text",
-      "default": "Assign a quick links menu."
+      "id": "newsletter_heading",
+      "label": "Newsletter heading",
+      "default": "Join our beauty circle"
     },
     {
       "type": "text",
-      "id": "social_heading",
-      "label": "Social heading",
-      "default": "Social Sites"
+      "id": "newsletter_text",
+      "label": "Newsletter description",
+      "default": "Exclusive offers, new launches, and skincare tips — delivered to your inbox."
     },
     {
       "type": "text",
-      "id": "social_empty_text",
-      "label": "Social empty text",
-      "default": "Add social links blocks."
+      "id": "newsletter_placeholder",
+      "label": "Email placeholder",
+      "default": "Your email address"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button",
+      "label": "Subscribe button",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_success",
+      "label": "Success message",
+      "default": "Welcome! You're subscribed to our newsletter."
+    },
+    {
+      "type": "header",
+      "content": "Map"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_map",
+      "label": "Show map",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "map_heading",
+      "label": "Map heading",
+      "default": "Visit our store"
+    },
+    {
+      "type": "text",
+      "id": "map_query",
+      "label": "Map search query",
+      "default": "Lamstone Healthcare Mangalapuram Kerala 695317",
+      "info": "Used for directions link when embed URL is empty."
+    },
+    {
+      "type": "url",
+      "id": "map_embed_url",
+      "label": "Google Maps embed URL",
+      "info": "Paste the iframe src URL from Google Maps → Share → Embed a map."
+    },
+    {
+      "type": "url",
+      "id": "map_directions_url",
+      "label": "Directions link (optional)"
+    },
+    {
+      "type": "text",
+      "id": "map_directions_label",
+      "label": "Directions link label",
+      "default": "Get directions"
+    },
+    {
+      "type": "text",
+      "id": "map_fallback_text",
+      "label": "Map fallback text",
+      "default": "Tap to open location in Google Maps"
+    },
+    {
+      "type": "header",
+      "content": "Contact & hours"
     },
     {
       "type": "text",
       "id": "hours_heading",
       "label": "Working hours heading",
-      "default": "Working Hours"
+      "default": "Boutique hours"
     },
     {
       "type": "richtext",
       "id": "working_hours",
       "label": "Working hours",
-      "default": "<p>Mon - Sat: 10:00 AM - 7:00 PM</p><p>Sunday: Closed</p>"
+      "default": "<p>Mon – Sat: 10:00 AM – 7:00 PM</p><p>Sunday: Closed</p>"
     },
     {
       "type": "text",
       "id": "address_heading",
       "label": "Address heading",
-      "default": "Shop Address"
+      "default": "Our location"
     },
     {
       "type": "richtext",
       "id": "shop_address",
       "label": "Shop address",
-      "default": "<p>123 Beauty Street, City Name, State 000000</p>"
+      "default": "<p>Z Avenue, 10/20/E-10/20/G, NH 66,<br>Mangalapuram, Kerala 695317</p>"
     },
     {
       "type": "text",
       "id": "contact_heading",
       "label": "Contact heading",
-      "default": "Contact Us"
+      "default": "Get in touch"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone",
+      "default": "+91 90000 00000"
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Email",
+      "default": "support@lamestonehealthcare.com"
     },
     {
       "type": "richtext",
       "id": "contact_details",
-      "label": "Contact details",
-      "default": "<p>Phone: +91 90000 00000</p><p>Email: support@example.com</p>"
+      "label": "Extra contact notes"
+    },
+    {
+      "type": "header",
+      "content": "Footer bottom"
+    },
+    {
+      "type": "text",
+      "id": "trust_badges",
+      "label": "Trust line",
+      "default": "Cruelty-free · Dermatologist tested · Secure checkout"
     },
     {
       "type": "text",
       "id": "copyright_text",
       "label": "Copyright text",
       "default": "© 2026 Lame Beauty Care. All rights reserved."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policy_links",
+      "label": "Show policy links",
+      "default": true
     },
     {
       "type": "header",
@@ -355,7 +996,7 @@
       "max": 120,
       "step": 4,
       "unit": "px",
-      "default": 36
+      "default": 48
     },
     {
       "type": "range",
@@ -365,7 +1006,7 @@
       "max": 120,
       "step": 4,
       "unit": "px",
-      "default": 28
+      "default": 32
     }
   ],
   "blocks": [
@@ -374,9 +1015,24 @@
       "name": "Social link",
       "settings": [
         {
+          "type": "select",
+          "id": "platform",
+          "label": "Platform",
+          "options": [
+            { "value": "instagram", "label": "Instagram" },
+            { "value": "facebook", "label": "Facebook" },
+            { "value": "youtube", "label": "YouTube" },
+            { "value": "tiktok", "label": "TikTok" },
+            { "value": "pinterest", "label": "Pinterest" },
+            { "value": "whatsapp", "label": "WhatsApp" },
+            { "value": "linkedin", "label": "LinkedIn" }
+          ],
+          "default": "instagram"
+        },
+        {
           "type": "text",
           "id": "label",
-          "label": "Platform name",
+          "label": "Accessibility label",
           "default": "Instagram"
         },
         {
@@ -398,18 +1054,15 @@
       "name": "Lame Editable Footer",
       "settings": {
         "brand_name": "Lame Beauty Care",
-        "categories_heading": "Categories",
-        "quick_links_heading": "Quick Links",
-        "social_heading": "Social Sites",
-        "hours_heading": "Working Hours",
-        "address_heading": "Shop Address",
-        "contact_heading": "Contact Us",
-        "copyright_text": "© 2026 Lame Beauty Care. All rights reserved."
+        "show_newsletter": true,
+        "show_map": true,
+        "trust_badges": "Cruelty-free · Dermatologist tested · Secure checkout"
       },
       "blocks": {
         "social_instagram": {
           "type": "social_link",
           "settings": {
+            "platform": "instagram",
             "label": "Instagram",
             "url": "https://instagram.com"
           }
@@ -417,6 +1070,7 @@
         "social_facebook": {
           "type": "social_link",
           "settings": {
+            "platform": "facebook",
             "label": "Facebook",
             "url": "https://facebook.com"
           }
@@ -424,6 +1078,7 @@
         "social_youtube": {
           "type": "social_link",
           "settings": {
+            "platform": "youtube",
             "label": "YouTube",
             "url": "https://youtube.com"
           }
@@ -434,3 +1089,4 @@
   ]
 }
 {% endschema %}
+

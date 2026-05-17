@@ -1,0 +1,23 @@
+{%- doc -%}
+  Picks a footer icon for a navigation link based on its URL.
+  @param {object} link - menu link object
+{%- enddoc -%}
+
+{%- liquid
+  assign link_icon = 'arrow'
+  assign link_url = link.url | downcase
+
+  if link_url == routes.root_url or link_url == '/'
+    assign link_icon = 'home'
+  elsif link_url contains routes.search_url or link_url contains '/search'
+    assign link_icon = 'search'
+  elsif link_url contains routes.account_url or link_url contains '/account'
+    assign link_icon = 'account'
+  elsif link_url contains '/collections/'
+    assign link_icon = 'grid'
+  elsif link_url contains '/pages/contact' or link.title contains 'Contact'
+    assign link_icon = 'email'
+  endif
+-%}
+
+{% render 'footer-icon', name: link_icon %}
