@@ -26,14 +26,23 @@
   <a href="{{ product.url }}" class="lame-home-product-card__media-link">
     <div class="lame-home-product-card__media">
       {% if product.featured_media %}
+        {% liquid
+          if card_style == 'flash'
+            assign card_image_widths = '120,180,240,320,400'
+            assign card_image_sizes = '(min-width: 750px) 200px, 42vw'
+          else
+            assign card_image_widths = '240,360,480,600,900'
+            assign card_image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw'
+          endif
+        %}
         {{
           product.featured_media
-          | image_url: width: 900
+          | image_url: width: 400
           | image_tag:
             class: 'lame-home-product-card__image',
             loading: 'lazy',
-            widths: '240,360,480,600,900',
-            sizes: '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw',
+            widths: card_image_widths,
+            sizes: card_image_sizes,
             alt: product.featured_media.alt | default: product.title | escape
         }}
       {% else %}
