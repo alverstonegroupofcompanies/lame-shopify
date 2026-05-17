@@ -19,17 +19,15 @@
     margin: 0 auto;
   }
 
-  .ai-category-carousel__header-{{ ai_gen_id }} {
-    text-align: {{ block.settings.heading_alignment }};
-    margin-bottom: 32px;
-  }
-
-  .ai-category-carousel__heading-{{ ai_gen_id }} {
+  .ai-category-carousel__header-{{ ai_gen_id }} .lame-section-heading__title {
     font-size: {{ block.settings.heading_size }}px;
     color: {{ block.settings.heading_color }};
-    margin: 0;
-    font-weight: 700;
-    line-height: 1.2;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-category-carousel__header-{{ ai_gen_id }} .lame-section-heading__title {
+      font-size: calc({{ block.settings.heading_size }}px * 0.75);
+    }
   }
 
   .ai-category-carousel__track-wrapper-{{ ai_gen_id }} {
@@ -188,9 +186,6 @@
       height: calc({{ block.settings.card_height }}px * 0.7);
     }
 
-    .ai-category-carousel__heading-{{ ai_gen_id }} {
-      font-size: calc({{ block.settings.heading_size }}px * 0.7);
-    }
   }
 {% endstyle %}
 
@@ -198,7 +193,11 @@
   <div class="ai-category-carousel__container-{{ ai_gen_id }}">
     {% if block.settings.heading != blank %}
       <div class="ai-category-carousel__header-{{ ai_gen_id }}">
-        <h2 class="ai-category-carousel__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+        {% render 'lame-section-heading',
+          title: block.settings.heading,
+          alignment: block.settings.heading_alignment,
+          size: 'large'
+        %}
       </div>
     {% endif %}
 

@@ -1,0 +1,41 @@
+{%- doc -%}
+  Premium section title — matches Shop by category / LAMÉ theme styling.
+  @param {string} title - Main heading text
+  @param {string} [subtitle] - Optional line below the divider
+  @param {string} [alignment] - left | center | right (default: center)
+  @param {string} [size] - default | large (default: default)
+  @param {boolean} [show_divider] - Show gold ornament (default: true)
+  @param {string} [class] - Extra classes on the wrapper
+{%- enddoc -%}
+
+{%- liquid
+  assign heading_title = title
+  assign heading_subtitle = subtitle
+  assign heading_align = alignment | default: 'center'
+  assign heading_size = size | default: 'default'
+  assign heading_show_divider = show_divider
+  if heading_show_divider == nil
+    assign heading_show_divider = true
+  endif
+  assign heading_class = class | default: '' | strip
+-%}
+
+{%- unless heading_title == blank -%}
+  <div
+    class="lame-section-heading lame-section-heading--{{ heading_align }} lame-section-heading--{{ heading_size }}{% if heading_class != blank %} {{ heading_class }}{% endif %}"
+  >
+    <h2 class="lame-section-heading__title">{{ heading_title }}</h2>
+    {%- if heading_show_divider -%}
+      <span class="lame-section-heading__divider" aria-hidden="true">
+        <svg viewBox="0 0 120 12" fill="none" focusable="false">
+          <path d="M0 6h44" stroke="currentColor" stroke-width="0.6"/>
+          <path d="M76 6h44" stroke="currentColor" stroke-width="0.6"/>
+          <path d="M60 2c-2.2 2.8-4.8 4-8 4 3.2 0 5.8 1.2 8 4 2.2-2.8 4.8-4 8-4-3.2 0-5.8-1.2-8-4Z" fill="currentColor"/>
+        </svg>
+      </span>
+    {%- endif -%}
+    {%- if heading_subtitle != blank -%}
+      <p class="lame-section-heading__subtitle">{{ heading_subtitle }}</p>
+    {%- endif -%}
+  </div>
+{%- endunless -%}

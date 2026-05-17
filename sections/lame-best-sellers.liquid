@@ -16,13 +16,13 @@
   {{ section.shopify_attributes }}
 >
   <div class="lame-product-carousel lame-best-sellers__carousel spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    {% if section.settings.heading != blank %}
-      <header class="lame-product-carousel__header">
-        <h2 class="lame-product-carousel__title">{{ section.settings.heading }}</h2>
-        {% if section.settings.subheading != blank %}
-          <p class="lame-product-carousel__subtitle">{{ section.settings.subheading }}</p>
-        {% endif %}
-      </header>
+    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+      {% render 'lame-section-heading',
+        title: section.settings.heading,
+        subtitle: section.settings.subheading,
+        alignment: 'center',
+        size: 'large'
+      %}
     {% endif %}
 
     <div class="lame-product-carousel__viewport">

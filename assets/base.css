@@ -4440,6 +4440,9 @@ button.shopify-payment-button__button--unbranded:hover {
   --lame-radius-card: 12px;
   --lame-shadow-soft: 0 8px 24px rgb(var(--color-shadow-rgb) / 0.08);
   --lame-border-soft: 1px solid rgb(var(--color-border-rgb) / 0.24);
+  --lame-section-heading-color: rgb(var(--brand-ink));
+  --lame-section-heading-accent: rgb(var(--brand-gold-readable));
+  --lame-section-heading-ornament: rgb(var(--brand-gold-strong));
 }
 
 body {
@@ -4864,17 +4867,96 @@ body {
   margin-inline: auto;
 }
 
-.template-index :is(.lame-new-products__title, .lame-flash-deal__title) {
-  font-size: var(--lame-home-heading-size);
-  font-weight: 700;
-  color: var(--lame-text-primary);
-  text-transform: capitalize;
+/* LAMÉ — unified premium section titles */
+.lame-section-heading {
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.lame-section-heading--left {
+  text-align: start;
+}
+
+.lame-section-heading--center {
+  text-align: center;
+}
+
+.lame-section-heading--right {
+  text-align: end;
+}
+
+.lame-section-heading__title {
+  margin: 0;
+  font-family: var(--lame-font-display, var(--font-heading--family));
+  font-size: clamp(1.2rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lame-section-heading-color);
+}
+
+.lame-section-heading--large .lame-section-heading__title {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  letter-spacing: 0.12em;
+}
+
+.lame-section-heading__divider {
+  display: block;
+  width: min(180px, 42vw);
+  margin: 0.6rem auto 0.5rem;
+  color: var(--lame-section-heading-ornament);
+}
+
+.lame-section-heading--left .lame-section-heading__divider,
+.lame-section-heading--right .lame-section-heading__divider {
+  margin-inline: 0;
+}
+
+.lame-section-heading--left .lame-section-heading__divider {
+  margin-left: 0;
+}
+
+.lame-section-heading--right .lame-section-heading__divider {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.lame-section-heading__divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lame-section-heading__subtitle {
+  margin: 0;
+  max-width: 42ch;
+  font-size: clamp(0.8125rem, 1.4vw, 0.9375rem);
+  line-height: 1.45;
+  color: rgb(0 0 0 / 0.78);
+}
+
+.lame-section-heading--center .lame-section-heading__subtitle {
+  margin-inline: auto;
+}
+
+.lame-section-heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.lame-section-heading-row .lame-section-heading {
+  margin-bottom: 0;
+  flex: 1 1 auto;
+  min-width: min(100%, 16rem);
 }
 
 /* Homepage — readable body copy and section headings */
 .template-index :is(
   .lame-signature__title-main,
-  .lame-brand-logos__title,
   [class*='ai-category-carousel__heading-']
 ) {
   color: var(--lame-text-primary);
@@ -4886,7 +4968,7 @@ body {
 
 .template-index :is(
   .lame-signature__subtitle,
-  .lame-brand-logos__subtitle,
+  .lame-section-heading__subtitle,
   .lame-new-products__view-all,
   .lame-flash-deal__countdown-label,
   .lame-flash-deal__empty p
@@ -4909,10 +4991,6 @@ body {
   line-height: 1.5;
 }
 
-.template-index .lame-brand-logos__subtitle {
-  font-size: clamp(0.8125rem, 1.4vw, 0.9375rem);
-  line-height: 1.45;
-}
 
 .template-index :is(
   .lame-signature__brand,
@@ -4966,7 +5044,18 @@ body {
 }
 
 .template-index [class*='ai-category-carousel__heading-'] {
-  font-size: var(--lame-home-heading-size);
+  margin: 0;
+  font-family: var(--lame-font-display, var(--font-heading--family));
+  font-size: clamp(1.2rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lame-section-heading-color, var(--lame-text-primary));
+}
+
+.template-index [class*='ai-category-carousel__header-'] {
+  margin-bottom: clamp(1rem, 2.5vw, 1.5rem);
 }
 
 .template-index [class*='ai-category-carousel__nav-'] {

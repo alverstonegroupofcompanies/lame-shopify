@@ -9,14 +9,12 @@
     "
   >
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
-      <header class="lame-brand-logos__header">
-        {% if section.settings.heading != blank %}
-          <h2 class="lame-brand-logos__title">{{ section.settings.heading }}</h2>
-        {% endif %}
-        {% if section.settings.subheading != blank %}
-          <p class="lame-brand-logos__subtitle">{{ section.settings.subheading }}</p>
-        {% endif %}
-      </header>
+      {% render 'lame-section-heading',
+        title: section.settings.heading,
+        subtitle: section.settings.subheading,
+        alignment: 'center',
+        size: 'large'
+      %}
     {% endif %}
 
     <div class="lame-brand-logos__row">
@@ -69,30 +67,6 @@
   .lame-brand-logos {
     width: 100%;
     overflow: hidden;
-  }
-
-  .lame-brand-logos__header {
-    text-align: center;
-    margin-bottom: clamp(1rem, 2.5vw, 1.35rem);
-  }
-
-  .lame-brand-logos__title {
-    margin: 0;
-    color: rgb(var(--brand-ink));
-    font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1rem, 1.8vw, 1.2rem);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    line-height: 1.2;
-  }
-
-  .lame-brand-logos__subtitle {
-    margin: 0.25rem 0 0;
-    font-size: clamp(0.8125rem, 1.4vw, 0.9375rem);
-    line-height: 1.45;
-    color: rgb(var(--color-foreground-rgb) / 0.82);
-    max-width: 42ch;
-    margin-inline: auto;
   }
 
   .lame-brand-logos__row {
