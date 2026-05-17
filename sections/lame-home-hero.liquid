@@ -107,7 +107,7 @@
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--desktop">
-            <p>Add desktop slides with images for screens 750px and wider.</p>
+            <p>Add desktop slides with images for screens 1200px and wider (13″+ displays).</p>
           </div>
         {%- endif -%}
 
@@ -124,7 +124,7 @@
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--mobile">
-            <p>Add mobile slides for screens under 750px, or enable “Use desktop slides on mobile”.</p>
+            <p>Add mobile slides for phones and tablets under 12″ (under 1200px), or enable “Use desktop slides on mobile”.</p>
           </div>
         {%- endif -%}
       {%- endif -%}
@@ -139,8 +139,10 @@
     --lame-hero-height-mobile: 220px;
     --lame-hero-height-offset: 0px;
     --lame-hero-display-height: var(--lame-hero-height-mobile);
+    --lame-hero-desktop-min: 1200px;
     width: 100%;
-    max-width: none;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   body:has(> #header-group > .header-section > #header-component)
@@ -172,7 +174,7 @@
     --lame-hero-display-height: calc(var(--lame-hero-height-mobile) - var(--lame-hero-height-offset, 0px));
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 1199px) {
     .lame-home-hero--mobile-full_screen {
       --lame-hero-display-height: calc(var(--lame-hero-height-mobile) - var(--lame-hero-height-offset, 0px));
     }
@@ -222,7 +224,31 @@
     overflow: hidden;
   }
 
-  @media screen and (min-width: 750px) {
+  /* Phones + tablets under ~12″: mobile banners only */
+  @media screen and (max-width: 1199px) {
+    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop {
+      display: none !important;
+    }
+
+    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile {
+      display: block !important;
+    }
+
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image-container {
+      background: rgb(var(--color-background-rgb));
+    }
+
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image-container img,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link .slide__image,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link img {
+      object-fit: contain;
+      object-position: center center;
+    }
+  }
+
+  /* Desktop / large screens (1200px+) */
+  @media screen and (min-width: 1200px) {
     .lame-home-hero {
       --lame-hero-display-height: var(--lame-hero-height);
     }
@@ -338,7 +364,7 @@
     height: 0.5rem;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 1199px) {
     .lame-home-hero__carousel slideshow-arrows,
     .lame-home-hero__carousel slideshow-arrows[position='center'] {
       --lame-hero-arrow-gap: 0.375rem;
@@ -368,13 +394,13 @@
     font-size: 0.9rem;
   }
 
-  @media screen and (min-width: 750px) {
+  @media screen and (min-width: 1200px) {
     .lame-home-hero__placeholder--mobile {
       display: none;
     }
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 1199px) {
     .lame-home-hero__placeholder--desktop {
       display: none;
     }
@@ -505,7 +531,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Desktop image",
-          "info": "Shown on screens 750px and wider. Hidden on mobile when mobile slides are added."
+          "info": "Shown on screens 1200px and wider (13″+). Hidden on phones and tablets when mobile slides exist."
         },
         {
           "type": "url",
@@ -528,7 +554,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Mobile image",
-          "info": "Shown only on screens under 750px. Use portrait or square crops (e.g. 1080×1350px)."
+          "info": "Shown on phones and tablets under 12″ (under 1200px). Use portrait crops (e.g. 1080×1350px) so text is not cut off."
         },
         {
           "type": "url",

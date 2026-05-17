@@ -22,6 +22,11 @@
   endif
 
   assign prioritize_first_slide = prioritize_first_slide | default: true
+
+  assign slide_media_fit = 'cover'
+  if carousel_modifier == 'mobile'
+    assign slide_media_fit = 'contain'
+  endif
 -%}
 
 {%- if slide_count > 0 -%}
@@ -40,9 +45,9 @@
         endif
 
         if carousel_modifier == 'mobile'
-          assign slide_widths = '400,600,750,828,1080'
+          assign slide_widths = '400,600,750,828,1080,1200,1400'
           assign slide_sizes = '100vw'
-          assign slide_max_width = 1080
+          assign slide_max_width = 1400
         else
           assign slide_widths = '832, 1200, 1600, 1920, 2560, 3840'
           assign slide_sizes = '100vw'
@@ -81,7 +86,7 @@
         children: slide_children,
         attributes: block.shopify_attributes,
         slide_size: slideshow_slide_size,
-        media_fit: 'cover',
+        media_fit: slide_media_fit,
         navigate_to_slide: false
       %}
       {%- assign slide_index = slide_index | plus: 1 -%}
