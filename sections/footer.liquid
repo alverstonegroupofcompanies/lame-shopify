@@ -333,7 +333,7 @@
     {% endif %}
 
     <div class="footer-premium__bottom">
-      <p class="footer-premium__copyright">{{ section.settings.copyright_text }}</p>
+      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
       {% if section.settings.show_policy_links %}
         <ul class="footer-premium__policies" role="list">
           {% for policy in shop.policies %}
@@ -362,7 +362,7 @@
     --footer-icon-bg: rgb(var(--brand-gold, 212 175 55) / 0.12);
     --footer-text: rgb(var(--color-foreground-rgb));
     --footer-text-muted: rgb(var(--color-foreground-rgb) / 0.88);
-    --footer-text-subtle: rgb(var(--color-foreground-rgb) / 0.72);
+    --footer-text-subtle: rgb(var(--color-foreground-rgb) / 0.8);
     --footer-icon-size: 0.875rem;
     --footer-icon-box: 1.375rem;
     font-family: var(--footer-font-body);
@@ -881,71 +881,7 @@
     .footer-premium__main {
       grid-template-columns: 1.15fr repeat(3, minmax(0, 1fr));
       align-items: start;
-    }  "copyright_text": "© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.\nLAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.",
-        "show_policy_links": true,
-    <div class="footer-premium__bottom">
-      <p class="footer-premium__copyright">{{ section.settings.copyright_text }}</p>
-      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
-      {% if section.settings.show_policy_links %}
-      "type": "text",
-      "id": "copyright_text",
-      "label": "Copyright text",
-      "default": "© 2026 Lame Beauty Care. All rights reserved."
-      "default": "© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.\nLAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.",
-      "info": "Use a new line for a second line (brand disclaimer)."
-    },
-    {
-      "type": "checkbox",
-Updated the footer copyright section with your new text.
-
-Footer bottom now shows:
-© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.
-LAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.
-
-Files updated
-sections/footer-group.json — live footer settings
-sections/footer.liquid — default text and line-break support for a second line
-You can still edit this under Customize → Footer → Copyright text in the theme editor. Use Enter for a new line if you want two lines.
-
-footer icon looks oversized fix it, align properly and use icons better theme colors all shud be readable
-
-Icon styles are missing from the footer CSS, so SVGs render at default size. Adding icon sizing, alignment, and improved theme colors for readability.
-
-    --footer-font-body: 'Jost', var(--font-body--family), sans-serif;
-    --footer-gold: rgb(var(--brand-gold, 212 175 55));
-    --footer-gold-soft: rgb(var(--brand-gold, 212 175 55) / 0.22);
-    --footer-gold: rgb(var(--brand-gold-readable, 109 86 22));
-    max-width: 36ch;
-    font-size: 0.92rem;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    justify-content: center;
-    width: 2.35rem;
-    height: 2.35rem;
-    width: 2rem;
-  .footer-premium__heading {
-    margin: 0 0 0.85rem;
-    margin: 0 0 0.75rem;
-    font-family: var(--footer-font-display);
-    margin: 0 0 0.85rem;
-    font-size: 0.88rem;
-    font-size: 0.875rem;
-    line-height: 1.5;
-<svg class="footer-icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-<svg class="footer-icon-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-  {%- case icon_name -%}
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  .footer-premium__newsletter-message--success {
-    color: rgb(var(--color-foreground-rgb) / 0.85);
-    color: var(--footer-text-muted);
-  }
-
-
-
-
+    }
 
     .footer-premium__mid {
       grid-template-columns: 1.1fr 1fr;
@@ -1197,7 +1133,8 @@ Icon styles are missing from the footer CSS, so SVGs render at default size. Add
       "type": "text",
       "id": "copyright_text",
       "label": "Copyright text",
-      "default": "© 2026 Lame Beauty Care. All rights reserved."
+      "default": "© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.\nLAME® is a skincare brand by Lamstone HealthCare Pvt Ltd.",
+      "info": "Press Enter for a second line (e.g. brand disclaimer)."
     },
     {
       "type": "checkbox",
