@@ -176,7 +176,13 @@
 
   @media screen and (max-width: 1199px) {
     .lame-home-hero--mobile-full_screen {
-      --lame-hero-display-height: calc(var(--lame-hero-height-mobile) - var(--lame-hero-height-offset, 0px));
+      --lame-hero-display-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+    }
+
+    @supports (height: 100dvh) {
+      .lame-home-hero--mobile-full_screen {
+        --lame-hero-display-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+      }
     }
   }
 
@@ -234,16 +240,30 @@
       display: block !important;
     }
 
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image-container {
-      background: rgb(var(--color-background-rgb));
+    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-component,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-container,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-slides,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-slide {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-slide > .slide__image-container,
+    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link {
+      width: 100%;
+      height: 100%;
     }
 
     .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image,
     .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image-container img,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link .slide__image,
     .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link img {
-      object-fit: contain;
+      object-fit: cover;
       object-position: center center;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+      min-height: 100%;
     }
   }
 
@@ -554,7 +574,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Mobile image",
-          "info": "Shown on phones and tablets under 12″ (under 1200px). Use portrait crops (e.g. 1080×1350px) so text is not cut off."
+          "info": "Shown on phones and tablets under 12″ (under 1200px). Portrait images (e.g. 1080×1920) work best for full-screen cover."
         },
         {
           "type": "url",
