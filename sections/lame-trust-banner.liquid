@@ -1,0 +1,140 @@
+{%- liquid
+  assign banner_image = section.settings.image
+  assign banner_alt = section.settings.image_alt | default: shop.name | escape
+  assign use_theme_asset = false
+
+  if banner_image == blank
+    assign use_theme_asset = true
+  endif
+-%}
+
+<section
+  class="section section--full-width lame-trust-banner"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-trust-banner__wrap">
+    {%- if section.settings.link != blank -%}
+      <a
+        href="{{ section.settings.link }}"
+        class="lame-trust-banner__link"
+        {% if section.settings.open_in_new_tab %}
+          target="_blank"
+          rel="noopener"
+        {% endif %}
+      >
+    {%- endif -%}
+
+    {%- if use_theme_asset -%}
+      <img
+        src="{{ 'lame-trust-banner.png' | asset_url }}"
+        class="lame-trust-banner__image"
+        alt="{{ banner_alt }}"
+        width="1920"
+        height="auto"
+        loading="lazy"
+        decoding="async"
+      >
+    {%- else -%}
+      {{
+        banner_image
+        | image_url: width: 3840
+        | image_tag:
+          class: 'lame-trust-banner__image',
+          loading: 'lazy',
+          widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+          sizes: '100vw',
+          alt: banner_alt
+      }}
+    {%- endif -%}
+
+    {%- if section.settings.link != blank -%}
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .shopify-section:has(.lame-trust-banner) {
+    width: 100%;
+    max-width: none;
+  }
+
+  .lame-trust-banner {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .lame-trust-banner__wrap {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .lame-trust-banner__link {
+    display: block;
+    width: 100%;
+    line-height: 0;
+    text-decoration: none;
+  }
+
+  .lame-trust-banner__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    object-fit: contain;
+    object-position: center center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Trust banner (full width)",
+  "tag": "section",
+  "class": "section-wrapper section-wrapper--full-width",
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner image",
+      "info": "Leave empty to use the built-in LAMÉ trust banner. Recommended: wide image (~1920×400px or similar)."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "info": "Optional. Describe the banner for accessibility."
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Banner link",
+      "info": "Optional. Makes the whole banner clickable."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "Open link in new tab",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust banner (full width)",
+      "category": "Banners"
+    }
+  ]
+}
+{% endschema %}
