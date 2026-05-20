@@ -5,7 +5,7 @@
   assign product = closest.product
   assign rating = product.metafields.reviews.rating.value.rating
   assign scale_max = product.metafields.reviews.rating.value.scale_max
-  assign rating_count = product.metafields.reviews.rating_count
+  assign rating_count = product.metafields.reviews.rating_count | default: 0
 
   if request.visual_preview_mode and product == blank
     assign product = collections.all.products.first
@@ -13,9 +13,11 @@
     assign scale_max = product.metafields.reviews.rating.value.scale_max | default: 5
     assign rating_count = product.metafields.reviews.rating_count | default: 3
   endif
+
+  assign rating_count_num = rating_count | plus: 0
 -%}
 
-{%- if rating != blank -%}
+{%- if rating != blank and rating_count_num > 0 -%}
   {% liquid
     assign star_count_rating = scale_max
     assign decimal_rating = 0
