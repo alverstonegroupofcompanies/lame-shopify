@@ -1,0 +1,102 @@
+{%- doc -%}
+  Second header row: contact, promo, and social links (cosmetic-style utility bar).
+
+  @param {object} section - Header section (utility bar settings live on the header schema)
+{%- enddoc -%}
+
+{%- liquid
+  assign phone = section.settings.utility_phone | default: shop.phone
+  assign show_contact = section.settings.utility_show_contact
+  if show_contact and phone == blank and section.settings.utility_phone_placeholder != blank
+    assign phone = section.settings.utility_phone_placeholder
+  endif
+  assign show_contact = show_contact and phone != blank
+
+  assign promo_text = section.settings.utility_promo_text | strip_html | strip
+  assign show_promo = promo_text != blank
+
+  assign social_keys = 'utility_facebook_url,utility_instagram_url,utility_youtube_url,utility_tiktok_url,utility_twitter_url,utility_pinterest_url' | split: ','
+  assign show_social = false
+  if section.settings.utility_show_social
+    for link_key in social_keys
+      if section.settings[link_key] != blank
+        assign show_social = true
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<div
+  class="header__row header__row--utility color-{{ section.settings.color_scheme_utility }} section section--{{ section.settings.section_width }}"
+  data-testid="header-utility-bar"
+  style="--utility-padding-block: {{ section.settings.utility_padding_block }}px; --utility-padding-inline: {{ section.settings.utility_padding_inline }}px;"
+  aria-label="{{ section.settings.utility_accessibility_label | escape }}"
+>
+  <div class="header-utility-bar__grid">
+    <div class="header-utility-bar__start">
+      {%- if show_contact -%}
+        <a class="header-utility-bar__contact" href="tel:{{ phone | replace: ' ', '' | replace: '-', '' | replace: '(', '' | replace: ')', '' }}">
+          <span class="header-utility-bar__contact-label">{{ section.settings.utility_contact_label }}</span>
+          <span class="header-utility-bar__contact-value">{{ phone }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="header-utility-bar__center">
+      {%- if show_promo -%}
+        <div class="header-utility-bar__promo">
+          {{ section.settings.utility_promo_text }}
+          {%- if section.settings.utility_promo_link != blank and section.settings.utility_promo_link_label != blank -%}
+            <a class="header-utility-bar__promo-link" href="{{ section.settings.utility_promo_link }}">
+              {{ section.settings.utility_promo_link_label }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="header-utility-bar__end">
+      {%- if show_social -%}
+        <ul class="header-utility-bar__social-list" role="list">
+          {%- for link_key in social_keys -%}
+            {%- assign link_url = section.settings[link_key] -%}
+            {%- if link_url == blank -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- liquid
+              assign platform_key = link_key | replace: 'utility_', ''
+              case platform_key
+                when 'facebook_url'
+                  assign platform = 'facebook'
+                when 'instagram_url'
+                  assign platform = 'instagram'
+                when 'youtube_url'
+                  assign platform = 'youtube'
+                when 'tiktok_url'
+                  assign platform = 'tiktok'
+                when 'twitter_url'
+                  assign platform = 'twitter'
+                when 'pinterest_url'
+                  assign platform = 'pinterest'
+              endcase
+            -%}
+            <li>
+              <a
+                class="header-utility-bar__social-link"
+                href="{{ link_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="{{ platform | capitalize }}"
+              >
+                <svg class="header-utility-bar__social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+                  {%- render 'icon', icon: platform -%}
+                </svg>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</div>

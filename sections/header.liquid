@@ -332,6 +332,9 @@
   {%- if request.page_type == 'index' -%}
     <h1 class="visually-hidden">{{ shop.name }}</h1>
   {%- endif -%}
+  {%- if section.settings.show_utility_bar and section.settings.utility_bar_position == 'above' -%}
+    {% render 'header-utility-bar', section: section %}
+  {%- endif -%}
   {% for row in rows %}
     {% liquid
       assign scheme = 'color_scheme_' | append: row
@@ -394,6 +397,10 @@
       </div>
     {% endif %}
   {% endfor %}
+
+  {%- if section.settings.show_utility_bar and section.settings.utility_bar_position == 'below' -%}
+    {% render 'header-utility-bar', section: section %}
+  {%- endif -%}
 
   {% if navigation_bar != blank %}
     <div class="header__row header__navigation-bar-row color-{{ section.settings.color_scheme_bottom }}">
@@ -652,6 +659,139 @@
   }
 
   /* End Underlays ================ */
+
+  /* Second row: contact / promo / social (cosmetic-style utility bar) */
+  .header__row--utility {
+    --color-account-icon: var(--color-foreground);
+    position: relative;
+    z-index: var(--layer-lowest);
+    background-color: rgb(var(--color-background-rgb));
+    border-block-start: 1px solid rgb(var(--color-border-rgb) / 0.35);
+    padding-block: var(--utility-padding-block, 8px);
+    padding-inline: var(--utility-padding-inline, var(--page-margin));
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+
+  .header-utility-bar__grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--gap-md);
+    min-height: 2rem;
+    max-width: var(--page-width);
+    margin-inline: auto;
+  }
+
+  .header-utility-bar__start {
+    justify-self: start;
+    min-width: 0;
+  }
+
+  .header-utility-bar__center {
+    justify-self: center;
+    text-align: center;
+    min-width: 0;
+    max-width: min(42rem, 100%);
+  }
+
+  .header-utility-bar__end {
+    justify-self: end;
+  }
+
+  .header-utility-bar__contact {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .header-utility-bar__contact:hover,
+  .header-utility-bar__contact:focus-visible {
+    opacity: 0.85;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .header-utility-bar__contact-label {
+    font-weight: 600;
+  }
+
+  .header-utility-bar__promo {
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .header-utility-bar__promo :first-child {
+    margin: 0;
+    display: inline;
+  }
+
+  .header-utility-bar__promo-link {
+    margin-inline-start: 0.35rem;
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .header-utility-bar__social-list {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .header-utility-bar__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 50%;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.35);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .header-utility-bar__social-link:hover,
+  .header-utility-bar__social-link:focus-visible {
+    background: rgb(var(--color-foreground-rgb) / 0.12);
+  }
+
+  .header-utility-bar__social-icon {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: currentColor;
+  }
+
+  @media screen and (max-width: 749px) {
+    .header-utility-bar__grid {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .header-utility-bar__start,
+    .header-utility-bar__end {
+      display: none;
+    }
+
+    .header-utility-bar__center {
+      max-width: 100%;
+    }
+
+    .header-utility-bar__promo {
+      font-size: 0.6875rem;
+    }
+  }
 
   .header__row {
     /* The account component uses a different color scheme, but we need to override it to inherit the color of the header row */
@@ -1545,6 +1685,154 @@
       ],
       "default": "none",
       "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
+    },
+    {
+      "type": "header",
+      "content": "Second bar (utility)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_utility_bar",
+      "label": "Show second bar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "utility_bar_position",
+      "label": "Second bar position",
+      "options": [
+        { "value": "below", "label": "Below main navigation" },
+        { "value": "above", "label": "Above main navigation" }
+      ],
+      "default": "below",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "utility_show_contact",
+      "label": "Show phone",
+      "default": true,
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "text",
+      "id": "utility_contact_label",
+      "label": "Phone label",
+      "default": "Call us:",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "text",
+      "id": "utility_phone",
+      "label": "Phone number",
+      "info": "Leave blank to use store phone from Shopify admin.",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "text",
+      "id": "utility_phone_placeholder",
+      "label": "Fallback phone (if store phone empty)",
+      "default": "+1 (234) 567-8900",
+      "visible_if": "{{ section.settings.show_utility_bar and section.settings.utility_show_contact }}"
+    },
+    {
+      "type": "richtext",
+      "id": "utility_promo_text",
+      "label": "Promo message",
+      "default": "<p>Sign up and GET 25% OFF for your first order.</p>",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_promo_link",
+      "label": "Promo link",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "text",
+      "id": "utility_promo_link_label",
+      "label": "Promo link text",
+      "default": "Sign up now",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "utility_show_social",
+      "label": "Show social icons",
+      "default": true,
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_facebook_url",
+      "label": "Facebook",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_instagram_url",
+      "label": "Instagram",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_youtube_url",
+      "label": "YouTube",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_tiktok_url",
+      "label": "TikTok",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_twitter_url",
+      "label": "X / Twitter",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "url",
+      "id": "utility_pinterest_url",
+      "label": "Pinterest",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_utility",
+      "label": "Second bar color scheme",
+      "default": "scheme-cosmetic-bar",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "range",
+      "id": "utility_padding_block",
+      "label": "Second bar vertical padding",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8,
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "range",
+      "id": "utility_padding_inline",
+      "label": "Second bar horizontal padding",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "text",
+      "id": "utility_accessibility_label",
+      "label": "Second bar region label",
+      "default": "Store contact and offers",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
     },
     {
       "type": "header",
