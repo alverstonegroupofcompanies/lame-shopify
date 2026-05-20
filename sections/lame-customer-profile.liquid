@@ -1,0 +1,778 @@
+<script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
+<script src="{{ 'lame-customer-profile.js' | asset_url }}" defer></script>
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-customer-profile"
+  data-lame-customer-profile
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-profile spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {% unless customer %}
+      <div class="lame-profile__guest">
+        <h1 class="lame-profile__title">
+          {% if section.settings.heading != blank %}
+            {{ section.settings.heading }}
+          {% else %}
+            {{ 'customer.account.title' | t }}
+          {% endif %}
+        </h1>
+        <p>{{ 'lame_customer.login_required' | t }}</p>
+        <a href="{{ routes.account_login_url }}" class="button lame-profile__btn-primary">
+          {{ 'customer.log_in' | t }}
+        </a>
+        <p class="lame-profile__hint">
+          {{ 'lame_customer.create_account_html' | t: link: routes.account_register_url }}
+        </p>
+      </div>
+    {% else %}
+      <header class="lame-profile__header">
+        <div>
+          <h1 class="lame-profile__title">
+            {% if section.settings.heading != blank %}
+              {{ section.settings.heading }}
+            {% else %}
+              {{ 'content.account_title_personalized' | t: first_name: customer.first_name }}
+            {% endif %}
+          </h1>
+          <p class="lame-profile__subtitle">{{ customer.email }}</p>
+        </div>
+        <a href="{{ routes.account_logout_url }}" class="lame-profile__logout">
+          {{ 'customer.log_out' | t }}
+        </a>
+      </header>
+
+      <p class="lame-profile__checkout-note">{{ 'lame_customer.checkout_note' | t }}</p>
+
+      <nav class="lame-profile__tabs" role="tablist" aria-label="{{ 'lame_customer.tabs_label' | t }}">
+        <button
+          type="button"
+          class="lame-profile__tab lame-profile__tab--active"
+          role="tab"
+          aria-selected="true"
+          data-profile-tab="profile"
+        >
+          {{ 'lame_customer.tab_profile' | t }}
+        </button>
+        <button
+          type="button"
+          class="lame-profile__tab"
+          role="tab"
+          aria-selected="false"
+          data-profile-tab="addresses"
+        >
+          {{ 'lame_customer.tab_addresses' | t }}
+          <span class="lame-profile__badge">{{ customer.addresses_count }}</span>
+        </button>
+        <button
+          type="button"
+          class="lame-profile__tab"
+          role="tab"
+          aria-selected="false"
+          data-profile-tab="bank"
+        >
+          {{ 'lame_customer.tab_bank' | t }}
+        </button>
+        {% if section.settings.show_orders %}
+          <a href="{{ routes.account_url }}" class="lame-profile__tab lame-profile__tab--link">
+            {{ 'customer.orders.title' | t }}
+          </a>
+        {% endif %}
+      </nav>
+
+      {%- comment -%} Profile panel {%- endcomment -%}
+      <div
+        class="lame-profile__panel lame-profile__panel--active"
+        data-profile-panel="profile"
+        role="tabpanel"
+      >
+        <h2 class="lame-profile__panel-title">{{ 'customer.account.details' | t }}</h2>
+
+        {%- form 'customer', class: 'lame-profile__form' -%}
+          {%- if form.errors -%}
+            <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus>
+              {{ form.errors | default_errors }}
+            </div>
+          {%- endif -%}
+
+          {%- if form.posted_successfully? -%}
+            <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
+              {{ 'lame_customer.profile_saved' | t }}
+            </div>
+          {%- endif -%}
+
+          <div class="lame-profile__field-row">
+            <div class="lame-profile__field">
+              <label for="ProfileFirstName">{{ 'customer.addresses.first_name' | t }}</label>
+              <input
+                type="text"
+                id="ProfileFirstName"
+                name="customer[first_name]"
+                value="{{ customer.first_name }}"
+                autocomplete="given-name"
+                class="lame-profile__input"
+              >
+            </div>
+            <div class="lame-profile__field">
+              <label for="ProfileLastName">{{ 'customer.addresses.last_name' | t }}</label>
+              <input
+                type="text"
+                id="ProfileLastName"
+                name="customer[last_name]"
+                value="{{ customer.last_name }}"
+                autocomplete="family-name"
+                class="lame-profile__input"
+              >
+            </div>
+          </div>
+
+          <div class="lame-profile__field">
+            <label for="ProfileEmail">{{ 'customer.login_page.email' | t }}</label>
+            <input
+              type="email"
+              id="ProfileEmail"
+              name="customer[email]"
+              value="{{ customer.email }}"
+              autocomplete="email"
+              class="lame-profile__input"
+            >
+          </div>
+
+          <div class="lame-profile__field">
+            <label for="ProfilePhone">{{ 'customer.addresses.phone' | t }}</label>
+            <input
+              type="tel"
+              id="ProfilePhone"
+              name="customer[phone]"
+              value="{{ customer.phone }}"
+              autocomplete="tel"
+              class="lame-profile__input"
+            >
+          </div>
+
+          <button type="submit" class="button lame-profile__btn-primary">
+            {{ 'lame_customer.save_profile' | t }}
+          </button>
+        {%- endform -%}
+
+        {% if customer.default_address %}
+          <div class="lame-profile__default-address">
+            <h3 class="lame-profile__panel-subtitle">{{ 'lame_customer.default_shipping' | t }}</h3>
+            <address>{{ customer.default_address | format_address }}</address>
+            <button
+              type="button"
+              class="lame-profile__text-btn"
+              data-profile-tab="addresses"
+              onclick="document.querySelector('[data-profile-tab=addresses]')?.click()"
+            >
+              {{ 'lame_customer.manage_addresses' | t }}
+            </button>
+          </div>
+        {% endif %}
+      </div>
+
+      {%- comment -%} Addresses panel {%- endcomment -%}
+      <div class="lame-profile__panel" data-profile-panel="addresses" role="tabpanel" hidden>
+        <h2 class="lame-profile__panel-title">{{ 'customer.addresses.title' | t }}</h2>
+        <p class="lame-profile__panel-desc">{{ 'lame_customer.addresses_help' | t }}</p>
+
+        <div data-customer-addresses>
+          <div class="lame-profile__address-actions">
+            <button
+              type="button"
+              class="button lame-profile__btn-primary"
+              data-toggle-address
+              aria-expanded="false"
+              aria-controls="AddressNewForm"
+            >
+              {{ 'customer.addresses.add_new' | t }}
+            </button>
+          </div>
+
+          <div
+            id="AddressNewForm"
+            class="lame-profile__address-form"
+            data-address-panel
+            hidden
+          >
+            <h3 class="lame-profile__panel-subtitle">{{ 'customer.addresses.add_new' | t }}</h3>
+            {%- form 'customer_address', customer.new_address, class: 'lame-profile__form' -%}
+              {% render 'lame-customer-address-fields', form: form, prefix: 'New' %}
+              <div class="lame-profile__form-actions">
+                <button type="submit" class="button lame-profile__btn-primary">
+                  {{ 'customer.addresses.add' | t }}
+                </button>
+                <button type="reset" class="button button-secondary" data-cancel-address>
+                  {{ 'customer.addresses.cancel' | t }}
+                </button>
+              </div>
+            {%- endform -%}
+          </div>
+
+          <ul class="lame-profile__address-list" role="list">
+            {%- for address in customer.addresses -%}
+              <li class="lame-profile__address-card" data-address-panel>
+                <div class="lame-profile__address-card-header">
+                  {% if address == customer.default_address %}
+                    <span class="lame-profile__default-badge">{{ 'customer.addresses.default' | t }}</span>
+                  {% endif %}
+                  <address class="lame-profile__address-display">{{ address | format_address }}</address>
+                </div>
+                <div class="lame-profile__address-card-actions">
+                  <button
+                    type="button"
+                    class="lame-profile__text-btn"
+                    data-toggle-address
+                    aria-expanded="false"
+                    aria-controls="EditAddress_{{ address.id }}"
+                  >
+                    {{ 'customer.addresses.edit' | t }}
+                  </button>
+                  <button
+                    type="button"
+                    class="lame-profile__text-btn lame-profile__text-btn--danger"
+                    data-delete-address
+                    data-target="{{ address.url }}"
+                    data-confirm-message="{{ 'customer.addresses.delete_confirm' | t }}"
+                  >
+                    {{ 'customer.addresses.delete' | t }}
+                  </button>
+                </div>
+
+                <div
+                  id="EditAddress_{{ address.id }}"
+                  class="lame-profile__address-form"
+                  hidden
+                >
+                  <h3 class="lame-profile__panel-subtitle">{{ 'customer.addresses.edit_address' | t }}</h3>
+                  {%- form 'customer_address', address, class: 'lame-profile__form' -%}
+                    {% render 'lame-customer-address-fields', form: form, prefix: address.id %}
+                    <div class="lame-profile__form-actions">
+                      <button type="submit" class="button lame-profile__btn-primary">
+                        {{ 'customer.addresses.update' | t }}
+                      </button>
+                      <button type="reset" class="button button-secondary" data-cancel-address>
+                        {{ 'customer.addresses.cancel' | t }}
+                      </button>
+                    </div>
+                  {%- endform -%}
+                </div>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+
+      {%- comment -%} Bank / payment details panel {%- endcomment -%}
+      <div class="lame-profile__panel" data-profile-panel="bank" role="tabpanel" hidden>
+        <h2 class="lame-profile__panel-title">{{ 'lame_customer.tab_bank' | t }}</h2>
+        <p class="lame-profile__panel-desc">{{ 'lame_customer.bank_help' | t }}</p>
+
+        {% liquid
+          assign bank_holder = customer.metafields.lame.account_holder.value | default: customer.metafields.lame.account_holder
+          assign bank_name = customer.metafields.lame.bank_name.value | default: customer.metafields.lame.bank_name
+          assign bank_account = customer.metafields.lame.account_number.value | default: customer.metafields.lame.account_number
+          assign bank_routing = customer.metafields.lame.routing_number.value | default: customer.metafields.lame.routing_number
+          assign bank_iban = customer.metafields.lame.iban.value | default: customer.metafields.lame.iban
+          assign has_saved_bank = false
+          if bank_holder != blank or bank_name != blank or bank_account != blank
+            assign has_saved_bank = true
+          endif
+        %}
+
+        {% if has_saved_bank %}
+          <dl class="lame-profile__bank-saved">
+            {% if bank_holder != blank %}
+              <div>
+                <dt>{{ 'lame_customer.bank_holder' | t }}</dt>
+                <dd>{{ bank_holder }}</dd>
+              </div>
+            {% endif %}
+            {% if bank_name != blank %}
+              <div>
+                <dt>{{ 'lame_customer.bank_name' | t }}</dt>
+                <dd>{{ bank_name }}</dd>
+              </div>
+            {% endif %}
+            {% if bank_account != blank %}
+              <div>
+                <dt>{{ 'lame_customer.bank_account' | t }}</dt>
+                <dd>{{ bank_account | slice: 0, 4 }}••••{{ bank_account | slice: -4, 4 }}</dd>
+              </div>
+            {% endif %}
+            {% if bank_routing != blank %}
+              <div>
+                <dt>{{ 'lame_customer.bank_routing' | t }}</dt>
+                <dd>{{ bank_routing }}</dd>
+              </div>
+            {% endif %}
+            {% if bank_iban != blank %}
+              <div>
+                <dt>{{ 'lame_customer.bank_iban' | t }}</dt>
+                <dd>{{ bank_iban | slice: 0, 4 }}••••{{ bank_iban | slice: -4, 4 }}</dd>
+              </div>
+            {% endif %}
+          </dl>
+        {% endif %}
+
+        {%- assign bank_form_id = 'BankForm-' | append: section.id -%}
+        {%- form 'contact', id: bank_form_id, class: 'lame-profile__form', data-bank-form: '' -%}
+          <input type="hidden" name="contact[email]" value="{{ customer.email }}">
+          <input type="hidden" name="contact[name]" value="{{ customer.name }}">
+          <textarea name="contact[body]" data-bank-body hidden></textarea>
+
+          {%- if form.posted_successfully? and form.id == bank_form_id -%}
+            <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
+              {{ 'lame_customer.bank_saved' | t }}
+            </div>
+          {%- endif -%}
+
+          {%- if form.errors and form.id == bank_form_id -%}
+            <div class="lame-profile__message lame-profile__message--error">
+              {{ form.errors | default_errors }}
+            </div>
+          {%- endif -%}
+
+          <div class="lame-profile__field">
+            <label for="BankHolder">{{ 'lame_customer.bank_holder' | t }}</label>
+            <input
+              type="text"
+              id="BankHolder"
+              class="lame-profile__input"
+              data-bank-field="Account holder"
+              value="{{ bank_holder }}"
+              autocomplete="name"
+            >
+          </div>
+          <div class="lame-profile__field">
+            <label for="BankName">{{ 'lame_customer.bank_name' | t }}</label>
+            <input
+              type="text"
+              id="BankName"
+              class="lame-profile__input"
+              data-bank-field="Bank name"
+              value="{{ bank_name }}"
+              autocomplete="organization"
+            >
+          </div>
+          <div class="lame-profile__field-row">
+            <div class="lame-profile__field">
+              <label for="BankAccount">{{ 'lame_customer.bank_account' | t }}</label>
+              <input
+                type="text"
+                id="BankAccount"
+                class="lame-profile__input"
+                data-bank-field="Account number"
+                inputmode="numeric"
+                autocomplete="off"
+              >
+            </div>
+            <div class="lame-profile__field">
+              <label for="BankRouting">{{ 'lame_customer.bank_routing' | t }}</label>
+              <input
+                type="text"
+                id="BankRouting"
+                class="lame-profile__input"
+                data-bank-field="Routing / sort code"
+                autocomplete="off"
+              >
+            </div>
+          </div>
+          <div class="lame-profile__field">
+            <label for="BankIban">{{ 'lame_customer.bank_iban' | t }}</label>
+            <input
+              type="text"
+              id="BankIban"
+              class="lame-profile__input"
+              data-bank-field="IBAN"
+              value="{{ bank_iban }}"
+              autocomplete="off"
+            >
+          </div>
+
+          <button type="submit" class="button lame-profile__btn-primary">
+            {{ 'lame_customer.save_bank' | t }}
+          </button>
+        {%- endform -%}
+      </div>
+    {% endunless %}
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-customer-profile {
+    --lame-profile-max: 52rem;
+  }
+
+  .lame-profile {
+    max-width: var(--lame-profile-max);
+    margin-inline: auto;
+    padding-block: 2rem 3rem;
+  }
+
+  .lame-profile__title {
+    font-family: var(--lame-font-display, inherit);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin: 0 0 0.35rem;
+    color: var(--lame-section-heading-color, inherit);
+  }
+
+  .lame-profile__subtitle {
+    margin: 0;
+    opacity: 0.72;
+    font-size: 0.95rem;
+  }
+
+  .lame-profile__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .lame-profile__logout {
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .lame-profile__checkout-note {
+    margin: 0 0 1.5rem;
+    padding: 0.75rem 1rem;
+    background: rgb(var(--brand-gold) / 0.12);
+    border: 1px solid rgb(var(--brand-gold) / 0.35);
+    border-radius: var(--lame-radius-card, 8px);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .lame-profile__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+    padding-bottom: 0;
+  }
+
+  .lame-profile__tab {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.65rem 1rem;
+    margin-bottom: -1px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.65;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+  }
+
+  .lame-profile__tab--active,
+  .lame-profile__tab:hover {
+    opacity: 1;
+    border-bottom-color: rgb(var(--brand-gold-strong));
+    color: rgb(var(--brand-gold-readable));
+  }
+
+  .lame-profile__tab--link {
+    margin-inline-start: auto;
+  }
+
+  .lame-profile__badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgb(var(--brand-gold) / 0.2);
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+  }
+
+  .lame-profile__panel-title {
+    font-size: 1.15rem;
+    margin: 0 0 0.5rem;
+    font-family: var(--lame-font-display, inherit);
+  }
+
+  .lame-profile__panel-subtitle {
+    font-size: 1rem;
+    margin: 0 0 1rem;
+    font-weight: 600;
+  }
+
+  .lame-profile__panel-desc {
+    margin: 0 0 1.25rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+
+  .lame-profile__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .lame-profile__field-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media screen and (min-width: 600px) {
+    .lame-profile__field-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .lame-profile__field label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .lame-profile__input,
+  .lame-profile__select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--style-border-radius-inputs, 4px);
+    border: 1px solid var(--color-input-border, rgb(0 0 0 / 0.2));
+    background: var(--color-input-background, #fff);
+    color: var(--color-input-text, inherit);
+    font: inherit;
+  }
+
+  .lame-profile__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .lame-profile__form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .lame-profile__btn-primary {
+    background: linear-gradient(135deg, rgb(var(--brand-gold)), rgb(var(--brand-gold-strong)));
+    border-color: rgb(var(--brand-gold));
+    color: #111;
+    font-weight: 600;
+  }
+
+  .lame-profile__message {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  .lame-profile__message--success {
+    background: rgb(34 120 60 / 0.12);
+    border: 1px solid rgb(34 120 60 / 0.35);
+  }
+
+  .lame-profile__message--error {
+    background: rgb(180 40 40 / 0.1);
+    border: 1px solid rgb(180 40 40 / 0.35);
+  }
+
+  .lame-profile__guest {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .lame-profile__hint {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.75;
+  }
+
+  .lame-profile__hint a {
+    text-decoration: underline;
+  }
+
+  .lame-profile__default-address {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(0 0 0 / 0.08);
+  }
+
+  .lame-profile__default-address address {
+    font-style: normal;
+    margin: 0.5rem 0 0.75rem;
+    line-height: 1.5;
+  }
+
+  .lame-profile__text-btn {
+    appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    color: rgb(var(--brand-gold-readable));
+  }
+
+  .lame-profile__text-btn--danger {
+    color: #a32;
+  }
+
+  .lame-profile__address-list {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .lame-profile__address-card {
+    border: var(--lame-border-soft, 1px solid rgb(0 0 0 / 0.1));
+    border-radius: var(--lame-radius-card, 10px);
+    padding: 1.25rem;
+    background: rgb(255 255 255 / 0.5);
+  }
+
+  .lame-profile__address-display {
+    font-style: normal;
+    margin: 0.35rem 0 0;
+    line-height: 1.45;
+    font-size: 0.95rem;
+  }
+
+  .lame-profile__default-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgb(var(--brand-gold) / 0.25);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.35rem;
+  }
+
+  .lame-profile__address-card-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .lame-profile__address-form {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed rgb(0 0 0 / 0.12);
+  }
+
+  .lame-profile__address-form[hidden] {
+    display: none !important;
+  }
+
+  .lame-profile__bank-saved {
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: rgb(0 0 0 / 0.03);
+    border-radius: 8px;
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .lame-profile__bank-saved dt {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.65;
+  }
+
+  .lame-profile__bank-saved dd {
+    margin: 0.15rem 0 0;
+    font-weight: 600;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Customer profile",
+  "tag": "section",
+  "class": "lame-customer-profile-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Create an Online Store page (e.g. handle my-profile) and assign the \"my-profile\" template. Add that page to your Customer account menu in Shopify admin. Addresses saved here are available at checkout for logged-in customers."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Custom heading",
+      "info": "Leave blank to use the default greeting with the customer's first name."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_orders",
+      "label": "Show link to order history",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        { "value": "page-width", "label": "t:options.page" },
+        { "value": "full-width", "label": "t:options.full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer profile"
+    }
+  ]
+}
+{% endschema %}
