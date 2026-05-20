@@ -1,0 +1,31 @@
+{%- doc -%}
+  Human-readable label for a collection/search sort option.
+  Falls back to Shopify's option.name when no override exists.
+
+  @param {object} option - sort_options loop item with .value and .name
+{%- enddoc -%}
+{%- liquid
+  assign o = option.value
+  assign label = option.name
+  case o
+    when 'manual'
+      assign label = 'content.sort_options.featured' | t
+    when 'best-selling'
+      assign label = 'content.sort_options.best_selling' | t
+    when 'title-ascending'
+      assign label = 'content.sort_options.a_to_z' | t
+    when 'title-descending'
+      assign label = 'content.sort_options.z_to_a' | t
+    when 'price-ascending'
+      assign label = 'content.sort_options.price_low_high' | t
+    when 'price-descending'
+      assign label = 'content.sort_options.price_high_low' | t
+    when 'created-ascending'
+      assign label = 'content.sort_options.date_old_new' | t
+    when 'created-descending'
+      assign label = 'content.sort_options.date_new_old' | t
+    when 'relevance'
+      assign label = 'content.sort_options.relevance' | t
+  endcase
+-%}
+{{- label -}}

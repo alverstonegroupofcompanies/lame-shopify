@@ -80,7 +80,9 @@
       style="{% render 'spacing-style', settings: block_settings %}{% if block_settings.text_label_case == 'uppercase' %} --facet-label-transform: uppercase;{% endif %}"
     >
       {% if block_settings.enable_filtering %}
-        <h4 class="facets--filters-title">{{ 'content.filters' | t }}</h4>
+        <h4 class="facets--filters-title{% if block_settings.filter_style == 'vertical' %} visually-hidden{% endif %}">
+          {{- 'content.filters' | t -}}
+        </h4>
       {% endif %}
 
       <div
@@ -97,15 +99,17 @@
       </div>
 
       {% if block_settings.enable_sorting %}
-        {% render 'sorting',
-          results: results,
-          sort_by: sort_by,
-          filter_style: block_settings.filter_style,
-          suffix: 'desktop',
-          sort_position: 'desktop',
-          should_use_select_on_mobile: false,
-          section_id: section.id
-        %}
+        {% unless block_settings.filter_style == 'vertical' %}
+          {% render 'sorting',
+            results: results,
+            sort_by: sort_by,
+            filter_style: block_settings.filter_style,
+            suffix: 'desktop',
+            sort_position: 'desktop',
+            should_use_select_on_mobile: false,
+            section_id: section.id
+          %}
+        {% endunless %}
       {% endif %}
 
       {% if block_settings.enable_grid_density %}
@@ -202,6 +206,17 @@
               {% endcapture %}
 
               <div class="facets__filters-wrapper">
+                {% if block_settings.filter_style == 'vertical' and block_settings.enable_sorting %}
+                  {% render 'sorting',
+                    results: results,
+                    sort_by: sort_by,
+                    filter_style: 'vertical',
+                    suffix: 'desktop',
+                    sort_position: 'desktop',
+                    should_use_select_on_mobile: false,
+                    section_id: section.id
+                  %}
+                {% endif %}
                 {% if block_settings.filter_style == 'horizontal' %}
                   {% liquid
                     assign more_attributes = 'on:click="#filters-drawer/showDialog"'
@@ -429,7 +444,20 @@
                 show_filter_label: block_settings.show_filter_label,
                 should_show_clear_all: false
               %}
+            {% endif %}
 
+            {% if block_settings.enable_sorting %}
+              {% render 'sorting',
+                results: results,
+                sort_by: sort_by,
+                filter_style: 'vertical',
+                suffix: 'overflow',
+                should_use_select_on_mobile: should_use_select_on_mobile,
+                section_id: section.id
+              %}
+            {% endif %}
+
+            {% if block_settings.enable_filtering %}
               <div class="facets__filters-wrapper">
                 {% assign total_active_values = 0 %}
                 {% assign is_active = false %}
@@ -458,17 +486,6 @@
                   {% endcase %}
                 {%- endfor -%}
               </div>
-            {% endif %}
-
-            {% if block_settings.enable_sorting %}
-              {% render 'sorting',
-                results: results,
-                sort_by: sort_by,
-                filter_style: block_settings.filter_style,
-                suffix: 'overflow',
-                should_use_select_on_mobile: should_use_select_on_mobile,
-                section_id: section.id
-              %}
             {% endif %}
           </scroll-hint>
         </form>
@@ -1463,6 +1480,29 @@
     border-inline-start: var(--style-border-width) solid var(--color-border);
     height: var(--font-paragraph--size);
     position: absolute;
+  }
+
+  /* Collection page: vertical facet column + full-width grid alignment */
+  @media screen and (min-width: 750px) {
+    .collection-wrapper:has(.facets-block-wrapper--vertical:not(.hidden)) .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
+      position: sticky;
+      top: 1.25rem;
+      align-self: start;
+      max-height: calc(100vh - 2.75rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .collection-wrapper:has(.facets-block-wrapper--vertical) .facets.facets-controls-wrapper.facets--horizontal {
+      justify-content: flex-end;
+      gap: var(--gap-md);
+    }
+
+    .facets--vertical .facets__filters-wrapper > accordion-custom:first-of-type .sorting-filter::before {
+      content: none;
+      border: none;
+      display: none;
+    }
   }
 {% endstylesheet %}
 

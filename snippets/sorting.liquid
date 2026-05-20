@@ -21,9 +21,12 @@
 >
   {% liquid
     assign default_sort_by = results.default_sort_by
+    assign status = ''
     for option in results.sort_options
       if option.value == sort_by
-        assign status = option.name
+        capture status
+          render 'sort-option-label', option: option
+        endcapture
       endif
     endfor
   %}
@@ -33,7 +36,11 @@
       for="sort-select-{{ section_id }}"
       class="facets__label"
     >
-      {{- 'actions.sort' | t -}}
+      {%- if filter_style == 'vertical' -%}
+        {{- 'actions.sort_by' | t -}}
+      {%- else -%}
+        {{- 'actions.sort' | t -}}
+      {%- endif -%}
     </label>
     <div class="sorting-filter__select-wrapper">
       <select
@@ -51,7 +58,7 @@
               selected
             {% endif %}
           >
-            {{ option.name }}
+            {%- render 'sort-option-label', option: option -%}
           </option>
         {% endfor %}
       </select>
@@ -88,12 +95,16 @@
           class="facets__label"
           id="sort-label-{{ section_id }}"
         >
-          {{- 'actions.sort' | t -}}
+          {%- if filter_style == 'vertical' -%}
+            {{- 'actions.sort_by' | t -}}
+          {%- else -%}
+            {{- 'actions.sort' | t -}}
+          {%- endif -%}
         </span>
         <span
-          class="facets__status h6 desktop:hidden"
+          class="facets__status h6 facets__status--sort{% unless filter_style == 'vertical' %} desktop:hidden{% endunless %}"
         >
-          {{- status -}}
+          {{- status | strip -}}
         </span>
         <span class="svg-wrapper icon-caret icon-animated">
           {{- 'icon-caret.svg' | inline_asset_content -}}
@@ -135,7 +146,9 @@
                 <span class="svg-wrapper icon-checkmark sorting-filter__checkmark">
                   {{- 'icon-checkmark.svg' | inline_asset_content -}}
                 </span>
-                <span class="sorting-filter__label">{{ option.name }}</span>
+                <span class="sorting-filter__label">
+                  {%- render 'sort-option-label', option: option -%}
+                </span>
               </div>
             </label>
           {% endfor %}
@@ -353,5 +366,14 @@
     @media screen and (min-width: 750px) {
       display: none;
     }
+  }
+
+  .facets__status--sort {
+    font-weight: 400;
+    color: rgb(var(--color-foreground-rgb) / 0.7);
+    max-width: min(14rem, 46vw);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 {% endstylesheet %}
