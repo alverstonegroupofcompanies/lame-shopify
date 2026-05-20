@@ -1,0 +1,538 @@
+{% liquid
+  assign img_desktop = section.settings.image
+  assign img_mobile = section.settings.image_mobile
+  if img_mobile == blank
+    assign img_mobile = img_desktop
+  endif
+
+  assign heading = section.settings.heading
+  if heading == blank and collection != blank
+    assign heading = collection.title
+  endif
+  if heading == blank
+    assign heading = 'Our Products'
+  endif
+
+  assign img_alt = section.settings.image_alt
+  if img_alt == blank and img_desktop != blank
+    assign img_alt = img_desktop.alt
+  endif
+  if img_alt == blank
+    assign img_alt = heading
+  endif
+
+  assign primary_url = section.settings.primary_button_link | default: '#ResultsList'
+  if primary_url == blank
+    assign primary_url = '#ResultsList'
+  endif
+
+  assign secondary_url = section.settings.secondary_button_link
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="section-wrapper lame-collection-luxury-hero lame-luxury-glow-root section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+  {{ section.shopify_attributes }}
+>
+  <div
+    class="lame-collection-luxury-hero__inner spacing-style lame-luxury-glow"
+    style="
+      {% render 'spacing-style', settings: section.settings %}
+      --lux-hero-overlay-top: {{ section.settings.overlay_gradient_top | divided_by: 100.0 }};
+      --lux-hero-overlay-bottom: {{ section.settings.overlay_gradient_bottom | divided_by: 100.0 }};
+      --lux-hero-overlay-blush: {{ section.settings.overlay_blush | divided_by: 100.0 }};
+      --lux-hero-min-height-mobile: {{ section.settings.min_height_mobile }}px;
+      --lux-hero-min-height-desktop: {{ section.settings.min_height_desktop }}px;
+    "
+  >
+    <div class="lame-collection-luxury-hero__media">
+      {% if img_desktop != blank %}
+        <picture>
+          {% if img_mobile != blank and img_mobile != img_desktop %}
+            <source
+              media="(max-width: 749px)"
+              srcset="
+                {{ img_mobile | image_url: width: 600 }} 600w,
+                {{ img_mobile | image_url: width: 900 }} 900w,
+                {{ img_mobile | image_url: width: 1200 }} 1200w
+              "
+              sizes="100vw"
+            >
+          {% endif %}
+          {{
+            img_desktop
+            | image_url: width: 2400
+            | image_tag:
+              class: 'lame-collection-luxury-hero__image',
+              loading: 'eager',
+              fetchpriority: 'high',
+              widths: '600, 900, 1200, 1600, 2000, 2400',
+              sizes: '(min-width: 990px) 100vw, 100vw',
+              alt: img_alt,
+              style: 'object-position: ' | append: section.settings.image_position | append: ';'
+          }}
+        </picture>
+      {% elsif request.design_mode %}
+        <div class="lame-collection-luxury-hero__placeholder" role="presentation">
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'lame-collection-luxury-hero__placeholder-svg' }}
+          <p class="lame-collection-luxury-hero__placeholder-text">Add a desktop hero image (cosmetic lifestyle, ~2400px wide)</p>
+        </div>
+      {% endif %}
+
+      <div class="lame-collection-luxury-hero__scrim" aria-hidden="true"></div>
+    </div>
+
+    <div class="lame-collection-luxury-hero__content lame-collection-luxury-hero__content--{{ section.settings.content_alignment }}">
+      {% if section.settings.eyebrow != blank %}
+        <p class="lame-collection-luxury-hero__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {% endif %}
+
+      <h1 class="lame-collection-luxury-hero__heading">{{ heading | escape }}</h1>
+
+      {% if section.settings.tagline != blank %}
+        <div class="lame-collection-luxury-hero__tagline rte">{{ section.settings.tagline }}</div>
+      {% endif %}
+
+      <div class="lame-collection-luxury-hero__actions">
+        {% if section.settings.primary_button_label != blank %}
+          <a class="lame-collection-luxury-hero__btn lame-collection-luxury-hero__btn--primary" href="{{ primary_url }}">
+            {{ section.settings.primary_button_label | escape }}
+          </a>
+        {% endif %}
+        {% if section.settings.secondary_button_label != blank and secondary_url != blank %}
+          <a class="lame-collection-luxury-hero__btn lame-collection-luxury-hero__btn--secondary" href="{{ secondary_url }}">
+            {{ section.settings.secondary_button_label | escape }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .lame-luxury-glow-root {
+    position: relative;
+  }
+
+  .lame-luxury-glow::before,
+  .lame-luxury-glow::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(72px);
+    opacity: 0.45;
+  }
+
+  .lame-luxury-glow::before {
+    width: min(55vw, 420px);
+    height: min(55vw, 420px);
+    top: -8%;
+    left: -6%;
+    background: radial-gradient(circle, rgb(var(--color-primary-rgb) / 0.35) 0%, transparent 70%);
+  }
+
+  .lame-luxury-glow::after {
+    width: min(48vw, 380px);
+    height: min(48vw, 380px);
+    bottom: -6%;
+    right: -4%;
+    background: radial-gradient(circle, rgb(212 165 165 / 0.4) 0%, transparent 72%);
+  }
+
+  .lame-collection-luxury-hero__inner {
+    position: relative;
+    padding-inline: var(--page-margin);
+    padding-block: 0;
+    overflow: hidden;
+    border-radius: clamp(0px, 2vw, 18px);
+    min-height: var(--lux-hero-min-height-mobile, 320px);
+    display: grid;
+    align-items: end;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-collection-luxury-hero__inner {
+      min-height: var(--lux-hero-min-height-desktop, 480px);
+      align-items: center;
+    }
+  }
+
+  .lame-collection-luxury-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .lame-collection-luxury-hero__image,
+  .lame-collection-luxury-hero__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lame-collection-luxury-hero__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+  }
+
+  .lame-collection-luxury-hero__placeholder-svg {
+    width: min(50%, 280px);
+    height: auto;
+    opacity: 0.35;
+  }
+
+  .lame-collection-luxury-hero__placeholder-text {
+    margin: 0;
+    padding-inline: 16px;
+    font-size: 0.875rem;
+    text-align: center;
+    opacity: 0.75;
+    max-width: 32ch;
+  }
+
+  .lame-collection-luxury-hero__scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        rgb(0 0 0 / var(--lux-hero-overlay-top, 0.15)) 0%,
+        rgb(41 28 26 / var(--lux-hero-overlay-blush, 0.25)) 42%,
+        rgb(250 247 244 / var(--lux-hero-overlay-bottom, 0.82)) 100%
+      ),
+      linear-gradient(90deg, rgb(250 247 244 / 0.55) 0%, transparent 55%);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-collection-luxury-hero__scrim {
+      background: linear-gradient(
+          105deg,
+          rgb(250 247 244 / 0.92) 0%,
+          rgb(250 247 244 / 0.55) 38%,
+          rgb(41 28 26 / var(--lux-hero-overlay-blush, 0.18)) 100%
+        ),
+        linear-gradient(180deg, rgb(0 0 0 / calc(var(--lux-hero-overlay-top, 0.15) * 0.6)) 0%, transparent 45%);
+    }
+  }
+
+  .lame-collection-luxury-hero__content {
+    position: relative;
+    z-index: 2;
+    padding: clamp(1.75rem, 4vw, 3rem) 0;
+    max-width: min(38rem, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lame-collection-luxury-hero__content--center {
+    margin-inline: auto;
+    text-align: center;
+    align-items: center;
+  }
+
+  .lame-collection-luxury-hero__content--left {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .lame-collection-luxury-hero__content--right {
+    margin-inline-start: auto;
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .lame-collection-luxury-hero__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgb(var(--color-primary-rgb));
+  }
+
+  .lame-collection-luxury-hero__heading {
+    margin: 0;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-weight: 500;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-foreground-heading-rgb));
+    text-wrap: balance;
+  }
+
+  .lame-collection-luxury-hero__tagline {
+    margin: 0;
+    font-size: clamp(0.9375rem, 1.35vw, 1.0625rem);
+    line-height: 1.65;
+    color: rgb(var(--color-foreground-rgb) / 0.88);
+    max-width: 36ch;
+  }
+
+  .lame-collection-luxury-hero__content--center .lame-collection-luxury-hero__tagline {
+    margin-inline: auto;
+  }
+
+  .lame-collection-luxury-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    margin-top: 0.35rem;
+  }
+
+  .lame-collection-luxury-hero__content--center .lame-collection-luxury-hero__actions {
+    justify-content: center;
+  }
+
+  .lame-collection-luxury-hero__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.85rem;
+    padding: 0 1.75rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 999px;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s ease,
+      background 0.25s ease,
+      color 0.25s ease;
+  }
+
+  .lame-collection-luxury-hero__btn--primary {
+    color: rgb(var(--color-background-rgb));
+    background: rgb(var(--color-foreground-rgb));
+    box-shadow: 0 12px 28px rgb(0 0 0 / 0.12);
+  }
+
+  .lame-collection-luxury-hero__btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgb(0 0 0 / 0.14);
+  }
+
+  .lame-collection-luxury-hero__btn--secondary {
+    color: rgb(var(--color-foreground-heading-rgb));
+    background: rgb(var(--color-background-rgb) / 0.65);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    backdrop-filter: blur(10px);
+  }
+
+  .lame-collection-luxury-hero__btn--secondary:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--color-primary-rgb) / 0.35);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collection luxury hero",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Full-width editorial hero for collection pages. Primary button defaults to scrolling to the product grid (#ResultsList)."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Hero image (desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Hero image (mobile)",
+      "info": "Optional. Uses desktop image when empty."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image focal point",
+      "options": [
+        { "value": "center center", "label": "Center" },
+        { "value": "top center", "label": "Top" },
+        { "value": "bottom center", "label": "Bottom" },
+        { "value": "left center", "label": "Left" },
+        { "value": "right center", "label": "Right" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "range",
+      "id": "min_height_mobile",
+      "label": "Minimum height (mobile)",
+      "min": 260,
+      "max": 520,
+      "step": 10,
+      "unit": "px",
+      "default": 340
+    },
+    {
+      "type": "range",
+      "id": "min_height_desktop",
+      "label": "Minimum height (desktop)",
+      "min": 360,
+      "max": 720,
+      "step": 10,
+      "unit": "px",
+      "default": 520
+    },
+    {
+      "type": "header",
+      "content": "Overlay strength"
+    },
+    {
+      "type": "range",
+      "id": "overlay_gradient_top",
+      "label": "Top shade strength",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "overlay_gradient_bottom",
+      "label": "Bottom / text side strength",
+      "min": 20,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 75
+    },
+    {
+      "type": "range",
+      "id": "overlay_blush",
+      "label": "Warm blush mix",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 22
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Skincare & beauty"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Products",
+      "info": "Leave blank to use the collection title."
+    },
+    {
+      "type": "richtext",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "<p>Ritual-worthy formulas, crafted for luminous skin and quiet luxury—every day.</p>"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "Primary button label",
+      "default": "Shop collection"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primary button link",
+      "info": "Use #ResultsList to jump to products. Leave empty for the same."
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "Secondary button label"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-golden"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection luxury hero",
+      "category": "Banners"
+    }
+  ]
+}
+{% endschema %}

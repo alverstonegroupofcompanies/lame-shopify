@@ -6,7 +6,7 @@ const selectors = {
   deleteAddress: '[data-delete-address]',
   editToggle: '[data-edit-toggle]',
   editCancel: '[data-edit-cancel]',
-  bankForm: '[data-bank-form]',
+  bankForm: 'form.lame-profile__form--bank',
 };
 
 const attrs = {
