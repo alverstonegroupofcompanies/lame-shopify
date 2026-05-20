@@ -1,13 +1,11 @@
 const selectors = {
   root: '[data-lame-customer-profile]',
-  addresses: '[data-customer-addresses]',
   countrySelect: '[data-address-country-select]',
-  addressPanel: '[data-address-panel]',
   toggleAddress: '[data-toggle-address]',
   cancelAddress: '[data-cancel-address]',
   deleteAddress: '[data-delete-address]',
-  tab: '[data-profile-tab]',
-  panel: '[data-profile-panel]',
+  editToggle: '[data-edit-toggle]',
+  editCancel: '[data-edit-cancel]',
   bankForm: '[data-bank-form]',
 };
 
@@ -19,35 +17,11 @@ const attrs = {
 class LameCustomerProfile {
   constructor(root) {
     this.root = root;
-    this.elements = this._getElements();
-    if (!this.elements.addresses) return;
     this._setupCountries();
     this._setupAddressListeners();
-    this._setupTabs();
+    this._setupEditPanels();
     this._setupBankForm();
-    this._openTabFromHash();
-    this._openTabFromPath();
-  }
-
-  _openTabFromPath() {
-    const path = window.location.pathname;
-    if (path.includes('/addresses') || path.endsWith('/addresses')) {
-      this._activateTab('addresses');
-    }
-  }
-
-  _getElements() {
-    const addresses = this.root.querySelector(selectors.addresses);
-    return {
-      addresses,
-      toggleButtons: this.root.querySelectorAll(selectors.toggleAddress),
-      cancelButtons: this.root.querySelectorAll(selectors.cancelAddress),
-      deleteButtons: this.root.querySelectorAll(selectors.deleteAddress),
-      countrySelects: addresses ? addresses.querySelectorAll(selectors.countrySelect) : [],
-      tabs: this.root.querySelectorAll(selectors.tab),
-      panels: this.root.querySelectorAll(selectors.panel),
-      bankForm: this.root.querySelector(selectors.bankForm),
-    };
+    this._openAddAddressFromHash();
   }
 
   _setupCountries() {
@@ -60,7 +34,7 @@ class LameCustomerProfile {
       });
     }
 
-    this.elements.countrySelects.forEach((select) => {
+    this.root.querySelectorAll(selectors.countrySelect).forEach((select) => {
       const formId = select.dataset.formId;
       if (!formId) return;
       new Shopify.CountryProvinceSelector(
@@ -74,28 +48,28 @@ class LameCustomerProfile {
   }
 
   _setupAddressListeners() {
-    this.elements.toggleButtons.forEach((button) => {
-      button.addEventListener('click', () => this._toggleExpanded(button));
+    this.root.querySelectorAll(selectors.toggleAddress).forEach((button) => {
+      button.addEventListener('click', () => this._togglePanel(button));
     });
 
-    this.elements.cancelButtons.forEach((button) => {
+    this.root.querySelectorAll(selectors.cancelAddress).forEach((button) => {
       button.addEventListener('click', () => {
         const panel =
-          button.closest(selectors.addressPanel) ||
-          button.closest('.lame-profile__address-form');
+          button.closest('.lame-profile__card-edit') ||
+          button.closest('.lame-profile__card-edit--inset');
         const panelId = panel?.id;
         const toggle = panelId
           ? this.root.querySelector(`[aria-controls="${panelId}"]`)
           : null;
         if (toggle) {
-          this._setExpanded(toggle, false);
+          this._setPanelOpen(toggle, false);
         } else if (panel) {
           panel.hidden = true;
         }
       });
     });
 
-    this.elements.deleteButtons.forEach((button) => {
+    this.root.querySelectorAll(selectors.deleteAddress).forEach((button) => {
       button.addEventListener('click', () => {
         const message = button.getAttribute(attrs.confirmMessage);
         if (message && confirm(message) && typeof Shopify !== 'undefined') {
@@ -107,57 +81,60 @@ class LameCustomerProfile {
     });
   }
 
-  _toggleExpanded(target) {
-    const isExpanded = target.getAttribute(attrs.expanded) === 'true';
-    this._setExpanded(target, !isExpanded);
-  }
+  _setupEditPanels() {
+    this.root.querySelectorAll(selectors.editToggle).forEach((button) => {
+      button.addEventListener('click', () => this._togglePanel(button));
+    });
 
-  _setExpanded(target, expanded) {
-    target.setAttribute(attrs.expanded, String(expanded));
-    const panelId = target.getAttribute('aria-controls');
-    const panel = panelId ? document.getElementById(panelId) : target.closest(selectors.addressPanel)?.querySelector('[id]');
-    if (panel) {
-      panel.hidden = !expanded;
-    }
-  }
-
-  _setupTabs() {
-    this.elements.tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const id = tab.dataset.profileTab;
-        this._activateTab(id);
-        if (id) {
-          history.replaceState(null, '', `#${id}`);
+    this.root.querySelectorAll(selectors.editCancel).forEach((button) => {
+      button.addEventListener('click', () => {
+        const panelId = button.getAttribute('aria-controls');
+        const toggle = panelId
+          ? this.root.querySelector(`[aria-controls="${panelId}"][data-edit-toggle]`)
+          : null;
+        if (toggle) {
+          this._setPanelOpen(toggle, false);
         }
       });
     });
   }
 
-  _activateTab(id) {
-    this.elements.tabs.forEach((tab) => {
-      const isActive = tab.dataset.profileTab === id;
-      tab.setAttribute('aria-selected', String(isActive));
-      tab.classList.toggle('lame-profile__tab--active', isActive);
-    });
-    this.elements.panels.forEach((panel) => {
-      const isActive = panel.dataset.profilePanel === id;
-      panel.hidden = !isActive;
-      panel.classList.toggle('lame-profile__panel--active', isActive);
-    });
+  _togglePanel(button) {
+    const isOpen = button.getAttribute(attrs.expanded) === 'true';
+    this._setPanelOpen(button, !isOpen);
   }
 
-  _openTabFromHash() {
-    const hash = window.location.hash.replace('#', '');
-    if (hash && this.root.querySelector(`[data-profile-tab="${hash}"]`)) {
-      this._activateTab(hash);
+  _setPanelOpen(button, open) {
+    button.setAttribute(attrs.expanded, String(open));
+    const panelId = button.getAttribute('aria-controls');
+    const panel = panelId ? document.getElementById(panelId) : null;
+    if (panel) {
+      panel.hidden = !open;
+    }
+
+    if (button.hasAttribute('data-edit-toggle') && panelId) {
+      const view = button.closest('.lame-profile__card')?.querySelector('[data-profile-view]');
+      if (view) {
+        view.hidden = open;
+      }
+    }
+  }
+
+  _openAddAddressFromHash() {
+    if (window.location.hash === '#add-address') {
+      const addBtn = this.root.querySelector('[aria-controls="AddressNewForm"]');
+      if (addBtn) {
+        this._setPanelOpen(addBtn, true);
+        document.getElementById('AddressNewForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
   _setupBankForm() {
-    const form = this.elements.bankForm;
+    const form = this.root.querySelector(selectors.bankForm);
     if (!form) return;
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', () => {
       const bodyField = form.querySelector('[data-bank-body]');
       if (!bodyField) return;
 

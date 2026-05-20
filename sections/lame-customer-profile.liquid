@@ -10,11 +10,11 @@
   <div class="lame-profile spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {% unless customer %}
       <div class="lame-profile__guest">
-        <h1 class="lame-profile__title">
+        <h1 class="lame-profile__page-title">
           {% if section.settings.heading != blank %}
             {{ section.settings.heading }}
           {% else %}
-            {{ 'customer.account.title' | t }}
+            {{ 'content.account_profile' | t }}
           {% endif %}
         </h1>
         <p>{{ 'lame_customer.login_required' | t }}</p>
@@ -26,176 +26,155 @@
         </p>
       </div>
     {% else %}
-      <header class="lame-profile__header">
-        <div>
-          <h1 class="lame-profile__title">
-            {% if section.settings.heading != blank %}
-              {{ section.settings.heading }}
-            {% else %}
-              {{ 'content.account_title_personalized' | t: first_name: customer.first_name }}
+      <h1 class="lame-profile__page-title">
+        {% if section.settings.heading != blank %}
+          {{ section.settings.heading }}
+        {% else %}
+          {{ 'content.account_profile' | t }}
+        {% endif %}
+      </h1>
+
+      {% if section.settings.show_orders %}
+        <nav class="lame-profile__subnav" aria-label="{{ 'lame_customer.account_nav' | t }}">
+          <a href="{{ routes.account_url }}" class="lame-profile__subnav-link">{{ 'customer.orders.title' | t }}</a>
+          <span class="lame-profile__subnav-link lame-profile__subnav-link--current" aria-current="page">
+            {{ 'content.account_profile' | t }}
+          </span>
+        </nav>
+      {% endif %}
+
+      <div class="lame-profile__stack">
+        {%- comment -%} Account card {%- endcomment -%}
+        <section class="lame-profile__card" aria-labelledby="ProfileAccountHeading">
+          <h2 id="ProfileAccountHeading" class="visually-hidden">{{ 'lame_customer.account_info' | t }}</h2>
+
+          <div class="lame-profile__card-view" data-profile-view="account">
+            <div class="lame-profile__info-row">
+              <div class="lame-profile__info-main">
+                <span class="lame-profile__info-label">{{ 'lame_customer.name' | t }}</span>
+                <span class="lame-profile__info-value">{{ customer.name }}</span>
+              </div>
+              <button
+                type="button"
+                class="lame-profile__icon-btn"
+                data-edit-toggle
+                aria-expanded="false"
+                aria-controls="AccountEditForm"
+              >
+                <span class="visually-hidden">{{ 'customer.addresses.edit' | t }}</span>
+                {% render 'icon-edit', class: 'lame-profile__icon' %}
+              </button>
+            </div>
+            <div class="lame-profile__info-row lame-profile__info-row--plain">
+              <div class="lame-profile__info-main">
+                <span class="lame-profile__info-label">{{ 'customer.login_page.email' | t }}</span>
+                <span class="lame-profile__info-value">{{ customer.email }}</span>
+              </div>
+            </div>
+            {% if customer.phone != blank %}
+              <div class="lame-profile__info-row lame-profile__info-row--plain">
+                <div class="lame-profile__info-main">
+                  <span class="lame-profile__info-label">{{ 'customer.addresses.phone' | t }}</span>
+                  <span class="lame-profile__info-value">{{ customer.phone }}</span>
+                </div>
+              </div>
             {% endif %}
-          </h1>
-          <p class="lame-profile__subtitle">{{ customer.email }}</p>
-        </div>
-        <a href="{{ routes.account_logout_url }}" class="lame-profile__logout">
-          {{ 'customer.log_out' | t }}
-        </a>
-      </header>
-
-      <p class="lame-profile__checkout-note">{{ 'lame_customer.checkout_note' | t }}</p>
-
-      <nav class="lame-profile__tabs" role="tablist" aria-label="{{ 'lame_customer.tabs_label' | t }}">
-        <button
-          type="button"
-          class="lame-profile__tab lame-profile__tab--active"
-          role="tab"
-          aria-selected="true"
-          data-profile-tab="profile"
-        >
-          {{ 'lame_customer.tab_profile' | t }}
-        </button>
-        <button
-          type="button"
-          class="lame-profile__tab"
-          role="tab"
-          aria-selected="false"
-          data-profile-tab="addresses"
-        >
-          {{ 'lame_customer.tab_addresses' | t }}
-          <span class="lame-profile__badge">{{ customer.addresses_count }}</span>
-        </button>
-        <button
-          type="button"
-          class="lame-profile__tab"
-          role="tab"
-          aria-selected="false"
-          data-profile-tab="bank"
-        >
-          {{ 'lame_customer.tab_bank' | t }}
-        </button>
-        {% if section.settings.show_orders %}
-          <a href="{{ routes.account_url }}" class="lame-profile__tab lame-profile__tab--link">
-            {{ 'customer.orders.title' | t }}
-          </a>
-        {% endif %}
-      </nav>
-
-      {%- comment -%} Profile panel {%- endcomment -%}
-      <div
-        class="lame-profile__panel lame-profile__panel--active"
-        data-profile-panel="profile"
-        role="tabpanel"
-      >
-        <h2 class="lame-profile__panel-title">{{ 'customer.account.details' | t }}</h2>
-
-        {%- form 'customer', class: 'lame-profile__form' -%}
-          {%- if form.errors -%}
-            <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus>
-              {{ form.errors | default_errors }}
-            </div>
-          {%- endif -%}
-
-          {%- if form.posted_successfully? -%}
-            <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
-              {{ 'lame_customer.profile_saved' | t }}
-            </div>
-          {%- endif -%}
-
-          <div class="lame-profile__field-row">
-            <div class="lame-profile__field">
-              <label for="ProfileFirstName">{{ 'customer.addresses.first_name' | t }}</label>
-              <input
-                type="text"
-                id="ProfileFirstName"
-                name="customer[first_name]"
-                value="{{ customer.first_name }}"
-                autocomplete="given-name"
-                class="lame-profile__input"
-              >
-            </div>
-            <div class="lame-profile__field">
-              <label for="ProfileLastName">{{ 'customer.addresses.last_name' | t }}</label>
-              <input
-                type="text"
-                id="ProfileLastName"
-                name="customer[last_name]"
-                value="{{ customer.last_name }}"
-                autocomplete="family-name"
-                class="lame-profile__input"
-              >
-            </div>
           </div>
 
-          <div class="lame-profile__field">
-            <label for="ProfileEmail">{{ 'customer.login_page.email' | t }}</label>
-            <input
-              type="email"
-              id="ProfileEmail"
-              name="customer[email]"
-              value="{{ customer.email }}"
-              autocomplete="email"
-              class="lame-profile__input"
-            >
+          <div id="AccountEditForm" class="lame-profile__card-edit" data-profile-edit="account" hidden>
+            {%- form 'customer', class: 'lame-profile__form' -%}
+              {%- if form.errors -%}
+                <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus>
+                  {{ form.errors | default_errors }}
+                </div>
+              {%- endif -%}
+
+              {%- if form.posted_successfully? -%}
+                <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
+                  {{ 'lame_customer.profile_saved' | t }}
+                </div>
+              {%- endif -%}
+
+              <div class="lame-profile__field-row">
+                <div class="lame-profile__field">
+                  <label for="ProfileFirstName">{{ 'customer.addresses.first_name' | t }}</label>
+                  <input
+                    type="text"
+                    id="ProfileFirstName"
+                    name="customer[first_name]"
+                    value="{{ customer.first_name }}"
+                    autocomplete="given-name"
+                    class="lame-profile__input"
+                  >
+                </div>
+                <div class="lame-profile__field">
+                  <label for="ProfileLastName">{{ 'customer.addresses.last_name' | t }}</label>
+                  <input
+                    type="text"
+                    id="ProfileLastName"
+                    name="customer[last_name]"
+                    value="{{ customer.last_name }}"
+                    autocomplete="family-name"
+                    class="lame-profile__input"
+                  >
+                </div>
+              </div>
+
+              <div class="lame-profile__field">
+                <label for="ProfileEmail">{{ 'customer.login_page.email' | t }}</label>
+                <input
+                  type="email"
+                  id="ProfileEmail"
+                  name="customer[email]"
+                  value="{{ customer.email }}"
+                  autocomplete="email"
+                  class="lame-profile__input"
+                >
+              </div>
+
+              <div class="lame-profile__field">
+                <label for="ProfilePhone">{{ 'customer.addresses.phone' | t }}</label>
+                <input
+                  type="tel"
+                  id="ProfilePhone"
+                  name="customer[phone]"
+                  value="{{ customer.phone }}"
+                  autocomplete="tel"
+                  class="lame-profile__input"
+                >
+              </div>
+
+              <div class="lame-profile__form-actions">
+                <button type="submit" class="button lame-profile__btn-primary">
+                  {{ 'lame_customer.save_profile' | t }}
+                </button>
+                <button type="button" class="button button-secondary" data-edit-cancel aria-controls="AccountEditForm">
+                  {{ 'customer.addresses.cancel' | t }}
+                </button>
+              </div>
+            {%- endform -%}
           </div>
+        </section>
 
-          <div class="lame-profile__field">
-            <label for="ProfilePhone">{{ 'customer.addresses.phone' | t }}</label>
-            <input
-              type="tel"
-              id="ProfilePhone"
-              name="customer[phone]"
-              value="{{ customer.phone }}"
-              autocomplete="tel"
-              class="lame-profile__input"
-            >
-          </div>
-
-          <button type="submit" class="button lame-profile__btn-primary">
-            {{ 'lame_customer.save_profile' | t }}
-          </button>
-        {%- endform -%}
-
-        {% if customer.default_address %}
-          <div class="lame-profile__default-address">
-            <h3 class="lame-profile__panel-subtitle">{{ 'lame_customer.default_shipping' | t }}</h3>
-            <address>{{ customer.default_address | format_address }}</address>
+        {%- comment -%} Addresses card {%- endcomment -%}
+        <section class="lame-profile__card" aria-labelledby="ProfileAddressesHeading" data-customer-addresses>
+          <div class="lame-profile__card-header">
+            <h2 id="ProfileAddressesHeading" class="lame-profile__card-title">{{ 'customer.addresses.title' | t }}</h2>
             <button
               type="button"
-              class="lame-profile__text-btn"
-              data-profile-tab="addresses"
-              onclick="document.querySelector('[data-profile-tab=addresses]')?.click()"
-            >
-              {{ 'lame_customer.manage_addresses' | t }}
-            </button>
-          </div>
-        {% endif %}
-      </div>
-
-      {%- comment -%} Addresses panel {%- endcomment -%}
-      <div class="lame-profile__panel" data-profile-panel="addresses" role="tabpanel" hidden>
-        <h2 class="lame-profile__panel-title">{{ 'customer.addresses.title' | t }}</h2>
-        <p class="lame-profile__panel-desc">{{ 'lame_customer.addresses_help' | t }}</p>
-
-        <div data-customer-addresses>
-          <div class="lame-profile__address-actions">
-            <button
-              type="button"
-              class="button lame-profile__btn-primary"
+              class="lame-profile__link-btn"
               data-toggle-address
               aria-expanded="false"
               aria-controls="AddressNewForm"
             >
-              {{ 'customer.addresses.add_new' | t }}
+              {{ 'lame_customer.add' | t }}
             </button>
           </div>
 
-          <div
-            id="AddressNewForm"
-            class="lame-profile__address-form"
-            data-address-panel
-            hidden
-          >
-            <h3 class="lame-profile__panel-subtitle">{{ 'customer.addresses.add_new' | t }}</h3>
+          <p class="lame-profile__card-desc">{{ 'lame_customer.addresses_help' | t }}</p>
+
+          <div id="AddressNewForm" class="lame-profile__card-edit lame-profile__card-edit--inset" hidden>
+            <h3 class="lame-profile__card-subtitle">{{ 'customer.addresses.add_new' | t }}</h3>
             {%- form 'customer_address', customer.new_address, class: 'lame-profile__form' -%}
               {% render 'lame-customer-address-fields', form: form, prefix: 'New' %}
               <div class="lame-profile__form-actions">
@@ -209,199 +188,256 @@
             {%- endform -%}
           </div>
 
-          <ul class="lame-profile__address-list" role="list">
-            {%- for address in customer.addresses -%}
-              <li class="lame-profile__address-card" data-address-panel>
-                <div class="lame-profile__address-card-header">
-                  {% if address == customer.default_address %}
-                    <span class="lame-profile__default-badge">{{ 'customer.addresses.default' | t }}</span>
-                  {% endif %}
-                  <address class="lame-profile__address-display">{{ address | format_address }}</address>
-                </div>
-                <div class="lame-profile__address-card-actions">
-                  <button
-                    type="button"
-                    class="lame-profile__text-btn"
-                    data-toggle-address
-                    aria-expanded="false"
-                    aria-controls="EditAddress_{{ address.id }}"
-                  >
-                    {{ 'customer.addresses.edit' | t }}
-                  </button>
-                  <button
-                    type="button"
-                    class="lame-profile__text-btn lame-profile__text-btn--danger"
-                    data-delete-address
-                    data-target="{{ address.url }}"
-                    data-confirm-message="{{ 'customer.addresses.delete_confirm' | t }}"
-                  >
-                    {{ 'customer.addresses.delete' | t }}
-                  </button>
-                </div>
-
-                <div
-                  id="EditAddress_{{ address.id }}"
-                  class="lame-profile__address-form"
-                  hidden
-                >
-                  <h3 class="lame-profile__panel-subtitle">{{ 'customer.addresses.edit_address' | t }}</h3>
-                  {%- form 'customer_address', address, class: 'lame-profile__form' -%}
-                    {% render 'lame-customer-address-fields', form: form, prefix: address.id %}
-                    <div class="lame-profile__form-actions">
-                      <button type="submit" class="button lame-profile__btn-primary">
-                        {{ 'customer.addresses.update' | t }}
-                      </button>
-                      <button type="reset" class="button button-secondary" data-cancel-address>
-                        {{ 'customer.addresses.cancel' | t }}
-                      </button>
+          {% if customer.addresses.size > 0 %}
+            <ul class="lame-profile__address-list" role="list">
+              {%- for address in customer.addresses -%}
+                <li class="lame-profile__address-block">
+                  <div class="lame-profile__address-block-header">
+                    <div>
+                      {% if address == customer.default_address %}
+                        <p class="lame-profile__address-label">{{ 'lame_customer.default_address' | t }}</p>
+                      {% else %}
+                        <p class="lame-profile__address-label">{{ 'lame_customer.address' | t }} {{ forloop.index }}</p>
+                      {% endif %}
+                      <address class="lame-profile__address-display">{{ address | format_address }}</address>
                     </div>
-                  {%- endform -%}
+                    <button
+                      type="button"
+                      class="lame-profile__icon-btn"
+                      data-toggle-address
+                      aria-expanded="false"
+                      aria-controls="EditAddress_{{ address.id }}"
+                    >
+                      <span class="visually-hidden">{{ 'customer.addresses.edit' | t }}</span>
+                      {% render 'icon-edit', class: 'lame-profile__icon' %}
+                    </button>
+                  </div>
+
+                  <div
+                    id="EditAddress_{{ address.id }}"
+                    class="lame-profile__card-edit lame-profile__card-edit--inset"
+                    hidden
+                  >
+                    <h3 class="lame-profile__card-subtitle">{{ 'customer.addresses.edit_address' | t }}</h3>
+                    {%- form 'customer_address', address, class: 'lame-profile__form' -%}
+                      {% render 'lame-customer-address-fields', form: form, prefix: address.id %}
+                      <div class="lame-profile__form-actions">
+                        <button type="submit" class="button lame-profile__btn-primary">
+                          {{ 'customer.addresses.update' | t }}
+                        </button>
+                        <button type="reset" class="button button-secondary" data-cancel-address>
+                          {{ 'customer.addresses.cancel' | t }}
+                        </button>
+                        {% unless address == customer.default_address and customer.addresses_count == 1 %}
+                          <button
+                            type="button"
+                            class="lame-profile__link-btn lame-profile__link-btn--danger"
+                            data-delete-address
+                            data-target="{{ address.url }}"
+                            data-confirm-message="{{ 'customer.addresses.delete_confirm' | t }}"
+                          >
+                            {{ 'customer.addresses.delete' | t }}
+                          </button>
+                        {% endunless %}
+                      </div>
+                    {%- endform -%}
+                  </div>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {% else %}
+            <p class="lame-profile__empty">{{ 'lame_customer.no_addresses' | t }}</p>
+          {% endif %}
+        </section>
+
+        {%- comment -%} Bank details card {%- endcomment -%}
+        {% if section.settings.show_bank %}
+          {% liquid
+            assign bank_holder = customer.metafields.lame.account_holder.value | default: customer.metafields.lame.account_holder
+            assign bank_name = customer.metafields.lame.bank_name.value | default: customer.metafields.lame.bank_name
+            assign bank_account = customer.metafields.lame.account_number.value | default: customer.metafields.lame.account_number
+            assign bank_routing = customer.metafields.lame.routing_number.value | default: customer.metafields.lame.routing_number
+            assign bank_iban = customer.metafields.lame.iban.value | default: customer.metafields.lame.iban
+            assign has_saved_bank = false
+            if bank_holder != blank or bank_name != blank or bank_account != blank or bank_iban != blank
+              assign has_saved_bank = true
+            endif
+          %}
+
+          <section class="lame-profile__card" aria-labelledby="ProfileBankHeading">
+            <div class="lame-profile__card-header">
+              <h2 id="ProfileBankHeading" class="lame-profile__card-title">{{ 'lame_customer.tab_bank' | t }}</h2>
+              <button
+                type="button"
+                class="lame-profile__link-btn"
+                data-edit-toggle
+                aria-expanded="false"
+                aria-controls="BankEditForm"
+              >
+                {% if has_saved_bank %}
+                  {{ 'customer.addresses.edit' | t }}
+                {% else %}
+                  {{ 'lame_customer.add' | t }}
+                {% endif %}
+              </button>
+            </div>
+
+            <div class="lame-profile__card-view" data-profile-view="bank">
+              {% if has_saved_bank %}
+                <dl class="lame-profile__bank-summary">
+                  {% if bank_holder != blank %}
+                    <div>
+                      <dt>{{ 'lame_customer.bank_holder' | t }}</dt>
+                      <dd>{{ bank_holder }}</dd>
+                    </div>
+                  {% endif %}
+                  {% if bank_name != blank %}
+                    <div>
+                      <dt>{{ 'lame_customer.bank_name' | t }}</dt>
+                      <dd>{{ bank_name }}</dd>
+                    </div>
+                  {% endif %}
+                  {% if bank_account != blank %}
+                    <div>
+                      <dt>{{ 'lame_customer.bank_account' | t }}</dt>
+                      <dd>
+                        {%- if bank_account.size > 8 -%}
+                          {{ bank_account | slice: 0, 4 }}••••{{ bank_account | slice: -4, 4 }}
+                        {%- else -%}
+                          ••••
+                        {%- endif -%}
+                      </dd>
+                    </div>
+                  {% endif %}
+                  {% if bank_routing != blank %}
+                    <div>
+                      <dt>{{ 'lame_customer.bank_routing' | t }}</dt>
+                      <dd>{{ bank_routing }}</dd>
+                    </div>
+                  {% endif %}
+                  {% if bank_iban != blank %}
+                    <div>
+                      <dt>{{ 'lame_customer.bank_iban' | t }}</dt>
+                      <dd>
+                        {%- if bank_iban.size > 8 -%}
+                          {{ bank_iban | slice: 0, 4 }}••••{{ bank_iban | slice: -4, 4 }}
+                        {%- else -%}
+                          ••••
+                        {%- endif -%}
+                      </dd>
+                    </div>
+                  {% endif %}
+                </dl>
+              {% else %}
+                <p class="lame-profile__empty">{{ 'lame_customer.bank_empty' | t }}</p>
+              {% endif %}
+            </div>
+
+            <div id="BankEditForm" class="lame-profile__card-edit" data-profile-edit="bank" hidden>
+              <p class="lame-profile__card-desc">{{ 'lame_customer.bank_help' | t }}</p>
+
+              {%- assign bank_form_id = 'BankForm-' | append: section.id -%}
+              {%- form 'contact', id: bank_form_id, class: 'lame-profile__form', data-bank-form: '' -%}
+                <input type="hidden" name="contact[email]" value="{{ customer.email }}">
+                <input type="hidden" name="contact[name]" value="{{ customer.name }}">
+                <textarea name="contact[body]" data-bank-body hidden></textarea>
+
+                {%- if form.posted_successfully? and form.id == bank_form_id -%}
+                  <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
+                    {{ 'lame_customer.bank_saved' | t }}
+                  </div>
+                {%- endif -%}
+
+                {%- if form.errors and form.id == bank_form_id -%}
+                  <div class="lame-profile__message lame-profile__message--error">
+                    {{ form.errors | default_errors }}
+                  </div>
+                {%- endif -%}
+
+                <div class="lame-profile__field">
+                  <label for="BankHolder">{{ 'lame_customer.bank_holder' | t }}</label>
+                  <input
+                    type="text"
+                    id="BankHolder"
+                    class="lame-profile__input"
+                    data-bank-field="Account holder"
+                    value="{{ bank_holder }}"
+                    autocomplete="name"
+                  >
                 </div>
-              </li>
-            {%- endfor -%}
-          </ul>
-        </div>
-      </div>
+                <div class="lame-profile__field">
+                  <label for="BankName">{{ 'lame_customer.bank_name' | t }}</label>
+                  <input
+                    type="text"
+                    id="BankName"
+                    class="lame-profile__input"
+                    data-bank-field="Bank name"
+                    value="{{ bank_name }}"
+                    autocomplete="organization"
+                  >
+                </div>
+                <div class="lame-profile__field-row">
+                  <div class="lame-profile__field">
+                    <label for="BankAccount">{{ 'lame_customer.bank_account' | t }}</label>
+                    <input
+                      type="text"
+                      id="BankAccount"
+                      class="lame-profile__input"
+                      data-bank-field="Account number"
+                      inputmode="numeric"
+                      autocomplete="off"
+                    >
+                  </div>
+                  <div class="lame-profile__field">
+                    <label for="BankRouting">{{ 'lame_customer.bank_routing' | t }}</label>
+                    <input
+                      type="text"
+                      id="BankRouting"
+                      class="lame-profile__input"
+                      data-bank-field="Routing / sort code"
+                      value="{{ bank_routing }}"
+                      autocomplete="off"
+                    >
+                  </div>
+                </div>
+                <div class="lame-profile__field">
+                  <label for="BankIban">{{ 'lame_customer.bank_iban' | t }}</label>
+                  <input
+                    type="text"
+                    id="BankIban"
+                    class="lame-profile__input"
+                    data-bank-field="IBAN"
+                    value="{{ bank_iban }}"
+                    autocomplete="off"
+                  >
+                </div>
 
-      {%- comment -%} Bank / payment details panel {%- endcomment -%}
-      <div class="lame-profile__panel" data-profile-panel="bank" role="tabpanel" hidden>
-        <h2 class="lame-profile__panel-title">{{ 'lame_customer.tab_bank' | t }}</h2>
-        <p class="lame-profile__panel-desc">{{ 'lame_customer.bank_help' | t }}</p>
-
-        {% liquid
-          assign bank_holder = customer.metafields.lame.account_holder.value | default: customer.metafields.lame.account_holder
-          assign bank_name = customer.metafields.lame.bank_name.value | default: customer.metafields.lame.bank_name
-          assign bank_account = customer.metafields.lame.account_number.value | default: customer.metafields.lame.account_number
-          assign bank_routing = customer.metafields.lame.routing_number.value | default: customer.metafields.lame.routing_number
-          assign bank_iban = customer.metafields.lame.iban.value | default: customer.metafields.lame.iban
-          assign has_saved_bank = false
-          if bank_holder != blank or bank_name != blank or bank_account != blank
-            assign has_saved_bank = true
-          endif
-        %}
-
-        {% if has_saved_bank %}
-          <dl class="lame-profile__bank-saved">
-            {% if bank_holder != blank %}
-              <div>
-                <dt>{{ 'lame_customer.bank_holder' | t }}</dt>
-                <dd>{{ bank_holder }}</dd>
-              </div>
-            {% endif %}
-            {% if bank_name != blank %}
-              <div>
-                <dt>{{ 'lame_customer.bank_name' | t }}</dt>
-                <dd>{{ bank_name }}</dd>
-              </div>
-            {% endif %}
-            {% if bank_account != blank %}
-              <div>
-                <dt>{{ 'lame_customer.bank_account' | t }}</dt>
-                <dd>{{ bank_account | slice: 0, 4 }}••••{{ bank_account | slice: -4, 4 }}</dd>
-              </div>
-            {% endif %}
-            {% if bank_routing != blank %}
-              <div>
-                <dt>{{ 'lame_customer.bank_routing' | t }}</dt>
-                <dd>{{ bank_routing }}</dd>
-              </div>
-            {% endif %}
-            {% if bank_iban != blank %}
-              <div>
-                <dt>{{ 'lame_customer.bank_iban' | t }}</dt>
-                <dd>{{ bank_iban | slice: 0, 4 }}••••{{ bank_iban | slice: -4, 4 }}</dd>
-              </div>
-            {% endif %}
-          </dl>
+                <div class="lame-profile__form-actions">
+                  <button type="submit" class="button lame-profile__btn-primary">
+                    {{ 'lame_customer.save_bank' | t }}
+                  </button>
+                  <button type="button" class="button button-secondary" data-edit-cancel aria-controls="BankEditForm">
+                    {{ 'customer.addresses.cancel' | t }}
+                  </button>
+                </div>
+              {%- endform -%}
+            </div>
+          </section>
         {% endif %}
-
-        {%- assign bank_form_id = 'BankForm-' | append: section.id -%}
-        {%- form 'contact', id: bank_form_id, class: 'lame-profile__form', data-bank-form: '' -%}
-          <input type="hidden" name="contact[email]" value="{{ customer.email }}">
-          <input type="hidden" name="contact[name]" value="{{ customer.name }}">
-          <textarea name="contact[body]" data-bank-body hidden></textarea>
-
-          {%- if form.posted_successfully? and form.id == bank_form_id -%}
-            <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
-              {{ 'lame_customer.bank_saved' | t }}
-            </div>
-          {%- endif -%}
-
-          {%- if form.errors and form.id == bank_form_id -%}
-            <div class="lame-profile__message lame-profile__message--error">
-              {{ form.errors | default_errors }}
-            </div>
-          {%- endif -%}
-
-          <div class="lame-profile__field">
-            <label for="BankHolder">{{ 'lame_customer.bank_holder' | t }}</label>
-            <input
-              type="text"
-              id="BankHolder"
-              class="lame-profile__input"
-              data-bank-field="Account holder"
-              value="{{ bank_holder }}"
-              autocomplete="name"
-            >
-          </div>
-          <div class="lame-profile__field">
-            <label for="BankName">{{ 'lame_customer.bank_name' | t }}</label>
-            <input
-              type="text"
-              id="BankName"
-              class="lame-profile__input"
-              data-bank-field="Bank name"
-              value="{{ bank_name }}"
-              autocomplete="organization"
-            >
-          </div>
-          <div class="lame-profile__field-row">
-            <div class="lame-profile__field">
-              <label for="BankAccount">{{ 'lame_customer.bank_account' | t }}</label>
-              <input
-                type="text"
-                id="BankAccount"
-                class="lame-profile__input"
-                data-bank-field="Account number"
-                inputmode="numeric"
-                autocomplete="off"
-              >
-            </div>
-            <div class="lame-profile__field">
-              <label for="BankRouting">{{ 'lame_customer.bank_routing' | t }}</label>
-              <input
-                type="text"
-                id="BankRouting"
-                class="lame-profile__input"
-                data-bank-field="Routing / sort code"
-                autocomplete="off"
-              >
-            </div>
-          </div>
-          <div class="lame-profile__field">
-            <label for="BankIban">{{ 'lame_customer.bank_iban' | t }}</label>
-            <input
-              type="text"
-              id="BankIban"
-              class="lame-profile__input"
-              data-bank-field="IBAN"
-              value="{{ bank_iban }}"
-              autocomplete="off"
-            >
-          </div>
-
-          <button type="submit" class="button lame-profile__btn-primary">
-            {{ 'lame_customer.save_bank' | t }}
-          </button>
-        {%- endform -%}
       </div>
+
+      <footer class="lame-profile__footer">
+        <a href="{{ routes.account_logout_url }}" class="button button-secondary lame-profile__sign-out">
+          {{ 'customer.log_out' | t }}
+        </a>
+      </footer>
     {% endunless %}
   </div>
 </section>
 
 {% stylesheet %}
   .lame-customer-profile {
-    --lame-profile-max: 52rem;
+    --lame-profile-max: 40rem;
   }
 
   .lame-profile {
@@ -410,108 +446,239 @@
     padding-block: 2rem 3rem;
   }
 
-  .lame-profile__title {
+  .lame-profile__page-title {
     font-family: var(--lame-font-display, inherit);
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    margin: 0 0 0.35rem;
-    color: var(--lame-section-heading-color, inherit);
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.02em;
   }
 
-  .lame-profile__subtitle {
-    margin: 0;
-    opacity: 0.72;
-    font-size: 0.95rem;
-  }
-
-  .lame-profile__header {
+  .lame-profile__subnav {
     display: flex;
-    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin: 0 0 1.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+  }
+
+  .lame-profile__subnav-link {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0.55;
+  }
+
+  .lame-profile__subnav-link:hover {
+    opacity: 0.85;
+  }
+
+  .lame-profile__subnav-link--current {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .lame-profile__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .lame-profile__card {
+    background: rgb(var(--color-background-rgb, 255 255 255));
+    border: 1px solid rgb(0 0 0 / 0.12);
+    border-radius: 12px;
+    padding: 1.25rem 1.35rem;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  }
+
+  .lame-profile__card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .lame-profile__card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .lame-profile__card-subtitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+
+  .lame-profile__card-desc {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    opacity: 0.72;
+  }
+
+  .lame-profile__info-row {
+    display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgb(0 0 0 / 0.08);
   }
 
-  .lame-profile__logout {
-    font-size: 0.9rem;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+  .lame-profile__info-row:first-child {
+    padding-top: 0;
   }
 
-  .lame-profile__checkout-note {
-    margin: 0 0 1.5rem;
-    padding: 0.75rem 1rem;
-    background: rgb(var(--brand-gold) / 0.12);
-    border: 1px solid rgb(var(--brand-gold) / 0.35);
-    border-radius: var(--lame-radius-card, 8px);
-    font-size: 0.9rem;
-    line-height: 1.45;
+  .lame-profile__info-row--plain {
+    padding-inline-end: 2.5rem;
   }
 
-  .lame-profile__tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-bottom: 1.75rem;
-    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+  .lame-profile__info-row:last-child {
+    border-bottom: none;
     padding-bottom: 0;
   }
 
-  .lame-profile__tab {
+  .lame-profile__info-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    opacity: 0.6;
+    margin-bottom: 0.2rem;
+  }
+
+  .lame-profile__info-value {
+    font-size: 0.98rem;
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .lame-profile__icon-btn {
+    flex-shrink: 0;
     appearance: none;
-    background: transparent;
+    background: none;
     border: none;
-    border-bottom: 2px solid transparent;
-    padding: 0.65rem 1rem;
-    margin-bottom: -1px;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: #1a5fb4;
+    line-height: 0;
+  }
+
+  .lame-profile__icon-btn:hover {
+    opacity: 0.75;
+  }
+
+  .lame-profile__icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .lame-profile__link-btn {
+    appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
     font: inherit;
     font-size: 0.9rem;
     font-weight: 600;
+    color: #1a5fb4;
     cursor: pointer;
-    color: inherit;
-    opacity: 0.65;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
     text-decoration: none;
   }
 
-  .lame-profile__tab--active,
-  .lame-profile__tab:hover {
-    opacity: 1;
-    border-bottom-color: rgb(var(--brand-gold-strong));
-    color: rgb(var(--brand-gold-readable));
+  .lame-profile__link-btn:hover {
+    text-decoration: underline;
   }
 
-  .lame-profile__tab--link {
+  .lame-profile__link-btn--danger {
+    color: #a32;
     margin-inline-start: auto;
   }
 
-  .lame-profile__badge {
-    font-size: 0.75rem;
-    font-weight: 700;
-    background: rgb(var(--brand-gold) / 0.2);
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
+  .lame-profile__card-edit {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgb(0 0 0 / 0.08);
   }
 
-  .lame-profile__panel-title {
-    font-size: 1.15rem;
-    margin: 0 0 0.5rem;
-    font-family: var(--lame-font-display, inherit);
+  .lame-profile__card-edit--inset {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: rgb(0 0 0 / 0.02);
+    border: 1px solid rgb(0 0 0 / 0.08);
+    border-radius: 8px;
   }
 
-  .lame-profile__panel-subtitle {
-    font-size: 1rem;
-    margin: 0 0 1rem;
+  .lame-profile__card-edit[hidden],
+  .lame-profile__card-edit--inset[hidden],
+  [data-profile-view][hidden] {
+    display: none !important;
+  }
+
+  .lame-profile__address-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lame-profile__address-block {
+    padding: 1rem 0;
+    border-top: 1px solid rgb(0 0 0 / 0.08);
+  }
+
+  .lame-profile__address-block:first-child {
+    border-top: none;
+    padding-top: 0.25rem;
+  }
+
+  .lame-profile__address-block-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .lame-profile__address-label {
+    margin: 0 0 0.35rem;
+    font-size: 0.82rem;
     font-weight: 600;
+    opacity: 0.65;
   }
 
-  .lame-profile__panel-desc {
-    margin: 0 0 1.25rem;
-    font-size: 0.9rem;
-    opacity: 0.8;
+  .lame-profile__address-display {
+    font-style: normal;
     line-height: 1.5;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .lame-profile__bank-summary {
+    margin: 0.5rem 0 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .lame-profile__bank-summary dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.6;
+    margin-bottom: 0.1rem;
+  }
+
+  .lame-profile__bank-summary dd {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .lame-profile__empty {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    opacity: 0.65;
   }
 
   .lame-profile__form {
@@ -542,12 +709,13 @@
   .lame-profile__input,
   .lame-profile__select {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: var(--style-border-radius-inputs, 4px);
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--style-border-radius-inputs, 6px);
     border: 1px solid var(--color-input-border, rgb(0 0 0 / 0.2));
     background: var(--color-input-background, #fff);
     color: var(--color-input-text, inherit);
     font: inherit;
+    font-size: 0.95rem;
   }
 
   .lame-profile__checkbox {
@@ -561,8 +729,8 @@
   .lame-profile__form-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
+    align-items: center;
+    gap: 0.65rem;
   }
 
   .lame-profile__btn-primary {
@@ -575,17 +743,27 @@
   .lame-profile__message {
     padding: 0.75rem 1rem;
     border-radius: 6px;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    margin-top: 0.75rem;
   }
 
   .lame-profile__message--success {
-    background: rgb(34 120 60 / 0.12);
-    border: 1px solid rgb(34 120 60 / 0.35);
+    background: rgb(34 120 60 / 0.1);
+    border: 1px solid rgb(34 120 60 / 0.3);
   }
 
   .lame-profile__message--error {
-    background: rgb(180 40 40 / 0.1);
-    border: 1px solid rgb(180 40 40 / 0.35);
+    background: rgb(180 40 40 / 0.08);
+    border: 1px solid rgb(180 40 40 / 0.3);
+  }
+
+  .lame-profile__footer {
+    margin-top: 1.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .lame-profile__sign-out {
+    min-width: 8rem;
   }
 
   .lame-profile__guest {
@@ -602,108 +780,6 @@
   .lame-profile__hint a {
     text-decoration: underline;
   }
-
-  .lame-profile__default-address {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgb(0 0 0 / 0.08);
-  }
-
-  .lame-profile__default-address address {
-    font-style: normal;
-    margin: 0.5rem 0 0.75rem;
-    line-height: 1.5;
-  }
-
-  .lame-profile__text-btn {
-    appearance: none;
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    font-size: 0.88rem;
-    font-weight: 600;
-    text-decoration: underline;
-    cursor: pointer;
-    color: rgb(var(--brand-gold-readable));
-  }
-
-  .lame-profile__text-btn--danger {
-    color: #a32;
-  }
-
-  .lame-profile__address-list {
-    list-style: none;
-    margin: 1.5rem 0 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .lame-profile__address-card {
-    border: var(--lame-border-soft, 1px solid rgb(0 0 0 / 0.1));
-    border-radius: var(--lame-radius-card, 10px);
-    padding: 1.25rem;
-    background: rgb(255 255 255 / 0.5);
-  }
-
-  .lame-profile__address-display {
-    font-style: normal;
-    margin: 0.35rem 0 0;
-    line-height: 1.45;
-    font-size: 0.95rem;
-  }
-
-  .lame-profile__default-badge {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: rgb(var(--brand-gold) / 0.25);
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.35rem;
-  }
-
-  .lame-profile__address-card-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.75rem;
-  }
-
-  .lame-profile__address-form {
-    margin-top: 1.25rem;
-    padding-top: 1.25rem;
-    border-top: 1px dashed rgb(0 0 0 / 0.12);
-  }
-
-  .lame-profile__address-form[hidden] {
-    display: none !important;
-  }
-
-  .lame-profile__bank-saved {
-    margin: 0 0 1.5rem;
-    padding: 1rem 1.25rem;
-    background: rgb(0 0 0 / 0.03);
-    border-radius: 8px;
-    display: grid;
-    gap: 0.65rem;
-  }
-
-  .lame-profile__bank-saved dt {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    opacity: 0.65;
-  }
-
-  .lame-profile__bank-saved dd {
-    margin: 0.15rem 0 0;
-    font-weight: 600;
-  }
 {% endstylesheet %}
 
 {% schema %}
@@ -714,18 +790,24 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Create an Online Store page (e.g. handle my-profile) and assign the \"my-profile\" template. Add that page to your Customer account menu in Shopify admin. Addresses saved here are available at checkout for logged-in customers."
+      "content": "Single-page profile: account, addresses, and bank details in one view (like Shopify customer accounts). Create a page with the my-profile template and link it from your customer account menu."
     },
     {
       "type": "text",
       "id": "heading",
-      "label": "Custom heading",
-      "info": "Leave blank to use the default greeting with the customer's first name."
+      "label": "Page title",
+      "info": "Leave blank to show \"Profile\"."
     },
     {
       "type": "checkbox",
       "id": "show_orders",
-      "label": "Show link to order history",
+      "label": "Show Orders link above profile",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bank",
+      "label": "Show bank details card",
       "default": true
     },
     {

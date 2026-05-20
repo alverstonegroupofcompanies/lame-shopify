@@ -1,0 +1,49 @@
+{%- doc -%}
+  Compact circular social icons for the header utility bar.
+
+  @param {object} settings - Section settings with *_url fields
+{%- enddoc -%}
+
+{%- liquid
+  assign social_keys = 'facebook_url,instagram_url,youtube_url,tiktok_url,twitter_url,pinterest_url' | split: ','
+-%}
+
+<ul class="lame-utility-bar__social-list" role="list">
+  {%- for link_key in social_keys -%}
+    {%- liquid
+      assign link_url = settings[link_key]
+    -%}
+    {%- if link_url == blank -%}
+      {%- continue -%}
+    {%- endif -%}
+    {%- liquid
+      case link_key
+        when 'facebook_url'
+          assign platform = 'facebook'
+        when 'instagram_url'
+          assign platform = 'instagram'
+        when 'youtube_url'
+          assign platform = 'youtube'
+        when 'tiktok_url'
+          assign platform = 'tiktok'
+        when 'twitter_url'
+          assign platform = 'twitter'
+        when 'pinterest_url'
+          assign platform = 'pinterest'
+      endcase
+    -%}
+    <li class="lame-utility-bar__social-item">
+      <a
+        class="lame-utility-bar__social-link"
+        href="{{ link_url }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="{{ platform | capitalize }}"
+      >
+        <svg class="lame-utility-bar__social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+          {%- render 'icon', icon: platform -%}
+        </svg>
+      </a>
+    </li>
+  {%- endfor -%}
+</ul>
