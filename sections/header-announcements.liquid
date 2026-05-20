@@ -14,6 +14,12 @@
   endif
   assign show_contact = section.settings.show_contact and phone != blank
 
+  assign utility_menu = linklists[section.settings.utility_menu]
+  assign show_utility_menu = false
+  if utility_menu != blank and utility_menu.links.size > 0
+    assign show_utility_menu = true
+  endif
+
   assign social_keys = 'facebook_url,instagram_url,youtube_url,tiktok_url,twitter_url,pinterest_url' | split: ','
   assign show_social = false
   if section.settings.show_social
@@ -27,9 +33,16 @@
 
   assign autoplay = false
   assign show_arrows = false
-  if section.blocks.size > 1
+  if section.blocks.size > 1 and show_utility_menu == false
     assign autoplay = true
     assign show_arrows = true
+  endif
+
+  assign center_mode = section.settings.center_mode
+  if show_utility_menu == false and section.blocks.size > 0
+    if center_mode == 'menu'
+      assign center_mode = 'announcements'
+    endif
   endif
 -%}
 
@@ -39,165 +52,251 @@
   style="{% render 'spacing-padding', settings: section.settings %}; --border-bottom-width: {{ section.settings.divider_width }}px;"
   aria-label="{{ section.settings.accessibility_label | escape }}"
 >
-  <div class="announcement-bar__grid page-width">
-    <div class="announcement-bar__column announcement-bar__column--start">
-      {%- if show_contact -%}
-        <a
-          class="announcement-bar__contact"
-          href="tel:{{ phone | replace: ' ', '' | replace: '-', '' | replace: '(', '' | replace: ')', '' }}"
-        >
-          <span class="announcement-bar__contact-label">{{ section.settings.contact_label }}</span>
-          <span class="announcement-bar__contact-value">{{ phone }}</span>
-        </a>
-      {%- elsif request.design_mode and section.settings.show_contact -%}
-        <span class="announcement-bar__hint">{{ section.settings.contact_label }} — add phone in bar settings</span>
-      {%- endif -%}
-    </div>
+  <div class="announcement-bar__shell page-width">
+    <div class="announcement-bar__grid">
+      <div class="announcement-bar__zone announcement-bar__zone--start">
+        {%- if show_contact -%}
+          <a
+            class="announcement-bar__menu-link announcement-bar__contact"
+            href="tel:{{ phone | replace: ' ', '' | replace: '-', '' | replace: '(', '' | replace: ')', '' }}"
+          >
+            <span class="announcement-bar__contact-label">{{ section.settings.contact_label }}</span>
+            <span class="announcement-bar__contact-value">{{ phone }}</span>
+          </a>
+        {%- elsif request.design_mode and section.settings.show_contact -%}
+          <span class="announcement-bar__hint">{{ section.settings.contact_label }}</span>
+        {%- endif -%}
+      </div>
 
-    <div class="announcement-bar__column announcement-bar__column--center">
-      {%- if section.blocks.size > 0 -%}
-        <announcement-bar-component
-          class="announcement-bar__slider"
-          {% if autoplay %}
-            autoplay="{{ section.settings.speed }}" aria-live="polite"
-          {% endif %}
-        >
-          {% if show_arrows %}
-            {% render 'slideshow-arrows', icon_style: 'chevron' %}
-          {% endif %}
+      <div class="announcement-bar__zone announcement-bar__zone--center">
+        {%- if center_mode == 'menu' or center_mode == 'menu_and_promo' -%}
+          {%- if show_utility_menu -%}
+            <nav class="announcement-bar__menu" aria-label="{{ section.settings.utility_menu_label | escape }}">
+              <ul class="announcement-bar__menu-list list-unstyled" role="list">
+                {%- for link in utility_menu.links -%}
+                  <li class="announcement-bar__menu-item">
+                    <a
+                      href="{{ link.url }}"
+                      class="announcement-bar__menu-link{% if link.active %} announcement-bar__menu-link--active{% endif %}"
+                      {% if link.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      <span class="announcement-bar__menu-link-title">{{ link.title }}</span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </nav>
+          {%- elsif request.design_mode -%}
+            <p class="announcement-bar__hint">Choose a menu under “Center links”</p>
+          {%- endif -%}
+        {%- endif -%}
 
-          <div class="announcement-bar__slides">
-            {% content_for 'blocks' %}
-          </div>
-        </announcement-bar-component>
-      {%- elsif request.design_mode -%}
-        <p class="announcement-bar__hint">Add an announcement block for the center message</p>
-      {%- endif -%}
-    </div>
+        {%- if center_mode == 'announcements' or center_mode == 'menu_and_promo' -%}
+          {%- if section.blocks.size > 0 -%}
+            <announcement-bar-component
+              class="announcement-bar__slider{% if center_mode == 'menu_and_promo' %} announcement-bar__slider--compact{% endif %}"
+              {% if autoplay %}
+                autoplay="{{ section.settings.speed }}" aria-live="polite"
+              {% endif %}
+            >
+              {% if show_arrows %}
+                {% render 'slideshow-arrows', icon_style: 'chevron' %}
+              {% endif %}
+              <div class="announcement-bar__slides">
+                {% content_for 'blocks' %}
+              </div>
+            </announcement-bar-component>
+          {%- elsif request.design_mode and center_mode != 'menu' -%}
+            <p class="announcement-bar__hint">Add announcement blocks or switch center to Menu links</p>
+          {%- endif -%}
+        {%- endif -%}
+      </div>
 
-    <div class="announcement-bar__column announcement-bar__column--end">
-      {%- if show_social -%}
-        <ul class="announcement-bar__social" role="list">
-          {%- for link_key in social_keys -%}
-            {%- assign link_url = section.settings[link_key] -%}
-            {%- if link_url == blank -%}
-              {%- continue -%}
-            {%- endif -%}
-            {%- liquid
-              case link_key
-                when 'facebook_url'
-                  assign platform = 'facebook'
-                when 'instagram_url'
-                  assign platform = 'instagram'
-                when 'youtube_url'
-                  assign platform = 'youtube'
-                when 'tiktok_url'
-                  assign platform = 'tiktok'
-                when 'twitter_url'
-                  assign platform = 'twitter'
-                when 'pinterest_url'
-                  assign platform = 'pinterest'
-              endcase
-            -%}
-            <li>
-              <a
-                class="announcement-bar__social-link"
-                href="{{ link_url }}"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="{{ platform | capitalize }}"
-              >
-                <svg class="announcement-bar__social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
-                  {%- render 'icon', icon: platform -%}
-                </svg>
-              </a>
-            </li>
-          {%- endfor -%}
-        </ul>
-      {%- endif -%}
+      <div class="announcement-bar__zone announcement-bar__zone--end">
+        {%- if show_social -%}
+          <ul class="announcement-bar__social list-unstyled" role="list">
+            {%- for link_key in social_keys -%}
+              {%- assign link_url = section.settings[link_key] -%}
+              {%- if link_url == blank -%}
+                {%- continue -%}
+              {%- endif -%}
+              {%- liquid
+                case link_key
+                  when 'facebook_url'
+                    assign platform = 'facebook'
+                  when 'instagram_url'
+                    assign platform = 'instagram'
+                  when 'youtube_url'
+                    assign platform = 'youtube'
+                  when 'tiktok_url'
+                    assign platform = 'tiktok'
+                  when 'twitter_url'
+                    assign platform = 'twitter'
+                  when 'pinterest_url'
+                    assign platform = 'pinterest'
+                endcase
+              -%}
+              <li>
+                <a
+                  class="announcement-bar__social-link"
+                  href="{{ link_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="{{ platform | capitalize }}"
+                >
+                  <svg class="announcement-bar__social-icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20">
+                    {%- render 'icon', icon: platform -%}
+                  </svg>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
     </div>
   </div>
 </aside>
 
 {% stylesheet %}
   .announcement-bar--cosmetic {
-    border-block-end: var(--border-bottom-width) solid rgb(var(--color-border-rgb) / 0.3);
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
+    --announcement-bar-min-height: 2.5rem;
+    border-block-end: var(--border-bottom-width) solid rgb(var(--color-border-rgb) / 0.35);
+    font-family: var(--lame-font-menu, var(--font-body--family));
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .announcement-bar__shell {
+    width: 100%;
   }
 
   .announcement-bar__grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-columns: minmax(8rem, 1fr) minmax(0, 2.2fr) minmax(8rem, 1fr);
     align-items: center;
-    gap: var(--gap-md);
-    min-height: 2.25rem;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    min-height: var(--announcement-bar-min-height);
   }
 
-  .announcement-bar__column {
+  .announcement-bar__zone {
     min-width: 0;
+    display: flex;
+    align-items: center;
   }
 
-  .announcement-bar__column--start {
-    justify-self: start;
+  .announcement-bar__zone--start {
+    justify-content: flex-start;
   }
 
-  .announcement-bar__column--center {
-    justify-self: center;
+  .announcement-bar__zone--center {
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .announcement-bar__zone--end {
+    justify-content: flex-end;
+  }
+
+  .announcement-bar__menu {
     width: 100%;
-    max-width: 40rem;
-    margin-inline: auto;
+    max-width: 100%;
   }
 
-  .announcement-bar__column--end {
-    justify-self: end;
+  .announcement-bar__menu-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.35rem, 1.5vw, 1.1rem);
+    margin: 0;
+    padding: 0;
+  }
+
+  .announcement-bar__menu-item {
+    margin: 0;
+  }
+
+  .announcement-bar__menu-link {
+    display: inline-flex;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    line-height: 1.2;
+    padding: 0.2rem 0.35rem;
+    border-radius: 2px;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .announcement-bar__menu-link-title {
+    display: inline-block;
+  }
+
+  .announcement-bar__menu-link:hover,
+  .announcement-bar__menu-link:focus-visible {
+    opacity: 0.82;
+  }
+
+  .announcement-bar__menu-link--active {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
   }
 
   .announcement-bar__contact {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: baseline;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-size: 0.7rem;
     gap: 0.35rem;
-    color: inherit;
-    text-decoration: none;
-    white-space: nowrap;
-    line-height: 1.3;
-  }
-
-  .announcement-bar__contact:hover,
-  .announcement-bar__contact:focus-visible {
-    opacity: 0.88;
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
+    flex-wrap: wrap;
   }
 
   .announcement-bar__contact-label {
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+  }
+
+  .announcement-bar__contact-value {
+    text-transform: none;
+    letter-spacing: 0.01em;
+    font-weight: 400;
   }
 
   .announcement-bar__hint {
     margin: 0;
     opacity: 0.55;
-    font-size: 0.6875rem;
-    line-height: 1.3;
+    font-size: 0.65rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
   }
 
   .announcement-bar__slider {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
     position: relative;
     width: 100%;
-    min-height: 1.35rem;
+    min-height: 1.25rem;
+  }
+
+  .announcement-bar__slider--compact {
+    min-height: 1rem;
   }
 
   .announcement-bar__slides {
     display: grid;
     grid: [stack] auto / [stack] minmax(0, 1fr);
     width: 100%;
-    max-width: 100%;
-    margin-inline: auto;
     place-items: center;
   }
 
@@ -205,11 +304,13 @@
     grid-area: stack;
   }
 
-  .announcement-bar__slide {
+  .announcement-bar--cosmetic .announcement-bar__slide {
     transition: opacity 0.45s ease-in-out, visibility 0.45s ease-in-out;
-    place-content: center;
     width: 100%;
     text-align: center;
+    text-transform: none;
+    letter-spacing: 0.03em;
+    font-size: 0.7rem;
 
     &[aria-hidden='true'] {
       opacity: 0;
@@ -217,27 +318,26 @@
     }
   }
 
-  .announcement-bar__text {
+  .announcement-bar--cosmetic .announcement-bar__text {
     margin: 0;
+    font: inherit;
     font-size: inherit;
     font-weight: 500;
     line-height: 1.35;
+    text-transform: none;
     letter-spacing: 0.03em;
   }
 
-  .announcement-bar__text:first-child {
-    margin: 0;
-  }
-
-  .announcement-bar__text p {
+  .announcement-bar--cosmetic .announcement-bar__text p {
     margin: 0;
     display: inline;
   }
 
-  .announcement-bar__text a {
+  .announcement-bar--cosmetic .announcement-bar__text a {
     color: inherit;
     font-weight: 700;
-    text-underline-offset: 0.12em;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 
   .announcement-bar__link {
@@ -250,58 +350,54 @@
     mix-blend-mode: normal;
   }
 
-  .announcement-bar__slider slideshow-arrows .slideshow-control {
-    color: var(--color-foreground);
-  }
-
   .announcement-bar__slider .slideshow-control {
     display: flex;
-    padding: 0;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.5rem;
+    height: 1.5rem;
     align-items: center;
     justify-content: center;
-    opacity: 0.85;
+    opacity: 0.8;
     animation: none;
+    color: inherit;
   }
 
   .announcement-bar__slider .slideshow-control .svg-wrapper {
-    width: 0.65rem;
-    height: 0.65rem;
+    width: 0.6rem;
+    height: 0.6rem;
   }
 
   .announcement-bar__social {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.4rem;
+    gap: 0.35rem;
     margin: 0;
     padding: 0;
-    list-style: none;
   }
 
   .announcement-bar__social-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 1.6rem;
+    height: 1.6rem;
     border-radius: 50%;
-    border: 1px solid rgb(var(--color-foreground-rgb) / 0.35);
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.4);
     color: inherit;
     text-decoration: none;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
 
   .announcement-bar__social-link:hover,
   .announcement-bar__social-link:focus-visible {
-    background: rgb(var(--color-foreground-rgb) / 0.12);
-    border-color: rgb(var(--color-foreground-rgb) / 0.55);
+    background: rgb(var(--color-foreground-rgb) / 0.14);
+    border-color: rgb(var(--color-foreground-rgb) / 0.65);
+    transform: translateY(-1px);
   }
 
   .announcement-bar__social-icon {
-    width: 0.85rem;
-    height: 0.85rem;
+    width: 0.8rem;
+    height: 0.8rem;
     fill: currentColor;
   }
 
@@ -310,21 +406,21 @@
       grid-template-columns: 1fr;
       justify-items: center;
       text-align: center;
-      gap: 0;
-      min-height: auto;
+      gap: 0.35rem;
     }
 
-    .announcement-bar__column--start,
-    .announcement-bar__column--end {
+    .announcement-bar__zone--start,
+    .announcement-bar__zone--end {
       display: none;
     }
 
-    .announcement-bar__column--center {
-      max-width: 100%;
+    .announcement-bar__menu-list {
+      gap: 0.5rem 0.75rem;
     }
 
-    .announcement-bar__text {
-      font-size: 0.6875rem;
+    .announcement-bar__menu-link {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.25rem;
     }
   }
 {% endstylesheet %}
@@ -371,6 +467,42 @@
     },
     {
       "type": "header",
+      "content": "Center (menu-style links)"
+    },
+    {
+      "type": "select",
+      "id": "center_mode",
+      "label": "Center content",
+      "options": [
+        { "value": "menu", "label": "Navigation menu" },
+        { "value": "announcements", "label": "Rotating announcements" },
+        { "value": "menu_and_promo", "label": "Menu + announcements" }
+      ],
+      "default": "menu"
+    },
+    {
+      "type": "link_list",
+      "id": "utility_menu",
+      "label": "Menu",
+      "info": "Shows as uppercase links like the main navbar (e.g. Skin Care, Offers, Blog)."
+    },
+    {
+      "type": "text",
+      "id": "utility_menu_label",
+      "label": "Menu label (screen readers)",
+      "default": "Quick links"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "t:settings.scroll_speed",
+      "min": 2,
+      "max": 10,
+      "default": 5,
+      "unit": "sec"
+    },
+    {
+      "type": "header",
       "content": "Social (right)"
     },
     {
@@ -410,23 +542,10 @@
       "label": "Pinterest"
     },
     {
-      "type": "header",
-      "content": "Announcements (center)"
-    },
-    {
-      "type": "range",
-      "id": "speed",
-      "label": "t:settings.scroll_speed",
-      "min": 2,
-      "max": 10,
-      "default": 5,
-      "unit": "sec"
-    },
-    {
       "type": "text",
       "id": "accessibility_label",
-      "label": "Region label (screen readers)",
-      "default": "Store announcements"
+      "label": "Bar label (screen readers)",
+      "default": "Secondary navigation"
     },
     {
       "type": "header",
@@ -437,16 +556,10 @@
       "id": "section_width",
       "label": "t:settings.section_width",
       "options": [
-        {
-          "value": "page-width",
-          "label": "t:options.page"
-        },
-        {
-          "value": "full-width",
-          "label": "t:options.full"
-        }
+        { "value": "page-width", "label": "t:options.page" },
+        { "value": "full-width", "label": "t:options.full" }
       ],
-      "default": "full-width"
+      "default": "page-width"
     },
     {
       "type": "color_scheme",
@@ -473,40 +586,40 @@
       "id": "padding-block-start",
       "label": "t:settings.top",
       "min": 0,
-      "max": 24,
+      "max": 20,
       "step": 1,
       "unit": "px",
-      "default": 8
+      "default": 10
     },
     {
       "type": "range",
       "id": "padding-block-end",
       "label": "t:settings.bottom",
       "min": 0,
-      "max": 24,
+      "max": 20,
       "step": 1,
       "unit": "px",
-      "default": 8
+      "default": 10
     },
     {
       "type": "range",
       "id": "padding-inline-start",
       "label": "Left",
       "min": 0,
-      "max": 40,
+      "max": 48,
       "step": 1,
       "unit": "px",
-      "default": 16
+      "default": 20
     },
     {
       "type": "range",
       "id": "padding-inline-end",
       "label": "Right",
       "min": 0,
-      "max": 40,
+      "max": 48,
       "step": 1,
       "unit": "px",
-      "default": 16
+      "default": 20
     }
   ],
   "presets": [
@@ -516,7 +629,7 @@
         "announcement_1": {
           "type": "_announcement",
           "settings": {
-            "text": "<p>Sign up and GET 25% OFF your first order. <a href=\"/account/register\">Sign up now</a></p>"
+            "text": "<p>Free shipping on orders over $75</p>"
           }
         }
       },
