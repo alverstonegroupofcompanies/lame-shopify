@@ -1,8 +1,16 @@
 {%- liquid
   assign phone = section.settings.phone | default: shop.phone
-  assign show_contact = section.settings.show_contact and phone != blank
+  assign show_contact = false
+  if section.settings.show_contact and phone != blank
+    assign show_contact = true
+  endif
+
   assign promo_text = section.settings.promo_text | strip_html | strip
-  assign show_promo = promo_text != blank
+  assign show_promo = false
+  if promo_text != blank
+    assign show_promo = true
+  endif
+
   assign social_keys = 'facebook_url,instagram_url,youtube_url,tiktok_url,twitter_url,pinterest_url' | split: ','
   assign show_social = false
   if section.settings.show_social
@@ -14,7 +22,12 @@
     endfor
   endif
 
-  assign show_bar = show_contact or show_promo or show_social or request.design_mode
+  assign show_bar = false
+  if request.design_mode
+    assign show_bar = true
+  elsif show_contact or show_promo or show_social
+    assign show_bar = true
+  endif
 -%}
 
 {%- if show_bar -%}

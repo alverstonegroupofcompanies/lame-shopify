@@ -20,7 +20,14 @@
   "
   {{ section.shopify_attributes }}
 >
-  <div class="lame-product-carousel lame-best-sellers__carousel spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+  <div
+    class="lame-product-carousel lame-best-sellers__carousel spacing-style"
+    style="
+      {% render 'spacing-padding', settings: section.settings %}
+      --lame-carousel-accent: {{ section.settings.accent_color }};
+      --lame-carousel-discount: {{ section.settings.discount_color }};
+    "
+  >
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
       {% render 'lame-section-heading',
         title: section.settings.heading,
@@ -92,10 +99,7 @@
   </div>
 </section>
 
-{% render 'lame-product-carousel-styles',
-  accent_color: section.settings.accent_color,
-  discount_color: section.settings.discount_color
-%}
+{% render 'lame-product-carousel-styles' %}
 
 <script>
   (() => {

@@ -12,7 +12,10 @@
   if phone == blank and section.settings.phone_fallback != blank
     assign phone = section.settings.phone_fallback
   endif
-  assign show_contact = section.settings.show_contact and phone != blank
+  assign show_contact = false
+  if section.settings.show_contact and phone != blank
+    assign show_contact = true
+  endif
 
   assign utility_menu = linklists[section.settings.utility_menu]
   assign show_utility_menu = false
