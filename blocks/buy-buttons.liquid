@@ -40,7 +40,8 @@
   {{ block.shopify_attributes }}
 >
   {%- if product != blank -%}
-    {%- assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id -%}
+        {%- comment -%} Unique per product (and section) so multiple cards on collection grids do not duplicate form IDs {%- endcomment -%}
+        {%- assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id | append: '-' | append: product.id -%}
     <product-form-component
       data-section-id="{{ section.id }}"
       data-product-id="{{ product.id }}"

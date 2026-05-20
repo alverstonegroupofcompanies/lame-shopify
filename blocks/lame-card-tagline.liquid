@@ -1,0 +1,90 @@
+{%- doc -%}
+  Short line under the product title (metafield, or first product tags joined with " | ").
+  Optional metafields: custom.card_tagline (single line text) or custom.short_benefits
+{%- enddoc -%}
+
+{% liquid
+  assign product = closest.product
+  assign line = blank
+
+  if product.metafields.custom.card_tagline.value != blank
+    assign line = product.metafields.custom.card_tagline.value | strip
+  elsif product.metafields.custom.short_benefits.value != blank
+    assign line = product.metafields.custom.short_benefits.value | strip
+  endif
+
+  if line == blank and product.tags.size > 0
+    capture line
+      for tag in product.tags limit: 5
+        unless forloop.first
+          echo ' | '
+        endunless
+        echo tag
+      endfor
+    endcapture
+  endif
+
+  if line == blank and product.type != blank
+    assign line = product.type
+  endif
+%}
+
+{% if line != blank %}
+  <p
+    class="lame-card-tagline spacing-style"
+    {{ block.shopify_attributes }}
+    style="{% render 'spacing-style', settings: block.settings %}"
+  >
+    {{- line | strip | escape -}}
+  </p>
+{% endif %}
+
+{% stylesheet %}
+  .lame-card-tagline {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    font-weight: 500;
+    color: rgb(var(--color-foreground-rgb) / 0.58);
+    letter-spacing: 0.03em;
+    max-width: 100%;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Card tagline",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Uses metafield custom.card_tagline when set; otherwise the first 5 tags (separated by |), or product type."
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    }
+  ]
+}
+{% endschema %}
