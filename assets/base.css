@@ -4747,24 +4747,63 @@ body {
   mask: none !important;
 }
 
-/* Core commerce pages */
+/* Core commerce pages — product grid cards (shared; layout for collection/search is in uniform-products-page rules in product-grid.liquid) */
 .product-grid-container .product-grid__item {
   border: 0;
+  display: flex;
+  align-items: stretch;
 }
 
-.product-grid-container .product-card__content {
+.product-grid-container .product-grid__item > product-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  flex: 1 1 auto;
+}
+
+/* Visual only — do not set display here (collection cards use CSS grid via .uniform-products-page) */
+.product-grid-container product-card .product-card__content.product-grid__card {
   border-radius: var(--lame-radius-card);
   border: var(--lame-border-soft);
   box-shadow: var(--lame-shadow-soft);
   overflow: hidden;
   background: rgb(var(--color-background-rgb));
+  transition:
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-grid-container product-card .product-card__content.product-grid__card {
+    transition: border-color 0.2s ease;
+  }
+}
+
+.product-grid-container .product-grid__card > product-price {
+  flex-shrink: 0;
 }
 
 .product-grid-container .card-gallery {
   border-bottom: 1px solid rgb(var(--color-border-rgb) / 0.18);
-  background: rgb(var(--color-foreground-rgb) / 0.015);
-  padding: 0.85rem 0.85rem 0.7rem;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--color-foreground-rgb) / 0.02) 0%,
+    rgb(var(--color-background-rgb)) 100%
+  );
+  padding: 1rem 1rem 0.85rem;
   box-sizing: border-box;
+}
+
+.product-grid-container .card-gallery .product-media-container img {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .product-grid-container product-card:hover .card-gallery .product-media-container img {
+    transform: scale(1.045);
+  }
 }
 
 /* Full image visible inside padded gallery (not cropped to cover) */
@@ -4799,6 +4838,18 @@ body {
   color: rgb(var(--brand-ink));
   border-color: rgb(var(--brand-gold) / 0.45);
   background: rgb(var(--color-background-rgb));
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .product-grid-container product-card:hover .quick-add__button {
+    transform: scale(1.08);
+    border-color: rgb(var(--brand-gold) / 0.68);
+    box-shadow: 0 6px 16px rgb(var(--brand-gold) / 0.22);
+  }
 }
 
 .product-grid-container .quick-add__button .add-to-cart-icon {
@@ -4806,11 +4857,14 @@ body {
 }
 
 .product-grid-container :is(.product-card, .product-grid__card) :is(h4, .h4) {
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   display: -webkit-box;
   overflow: hidden;
+  font-weight: 600;
+  line-height: 1.38;
+  letter-spacing: 0.01em;
 }
 
 /* Collection catalog — scoped layout (see body.template-collection in theme.liquid) */
@@ -4830,12 +4884,6 @@ body {
 
 .template-collection .main-collection-grid {
   margin-top: 0.15rem;
-}
-
-.template-collection .product-grid-container .product-card__content {
-  border-color: rgb(var(--color-border-rgb) / 0.38);
-  border-width: 1px;
-  box-shadow: 0 4px 12px rgb(20 20 20 / 0.05);
 }
 
 .template-collection .product-grid-container :is(.product-card, .product-grid__card) :is(h4, .h4, product-title) {
