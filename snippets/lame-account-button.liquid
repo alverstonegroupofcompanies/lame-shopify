@@ -1,0 +1,72 @@
+{%- doc -%}
+  Account control that links to the custom Lame profile page instead of the default Shopify account UI.
+
+  @param {object} section - Header section (profile_page setting)
+  @param {string} [display_style] - icon or text
+{%- enddoc -%}
+
+{%- liquid
+  assign profile_page = section.settings.profile_page
+  assign profile_url = '/pages/my-profile'
+  if profile_page != blank
+    assign profile_url = profile_page.url
+  endif
+-%}
+
+<div class="lame-account header-actions__action{% if display_style == 'text' %} lame-account--text{% endif %}">
+  {%- if customer -%}
+    <details class="lame-account__details">
+      <summary
+        class="lame-account__trigger account-button"
+        aria-label="{{ 'content.account_title' | t }}"
+      >
+        <span class="lame-account__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0, 1 | upcase }}</span>
+        <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+          {{ 'content.account_title' | t }}
+        </span>
+      </summary>
+      <div
+        class="lame-account__panel color-{{ settings.popover_color_scheme }}"
+        role="menu"
+      >
+        <ul class="lame-account__menu list-unstyled" role="list">
+          <li role="none">
+            <a class="lame-account__link" href="{{ profile_url }}" role="menuitem">
+              {{ 'content.account_profile' | t }}
+            </a>
+          </li>
+          <li role="none">
+            <a class="lame-account__link" href="{{ routes.account_url }}" role="menuitem">
+              {{ 'customer.orders.title' | t }}
+            </a>
+          </li>
+          <li role="none">
+            <a class="lame-account__link" href="{{ routes.account_addresses_url }}" role="menuitem">
+              {{ 'customer.addresses.title' | t }}
+            </a>
+          </li>
+          <li role="none">
+            <a class="lame-account__link lame-account__link--logout" href="{{ routes.account_logout_url }}" role="menuitem">
+              {{ 'actions.log_out' | t }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </details>
+  {%- else -%}
+    <a
+      class="lame-account__trigger account-button"
+      href="{{ routes.account_login_url }}"
+      aria-label="{{ 'content.account_title' | t }}"
+    >
+      <span class="{% if display_style != 'icon' %}desktop:hidden{% endif %}" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="17" viewBox="0 0 15 17" fill="none" class="account-button__icon">
+          <path stroke="currentColor" stroke-linejoin="round" stroke-width="var(--icon-stroke-width)" d="M10.375 3.813a3.063 3.063 0 1 1-6.125 0 3.063 3.063 0 0 1 6.125 0ZM7.313 9.5c-3.667 0-6.24 2.691-6.563 6.125h13.125C13.552 12.191 10.979 9.5 7.312 9.5Z"/>
+        </svg>
+      </span>
+      <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+        {{ 'content.account_title' | t }}
+      </span>
+    </a>
+  {%- endif -%}
+</div>

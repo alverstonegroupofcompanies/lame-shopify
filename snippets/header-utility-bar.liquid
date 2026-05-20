@@ -6,14 +6,24 @@
 
 {%- liquid
   assign phone = section.settings.utility_phone | default: shop.phone
-  assign show_contact = section.settings.utility_show_contact
-  if show_contact and phone == blank and section.settings.utility_phone_placeholder != blank
-    assign phone = section.settings.utility_phone_placeholder
+  if section.settings.utility_show_contact
+    if phone == blank and section.settings.utility_phone_placeholder != blank
+      assign phone = section.settings.utility_phone_placeholder
+    endif
   endif
-  assign show_contact = show_contact and phone != blank
+
+  assign show_contact = false
+  if section.settings.utility_show_contact
+    if phone != blank
+      assign show_contact = true
+    endif
+  endif
 
   assign promo_text = section.settings.utility_promo_text | strip_html | strip
-  assign show_promo = promo_text != blank
+  assign show_promo = false
+  if promo_text != blank
+    assign show_promo = true
+  endif
 
   assign social_keys = 'utility_facebook_url,utility_instagram_url,utility_youtube_url,utility_tiktok_url,utility_twitter_url,utility_pinterest_url' | split: ','
   assign show_social = false

@@ -65,6 +65,15 @@
 >
   {% if shop.customer_accounts_enabled %}
     {% liquid
+      assign use_lame_profile = false
+      if section and section.settings.use_lame_profile_menu
+        assign use_lame_profile = true
+      endif
+    %}
+    {% if use_lame_profile %}
+      {% render 'lame-account-button', section: section, display_style: display_style %}
+    {% else %}
+    {% liquid
       assign account_actions_style = ''
       if display_style == 'text' and section
         assign actions_font = section.settings.actions_font | default: 'body'
@@ -111,6 +120,7 @@
         {% endif %}
       </shopify-account>
     </div>
+    {% endif %}
   {% endif %}
 
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
@@ -323,6 +333,85 @@
 
   .account-button--text shopify-account {
     color: inherit;
+  }
+
+  .lame-account {
+    position: relative;
+  }
+
+  .lame-account__details {
+    position: relative;
+  }
+
+  .lame-account__trigger {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .lame-account__trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .lame-account__avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgb(var(--brand-gold) / 0.15);
+    border: 1px solid rgb(var(--brand-gold) / 0.35);
+    color: rgb(var(--brand-gold-strong));
+    line-height: 1;
+  }
+
+  .lame-account__panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: var(--layer-popover, 100);
+    min-width: 11rem;
+    padding: 0.35rem 0;
+    border-radius: var(--style-border-radius-popover, 8px);
+    border: var(--style-border-popover, 1px solid rgb(var(--color-border-rgb) / 0.2));
+    box-shadow: var(--shadow-popover);
+    background: var(--color-background);
+  }
+
+  .lame-account__menu {
+    margin: 0;
+    padding: 0;
+  }
+
+  .lame-account__link {
+    display: block;
+    padding: 0.55rem 1rem;
+    color: var(--color-foreground);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .lame-account__link:hover,
+  .lame-account__link:focus-visible {
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+  }
+
+  .lame-account__link--logout {
+    border-top: 1px solid rgb(var(--color-border-rgb) / 0.2);
+    margin-top: 0.2rem;
+    padding-top: 0.65rem;
   }
 
   .cart-drawer {
