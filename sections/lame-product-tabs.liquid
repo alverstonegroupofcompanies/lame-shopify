@@ -1,0 +1,210 @@
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-product-tabs-section"
+  {{ section.shopify_attributes }}
+>
+  <div
+    class="lame-product-tabs spacing-style"
+    style="{% render 'spacing-padding', settings: section.settings %}"
+    data-lame-pdp-reveal
+  >
+    {% if section.settings.heading != blank %}
+      <h2 class="lame-product-tabs__heading visually-hidden">{{ section.settings.heading | escape }}</h2>
+    {% endif %}
+
+    {% if section.blocks.size > 0 %}
+      <div class="lame-product-tabs__inner">
+        <div class="lame-product-tabs__nav" role="tablist" aria-label="{{ section.settings.heading | default: 'Product details' | escape }}">
+          {% for block in section.blocks %}
+            <button
+              type="button"
+              class="lame-product-tabs__tab"
+              role="tab"
+              id="LameTab-{{ section.id }}-{{ block.id }}"
+              aria-controls="LamePanel-{{ section.id }}-{{ block.id }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              data-lame-tab
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.title | escape }}
+            </button>
+          {% endfor %}
+        </div>
+
+        {% for block in section.blocks %}
+          <div
+            id="LamePanel-{{ section.id }}-{{ block.id }}"
+            class="lame-product-tabs__panel rte"
+            role="tabpanel"
+            aria-labelledby="LameTab-{{ section.id }}-{{ block.id }}"
+            {% unless forloop.first %}
+              hidden
+            {% endunless %}
+            data-lame-panel
+          >
+            {% if block.settings.use_product_description and product.description != blank %}
+              {{ product.description }}
+            {% elsif block.settings.content != blank %}
+              {{ block.settings.content }}
+            {% elsif request.design_mode %}
+              <p>{{ 'lame_product.tab_placeholder' | t }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% elsif request.design_mode %}
+      <p class="lame-product-tabs__empty">{{ 'lame_product.tabs_empty' | t }}</p>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+  (() => {
+    const root = document.getElementById('shopify-section-{{ section.id }}');
+    if (!root) return;
+
+    const tabs = root.querySelectorAll('[data-lame-tab]');
+    const panels = root.querySelectorAll('[data-lame-panel]');
+    if (!tabs.length) return;
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const panelId = tab.getAttribute('aria-controls');
+        tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+        panels.forEach((p) => p.hidden = true);
+        tab.setAttribute('aria-selected', 'true');
+        const panel = root.querySelector(`#${panelId}`);
+        if (panel) panel.hidden = false;
+      });
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  .lame-product-tabs__heading {
+    margin: 0 0 1rem;
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 500;
+    text-align: center;
+    color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-product-tabs__empty {
+    text-align: center;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    font-size: 0.875rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product tabs (premium)",
+  "tag": "section",
+  "class": "lame-product-tabs-wrapper",
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab title",
+          "default": "Details"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_product_description",
+          "label": "Use product description",
+          "default": false,
+          "info": "When enabled, shows the product description instead of custom content."
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Tab content"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Accessible section label",
+      "default": "Product information"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "t:options.page"
+        },
+        {
+          "value": "full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-golden"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product tabs (premium)",
+      "blocks": [
+        {
+          "type": "tab",
+          "settings": {
+            "title": "Description",
+            "use_product_description": true
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "title": "How to use",
+            "content": "<p>Apply to clean skin morning and evening. Pat gently until absorbed.</p>"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "title": "Ingredients",
+            "content": "<p>Aqua, Glycerin, Niacinamide, Hyaluronic Acid, Panthenol, Tocopherol.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
