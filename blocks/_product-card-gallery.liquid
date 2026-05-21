@@ -2,9 +2,11 @@
   assign product = closest.product
 
   assign card_show_quick_add = false
-  if settings.quick_add or settings.mobile_quick_add
-    assign card_show_quick_add = true
-  endif
+  unless template.suffix == 'our-products'
+    if settings.quick_add or settings.mobile_quick_add
+      assign card_show_quick_add = true
+    endif
+  endunless
 
   assign lame_show_wishlist = false
   if settings.lame_enable_wishlist and template.suffix == 'our-products' and section.settings.show_wishlist == true and product != blank
