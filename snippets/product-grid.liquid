@@ -162,7 +162,27 @@
       {% if enable_infinite_scroll != false %}
         <span ref="viewMoreNext"></span>
       {% else %}
-        {% render 'pagination-controls', paginate: paginate %}
+        {% if template.suffix == 'our-products' %}
+          {% liquid
+            assign range_start = paginate.current_offset | plus: 1
+            assign range_end = paginate.current_offset | plus: paginate.page_size
+            if range_end > paginate.items
+              assign range_end = paginate.items
+            endif
+          %}
+          <div class="lame-our-products-pagination-wrap">
+            <p class="lame-our-products-pagination-meta">
+              {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
+              {% if paginate.pages > 1 %}
+                <span class="lame-our-products-pagination-meta__sep" aria-hidden="true">·</span>
+                {{ 'lame_our_products.page_of' | t: current: paginate.current_page, pages: paginate.pages }}
+              {% endif %}
+            </p>
+            {% render 'pagination-controls', paginate: paginate %}
+          </div>
+        {% else %}
+          {% render 'pagination-controls', paginate: paginate %}
+        {% endif %}
       {% endif %}
     {% endif %}
   </div>
