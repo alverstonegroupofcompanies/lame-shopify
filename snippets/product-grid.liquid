@@ -162,27 +162,7 @@
       {% if enable_infinite_scroll != false %}
         <span ref="viewMoreNext"></span>
       {% else %}
-        {% if template.suffix == 'our-products' %}
-          {% liquid
-            assign range_start = paginate.current_offset | plus: 1
-            assign range_end = paginate.current_offset | plus: paginate.page_size
-            if range_end > paginate.items
-              assign range_end = paginate.items
-            endif
-          %}
-          <div class="lame-our-products-pagination-wrap">
-            <p class="lame-our-products-pagination-meta">
-              {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
-              {% if paginate.pages > 1 %}
-                <span class="lame-our-products-pagination-meta__sep" aria-hidden="true">·</span>
-                {{ 'lame_our_products.page_of' | t: current: paginate.current_page, pages: paginate.pages }}
-              {% endif %}
-            </p>
-            {% render 'pagination-controls', paginate: paginate %}
-          </div>
-        {% else %}
-          {% render 'pagination-controls', paginate: paginate %}
-        {% endif %}
+        {% render 'pagination-controls', paginate: paginate %}
       {% endif %}
     {% endif %}
   </div>
@@ -438,18 +418,18 @@
     color: rgb(var(--color-background-rgb));
   }
 
-  /* —— Collection / search catalog cards (left-aligned; Our products template is centered separately) —— */
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) .product-grid__card,
+  /* —— Collection / search catalog cards (left-aligned) —— */
+  body.template-collection .uniform-products-page .product-grid__card,
   .template-search .uniform-products-page .product-grid__card {
     text-align: left;
   }
 
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) .quick-add,
+  body.template-collection .uniform-products-page .quick-add,
   .template-search .uniform-products-page .quick-add {
     display: none !important;
   }
 
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) .product-grid__item .product-grid__card .card-gallery ~ a.contents .text-block,
+  body.template-collection .uniform-products-page .product-grid__item .product-grid__card .card-gallery ~ a.contents .text-block,
   .template-search .uniform-products-page .product-grid__item .product-grid__card .card-gallery ~ a.contents .text-block {
     text-align: left;
     max-width: none;
@@ -458,19 +438,19 @@
     font-weight: 600;
   }
 
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) .rating-wrapper,
+  body.template-collection .uniform-products-page .rating-wrapper,
   .template-search .uniform-products-page .rating-wrapper {
     justify-content: flex-start !important;
     width: 100%;
     margin-inline: 0;
   }
 
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) product-price,
+  body.template-collection .uniform-products-page product-price,
   .template-search .uniform-products-page product-price {
     justify-content: flex-start;
   }
 
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) product-price.text-block,
+  body.template-collection .uniform-products-page product-price.text-block,
   .template-search .uniform-products-page product-price.text-block {
     display: flex;
     flex-wrap: wrap;
