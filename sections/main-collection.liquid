@@ -22,16 +22,24 @@
   }
 {% endjavascript %}
 
+{% liquid
+  assign lame_cosmetic_collection = false
+  if template.suffix == 'our-products'
+    assign lame_cosmetic_collection = true
+  endif
+%}
+
 {% if template.name == 'collection' %}
   {% render 'lame-collection-premium' %}
 {% endif %}
 {% comment %} We always render this full-width, as the child blocks have width: page/full settings {% endcomment %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if template.suffix == 'our-products' %} collection-template-our-products{% endif %}"
+  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if lame_cosmetic_collection %} collection-template-our-products lame-our-products-grid{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
-  infinite-scroll="{% if template.suffix == 'our-products' %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
+  infinite-scroll="{% if lame_cosmetic_collection %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
+  {% if lame_cosmetic_collection %}data-lame-our-products="true"{% endif %}
 >
   {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
 
@@ -46,7 +54,7 @@
     %}
 
     {% liquid
-      if template.suffix == 'our-products'
+      if lame_cosmetic_collection
         assign products_per_page = 12
         assign use_infinite_scroll = false
       else
