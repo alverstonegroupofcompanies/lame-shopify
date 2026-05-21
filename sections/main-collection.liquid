@@ -28,10 +28,10 @@
 {% comment %} We always render this full-width, as the child blocks have width: page/full settings {% endcomment %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}"
+  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if template.suffix == 'our-products' %} collection-template-our-products{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
-  infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
+  infinite-scroll="{% if template.suffix == 'our-products' %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
 >
   {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
 
@@ -45,11 +45,18 @@
       results_size: collection.products_count
     %}
 
-    {% assign products_per_page = 24 %}
-
-    {% if section.settings.enable_infinite_scroll == false %}
-      {% assign products_per_page = section.settings.products_per_page %}
-    {% endif %}
+    {% liquid
+      if template.suffix == 'our-products'
+        assign products_per_page = 12
+        assign use_infinite_scroll = false
+      else
+        assign products_per_page = 24
+        assign use_infinite_scroll = section.settings.enable_infinite_scroll
+        if use_infinite_scroll == false
+          assign products_per_page = section.settings.products_per_page
+        endif
+      endif
+    %}
 
     {% paginate collection.products by products_per_page %}
       {% capture children %}
@@ -73,7 +80,7 @@
         children: children,
         products: collection.products,
         paginate: paginate,
-        enable_infinite_scroll: section.settings.enable_infinite_scroll
+        enable_infinite_scroll: use_infinite_scroll
       %}
     {% endpaginate %}
   </div>
@@ -235,7 +242,7 @@
       "id": "show_wishlist",
       "label": "Show wishlist on product images",
       "default": true,
-      "info": "Requires LAMÉ wishlist enabled in theme settings."
+      "info": "Only applies to the Our products collection template. Requires LAMÉ wishlist in theme settings."
     },
     {
       "type": "color_scheme",
