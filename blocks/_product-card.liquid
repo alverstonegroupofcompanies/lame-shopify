@@ -8,7 +8,14 @@
   {% content_for 'blocks', closest.product: product %}
 {% endcapture %}
 
-{% render 'product-card', children: children, product: product %}
+{% liquid
+  assign lame_catalog_card = false
+  if template.name == 'collection'
+    assign lame_catalog_card = true
+  endif
+%}
+
+{% render 'product-card', children: children, product: product, lame_catalog_card: lame_catalog_card %}
 {% render 'buy-buttons-styles' %}
 {% render 'gift-card-recipient-form-styles' %}
 {% render 'quick-add-styles' %}
