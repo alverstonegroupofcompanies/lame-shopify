@@ -3,6 +3,11 @@
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature"
   {{ section.shopify_attributes }}
 >
+  <div class="lame-signature__vector-art" aria-hidden="true">
+    <span class="lame-signature__vector lame-signature__vector--tl"></span>
+    <span class="lame-signature__vector lame-signature__vector--br"></span>
+    <span class="lame-signature__vector lame-signature__vector--pattern"></span>
+  </div>
   <div class="lame-signature__decor lame-signature__decor--left" aria-hidden="true"></div>
   <div class="lame-signature__decor lame-signature__decor--right" aria-hidden="true"></div>
 
@@ -245,9 +250,59 @@
 
 {% stylesheet %}
   .lame-signature {
+    --lame-sig-vector-gold: rgb(var(--brand-gold, 212 175 55) / 0.22);
+    --lame-sig-vector-blush: rgb(245 210 220 / 0.35);
     position: relative;
     overflow: hidden;
-    background: #faf8f5;
+    background:
+      radial-gradient(ellipse 55% 45% at 0% 20%, var(--lame-sig-vector-blush), transparent 58%),
+      radial-gradient(ellipse 50% 40% at 100% 75%, rgb(221 181 109 / 0.14), transparent 55%),
+      #faf8f5;
+  }
+
+  .lame-signature__vector-art {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .lame-signature__vector {
+    position: absolute;
+    display: block;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.55;
+  }
+
+  .lame-signature__vector--tl {
+    top: -2%;
+    left: -1%;
+    width: clamp(160px, 26vw, 320px);
+    height: clamp(160px, 26vw, 320px);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none'%3E%3Cpath d='M20 160C55 120 90 95 130 75' stroke='%23c9971f' stroke-width='0.7' opacity='0.35'/%3E%3Cpath d='M35 175C70 140 105 115 150 90' stroke='%23c9971f' stroke-width='0.5' opacity='0.22'/%3E%3Cpath d='M48 42c-8 14-12 28-10 42 18-6 32-18 42-36-14 2-24-2-32-6Z' fill='%23c9971f' opacity='0.12'/%3E%3Cpath d='M62 28c12 8 22 20 28 36' stroke='%23c9971f' stroke-width='0.6' opacity='0.28'/%3E%3Ccircle cx='88' cy='52' r='4' fill='%23c9971f' opacity='0.2'/%3E%3C/svg%3E");
+    background-position: left top;
+  }
+
+  .lame-signature__vector--br {
+    right: -2%;
+    bottom: -4%;
+    width: clamp(180px, 28vw, 340px);
+    height: clamp(180px, 28vw, 340px);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none'%3E%3Cpath d='M180 40C145 80 110 105 70 125' stroke='%23c9971f' stroke-width='0.7' opacity='0.35'/%3E%3Cpath d='M165 25C130 60 95 85 50 110' stroke='%23c9971f' stroke-width='0.5' opacity='0.22'/%3E%3Cpath d='M152 158c8-14 12-28 10-42-18 6-32 18-42 36 14-2 24 2 32 6Z' fill='%23c9971f' opacity='0.12'/%3E%3Cpath d='M138 172c-12-8-22-20-28-36' stroke='%23c9971f' stroke-width='0.6' opacity='0.28'/%3E%3Ccircle cx='112' cy='148' r='4' fill='%23c9971f' opacity='0.2'/%3E%3C/svg%3E");
+    background-position: right bottom;
+  }
+
+  .lame-signature__vector--pattern {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120' fill='none'%3E%3Cpath d='M60 8v16M60 96v16M8 60h16M96 60h16' stroke='%23c9971f' stroke-width='0.35' opacity='0.18'/%3E%3Cpath d='M60 44c-2.2 2.8-4.8 4-8 4 3.2 0 5.8 1.2 8 4 2.2-2.8 4.8-4 8-4-3.2 0-5.8-1.2-8-4Z' fill='%23c9971f' opacity='0.08'/%3E%3Ccircle cx='60' cy='60' r='28' stroke='%23c9971f' stroke-width='0.35' opacity='0.12'/%3E%3C/svg%3E");
+    background-size: clamp(100px, 14vw, 160px) clamp(100px, 14vw, 160px);
+    background-position: center 18%;
+    mask-image: radial-gradient(ellipse 70% 55% at 50% 40%, #000 0%, transparent 72%);
   }
 
   .lame-signature__decor {
