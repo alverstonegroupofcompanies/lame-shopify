@@ -53,10 +53,15 @@
   if product.id == empty or product == blank
     assign onboarding = true
   endif
+
+  assign lame_luxury_card = false
+  if template.name == 'collection' or template.name == 'search'
+    assign lame_luxury_card = true
+  endif
 %}
 
 <product-card
-  class="product-card size-style{% if lame_catalog_card %} product-card--catalog{% endif %}"
+  class="product-card size-style{% if lame_catalog_card %} product-card--catalog{% endif %}{% if lame_luxury_card %} product-card--lamstone-luxury{% endif %}"
   style="{% render 'size-style', settings: block_settings %}"
   data-product-id="{{ product.id }}"
   id="product-card-{{ block.id }}"
@@ -88,6 +93,7 @@
       layout-panel-flex
       layout-panel-flex--column
       product-grid__card
+      {% if lame_luxury_card %}product-grid__card--luxury{% endif %}
       spacing-style
       border-style
       gap-style
@@ -120,9 +126,35 @@
     --cursor: pointer;
   }
 
+  .product-card--lamstone-luxury {
+    display: block;
+    height: 100%;
+  }
+
+  .product-card--lamstone-luxury .product-card__link {
+    inset: 0;
+    z-index: 2;
+  }
+
+  .product-grid__card--luxury {
+    position: relative;
+    isolation: isolate;
+  }
+
   @media screen and (max-width: 749px) {
     .product-card slideshow-arrows .slideshow-control {
       display: none;
+    }
+  }
+
+  .lame-collection-premium-active .product-card--lamstone-luxury slideshow-arrows .slideshow-control {
+    @media screen and (max-width: 749px) {
+      display: grid;
+      width: 1.85rem;
+      height: 1.85rem;
+      border-radius: 50%;
+      background: rgb(var(--color-background-rgb) / 0.9);
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
     }
   }
 {% endstylesheet %}
