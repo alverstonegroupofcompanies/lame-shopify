@@ -1,0 +1,85 @@
+{%- doc -%}
+  Brand quick-filter pills for collection pages.
+  Uses Shopify vendor facet when enabled; otherwise vendors from the current result set.
+
+  @param {object} collection - Collection object
+  @param {object} [products] - Products on the current page (for fallback list)
+{%- enddoc -%}
+
+{% liquid
+  assign vendor_filter = blank
+  assign active_vendor = blank
+
+  for filter in collection.filters
+    if filter.param_name == 'filter.p.vendor'
+      assign vendor_filter = filter
+      for value in filter.active_values
+        assign active_vendor = value.label
+        break
+      endfor
+      break
+    endif
+  endfor
+
+  assign fallback_brands_pipe = '|'
+  if vendor_filter == blank and products != blank
+    for product in products
+      assign brand_name = product.vendor | default: shop.name | strip
+      if brand_name == blank
+        continue
+      endif
+      assign brand_key = '|' | append: brand_name | append: '|'
+      unless fallback_brands_pipe contains brand_key
+        assign fallback_brands_pipe = fallback_brands_pipe | append: brand_name | append: '|'
+      endunless
+    endfor
+  endif
+%}
+
+{% if vendor_filter != blank or fallback_brands_pipe != '|' %}
+  <nav class="lame-collection-brand-nav" aria-label="{{ 'lame_collection.shop_by_brand' | t }}">
+    <p class="lame-collection-brand-nav__label">{{ 'lame_collection.shop_by_brand' | t }}</p>
+    <ul class="lame-collection-brand-nav__list" role="list">
+      <li class="lame-collection-brand-nav__item">
+        <a
+          href="{{ collection.url }}"
+          class="lame-collection-brand-nav__pill{% if active_vendor == blank %} lame-collection-brand-nav__pill--active{% endif %}"
+        >
+          {{ 'lame_collection.all_brands' | t }}
+        </a>
+      </li>
+
+      {% if vendor_filter != blank %}
+        {% for value in vendor_filter.values %}
+          <li class="lame-collection-brand-nav__item">
+            <a
+              href="{{ value.url_to_add }}"
+              class="lame-collection-brand-nav__pill{% if value.active %} lame-collection-brand-nav__pill--active{% endif %}"
+              {% if value.count == 0 %}aria-disabled="true"{% endif %}
+            >
+              <span class="lame-collection-brand-nav__name">{{ value.label }}</span>
+              <span class="lame-collection-brand-nav__count">({{ value.count }})</span>
+            </a>
+          </li>
+        {% endfor %}
+      {% else %}
+        {% assign fallback_brands = fallback_brands_pipe | split: '|' %}
+        {% for brand_name in fallback_brands %}
+          {% if brand_name != blank %}
+            <li class="lame-collection-brand-nav__item">
+              <a
+                href="{{ collection.url }}#brand-{{ brand_name | handleize }}"
+                class="lame-collection-brand-nav__pill"
+              >
+                <span class="lame-collection-brand-nav__name">{{ brand_name }}</span>
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </ul>
+    {% if vendor_filter == blank and fallback_brands_pipe != '|' %}
+      <p class="lame-collection-brand-nav__hint">{{ 'lame_collection.brand_nav_hint' | t }}</p>
+    {% endif %}
+  </nav>
+{% endif %}

@@ -1,0 +1,86 @@
+{%- doc -%}
+  Renders collection products grouped by brand (product.vendor).
+
+  @param {object} collection
+  @param {object} section
+  @param {object} paginate
+{%- enddoc -%}
+
+{% liquid
+  assign brands_pipe = '|'
+  for product in collection.products
+    assign brand_name = product.vendor | default: shop.name | strip
+    if brand_name == blank
+      assign brand_name = 'Other'
+    endif
+    assign brand_key = '|' | append: brand_name | append: '|'
+    unless brands_pipe contains brand_key
+      assign brands_pipe = brands_pipe | append: brand_name | append: '|'
+    endunless
+  endfor
+  assign brand_list = brands_pipe | split: '|'
+%}
+
+{% for brand_name in brand_list %}
+  {% if brand_name == blank %}
+    {% continue %}
+  {% endif %}
+
+  {% liquid
+    assign brand_product_count = 0
+    for product in collection.products
+      assign product_brand = product.vendor | default: shop.name | strip
+      if product_brand == blank
+        assign product_brand = 'Other'
+      endif
+      if product_brand == brand_name
+        assign brand_product_count = brand_product_count | plus: 1
+      endif
+    endfor
+  %}
+
+  {% if brand_product_count > 0 %}
+    <section
+      class="lame-collection-brand-section"
+      id="brand-{{ brand_name | handleize }}"
+      aria-labelledby="brand-heading-{{ section.id }}-{{ brand_name | handleize }}"
+    >
+      <header class="lame-collection-brand-section__header">
+        <h2
+          class="lame-collection-brand-section__title"
+          id="brand-heading-{{ section.id }}-{{ brand_name | handleize }}"
+        >
+          {{ brand_name }}
+        </h2>
+        <p class="lame-collection-brand-section__count">
+          {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
+        </p>
+      </header>
+
+      <ul
+        class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
+        data-testid="product-grid-brand-{{ brand_name | handleize }}"
+        role="list"
+      >
+        {% assign item_index = 0 %}
+        {% for product in collection.products %}
+          {% liquid
+            assign product_brand = product.vendor | default: shop.name | strip
+            if product_brand == blank
+              assign product_brand = 'Other'
+            endif
+          %}
+          {% if product_brand == brand_name %}
+            {% render 'lame-collection-product-item',
+              product: product,
+              section: section,
+              paginate_current_page: paginate.current_page,
+              item_index: item_index
+            %}
+            {% assign item_index = item_index | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+{% endfor %}

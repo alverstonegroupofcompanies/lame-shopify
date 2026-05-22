@@ -1,0 +1,21 @@
+{%- doc -%}
+  Single product grid item for collection pages.
+
+  @param {object} product
+  @param {object} section
+  @param {number} paginate_current_page
+  @param {number} item_index
+{%- enddoc -%}
+
+<li
+  id="{{ section.id }}-{{ product.id }}"
+  class="product-grid__item product-grid__item--premium product-grid__item--{{ item_index }}"
+  data-page="{{ paginate_current_page }}"
+  data-product-id="{{ product.id }}"
+  data-brand="{{ product.vendor | escape }}"
+  ref="cards[]"
+>
+  {% # theme-check-disable %}
+  {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+  {% # theme-check-enable %}
+</li>

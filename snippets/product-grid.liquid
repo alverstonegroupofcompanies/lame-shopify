@@ -7,6 +7,7 @@
   @param {string} [title] - Header of the collection or search results
   @param {string} children - List or grid of product cards
   @param {boolean} [enable_infinite_scroll] - Whether to enable infinite scroll (default: true)
+  @param {boolean} [grouped_by_brand] - When true, children is brand sections markup (not a flat list)
 {%- enddoc -%}
 
 {% capture product_card_size %}
@@ -117,48 +118,58 @@
       {% if title %}
         <h4 class="main-collection-grid__title">{{ title }}</h4>
       {% endif %}
-      <ul
-        class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} {% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
-        data-testid="product-grid"
-        product-grid-view="default"
-        ref="grid"
-        role="list"
-        data-last-page="{{ paginate.pages }}"
-        data-product-card-size="{{ section.settings.product_card_size }}"
-        style="--mobile-columns: {% if section.settings.mobile_product_card_size == 'large' %}1{% else %}2{% endif %};"
-      >
-        {% comment %}
-          This script is used to set the grid view on the product grid stored in sessionStorage. Keeping it here helps us prevent seeing the default state.
-        {% endcomment %}
-        {% unless request.design_mode %}
-          <script>
-            (() => {
-              const grid = document.querySelector('.product-grid');
-              if (!grid) return;
+      {% if grouped_by_brand %}
+        <div
+          class="lame-collection-grouped-products"
+          data-testid="product-grid-grouped"
+          ref="grid"
+          data-last-page="{{ paginate.pages }}"
+        >
+          {{ children }}
+        </div>
+      {% else %}
+        <ul
+          class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} {% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
+          data-testid="product-grid"
+          product-grid-view="default"
+          ref="grid"
+          role="list"
+          data-last-page="{{ paginate.pages }}"
+          data-product-card-size="{{ section.settings.product_card_size }}"
+          style="--mobile-columns: {% if section.settings.mobile_product_card_size == 'large' %}1{% else %}2{% endif %};"
+        >
+          {% comment %}
+            This script is used to set the grid view on the product grid stored in sessionStorage. Keeping it here helps us prevent seeing the default state.
+          {% endcomment %}
+          {% unless request.design_mode %}
+            <script>
+              (() => {
+                const grid = document.querySelector('.product-grid');
+                if (!grid) return;
 
-              const storedLayoutMobile = sessionStorage.getItem('product-grid-view-mobile') || 'default';
-              const storedLayoutDesktop = sessionStorage.getItem('product-grid-view-desktop') || 'default';
+                const storedLayoutMobile = sessionStorage.getItem('product-grid-view-mobile') || 'default';
+                const storedLayoutDesktop = sessionStorage.getItem('product-grid-view-desktop') || 'default';
 
-              // No need to read the window width if no custom layouts were saved.
-              if (storedLayoutMobile === 'default' && storedLayoutDesktop === 'default') return;
+                if (storedLayoutMobile === 'default' && storedLayoutDesktop === 'default') return;
 
-              const storedLayout = window.innerWidth >= 750 ? storedLayoutDesktop : storedLayoutMobile;
-              if (storedLayout === 'default') return;
+                const storedLayout = window.innerWidth >= 750 ? storedLayoutDesktop : storedLayoutMobile;
+                if (storedLayout === 'default') return;
 
-              grid.setAttribute('product-grid-view', storedLayout);
+                grid.setAttribute('product-grid-view', storedLayout);
 
-              const options = document.querySelectorAll(
-                'input[type="radio"][name="grid"], input[type="radio"][name="grid-mobile"]'
-              );
-              for (const option of options) {
-                option.checked = option.value === storedLayout;
-              }
-            })();
-          </script>
-        {% endunless %}
+                const options = document.querySelectorAll(
+                  'input[type="radio"][name="grid"], input[type="radio"][name="grid-mobile"]'
+                );
+                for (const option of options) {
+                  option.checked = option.value === storedLayout;
+                }
+              })();
+            </script>
+          {% endunless %}
 
-        {{ children }}
-      </ul>
+          {{ children }}
+        </ul>
+      {% endif %}
       {% if enable_infinite_scroll != false %}
         <span ref="viewMoreNext"></span>
       {% else %}
@@ -451,8 +462,8 @@
     text-align: left;
   }
 
-  body.template-collection .uniform-products-page:not(.collection-template-our-products) .quick-add,
-  .template-search .uniform-products-page .quick-add {
+  body.template-collection .uniform-products-page:not(.collection-template-our-products):not(.lame-collection-premium-active) .quick-add,
+  .template-search .uniform-products-page:not(.lame-collection-premium-active) .quick-add {
     display: none !important;
   }
 

@@ -1,0 +1,96 @@
+{%- doc -%}
+  Brand line on product cards (uses product vendor).
+{%- enddoc -%}
+
+{% liquid
+  assign product = closest.product
+  assign brand_name = product.vendor | strip
+
+  if brand_name == blank and product.metafields.custom.brand.value != blank
+    assign brand_name = product.metafields.custom.brand.value | strip
+  endif
+%}
+
+{% if brand_name != blank %}
+  <p
+    class="lame-card-brand spacing-style"
+    {{ block.shopify_attributes }}
+    style="{% render 'spacing-style', settings: block.settings %}"
+  >
+    {{ brand_name | escape }}
+  </p>
+{% endif %}
+
+{% stylesheet %}
+  .lame-card-brand {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--brand-gold-readable, 139 115 72));
+  }
+
+  .lame-collection-premium-active .lame-card-brand {
+    text-align: left;
+  }
+
+  .collection-template-our-products .lame-card-brand {
+    text-align: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand",
+  "tag": null,
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,30 @@
+{%- liquid
+  assign header_title = collection.title
+  if header_title == blank
+    assign header_title = 'Our Collection'
+  endif
+
+  assign header_description = collection.description | strip_html | strip
+  if header_description == blank and collection.metafields.custom.short_description != blank
+    assign header_description = collection.metafields.custom.short_description
+  endif
+-%}
+
+<header class="lame-collection-page-header">
+  <nav class="lame-collection-page-header__breadcrumbs" aria-label="{{ 'accessibility.breadcrumbs' | t | default: 'Breadcrumb' }}">
+    <a href="{{ routes.root_url }}">{{ 'lame_collection.breadcrumb_home' | t }}</a>
+    <span class="lame-collection-page-header__sep" aria-hidden="true">&gt;</span>
+    <span aria-current="page">{{ header_title }}</span>
+  </nav>
+
+  <div class="lame-collection-page-header__main">
+    <div class="lame-collection-page-header__copy">
+      <h1 class="lame-collection-page-header__title">{{ header_title }}</h1>
+      {% if header_description != blank %}
+        <p class="lame-collection-page-header__description">{{ header_description }}</p>
+      {% else %}
+        <p class="lame-collection-page-header__description">{{ 'lame_collection.default_description' | t }}</p>
+      {% endif %}
+    </div>
+  </div>
+</header>

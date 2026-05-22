@@ -99,7 +99,13 @@
       </div>
 
       {% if block_settings.enable_sorting %}
-        {% unless block_settings.filter_style == 'vertical' %}
+        {% liquid
+          assign show_sort_in_toolbar = true
+          if block_settings.filter_style == 'vertical' and template.name != 'collection'
+            assign show_sort_in_toolbar = false
+          endif
+        %}
+        {% if show_sort_in_toolbar %}
           {% render 'sorting',
             results: results,
             sort_by: sort_by,
@@ -109,7 +115,7 @@
             should_use_select_on_mobile: false,
             section_id: section.id
           %}
-        {% endunless %}
+        {% endif %}
       {% endif %}
 
       {% if block_settings.enable_grid_density %}
@@ -158,6 +164,10 @@
           ref="facetsForm"
         >
           {% if should_show_pane %}
+            {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering %}
+              {% render 'lame-collection-filters-panel-head', active_count: total_active_values %}
+            {% endif %}
+
             {% render 'filter-remove-buttons',
               filters: filters,
               results_url: results_url,
@@ -206,7 +216,7 @@
               {% endcapture %}
 
               <div class="facets__filters-wrapper">
-                {% if block_settings.filter_style == 'vertical' and block_settings.enable_sorting %}
+                {% if block_settings.filter_style == 'vertical' and block_settings.enable_sorting and template.name != 'collection' %}
                   {% render 'sorting',
                     results: results,
                     sort_by: sort_by,
@@ -236,6 +246,20 @@
                   {{ rendered_filters }}
                 {% endif %}
               </div>
+
+              {% if block_settings.filter_style == 'vertical' and template.name == 'collection' %}
+                {% liquid
+                  assign filters_active = false
+                  if total_active_values > 0
+                    assign filters_active = true
+                  endif
+                %}
+                {% render 'lame-collection-facet-actions',
+                  results_url: results_url,
+                  is_active: filters_active,
+                  section_id: section.id
+                %}
+              {% endif %}
 
               {% if block_settings.filter_style == 'horizontal' %}
                 <facet-remove-component

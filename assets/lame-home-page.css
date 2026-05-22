@@ -1,0 +1,203 @@
+/**
+ * LAMÉ homepage — page shell, section bands, dividers, subtle ornaments
+ * Loaded on template-index only (see layout/theme.liquid)
+ */
+
+.template-index {
+  --lame-home-cream: #faf7f4;
+  --lame-home-blush: #f5ebe8;
+  --lame-home-white: #ffffff;
+  --lame-home-ink: 28 22 20;
+  --lame-home-gold: 193 151 31;
+  --lame-home-divider: rgb(var(--lame-home-ink) / 0.09);
+  --lame-home-ornament: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' fill='none'%3E%3Cpath d='M0 6h44' stroke='%23c9971f' stroke-width='0.6' opacity='0.45'/%3E%3Cpath d='M76 6h44' stroke='%23c9971f' stroke-width='0.6' opacity='0.45'/%3E%3Cpath d='M60 2c-2.2 2.8-4.8 4-8 4 3.2 0 5.8 1.2 8 4 2.2-2.8 4.8-4 8-4-3.2 0-5.8-1.2-8-4Z' fill='%23c9971f' opacity='0.55'/%3E%3C/svg%3E");
+  --lame-home-flourish: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none'%3E%3Cpath d='M100 20c-30 40-55 70-55 100s25 60 55 80c30-20 55-50 55-80s-25-60-55-100Z' stroke='%23c9971f' stroke-width='0.5' opacity='0.12'/%3E%3Cpath d='M100 50c-18 24-32 42-32 60s14 36 32 48c18-12 32-30 32-48s-14-36-32-60Z' stroke='%23c9971f' stroke-width='0.4' opacity='0.08'/%3E%3Ccircle cx='100' cy='100' r='3' fill='%23c9971f' opacity='0.15'/%3E%3C/svg%3E");
+}
+
+/* Warm page shell instead of flat white */
+html:has(body.template-index),
+body.template-index {
+  background:
+    radial-gradient(circle at 8% 4%, rgb(221 181 109 / 0.11), transparent 34%),
+    radial-gradient(circle at 92% 10%, rgb(245 210 220 / 0.2), transparent 36%),
+    radial-gradient(circle at 50% 98%, rgb(250 247 244 / 1), var(--lame-home-cream) 42%),
+    var(--lame-home-cream) !important;
+  background-color: var(--lame-home-cream) !important;
+}
+
+/* Section dividers (skip hero + full-bleed trust banner) */
+.template-index .content-for-layout > .shopify-section:not(:first-child):not(:has(.lame-home-hero)):not(:has(.lame-trust-banner)) {
+  position: relative;
+  border-top: 1px solid var(--lame-home-divider);
+}
+
+.template-index
+  .content-for-layout
+  > .shopify-section:not(:first-child):not(:has(.lame-home-hero)):not(:has(.lame-trust-banner))::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  width: min(140px, 32vw);
+  height: 12px;
+  transform: translate(-50%, -50%);
+  background: var(--lame-home-ornament) center / contain no-repeat;
+  pointer-events: none;
+}
+
+/* Neutralize default section-background on homepage bands */
+.template-index .shopify-section:has(.lame-signature, .lame-flash-deal, .lame-new-products) .section-background {
+  background: transparent !important;
+}
+
+/* Shop by category */
+.template-index .shopify-section:has([class*='ai-category-carousel-']) {
+  background: linear-gradient(180deg, var(--lame-home-white) 0%, var(--lame-home-cream) 100%);
+}
+
+.template-index .shopify-section:has([class*='ai-category-carousel-']) [class*='ai-category-carousel-'] {
+  background-color: transparent !important;
+  margin-inline: max(0.75rem, var(--page-margin, 1rem));
+  border: 1px solid rgb(var(--lame-home-ink) / 0.07);
+  border-radius: 14px;
+  box-shadow: 0 10px 36px rgb(24 18 16 / 0.05);
+}
+
+.template-index .shopify-section:has([class*='ai-category-carousel-'])::before {
+  content: '';
+  position: absolute;
+  right: -2%;
+  top: 12%;
+  width: clamp(120px, 18vw, 220px);
+  height: clamp(120px, 18vw, 220px);
+  background: var(--lame-home-flourish) center / contain no-repeat;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Signature collection — reinforce cream band */
+.template-index .shopify-section:has(.lame-signature) {
+  background: #faf8f5;
+}
+
+.template-index .shopify-section:has(.lame-signature) .lame-signature {
+  background: transparent;
+}
+
+/* Flash deal — white panel with soft glow + corner flourish */
+.template-index .shopify-section:has(.lame-flash-deal) {
+  background:
+    radial-gradient(ellipse 70% 55% at 100% 0%, rgb(var(--lame-home-gold) / 0.07), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 0% 100%, rgb(245 210 220 / 0.14), transparent 48%),
+    var(--lame-home-white);
+}
+
+.template-index .shopify-section:has(.lame-flash-deal)::before {
+  content: '';
+  position: absolute;
+  left: -3%;
+  bottom: 8%;
+  width: clamp(100px, 16vw, 180px);
+  height: clamp(100px, 16vw, 180px);
+  background: var(--lame-home-flourish) center / contain no-repeat;
+  transform: rotate(-12deg);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.template-index .shopify-section:has(.lame-flash-deal) .lame-flash-deal__wrap {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgb(var(--lame-home-ink) / 0.07);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: 0 14px 42px rgb(24 18 16 / 0.05);
+}
+
+/* New arrivals — blush band */
+.template-index .shopify-section:has(.lame-new-products) {
+  background:
+    radial-gradient(circle at 6% 50%, rgb(245 210 220 / 0.22), transparent 40%),
+    radial-gradient(circle at 94% 40%, rgb(221 181 109 / 0.1), transparent 38%),
+    linear-gradient(135deg, var(--lame-home-blush) 0%, var(--lame-home-cream) 48%, var(--lame-home-white) 100%);
+}
+
+.template-index .shopify-section:has(.lame-new-products)::before {
+  content: '';
+  position: absolute;
+  right: 2%;
+  top: 18%;
+  width: clamp(90px, 14vw, 160px);
+  height: clamp(90px, 14vw, 160px);
+  background: var(--lame-home-flourish) center / contain no-repeat;
+  transform: rotate(18deg);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.template-index .shopify-section:has(.lame-new-products) .lame-new-products__wrap {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgb(var(--lame-home-ink) / 0.07);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: 0 12px 38px rgb(24 18 16 / 0.05);
+}
+
+/* Offers ticker — keep merchant tint, add subtle frame */
+.template-index .shopify-section:has([class*='ai-cosmetics-offers-']) {
+  border-top: none;
+}
+
+.template-index .shopify-section:has([class*='ai-cosmetics-offers-'])::after {
+  display: none;
+}
+
+.template-index .shopify-section:has([class*='ai-cosmetics-offers-']) [class*='ai-cosmetics-offers-'] {
+  border-block: 1px solid rgb(var(--lame-home-gold) / 0.2);
+}
+
+/* Brand logos — cream footer band */
+.template-index .shopify-section:has(.lame-brand-logos) {
+  background:
+    linear-gradient(180deg, var(--lame-home-cream) 0%, rgb(250 248 245) 100%);
+  border-top: 1px solid var(--lame-home-divider);
+}
+
+.template-index .shopify-section:has(.lame-brand-logos)::after {
+  display: none;
+}
+
+.template-index .shopify-section:has(.lame-brand-logos)::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(200px, 40vw);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--lame-home-gold) / 0.35) 20%,
+    rgb(var(--lame-home-gold) / 0.35) 80%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.template-index .shopify-section:has(.lame-brand-logos) .lame-brand-logos {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(0.5rem, 2vw, 1rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-index .shopify-section::before {
+    opacity: 0.35;
+  }
+}

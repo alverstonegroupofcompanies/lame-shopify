@@ -34,7 +34,7 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active lame-collection-refine{% if collection.handle == 'all' %} all-products-page{% endif %}{% if lame_cosmetic_collection %} collection-template-our-products lame-our-products-grid{% endif %}"
+  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if lame_cosmetic_collection %} collection-template-our-products lame-our-products-grid{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{% if lame_cosmetic_collection %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
@@ -43,8 +43,12 @@
   {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
 
   <div class="lame-collection-shell">
+    {% unless lame_cosmetic_collection %}
+      {% render 'lame-collection-page-header', collection: collection %}
+    {% endunless %}
+
     <div
-      class="collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--refine-right{% if section.settings.product_grid_width == 'full-width' %} collection-wrapper--grid-full-width{% endif %}"
+      class="collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left{% if section.settings.product_grid_width == 'full-width' %} collection-wrapper--grid-full-width{% endif %}"
     >
       {% content_for 'block',
         type: 'filters',
@@ -67,28 +71,44 @@
       %}
 
       {% paginate collection.products by products_per_page %}
-        {% capture children %}
-          {% for product in collection.products %}
-            <li
-              id="{{ section.id }}-{{ product.id }}"
-              class="product-grid__item product-grid__item--arch product-grid__item--{{ forloop.index0 }}"
-              data-page="{{ paginate.current_page }}"
-              data-product-id="{{ product.id }}"
-              ref="cards[]"
-            >
-              {% # theme-check-disable %}
-              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
-              {% # theme-check-enable %}
-            </li>
-          {% endfor %}
-        {% endcapture %}
+        <div class="lame-collection-brand-nav-wrap">
+          {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
+        </div>
+        {% liquid
+          assign group_by_brand = section.settings.group_products_by_brand
+          if lame_cosmetic_collection and section.settings.group_products_by_brand_our_products == false
+            assign group_by_brand = false
+          endif
+        %}
+
+        {% if group_by_brand %}
+          {% capture children %}
+            {% render 'lame-collection-products-grouped',
+              collection: collection,
+              section: section,
+              paginate: paginate
+            %}
+          {% endcapture %}
+        {% else %}
+          {% capture children %}
+            {% for product in collection.products %}
+              {% render 'lame-collection-product-item',
+                product: product,
+                section: section,
+                paginate_current_page: paginate.current_page,
+                item_index: forloop.index0
+              %}
+            {% endfor %}
+          {% endcapture %}
+        {% endif %}
 
         {% render 'product-grid',
           section: section,
           children: children,
           products: collection.products,
           paginate: paginate,
-          enable_infinite_scroll: use_infinite_scroll
+          enable_infinite_scroll: use_infinite_scroll,
+          grouped_by_brand: group_by_brand
         %}
       {% endpaginate %}
     </div>
@@ -220,7 +240,7 @@
       "max": 50,
       "step": 1,
       "unit": "px",
-      "default": 36
+      "default": 32
     },
     {
       "type": "range",
@@ -241,6 +261,23 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Brands"
+    },
+    {
+      "type": "checkbox",
+      "id": "group_products_by_brand",
+      "label": "Group products by brand on the page",
+      "default": true,
+      "info": "Uses each product’s Vendor field as the brand name. Sections appear per brand on this page."
+    },
+    {
+      "type": "checkbox",
+      "id": "group_products_by_brand_our_products",
+      "label": "Also group by brand on Our products template",
+      "default": true
     },
     {
       "type": "header",
