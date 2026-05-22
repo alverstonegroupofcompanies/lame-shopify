@@ -25,7 +25,56 @@ body.template-index {
   background-color: var(--lame-home-cream) !important;
 }
 
-/* Section dividers (skip hero + full-bleed trust banner) */
+/* Hero: never tuck under header (keeps top of banner visible) */
+.template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child {
+  margin-top: 0 !important;
+}
+
+.template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+  object-fit: cover;
+  object-position: center top;
+}
+
+.template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img) {
+  transform-origin: center top;
+}
+
+/* Hero → Shop by Category: tight handoff, slight overlap (bottom of banner may tuck under category) */
+.template-index .content-for-layout > .shopify-section:has(.lame-home-hero) {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section {
+  border-top: none;
+  margin-top: clamp(-1.35rem, -2.8vw, -0.85rem);
+  z-index: 1;
+}
+
+.template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section::after {
+  display: none;
+}
+
+.template-index
+  .content-for-layout
+  > .shopify-section:has(.lame-home-hero)
+  + .shopify-section:has([class*='ai-category-carousel-'])
+  .section {
+  padding-block-start: 0 !important;
+}
+
+.template-index
+  .content-for-layout
+  > .shopify-section:has(.lame-home-hero)
+  + .shopify-section
+  [class*='ai-category-carousel-'] {
+  padding-top: clamp(0.85rem, 2vw, 1.35rem) !important;
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Section dividers (skip hero + full-bleed trust banner + category directly under hero) */
 .template-index .content-for-layout > .shopify-section:not(:first-child):not(:has(.lame-home-hero)):not(:has(.lame-trust-banner)) {
   position: relative;
   border-top: 1px solid var(--lame-home-divider);
