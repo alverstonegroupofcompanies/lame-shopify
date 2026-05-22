@@ -92,12 +92,18 @@
         {% else %}
           {% capture children %}
             {% for product in collection.products %}
-              {% render 'lame-collection-product-item',
-                product: product,
-                section: section,
-                paginate_current_page: paginate.current_page,
-                item_index: forloop.index0
-              %}
+              <li
+                id="{{ section.id }}-{{ product.id }}"
+                class="product-grid__item product-grid__item--premium product-grid__item--{{ forloop.index0 }}"
+                data-page="{{ paginate.current_page }}"
+                data-product-id="{{ product.id }}"
+                data-brand="{{ product.vendor | escape }}"
+                ref="cards[]"
+              >
+                {% # theme-check-disable %}
+                {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+                {% # theme-check-enable %}
+              </li>
             {% endfor %}
           {% endcapture %}
         {% endif %}

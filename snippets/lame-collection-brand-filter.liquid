@@ -1,6 +1,6 @@
 {%- doc -%}
   Brand quick-filter pills for collection pages.
-  Uses Shopify vendor facet when enabled; otherwise vendors from the current result set.
+  Uses Shopify vendor facet when enabled; otherwise normalized vendors from the current page.
 
   @param {object} collection - Collection object
   @param {object} [products] - Products on the current page (for fallback list)
@@ -21,22 +21,36 @@
     endif
   endfor
 
-  assign fallback_brands_pipe = '|'
+  assign fallback_slugs_pipe = '|'
+  assign fallback_labels_json = ''
+
   if vendor_filter == blank and products != blank
     for product in products
-      assign brand_name = product.vendor | default: shop.name | strip
-      if brand_name == blank
+      assign raw_vendor = product.vendor | strip
+      assign raw_down = raw_vendor | downcase
+
+      if raw_vendor == blank
         continue
       endif
-      assign brand_key = '|' | append: brand_name | append: '|'
-      unless fallback_brands_pipe contains brand_key
-        assign fallback_brands_pipe = fallback_brands_pipe | append: brand_name | append: '|'
+
+      if raw_down contains 'lamstone'
+        assign brand_slug = 'lamstone-healthcare'
+        assign brand_label = 'Lamstone Healthcare'
+      else
+        assign brand_slug = raw_vendor | handleize
+        assign brand_label = raw_vendor
+      endif
+
+      assign slug_token = '|' | append: brand_slug | append: '|'
+      unless fallback_slugs_pipe contains slug_token
+        assign fallback_slugs_pipe = fallback_slugs_pipe | append: brand_slug | append: '|'
+        assign fallback_labels_json = fallback_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
       endunless
     endfor
   endif
 %}
 
-{% if vendor_filter != blank or fallback_brands_pipe != '|' %}
+{% if vendor_filter != blank or fallback_slugs_pipe != '|' %}
   <nav class="lame-collection-brand-nav" aria-label="{{ 'lame_collection.shop_by_brand' | t }}">
     <p class="lame-collection-brand-nav__label">{{ 'lame_collection.shop_by_brand' | t }}</p>
     <ul class="lame-collection-brand-nav__list" role="list">
@@ -63,22 +77,32 @@
           </li>
         {% endfor %}
       {% else %}
-        {% assign fallback_brands = fallback_brands_pipe | split: '|' %}
-        {% for brand_name in fallback_brands %}
-          {% if brand_name != blank %}
+        {% assign fallback_slugs = fallback_slugs_pipe | split: '|' %}
+        {% for brand_slug in fallback_slugs %}
+          {% if brand_slug != blank %}
+            {% liquid
+              assign brand_label = brand_slug
+              assign label_chunks = fallback_labels_json | split: '||'
+              for chunk in label_chunks
+                if chunk contains brand_slug
+                  assign brand_label = chunk | split: '::' | last
+                  break
+                endif
+              endfor
+            %}
             <li class="lame-collection-brand-nav__item">
               <a
-                href="{{ collection.url }}#brand-{{ brand_name | handleize }}"
+                href="{{ collection.url }}#brand-{{ brand_slug }}"
                 class="lame-collection-brand-nav__pill"
               >
-                <span class="lame-collection-brand-nav__name">{{ brand_name }}</span>
+                <span class="lame-collection-brand-nav__name">{{ brand_label }}</span>
               </a>
             </li>
           {% endif %}
         {% endfor %}
       {% endif %}
     </ul>
-    {% if vendor_filter == blank and fallback_brands_pipe != '|' %}
+    {% if vendor_filter == blank and fallback_slugs_pipe != '|' %}
       <p class="lame-collection-brand-nav__hint">{{ 'lame_collection.brand_nav_hint' | t }}</p>
     {% endif %}
   </nav>
