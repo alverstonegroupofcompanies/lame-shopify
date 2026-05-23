@@ -339,11 +339,14 @@
 
 /* Drawer summary ships with large padding — reset so the hamburger stays visible */
 #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu {
+  position: relative;
   padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
-#header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon,
-#header-component.header--cosmetic-luxury .header__icon--menu .svg-wrapper {
+/* Only one icon visible: hamburger when closed, X when open (fixes overlap bug) */
+#header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,6 +354,24 @@
   height: 1.125rem;
   margin: 0;
   color: rgb(var(--brand-gold-strong));
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--close {
+  display: none !important;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--open,
+#header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--open {
+  display: none !important;
+}
+
+#header-component.header--cosmetic-luxury .header__icon--menu .svg-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
 }
 
 #header-component.header--cosmetic-luxury .header__icon--menu svg {
@@ -650,4 +671,184 @@ body:has(#header-component.header--cosmetic-luxury) {
     font-size: 0.8125rem;
     padding-block: 0.7rem;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE MENU DRAWER — clean Lamstone side panel
+   ═══════════════════════════════════════════════════════════════ */
+
+#header-component.header--cosmetic-luxury .menu-drawer {
+  --drawer-padding: 1.25rem;
+  --drawer-max-width: min(20rem, 88vw);
+  width: var(--drawer-max-width);
+  max-width: var(--drawer-max-width);
+  background: linear-gradient(180deg, #fffdfb 0%, #f7f4ef 100%);
+  border-right: 1px solid rgb(var(--brand-gold) / 0.18);
+  box-shadow: 12px 0 48px rgb(24 18 16 / 0.14);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Drawer shows menu links only — hide duplicate mobile nav strip */
+@media screen and (max-width: 749px) {
+  #header-component.header--cosmetic-luxury[data-menu-style='drawer'] .header__navigation-bar-row {
+    display: none !important;
+  }
+}
+
+body:has(#header-component .menu-drawer-container details[open]) .lame-wishlist-fab,
+body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__backdrop {
+  backdrop-filter: blur(4px) brightness(0.55);
+  -webkit-backdrop-filter: blur(4px) brightness(0.55);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__close-button {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 3;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: rgb(var(--brand-gold) / 0.1);
+  border: 1px solid rgb(var(--brand-gold) / 0.22);
+  color: rgb(var(--brand-gold-strong));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__close-button:hover {
+  background: rgb(var(--brand-gold) / 0.18);
+  border-color: rgb(var(--brand-gold) / 0.4);
+  transform: scale(1.04);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__close-button .header-drawer-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__navigation {
+  --menu-top-level-font-size: 0.9375rem;
+  --menu-top-level-font-line-height: 1.4;
+  --menu-child-font-size: 0.875rem;
+  --menu-child-font-line-height: 1.45;
+  flex: 0 0 auto;
+  padding-block-start: 3.25rem;
+  padding-inline: var(--drawer-padding);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu {
+  padding-inline: 0;
+  margin-block-start: 0;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist {
+  min-height: 2.75rem;
+  padding-block: 0.65rem;
+  border-bottom: 1px solid rgb(var(--brand-ink) / 0.06);
+  font-family: var(--lame-font-menu, var(--font-body--family));
+  font-size: var(--menu-top-level-font-size, 0.9375rem);
+  line-height: var(--menu-top-level-font-line-height, 1.4);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--brand-ink) / 0.92);
+  transition:
+    color 0.2s ease,
+    padding-inline-start 0.2s ease;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist:hover,
+#header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active {
+  color: rgb(var(--brand-gold-strong));
+  padding-inline-start: 0.35rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu-item--child {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgb(var(--brand-ink) / 0.72);
+  padding-block: 0.45rem;
+  padding-inline-start: 0.5rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu-item--child.menu-drawer__menu-item--active {
+  color: rgb(var(--brand-gold-readable));
+  font-weight: 600;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__list-item--divider {
+  border-block-end-color: rgb(var(--brand-gold) / 0.12);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__summary .icon-plus,
+#header-component.header--cosmetic-luxury .menu-drawer__summary .icon-caret {
+  color: rgb(var(--brand-gold-strong));
+  opacity: 0.85;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__social {
+  margin-block-start: auto;
+  border-block-start: 1px solid rgb(var(--brand-gold) / 0.15);
+  padding-block: 1.15rem 1.35rem;
+  padding-inline: var(--drawer-padding);
+  background: rgb(var(--brand-gold) / 0.04);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__social-inner {
+  gap: 0.65rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__social .social-icons__icon-wrapper a {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--brand-gold) / 0.2);
+  background: rgb(255 255 255 / 0.85);
+  color: rgb(var(--brand-gold-strong));
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__social .social-icons__icon-wrapper a:hover {
+  background: rgb(var(--brand-gold) / 0.12);
+  transform: translateY(-2px);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__utility-links {
+  flex: 0 0 auto;
+  background: transparent;
+  margin-block: 0;
+  margin-inline-start: 0;
+  padding-block: 0.5rem 0;
+  padding-inline: var(--drawer-padding);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__utility-links:empty {
+  display: none;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__utility-links .drawer-localization,
+#header-component.header--cosmetic-luxury .menu-drawer__utility-links .menu-drawer__localization {
+  font-size: 0.8125rem;
 }
