@@ -26,15 +26,26 @@
   if template.suffix == 'our-products'
     assign lame_cosmetic_collection = true
   endif
+
+  if lame_cosmetic_collection
+    assign lame_product_grid_item_class = 'product-grid__item lame-op-card__item'
+  else
+    assign lame_product_grid_item_class = 'product-grid__item product-grid__item--premium'
+  endif
 %}
 
 {% if template.name == 'collection' %}
   {% render 'lame-collection-premium' %}
 {% endif %}
 
+{% comment %}
+  Our Products cards: isolated layout in assets/lame-our-products-cards.css
+  Edit --lame-op-card-width, --lame-op-image-height, --lame-op-columns-desktop there.
+{% endcomment %}
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if lame_cosmetic_collection %} collection-template-our-products lame-our-products-grid{% endif %}"
+  class="section product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if lame_cosmetic_collection %} collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{% if lame_cosmetic_collection %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
@@ -175,7 +186,7 @@
                       {% if product_slug == brand_slug %}
                         <li
                           id="{{ section.id }}-{{ product.id }}"
-                          class="product-grid__item product-grid__item--premium product-grid__item--{{ item_index }}"
+                          class="{{ lame_product_grid_item_class }} product-grid__item--{{ item_index }}"
                           data-page="{{ paginate.current_page }}"
                           data-product-id="{{ product.id }}"
                           data-brand="{{ brand_label | escape }}"
@@ -198,7 +209,7 @@
             {% for product in collection.products %}
               <li
                 id="{{ section.id }}-{{ product.id }}"
-                class="product-grid__item product-grid__item--premium product-grid__item--{{ forloop.index0 }}"
+                class="{{ lame_product_grid_item_class }} product-grid__item--{{ forloop.index0 }}"
                 data-page="{{ paginate.current_page }}"
                 data-product-id="{{ product.id }}"
                 data-brand="{{ product.vendor | escape }}"

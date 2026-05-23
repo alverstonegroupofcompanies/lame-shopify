@@ -54,15 +54,22 @@
     assign onboarding = true
   endif
 
-  assign lame_luxury_card = false
-  if template.name == 'collection' or template.name == 'search'
-    assign lame_luxury_card = true
+  assign lame_op_card = false
+  if template.suffix == 'our-products'
+    assign lame_op_card = true
   endif
+
+  assign lame_luxury_card = false
+  unless lame_op_card
+    if template.name == 'collection' or template.name == 'search'
+      assign lame_luxury_card = true
+    endif
+  endunless
 %}
 
 <product-card
-  class="product-card size-style{% if lame_catalog_card %} product-card--catalog{% endif %}{% if lame_luxury_card %} product-card--lamstone-luxury{% endif %}"
-  style="{% render 'size-style', settings: block_settings %}"
+  class="product-card{% if lame_op_card %} lame-op-card{% else %} size-style{% if lame_catalog_card %} product-card--catalog{% endif %}{% if lame_luxury_card %} product-card--lamstone-luxury{% endif %}{% endif %}"
+  {% unless lame_op_card %}style="{% render 'size-style', settings: block_settings %}"{% endunless %}
   data-product-id="{{ product.id }}"
   id="product-card-{{ block.id }}"
   {% if settings.transition_to_main_product %}
@@ -90,28 +97,34 @@
   <div
     class="
       product-card__content
-      layout-panel-flex
-      layout-panel-flex--column
       product-grid__card
-      {% if lame_luxury_card %}product-grid__card--luxury product-grid__card--premium{% endif %}
-      spacing-style
-      border-style
-      gap-style
-      {% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}
+      {% if lame_op_card %}
+        lame-op-card__inner
+      {% else %}
+        layout-panel-flex
+        layout-panel-flex--column
+        {% if lame_luxury_card %}product-grid__card--luxury product-grid__card--premium{% endif %}
+        spacing-style
+        border-style
+        gap-style
+        {% if block_settings.inherit_color_scheme == false %} color-{{ block_settings.color_scheme }}{% endif %}
+      {% endif %}
     "
-    style="
-      {% render 'border-override', settings: block_settings %}
-      {% render 'layout-panel-style', settings: block_settings %}
-      {% render 'spacing-style', settings: block_settings %}
-      {% render 'gap-style', value: product_card_gap_value, name: 'product-card-gap' %}
-      --quick-add-display: {% if has_quick_add %}flex{% else %}none{% endif %};
-      --quick-add-mobile-display: {% if has_mobile_quick_add %}flex{% else %}none{% endif %};
-      --quick-add-mobile-opacity: {% if has_mobile_quick_add %}1{% else %}0{% endif %};
-      {% if block_settings.padding-inline-start > 0 %}--zoom-out-padding-inline-start: min(var(--padding-xs), {{ block_settings.padding-inline-start | times: 0.7}}px);{% endif %}
-      {% if block_settings.padding-inline-end > 0 %}--zoom-out-padding-inline-end: min(var(--padding-xs), {{ block_settings.padding-inline-end | times: 0.7}}px);{% endif %}
-      {% if block_settings.padding-block-start > 0 %}--zoom-out-padding-block-start: min(var(--padding-xs), {{ block_settings.padding-block-start | times: 0.7}}px);{% endif %}
-      {% if block_settings.padding-block-end > 0 %}--zoom-out-padding-block-end: min(var(--padding-xs), {{ block_settings.padding-block-end | times: 0.7}}px);{% endif %}
-    "
+    {% unless lame_op_card %}
+      style="
+        {% render 'border-override', settings: block_settings %}
+        {% render 'layout-panel-style', settings: block_settings %}
+        {% render 'spacing-style', settings: block_settings %}
+        {% render 'gap-style', value: product_card_gap_value, name: 'product-card-gap' %}
+        --quick-add-display: {% if has_quick_add %}flex{% else %}none{% endif %};
+        --quick-add-mobile-display: {% if has_mobile_quick_add %}flex{% else %}none{% endif %};
+        --quick-add-mobile-opacity: {% if has_mobile_quick_add %}1{% else %}0{% endif %};
+        {% if block_settings.padding-inline-start > 0 %}--zoom-out-padding-inline-start: min(var(--padding-xs), {{ block_settings.padding-inline-start | times: 0.7}}px);{% endif %}
+        {% if block_settings.padding-inline-end > 0 %}--zoom-out-padding-inline-end: min(var(--padding-xs), {{ block_settings.padding-inline-end | times: 0.7}}px);{% endif %}
+        {% if block_settings.padding-block-start > 0 %}--zoom-out-padding-block-start: min(var(--padding-xs), {{ block_settings.padding-block-start | times: 0.7}}px);{% endif %}
+        {% if block_settings.padding-block-end > 0 %}--zoom-out-padding-block-end: min(var(--padding-xs), {{ block_settings.padding-block-end | times: 0.7}}px);{% endif %}
+      "
+    {% endunless %}
   >
     {{ children }}
   </div>
