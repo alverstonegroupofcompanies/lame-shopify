@@ -71,9 +71,10 @@
       %}
 
       {% paginate collection.products by products_per_page %}
-        <div class="lame-collection-brand-nav-wrap">
-          {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
-        </div>
+        <div class="lame-collection-products-column" data-lame-products-scroll>
+          <div class="lame-collection-brand-nav-wrap">
+            {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
+          </div>
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
           if lame_cosmetic_collection and section.settings.group_products_by_brand_our_products == false
@@ -211,14 +212,16 @@
           {% endcapture %}
         {% endif %}
 
-        {% render 'product-grid',
-          section: section,
-          children: children,
-          products: collection.products,
-          paginate: paginate,
-          enable_infinite_scroll: use_infinite_scroll,
-          grouped_by_brand: group_by_brand
-        %}
+          {% render 'product-grid',
+            section: section,
+            children: children,
+            products: collection.products,
+            paginate: paginate,
+            enable_infinite_scroll: use_infinite_scroll,
+            grouped_by_brand: group_by_brand,
+            lame_paginated_collection: lame_cosmetic_collection
+          %}
+        </div>
       {% endpaginate %}
     </div>
   </div>

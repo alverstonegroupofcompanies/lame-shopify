@@ -2,6 +2,7 @@
   Our Products — replace-style pagination (next / previous only, no infinite scroll).
 
   @param {object} paginate - Shopify paginate object
+  @param {string} [on_click_handler] - results-list handler for section morph (replaces grid)
 {%- enddoc -%}
 
 {%- if paginate.pages > 1 -%}
@@ -12,10 +13,14 @@
 >
   <div class="lame-collection-pagination__actions">
     {%- if paginate.previous -%}
+      {%- assign prev_params = paginate.previous.url | split: '?' | last -%}
       <a
         href="{{ paginate.previous.url }}"
         class="lame-collection-pagination__btn lame-collection-pagination__btn--prev button-unstyled"
         rel="prev"
+        {% if on_click_handler != blank %}
+          on:click="{{ on_click_handler }}?{{ prev_params }}"
+        {% endif %}
       >
         <span class="lame-collection-pagination__arrow" aria-hidden="true">←</span>
         {{ 'lame_our_products.previous' | t }}
@@ -31,10 +36,14 @@
     {%- endif -%}
 
     {%- if paginate.next -%}
+      {%- assign next_params = paginate.next.url | split: '?' | last -%}
       <a
         href="{{ paginate.next.url }}"
         class="lame-collection-pagination__btn lame-collection-pagination__btn--next button-unstyled"
         rel="next"
+        {% if on_click_handler != blank %}
+          on:click="{{ on_click_handler }}?{{ next_params }}"
+        {% endif %}
       >
         {{ 'lame_our_products.next' | t }}
         <span class="lame-collection-pagination__arrow" aria-hidden="true">→</span>

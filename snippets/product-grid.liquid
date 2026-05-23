@@ -8,6 +8,7 @@
   @param {string} children - List or grid of product cards
   @param {boolean} [enable_infinite_scroll] - Whether to enable infinite scroll (default: true)
   @param {boolean} [grouped_by_brand] - When true, children is brand sections markup (not a flat list)
+  @param {boolean} [lame_paginated_collection] - Our Products: 12 per page, next/prev replaces grid
 {%- enddoc -%}
 
 {% capture product_card_size %}
@@ -173,7 +174,7 @@
       {% if enable_infinite_scroll != false %}
         <span ref="viewMoreNext"></span>
       {% else %}
-        {% if template.suffix == 'our-products' %}
+        {% if lame_paginated_collection %}
           {% liquid
             assign range_start = paginate.current_offset | plus: 1
             assign range_end = paginate.current_offset | plus: paginate.page_size
@@ -189,22 +190,11 @@
                 {{ 'lame_our_products.page_of' | t: current: paginate.current_page, pages: paginate.pages }}
               {% endif %}
             </p>
-            {% render 'lame-our-products-pagination', paginate: paginate %}
+            {% render 'lame-our-products-pagination',
+              paginate: paginate,
+              on_click_handler: 'results-list/onCollectionPaginationClick'
+            %}
           </div>
-          <script>
-            (() => {
-              const root = document.querySelector('.collection-template-our-products');
-              if (!root) return;
-              const page = new URL(window.location.href).searchParams.get('page');
-              if (!page || page === '1') return;
-              const target = document.getElementById('ResultsList');
-              if (target) {
-                requestAnimationFrame(() => {
-                  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-              }
-            })();
-          </script>
         {% else %}
           {% render 'pagination-controls', paginate: paginate %}
         {% endif %}

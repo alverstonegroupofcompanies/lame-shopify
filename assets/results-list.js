@@ -1,4 +1,5 @@
 import { mediaQueryLarge, requestIdleCallback, startViewTransition } from '@theme/utilities';
+import { sectionRenderer } from '@theme/section-renderer';
 import PaginatedList from '@theme/paginated-list';
 
 /**
@@ -71,6 +72,45 @@ export default class ResultsList extends PaginatedList {
     targetElement.checked = true;
     this.#setLayout('default');
   };
+
+  /**
+   * Our Products — load next/previous 12 via section morph (replace grid, do not append).
+   * @param {Record<string, string>} data - URL search params from pagination link
+   * @param {Event} event
+   */
+  async onCollectionPaginationClick(data, event) {
+    event.preventDefault();
+
+    const url = new URL(window.location.href);
+    for (const [key, value] of Object.entries(data)) {
+      url.searchParams.set(key, value);
+    }
+
+    this.pages.clear();
+
+    await startViewTransition(
+      () => sectionRenderer.renderSection(this.sectionId, { cache: false, url }),
+      ['product-grid']
+    );
+
+    history.pushState('', '', url.toString());
+    this.#scrollProductsColumnToTop();
+  }
+
+  #scrollProductsColumnToTop() {
+    const column = this.querySelector('[data-lame-products-scroll]');
+    const results = this.querySelector('#ResultsList');
+
+    if (column instanceof HTMLElement) {
+      column.scrollTop = 0;
+    }
+
+    if (results instanceof HTMLElement) {
+      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 }
 
 if (!customElements.get('results-list')) {
