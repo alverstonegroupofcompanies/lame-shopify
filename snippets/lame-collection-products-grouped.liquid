@@ -1,5 +1,6 @@
 {%- doc -%}
-  Renders collection products grouped by brand (product.vendor).
+  Collection products grouped by brand (normalized vendor).
+  Product cards are inlined here (no sub-snippet) so content_for works on collection pages.
 
   @param {object} collection
   @param {object} section
@@ -7,33 +8,61 @@
 {%- enddoc -%}
 
 {% liquid
-  assign brands_pipe = '|'
+  assign brand_slugs_pipe = '|'
+  assign brand_labels_json = ''
+
   for product in collection.products
-    assign brand_name = product.vendor | default: shop.name | strip
-    if brand_name == blank
-      assign brand_name = 'Other'
+    assign raw_vendor = product.vendor | strip
+    assign raw_down = raw_vendor | downcase
+
+    if raw_vendor == blank
+      assign brand_slug = 'other'
+      assign brand_label = 'Other'
+    elsif raw_down contains 'lamstone'
+      assign brand_slug = 'lamstone-healthcare'
+      assign brand_label = 'Lamstone Healthcare'
+    else
+      assign brand_slug = raw_vendor | handleize
+      assign brand_label = raw_vendor
     endif
-    assign brand_key = '|' | append: brand_name | append: '|'
-    unless brands_pipe contains brand_key
-      assign brands_pipe = brands_pipe | append: brand_name | append: '|'
+
+    assign slug_token = '|' | append: brand_slug | append: '|'
+    unless brand_slugs_pipe contains slug_token
+      assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|'
+      assign brand_labels_json = brand_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
     endunless
   endfor
-  assign brand_list = brands_pipe | split: '|'
+
+  assign brand_slugs = brand_slugs_pipe | split: '|'
 %}
 
-{% for brand_name in brand_list %}
-  {% if brand_name == blank %}
+{% for brand_slug in brand_slugs %}
+  {% if brand_slug == blank %}
     {% continue %}
   {% endif %}
 
   {% liquid
+    assign brand_label = brand_slug
+    assign label_chunks = brand_labels_json | split: '||'
+    for chunk in label_chunks
+      if chunk contains brand_slug
+        assign brand_label = chunk | split: '::' | last
+        break
+      endif
+    endfor
+
     assign brand_product_count = 0
     for product in collection.products
-      assign product_brand = product.vendor | default: shop.name | strip
-      if product_brand == blank
-        assign product_brand = 'Other'
+      assign raw_vendor = product.vendor | strip
+      assign raw_down = raw_vendor | downcase
+      if raw_vendor == blank
+        assign product_slug = 'other'
+      elsif raw_down contains 'lamstone'
+        assign product_slug = 'lamstone-healthcare'
+      else
+        assign product_slug = raw_vendor | handleize
       endif
-      if product_brand == brand_name
+      if product_slug == brand_slug
         assign brand_product_count = brand_product_count | plus: 1
       endif
     endfor
@@ -42,15 +71,15 @@
   {% if brand_product_count > 0 %}
     <section
       class="lame-collection-brand-section"
-      id="brand-{{ brand_name | handleize }}"
-      aria-labelledby="brand-heading-{{ section.id }}-{{ brand_name | handleize }}"
+      id="brand-{{ brand_slug }}"
+      aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"
     >
       <header class="lame-collection-brand-section__header">
         <h2
           class="lame-collection-brand-section__title"
-          id="brand-heading-{{ section.id }}-{{ brand_name | handleize }}"
+          id="brand-heading-{{ section.id }}-{{ brand_slug }}"
         >
-          {{ brand_name }}
+          {{ brand_label }}
         </h2>
         <p class="lame-collection-brand-section__count">
           {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
@@ -59,24 +88,35 @@
 
       <ul
         class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
-        data-testid="product-grid-brand-{{ brand_name | handleize }}"
+        data-testid="product-grid-brand-{{ brand_slug }}"
         role="list"
       >
         {% assign item_index = 0 %}
         {% for product in collection.products %}
           {% liquid
-            assign product_brand = product.vendor | default: shop.name | strip
-            if product_brand == blank
-              assign product_brand = 'Other'
+            assign raw_vendor = product.vendor | strip
+            assign raw_down = raw_vendor | downcase
+            if raw_vendor == blank
+              assign product_slug = 'other'
+            elsif raw_down contains 'lamstone'
+              assign product_slug = 'lamstone-healthcare'
+            else
+              assign product_slug = raw_vendor | handleize
             endif
           %}
-          {% if product_brand == brand_name %}
-            {% render 'lame-collection-product-item',
-              product: product,
-              section: section,
-              paginate_current_page: paginate.current_page,
-              item_index: item_index
-            %}
+          {% if product_slug == brand_slug %}
+            <li
+              id="{{ section.id }}-{{ product.id }}"
+              class="product-grid__item product-grid__item--premium product-grid__item--{{ item_index }}"
+              data-page="{{ paginate.current_page }}"
+              data-product-id="{{ product.id }}"
+              data-brand="{{ brand_label | escape }}"
+              ref="cards[]"
+            >
+              {% # theme-check-disable %}
+              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+              {% # theme-check-enable %}
+            </li>
             {% assign item_index = item_index | plus: 1 %}
           {% endif %}
         {% endfor %}

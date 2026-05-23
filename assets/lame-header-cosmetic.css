@@ -242,6 +242,32 @@
   max-width: var(--page-width);
   margin-inline: auto;
   width: 100%;
+  align-items: center;
+}
+
+#header-component.header--cosmetic-luxury .header__column--left,
+#header-component.header--cosmetic-luxury .header__column--center,
+#header-component.header--cosmetic-luxury .header__column--right {
+  align-items: center;
+  gap: clamp(0.5rem, 1.2vw, 0.85rem);
+}
+
+#header-component.header--cosmetic-luxury .header__column--center {
+  justify-content: center;
+}
+
+#header-component.header--cosmetic-luxury .header__column--right header-actions {
+  margin-inline-start: 0;
+}
+
+#header-component.header--cosmetic-luxury .header__column--right .search-action {
+  margin-inline: 0;
+}
+
+#header-component.header--cosmetic-luxury header-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.45rem, 1vw, 0.65rem);
 }
 
 #header-component.header--cosmetic-luxury .header-logo {
@@ -256,12 +282,12 @@
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
   position: relative;
   font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: clamp(0.8125rem, 1.05vw, 0.9375rem);
-  font-weight: 500;
+  font-size: clamp(0.875rem, 1.05vw, 1rem);
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   padding: 0.5rem 0.7rem;
-  color: rgb(var(--brand-ink) / 0.82);
+  color: rgb(var(--brand-ink) / 0.92);
   background: transparent;
   border: none;
   transition: color 0.2s ease;
@@ -294,14 +320,53 @@
 #header-component.header--cosmetic-luxury .header__icon--menu {
   width: 2.35rem;
   height: 2.35rem;
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+  padding: 0;
   border-radius: 50%;
   background: rgb(var(--brand-gold) / 0.08);
   border: 1px solid rgb(var(--brand-gold) / 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   transition:
     background 0.22s ease,
     border-color 0.22s ease,
     transform 0.22s ease,
     box-shadow 0.22s ease;
+}
+
+/* Drawer summary ships with large padding — reset so the hamburger stays visible */
+#header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu {
+  padding: 0;
+}
+
+#header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon,
+#header-component.header--cosmetic-luxury .header__icon--menu .svg-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  color: rgb(var(--brand-gold-strong));
+}
+
+#header-component.header--cosmetic-luxury .header__icon--menu svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  stroke: currentColor;
+}
+
+#header-component.header--cosmetic-luxury .header__drawer {
+  min-height: unset;
+  align-items: center;
+}
+
+#header-component.header--cosmetic-luxury .header-actions__action:not(.account-button) .svg-wrapper {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 #header-component.header--cosmetic-luxury .header-actions__action:hover,
@@ -344,14 +409,20 @@
   box-shadow: 0 2px 8px rgb(24 18 16 / 0.04);
 }
 
+#header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__scroll-container .menu-list__list {
+  justify-content: center;
+  width: 100%;
+  margin-inline: auto;
+}
+
 #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__item {
   font-family: var(--lame-font-menu, var(--font-body--family));
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: clamp(0.8125rem, 2.2vw, 0.9375rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgb(var(--brand-ink) / 0.78);
-  padding-block: 0.65rem;
+  color: rgb(var(--brand-ink) / 0.92);
+  padding-block: 0.75rem;
   transition: color 0.2s ease;
 }
 
@@ -396,8 +467,12 @@
   z-index: 1;
   max-width: var(--page-width);
   margin-inline: auto;
-  min-height: 2.35rem;
+  min-height: 2.65rem;
   gap: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+#header-component.header--cosmetic-luxury .header-utility-bar__center {
+  text-align: center;
 }
 
 #header-component.header--cosmetic-luxury .header-utility-bar__contact {
@@ -434,10 +509,10 @@
 }
 
 #header-component.header--cosmetic-luxury .header-utility-bar__promo {
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  line-height: 1.35;
+  font-size: clamp(0.8125rem, 2vw, 0.9375rem);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.45;
 }
 
 #header-component.header--cosmetic-luxury .header-utility-bar__promo strong {
@@ -534,13 +609,31 @@ body:has(#header-component.header--cosmetic-luxury) {
   #header-component.header--cosmetic-luxury .header__columns {
     min-height: 4rem;
     padding-block: 0.4rem;
-    padding-inline: var(--padding-sm);
+    padding-inline: 1rem;
+    column-gap: 0.65rem;
+  }
+
+  #header-component.header--cosmetic-luxury[data-menu-style='drawer'] .header__columns {
+    column-gap: 0.65rem;
+  }
+
+  #header-component.header--cosmetic-luxury .header-logo {
+    justify-self: center;
+  }
+
+  #header-component.header--cosmetic-luxury .header__drawer,
+  #header-component.header--cosmetic-luxury .search-action,
+  #header-component.header--cosmetic-luxury shopify-account,
+  #header-component.header--cosmetic-luxury header-actions {
+    align-self: center;
   }
 
   #header-component.header--cosmetic-luxury .header-actions__action,
   #header-component.header--cosmetic-luxury .header__icon--menu {
     width: 2.15rem;
     height: 2.15rem;
+    min-width: 2.15rem;
+    min-height: 2.15rem;
   }
 
   #header-component.header--cosmetic-luxury .header__row--utility .header-utility-bar__start,
@@ -549,6 +642,12 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   #header-component.header--cosmetic-luxury .header-utility-bar__promo {
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__item {
+    font-size: 0.8125rem;
+    padding-block: 0.7rem;
   }
 }
