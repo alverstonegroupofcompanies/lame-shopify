@@ -130,8 +130,8 @@
                         class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset"
                       >
                         <span class="menu-drawer__menu-item-text wrap-text">{{ link.title | escape }}</span>
-                        <span class="svg-wrapper icon-plus">
-                          {{- 'icon-plus.svg' | inline_asset_content -}}
+                        <span class="svg-wrapper icon-caret icon-caret--forward">
+                          {{- 'icon-caret.svg' | inline_asset_content -}}
                         </span>
                       </summary>
                       {% liquid
@@ -384,8 +384,8 @@
                                         <span class="menu-drawer__menu-item-text wrap-text">
                                           {{- childlink.title | escape -}}
                                         </span>
-                                        <span class="svg-wrapper icon-plus">
-                                          {{- 'icon-plus.svg' | inline_asset_content -}}
+                                        <span class="svg-wrapper icon-caret icon-caret--forward">
+                                          {{- 'icon-caret.svg' | inline_asset_content -}}
                                         </span>
                                       </summary>
                                       {% liquid
@@ -705,6 +705,26 @@
               </details>
             </drawer-localization-component>
           {% endif %}
+        {%- endif -%}
+
+        {%- if shop.customer_accounts_enabled and data_header_drawer_type == 'mobile-drawer' -%}
+          <div class="menu-drawer__footer-account">
+            <a
+              href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}"
+              class="menu-drawer__account menu-drawer__account--luxury link focus-inset"
+            >
+              <span class="svg-wrapper menu-drawer__account-icon" aria-hidden="true">
+                {{- 'icon-account.svg' | inline_asset_content -}}
+              </span>
+              <span class="menu-drawer__account-label">
+                {%- if customer -%}
+                  {{ 'customer.account.title' | t }}
+                {%- else -%}
+                  {{ 'customer.log_in' | t }}
+                {%- endif -%}
+              </span>
+            </a>
+          </div>
         {%- endif -%}
       </div>
 

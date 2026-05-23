@@ -181,7 +181,7 @@
               assign range_end = paginate.items
             endif
           %}
-          <div class="lame-our-products-pagination-wrap">
+          <div class="lame-our-products-pagination-wrap" id="LameCollectionPagination">
             <p class="lame-our-products-pagination-meta">
               {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
               {% if paginate.pages > 1 %}
@@ -189,8 +189,22 @@
                 {{ 'lame_our_products.page_of' | t: current: paginate.current_page, pages: paginate.pages }}
               {% endif %}
             </p>
-            {% render 'pagination-controls', paginate: paginate %}
+            {% render 'lame-our-products-pagination', paginate: paginate %}
           </div>
+          <script>
+            (() => {
+              const root = document.querySelector('.collection-template-our-products');
+              if (!root) return;
+              const page = new URL(window.location.href).searchParams.get('page');
+              if (!page || page === '1') return;
+              const target = document.getElementById('ResultsList');
+              if (target) {
+                requestAnimationFrame(() => {
+                  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+              }
+            })();
+          </script>
         {% else %}
           {% render 'pagination-controls', paginate: paginate %}
         {% endif %}

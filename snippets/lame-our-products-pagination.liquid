@@ -1,0 +1,53 @@
+{%- doc -%}
+  Our Products — replace-style pagination (next / previous only, no infinite scroll).
+
+  @param {object} paginate - Shopify paginate object
+{%- enddoc -%}
+
+{%- if paginate.pages > 1 -%}
+<nav
+  class="lame-collection-pagination"
+  aria-label="{{ 'content.pagination.nav_label' | t }}"
+  data-current-page="{{ paginate.current_page }}"
+>
+  <div class="lame-collection-pagination__actions">
+    {%- if paginate.previous -%}
+      <a
+        href="{{ paginate.previous.url }}"
+        class="lame-collection-pagination__btn lame-collection-pagination__btn--prev button-unstyled"
+        rel="prev"
+      >
+        <span class="lame-collection-pagination__arrow" aria-hidden="true">←</span>
+        {{ 'lame_our_products.previous' | t }}
+      </a>
+    {%- else -%}
+      <span
+        class="lame-collection-pagination__btn lame-collection-pagination__btn--prev lame-collection-pagination__btn--disabled"
+        aria-disabled="true"
+      >
+        <span class="lame-collection-pagination__arrow" aria-hidden="true">←</span>
+        {{ 'lame_our_products.previous' | t }}
+      </span>
+    {%- endif -%}
+
+    {%- if paginate.next -%}
+      <a
+        href="{{ paginate.next.url }}"
+        class="lame-collection-pagination__btn lame-collection-pagination__btn--next button-unstyled"
+        rel="next"
+      >
+        {{ 'lame_our_products.next' | t }}
+        <span class="lame-collection-pagination__arrow" aria-hidden="true">→</span>
+      </a>
+    {%- else -%}
+      <span
+        class="lame-collection-pagination__btn lame-collection-pagination__btn--next lame-collection-pagination__btn--disabled"
+        aria-disabled="true"
+      >
+        {{ 'lame_our_products.next' | t }}
+        <span class="lame-collection-pagination__arrow" aria-hidden="true">→</span>
+      </span>
+    {%- endif -%}
+  </div>
+</nav>
+{%- endif -%}
