@@ -218,11 +218,57 @@
    ═══════════════════════════════════════════════════════════════ */
 
 #header-group {
+  position: relative;
+  z-index: var(--layer-sticky, 8);
   box-shadow: 0 4px 24px rgb(20 16 12 / 0.06);
+}
+
+#header-group .header-section {
+  position: relative;
+  z-index: inherit;
 }
 
 #header-component.header--cosmetic-luxury {
   --header-luxury-min-height: 4.75rem;
+  position: relative;
+  z-index: calc(var(--layer-sticky, 8) + 1);
+  isolation: isolate;
+}
+
+#header-component.header--cosmetic-luxury .header__row--top,
+#header-component.header--cosmetic-luxury .header__row--utility,
+#header-component.header--cosmetic-luxury .header__navigation-bar-row {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+#header-component.header--cosmetic-luxury .header__icon--summary,
+#header-component.header--cosmetic-luxury .header-menu a,
+#header-component.header--cosmetic-luxury .header-actions__action,
+#header-component.header--cosmetic-luxury .header-logo a,
+#header-component.header--cosmetic-luxury .search-action a,
+#header-component.header--cosmetic-luxury .dropdown-localization__button {
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+/* Closed drawer must not block header clicks */
+#header-component.header--cosmetic-luxury .menu-drawer-container:not([open]):not(.menu-open) .menu-drawer__backdrop {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container:not([open]):not(.menu-open) .menu-drawer {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container[open] .menu-drawer__backdrop,
+#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer__backdrop {
+  pointer-events: auto;
 }
 
 #header-component.header--cosmetic-luxury .header__row--top {
