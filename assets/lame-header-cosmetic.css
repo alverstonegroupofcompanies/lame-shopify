@@ -391,24 +391,70 @@
   height: 100%;
 }
 
-/* Only one icon visible: hamburger when closed, X when open (fixes overlap bug) */
+/* Mobile menu toggle: hamburger only when closed, animated cross when open */
+#header-component.header--cosmetic-luxury .header__icon--summary.header__icon--menu {
+  overflow: hidden;
+}
+
 #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon {
-  display: flex;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   width: 1.125rem;
   height: 1.125rem;
-  margin: 0;
   color: rgb(var(--brand-gold-strong));
+  transition:
+    opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--open {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  visibility: visible;
+  pointer-events: auto;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--close {
-  display: none !important;
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.55);
+  visibility: hidden;
+  pointer-events: none;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--open,
 #header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--open {
-  display: none !important;
+  opacity: 0;
+  transform: rotate(90deg) scale(0.55);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--close,
+#header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--close {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
+
+  #header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--close {
+    transform: none;
+  }
+
+  #header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--open,
+  #header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--open {
+    transform: none;
+  }
 }
 
 #header-component.header--cosmetic-luxury .header__icon--menu .svg-wrapper {
