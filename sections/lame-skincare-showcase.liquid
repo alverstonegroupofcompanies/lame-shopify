@@ -1,0 +1,925 @@
+{%- liquid
+  assign feature_blocks = section.blocks | where: 'type', 'feature'
+  assign callout_blocks = section.blocks | where: 'type', 'callout'
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-skincare-showcase"
+  style="
+    --skincare-radius: {{ section.settings.card_radius }}px;
+    --skincare-gap: {{ section.settings.stack_gap }}px;
+    --skincare-gradient-start: {{ section.settings.gradient_start }};
+    --skincare-gradient-end: {{ section.settings.gradient_end }};
+  "
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-skincare-showcase__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {%- if section.settings.show_top_banner -%}
+      <div class="lame-skincare-showcase__panel lame-skincare-showcase__panel--hero" data-lame-reveal>
+        {%- if section.settings.top_banner_image != blank -%}
+          {%- if section.settings.top_link != blank -%}
+            <a href="{{ section.settings.top_link }}" class="lame-skincare-showcase__banner-link">
+          {%- endif -%}
+          {{
+            section.settings.top_banner_image
+            | image_url: width: 2400
+            | image_tag:
+              class: 'lame-skincare-showcase__banner-img',
+              loading: 'lazy',
+              widths: '600, 900, 1200, 1600, 2000, 2400',
+              sizes: '100vw',
+              alt: section.settings.top_heading | default: 'Skincare promotion' | escape
+          }}
+          {%- if section.settings.top_link != blank -%}
+            </a>
+          {%- endif -%}
+        {%- else -%}
+          <div class="lame-skincare-showcase__hero-split">
+            <div class="lame-skincare-showcase__hero-copy">
+              {%- if section.settings.top_badge != blank -%}
+                <span class="lame-skincare-showcase__pill lame-skincare-showcase__pill--dark">{{ section.settings.top_badge }}</span>
+              {%- endif -%}
+              {%- if section.settings.top_heading != blank -%}
+                <h2 class="lame-skincare-showcase__hero-heading">{{ section.settings.top_heading }}</h2>
+              {%- endif -%}
+              {%- if section.settings.top_duration != blank -%}
+                <span class="lame-skincare-showcase__pill lame-skincare-showcase__pill--dark lame-skincare-showcase__pill--duration">
+                  <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14"><circle cx="8" cy="8" r="6.5" stroke="currentColor" fill="none"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-linecap="round"/></svg>
+                  {{ section.settings.top_duration }}
+                </span>
+              {%- endif -%}
+              {%- if section.settings.top_tag != blank -%}
+                <span class="lame-skincare-showcase__pill lame-skincare-showcase__pill--soft">{{ section.settings.top_tag }}</span>
+              {%- endif -%}
+            </div>
+            <div class="lame-skincare-showcase__hero-media">
+              {%- if section.settings.top_image != blank -%}
+                {{
+                  section.settings.top_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'lame-skincare-showcase__hero-photo',
+                    loading: 'lazy',
+                    widths: '400, 600, 800, 1000, 1200',
+                    sizes: '(min-width: 990px) 42vw, 50vw',
+                    alt: section.settings.top_heading | escape
+                }}
+              {%- else -%}
+                {{ 'lifestyle-1' | placeholder_svg_tag: 'lame-skincare-showcase__hero-photo placeholder-svg' }}
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.show_middle -%}
+      <div class="lame-skincare-showcase__panel lame-skincare-showcase__panel--middle" data-lame-reveal data-lame-delay="1">
+        <div class="lame-skincare-showcase__middle-grid">
+          <div class="lame-skincare-showcase__product-spot">
+            {%- if section.settings.middle_product_image != blank -%}
+              {{
+                section.settings.middle_product_image
+                | image_url: width: 800
+                | image_tag:
+                  class: 'lame-skincare-showcase__product-img',
+                  loading: 'lazy',
+                  widths: '300, 400, 600, 800',
+                  sizes: '(min-width: 990px) 28vw, 70vw',
+                  alt: section.settings.middle_product_alt | default: 'Product' | escape
+              }}
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'lame-skincare-showcase__product-img placeholder-svg' }}
+            {%- endif -%}
+            <span class="lame-skincare-showcase__sunburst" aria-hidden="true"></span>
+          </div>
+
+          <div class="lame-skincare-showcase__features">
+            {%- if section.settings.middle_badge != blank -%}
+              <span class="lame-skincare-showcase__confirm-badge">{{ section.settings.middle_badge }}</span>
+            {%- endif -%}
+            <ul class="lame-skincare-showcase__feature-grid" role="list">
+              {%- for block in feature_blocks -%}
+                <li class="lame-skincare-showcase__feature-card" {{ block.shopify_attributes }}>
+                  <span class="lame-skincare-showcase__feature-icon" aria-hidden="true">
+                    {%- case block.settings.icon -%}
+                      {%- when 'shield' -%}
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 4.5 2.8 8.6 8 9.5 5.2-.9 8-5 8-9.5V6l-8-3Z" stroke="currentColor" stroke-width="1.3"/></svg>
+                      {%- when 'light' -%}
+                        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                      {%- when 'pollution' -%}
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M4 14h16M6 10h12M8 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="9" cy="17" r="1.2" fill="currentColor"/><circle cx="15" cy="17" r="1.2" fill="currentColor"/></svg>
+                      {%- else -%}
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 1 6 6c0 4-6 12-6 12S6 13 6 9a6 6 0 0 1 6-6Z" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="9" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
+                    {%- endcase -%}
+                  </span>
+                  <div class="lame-skincare-showcase__feature-text">
+                    {%- if block.settings.title != blank -%}
+                      <p class="lame-skincare-showcase__feature-title">{{ block.settings.title }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.text != blank -%}
+                      <p class="lame-skincare-showcase__feature-body">{{ block.settings.text }}</p>
+                    {%- endif -%}
+                  </div>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.show_bottom_banner -%}
+      <div class="lame-skincare-showcase__panel lame-skincare-showcase__panel--benefits" data-lame-reveal data-lame-delay="2">
+        {%- if section.settings.bottom_banner_image != blank -%}
+          {%- if section.settings.bottom_link != blank -%}
+            <a href="{{ section.settings.bottom_link }}" class="lame-skincare-showcase__banner-link">
+          {%- endif -%}
+          {{
+            section.settings.bottom_banner_image
+            | image_url: width: 2400
+            | image_tag:
+              class: 'lame-skincare-showcase__banner-img',
+              loading: 'lazy',
+              widths: '600, 900, 1200, 1600, 2000, 2400',
+              sizes: '100vw',
+              alt: section.settings.bottom_bg_word | default: 'Skincare benefits' | escape
+          }}
+          {%- if section.settings.bottom_link != blank -%}
+            </a>
+          {%- endif -%}
+        {%- else -%}
+          {%- if section.settings.bottom_bg_word != blank -%}
+            <p class="lame-skincare-showcase__bg-word" aria-hidden="true">{{ section.settings.bottom_bg_word }}</p>
+          {%- endif -%}
+          <div class="lame-skincare-showcase__benefits-stage">
+            {%- for block in callout_blocks -%}
+              <p
+                class="lame-skincare-showcase__callout lame-skincare-showcase__callout--{{ block.settings.position }}"
+                {{ block.shopify_attributes }}
+              >
+                <span class="lame-skincare-showcase__callout-line" aria-hidden="true"></span>
+                <span class="lame-skincare-showcase__callout-text">{{ block.settings.text }}</span>
+              </p>
+            {%- endfor -%}
+            <div class="lame-skincare-showcase__benefits-media">
+              {%- if section.settings.bottom_image != blank -%}
+                {{
+                  section.settings.bottom_image
+                  | image_url: width: 1000
+                  | image_tag:
+                    class: 'lame-skincare-showcase__benefits-photo',
+                    loading: 'lazy',
+                    widths: '400, 600, 800, 1000',
+                    sizes: '(min-width: 990px) 32vw, 55vw',
+                    alt: 'Skincare benefits' | escape
+                }}
+              {%- else -%}
+                {{ 'lifestyle-2' | placeholder_svg_tag: 'lame-skincare-showcase__benefits-photo placeholder-svg' }}
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    const nodes = section.querySelectorAll('[data-lame-reveal]');
+    if (!nodes.length) return;
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+      );
+      nodes.forEach((node) => observer.observe(node));
+    } else {
+      nodes.forEach((node) => node.classList.add('is-visible'));
+    }
+  })();
+</script>
+
+{% stylesheet %}
+  .lame-skincare-showcase__wrap {
+    display: grid;
+    gap: var(--skincare-gap, 1rem);
+    width: 100%;
+  }
+
+  .lame-skincare-showcase__panel {
+    border-radius: var(--skincare-radius, 28px);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lame-skincare-showcase__panel--hero,
+  .lame-skincare-showcase__panel--benefits {
+    background: radial-gradient(ellipse 120% 90% at 50% 0%, var(--skincare-gradient-start, #f9d4dc), var(--skincare-gradient-end, #f5b8c4));
+    min-height: clamp(220px, 38vw, 420px);
+  }
+
+  .lame-skincare-showcase__panel--middle {
+    background: rgb(var(--color-background-rgb));
+    padding: clamp(1rem, 3vw, 1.75rem);
+  }
+
+  .lame-skincare-showcase__banner-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 0;
+  }
+
+  .lame-skincare-showcase__banner-img {
+    width: 100%;
+    height: auto;
+    min-height: clamp(220px, 38vw, 420px);
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .lame-skincare-showcase__hero-split {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    min-height: inherit;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    gap: 0.5rem;
+  }
+
+  .lame-skincare-showcase__hero-copy {
+    display: grid;
+    gap: 0.65rem;
+    align-content: center;
+    z-index: 1;
+    padding-inline: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .lame-skincare-showcase__hero-heading {
+    margin: 0;
+    font-family: var(--font-heading--family, Georgia, serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.85rem, 4.5vw, 3.25rem);
+    line-height: 1.05;
+    color: #1a1a1a;
+    max-width: 12ch;
+  }
+
+  .lame-skincare-showcase__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .lame-skincare-showcase__pill--dark {
+    background: #111;
+    color: #fff;
+  }
+
+  .lame-skincare-showcase__pill--soft {
+    background: rgb(255 255 255 / 0.55);
+    color: #333;
+    border: 1px solid rgb(255 255 255 / 0.7);
+  }
+
+  .lame-skincare-showcase__pill--duration svg {
+    flex-shrink: 0;
+  }
+
+  .lame-skincare-showcase__hero-media {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: clamp(200px, 32vw, 360px);
+  }
+
+  .lame-skincare-showcase__hero-photo {
+    width: auto;
+    max-width: min(100%, 520px);
+    height: auto;
+    max-height: clamp(220px, 34vw, 380px);
+    object-fit: contain;
+    object-position: bottom center;
+    display: block;
+  }
+
+  .lame-skincare-showcase__middle-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    align-items: center;
+  }
+
+  .lame-skincare-showcase__product-spot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(200px, 28vw, 320px);
+  }
+
+  .lame-skincare-showcase__sunburst {
+    position: absolute;
+    width: clamp(160px, 22vw, 240px);
+    height: clamp(160px, 22vw, 240px);
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #e8a0b0 0deg,
+      transparent 18deg,
+      #e8a0b0 36deg,
+      transparent 54deg,
+      #e8a0b0 72deg,
+      transparent 90deg,
+      #e8a0b0 108deg,
+      transparent 126deg,
+      #e8a0b0 144deg,
+      transparent 162deg,
+      #e8a0b0 180deg,
+      transparent 198deg,
+      #e8a0b0 216deg,
+      transparent 234deg,
+      #e8a0b0 252deg,
+      transparent 270deg,
+      #e8a0b0 288deg,
+      transparent 306deg,
+      #e8a0b0 324deg,
+      transparent 342deg
+    );
+    opacity: 0.45;
+    z-index: 0;
+  }
+
+  .lame-skincare-showcase__product-img {
+    position: relative;
+    z-index: 1;
+    width: auto;
+    max-width: min(100%, 220px);
+    height: auto;
+    max-height: clamp(200px, 26vw, 300px);
+    object-fit: contain;
+  }
+
+  .lame-skincare-showcase__features {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .lame-skincare-showcase__confirm-badge {
+    display: inline-block;
+    width: fit-content;
+    padding: 0.3rem 0.85rem;
+    background: #111;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    transform: rotate(-4deg);
+  }
+
+  .lame-skincare-showcase__feature-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .lame-skincare-showcase__feature-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.75rem 0.85rem;
+    background: #f3f3f3;
+    border-radius: 14px;
+    min-height: 4.5rem;
+  }
+
+  .lame-skincare-showcase__feature-icon {
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #c45c72;
+    display: inline-flex;
+  }
+
+  .lame-skincare-showcase__feature-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-skincare-showcase__feature-title {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #222;
+  }
+
+  .lame-skincare-showcase__feature-body {
+    margin: 0.2rem 0 0;
+    font-size: 0.65rem;
+    line-height: 1.35;
+    color: rgb(0 0 0 / 0.62);
+  }
+
+  .lame-skincare-showcase__benefits-stage {
+    position: relative;
+    min-height: clamp(280px, 42vw, 460px);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    display: grid;
+    place-items: center;
+  }
+
+  .lame-skincare-showcase__bg-word {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(3.5rem, 14vw, 9rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.35);
+    pointer-events: none;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .lame-skincare-showcase__benefits-media {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lame-skincare-showcase__benefits-photo {
+    width: auto;
+    max-width: min(100%, 340px);
+    max-height: clamp(240px, 36vw, 400px);
+    object-fit: contain;
+    display: block;
+  }
+
+  .lame-skincare-showcase__callout {
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: min(38vw, 11rem);
+    font-size: clamp(0.55rem, 1.4vw, 0.68rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.25;
+    color: #fff;
+  }
+
+  .lame-skincare-showcase__callout-line {
+    flex: 0 0 2rem;
+    height: 1px;
+    background: rgb(255 255 255 / 0.85);
+    position: relative;
+  }
+
+  .lame-skincare-showcase__callout-line::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border: 1px solid rgb(255 255 255 / 0.9);
+    border-radius: 50%;
+    background: transparent;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lame-skincare-showcase__callout--top-left {
+    top: 18%;
+    left: 4%;
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .lame-skincare-showcase__callout--top-left .lame-skincare-showcase__callout-line::after {
+    right: -1px;
+  }
+
+  .lame-skincare-showcase__callout--bottom-left {
+    bottom: 16%;
+    left: 4%;
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .lame-skincare-showcase__callout--bottom-left .lame-skincare-showcase__callout-line::after {
+    right: -1px;
+  }
+
+  .lame-skincare-showcase__callout--top-right {
+    top: 18%;
+    right: 4%;
+    text-align: left;
+  }
+
+  .lame-skincare-showcase__callout--top-right .lame-skincare-showcase__callout-line::after {
+    left: -1px;
+  }
+
+  .lame-skincare-showcase__callout--bottom-right {
+    bottom: 16%;
+    right: 4%;
+    text-align: left;
+  }
+
+  .lame-skincare-showcase__callout--bottom-right .lame-skincare-showcase__callout-line::after {
+    left: -1px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-skincare-showcase__hero-split {
+      grid-template-columns: 1fr 1fr;
+      padding: clamp(1.5rem, 2.5vw, 2.25rem) clamp(1.25rem, 3vw, 2.5rem);
+    }
+
+    .lame-skincare-showcase__hero-media {
+      justify-content: flex-end;
+    }
+
+    .lame-skincare-showcase__middle-grid {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 2rem;
+    }
+
+    .lame-skincare-showcase__feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-skincare-showcase__callout {
+      max-width: 12rem;
+    }
+  }
+
+  @media screen and (max-width: 549px) {
+    .lame-skincare-showcase__callout {
+      max-width: 42%;
+      font-size: 0.5rem;
+    }
+
+    .lame-skincare-showcase__callout-line {
+      flex-basis: 1.25rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Skincare showcase",
+  "tag": "section",
+  "class": "section-wrapper",
+  "max_blocks": 8,
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "stack_gap",
+      "label": "Space between panels",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "gradient_start",
+      "label": "Banner gradient (light)",
+      "default": "#f9d4dc"
+    },
+    {
+      "type": "color",
+      "id": "gradient_end",
+      "label": "Banner gradient (deep)",
+      "default": "#f5b8c4"
+    },
+    {
+      "type": "header",
+      "content": "Top banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_top_banner",
+      "label": "Show top banner",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "top_banner_image",
+      "label": "Top banner image (full design)",
+      "info": "Upload one complete banner graphic, or leave empty to build from text and image below."
+    },
+    {
+      "type": "url",
+      "id": "top_link",
+      "label": "Top banner link"
+    },
+    {
+      "type": "text",
+      "id": "top_badge",
+      "label": "Badge text",
+      "default": "TRY"
+    },
+    {
+      "type": "text",
+      "id": "top_heading",
+      "label": "Heading",
+      "default": "Complete Sun Defense"
+    },
+    {
+      "type": "text",
+      "id": "top_duration",
+      "label": "Duration badge",
+      "default": "TOTAL 12H"
+    },
+    {
+      "type": "text",
+      "id": "top_tag",
+      "label": "Bottom tag",
+      "default": "Contains SPF 30 Sun Protection"
+    },
+    {
+      "type": "image_picker",
+      "id": "top_image",
+      "label": "Top lifestyle image"
+    },
+    {
+      "type": "header",
+      "content": "Middle section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_middle",
+      "label": "Show middle section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "middle_badge",
+      "label": "Badge text",
+      "default": "CONFIRM"
+    },
+    {
+      "type": "image_picker",
+      "id": "middle_product_image",
+      "label": "Product image"
+    },
+    {
+      "type": "text",
+      "id": "middle_product_alt",
+      "label": "Product image alt text",
+      "default": "Beauty product"
+    },
+    {
+      "type": "header",
+      "content": "Bottom banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_banner",
+      "label": "Show bottom banner",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "bottom_banner_image",
+      "label": "Bottom banner image (full design)",
+      "info": "Upload one complete banner graphic, or leave empty to build from callouts and image below."
+    },
+    {
+      "type": "url",
+      "id": "bottom_link",
+      "label": "Bottom banner link"
+    },
+    {
+      "type": "text",
+      "id": "bottom_bg_word",
+      "label": "Background word",
+      "default": "MOISTURE"
+    },
+    {
+      "type": "image_picker",
+      "id": "bottom_image",
+      "label": "Center lifestyle image"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature card",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "sun", "label": "Sun" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "light", "label": "Light" },
+            { "value": "pollution", "label": "Pollution" }
+          ],
+          "default": "sun"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Feature title"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Description",
+          "default": "Short description for this benefit."
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "name": "Benefit callout",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "position",
+          "label": "Position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "top-left"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Benefit callout"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Skincare showcase",
+      "category": "Banners",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "sun",
+            "title": "Protects against both UVA & UVB",
+            "text": "Broad-spectrum defense for daily wear."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "light",
+            "title": "High Energy Visible Light (HEV)",
+            "text": "Helps shield skin from blue light exposure."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "pollution",
+            "title": "Protect pollution damage",
+            "text": "Supports skin against environmental stress."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "shield",
+            "title": "Infrared radiation protection",
+            "text": "Extra layer of defense for outdoor routines."
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "position": "top-left",
+            "text": "Hydration and moisture retention"
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "position": "bottom-left",
+            "text": "Strengthening the skin barrier"
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "position": "top-right",
+            "text": "Slowing the signs of aging"
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "position": "bottom-right",
+            "text": "Improving skin texture and tone"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
