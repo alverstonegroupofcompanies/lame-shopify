@@ -4,39 +4,235 @@
  */
 
 .lame-product-healthcare-wrap {
-  --hc-green: #2f4f3a;
+  --hc-green: #2d4a36;
   --hc-green-hover: #243d2e;
-  --hc-green-light: #e8f0e8;
-  --hc-green-muted: #5a7a62;
-  --hc-cream: #f9f7f2;
-  --hc-cream-dark: #f0ebe3;
+  --hc-green-light: #e9f5ec;
+  --hc-green-muted: #3d6b4a;
+  --hc-grey: #f5f5f5;
+  --hc-cream: #f7f3eb;
+  --hc-cream-dark: #efe9df;
   --hc-ink: #1a1a1a;
   --hc-muted: #6b6b6b;
-  --hc-radius: 10px;
+  --hc-radius: 8px;
   --hc-radius-lg: 14px;
+  --hc-thumb: 72px;
   --hc-pad: max(1rem, var(--page-margin));
 }
 
 .lame-product-healthcare-wrap .product-information--healthcare {
-  --pdp-cream: var(--hc-cream);
-  --pdp-border: rgb(47 79 58 / 0.12);
+  --pdp-cream: var(--hc-grey);
+  --pdp-border: rgb(45 74 54 / 0.12);
   --pdp-muted: var(--hc-muted);
-  --pdp-gap: clamp(1.5rem, 3vw, 2.75rem);
-  --pdp-radius: var(--hc-radius-lg);
+  --pdp-gap: clamp(2rem, 4vw, 3.5rem);
   padding-inline: var(--hc-pad);
+  max-width: var(--page-width);
+  margin-inline: auto;
 }
 
+/* Two-column hero: wider gallery, narrower buy box */
 .lame-product-healthcare-wrap .product-information--healthcare .product-information__grid {
   gap: var(--pdp-gap);
   align-items: start;
 }
 
-/* Media column */
-.lame-product-healthcare-wrap .product-information__media-shell {
+@media screen and (min-width: 750px) {
+  .lame-product-healthcare-wrap .product-information--healthcare.product-information--redesign .product-information__grid {
+    grid-column: 1 / -1 !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) !important;
+    gap: clamp(2rem, 3.5vw, 3rem) !important;
+    align-items: start !important;
+  }
+
+  .lame-product-healthcare-wrap .product-information--healthcare .product-information__grid--half {
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) !important;
+  }
+
+  .lame-product-healthcare-wrap .product-information--healthcare .product-information__media-column,
+  .lame-product-healthcare-wrap .product-information--healthcare .product-information__media {
+    grid-column: auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .lame-product-healthcare-wrap .product-information--healthcare .product-details {
+    grid-column: auto !important;
+    padding: 0 !important;
+    max-width: 420px;
+  }
+}
+
+/* Left column: gallery + features */
+.lame-product-healthcare-wrap .product-information__media-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.lame-product-healthcare-wrap .product-information__gallery-shell {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  padding: 0;
+  min-height: 0;
+}
+
+.lame-product-healthcare-wrap media-gallery.media-gallery--carousel {
+  --thumbnail-width: var(--hc-thumb);
+  width: 100%;
+}
+
+/* Carousel: thumbnails left | main image right */
+@media screen and (min-width: 750px) {
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-component:has(slideshow-controls[thumbnails]) {
+    display: grid !important;
+    grid-template:
+      'controls container' 1fr
+      'controls arrows' min-content
+      / auto minmax(0, 1fr) !important;
+    gap: 0 1rem;
+    align-items: stretch;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] {
+    order: -1;
+    width: var(--hc-thumb);
+    min-width: var(--hc-thumb);
+    height: auto;
+    align-self: stretch;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] .slideshow-controls__thumbnails-container {
+    max-height: min(520px, 58vh);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] .slideshow-controls__thumbnails {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button {
+    width: var(--hc-thumb) !important;
+    min-width: var(--hc-thumb);
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: var(--hc-radius);
+    border: 1.5px solid var(--pdp-border);
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button[aria-current='true'] {
+    border-color: var(--hc-green);
+    box-shadow: 0 0 0 1px var(--hc-green);
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Main image — light grey box */
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
+    grid-area: container;
+    background: var(--hc-grey);
+    border-radius: var(--hc-radius-lg);
+    min-height: clamp(380px, 52vh, 540px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-slide {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel .product-media-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel .product-media {
+    background: transparent;
+    min-height: clamp(340px, 48vh, 500px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel .product-media img,
+  .lame-product-healthcare-wrap .media-gallery--carousel .product-media video {
+    object-fit: contain;
+    max-height: min(460px, 50vh);
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-arrows {
+    display: none;
+  }
+}
+
+/* Zoom pill — bottom right of main image */
+.lame-product-healthcare-wrap .product-media-container__zoom-button {
+  position: absolute;
+  inset: auto 1rem 1rem auto;
+  z-index: 2;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0.45rem 0.85rem 0.45rem 0.65rem;
+  border-radius: 999px;
   background: #fff;
   border: 1px solid var(--pdp-border);
-  border-radius: var(--hc-radius-lg);
-  overflow: clip;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.06);
+  cursor: zoom-in;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--hc-muted);
+  pointer-events: auto;
+}
+
+.lame-product-healthcare-wrap .product-media-container__zoom-button::before {
+  content: '';
+  display: block;
+  width: 0.9rem;
+  height: 0.9rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='6' stroke='%232d4a36' stroke-width='1.5'/%3E%3Cpath stroke='%232d4a36' stroke-width='1.5' stroke-linecap='round' d='M16 16l5 5'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+.lame-product-healthcare-wrap .product-media-container__zoom-button::after {
+  content: 'Click to zoom';
+  white-space: nowrap;
+}
+
+.lame-product-healthcare-wrap .product-media-container {
+  position: relative;
 }
 
 .lame-product-healthcare-wrap media-gallery {
@@ -45,32 +241,7 @@
 
 .lame-product-healthcare-wrap .product-media-container,
 .lame-product-healthcare-wrap .product-media {
-  background: #fff;
-}
-
-.lame-product-healthcare-wrap .product-media img,
-.lame-product-healthcare-wrap .product-media video {
-  object-fit: contain;
-}
-
-.lame-product-healthcare-wrap .product-media-container__zoom-button {
-  cursor: zoom-in;
-}
-
-.lame-product-healthcare-wrap slideshow-controls[controls='thumbnails'] button,
-.lame-product-healthcare-wrap .slideshow-controls__thumbnail {
-  border-radius: 8px;
-  border: 1px solid var(--pdp-border);
-  overflow: hidden;
-}
-
-.lame-product-healthcare-wrap slideshow-controls[controls='thumbnails'] button[aria-current='true'] {
-  border-color: var(--hc-green);
-  box-shadow: 0 0 0 1px var(--hc-green);
-}
-
-.lame-product-healthcare-wrap slideshow-controls[pagination-position='left'] .slideshow-controls__thumbnails {
-  gap: 0.5rem;
+  background: transparent;
 }
 
 .lame-product-healthcare-wrap .product-media-container__zoom-button svg,
@@ -78,15 +249,15 @@
   color: var(--hc-green);
 }
 
-/* Feature strip below gallery */
+/* Feature strip — full width under gallery column */
 .lame-pdp-media-features {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-  padding: 1rem 1.1rem;
-  background: var(--hc-cream);
-  border: 1px solid var(--pdp-border);
+  gap: 0.5rem;
+  margin-top: 0;
+  padding: 1rem 1.25rem;
+  background: var(--hc-grey);
+  border: 0;
   border-radius: var(--hc-radius);
 }
 
@@ -421,17 +592,37 @@
     top: calc(var(--header-group-height, 0px) + 1rem);
     align-self: start;
   }
-
-  .lame-product-healthcare-wrap .product-information__media-shell {
-    min-height: auto;
-  }
-
-  .lame-product-healthcare-wrap media-gallery:has(slideshow-controls[pagination-position='left']) {
-    --thumbnail-width: 72px;
-  }
 }
 
 @media screen and (max-width: 749px) {
+  .lame-product-healthcare-wrap .product-information--healthcare .product-information__media-column,
+  .lame-product-healthcare-wrap .product-information--healthcare .product-details {
+    grid-column: 1 / -1 !important;
+  }
+
+  .lame-product-healthcare-wrap .product-information--healthcare .product-details {
+    max-width: none;
+  }
+
+  .lame-product-healthcare-wrap .product-information--healthcare .product-information__grid {
+    gap: 1.25rem;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
+    background: var(--hc-grey);
+    border-radius: var(--hc-radius-lg);
+    min-height: 320px;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel .product-media {
+    min-height: 280px;
+    padding: 1rem;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel .product-media img {
+    max-height: 300px;
+  }
+
   .lame-pdp-media-features {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
@@ -440,10 +631,6 @@
   .lame-pdp-trust-row {
     grid-template-columns: 1fr;
     gap: 0.85rem;
-  }
-
-  .lame-product-healthcare-wrap .product-information--healthcare .product-information__grid {
-    gap: 1.25rem;
   }
 }
 

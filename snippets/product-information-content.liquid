@@ -96,17 +96,30 @@
     data-product-grid-content
   >
     {% assign render_order_array = render_order | split: ',' %}
-    {% capture media %}
-      <div
-        class="product-information__media product-information__media-shell"
-        data-testid="product-information-media"
-      >
-        {{ media_gallery }}
-        {% if layout_variant == 'healthcare' and feature_settings != blank %}
-          {% render 'lame-pdp-media-features', settings: feature_settings %}
-        {% endif %}
-      </div>
-    {% endcapture %}
+    {% if layout_variant == 'healthcare' %}
+      {% capture media %}
+        <div class="product-information__media-column">
+          <div
+            class="product-information__media product-information__gallery-shell"
+            data-testid="product-information-media"
+          >
+            {{ media_gallery }}
+          </div>
+          {% if feature_settings != blank %}
+            {% render 'lame-pdp-media-features', settings: feature_settings %}
+          {% endif %}
+        </div>
+      {% endcapture %}
+    {% else %}
+      {% capture media %}
+        <div
+          class="product-information__media product-information__media-shell"
+          data-testid="product-information-media"
+        >
+          {{ media_gallery }}
+        </div>
+      {% endcapture %}
+    {% endif %}
 
     {% for block in render_order_array %}
       {% if block == 'media' and product_has_media %}
@@ -400,5 +413,17 @@
     .product-information--redesign .product-information__grid:not(.product-information--media-none) {
       grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr) !important;
     }
+  }
+
+  /* Healthcare: do not apply cosmetic grid-gallery / tall media-shell rules */
+  .product-information--healthcare.product-information--redesign .product-information__media-shell,
+  .product-information--healthcare .product-information__gallery-shell {
+    min-height: 0;
+    background: transparent;
+    border: 0;
+  }
+
+  .product-information--healthcare .media-gallery--grid .media-gallery__grid {
+    display: none;
   }
 {% endstylesheet %}
