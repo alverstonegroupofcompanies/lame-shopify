@@ -1,0 +1,58 @@
+{%- doc -%}
+  Lamstone trust badges for cart drawer and cart summary.
+  Cosmetic / healthcare ecommerce — does not alter cart logic.
+{%- enddoc -%}
+
+{%- liquid
+  assign compact = compact | default: false
+  assign trust_class = 'lame-cart-trust'
+  if compact
+    assign trust_class = trust_class | append: ' lame-cart-trust--compact'
+  endif
+-%}
+
+<ul class="{{ trust_class }}" role="list" aria-label="{{ 'lame_cart.trust_aria' | t }}">
+  <li class="lame-cart-trust__item">
+    <span class="lame-cart-trust__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" focusable="false">
+        <path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.35"/>
+        <path d="M14 10h4l3 3v2h-7v-5Z" stroke="currentColor" stroke-width="1.35"/>
+        <circle cx="7" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/>
+        <circle cx="17" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/>
+      </svg>
+    </span>
+    <span class="lame-cart-trust__label">{{ 'lame_cart.trust_shipping_title' | t }}</span>
+    <span class="lame-cart-trust__sub">{{ 'lame_cart.trust_shipping_sub' | t }}</span>
+  </li>
+  <li class="lame-cart-trust__item">
+    <span class="lame-cart-trust__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" focusable="false">
+        <path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.35"/>
+        <path d="M9 12.5 11 15l5-5.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="lame-cart-trust__label">{{ 'lame_cart.trust_secure_title' | t }}</span>
+    <span class="lame-cart-trust__sub">{{ 'lame_cart.trust_secure_sub' | t }}</span>
+  </li>
+  <li class="lame-cart-trust__item">
+    <span class="lame-cart-trust__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" focusable="false">
+        <path d="M12 3v18M8 7h8a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h8" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="lame-cart-trust__label">{{ 'lame_cart.trust_quality_title' | t }}</span>
+    <span class="lame-cart-trust__sub">{{ 'lame_cart.trust_quality_sub' | t }}</span>
+  </li>
+</ul>
+
+{%- if shop.shipping_policy.body != blank or shop.shipping_policy.url != blank -%}
+  <p class="lame-cart-shipping-note">
+    {%- if shop.shipping_policy.url != blank -%}
+      {{ 'lame_cart.shipping_note_html' | t: link: shop.shipping_policy.url }}
+    {%- else -%}
+      {{ 'lame_cart.shipping_note' | t }}
+    {%- endif -%}
+  </p>
+{%- else -%}
+  <p class="lame-cart-shipping-note">{{ 'lame_cart.shipping_note' | t }}</p>
+{%- endif -%}
