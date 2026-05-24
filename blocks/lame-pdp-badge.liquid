@@ -1,0 +1,45 @@
+{% if block.settings.text != blank %}
+  <span
+    class="lame-pdp-badge{% if block.settings.style == 'accent' %} lame-pdp-badge--accent{% endif %}"
+    {{ block.shopify_attributes }}
+  >
+    {{ block.settings.text | escape }}
+  </span>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product badge",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Badge text",
+      "default": "Best seller"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "Style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Green pill"
+        },
+        {
+          "value": "accent",
+          "label": "Muted"
+        }
+      ],
+      "default": "default"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product badge",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

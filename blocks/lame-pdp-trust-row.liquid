@@ -1,0 +1,138 @@
+<div class="lame-pdp-trust-row" {{ block.shopify_attributes }}>
+  {% for i in (1..3) %}
+    {% liquid
+      case i
+        when 1
+          assign icon = block.settings.icon_1
+          assign title = block.settings.title_1
+          assign subtitle = block.settings.subtitle_1
+        when 2
+          assign icon = block.settings.icon_2
+          assign title = block.settings.title_2
+          assign subtitle = block.settings.subtitle_2
+        when 3
+          assign icon = block.settings.icon_3
+          assign title = block.settings.title_3
+          assign subtitle = block.settings.subtitle_3
+      endcase
+    %}
+    {% if title != blank %}
+      <div class="lame-pdp-trust-row__item">
+        <span class="lame-pdp-trust-row__icon" aria-hidden="true">
+          {% case icon %}
+            {% when 'shipping' %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.35"/><path d="M14 10h4l3 3v2h-7v-5Z" stroke="currentColor" stroke-width="1.35"/><circle cx="7" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/><circle cx="17" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/></svg>
+            {% when 'secure' %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.35"/><path d="M9 12.5 11 15l5-5.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+            {% when 'returns' %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12a4 4 0 0 1 0 8H9" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><path d="M9 12 6 9l3-3" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {% else %}
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.35"/></svg>
+          {% endcase %}
+        </span>
+        <span class="lame-pdp-trust-row__copy">
+          <strong>{{ title | escape }}</strong>
+          {% if subtitle != blank %}
+            <span>{{ subtitle | escape }}</span>
+          {% endif %}
+        </span>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "Trust icons row",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Item 1"
+    },
+    {
+      "type": "select",
+      "id": "icon_1",
+      "label": "Icon",
+      "options": [
+        { "value": "shipping", "label": "Shipping" },
+        { "value": "secure", "label": "Secure" },
+        { "value": "returns", "label": "Returns" }
+      ],
+      "default": "shipping"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Title",
+      "default": "Free shipping"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_1",
+      "label": "Subtitle",
+      "default": "On orders above Rs. 999"
+    },
+    {
+      "type": "header",
+      "content": "Item 2"
+    },
+    {
+      "type": "select",
+      "id": "icon_2",
+      "label": "Icon",
+      "options": [
+        { "value": "shipping", "label": "Shipping" },
+        { "value": "secure", "label": "Secure" },
+        { "value": "returns", "label": "Returns" }
+      ],
+      "default": "secure"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Title",
+      "default": "Secure payment"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_2",
+      "label": "Subtitle",
+      "default": "100% secure checkout"
+    },
+    {
+      "type": "header",
+      "content": "Item 3"
+    },
+    {
+      "type": "select",
+      "id": "icon_3",
+      "label": "Icon",
+      "options": [
+        { "value": "shipping", "label": "Shipping" },
+        { "value": "secure", "label": "Secure" },
+        { "value": "returns", "label": "Returns" }
+      ],
+      "default": "returns"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Title",
+      "default": "Easy returns"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_3",
+      "label": "Subtitle",
+      "default": "7-day return policy"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust icons row",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}

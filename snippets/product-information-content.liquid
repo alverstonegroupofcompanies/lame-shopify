@@ -10,6 +10,8 @@
   @param {string} media_gallery - Captured HTML for the product media gallery block
   @param {string} product_details - Captured HTML for the product details block
   @param {string} additional_blocks - Captured HTML for additional section blocks
+  @param {string} [layout_variant] - Layout skin: cosmetic (default) or healthcare
+  @param {object} [feature_settings] - Section settings for media feature strip (healthcare)
 
   @example
   {% capture media_gallery %}
@@ -74,11 +76,14 @@
     when 'content-full-width'
       assign content_width = 'full-width'
   endcase
+
+  assign layout_variant = layout_variant | default: 'cosmetic'
+  assign layout_class = 'product-information--' | append: layout_variant
 %}
 
 <div class="section-background color-{{ settings.color_scheme }}"></div>
 <div
-  class="product-information product-information--redesign product-information--cosmetic section section--{{ content_width }} spacing-style color-{{ settings.color_scheme }} relative"
+  class="product-information product-information--redesign {{ layout_class }} section section--{{ content_width }} spacing-style color-{{ settings.color_scheme }} relative"
   style="{% render 'spacing-style', settings: settings %} --gap: {{ settings.gap }}px;"
   data-testid="product-information"
 >
@@ -97,6 +102,9 @@
         data-testid="product-information-media"
       >
         {{ media_gallery }}
+        {% if layout_variant == 'healthcare' and feature_settings != blank %}
+          {% render 'lame-pdp-media-features', settings: feature_settings %}
+        {% endif %}
       </div>
     {% endcapture %}
 

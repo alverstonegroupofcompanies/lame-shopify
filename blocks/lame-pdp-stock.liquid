@@ -1,0 +1,58 @@
+{% liquid
+  assign variant = closest.product.selected_or_first_available_variant
+  assign in_stock = variant.available
+
+  if variant.inventory_management == 'shopify' and variant.inventory_quantity <= 0 and variant.inventory_policy != 'continue'
+    assign in_stock = false
+  endif
+%}
+
+<p
+  class="lame-pdp-stock{% unless in_stock %} lame-pdp-stock--out{% endunless %}"
+  {{ block.shopify_attributes }}
+  role="status"
+>
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" class="lame-pdp-stock__icon">
+    {% if in_stock %}
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M8 12.5 10.5 15 16 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    {% else %}
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    {% endif %}
+  </svg>
+  <span>
+    {% if in_stock %}
+      {{ block.settings.in_stock_text | default: 'In stock - Ready to ship' }}
+    {% else %}
+      {{ block.settings.out_of_stock_text | default: 'Out of stock' }}
+    {% endif %}
+  </span>
+</p>
+
+{% schema %}
+{
+  "name": "Stock status",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "in_stock_text",
+      "label": "In stock message",
+      "default": "In stock - Ready to ship"
+    },
+    {
+      "type": "text",
+      "id": "out_of_stock_text",
+      "label": "Out of stock message",
+      "default": "Out of stock"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stock status",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
