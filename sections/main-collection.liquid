@@ -152,19 +152,21 @@
                 <section
                   class="lame-collection-brand-section"
                   id="brand-{{ brand_slug }}"
-                  aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"
+                  {% unless lame_cosmetic_collection %}aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"{% endunless %}
                 >
-                  <header class="lame-collection-brand-section__header">
-                    <h2
-                      class="lame-collection-brand-section__title"
-                      id="brand-heading-{{ section.id }}-{{ brand_slug }}"
-                    >
-                      {{ brand_label }}
-                    </h2>
-                    <p class="lame-collection-brand-section__count">
-                      {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
-                    </p>
-                  </header>
+                  {% unless lame_cosmetic_collection %}
+                    <header class="lame-collection-brand-section__header">
+                      <h2
+                        class="lame-collection-brand-section__title"
+                        id="brand-heading-{{ section.id }}-{{ brand_slug }}"
+                      >
+                        {{ brand_label }}
+                      </h2>
+                      <p class="lame-collection-brand-section__count">
+                        {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
+                      </p>
+                    </header>
+                  {% endunless %}
                   <ul
                     class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
                     data-testid="product-grid-brand-{{ brand_slug }}"
@@ -407,7 +409,7 @@
       "type": "checkbox",
       "id": "group_products_by_brand_our_products",
       "label": "Also group by brand on Our products template",
-      "default": true
+      "default": false
     },
     {
       "type": "header",
