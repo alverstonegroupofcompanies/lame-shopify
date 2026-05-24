@@ -1,0 +1,61 @@
+{% liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign show_wishlist = false
+  if settings.lame_enable_wishlist and product != blank
+    assign show_wishlist = true
+  endif
+
+  if show_wishlist
+    assign wl_image = product.featured_image | image_url: width: 600
+    if product.selected_or_first_available_variant.featured_image
+      assign wl_image = product.selected_or_first_available_variant.featured_image | image_url: width: 600
+    endif
+    assign wl_price = product.selected_or_first_available_variant.price | money
+  endif
+%}
+
+{% if show_wishlist %}
+  <motion-element
+    class="pdp-wishlist-row"
+    {{ block.shopify_attributes }}
+  >
+    <button
+      type="button"
+      class="lame-wishlist-toggle pdp-wishlist-btn"
+      aria-label="{{ 'lame_wishlist.toggle' | t }}"
+      aria-pressed="false"
+      data-lame-wishlist-toggle
+      data-product-id="{{ product.id }}"
+      data-product-handle="{{ product.handle }}"
+      data-product-url="{{ product.url }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-image="{{ wl_image }}"
+      data-product-price="{{ wl_price | escape }}"
+    >
+      <span class="lame-wishlist-toggle__icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" focusable="false">
+          <path
+            class="lame-wishlist-toggle__outline"
+            d="M12 21s-7.2-4.35-9.6-8.4C.63 9.63 1.62 6 5.02 6c2.09 0 3.37 1.27 4.03 2.37.66-1.1 1.94-2.37 4.03-2.37 3.4 0 4.39 3.63 1.62 6.6C14.3 16.65 12 21 12 21Z"
+            stroke="currentColor"
+            stroke-width="1.35"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <span>{{ 'lame_wishlist.toggle' | t }}</span>
+    </button>
+  </motion-element>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Wishlist button",
+  "tag": null,
+  "settings": []
+}
+{% endschema %}

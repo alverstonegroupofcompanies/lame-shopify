@@ -52,10 +52,11 @@
 /* ── Neutralize global uniform / premium card rules inside this scope only ── */
 .lame-our-products-card-scope.uniform-products-page .product-grid__item,
 .lame-our-products-card-scope .product-grid__item {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: none;
-  height: auto;
+  height: 100%;
   min-height: 0;
   margin: 0;
   padding: 0;
@@ -63,12 +64,29 @@
   align-self: stretch;
 }
 
+/* Theme editor / static block wrapper (e.g. shopify-block-413a45783dae5b637a57442c5d685ccb) */
+.lame-our-products-card-scope .product-grid__item > .shopify-block,
+.lame-our-products-card-scope .product-grid__item > a.shopify-block {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
 .lame-our-products-card-scope.uniform-products-page .product-grid__item product-card,
 .lame-our-products-card-scope .product-grid__item product-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   width: 100%;
-  height: auto;
-  min-height: 0;
+  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
 }
@@ -132,15 +150,26 @@
 
 /* ── Card wrapper (product-card) ── */
 .lame-our-products-card-scope .lame-op-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   width: 100%;
-  height: auto;
+  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
   position: relative;
 }
 
-.lame-our-products-card-scope .lame-op-card .product-card__link {
+/* Full-card link surface inside the white box (tag <a> = entire card except ATC) */
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__link-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.lame-our-products-card-scope .lame-op-card .product-card__link:not(.lame-op-card__link-surface) {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -152,6 +181,7 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   width: 100%;
   height: 100%;
   min-height: var(--lame-op-card-min-height);
@@ -176,7 +206,10 @@
   box-shadow: var(--lame-op-card-shadow-hover);
 }
 
-.lame-our-products-card-scope .lame-op-card__inner :is(a, button, input, select, label, product-form-component, add-to-cart-component) {
+.lame-our-products-card-scope .lame-op-card__inner :is(button, input, select, label, product-form-component, add-to-cart-component),
+.lame-our-products-card-scope .lame-op-card__inner a:not(.lame-op-card__link-surface) {
+  position: relative;
+  z-index: 3;
   pointer-events: auto;
 }
 
@@ -315,15 +348,7 @@
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-card-brand {
-  display: block;
-  margin: 0 0 4px;
-  padding: 0;
-  font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: var(--lame-op-brand-size);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--lame-op-gold);
+  display: none;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner :is(.product-title, .product-title a, .product-title p, .product-title .text-block),

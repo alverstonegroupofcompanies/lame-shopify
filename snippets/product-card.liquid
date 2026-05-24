@@ -77,23 +77,27 @@
     data-featured-media-url="{{ featured_media_url }}"
     on:click="/handleViewTransition"
   {% endif %}
-  {{ block.shopify_attributes }}
+  {% unless lame_op_card %}
+    {{ block.shopify_attributes }}
+  {% endif %}
   {% if onboarding %}
     data-placeholder="true"
   {% endif %}
 >
-  <a
-    id="{{ product_card_id | md5 }}"
-    {% unless onboarding %}
-      href="{{ variant_to_link.url }}"
-    {% endunless %}
-    class="product-card__link"
-    ref="productCardLink"
-  >
-    <span class="visually-hidden">
-      {{ product.title }}
-    </span>
-  </a>
+  {% unless lame_op_card %}
+    <a
+      id="{{ product_card_id | md5 }}"
+      {% unless onboarding %}
+        href="{{ variant_to_link.url }}"
+      {% endunless %}
+      class="product-card__link"
+      ref="productCardLink"
+    >
+      <span class="visually-hidden">
+        {{ product.title }}
+      </span>
+    </a>
+  {% endunless %}
   <div
     class="
       product-card__content
@@ -125,7 +129,24 @@
         {% if block_settings.padding-block-end > 0 %}--zoom-out-padding-block-end: min(var(--padding-xs), {{ block_settings.padding-block-end | times: 0.7}}px);{% endif %}
       "
     {% endunless %}
+    {% if lame_op_card %}
+      {{ block.shopify_attributes }}
+    {% endif %}
   >
+    {% if lame_op_card %}
+      <a
+        id="{{ product_card_id | md5 }}"
+        {% unless onboarding %}
+          href="{{ variant_to_link.url }}"
+        {% endunless %}
+        class="product-card__link lame-op-card__link-surface"
+        ref="productCardLink"
+      >
+        <span class="visually-hidden">
+          {{ product.title }}
+        </span>
+      </a>
+    {% endif %}
     {{ children }}
   </div>
 </product-card>
