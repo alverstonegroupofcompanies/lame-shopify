@@ -1,3 +1,13 @@
+{% if template.name == 'page' and page.handle == 'my-profile' and request.design_mode == false %}
+  <div class="section page-width-content" style="padding: 3rem 1rem; text-align: center;">
+    <script>window.location.replace({{ routes.account_url | json }});</script>
+    <meta http-equiv="refresh" content="0;url={{ routes.account_url }}">
+    <p>
+      <a href="{{ routes.account_url }}">{{ 'content.account_title' | t }}</a>
+    </p>
+  </div>
+{% else %}
+
 <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
 <script src="{{ 'lame-customer-profile.js' | asset_url }}" defer></script>
 
@@ -27,18 +37,6 @@
       </div>
     {% else %}
       {%- liquid
-        assign profile_page = pages['my-profile']
-        assign profile_path = '/pages/my-profile'
-        if profile_page != blank
-          assign profile_path = profile_page.url
-        endif
-        assign on_profile_page = false
-        if request.path == profile_path
-          assign on_profile_page = true
-        endif
-        if template.name == 'page' and page.handle == 'my-profile'
-          assign on_profile_page = true
-        endif
         assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
         if avatar_letter == blank
           assign avatar_letter = customer.email | slice: 0, 1 | upcase
@@ -61,29 +59,6 @@
           </div>
         </div>
       </header>
-
-      {% if section.settings.show_orders %}
-        <nav class="lame-profile__subnav" aria-label="{{ 'lame_customer.account_nav' | t }}">
-          <a
-            href="{{ routes.account_url }}"
-            class="lame-profile__subnav-link{% unless on_profile_page %} lame-profile__subnav-link--current{% endunless %}"
-            {% unless on_profile_page %}
-              aria-current="page"
-            {% endunless %}
-          >
-            {{ 'customer.orders.title' | t }}
-          </a>
-          <a
-            href="{{ profile_path }}"
-            class="lame-profile__subnav-link{% if on_profile_page %} lame-profile__subnav-link--current{% endif %}"
-            {% if on_profile_page %}
-              aria-current="page"
-            {% endif %}
-          >
-            {{ 'content.account_profile' | t }}
-          </a>
-        </nav>
-      {% endif %}
 
       <div class="lame-profile__stack">
         {%- comment -%} Account card {%- endcomment -%}
@@ -477,6 +452,8 @@
     {% endunless %}
   </div>
 </section>
+
+{% endif %}
 
 {% stylesheet %}
   .lame-customer-profile {
@@ -899,19 +876,13 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Branded profile on your store (not Shopify’s default account screen). Create a page with the “my-profile” template, then in Header settings enable “Use custom profile page” and select that page. The built-in Shopify Profile tab cannot be themed—customers should open this page from your store menu/account icon."
+      "content": "Renders on Shopify’s default account URLs (/account and /account/addresses). In Header settings, keep “Use themed customer account” enabled so the account icon uses this design instead of Shopify’s default popover."
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Page title",
       "info": "Leave blank to show \"Profile\"."
-    },
-    {
-      "type": "checkbox",
-      "id": "show_orders",
-      "label": "Show Orders link above profile",
-      "default": true
     },
     {
       "type": "checkbox",

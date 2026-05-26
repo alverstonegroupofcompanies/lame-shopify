@@ -1,15 +1,14 @@
 {%- doc -%}
-  Account control that links to the custom Lame profile page instead of the default Shopify account UI.
+  Account control that links to the themed profile at /account instead of Shopify’s default account UI.
 
   @param {object} section - Header section (profile_page setting)
   @param {string} [display_style] - icon or text
 {%- enddoc -%}
 
 {%- liquid
-  assign profile_page = section.settings.profile_page
-  assign profile_url = '/pages/my-profile'
-  if profile_page != blank
-    assign profile_url = profile_page.url
+  assign profile_url = routes.account_url
+  if section.settings.profile_page != blank
+    assign profile_url = section.settings.profile_page.url
   endif
 -%}
 
@@ -32,12 +31,7 @@
         <ul class="lame-account__menu list-unstyled" role="list">
           <li role="none">
             <a class="lame-account__link" href="{{ profile_url }}" role="menuitem">
-              {{ 'content.account_profile' | t }}
-            </a>
-          </li>
-          <li role="none">
-            <a class="lame-account__link" href="{{ routes.account_url }}" role="menuitem">
-              {{ 'customer.orders.title' | t }}
+              {{ 'content.account_title' | t }}
             </a>
           </li>
           <li role="none">
