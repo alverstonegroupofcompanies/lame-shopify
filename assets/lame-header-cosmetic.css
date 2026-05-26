@@ -930,21 +930,73 @@ body:has(#header-component.header--cosmetic-luxury) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MOBILE MENU DRAWER — luxury serif nav (reference layout)
+   MOBILE MENU DRAWER — premium cosmetic layout
    ═══════════════════════════════════════════════════════════════ */
 
-#header-component.header--cosmetic-luxury .menu-drawer {
-  --drawer-padding: 1.5rem;
-  --drawer-max-width: min(22.5rem, 90vw);
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container[open]),
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open) {
+  overflow: hidden;
+}
+
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container[open]) #header-group,
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open) #header-group {
+  z-index: var(--layer-overlay, 16);
+}
+
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container[open]) #header-group > .shopify-section:not(.header-section),
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open) #header-group > .shopify-section:not(.header-section) {
+  z-index: 0;
+  position: relative;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container[open] .menu-drawer__backdrop,
+#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer__backdrop {
+  z-index: var(--layer-overlay, 16);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container[open] .menu-drawer,
+#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer {
+  z-index: calc(var(--layer-overlay, 16) + 1);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {
+  --drawer-padding: 1.375rem;
+  --drawer-max-width: min(24rem, 92vw);
+  --menu-drawer-item-gap: 1.125rem;
+  --menu-drawer-cream: 255 251 245;
+  --menu-drawer-cream-deep: 250 244 234;
+  --menu-drawer-ink: 28 24 20;
+  --menu-drawer-muted: 28 24 20;
   width: var(--drawer-max-width);
   max-width: var(--drawer-max-width);
-  background: #fff !important;
-  color: rgb(24 22 20);
-  border-right: none;
-  box-shadow: 6px 0 32px rgb(0 0 0 / 0.1);
+  height: 100dvh;
+  max-height: 100dvh;
+  padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--menu-drawer-cream)) 0%,
+    rgb(var(--menu-drawer-cream-deep)) 100%
+  ) !important;
+  color: rgb(var(--menu-drawer-ink));
+  border-right: 1px solid rgb(var(--brand-gold) / 0.22);
+  box-shadow:
+    8px 0 40px rgb(20 16 12 / 0.14),
+    inset -1px 0 0 rgb(255 255 255 / 0.65);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  overflow: hidden;
+  transition:
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.28s ease;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {
+    transition-duration: 0.15s;
+  }
 }
 
 @media screen and (max-width: 749px) {
@@ -961,134 +1013,235 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__backdrop {
-  background: rgb(0 0 0 / 0.45);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: rgb(20 16 12 / 0.42);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__close-button {
-  position: absolute;
-  top: 1.15rem;
-  left: 1.35rem;
-  right: auto;
-  z-index: 3;
-  width: auto;
-  height: auto;
-  min-width: unset;
-  min-height: unset;
-  padding: 0.25rem;
+#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+  padding-block: max(0.85rem, env(safe-area-inset-top, 0px)) 0.75rem;
+  padding-inline: var(--drawer-padding);
+  border-block-end: 1px solid rgb(var(--brand-gold) / 0.2);
+  background: rgb(var(--menu-drawer-cream) / 0.98);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__header-title {
   margin: 0;
-  border-radius: 0;
-  background: transparent;
-  border: none;
-  color: rgb(24 22 20);
+  font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(var(--brand-gold-strong));
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__close-button--header {
+  position: relative;
+  top: auto;
+  left: auto;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--brand-gold) / 0.28);
+  background: rgb(var(--brand-gold) / 0.08);
+  color: rgb(var(--brand-gold-strong));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: none;
-  transition: opacity 0.2s ease;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.22s ease;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__close-button:hover {
-  background: transparent;
-  opacity: 0.55;
-  transform: none;
+#header-component.header--cosmetic-luxury .menu-drawer__close-button--header:hover,
+#header-component.header--cosmetic-luxury .menu-drawer__close-button--header:focus-visible {
+  background: rgb(var(--brand-gold) / 0.16);
+  border-color: rgb(var(--brand-gold) / 0.45);
+  opacity: 1;
+  transform: scale(1.03);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__close-button .header-drawer-icon {
-  width: 1.125rem;
-  height: 1.125rem;
+#header-component.header--cosmetic-luxury .menu-drawer__close-button--header .header-drawer-icon,
+#header-component.header--cosmetic-luxury .menu-drawer__close-button--header svg {
+  width: 1.0625rem;
+  height: 1.0625rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__navigation {
-  --menu-top-level-font-size: 1.125rem;
-  --menu-top-level-font-line-height: 1.35;
+  --menu-top-level-font-size: 1.0625rem;
+  --menu-top-level-font-line-height: 1.45;
   --menu-top-level-font-case: none;
-  --menu-child-font-size: 1rem;
-  --menu-child-font-line-height: 1.4;
+  --menu-child-font-size: 0.9375rem;
+  --menu-child-font-line-height: 1.5;
   flex: 1 1 auto;
   overflow-y: auto;
-  padding-block: 3.75rem 0.5rem;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-block: 0.25rem 0.5rem;
   padding-inline: 0;
+  scroll-behavior: smooth;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__section {
+  padding-block: 0.85rem 0.25rem;
+  padding-inline: var(--drawer-padding);
+  border-block-end: 1px solid rgb(var(--brand-gold) / 0.14);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__section:last-of-type {
+  border-block-end: none;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__section-heading {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(var(--brand-gold-readable));
+  line-height: 1.3;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu {
-  padding-inline: var(--drawer-padding);
-  margin-block-start: 0;
+  padding-inline: 0;
+  margin-block: 0;
+  list-style: none;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu > .menu-drawer__list-item,
 #header-component.header--cosmetic-luxury .menu-drawer__menu > li {
   min-height: unset;
-  border-block-end: 1px solid rgb(0 0 0 / 0.08);
+  margin-block-end: var(--menu-drawer-item-gap);
+  border-block-end: none;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu > .menu-drawer__list-item:last-child,
+#header-component.header--cosmetic-luxury .menu-drawer__menu > li:last-child {
+  margin-block-end: 0;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist,
 #header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
   width: 100%;
-  min-height: 3.35rem;
-  padding-block: 0;
-  padding-inline: 0;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.65rem;
+  margin-inline: -0.65rem;
+  border-radius: 6px;
   border-bottom: none;
   font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: var(--menu-top-level-font-size, 1.125rem);
-  line-height: var(--menu-top-level-font-line-height, 1.35);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-size: var(--menu-top-level-font-size, 1.0625rem);
+  line-height: var(--menu-top-level-font-line-height, 1.45);
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-transform: none;
-  color: rgb(24 22 20);
-  transition: opacity 0.2s ease;
+  color: rgb(var(--menu-drawer-ink));
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist:hover,
+@media (hover: hover) {
+  #header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist:hover,
+  #header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist:hover {
+    background: rgb(var(--brand-gold) / 0.08);
+    color: rgb(var(--menu-drawer-ink));
+    opacity: 1;
+  }
+}
+
 #header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active,
-#header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist:hover {
-  color: rgb(24 22 20);
-  padding-inline-start: 0;
-  opacity: 0.65;
+#header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active {
+  color: rgb(var(--brand-gold-strong));
+  font-weight: 600;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu-item-text {
   flex: 1 1 auto;
   text-align: start;
+  line-height: inherit;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu .icon-caret--forward {
   flex-shrink: 0;
   margin-inline-start: auto;
-  padding-inline: 0;
-  opacity: 0.4;
+  padding: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+  color: rgb(var(--brand-gold-strong));
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu .icon-caret--forward svg {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu-item--child {
   font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: 1rem;
+  font-size: var(--menu-child-font-size, 0.9375rem);
   font-weight: 400;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  line-height: var(--menu-child-font-line-height, 1.5);
   text-transform: none;
-  color: rgb(24 22 20 / 0.72);
-  padding-block: 0.55rem;
-  padding-inline: 0 0 0.75rem;
+  color: rgb(var(--menu-drawer-muted) / 0.72);
+  padding: 0.4rem 0.65rem 0.4rem 1.35rem;
+  margin-inline: -0.65rem;
   min-height: 2.5rem;
+  border-radius: 4px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+@media (hover: hover) {
+  #header-component.header--cosmetic-luxury .menu-drawer__menu-item--child:hover {
+    background: rgb(var(--brand-gold) / 0.06);
+    color: rgb(var(--menu-drawer-ink) / 0.88);
+  }
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu-item--child.menu-drawer__menu-item--active {
-  color: rgb(24 22 20);
-  font-weight: 500;
+  color: rgb(var(--brand-gold-strong));
+  font-weight: 600;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__list-item--divider,
 #header-component.header--cosmetic-luxury .menu-drawer__menu-container--divider {
-  border-block-end-color: rgb(0 0 0 / 0.08);
+  border-block-end: none;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu .icon-plus {
@@ -1097,28 +1250,116 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
 
 #header-component.header--cosmetic-luxury .menu-drawer__menu--childlist {
   padding-inline: 0;
-  margin-block-start: 0;
+  margin-block: 0.15rem 0;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__menu--childlist .menu-drawer__list-item {
+  margin-block-end: 0.35rem;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__social {
   display: none;
 }
 
+/* Newsletter */
+#header-component.header--cosmetic-luxury .menu-drawer__section--newsletter {
+  flex-shrink: 0;
+  padding-block: 1.15rem 1.25rem;
+  border-block-start: 1px solid rgb(var(--brand-gold) / 0.14);
+  border-block-end: none;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-text {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgb(var(--menu-drawer-ink) / 0.68);
+  max-width: 28ch;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.3rem 0.35rem 0.3rem 0.85rem;
+  border: 1px solid rgb(var(--brand-gold) / 0.35);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.55);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0.55rem 0;
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgb(var(--menu-drawer-ink));
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-input::placeholder {
+  color: rgb(var(--menu-drawer-ink) / 0.45);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-input:focus-visible {
+  outline: 2px solid rgb(var(--brand-gold) / 0.55);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-btn {
+  flex-shrink: 0;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: rgb(255 253 249);
+  background: linear-gradient(135deg, rgb(var(--brand-gold)), rgb(var(--brand-gold-strong)));
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-message {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-message--error {
+  color: #9a3412;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer__newsletter-message--success {
+  color: rgb(var(--brand-gold-readable));
+}
+
 #header-component.header--cosmetic-luxury .menu-drawer__utility-links {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   margin-block: 0;
   margin-inline: 0;
-  margin-block-start: auto;
   padding: 0;
-  background: #fff;
-  border-block-start: 1px solid rgb(0 0 0 / 0.08);
-}
-
-#header-component.header--cosmetic-luxury .menu-drawer__utility-links:not(:has(.menu-drawer__footer-account)) {
-  display: none;
+  background: transparent;
   border-block-start: none;
 }
 
@@ -1128,27 +1369,43 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   display: none !important;
 }
 
+#header-component.header--cosmetic-luxury .menu-drawer__section--account {
+  padding-block: 1rem 1.25rem;
+  padding-inline: var(--drawer-padding);
+  border-block-start: 1px solid rgb(var(--brand-gold) / 0.14);
+}
+
 #header-component.header--cosmetic-luxury .menu-drawer__footer-account {
-  padding: 1.35rem var(--drawer-padding) 1.5rem;
+  padding: 0;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__account--luxury {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 2.25rem;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.65rem;
+  margin-inline: -0.65rem;
+  border-radius: 6px;
   text-decoration: none;
-  color: rgb(24 22 20);
-  transition: opacity 0.2s ease;
+  color: rgb(var(--menu-drawer-ink));
+  transition: background 0.2s ease;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__account--luxury:hover {
-  opacity: 0.65;
+@media (hover: hover) {
+  #header-component.header--cosmetic-luxury .menu-drawer__account--luxury:hover {
+    background: rgb(var(--brand-gold) / 0.08);
+    opacity: 1;
+  }
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer__account-icon {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: rgb(var(--brand-gold-strong));
 }
 
@@ -1159,8 +1416,43 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
 
 #header-component.header--cosmetic-luxury .menu-drawer__account-label {
   font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  line-height: 1.35;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__menu-item > .svg-wrapper {
+  padding: 0;
+  width: auto;
+  height: auto;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__list-item--flat {
+  margin-block-end: 0;
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__list-item--flat .menu-drawer__menu--childlist {
+  margin-block-start: 0.25rem;
+  padding-inline-start: 0.25rem;
+  border-inline-start: 1px solid rgb(var(--brand-gold) / 0.2);
+}
+
+@media screen and (max-width: 380px) {
+  #header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {
+    --drawer-max-width: 100vw;
+    --drawer-padding: 1.125rem;
+  }
+
+  #header-component.header--cosmetic-luxury .menu-drawer__newsletter-row {
+    flex-wrap: wrap;
+    border-radius: 12px;
+    padding: 0.5rem;
+  }
+
+  #header-component.header--cosmetic-luxury .menu-drawer__newsletter-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

@@ -1,0 +1,61 @@
+{%- doc -%}
+  Newsletter signup block for the mobile menu drawer.
+
+  @param {object} block - Header menu block (settings source)
+{%- enddoc -%}
+
+{% liquid
+  assign show_newsletter = block.settings.drawer_show_newsletter
+  if show_newsletter == nil
+    assign show_newsletter = true
+  endif
+%}
+
+{% if show_newsletter %}
+  <div class="menu-drawer__section menu-drawer__section--newsletter menu-drawer__animated-element">
+    <h2 class="menu-drawer__section-heading">
+      {{ block.settings.drawer_newsletter_heading | default: 'Newsletter' | escape }}
+    </h2>
+    {% if block.settings.drawer_newsletter_text != blank %}
+      <p class="menu-drawer__newsletter-text">{{ block.settings.drawer_newsletter_text | escape }}</p>
+    {% endif %}
+    {%- form 'customer', class: 'menu-drawer__newsletter-form' -%}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <div class="menu-drawer__newsletter-row">
+        <label class="visually-hidden" for="MenuDrawerNewsletterEmail">
+          {{ 'blocks.email_signup.label' | t | default: 'Email' }}
+        </label>
+        <input
+          id="MenuDrawerNewsletterEmail"
+          type="email"
+          name="contact[email]"
+          class="menu-drawer__newsletter-input"
+          value="{{ form.email }}"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="email"
+          placeholder="{{ block.settings.drawer_newsletter_placeholder | default: 'Your email address' | escape }}"
+          required
+        >
+        <button type="submit" class="menu-drawer__newsletter-btn">
+          {{ block.settings.drawer_newsletter_button | default: 'Subscribe' | escape }}
+        </button>
+      </div>
+      {%- if form.errors -%}
+        <p class="menu-drawer__newsletter-message menu-drawer__newsletter-message--error">
+          {{ form.errors.translated_fields.email | capitalize }}
+          {{ form.errors.messages.email }}
+        </p>
+      {%- endif -%}
+      {%- if form.posted_successfully? -%}
+        <p class="menu-drawer__newsletter-message menu-drawer__newsletter-message--success">
+          {% if block.settings.drawer_newsletter_success != blank %}
+            {{ block.settings.drawer_newsletter_success | escape }}
+          {% else %}
+            {{ 'blocks.email_signup.success' | t | default: 'Thanks for subscribing.' }}
+          {% endif %}
+        </p>
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+{% endif %}

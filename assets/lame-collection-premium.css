@@ -10,9 +10,11 @@
   --lame-col-ink: 28 22 20;
   --lame-col-muted: 120 108 100;
   --lame-col-forest: 26 58 48;
-  --lame-col-gold: #c9a227;
-  --lame-col-gold-bright: #c9a227;
-  --lame-col-gold-soft: #c9a227;
+  --lame-col-gold: 201 162 39;
+  --lame-col-gold-bright: 212 175 55;
+  --lame-col-gold-soft: 201 162 39;
+  --lame-col-gold-hover: 175 137 24;
+  --lame-col-atc-text: 255 255 255;
   --lame-col-radius-card: 10px;
   --lame-col-radius-panel: 10px;
   --lame-col-shadow-card: 0 2px 10px rgb(0 0 0 / 0.04);
@@ -536,7 +538,39 @@
   font-weight: 500;
 }
 
-/* Add to cart — gold outline */
+/* Card link behind content — clicks reach ATC; image/title links still navigate */
+.lame-collection-premium-active .product-card--lamstone-luxury .product-card__link {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lame-collection-premium-active .product-card--lamstone-luxury .product-grid__card {
+  position: relative;
+  z-index: 2;
+}
+
+.lame-collection-premium-active .product-card--lamstone-luxury :is(
+    .buy-buttons-block,
+    product-form-component,
+    add-to-cart-component,
+    button,
+    input,
+    select,
+    label,
+    textarea
+  ) {
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.lame-collection-premium-active .product-card--lamstone-luxury :is(.card-gallery a.contents, product-title a, a.contents) {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* Add to cart — golden fill */
 .lame-collection-premium-active .buy-buttons-block {
   display: block !important;
   width: 100%;
@@ -559,25 +593,37 @@
 
 .lame-collection-premium-active .buy-buttons-block .add-to-cart-button {
   width: 100%;
-  min-height: 2.35rem;
+  min-height: 2.5rem;
   border-radius: 10px;
-  border: 1px solid rgb(var(--lame-col-gold-soft) / 0.65) !important;
-  background: var(--lame-col-white) !important;
-  color: rgb(var(--lame-col-gold)) !important;
+  border: none !important;
+  background: linear-gradient(
+    135deg,
+    rgb(var(--lame-col-gold-bright)),
+    rgb(var(--lame-col-gold-soft))
+  ) !important;
+  color: rgb(var(--lame-col-atc-text)) !important;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  box-shadow: 0 2px 10px rgb(var(--lame-col-gold-soft) / 0.28);
+  cursor: pointer;
   transition:
     background 0.25s ease,
     color 0.25s ease,
-    border-color 0.25s ease;
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+.lame-collection-premium-active .buy-buttons-block .add-to-cart-button :is(.add-to-cart-text, .add-to-cart-icon, .svg-wrapper) {
+  color: inherit !important;
 }
 
 .lame-collection-premium-active .buy-buttons-block .add-to-cart-button:not(:disabled):hover {
-  background: rgb(var(--lame-col-gold-soft) / 0.08) !important;
-  border-color: rgb(var(--lame-col-gold-soft)) !important;
-  color: rgb(var(--lame-col-gold)) !important;
+  background: rgb(var(--lame-col-gold-hover)) !important;
+  color: rgb(var(--lame-col-atc-text)) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgb(var(--lame-col-gold-soft) / 0.35);
 }
 
 .lame-collection-premium-active .quick-add {
@@ -758,12 +804,135 @@
 }
 
 @media screen and (max-width: 749px) {
+  .lame-collection-premium-active {
+    --lame-col-page-pad: 1rem;
+    --padding-inline-start: 0 !important;
+    --padding-inline-end: 0 !important;
+  }
+
+  .lame-collection-premium-active > .lame-collection-shell {
+    padding-inline: var(--lame-col-page-pad);
+    padding-block: 0.5rem 1.75rem;
+  }
+
+  .lame-collection-premium-active .collection-wrapper.lame-collection-layout--sidebar-left {
+    gap: 0.75rem;
+  }
+
   .lame-collection-page-header {
-    padding-block: 1rem 1.25rem;
+    padding-block: 0.75rem 1rem;
+  }
+
+  .lame-collection-page-header__title {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
+
+  .lame-collection-page-header__description {
+    font-size: 0.875rem;
+  }
+
+  .lame-collection-premium-active .facets-toggle {
+    margin-inline: calc(-1 * var(--lame-col-page-pad));
+    padding-inline: var(--lame-col-page-pad);
   }
 
   .lame-collection-premium-active .facets-controls-wrapper.facets--horizontal {
-    justify-content: space-between;
-    padding-block: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    padding-block: 0.5rem 0.75rem;
+  }
+
+  .lame-collection-premium-active .products-count-wrapper {
+    margin-inline-end: 0 !important;
+    width: 100%;
+  }
+
+  .lame-collection-premium-active .facets-controls-wrapper .sorting-filter {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+  }
+
+  .lame-collection-premium-active .facets-controls-wrapper .sorting-filter__select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .lame-collection-premium-active .column-options-wrapper {
+    align-self: flex-end;
+  }
+
+  .lame-collection-brand-nav__list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.25rem;
+    margin-inline: calc(-1 * var(--lame-col-page-pad));
+    padding-inline: var(--lame-col-page-pad);
+  }
+
+  .lame-collection-brand-nav__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-collection-brand-nav__pill {
+    flex-shrink: 0;
+  }
+
+  .lame-collection-premium-active .lame-collection-brand-section {
+    padding: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .lame-collection-brand-section__header {
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .lame-collection-brand-section__title {
+    font-size: 1.125rem;
+  }
+
+  .lame-collection-premium-active .product-grid,
+  .lame-collection-premium-active.uniform-products-page .product-grid,
+  .lame-collection-premium-active .lame-collection-brand-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem 0.5rem !important;
+  }
+
+  .lame-collection-premium-active .product-grid__item .product-grid__card > :not(.card-gallery) {
+    padding-inline: 0.65rem;
+  }
+
+  .lame-collection-premium-active .product-grid__card :is(product-title, .product-title),
+  .lame-collection-premium-active .product-title,
+  .lame-collection-premium-active .product-title a {
+    font-size: 0.75rem !important;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .lame-collection-premium-active product-price {
+    font-size: 0.8125rem !important;
+  }
+
+  .lame-collection-premium-active .buy-buttons-block .add-to-cart-button {
+    min-height: 2.4rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.05em;
+  }
+}
+
+@media screen and (max-width: 399px) {
+  .lame-collection-premium-active .product-grid,
+  .lame-collection-premium-active.uniform-products-page .product-grid,
+  .lame-collection-premium-active .lame-collection-brand-section__grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
   }
 }
