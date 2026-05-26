@@ -230,9 +230,13 @@
 
 #header-component.header--cosmetic-luxury {
   --header-luxury-min-height: 4.75rem;
+  --lame-mobile-menu-z: 100000;
   position: relative;
   z-index: calc(var(--layer-sticky, 8) + 1);
-  isolation: isolate;
+}
+
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open) #header-component.header--cosmetic-luxury {
+  z-index: var(--lame-mobile-menu-z);
 }
 
 #header-component.header--cosmetic-luxury .header__row--top,
@@ -262,6 +266,7 @@
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container:not(.menu-open) .menu-drawer.menu-drawer--luxury {
+  z-index: -1;
   pointer-events: none !important;
   visibility: hidden;
 }
@@ -378,10 +383,20 @@
     box-shadow 0.22s ease;
 }
 
-/* Drawer summary ships with large padding — reset so the hamburger stays visible */
+/* Drawer column + toggle always above closed drawer panel */
+#header-component.header--cosmetic-luxury .header__drawer {
+  position: relative;
+  z-index: calc(var(--lame-mobile-menu-z, 100000) + 2);
+}
+
+#header-component.header--cosmetic-luxury .menu-drawer-container {
+  position: relative;
+  z-index: calc(var(--lame-mobile-menu-z, 100000) + 2);
+}
+
 #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu {
   position: relative;
-  z-index: calc(var(--layer-temporary, 20) + 1);
+  z-index: calc(var(--lame-mobile-menu-z, 100000) + 3);
   padding: 0;
   width: 100%;
   height: 100%;
@@ -397,8 +412,7 @@
   color: rgb(var(--brand-gold-strong));
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open > .header__icon--summary.header__icon--menu,
-#header-component.header--cosmetic-luxury .menu-drawer-container[open] > .header__icon--summary.header__icon--menu {
+#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open > .header__icon--summary.header__icon--menu {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -431,6 +445,7 @@
 #header-component.header--cosmetic-luxury .header__drawer {
   min-height: unset;
   align-items: center;
+  overflow: visible;
 }
 
 #header-component.header--cosmetic-luxury .header-actions__action:not(.account-button) .svg-wrapper {
