@@ -1,0 +1,110 @@
+{%- doc -%}
+  Premium order history cards for the customer account page.
+
+  @param {number} [orders_per_page] - Orders per page (default 8)
+{%- enddoc -%}
+
+{%- liquid
+  assign per_page = orders_per_page | default: 8
+-%}
+
+<section id="orders" class="lame-profile__panel lame-profile__card" aria-labelledby="ProfileOrdersHeading">
+  <div class="lame-profile__card-header">
+    <h2 id="ProfileOrdersHeading" class="lame-profile__card-title">{{ 'customer.orders.title' | t }}</h2>
+  </div>
+
+  {% paginate customer.orders by per_page %}
+    {% if customer.orders.size > 0 %}
+      <ul class="lame-orders" role="list">
+        {%- for order in customer.orders -%}
+          {%- liquid
+            assign thumb = order.line_items.first.image
+            assign status_key = order.fulfillment_status | default: 'unfulfilled'
+            if order.cancelled
+              assign status_key = 'cancelled'
+            endif
+            assign status_label = order.fulfillment_status_label
+            if order.cancelled
+              assign status_label = 'lame_customer.order_cancelled' | t
+            endif
+          -%}
+          <li class="lame-orders__item">
+            <article class="lame-orders__card">
+              <a href="{{ order.customer_url }}" class="lame-orders__thumb" tabindex="-1" aria-hidden="true">
+                {% if thumb != blank %}
+                  {{
+                    thumb
+                    | image_url: width: 160
+                    | image_tag:
+                      widths: '80, 120, 160',
+                      sizes: '80px',
+                      class: 'lame-orders__thumb-img',
+                      loading: 'lazy',
+                      alt: ''
+                  }}
+                {% else %}
+                  <span class="lame-orders__thumb-fallback" aria-hidden="true"></span>
+                {% endif %}
+              </a>
+
+              <div class="lame-orders__body">
+                <div class="lame-orders__meta">
+                  <p class="lame-orders__number">{{ 'lame_customer.order_number' | t: number: order.name }}</p>
+                  <time class="lame-orders__date" datetime="{{ order.created_at | date: '%Y-%m-%d' }}">
+                    {{ order.created_at | time_tag: format: 'date' }}
+                  </time>
+                </div>
+
+                <p class="lame-orders__items">
+                  {{ 'lame_customer.order_items_count' | t: count: order.line_items.size }}
+                </p>
+
+                <div class="lame-orders__footer">
+                  <span class="lame-orders__badge lame-orders__badge--{{ status_key }}">
+                    {{ status_label }}
+                  </span>
+                  <p class="lame-orders__total">
+                    {%- if order.total_net_amount != blank -%}
+                      {{ order.total_net_amount | money_with_currency }}
+                    {%- else -%}
+                      {{ order.total_price | money_with_currency }}
+                    {%- endif -%}
+                  </p>
+                </div>
+
+                <a href="{{ order.customer_url }}" class="lame-orders__cta button button-secondary">
+                  {{ 'lame_customer.view_order' | t }}
+                </a>
+              </div>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {% if paginate.pages > 1 %}
+        <nav class="lame-orders__pagination" aria-label="{{ 'lame_customer.orders_pagination' | t }}">
+          {% if paginate.previous %}
+            <a class="lame-orders__page-btn" href="{{ paginate.previous.url }}">{{ 'lame_our_products.previous' | t }}</a>
+          {% endif %}
+          <span class="lame-orders__page-status">
+            {{ 'lame_customer.orders_page' | t: current: paginate.current_page, total: paginate.pages }}
+          </span>
+          {% if paginate.next %}
+            <a class="lame-orders__page-btn" href="{{ paginate.next.url }}">{{ 'lame_our_products.next' | t }}</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="lame-profile__empty-state">
+        <span class="lame-profile__empty-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+        </span>
+        <p class="lame-profile__empty-title">{{ 'lame_customer.orders_empty_title' | t }}</p>
+        <p class="lame-profile__empty-desc">{{ 'lame_customer.orders_empty' | t }}</p>
+        <a href="{{ routes.all_products_collection_url }}" class="button lame-profile__btn-primary">
+          {{ 'lame_customer.shop_now' | t }}
+        </a>
+      </div>
+    {% endif %}
+  {% endpaginate %}
+</section>

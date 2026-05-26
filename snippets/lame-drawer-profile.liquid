@@ -1,0 +1,54 @@
+{%- doc -%}
+  Premium profile block at the top of the mobile menu drawer.
+
+  @param {object} [section] - Header section (optional profile_page)
+{%- enddoc -%}
+
+{%- liquid
+  assign account_url = routes.account_url
+  if section != blank and section.settings.profile_page != blank
+    assign account_url = section.settings.profile_page.url
+  endif
+
+  assign avatar_letter = ''
+  if customer
+    assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
+    if avatar_letter == blank
+      assign avatar_letter = customer.email | slice: 0, 1 | upcase
+    endif
+  endif
+-%}
+
+<div class="lame-drawer-profile" data-lame-drawer-profile>
+  <div class="lame-drawer-profile__inner">
+    {% if customer %}
+      <div class="lame-drawer-profile__avatar" aria-hidden="true">{{ avatar_letter }}</div>
+      <div class="lame-drawer-profile__text">
+        <p class="lame-drawer-profile__greeting">{{ 'lame_customer.drawer_welcome' | t }}</p>
+        <p class="lame-drawer-profile__name">{{ customer.name }}</p>
+        <p class="lame-drawer-profile__email">{{ customer.email }}</p>
+      </div>
+      <a href="{{ account_url }}" class="lame-drawer-profile__cta button lame-profile__btn-primary">
+        {{ 'content.account_title' | t }}
+      </a>
+    {% else %}
+      <div class="lame-drawer-profile__avatar lame-drawer-profile__avatar--guest" aria-hidden="true">
+        {% render 'lame-account-icon', size: 22, class: 'lame-drawer-profile__guest-icon' %}
+      </div>
+      <div class="lame-drawer-profile__text">
+        <p class="lame-drawer-profile__greeting">{{ shop.name }}</p>
+        <p class="lame-drawer-profile__name">{{ 'lame_customer.drawer_guest_title' | t }}</p>
+        <p class="lame-drawer-profile__email">{{ 'lame_customer.drawer_guest_hint' | t }}</p>
+      </div>
+      <div class="lame-drawer-profile__actions">
+        <a href="{{ routes.account_login_url }}" class="lame-drawer-profile__cta button lame-profile__btn-primary">
+          {{ 'customer.log_in' | t }}
+        </a>
+        <a href="{{ routes.account_register_url }}" class="lame-drawer-profile__cta button button-secondary">
+          {{ 'lame_customer.create_account' | t }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+  <div class="lame-drawer-profile__rule" aria-hidden="true"></div>
+</div>

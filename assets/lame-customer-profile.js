@@ -152,11 +152,55 @@ class LameCustomerProfile {
   }
 }
 
+function syncAccountWishlistCount(root) {
+  const STORAGE_KEY = 'lame:wishlist:v1';
+  const badges = root.querySelectorAll('[data-account-wishlist-count]');
+  if (!badges.length) return;
+
+  let count = 0;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      count = Array.isArray(parsed) ? parsed.length : 0;
+    }
+  } catch (_e) {
+    count = 0;
+  }
+
+  badges.forEach((badge) => {
+    badge.textContent = String(count);
+    badge.hidden = count < 1;
+  });
+}
+
+function setupAccountAnchorScroll(root) {
+  root.querySelectorAll('.lame-profile__quick-card[href^="#"]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const id = link.getAttribute('href')?.slice(1);
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (history.replaceState) {
+        history.replaceState(null, '', `#${id}`);
+      }
+    });
+  });
+}
+
 function initLameCustomerProfile() {
   document.querySelectorAll(selectors.root).forEach((root) => {
     new LameCustomerProfile(root);
+    syncAccountWishlistCount(root);
+    setupAccountAnchorScroll(root);
   });
 }
+
+document.addEventListener('lame:wishlistchange', () => {
+  document.querySelectorAll(selectors.root).forEach(syncAccountWishlistCount);
+});
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initLameCustomerProfile);
