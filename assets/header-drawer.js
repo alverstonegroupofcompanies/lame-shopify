@@ -79,6 +79,7 @@ class HeaderDrawer extends Component {
     if (!summary) return;
 
     summary.setAttribute('aria-expanded', 'true');
+    summary.setAttribute('aria-hidden', 'true');
     details.setAttribute('open', '');
 
     this.preventInitialAccordionAnimations(details);
@@ -121,6 +122,7 @@ class HeaderDrawer extends Component {
     if (!summary) return;
 
     summary.setAttribute('aria-expanded', 'false');
+    summary.removeAttribute('aria-hidden');
     details.classList.remove('menu-open');
     this.refs.menuDrawer.classList.remove('menu-drawer--has-submenu-opened');
 
@@ -191,5 +193,7 @@ if (!customElements.get('header-drawer')) {
 function reset(element) {
   element.classList.remove('menu-open');
   element.removeAttribute('open');
-  element.querySelector('summary')?.setAttribute('aria-expanded', 'false');
+  const summary = element.querySelector('summary');
+  summary?.setAttribute('aria-expanded', 'false');
+  summary?.removeAttribute('aria-hidden');
 }

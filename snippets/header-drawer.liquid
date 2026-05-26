@@ -85,13 +85,11 @@
     <summary
       class="header__icon header__icon--menu header__icon--summary"
       aria-label="{{ 'accessibility.menu' | t }}"
+      aria-expanded="false"
       on:click="/toggle"
     >
-      <span class="svg-wrapper header-drawer-icon header-drawer-icon--open">
+      <span class="svg-wrapper header-drawer-icon header-drawer-icon--open" aria-hidden="true">
         {{- 'icon-menu.svg' | inline_asset_content -}}
-      </span>
-      <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
-        {{- 'icon-close.svg' | inline_asset_content -}}
       </span>
     </summary>
     <div
@@ -814,13 +812,25 @@
     color: var(--color-foreground);
   }
 
-  details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--close {
-    display: none;
+  /* Hamburger only in header — close lives inside the drawer panel */
+  .menu-drawer-container > summary.header__icon--menu .header-drawer-icon--close {
+    display: none !important;
   }
 
-  details.menu-open .header__icon--menu .header-drawer-icon--open,
-  details[open] .header__icon--menu .header-drawer-icon--open {
-    display: none;
+  .menu-drawer-container.menu-open > summary.header__icon--menu,
+  .menu-drawer-container[open] > summary.header__icon--menu {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   .menu-drawer {
