@@ -19,8 +19,13 @@
   --lame-col-radius-panel: 10px;
   --lame-col-shadow-card: 0 2px 10px rgb(0 0 0 / 0.04);
   --lame-col-shadow-panel: 0 2px 10px rgb(0 0 0 / 0.04);
-  --lame-col-page-pad: clamp(1rem, 2.5vw, 2.5rem);
-  --lame-col-shell-max: none;
+  --lame-col-page-pad: clamp(1rem, 3vw, 2rem);
+  --lame-col-shell-max: 100%;
+  /* ~14″ laptop viewport — 2 cards per row below this */
+  --lame-col-grid-3-min: 1440px;
+  --lame-col-grid-4-min: 1680px;
+  --padding-inline-start: 0 !important;
+  --padding-inline-end: 0 !important;
   background: var(--lame-col-cream) !important;
 }
 
@@ -33,16 +38,36 @@
   box-sizing: border-box;
 }
 
-/* —— Page header —— */
+/* Centered full-width — symmetric gutters, no theme offset cut-off */
+.lame-collection-premium-active .collection-wrapper {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: 0;
+  box-sizing: border-box;
+}
+
+.lame-collection-premium-active .main-collection-grid {
+  padding-inline: 0 !important;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* —— Page header (centered) —— */
 .lame-collection-page-header {
   padding-block: 1.25rem 1.75rem;
   margin-bottom: 0.25rem;
+  margin-inline: auto;
+  max-width: 100%;
+  text-align: center;
 }
 
 .lame-collection-page-header__breadcrumbs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem 0.5rem;
   margin-bottom: 0.85rem;
   font-size: 0.75rem;
@@ -74,7 +99,7 @@
 }
 
 .lame-collection-page-header__description {
-  margin: 0;
+  margin: 0 auto;
   max-width: 42rem;
   font-family: var(--font-body--family);
   font-size: 0.9375rem;
@@ -110,30 +135,21 @@
   max-width: 100%;
 }
 
+/* Hide default horizontal toolbar (21 items / Sort by / grid icons) */
+.lame-collection-premium-active .collection-wrapper > .facets.facets-controls-wrapper.facets--horizontal {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
 @media screen and (min-width: 750px) {
   .lame-collection-premium-active .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     display: grid !important;
     grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) !important;
-    grid-template-rows: auto minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
     column-gap: 2rem !important;
-    row-gap: 0.85rem !important;
-  }
-
-  /* Toolbar spans product column only */
-  .lame-collection-premium-active .collection-wrapper.lame-collection-layout--sidebar-left .facets.facets-controls-wrapper.facets--horizontal {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    display: flex !important;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end !important;
-    gap: 0.75rem 1.25rem !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 0 0.5rem !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    row-gap: 0 !important;
   }
 
   .lame-collection-premium-active .collection-wrapper.lame-collection-layout--sidebar-left .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
@@ -146,75 +162,15 @@
 
   .lame-collection-premium-active .lame-collection-products-column {
     grid-column: 2 !important;
-    grid-row: 2 !important;
+    grid-row: 1 !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
   .lame-collection-premium-active .collection-wrapper:has(.facets--vertical) .facets-block-wrapper--vertical:not(.hidden) ~ .lame-collection-products-column {
     grid-column: 2 !important;
+    grid-row: 1 !important;
   }
-}
-
-/* Item count — left of toolbar */
-.lame-collection-premium-active .products-count-wrapper {
-  margin-inline-end: auto !important;
-  order: 0;
-}
-
-.lame-collection-premium-active .products-count-wrapper [role='status'] {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgb(var(--lame-col-muted));
-}
-
-/* Sort in toolbar */
-.lame-collection-premium-active .facets-controls-wrapper .sorting-filter {
-  order: 1;
-}
-
-.lame-collection-premium-active .facets-controls-wrapper .sorting-filter__label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: rgb(var(--lame-col-muted));
-  margin-inline-end: 0.35rem;
-}
-
-.lame-collection-premium-active .facets-controls-wrapper .sorting-filter__select {
-  min-height: 2.5rem;
-  padding-inline: 0.85rem;
-  border-radius: 10px;
-  border: 1px solid rgb(var(--lame-col-ink) / 0.12);
-  background: var(--lame-col-white);
-  font-size: 0.8125rem;
-}
-
-.lame-collection-premium-active .column-options-wrapper {
-  order: 2;
-}
-
-.lame-collection-premium-active .column-options {
-  display: flex;
-  gap: 0.3rem;
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.lame-collection-premium-active .column-picker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.15rem;
-  height: 2.15rem;
-  border-radius: 8px;
-  border: 1px solid rgb(var(--lame-col-ink) / 0.1);
-  background: var(--lame-col-white);
-}
-
-.lame-collection-premium-active .column-options__option-input:checked + .column-picker {
-  border-color: rgb(var(--lame-col-gold-soft) / 0.55);
-  background: rgb(var(--lame-col-gold-soft) / 0.1);
 }
 
 /* —— Filter sidebar (left) —— */
@@ -419,11 +375,18 @@
   }
 }
 
-@media screen and (min-width: 990px) {
+/* 3 columns only on large screens (~14″+ at typical scaling) */
+@media screen and (min-width: 1440px) {
   .lame-collection-premium-active .product-grid,
   .lame-collection-premium-active.uniform-products-page .product-grid,
   .lame-collection-premium-active .lame-collection-brand-section__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 1680px) {
+  .lame-collection-premium-active .lame-collection-brand-section__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
 }
 
@@ -812,13 +775,13 @@
   gap: clamp(0.85rem, 2vw, 1.25rem) !important;
 }
 
-@media screen and (min-width: 990px) {
+@media screen and (min-width: 1440px) {
   .lame-collection-premium-active .lame-collection-brand-section__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
-@media screen and (min-width: 1200px) {
+@media screen and (min-width: 1680px) {
   .lame-collection-premium-active .lame-collection-brand-section__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
@@ -854,21 +817,6 @@
     padding: 0 !important;
   }
 
-  /* Theme hides .facets--horizontal on mobile — restore count / sort / grid toolbar */
-  .lame-collection-premium-active .collection-wrapper > .facets.facets-controls-wrapper.facets--horizontal {
-    display: flex !important;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 0.65rem;
-    width: 100%;
-    margin: 0 !important;
-    padding: 0.5rem 0 0.35rem !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
   .lame-collection-premium-active .facets-toggle {
     display: flex;
     align-items: center;
@@ -888,29 +836,6 @@
 
   .lame-collection-premium-active .facets-mobile-wrapper {
     flex: 0 0 auto;
-  }
-
-  .lame-collection-premium-active .products-count-wrapper {
-    margin-inline-end: 0 !important;
-    width: 100%;
-  }
-
-  .lame-collection-premium-active .facets-controls-wrapper .sorting-filter {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.35rem 0.5rem;
-  }
-
-  .lame-collection-premium-active .facets-controls-wrapper .sorting-filter__select {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .lame-collection-premium-active .column-options-wrapper {
-    align-self: flex-end;
   }
 
   .lame-collection-page-header {
@@ -1037,8 +962,8 @@
   }
 }
 
-/* Tablet: sidebar + 2-column grid */
-@media screen and (min-width: 750px) and (max-width: 989px) {
+/* Tablet & sub-14″ laptop: sidebar + 2-column grid */
+@media screen and (min-width: 750px) and (max-width: 1439px) {
   .lame-collection-premium-active .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) !important;
     column-gap: 1.25rem !important;
@@ -1048,5 +973,11 @@
   .lame-collection-premium-active.uniform-products-page .product-grid,
   .lame-collection-premium-active .lame-collection-brand-section__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .lame-collection-premium-active > .lame-collection-shell {
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
   }
 }
