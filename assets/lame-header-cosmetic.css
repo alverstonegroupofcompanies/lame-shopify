@@ -247,6 +247,14 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   pointer-events: auto;
 }
 
+#header-component.header--cosmetic-luxury .header__row--top {
+  overflow: visible;
+}
+
+#header-component.header--cosmetic-luxury .header__row--top .header__columns {
+  overflow: visible;
+}
+
 #header-component.header--cosmetic-luxury .header__icon--summary,
 #header-component.header--cosmetic-luxury .header-menu a,
 #header-component.header--cosmetic-luxury .header-actions__action,
@@ -265,20 +273,34 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   visibility: hidden !important;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container:not(.menu-open) .menu-drawer.menu-drawer--luxury {
-  z-index: -1;
+#header-component.header--cosmetic-luxury .menu-drawer-container:not(.menu-open):not([open]) .menu-drawer.menu-drawer--luxury {
   pointer-events: none !important;
   visibility: hidden;
 }
 
 #header-component.header--cosmetic-luxury .header__row--top {
+  position: relative;
   background: linear-gradient(180deg, rgb(255 253 249 / 0.99) 0%, rgb(250 244 234 / 0.98) 100%);
   border-bottom: 1px solid rgb(var(--brand-gold) / 0.18);
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.9) inset,
     0 8px 28px rgb(28 22 18 / 0.06);
+}
+
+/* Blur on pseudo so position:fixed drawer is not trapped in the header row */
+#header-component.header--cosmetic-luxury .header__row--top::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   backdrop-filter: blur(14px) saturate(1.1);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
+#header-component.header--cosmetic-luxury .header__row--top > .header__columns {
+  position: relative;
+  z-index: 1;
 }
 
 #header-component.header--cosmetic-luxury .header__columns {
@@ -383,20 +405,23 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
     box-shadow 0.22s ease;
 }
 
-/* Drawer column + toggle always above closed drawer panel */
+/* Drawer column + toggle */
 #header-component.header--cosmetic-luxury .header__drawer {
   position: relative;
-  z-index: calc(var(--lame-mobile-menu-z, 100000) + 2);
+  z-index: 5;
+  min-height: unset;
+  align-items: center;
+  overflow: visible;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container {
   position: relative;
-  z-index: calc(var(--lame-mobile-menu-z, 100000) + 2);
+  z-index: 5;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu {
   position: relative;
-  z-index: calc(var(--lame-mobile-menu-z, 100000) + 3);
+  z-index: 6;
   padding: 0;
   width: 100%;
   height: 100%;
@@ -440,12 +465,6 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   width: 1.125rem;
   height: 1.125rem;
   stroke: currentColor;
-}
-
-#header-component.header--cosmetic-luxury .header__drawer {
-  min-height: unset;
-  align-items: center;
-  overflow: visible;
 }
 
 #header-component.header--cosmetic-luxury .header-actions__action:not(.account-button) .svg-wrapper {
@@ -904,7 +923,11 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   overflow: hidden;
 }
 
-body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open) #header-group {
+/* display:contents on #header-group (sticky) ignores z-index — restore stacking when menu is open */
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open) #header-group,
+body:has(#header-component.header--cosmetic-luxury .menu-drawer-container[open]) #header-group {
+  display: block;
+  position: relative;
   z-index: var(--lame-mobile-menu-z, 100000);
 }
 
@@ -925,13 +948,15 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   visibility: hidden;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer.menu-drawer--luxury {
+#header-component.header--cosmetic-luxury .menu-drawer-container:is(.menu-open, [open]) .menu-drawer.menu-drawer--luxury {
   position: fixed;
   inset: 0;
   z-index: var(--lame-mobile-menu-z, 100000);
   pointer-events: auto;
   visibility: visible;
+  opacity: 1;
   transform: translateX(0);
+  display: flex;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer__header,

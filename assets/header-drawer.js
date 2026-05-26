@@ -81,19 +81,17 @@ class HeaderDrawer extends Component {
     summary.setAttribute('aria-expanded', 'true');
     summary.setAttribute('aria-hidden', 'true');
     details.setAttribute('open', '');
+    details.classList.add('menu-open');
+
+    if (target) {
+      this.refs.menuDrawer.classList.add('menu-drawer--has-submenu-opened');
+    }
 
     this.preventInitialAccordionAnimations(details);
-    requestAnimationFrame(() => {
-      details.classList.add('menu-open');
 
-      if (target) {
-        this.refs.menuDrawer.classList.add('menu-drawer--has-submenu-opened');
-      }
-
-      // Wait for the drawer animation to complete before trapping focus
-      const drawer = details.querySelector('.menu-drawer, .menu-drawer__submenu');
-      onAnimationEnd(drawer || details, () => trapFocus(details), { subtree: false });
-    });
+    // Wait for the drawer animation to complete before trapping focus
+    const drawer = details.querySelector('.menu-drawer, .menu-drawer__submenu');
+    onAnimationEnd(drawer || details, () => trapFocus(details), { subtree: false });
   }
 
   /**
