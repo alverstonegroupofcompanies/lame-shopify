@@ -20,7 +20,8 @@
   --lame-col-shadow-card: 0 2px 10px rgb(0 0 0 / 0.04);
   --lame-col-shadow-panel: 0 2px 10px rgb(0 0 0 / 0.04);
   --lame-col-page-pad: clamp(1rem, 2.5vw, 2.5rem);
-  --lame-col-shell-max: 100%;
+  --lame-col-layout-max: 1520px;
+  --lame-col-shell-max: min(100%, var(--lame-col-layout-max));
   --lame-col-card-min: 220px;
   /* ~14″ laptop viewport — 2 cards per row below this */
   --lame-col-grid-3-min: 1440px;
@@ -69,8 +70,7 @@
 }
 
 .lame-collection-premium-active .lame-collection-products-column,
-.lame-collection-premium-active .lame-collection-grouped-products,
-.lame-collection-premium-active .lame-collection-brand-nav-wrap {
+.lame-collection-premium-active .lame-collection-grouped-products {
   text-align: left;
 }
 
@@ -649,16 +649,19 @@
   border-radius: 999px;
 }
 
-/* —— Shop by brand pills (full width above grid + sidebar) —— */
+/* —— Shop by brand pills —— */
 .lame-collection-brand-nav-wrap {
-  grid-column: 1 / -1;
   width: 100%;
   margin-bottom: 0.35rem;
 }
 
+.lame-collection-premium-active .lame-collection-brand-nav-wrap {
+  text-align: center;
+}
+
 .lame-collection-brand-nav {
   padding-block: 0.5rem 0.75rem;
-  text-align: left;
+  text-align: center;
 }
 
 .lame-collection-brand-nav__label {
@@ -673,7 +676,7 @@
 .lame-collection-brand-nav__list {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.45rem;
   margin: 0;
   padding: 0;
@@ -734,7 +737,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.75rem 1.25rem;
   margin-bottom: 1.15rem;
   padding-bottom: 0.85rem;
@@ -745,6 +748,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  justify-content: center;
   gap: 0.35rem 0.85rem;
   min-width: 0;
 }
@@ -790,6 +794,13 @@
 
 .lame-collection-premium-active .lame-collection-brand-section__grid {
   gap: clamp(0.85rem, 2vw, 1.25rem) !important;
+  justify-content: center;
+}
+
+/* Center product rows when fewer cards than columns */
+.lame-collection-premium-active .product-grid,
+.lame-collection-premium-active.uniform-products-page .product-grid {
+  justify-content: center;
 }
 
 
