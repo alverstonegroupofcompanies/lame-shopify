@@ -261,8 +261,8 @@
   visibility: hidden !important;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container:not([open]):not(.menu-open) .menu-drawer {
-  pointer-events: none;
+#header-component.header--cosmetic-luxury .menu-drawer-container:not(.menu-open) .menu-drawer.menu-drawer--luxury {
+  pointer-events: none !important;
   visibility: hidden;
 }
 
@@ -381,80 +381,36 @@
 /* Drawer summary ships with large padding — reset so the hamburger stays visible */
 #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu {
   position: relative;
+  z-index: calc(var(--layer-temporary, 20) + 1);
   padding: 0;
   width: 100%;
   height: 100%;
 }
 
-/* Mobile menu toggle: hamburger only when closed, animated cross when open */
-@media screen and (max-width: 749px) {
-#header-component.header--cosmetic-luxury .header__icon--summary.header__icon--menu {
-  overflow: hidden;
-}
-
+/* Menu toggle: one icon at a time (hamburger closed, X when open) */
 #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 1.125rem;
   height: 1.125rem;
   color: rgb(var(--brand-gold-strong));
-  transition:
-    opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--open {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-  visibility: visible;
-  pointer-events: auto;
+#header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open) .header__icon--menu .header-drawer-icon--open {
+  display: flex;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--close {
-  display: flex !important;
-  opacity: 0;
-  transform: rotate(-90deg) scale(0.55);
-  visibility: hidden;
-  pointer-events: none;
+#header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open) .header__icon--menu .header-drawer-icon--close {
+  display: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--open,
-#header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--open {
-  display: flex !important;
-  opacity: 0;
-  transform: rotate(90deg) scale(0.55);
-  visibility: hidden;
-  pointer-events: none;
+#header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--open {
+  display: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--close,
-#header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--close {
-  display: flex !important;
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
-  visibility: visible;
-  pointer-events: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon {
-    transition: opacity 0.15s ease;
-    transform: none;
-  }
-
-  #header-component.header--cosmetic-luxury .menu-drawer-container details:not(.menu-open):not([open]) .header__icon--menu .header-drawer-icon--close {
-    transform: none;
-  }
-
-  #header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--open,
-  #header-component.header--cosmetic-luxury .menu-drawer-container details[open] .header__icon--menu .header-drawer-icon--open {
-    transform: none;
-  }
-}
+#header-component.header--cosmetic-luxury .menu-drawer-container details.menu-open .header__icon--menu .header-drawer-icon--close {
+  display: flex;
 }
 
 #header-component.header--cosmetic-luxury .header__icon--menu .svg-wrapper {
@@ -955,11 +911,12 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   visibility: hidden;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container[open] .menu-drawer.menu-drawer--luxury,
 #header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer.menu-drawer--luxury {
   position: fixed;
   inset: 0;
   z-index: var(--layer-temporary, 20);
+  pointer-events: auto;
+  visibility: visible;
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {

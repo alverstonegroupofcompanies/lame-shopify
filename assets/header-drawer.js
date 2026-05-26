@@ -40,7 +40,9 @@ class HeaderDrawer extends Component {
    * @returns {boolean} Whether the main menu drawer is open
    */
   get isOpen() {
-    return this.refs.details.hasAttribute('open');
+    return (
+      this.refs.details.classList.contains('menu-open') || this.refs.details.hasAttribute('open')
+    );
   }
 
   /**
@@ -57,8 +59,12 @@ class HeaderDrawer extends Component {
   /**
    * Toggle the main menu drawer
    */
-  toggle() {
-    return this.isOpen ? this.close() : this.open();
+  /**
+   * @param {Event} [event]
+   */
+  toggle(event) {
+    event?.preventDefault();
+    return this.isOpen ? this.close() : this.open(undefined, event);
   }
 
   /**
@@ -73,6 +79,7 @@ class HeaderDrawer extends Component {
     if (!summary) return;
 
     summary.setAttribute('aria-expanded', 'true');
+    details.setAttribute('open', '');
 
     this.preventInitialAccordionAnimations(details);
     requestAnimationFrame(() => {
