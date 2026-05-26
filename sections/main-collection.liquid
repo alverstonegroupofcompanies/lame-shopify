@@ -78,16 +78,37 @@
       %}
 
       {% paginate collection.products by products_per_page %}
-        <div class="lame-collection-products-column" data-lame-products-scroll>
-          <div class="lame-collection-brand-nav-wrap">
-            {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
-          </div>
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
           if lame_cosmetic_collection and section.settings.group_products_by_brand_our_products == false
             assign group_by_brand = false
           endif
+
+          assign lame_active_brand_slug = blank
+          for filter in collection.filters
+            if filter.param_name == 'filter.p.vendor'
+              for value in filter.active_values
+                assign raw_vendor = value.label | strip
+                assign raw_down = raw_vendor | downcase
+                if raw_down contains 'lamstone'
+                  assign lame_active_brand_slug = 'lamstone-healthcare'
+                else
+                  assign lame_active_brand_slug = raw_vendor | handleize
+                endif
+                break
+              endfor
+              break
+            endif
+          endfor
         %}
+        <div
+          class="lame-collection-products-column{% if lame_active_brand_slug != blank %} lame-collection-products-column--brand-selected{% endif %}"
+          data-lame-products-scroll
+          {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
+        >
+          <div class="lame-collection-brand-nav-wrap">
+            {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
+          </div>
 
         {% if group_by_brand %}
           {% liquid
@@ -145,24 +166,32 @@
                 endfor
               %}
               {% if brand_product_count > 0 %}
+                {% liquid
+                  assign show_brand_section_header = false
+                  if lame_active_brand_slug != blank and brand_slug == lame_active_brand_slug
+                    assign show_brand_section_header = true
+                  endif
+                %}
                 <section
-                  class="lame-collection-brand-section"
+                  class="lame-collection-brand-section{% if show_brand_section_header %} lame-collection-brand-section--show-header{% endif %}"
                   id="brand-{{ brand_slug }}"
-                  aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"
+                  {% if show_brand_section_header %}aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"{% else %}aria-label="{{ brand_label }}"{% endif %}
                 >
-                  <header class="lame-collection-brand-section__header">
-                    <div class="lame-collection-brand-section__heading">
-                      <h2
-                        class="lame-collection-brand-section__title"
-                        id="brand-heading-{{ section.id }}-{{ brand_slug }}"
-                      >
-                        {{ brand_label }}
-                      </h2>
-                      <p class="lame-collection-brand-section__count">
-                        {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
-                      </p>
-                    </div>
-                  </header>
+                  {% if show_brand_section_header %}
+                    <header class="lame-collection-brand-section__header">
+                      <div class="lame-collection-brand-section__heading">
+                        <h2
+                          class="lame-collection-brand-section__title"
+                          id="brand-heading-{{ section.id }}-{{ brand_slug }}"
+                        >
+                          {{ brand_label }}
+                        </h2>
+                        <p class="lame-collection-brand-section__count">
+                          {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
+                        </p>
+                      </div>
+                    </header>
+                  {% endif %}
                   <ul
                     class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
                     data-testid="product-grid-brand-{{ brand_slug }}"
