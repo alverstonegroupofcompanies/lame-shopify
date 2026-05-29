@@ -1,0 +1,40 @@
+{%- doc -%}
+  Collection toolbar: result count, sort, grid density (Our Products template).
+
+  @param {object} collection - Collection
+  @param {object} paginate - Paginate object
+  @param {object} section - Section
+  @param {boolean} [enable_sorting]
+  @param {boolean} [enable_grid_density]
+{%- enddoc -%}
+
+{%- liquid
+  assign range_start = paginate.current_offset | plus: 1
+  assign range_end = paginate.current_offset | plus: paginate.page_size
+  if range_end > paginate.items
+    assign range_end = paginate.items
+  endif
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+-%}
+
+<div class="lame-our-products-toolbar">
+  <p class="lame-our-products-toolbar__count" role="status">
+    {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
+  </p>
+  <div class="lame-our-products-toolbar__actions">
+    {% if enable_sorting %}
+      {% render 'sorting',
+        results: collection,
+        sort_by: sort_by,
+        filter_style: 'horizontal',
+        suffix: 'our-products',
+        sort_position: 'desktop',
+        should_use_select_on_mobile: false,
+        section_id: section.id
+      %}
+    {% endif %}
+    {% if enable_grid_density %}
+      {% render 'grid-density-controls', viewport: 'desktop' %}
+    {% endif %}
+  </div>
+</div>

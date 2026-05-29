@@ -1,0 +1,40 @@
+{%- doc -%}
+  Wishlist toggle for Our Products collection cards (beside add to cart).
+
+  @param {object} product - Product object
+{%- enddoc -%}
+
+{%- liquid
+  assign lame_wl_image = ''
+  assign lame_wl_price = ''
+  if product.featured_media
+    assign lame_wl_image = product.featured_media.preview_image | image_url: width: 480
+  endif
+  assign lame_wl_price = product.price_min | money
+-%}
+
+<button
+  type="button"
+  class="lame-wishlist-toggle lame-op-wishlist-btn"
+  aria-label="{{ 'lame_wishlist.toggle' | t }}"
+  aria-pressed="false"
+  data-lame-wishlist-toggle
+  data-product-id="{{ product.id }}"
+  data-product-handle="{{ product.handle }}"
+  data-product-url="{{ product.url }}"
+  data-product-title="{{ product.title | escape }}"
+  data-product-image="{{ lame_wl_image }}"
+  data-product-price="{{ lame_wl_price | escape }}"
+>
+  <span class="lame-wishlist-toggle__icon" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" focusable="false">
+      <path
+        class="lame-wishlist-toggle__outline"
+        d="M12 21s-7.2-4.35-9.6-8.4C.63 9.63 1.62 6 5.02 6c2.09 0 3.37 1.27 4.03 2.37.66-1.1 1.94-2.37 4.03-2.37 3.4 0 4.39 3.63 1.62 6.6C14.3 16.65 12 21 12 21Z"
+        stroke="currentColor"
+        stroke-width="1.35"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </span>
+</button>

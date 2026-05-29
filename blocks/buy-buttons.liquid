@@ -225,6 +225,14 @@
             add_to_cart_text: add_to_cart_text
           %}
 
+          {%- if template.suffix == 'our-products'
+            and settings.lame_enable_wishlist
+            and section.settings.show_wishlist
+            and product != blank
+          -%}
+            {% render 'lame-our-products-wishlist-btn', product: product %}
+          {%- endif -%}
+
           {% content_for 'block',
             type: 'accelerated-checkout',
             id: 'accelerated-checkout',

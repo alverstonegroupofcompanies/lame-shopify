@@ -12,7 +12,7 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
-  class="lame-our-products-intro lame-our-products-intro--{{ section.settings.heading_alignment }} spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+  class="lame-our-products-intro lame-our-products-intro--{{ section.settings.heading_alignment | default: 'left' }} spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
   style="{% render 'spacing-style', settings: section.settings %}"
   {{ section.shopify_attributes }}
 >
@@ -33,14 +33,49 @@
 
 {% stylesheet %}
   .lame-our-products-intro {
-    --lame-section-heading-color: rgb(var(--color-foreground-heading-rgb));
-    --lame-section-heading-ornament: rgb(var(--brand-gold-strong));
+    --lame-section-heading-color: #2a3a30;
+    --lame-section-heading-accent: #2a3a30;
+    --lame-section-heading-ornament: rgb(42 58 48 / 0.35);
   }
 
   .lame-our-products-intro__inner {
-    padding-inline: var(--page-margin);
-    max-width: 1480px;
+    padding-inline: clamp(1rem, 3vw, 2rem);
+    max-width: 1520px;
     margin-inline: auto;
+  }
+
+  .lame-our-products-intro--left .lame-our-products-intro__inner,
+  .lame-our-products-intro--left .lame-section-heading {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .template-collection-our-products .lame-our-products-intro {
+    padding-block-end: 0.35rem !important;
+  }
+
+  .template-collection-our-products .lame-our-products-intro .lame-section-heading__divider {
+    display: none;
+  }
+
+  .template-collection-our-products .lame-our-products-intro__eyebrow {
+    display: none;
+  }
+
+  .template-collection-our-products .lame-our-products-intro .lame-section-heading__title {
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+    font-weight: 600;
+    color: #2a3a30;
+    letter-spacing: 0.01em;
+  }
+
+  .template-collection-our-products .lame-our-products-intro .lame-section-heading__subtitle {
+    margin-top: 0.35rem;
+    max-width: 36rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #6b635c;
   }
 
   .lame-our-products-intro__eyebrow {
@@ -97,7 +132,7 @@
         { "value": "center", "label": "Center" },
         { "value": "right", "label": "Right" }
       ],
-      "default": "center"
+      "default": "left"
     },
     {
       "type": "select",

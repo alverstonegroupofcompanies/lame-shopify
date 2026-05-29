@@ -80,8 +80,12 @@
       {% paginate collection.products by products_per_page %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
-          if lame_cosmetic_collection and section.settings.group_products_by_brand_our_products == false
-            assign group_by_brand = false
+          if lame_cosmetic_collection
+            if section.settings.group_products_by_brand_our_products
+              assign group_by_brand = true
+            else
+              assign group_by_brand = false
+            endif
           endif
 
           assign lame_active_brand_slug = blank
@@ -109,6 +113,25 @@
           <div class="lame-collection-brand-nav-wrap">
             {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
           </div>
+
+          {% if lame_cosmetic_collection %}
+            {% liquid
+              assign lame_filters_block = section.blocks['filters']
+              assign lame_enable_sorting = false
+              assign lame_enable_grid_density = false
+              if lame_filters_block != blank
+                assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
+                assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
+              endif
+            %}
+            {% render 'lame-our-products-toolbar',
+              collection: collection,
+              paginate: paginate,
+              section: section,
+              enable_sorting: lame_enable_sorting,
+              enable_grid_density: lame_enable_grid_density
+            %}
+          {% endif %}
 
         {% if group_by_brand %}
           {% liquid
@@ -233,19 +256,34 @@
           {% endcapture %}
         {% else %}
           {% capture children %}
+            {% assign flat_grid_index = 0 %}
             {% for product in collection.products %}
-              <li
-                id="{{ section.id }}-{{ product.id }}"
-                class="{{ lame_product_grid_item_class }} product-grid__item--{{ forloop.index0 }}"
-                data-page="{{ paginate.current_page }}"
-                data-product-id="{{ product.id }}"
-                data-brand="{{ product.vendor | escape }}"
-                ref="cards[]"
-              >
-                {% # theme-check-disable %}
-                {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
-                {% # theme-check-enable %}
-              </li>
+              {% liquid
+                assign raw_vendor = product.vendor | strip
+                assign raw_down = raw_vendor | downcase
+                if raw_vendor == blank
+                  assign product_brand_slug = 'other'
+                elsif raw_down contains 'lamstone'
+                  assign product_brand_slug = 'lamstone-healthcare'
+                else
+                  assign product_brand_slug = raw_vendor | handleize
+                endif
+              %}
+              {% if lame_active_brand_slug == blank or product_brand_slug == lame_active_brand_slug %}
+                <li
+                  id="{{ section.id }}-{{ product.id }}"
+                  class="{{ lame_product_grid_item_class }} product-grid__item--{{ flat_grid_index }}"
+                  data-page="{{ paginate.current_page }}"
+                  data-product-id="{{ product.id }}"
+                  data-brand="{{ product.vendor | escape }}"
+                  ref="cards[]"
+                >
+                  {% # theme-check-disable %}
+                  {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+                  {% # theme-check-enable %}
+                </li>
+                {% assign flat_grid_index = flat_grid_index | plus: 1 %}
+              {% endif %}
             {% endfor %}
           {% endcapture %}
         {% endif %}

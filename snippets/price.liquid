@@ -19,6 +19,11 @@
     assign show_compare_price = true
   endif
 
+  assign lame_discount_percent = 0
+  if show_compare_price and compare_at_price > 0
+    assign lame_discount_percent = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+  endif
+
   if product_resource == blank
     assign price = 1999
   endif
@@ -114,6 +119,9 @@
           <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
           <span class="price-item--regular compare-at-price">{{- compare_at_price -}}</span>
         </span>
+        {% if template.suffix == 'our-products' and lame_discount_percent > 0 %}
+          <span class="lame-op-discount-badge">{{ lame_discount_percent }}% OFF</span>
+        {% endif %}
       {% else %}
         <span class="price-item__group">
           <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
