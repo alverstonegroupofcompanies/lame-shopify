@@ -21,9 +21,16 @@
   }
 {% endjavascript %}
 
-{% include 'lame-our-products-active', section: section %}
-
 {% liquid
+  assign lame_our_products_active = false
+  if template.name == 'collection' and collection != blank
+    if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+      assign lame_our_products_active = true
+    elsif section.settings.use_our_products_layout
+      assign lame_our_products_active = true
+    endif
+  endif
+
   assign lame_cosmetic_collection = lame_our_products_active
 
   if lame_cosmetic_collection
