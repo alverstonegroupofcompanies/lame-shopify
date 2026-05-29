@@ -1,0 +1,40 @@
+{%- doc -%}
+  Whether the current collection page should use the Our Products healthcare layout.
+
+  Active when:
+  - Theme template suffix is `our-products`, or
+  - Collection handle is listed in theme settings, or
+  - Main collection section has "Use Our Products layout" enabled
+
+  @param {object} [section] - main-collection section (optional, for section setting)
+
+  @example
+  {% render 'lame-our-products-active', section: section %}
+  {% if lame_our_products_active %} ... {% endif %}
+{%- enddoc -%}
+
+{%- liquid
+  assign lame_our_products_active = false
+
+  if template.name == 'collection' and collection != blank
+    if template.suffix == 'our-products'
+      assign lame_our_products_active = true
+    endif
+
+    if lame_our_products_active == false and section != blank and section.settings.use_our_products_layout
+      assign lame_our_products_active = true
+    endif
+
+    if lame_our_products_active == false
+      assign lame_handles_raw = settings.lame_our_products_collection_handles | default: 'all,our-products,products'
+      assign lame_handles = lame_handles_raw | split: ','
+      for lame_handle_part in lame_handles
+        assign lame_handle_trim = lame_handle_part | strip
+        if lame_handle_trim != blank and collection.handle == lame_handle_trim
+          assign lame_our_products_active = true
+          break
+        endif
+      endfor
+    endif
+  endif
+-%}

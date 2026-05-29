@@ -21,11 +21,10 @@
   }
 {% endjavascript %}
 
+{% render 'lame-our-products-active', section: section %}
+
 {% liquid
-  assign lame_cosmetic_collection = false
-  if template.suffix == 'our-products'
-    assign lame_cosmetic_collection = true
-  endif
+  assign lame_cosmetic_collection = lame_our_products_active
 
   if lame_cosmetic_collection
     assign lame_product_grid_item_class = 'product-grid__item lame-op-card__item'
@@ -110,6 +109,15 @@
           data-lame-products-scroll
           {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
         >
+          {% if lame_cosmetic_collection and template.suffix != 'our-products' and section.settings.our_products_heading != blank %}
+            <div class="lame-our-products-inline-header">
+              <h1 class="lame-our-products-inline-header__title">{{ section.settings.our_products_heading | escape }}</h1>
+              {% if section.settings.our_products_subtitle != blank %}
+                <p class="lame-our-products-inline-header__subtitle">{{ section.settings.our_products_subtitle | escape }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
+
           <div class="lame-collection-brand-nav-wrap">
             {% render 'lame-collection-brand-filter', collection: collection, products: collection.products %}
           </div>
@@ -456,6 +464,29 @@
       "step": 1,
       "unit": "px",
       "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Our Products layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_our_products_layout",
+      "label": "Use Our Products healthcare layout on this collection",
+      "default": false,
+      "info": "Also turns on automatically for the our-products theme template or handles listed in Theme settings → LAMÉ wishlist."
+    },
+    {
+      "type": "text",
+      "id": "our_products_heading",
+      "label": "Page heading (when not using Our products header section)",
+      "default": "Our Products"
+    },
+    {
+      "type": "textarea",
+      "id": "our_products_subtitle",
+      "label": "Page subtitle",
+      "default": "Trusted healthcare essentials for your everyday wellness."
     },
     {
       "type": "header",

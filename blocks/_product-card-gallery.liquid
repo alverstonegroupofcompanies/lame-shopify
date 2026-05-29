@@ -1,15 +1,17 @@
+{% render 'lame-our-products-active', section: section %}
+
 {% liquid
   assign product = closest.product
 
   assign card_show_quick_add = false
-  if template.suffix == 'our-products'
+  if lame_our_products_active
     assign card_show_quick_add = false
   elsif settings.quick_add or settings.mobile_quick_add
     assign card_show_quick_add = true
   endif
 
   assign lame_show_wishlist = false
-  if settings.lame_enable_wishlist and template.suffix == 'our-products' and section.settings.show_wishlist and product != blank
+  if settings.lame_enable_wishlist and lame_our_products_active and section.settings.show_wishlist and product != blank
     assign lame_show_wishlist = true
   endif
 
@@ -61,7 +63,7 @@
       {% render 'quick-add', product: product, section_id: section.id %}
     {% endif %}
 
-    {% if lame_show_wishlist and template.suffix != 'our-products' %}
+    {% if lame_show_wishlist and lame_our_products_active == false %}
       <div class="product-card-gallery__corner-tr">
         <button
           type="button"
