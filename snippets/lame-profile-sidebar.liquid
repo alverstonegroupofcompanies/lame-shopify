@@ -7,23 +7,47 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign profile_logo = settings.favicon
-  assign profile_logo_class = 'lame-acct-sidebar__logo lame-acct-sidebar__logo--favicon'
-  assign profile_logo_height = 48
+  assign profile_logo = section.settings.sidebar_logo
+  assign profile_logo_asset = false
+  assign profile_logo_class = 'lame-acct-sidebar__logo lame-acct-sidebar__logo--brand'
+  assign profile_logo_height = 56
+
   if profile_logo == blank
     assign profile_logo = settings.logo
-    assign profile_logo_class = 'lame-acct-sidebar__logo'
-    assign profile_logo_height = 40
-    if profile_logo == blank
-      assign profile_logo = settings.logo_inverse
-    endif
   endif
+  if profile_logo == blank
+    assign profile_logo = settings.logo_inverse
+  endif
+  if profile_logo == blank
+    assign profile_logo_asset = true
+  endif
+
+  unless profile_logo_asset
+    if profile_logo.aspect_ratio != blank and profile_logo.aspect_ratio > 0
+      assign profile_logo_height = 52 | times: profile_logo.aspect_ratio | round
+      if profile_logo_height > 72
+        assign profile_logo_height = 72
+      endif
+      if profile_logo_height < 44
+        assign profile_logo_height = 44
+      endif
+    endif
+  endunless
 -%}
 
 <aside class="lame-acct-sidebar" aria-label="{{ 'lame_customer.account_nav' | t }}">
   <div class="lame-acct-sidebar__brand">
     <a href="{{ routes.root_url }}" class="lame-acct-sidebar__logo-link">
-      {% if profile_logo != blank %}
+      {% if profile_logo_asset %}
+        <img
+          src="{{ 'lame-profile-logo.png' | asset_url }}"
+          alt="{{ shop.name | escape }}"
+          class="{{ profile_logo_class }}"
+          width="200"
+          height="52"
+          loading="eager"
+        >
+      {% elsif profile_logo != blank %}
         {% render 'image',
           image: profile_logo,
           height: profile_logo_height,
@@ -126,7 +150,11 @@
         {% endif %}
         {% assign promo_link = section.settings.promo_link | default: routes.all_products_collection_url %}
         <a href="{{ promo_link }}" class="lame-acct-sidebar__promo-btn">
-          {{ section.settings.promo_button_label | default: 'lame_customer.shop_now' | t }}
+          {% if section.settings.promo_button_label != blank %}
+            {{ section.settings.promo_button_label }}
+          {% else %}
+            {{ 'lame_customer.shop_now' | t }}
+          {% endif %}
         </a>
       </div>
     </div>
