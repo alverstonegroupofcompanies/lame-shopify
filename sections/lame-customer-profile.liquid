@@ -77,40 +77,38 @@
 
         {%- comment -%} Account card {%- endcomment -%}
         <section id="profile-details" class="lame-profile__panel lame-profile__card" aria-labelledby="ProfileAccountHeading">
-          <h2 id="ProfileAccountHeading" class="visually-hidden">{{ 'lame_customer.account_info' | t }}</h2>
-
-          <div class="lame-profile__card-view" data-profile-view="account">
-            <div class="lame-profile__info-row">
-              <div class="lame-profile__info-main">
-                <span class="lame-profile__info-label">{{ 'lame_customer.name' | t }}</span>
-                <span class="lame-profile__info-value">{{ customer.name }}</span>
-              </div>
-              <button
-                type="button"
-                class="lame-profile__icon-btn"
-                data-edit-toggle
-                aria-expanded="false"
-                aria-controls="AccountEditForm"
-              >
-                <span class="visually-hidden">{{ 'customer.addresses.edit' | t }}</span>
-                {% render 'icon-edit', class: 'lame-profile__icon' %}
-              </button>
-            </div>
-            <div class="lame-profile__info-row lame-profile__info-row--plain">
-              <div class="lame-profile__info-main">
-                <span class="lame-profile__info-label">{{ 'customer.login_page.email' | t }}</span>
-                <span class="lame-profile__info-value">{{ customer.email }}</span>
-              </div>
-            </div>
-            {% if customer.phone != blank %}
-              <div class="lame-profile__info-row lame-profile__info-row--plain">
-                <div class="lame-profile__info-main">
-                  <span class="lame-profile__info-label">{{ 'customer.addresses.phone' | t }}</span>
-                  <span class="lame-profile__info-value">{{ customer.phone }}</span>
-                </div>
-              </div>
-            {% endif %}
+          <div class="lame-profile__card-header">
+            <h2 id="ProfileAccountHeading" class="lame-profile__card-title">{{ 'lame_customer.account_info' | t }}</h2>
+            <button
+              type="button"
+              class="lame-profile__btn-ghost"
+              data-edit-toggle
+              aria-expanded="false"
+              aria-controls="AccountEditForm"
+            >
+              {{ 'customer.addresses.edit' | t }}
+            </button>
           </div>
+
+          <div class="lame-profile__card-body">
+            <div class="lame-profile__card-view" data-profile-view="account">
+              <div class="lame-profile__info-grid">
+                <div class="lame-profile__info-item">
+                  <span class="lame-profile__info-label">{{ 'lame_customer.name' | t }}</span>
+                  <span class="lame-profile__info-value">{{ customer.name }}</span>
+                </div>
+                <div class="lame-profile__info-item">
+                  <span class="lame-profile__info-label">{{ 'customer.login_page.email' | t }}</span>
+                  <span class="lame-profile__info-value">{{ customer.email }}</span>
+                </div>
+                {% if customer.phone != blank %}
+                  <div class="lame-profile__info-item">
+                    <span class="lame-profile__info-label">{{ 'customer.addresses.phone' | t }}</span>
+                    <span class="lame-profile__info-value">{{ customer.phone }}</span>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
 
           <div id="AccountEditForm" class="lame-profile__card-edit" data-profile-edit="account" hidden>
             {%- form 'customer', class: 'lame-profile__form' -%}
@@ -185,6 +183,7 @@
               </div>
             {%- endform -%}
           </div>
+          </div>
         </section>
 
         {%- comment -%} Addresses card {%- endcomment -%}
@@ -193,7 +192,7 @@
             <h2 id="ProfileAddressesHeading" class="lame-profile__card-title">{{ 'customer.addresses.title' | t }}</h2>
             <button
               type="button"
-              class="lame-profile__link-btn"
+              class="lame-profile__btn-ghost"
               data-toggle-address
               aria-expanded="false"
               aria-controls="AddressNewForm"
@@ -202,8 +201,8 @@
             </button>
           </div>
 
-          <p class="lame-profile__card-desc">{{ 'lame_customer.addresses_help' | t }}</p>
-
+          <div class="lame-profile__card-body">
+          <p class="lame-profile__card-desc lame-profile__card-desc--inset">{{ 'lame_customer.addresses_help' | t }}</p>
           <div id="AddressNewForm" class="lame-profile__card-edit lame-profile__card-edit--inset" hidden>
             <h3 class="lame-profile__card-subtitle">{{ 'customer.addresses.add_new' | t }}</h3>
             {%- form 'customer_address', customer.new_address, class: 'lame-profile__form' -%}
@@ -222,7 +221,7 @@
           {% if customer.addresses.size > 0 %}
             <ul class="lame-profile__address-list" role="list">
               {%- for address in customer.addresses -%}
-                <li class="lame-profile__address-block">
+                <li class="lame-profile__address-block lame-profile__address-tile">
                   <div class="lame-profile__address-block-header">
                     <div>
                       {% if address == customer.default_address %}
@@ -279,6 +278,7 @@
           {% else %}
             <p class="lame-profile__empty">{{ 'lame_customer.no_addresses' | t }}</p>
           {% endif %}
+          </div>
         </section>
 
         {%- comment -%} Bank details card {%- endcomment -%}
@@ -300,7 +300,7 @@
               <h2 id="ProfileBankHeading" class="lame-profile__card-title">{{ 'lame_customer.tab_bank' | t }}</h2>
               <button
                 type="button"
-                class="lame-profile__link-btn"
+                class="lame-profile__btn-ghost"
                 data-edit-toggle
                 aria-expanded="false"
                 aria-controls="BankEditForm"
@@ -313,6 +313,7 @@
               </button>
             </div>
 
+            <div class="lame-profile__card-body">
             <div class="lame-profile__card-view" data-profile-view="bank">
               {% if has_saved_bank %}
                 <dl class="lame-profile__bank-summary">
@@ -453,6 +454,7 @@
                   </button>
                 </div>
               {%- endform -%}
+            </div>
             </div>
           </section>
         {% endif %}
