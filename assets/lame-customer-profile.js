@@ -204,6 +204,68 @@ function syncAccountWishlistCount(root) {
   });
 }
 
+function syncAccountWishlistPreview(root) {
+  const STORAGE_KEY = 'lame:wishlist:v1';
+  const preview = root.querySelector('[data-account-wishlist-preview]');
+  if (!(preview instanceof HTMLElement)) return;
+
+  const empty = preview.querySelector('[data-account-wishlist-empty]');
+  const filled = preview.querySelector('[data-account-wishlist-filled]');
+  const list = preview.querySelector('[data-account-wishlist-list]');
+  if (!(list instanceof HTMLElement) || !(filled instanceof HTMLElement) || !(empty instanceof HTMLElement)) return;
+
+  /** @type {Array<{id:number|string,handle?:string,url?:string,title?:string,image?:string,price?:string}>} */
+  let items = [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      items = Array.isArray(parsed) ? parsed : [];
+    }
+  } catch (_e) {
+    items = [];
+  }
+
+  if (!items.length) {
+    list.innerHTML = '';
+    filled.hidden = true;
+    empty.hidden = false;
+    return;
+  }
+
+  empty.hidden = true;
+  filled.hidden = false;
+
+  const max = 4;
+  const slice = items.slice(0, max);
+  list.innerHTML = slice
+    .map((item) => {
+      const url = item.url || (item.handle ? `/products/${item.handle}` : '#');
+      const title = item.title || '';
+      const img = item.image || '';
+      const price = item.price || '';
+      const safe = (s) =>
+        String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+      return `
+        <li class="lame-profile__wishlist-item">
+          <a class="lame-profile__wishlist-thumb" href="${safe(url)}">
+            ${img ? `<img class="lame-profile__wishlist-img" src="${safe(img)}" alt="" loading="lazy" width="64" height="64">` : `<span class="lame-profile__wishlist-fallback" aria-hidden="true"></span>`}
+          </a>
+          <div class="lame-profile__wishlist-meta">
+            <a class="lame-profile__wishlist-title" href="${safe(url)}">${safe(title)}</a>
+            ${price ? `<div class="lame-profile__wishlist-price">${safe(price)}</div>` : ''}
+          </div>
+        </li>`;
+    })
+    .join('');
+}
+
 function setupAccountAnchorScroll(root) {
   root.querySelectorAll('.lame-profile__quick-card[href^="#"]').forEach((link) => {
     link.addEventListener('click', (event) => {
@@ -224,12 +286,16 @@ function initLameCustomerProfile() {
   document.querySelectorAll(selectors.root).forEach((root) => {
     new LameCustomerProfile(root);
     syncAccountWishlistCount(root);
+    syncAccountWishlistPreview(root);
     setupAccountAnchorScroll(root);
   });
 }
 
 document.addEventListener('lame:wishlistchange', () => {
-  document.querySelectorAll(selectors.root).forEach(syncAccountWishlistCount);
+  document.querySelectorAll(selectors.root).forEach((root) => {
+    syncAccountWishlistCount(root);
+    syncAccountWishlistPreview(root);
+  });
 });
 
 if (document.readyState === 'loading') {
