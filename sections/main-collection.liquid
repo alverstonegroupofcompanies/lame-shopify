@@ -24,9 +24,13 @@
 {% liquid
   assign lame_our_products_active = false
   if template.name == 'collection' and collection != blank
-    if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+    if template.suffix == 'our-products'
       assign lame_our_products_active = true
-    elsif section.settings.use_our_products_layout
+    endif
+    if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+      assign lame_our_products_active = true
+    endif
+    if section.settings.use_our_products_layout
       assign lame_our_products_active = true
     endif
   endif
@@ -50,7 +54,7 @@
 {% endcomment %}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-{%- if lame_cosmetic_collection -%}<!-- lame-our-products-layout-active handle:{{ collection.handle }} -->{%- endif -%}
+<!-- lame-debug tpl={{ template.name }} h={{ collection.handle }} op={{ lame_cosmetic_collection }} -->
 <results-list
   class="section section--full-width product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if collection.handle == 'all' %} all-products-page{% endif %}{% if lame_cosmetic_collection %} collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
