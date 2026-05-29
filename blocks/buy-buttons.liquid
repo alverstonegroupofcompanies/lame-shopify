@@ -225,13 +225,33 @@
             add_to_cart_text: add_to_cart_text
           %}
 
-          {%- capture lame_op_flag -%}{%- render 'lame-our-products-active', section: section -%}{%- endcapture -%}
-          {%- liquid
-            assign lame_our_products_active = false
-            if lame_op_flag | strip == '1'
-              assign lame_our_products_active = true
-            endif
-          -%}
+          {%- capture _lame_op_discard -%}
+            {%- liquid
+              assign lame_our_products_active = false
+              if template.name == 'collection' and collection != blank
+                if template.suffix == 'our-products'
+                  assign lame_our_products_active = true
+                endif
+                if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+                  assign lame_our_products_active = true
+                endif
+                if lame_our_products_active == false and section.settings.use_our_products_layout
+                  assign lame_our_products_active = true
+                endif
+                if lame_our_products_active == false
+                  assign lame_handles_raw = settings.lame_our_products_collection_handles | default: 'all,our-products,products'
+                  assign lame_handles = lame_handles_raw | split: ','
+                  for lame_handle_part in lame_handles
+                    assign lame_handle_trim = lame_handle_part | strip
+                    if lame_handle_trim != blank and collection.handle == lame_handle_trim
+                      assign lame_our_products_active = true
+                      break
+                    endif
+                  endfor
+                endif
+              endif
+            -%}
+          {%- endcapture -%}
           {%- if lame_our_products_active
             and settings.lame_enable_wishlist
             and section.settings.show_wishlist
