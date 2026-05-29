@@ -1,6 +1,4 @@
-﻿{% include 'lame-our-products-active', section: section %}
-
-{%- doc -%}
+﻿{%- doc -%}
   This snippet is used to render a product card.
   It is used in the product block, featured product block, and the product card block.
   The product object is null or when placeholders are rendered.
@@ -10,6 +8,7 @@
   @param {object} [block] - The block object
   @param {number} [product_card_gap] - The gap between the product card children (overrides block settings)
   @param {boolean} [lame_catalog_card] - Collection catalog layout (centered stack)
+  @param {boolean} [lame_our_products_active] - Our Products healthcare card layout
 {%- enddoc -%}
 
 {% assign block_settings = block.settings %}
@@ -57,13 +56,14 @@
   endif
 
   assign lame_op_card = false
-  if template.name == 'collection' and collection != blank
+  if lame_our_products_active
+    assign lame_op_card = true
+  elsif template.name == 'collection' and collection != blank
     if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
       assign lame_op_card = true
+    elsif section != blank and section.settings.use_our_products_layout
+      assign lame_op_card = true
     endif
-  endif
-  if lame_op_card == false and lame_our_products_active
-    assign lame_op_card = true
   endif
 
   assign lame_luxury_card = false

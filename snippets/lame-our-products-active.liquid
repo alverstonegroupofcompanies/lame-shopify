@@ -1,33 +1,33 @@
 {%- comment -%}
-  Sets lame_our_products_active. Use {% include %}, not render — render isolates scope.
+  Outputs 1 or 0 for Our Products collection layout (use with render + capture).
   @param {object} [section] - main-collection section
 {%- endcomment -%}
 {%- liquid
-  assign lame_our_products_active = false
+  assign lame_flag = '0'
 
   if template.name == 'collection' and collection != blank
     if template.suffix == 'our-products'
-      assign lame_our_products_active = true
+      assign lame_flag = '1'
     endif
 
     if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
-      assign lame_our_products_active = true
+      assign lame_flag = '1'
     endif
 
-    if lame_our_products_active == false and section != blank and section.settings.use_our_products_layout
-      assign lame_our_products_active = true
+    if lame_flag == '0' and section != blank and section.settings.use_our_products_layout
+      assign lame_flag = '1'
     endif
 
-    if lame_our_products_active == false
+    if lame_flag == '0'
       assign lame_handles_raw = settings.lame_our_products_collection_handles | default: 'all,our-products,products'
       assign lame_handles = lame_handles_raw | split: ','
       for lame_handle_part in lame_handles
         assign lame_handle_trim = lame_handle_part | strip
         if lame_handle_trim != blank and collection.handle == lame_handle_trim
-          assign lame_our_products_active = true
+          assign lame_flag = '1'
           break
         endif
       endfor
     endif
   endif
--%}
+-%}{{- lame_flag -}}

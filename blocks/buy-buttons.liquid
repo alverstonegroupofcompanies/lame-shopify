@@ -225,7 +225,13 @@
             add_to_cart_text: add_to_cart_text
           %}
 
-          {%- include 'lame-our-products-active', section: section -%}
+          {%- capture lame_op_flag -%}{%- render 'lame-our-products-active', section: section -%}{%- endcapture -%}
+          {%- liquid
+            assign lame_our_products_active = false
+            if lame_op_flag | strip == '1'
+              assign lame_our_products_active = true
+            endif
+          -%}
           {%- if lame_our_products_active
             and settings.lame_enable_wishlist
             and section.settings.show_wishlist

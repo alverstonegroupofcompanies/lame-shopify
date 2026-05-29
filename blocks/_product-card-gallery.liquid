@@ -1,6 +1,9 @@
-﻿{% include 'lame-our-products-active', section: section %}
-
+﻿{% capture lame_op_flag %}{% render 'lame-our-products-active', section: section %}{% endcapture %}
 {% liquid
+  assign lame_our_products_active = false
+  if lame_op_flag | strip == '1'
+    assign lame_our_products_active = true
+  endif
   assign product = closest.product
 
   assign card_show_quick_add = false

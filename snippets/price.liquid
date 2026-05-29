@@ -119,8 +119,15 @@
           <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
           <span class="price-item--regular compare-at-price">{{- compare_at_price -}}</span>
         </span>
-        {% include 'lame-our-products-active' %}
-        {% if lame_our_products_active and lame_discount_percent > 0 %}
+        {% liquid
+          assign lame_show_op_discount = false
+          if template.name == 'collection' and collection != blank
+            if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+              assign lame_show_op_discount = true
+            endif
+          endif
+        %}
+        {% if lame_show_op_discount and lame_discount_percent > 0 %}
           <span class="lame-op-discount-badge">{{ lame_discount_percent }}% OFF</span>
         {% endif %}
       {% else %}
