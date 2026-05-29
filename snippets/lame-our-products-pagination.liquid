@@ -22,18 +22,26 @@
           on:click="{{ on_click_handler }}?{{ prev_params }}"
         {% endif %}
       >
-        <span class="lame-collection-pagination__arrow" aria-hidden="true">←</span>
-        {{ 'lame_our_products.previous' | t }}
+        <span class="lame-collection-pagination__icon" aria-hidden="true">
+          {{- 'icon-chevron-left.svg' | inline_asset_content -}}
+        </span>
+        <span class="lame-collection-pagination__label">{{ 'lame_our_products.previous' | t }}</span>
       </a>
     {%- else -%}
       <span
         class="lame-collection-pagination__btn lame-collection-pagination__btn--prev lame-collection-pagination__btn--disabled"
         aria-disabled="true"
       >
-        <span class="lame-collection-pagination__arrow" aria-hidden="true">←</span>
-        {{ 'lame_our_products.previous' | t }}
+        <span class="lame-collection-pagination__icon" aria-hidden="true">
+          {{- 'icon-chevron-left.svg' | inline_asset_content -}}
+        </span>
+        <span class="lame-collection-pagination__label">{{ 'lame_our_products.previous' | t }}</span>
       </span>
     {%- endif -%}
+
+    <span class="lame-collection-pagination__status" aria-live="polite">
+      {{ 'lame_our_products.page_of' | t: current: paginate.current_page, pages: paginate.pages }}
+    </span>
 
     {%- if paginate.next -%}
       {%- assign next_params = paginate.next.url | split: '?' | last -%}
@@ -45,16 +53,20 @@
           on:click="{{ on_click_handler }}?{{ next_params }}"
         {% endif %}
       >
-        {{ 'lame_our_products.next' | t }}
-        <span class="lame-collection-pagination__arrow" aria-hidden="true">→</span>
+        <span class="lame-collection-pagination__label">{{ 'lame_our_products.next' | t }}</span>
+        <span class="lame-collection-pagination__icon" aria-hidden="true">
+          {{- 'icon-chevron-right.svg' | inline_asset_content -}}
+        </span>
       </a>
     {%- else -%}
       <span
         class="lame-collection-pagination__btn lame-collection-pagination__btn--next lame-collection-pagination__btn--disabled"
         aria-disabled="true"
       >
-        {{ 'lame_our_products.next' | t }}
-        <span class="lame-collection-pagination__arrow" aria-hidden="true">→</span>
+        <span class="lame-collection-pagination__label">{{ 'lame_our_products.next' | t }}</span>
+        <span class="lame-collection-pagination__icon" aria-hidden="true">
+          {{- 'icon-chevron-right.svg' | inline_asset_content -}}
+        </span>
       </span>
     {%- endif -%}
   </div>
