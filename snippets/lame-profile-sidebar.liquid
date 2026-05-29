@@ -7,9 +7,16 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign profile_logo = settings.logo
+  assign profile_logo = settings.favicon
+  assign profile_logo_class = 'lame-acct-sidebar__logo lame-acct-sidebar__logo--favicon'
+  assign profile_logo_height = 48
   if profile_logo == blank
-    assign profile_logo = settings.logo_inverse
+    assign profile_logo = settings.logo
+    assign profile_logo_class = 'lame-acct-sidebar__logo'
+    assign profile_logo_height = 40
+    if profile_logo == blank
+      assign profile_logo = settings.logo_inverse
+    endif
   endif
 -%}
 
@@ -19,8 +26,8 @@
       {% if profile_logo != blank %}
         {% render 'image',
           image: profile_logo,
-          height: 40,
-          class: 'lame-acct-sidebar__logo',
+          height: profile_logo_height,
+          class: profile_logo_class,
           alt_text_fallback: shop.name,
           text_fallback: shop.name
         %}
