@@ -51,7 +51,28 @@
         <div class="lame-profile__hero-main">
           <span class="lame-profile__avatar" aria-hidden="true">{{ avatar_letter }}</span>
           <div class="lame-profile__hero-text">
-            <p class="lame-profile__eyebrow">{{ shop.name }}</p>
+            {%- liquid
+              assign profile_logo = settings.logo_inverse
+              if profile_logo == blank
+                assign profile_logo = settings.logo
+              endif
+              assign profile_logo_height = 32
+            -%}
+            <div class="lame-profile__hero-brand">
+              {% if profile_logo != blank %}
+                <a href="{{ routes.root_url }}" class="lame-profile__hero-logo-link">
+                  {% render 'image',
+                    image: profile_logo,
+                    height: profile_logo_height,
+                    class: 'lame-profile__hero-logo',
+                    alt_text_fallback: shop.name,
+                    text_fallback: shop.name
+                  %}
+                </a>
+              {% else %}
+                <p class="lame-profile__eyebrow">{{ shop.name }}</p>
+              {% endif %}
+            </div>
             <h1 class="lame-profile__page-title">
               {% if section.settings.heading != blank %}
                 {{ section.settings.heading }}
