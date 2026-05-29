@@ -1,4 +1,4 @@
-{% include 'lame-our-products-active', section: section %}
+﻿{% include 'lame-our-products-active', section: section %}
 
 {%- doc -%}
   This snippet is used to render a product card.
@@ -57,7 +57,12 @@
   endif
 
   assign lame_op_card = false
-  if lame_our_products_active
+  if template.name == 'collection' and collection != blank
+    if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+      assign lame_op_card = true
+    endif
+  endif
+  if lame_op_card == false and lame_our_products_active
     assign lame_op_card = true
   endif
 

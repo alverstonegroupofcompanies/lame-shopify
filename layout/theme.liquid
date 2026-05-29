@@ -33,17 +33,23 @@
       rel="stylesheet"
     >
     {%- render 'stylesheets' -%}
-    {%- if template.name == 'collection' and collection != blank -%}
-      {%- liquid
-        assign lame_load_op_css = false
-        if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+    {%- liquid
+      assign lame_load_op_css = false
+      if template.name == 'collection'
+        if template.suffix == 'our-products'
+          assign lame_load_op_css = true
+        elsif collection != blank
+          if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+            assign lame_load_op_css = true
+          endif
+        elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products'
           assign lame_load_op_css = true
         endif
-      -%}
-      {%- if lame_load_op_css -%}
-        {{ 'lame-our-products-collection.css' | asset_url | stylesheet_tag }}
-        {{ 'lame-our-products-cards.css' | asset_url | stylesheet_tag }}
-      {%- endif -%}
+      endif
+    -%}
+    {%- if lame_load_op_css -%}
+      {{ 'lame-our-products-collection.css' | asset_url | stylesheet_tag }}
+      {{ 'lame-our-products-cards.css' | asset_url | stylesheet_tag }}
     {%- endif -%}
     {%- if template.name == 'index' -%}
       {{ 'lame-home-page.css' | asset_url | stylesheet_tag }}
@@ -63,7 +69,20 @@
     {% # theme-check-enable RemoteAsset %}
   </head>
 
-  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if template.name == 'index' %} template-index{% endif %}{% if template.name == 'collection' %} template-collection{% endif %}{% if template.name == 'collection' and collection != blank %}{% if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products' %} template-collection-our-products{% endif %}{% endif %}">
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if template.name == 'index' %} template-index{% endif %}{% if template.name == 'collection' %} template-collection{% endif %}{% liquid
+    assign lame_body_our_products = false
+    if template.name == 'collection'
+      if template.suffix == 'our-products'
+        assign lame_body_our_products = true
+      elsif collection != blank
+        if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+          assign lame_body_our_products = true
+        endif
+      elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products'
+        assign lame_body_our_products = true
+      endif
+    endif
+  %}{% if lame_body_our_products %} template-collection-our-products{% endif %}">
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
     <div id="header-group">
       {% sections 'header-group' %}
