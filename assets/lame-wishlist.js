@@ -150,13 +150,17 @@
   /** @type {HTMLElement | null} */
   let fabEl = null;
 
+  function isHomepage() {
+    return document.body.classList.contains('template-index');
+  }
+
   function updateFabCount() {
     const n = readItems().length;
-    const fab = fabEl || document.querySelector('[data-lame-wishlist-open]');
+    const fab = fabEl || document.querySelector('[data-lame-wishlist-open].lame-wishlist-fab');
     if (!(fab instanceof HTMLElement)) return;
 
     fabEl = fab;
-    fab.hidden = n === 0;
+    fab.hidden = n === 0 || isHomepage();
     fab.setAttribute('data-count', String(n));
 
     const badge = fab.querySelector('[data-wishlist-count]');
