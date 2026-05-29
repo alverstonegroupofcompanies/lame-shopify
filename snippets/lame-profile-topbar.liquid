@@ -1,0 +1,49 @@
+{%- doc -%}
+  Account page top bar: store logo, Orders / Profile links, avatar (matches native account chrome).
+
+  @param {string} profile_url - Base profile page URL
+  @param {string} avatar_letter - Initial for avatar circle
+{%- enddoc -%}
+
+{%- liquid
+  assign profile_logo = settings.logo
+  if profile_logo == blank
+    assign profile_logo = settings.logo_inverse
+  endif
+  assign profile_logo_height = 36
+-%}
+
+<header class="lame-profile__topbar" aria-label="{{ 'lame_customer.account_topbar' | t | default: 'Account' }}">
+  <div class="lame-profile__topbar-start">
+    {% if profile_logo != blank %}
+      <a href="{{ routes.root_url }}" class="lame-profile__topbar-logo-link">
+        {% render 'image',
+          image: profile_logo,
+          height: profile_logo_height,
+          class: 'lame-profile__topbar-logo',
+          alt_text_fallback: shop.name,
+          text_fallback: shop.name
+        %}
+      </a>
+    {% else %}
+      <a href="{{ routes.root_url }}" class="lame-profile__topbar-name">{{ shop.name }}</a>
+    {% endif %}
+  </div>
+
+  {% if customer %}
+    <nav class="lame-profile__topbar-nav" aria-label="{{ 'lame_customer.dashboard_nav' | t }}">
+      <a href="{{ profile_url }}#orders" class="lame-profile__topbar-link">{{ 'customer.orders.title' | t }}</a>
+      <a
+        href="{{ profile_url }}#profile-details"
+        class="lame-profile__topbar-link lame-profile__topbar-link--current"
+        {% if page.handle == 'my-profile' or request.page_type == 'customers/account' %}
+          aria-current="page"
+        {% endif %}
+      >
+        {{ 'content.account_profile' | t }}
+      </a>
+    </nav>
+
+    <span class="lame-profile__topbar-avatar" aria-hidden="true">{{ avatar_letter }}</span>
+  {% endif %}
+</header>

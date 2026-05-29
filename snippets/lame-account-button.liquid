@@ -5,12 +5,7 @@
   @param {string} [display_style] - icon or text
 {%- enddoc -%}
 
-{%- liquid
-  assign profile_url = routes.account_url
-  if section.settings.profile_page != blank
-    assign profile_url = section.settings.profile_page.url
-  endif
--%}
+{%- capture profile_url -%}{%- render 'lame-customer-profile-url', section: section -%}{%- endcapture -%}
 
 <div class="lame-account header-actions__action{% if display_style == 'text' %} lame-account--text{% endif %}">
   {%- if customer -%}

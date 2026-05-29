@@ -1,9 +1,9 @@
-{% if template.name == 'page' and page.handle == 'my-profile' and request.design_mode == false %}
+{% if template.directory == 'customers' and template.name == 'account' and pages['my-profile'] != blank and request.design_mode == false %}
   <div class="section page-width-content" style="padding: 3rem 1rem; text-align: center;">
-    <script>window.location.replace({{ routes.account_url | json }});</script>
-    <meta http-equiv="refresh" content="0;url={{ routes.account_url }}">
+    <script>window.location.replace({{ pages['my-profile'].url | json }});</script>
+    <meta http-equiv="refresh" content="0;url={{ pages['my-profile'].url }}">
     <p>
-      <a href="{{ routes.account_url }}">{{ 'content.account_title' | t }}</a>
+      <a href="{{ pages['my-profile'].url }}">{{ 'content.account_title' | t }}</a>
     </p>
   </div>
 {% else %}
@@ -18,6 +18,18 @@
   data-lame-customer-profile
   {{ section.shopify_attributes }}
 >
+  {%- capture lame_profile_url -%}{%- render 'lame-customer-profile-url' -%}{%- endcapture -%}
+  {%- liquid
+    assign avatar_letter = ''
+    if customer
+      assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
+      if avatar_letter == blank
+        assign avatar_letter = customer.email | slice: 0, 1 | upcase
+      endif
+    endif
+  -%}
+  {% render 'lame-profile-topbar', profile_url: lame_profile_url, avatar_letter: avatar_letter %}
+
   <div class="lame-profile spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {% unless customer %}
       <div class="lame-profile__guest lame-profile__card">
@@ -40,39 +52,10 @@
         </p>
       </div>
     {% else %}
-      {%- liquid
-        assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
-        if avatar_letter == blank
-          assign avatar_letter = customer.email | slice: 0, 1 | upcase
-        endif
-      -%}
-
       <header class="lame-profile__hero">
         <div class="lame-profile__hero-main">
           <span class="lame-profile__avatar" aria-hidden="true">{{ avatar_letter }}</span>
           <div class="lame-profile__hero-text">
-            {%- liquid
-              assign profile_logo = settings.logo_inverse
-              if profile_logo == blank
-                assign profile_logo = settings.logo
-              endif
-              assign profile_logo_height = 32
-            -%}
-            <div class="lame-profile__hero-brand">
-              {% if profile_logo != blank %}
-                <a href="{{ routes.root_url }}" class="lame-profile__hero-logo-link">
-                  {% render 'image',
-                    image: profile_logo,
-                    height: profile_logo_height,
-                    class: 'lame-profile__hero-logo',
-                    alt_text_fallback: shop.name,
-                    text_fallback: shop.name
-                  %}
-                </a>
-              {% else %}
-                <p class="lame-profile__eyebrow">{{ shop.name }}</p>
-              {% endif %}
-            </div>
             <h1 class="lame-profile__page-title">
               {% if section.settings.heading != blank %}
                 {{ section.settings.heading }}

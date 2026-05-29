@@ -1,5 +1,14 @@
 /* Premium customer account — luxury cosmetics brand */
 
+/* Themed profile page: use account top bar instead of duplicate store header */
+[data-template='page.my-profile'] #header-group {
+  display: none;
+}
+
+[data-template='page.my-profile'] #MainContent {
+  padding-top: 0;
+}
+
 .lame-customer-profile {
   --lame-acct-max: 52rem;
   --lame-acct-forest: 26 58 48;
@@ -27,10 +36,129 @@
   );
 }
 
+/* Account chrome top bar (logo + Orders / Profile) */
+.lame-profile__topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem 1rem;
+  width: 100%;
+  padding: 0.85rem max(1.125rem, env(safe-area-inset-right)) 0.85rem max(1.125rem, env(safe-area-inset-left));
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  background: rgb(var(--color-background-rgb, 255 255 255));
+  border-bottom: 1px solid rgb(var(--lame-acct-ink) / 0.08);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.03);
+}
+
+.lame-profile__topbar-start {
+  grid-column: 1;
+  justify-self: start;
+  min-width: 0;
+}
+
+.lame-profile__topbar-logo-link {
+  display: inline-block;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.lame-profile__topbar-logo {
+  display: block;
+  width: auto;
+  max-width: min(11rem, 38vw);
+  height: 2.25rem;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.lame-profile__topbar-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgb(var(--lame-acct-ink));
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.lame-profile__topbar-name:hover {
+  opacity: 0.8;
+}
+
+.lame-profile__topbar-nav {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.lame-profile__topbar-link {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgb(var(--lame-acct-ink) / 0.65);
+  text-decoration: none;
+  padding-bottom: 0.15rem;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.lame-profile__topbar-link:hover {
+  color: rgb(var(--lame-acct-ink));
+}
+
+.lame-profile__topbar-link--current,
+.lame-profile__topbar-link[aria-current='page'] {
+  color: rgb(var(--lame-acct-ink));
+  font-weight: 600;
+  border-bottom-color: rgb(var(--lame-acct-ink));
+}
+
+.lame-profile__topbar-avatar {
+  grid-column: 3;
+  justify-self: end;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgb(var(--lame-acct-ink));
+  background: rgb(var(--lame-acct-ink) / 0.06);
+  border: 1px solid rgb(var(--lame-acct-ink) / 0.1);
+}
+
+@media screen and (max-width: 479px) {
+  .lame-profile__topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    row-gap: 0.65rem;
+  }
+
+  .lame-profile__topbar-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .lame-profile__topbar-avatar {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .lame-profile__topbar-logo {
+    max-width: min(9.5rem, 52vw);
+    height: 2rem;
+  }
+}
+
 .lame-profile {
   max-width: var(--lame-acct-max);
   margin-inline: auto;
-  padding-block: clamp(1.5rem, 4vw, 2.25rem) clamp(2.5rem, 6vw, 3.5rem);
+  padding-block: 0 clamp(2.5rem, 6vw, 3.5rem);
   padding-inline: max(1.125rem, env(safe-area-inset-left)) max(1.125rem, env(safe-area-inset-right));
   overflow-x: clip;
 }
@@ -73,52 +201,6 @@
   background: rgb(var(--lame-acct-gold) / 0.15);
   border: 1px solid rgb(var(--lame-acct-gold) / 0.45);
   color: #fff;
-}
-
-.lame-profile__hero-brand {
-  margin: 0 0 0.35rem;
-}
-
-.lame-profile__hero-logo-link {
-  display: inline-block;
-  line-height: 0;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: opacity 0.22s var(--lame-acct-ease);
-}
-
-.lame-profile__hero-logo-link:hover {
-  opacity: 0.88;
-}
-
-.lame-profile__hero-logo-link:focus-visible {
-  outline: 2px solid rgb(var(--lame-acct-gold));
-  outline-offset: 3px;
-}
-
-.lame-profile__hero-logo {
-  display: block;
-  width: auto;
-  max-width: min(9.5rem, 42vw);
-  height: 2rem;
-  object-fit: contain;
-  object-position: left center;
-}
-
-@media screen and (min-width: 600px) {
-  .lame-profile__hero-logo {
-    max-width: 10.5rem;
-    height: 2.25rem;
-  }
-}
-
-.lame-profile__eyebrow {
-  margin: 0;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  opacity: 0.75;
 }
 
 .lame-profile__page-title {

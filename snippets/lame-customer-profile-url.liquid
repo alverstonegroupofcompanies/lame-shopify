@@ -1,0 +1,14 @@
+{%- doc -%}
+  Outputs the themed customer profile URL. Capture in the parent: {% capture profile_url %}{% render 'lame-customer-profile-url', section: section %}{% endcapture %}
+
+  @param {object} [section] - Header section with profile_page setting
+{%- enddoc -%}
+
+{%- liquid
+  assign lame_profile_url = routes.account_url
+  if section != blank and section.settings.profile_page != blank
+    assign lame_profile_url = section.settings.profile_page.url
+  elsif pages['my-profile'] != blank
+    assign lame_profile_url = pages['my-profile'].url
+  endif
+-%}{{- lame_profile_url -}}

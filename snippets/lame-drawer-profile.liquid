@@ -4,12 +4,9 @@
   @param {object} [section] - Header section (optional profile_page)
 {%- enddoc -%}
 
-{%- liquid
-  assign account_url = routes.account_url
-  if section != blank and section.settings.profile_page != blank
-    assign account_url = section.settings.profile_page.url
-  endif
+{%- capture account_url -%}{%- render 'lame-customer-profile-url', section: section -%}{%- endcapture -%}
 
+{%- liquid
   assign avatar_letter = ''
   if customer
     assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
