@@ -33,9 +33,14 @@
       rel="stylesheet"
     >
     {%- render 'stylesheets' -%}
-    {%- if template.name == 'collection' -%}
-      {%- render 'lame-our-products-active' -%}
-      {%- if lame_our_products_active -%}
+    {%- if template.name == 'collection' and collection != blank -%}
+      {%- liquid
+        assign lame_load_op_css = false
+        if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+          assign lame_load_op_css = true
+        endif
+      -%}
+      {%- if lame_load_op_css -%}
         {{ 'lame-our-products-collection.css' | asset_url | stylesheet_tag }}
         {{ 'lame-our-products-cards.css' | asset_url | stylesheet_tag }}
       {%- endif -%}
@@ -58,7 +63,7 @@
     {% # theme-check-enable RemoteAsset %}
   </head>
 
-  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if template.name == 'index' %} template-index{% endif %}{% if template.name == 'collection' %} template-collection{% endif %}{% if template.name == 'collection' %}{% render 'lame-our-products-active' %}{% if lame_our_products_active %} template-collection-our-products{% endif %}{% endif %}">
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if template.name == 'index' %} template-index{% endif %}{% if template.name == 'collection' %} template-collection{% endif %}{% if template.name == 'collection' and collection != blank %}{% if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products' %} template-collection-our-products{% endif %}{% endif %}">
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
     <div id="header-group">
       {% sections 'header-group' %}
