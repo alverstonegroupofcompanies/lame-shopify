@@ -21,6 +21,7 @@ class LameCustomerProfile {
     this._setupAddressListeners();
     this._setupEditPanels();
     this._setupBankForm();
+    this._setupSidebarNav();
     this._openAddAddressFromHash();
   }
 
@@ -113,11 +114,40 @@ class LameCustomerProfile {
     }
 
     if (button.hasAttribute('data-edit-toggle') && panelId) {
-      const view = button.closest('.lame-profile__card')?.querySelector('[data-profile-view]');
+      const view =
+        button.closest('.lame-acct-card, .lame-profile__card, .lame-acct-bank')?.querySelector('[data-profile-view]') ||
+        this.root.querySelector(`[data-profile-view]`);
       if (view) {
         view.hidden = open;
       }
+      if (open && panelId === 'AccountEditForm') {
+        const settings = document.getElementById('account-settings');
+        settings?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.root.querySelectorAll('[data-profile-nav]').forEach((link) => {
+          link.classList.toggle('is-active', link.getAttribute('href') === '#account-settings');
+        });
+      }
     }
+  }
+
+  _setupSidebarNav() {
+    this.root.querySelectorAll('[data-profile-nav]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const href = link.getAttribute('href');
+        if (!href?.startsWith('#')) return;
+        const target = document.getElementById(href.slice(1));
+        if (!target) return;
+        event.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.root.querySelectorAll('[data-profile-nav]').forEach((item) => {
+          item.classList.remove('is-active');
+        });
+        link.classList.add('is-active');
+        if (history.replaceState) {
+          history.replaceState(null, '', href);
+        }
+      });
+    });
   }
 
   _openAddAddressFromHash() {

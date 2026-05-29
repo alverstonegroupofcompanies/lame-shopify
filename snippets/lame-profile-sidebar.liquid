@@ -1,0 +1,127 @@
+{%- doc -%}
+  Profile page sidebar: logo, navigation, promo card.
+
+  @param {object} section - Section with promo settings
+  @param {string} profile_url - Base URL for hash links
+  @param {boolean} [show_wishlist] - Show wishlist nav item
+{%- enddoc -%}
+
+{%- liquid
+  assign profile_logo = settings.logo
+  if profile_logo == blank
+    assign profile_logo = settings.logo_inverse
+  endif
+-%}
+
+<aside class="lame-acct-sidebar" aria-label="{{ 'lame_customer.account_nav' | t }}">
+  <div class="lame-acct-sidebar__brand">
+    <a href="{{ routes.root_url }}" class="lame-acct-sidebar__logo-link">
+      {% if profile_logo != blank %}
+        {% render 'image',
+          image: profile_logo,
+          height: 40,
+          class: 'lame-acct-sidebar__logo',
+          alt_text_fallback: shop.name,
+          text_fallback: shop.name
+        %}
+      {% else %}
+        <span class="lame-acct-sidebar__shop-name">{{ shop.name }}</span>
+      {% endif %}
+    </a>
+  </div>
+
+  <nav class="lame-acct-sidebar__nav">
+    <a href="#profile-overview" class="lame-acct-sidebar__link is-active" data-profile-nav>
+      <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+      </span>
+      <span class="lame-acct-sidebar__link-text">
+        <span class="lame-acct-sidebar__link-title">{{ 'content.account_profile' | t }}</span>
+        <span class="lame-acct-sidebar__link-desc">{{ 'lame_customer.nav_profile_desc' | t }}</span>
+      </span>
+    </a>
+
+    <a href="#orders" class="lame-acct-sidebar__link" data-profile-nav>
+      <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+      </span>
+      <span class="lame-acct-sidebar__link-text">
+        <span class="lame-acct-sidebar__link-title">{{ 'customer.orders.title' | t }}</span>
+        <span class="lame-acct-sidebar__link-desc">{{ 'lame_customer.nav_orders_desc' | t }}</span>
+      </span>
+    </a>
+
+    {% if show_wishlist and settings.lame_enable_wishlist %}
+      <a href="#wishlist" class="lame-acct-sidebar__link" data-profile-nav>
+        <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20.5s-6.5-4-8.8-7.6C1.4 10.2 2.2 7 5.2 7c1.8 0 3 1.1 3.6 2.1.6-1 1.8-2.1 3.6-2.1 3 0 3.8 3.2 1.4 5.9C15.2 16.5 12 20.5 12 20.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="lame-acct-sidebar__link-text">
+          <span class="lame-acct-sidebar__link-title">{{ 'lame_wishlist.title' | t }}</span>
+          <span class="lame-acct-sidebar__link-desc">{{ 'lame_customer.nav_wishlist_desc' | t }}</span>
+        </span>
+      </a>
+    {% endif %}
+
+    <a href="#addresses" class="lame-acct-sidebar__link" data-profile-nav>
+      <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10.5a6 6 0 1 0-12 0C6 15.8 12 21 12 21Z" stroke="currentColor" stroke-width="1.25"/><circle cx="12" cy="10.5" r="2" stroke="currentColor" stroke-width="1.25"/></svg>
+      </span>
+      <span class="lame-acct-sidebar__link-text">
+        <span class="lame-acct-sidebar__link-title">{{ 'customer.addresses.title' | t }}</span>
+        <span class="lame-acct-sidebar__link-desc">{{ 'lame_customer.nav_addresses_desc' | t }}</span>
+      </span>
+    </a>
+
+    <a href="#account-settings" class="lame-acct-sidebar__link" data-profile-nav>
+      <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.75" stroke="currentColor" stroke-width="1.25"/><path d="M12 14.5v2.5M8.2 8.2 6.8 6.8M15.8 8.2l1.4-1.4M6.8 17.2l-1.4 1.4M17.2 17.2l1.4 1.4M4.5 12H2M22 12h-2.5M12 4.5V2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+      </span>
+      <span class="lame-acct-sidebar__link-text">
+        <span class="lame-acct-sidebar__link-title">{{ 'lame_customer.nav_settings' | t }}</span>
+        <span class="lame-acct-sidebar__link-desc">{{ 'lame_customer.nav_settings_desc' | t }}</span>
+      </span>
+    </a>
+
+    <a href="{{ routes.account_logout_url }}" class="lame-acct-sidebar__link lame-acct-sidebar__link--logout">
+      <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 12H3M11 8l4 4-4 4M21 5v14" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="lame-acct-sidebar__link-text">
+        <span class="lame-acct-sidebar__link-title">{{ 'customer.log_out' | t }}</span>
+        <span class="lame-acct-sidebar__link-desc">{{ 'lame_customer.nav_logout_desc' | t }}</span>
+      </span>
+    </a>
+  </nav>
+
+  {% if section.settings.promo_heading != blank or section.settings.promo_image != blank %}
+    <div class="lame-acct-sidebar__promo">
+      {% if section.settings.promo_image != blank %}
+        <div class="lame-acct-sidebar__promo-media">
+          {{
+            section.settings.promo_image
+            | image_url: width: 600
+            | image_tag:
+              class: 'lame-acct-sidebar__promo-img',
+              loading: 'lazy',
+              widths: '300, 400, 600',
+              sizes: '(min-width: 990px) 260px, 100vw',
+              alt: section.settings.promo_heading
+          }}
+        </div>
+      {% endif %}
+      <div class="lame-acct-sidebar__promo-body">
+        {% if section.settings.promo_heading != blank %}
+          <p class="lame-acct-sidebar__promo-title">{{ section.settings.promo_heading }}</p>
+        {% endif %}
+        {% if section.settings.promo_text != blank %}
+          <p class="lame-acct-sidebar__promo-text">{{ section.settings.promo_text }}</p>
+        {% endif %}
+        {% assign promo_link = section.settings.promo_link | default: routes.all_products_collection_url %}
+        <a href="{{ promo_link }}" class="lame-acct-sidebar__promo-btn">
+          {{ section.settings.promo_button_label | default: 'lame_customer.shop_now' | t }}
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</aside>

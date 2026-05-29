@@ -1,0 +1,66 @@
+{%- doc -%}
+  Profile overview hero card with avatar, member badge, email, and optional decor image.
+
+  @param {object} section - Section settings (header_decor_image)
+  @param {string} avatar_letter - Avatar initial
+{%- enddoc -%}
+
+{%- liquid
+  assign member_since = customer.created_at | date: '%B %Y'
+-%}
+
+<section id="profile-overview" class="lame-acct-card lame-acct-card--hero lame-profile__panel" aria-labelledby="ProfileOverviewHeading">
+  {% if section.settings.header_decor_image != blank %}
+    <div class="lame-acct-card__decor" aria-hidden="true">
+      {{
+        section.settings.header_decor_image
+        | image_url: width: 800
+        | image_tag:
+          class: 'lame-acct-card__decor-img',
+          loading: 'lazy',
+          widths: '400, 600, 800',
+          sizes: '(min-width: 990px) 320px, 50vw',
+          alt: ''
+      }}
+    </div>
+  {% endif %}
+
+  <div class="lame-acct-card__inner lame-acct-hero">
+    <div class="lame-acct-hero__avatar-wrap">
+      <span class="lame-acct-hero__avatar" aria-hidden="true">{{ avatar_letter }}</span>
+      <button
+        type="button"
+        class="lame-acct-hero__avatar-edit"
+        data-edit-toggle
+        aria-expanded="false"
+        aria-controls="AccountEditForm"
+        aria-label="{{ 'customer.addresses.edit' | t }}"
+      >
+        {% render 'icon-edit', class: 'lame-acct-hero__avatar-edit-icon' %}
+      </button>
+    </div>
+
+    <div class="lame-acct-hero__content">
+      <h1 id="ProfileOverviewHeading" class="visually-hidden">{{ 'content.account_profile' | t }}</h1>
+      <div class="lame-acct-hero__name-row">
+        <p class="lame-acct-hero__name">{{ customer.name }}</p>
+        <span class="lame-acct-hero__badge">{{ 'lame_customer.member_since' | t: date: member_since }}</span>
+      </div>
+      <div class="lame-acct-hero__email-row">
+        <span class="lame-acct-hero__email">{{ customer.email }}</span>
+        <button
+          type="button"
+          class="lame-acct-hero__text-edit"
+          data-edit-toggle
+          aria-expanded="false"
+          aria-controls="AccountEditForm"
+        >
+          {{ 'customer.addresses.edit' | t }}
+        </button>
+      </div>
+      {% if customer.phone != blank %}
+        <p class="lame-acct-hero__phone">{{ customer.phone }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>

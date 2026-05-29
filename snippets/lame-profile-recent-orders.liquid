@@ -1,0 +1,81 @@
+{%- doc -%}
+  Compact recent orders list for the profile dashboard.
+
+  @param {number} [limit] - Max orders to show (default 3)
+{%- enddoc -%}
+
+{%- liquid
+  assign order_limit = limit | default: 3
+-%}
+
+<section id="recent-orders" class="lame-acct-card lame-profile__panel" aria-labelledby="RecentOrdersHeading">
+  <div class="lame-acct-card__head">
+    <h2 id="RecentOrdersHeading" class="lame-acct-card__title">{{ 'lame_customer.recent_orders' | t }}</h2>
+    <a href="#orders" class="lame-acct-card__action-link" data-profile-nav>{{ 'lame_customer.view_all_orders' | t }}</a>
+  </div>
+
+  <div class="lame-acct-card__body">
+    {% if customer.orders.size > 0 %}
+      <ul class="lame-acct-order-list" role="list">
+        {%- for order in customer.orders limit: order_limit -%}
+          {%- liquid
+            assign thumb = order.line_items.first.image
+            assign status_key = order.fulfillment_status | default: 'unfulfilled'
+            if order.cancelled
+              assign status_key = 'cancelled'
+            endif
+            assign status_label = order.fulfillment_status_label
+            if order.cancelled
+              assign status_label = 'lame_customer.order_cancelled' | t
+            endif
+          -%}
+          <li class="lame-acct-order-list__item">
+            <article class="lame-acct-order-row">
+              <a href="{{ order.customer_url }}" class="lame-acct-order-row__thumb" tabindex="-1" aria-hidden="true">
+                {% if thumb != blank %}
+                  {{
+                    thumb
+                    | image_url: width: 120
+                    | image_tag:
+                      widths: '60, 80, 120',
+                      sizes: '64px',
+                      class: 'lame-acct-order-row__thumb-img',
+                      loading: 'lazy',
+                      alt: ''
+                  }}
+                {% else %}
+                  <span class="lame-acct-order-row__thumb-fallback" aria-hidden="true"></span>
+                {% endif %}
+              </a>
+              <div class="lame-acct-order-row__main">
+                <div class="lame-acct-order-row__top">
+                  <p class="lame-acct-order-row__number">{{ 'lame_customer.order_number' | t: number: order.name }}</p>
+                  <time class="lame-acct-order-row__date" datetime="{{ order.created_at | date: '%Y-%m-%d' }}">
+                    {{ order.created_at | time_tag: format: 'date' }}
+                  </time>
+                </div>
+                <p class="lame-acct-order-row__items">{{ 'lame_customer.order_items_count' | t: count: order.line_items.size }}</p>
+                <div class="lame-acct-order-row__bottom">
+                  <span class="lame-acct-order-row__badge lame-acct-order-row__badge--{{ status_key }}">{{ status_label }}</span>
+                  <p class="lame-acct-order-row__total">
+                    {%- if order.total_net_amount != blank -%}
+                      {{ order.total_net_amount | money_with_currency }}
+                    {%- else -%}
+                      {{ order.total_price | money_with_currency }}
+                    {%- endif -%}
+                  </p>
+                </div>
+              </div>
+              <a href="{{ order.customer_url }}" class="lame-acct-order-row__cta">
+                <span>{{ 'lame_customer.view_order' | t }}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {% else %}
+      <p class="lame-acct-empty">{{ 'lame_customer.orders_empty' | t }}</p>
+    {% endif %}
+  </div>
+</section>
