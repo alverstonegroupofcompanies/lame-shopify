@@ -261,32 +261,58 @@
   {% render 'lame-cart-trust', compact: true %}
 {%- endunless -%}
 
-<div class="cart__ctas">
-  <button
-    type="submit"
-    id="checkout"
-    class="cart__checkout-button button"
-    name="checkout"
-    {% if cart == empty %}
-      disabled
-    {% endif %}
-    form="cart-form"
-  >
-    <span class="button-text">
-      {{ 'content.checkout' | t }}
-    </span>
-  </button>
+{%- liquid
+  assign lame_checkout_login_required = false
+  if shop.customer_accounts_enabled and customer == blank
+    assign lame_checkout_login_required = true
+    assign lame_checkout_return_url = routes.cart_url | url_encode
+    assign lame_checkout_login_url = routes.account_login_url | append: '?return_url=' | append: lame_checkout_return_url
+    assign lame_checkout_register_url = routes.account_register_url | append: '?return_url=' | append: lame_checkout_return_url
+  endif
+-%}
 
-  {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
-    <div
-      class="
-        additional-checkout-buttons
-        {% if accelerated_checkout_buttons_layout == 'vertical' %}additional-checkout-buttons--vertical{% endif %}
-      "
+<div class="cart__ctas">
+  {%- if lame_checkout_login_required -%}
+    <p class="cart__login-notice cart-primary-typography">{{ 'lame_customer.checkout_login_required' | t }}</p>
+    <a
+      id="checkout"
+      href="{{ lame_checkout_login_url }}"
+      class="cart__checkout-button button"
     >
-      {{ content_for_additional_checkout_buttons }}
-    </div>
-  {% endif %}
+      <span class="button-text">
+        {{ 'lame_customer.checkout_sign_in' | t }}
+      </span>
+    </a>
+    <p class="cart__login-register cart-primary-typography">
+      {{ 'lame_customer.create_account_html' | t: link: lame_checkout_register_url }}
+    </p>
+  {%- else -%}
+    <button
+      type="submit"
+      id="checkout"
+      class="cart__checkout-button button"
+      name="checkout"
+      {% if cart == empty %}
+        disabled
+      {% endif %}
+      form="cart-form"
+    >
+      <span class="button-text">
+        {{ 'content.checkout' | t }}
+      </span>
+    </button>
+
+    {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
+      <div
+        class="
+          additional-checkout-buttons
+          {% if accelerated_checkout_buttons_layout == 'vertical' %}additional-checkout-buttons--vertical{% endif %}
+        "
+      >
+        {{ content_for_additional_checkout_buttons }}
+      </div>
+    {% endif %}
+  {%- endif -%}
 </div>
 
 {% stylesheet %}
@@ -475,6 +501,22 @@
     width: 100%;
     height: clamp(25px, var(--height-buy-buttons), 55px);
     padding-inline: var(--padding-4xl);
+  }
+
+  .cart__login-notice,
+  .cart__login-register {
+    width: 100%;
+    margin: 0;
+    font-size: var(--font-size--2xs);
+    line-height: 1.45;
+    text-align: center;
+    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
+  }
+
+  .cart__login-register a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .cart-drawer__summary .cart-totals:not(:has(.cart-totals__original-container:empty)) {

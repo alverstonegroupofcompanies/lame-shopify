@@ -16,6 +16,11 @@
   if request.visual_preview_mode and product == blank
     assign product = collections.all.products.first
   endif
+
+  assign lame_checkout_login_required = false
+  if shop.customer_accounts_enabled and customer == blank
+    assign lame_checkout_login_required = true
+  endif
 %}
 
 {% capture accelerated_checkout_button %}
@@ -24,7 +29,7 @@
   {% endif %}
 {% endcapture %}
 
-{% if accelerated_checkout_button != blank %}
+{% if accelerated_checkout_button != blank and lame_checkout_login_required == false %}
   <div
     class="accelerated-checkout-block"
     ref="acceleratedCheckoutButtonContainer"
