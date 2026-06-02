@@ -39,6 +39,12 @@
             role="list"
           >
             {% for link in block_settings.menu.links %}
+              {% liquid
+                assign menu_link_title = link.title
+                if link.title | downcase == 'our products'
+                  assign menu_link_title = 'Shope'
+                endif
+              %}
               <li>
                 <a
                   href="{{ link.url }}"
@@ -48,7 +54,7 @@
                     aria-current="page"
                   {% endif %}
                 >
-                  {{- link.title -}}
+                  {{- menu_link_title -}}
                 </a>
               </li>
             {% endfor %}
@@ -84,6 +90,12 @@
 
     {% capture children %}
       {% for link in block_settings.menu.links %}
+        {% liquid
+          assign menu_link_title = link.title
+          if link.title | downcase == 'our products'
+            assign menu_link_title = 'Shope'
+          endif
+        %}
         <li
           role="presentation"
           class="menu-list__list-item"
@@ -106,7 +118,7 @@
             {% endif %}
             ref="menuitem"
           >
-            <span class="menu-list__link-title">{{- link.title -}}</span>
+            <span class="menu-list__link-title">{{- menu_link_title -}}</span>
           </a>
           {%- if link.links != blank -%}
             <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">
