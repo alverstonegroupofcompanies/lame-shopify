@@ -4,6 +4,7 @@
 
   @param {object} collection - Collection object
   @param {object} [products] - Products on the current page (for fallback list)
+  @param {boolean} [grouped_by_brand] - If true, link pills to on-page brand anchors
 {%- enddoc -%}
 
 {% liquid
@@ -65,9 +66,16 @@
 
       {% if vendor_filter != blank %}
         {% for value in vendor_filter.values %}
+          {% liquid
+            assign value_brand_slug = value.label | handleize
+            assign value_brand_down = value.label | downcase
+            if value_brand_down contains 'lamstone'
+              assign value_brand_slug = 'lamstone-healthcare'
+            endif
+          %}
           <li class="lame-collection-brand-nav__item">
             <a
-              href="{{ value.url_to_add }}"
+              href="{% if grouped_by_brand %}{{ collection.url }}#brand-{{ value_brand_slug }}{% else %}{{ value.url_to_add }}{% endif %}"
               class="lame-collection-brand-nav__pill{% if value.active %} lame-collection-brand-nav__pill--active{% endif %}"
               {% if value.count == 0 %}aria-disabled="true"{% endif %}
             >
@@ -92,7 +100,7 @@
             %}
             <li class="lame-collection-brand-nav__item">
               <a
-                href="{{ collection.url }}?filter.p.vendor={{ brand_label | url_encode }}"
+                href="{% if grouped_by_brand %}{{ collection.url }}#brand-{{ brand_slug }}{% else %}{{ collection.url }}?filter.p.vendor={{ brand_label | url_encode }}{% endif %}"
                 class="lame-collection-brand-nav__pill{% if active_vendor == brand_label %} lame-collection-brand-nav__pill--active{% endif %}"
               >
                 <span class="lame-collection-brand-nav__name">{{ brand_label }}</span>
