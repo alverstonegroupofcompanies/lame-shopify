@@ -55,8 +55,20 @@
       {{ 'lame-home-page.css' | asset_url | stylesheet_tag }}
       {{ 'lame-home-cosmetic.css' | asset_url | stylesheet_tag }}
     {%- endif -%}
+    {%- liquid
+      assign lame_load_category_shop_css = false
+      if template.name == 'collection' and collection != blank
+        assign lame_category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
+        if lame_category_shop_handles contains collection.handle
+          assign lame_load_category_shop_css = true
+        endif
+      endif
+    -%}
     {%- if template.name == 'collection' -%}
       {{ 'lame-cosmetic-collection.css' | asset_url | stylesheet_tag }}
+    {%- endif -%}
+    {%- if lame_load_category_shop_css -%}
+      {{ 'lame-category-shop.css' | asset_url | stylesheet_tag }}
     {%- endif -%}
     {%- render 'lame-header-cosmetic' -%}
     {%- render 'lame-cart-checkout-assets' -%}
@@ -75,6 +87,7 @@
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if template.name == 'index' %} template-index{% endif %}{% if template.name == 'collection' %} template-collection{% endif %}{% liquid
     assign lame_body_our_products = false
+    assign lame_body_category_shop = false
     if template.name == 'collection'
       if template.suffix == 'our-products'
         assign lame_body_our_products = true
@@ -82,11 +95,15 @@
         if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
           assign lame_body_our_products = true
         endif
+        assign lame_category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
+        if lame_category_shop_handles contains collection.handle
+          assign lame_body_category_shop = true
+        endif
       elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products'
         assign lame_body_our_products = true
       endif
     endif
-  %}{% if lame_body_our_products %} template-collection-our-products{% endif %}">
+  %}{% if lame_body_our_products %} template-collection-our-products{% endif %}{% if lame_body_category_shop %} template-collection-category-shop template-collection-category-shop--{{ collection.handle }}{% endif %}">
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
     <div id="header-group">
       {% sections 'header-group' %}

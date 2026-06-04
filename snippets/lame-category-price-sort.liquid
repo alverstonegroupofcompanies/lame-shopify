@@ -1,0 +1,51 @@
+{%- doc -%}
+  Price-only sort control for individual category collection pages.
+
+  @param {object} collection - Collection
+  @param {object} paginate - Paginate object
+{%- enddoc -%}
+
+{%- liquid
+  assign range_start = paginate.current_offset | plus: 1
+  assign range_end = paginate.current_offset | plus: paginate.page_size
+  if range_end > paginate.items
+    assign range_end = paginate.items
+  endif
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign sort_form_action = collection.url
+  if collection.current_type != blank or collection.current_vendor != blank
+    assign sort_form_action = collection.url | append: '/'
+  endif
+-%}
+
+<div class="lame-category-shop__toolbar">
+  <p class="lame-category-shop__count" role="status">
+    {{ 'lame_category_shop.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
+  </p>
+  <form class="lame-category-shop__sort-form" method="get" action="{{ sort_form_action }}">
+    {%- for filter in collection.filters -%}
+      {%- for value in filter.active_values -%}
+        <input type="hidden" name="{{ value.param_name }}" value="{{ value.value }}">
+      {%- endfor -%}
+    {%- endfor -%}
+    {%- if collection.current_type != blank -%}
+      <input type="hidden" name="q" value="{{ collection.current_type | escape }}">
+    {%- endif -%}
+    <label class="lame-category-shop__sort-label" for="lame-category-sort-{{ collection.id }}">
+      {{ 'lame_category_shop.sort_label' | t }}
+    </label>
+    <select
+      id="lame-category-sort-{{ collection.id }}"
+      class="lame-category-shop__sort-select"
+      name="sort_by"
+      onchange="this.form.submit()"
+    >
+      <option value="price-ascending" {% if sort_by == 'price-ascending' %}selected{% endif %}>
+        {{ 'lame_category_shop.sort_price_low' | t }}
+      </option>
+      <option value="price-descending" {% if sort_by == 'price-descending' %}selected{% endif %}>
+        {{ 'lame_category_shop.sort_price_high' | t }}
+      </option>
+    </select>
+  </form>
+</div>

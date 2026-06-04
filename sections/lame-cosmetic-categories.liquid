@@ -113,7 +113,7 @@
     const section = document.getElementById('shopify-section-{{ section.id }}');
     if (!section) return;
 
-    section.querySelectorAll('[data-lame-reveal]').forEach((node) => {
+    section.querySelectorAll('[data-lame-reveal]:not([data-category-clone])').forEach((node) => {
       if ('IntersectionObserver' in window) {
         const observer = new IntersectionObserver(
           (entries, obs) => {
@@ -132,53 +132,121 @@
     });
 
     const track = section.querySelector('[data-category-track]');
-    const slides = [...section.querySelectorAll('[data-category-slide]')];
     const prev = section.querySelector('[data-category-prev]');
     const next = section.querySelector('[data-category-next]');
     const dotsWrap = section.querySelector('[data-category-dots]');
 
-    if (!track || slides.length === 0) return;
+    if (!track) return;
 
+    const originals = [...track.querySelectorAll('[data-category-slide]:not([data-category-clone])')];
+    if (originals.length === 0) return;
+
+    const markClone = (slide) => {
+      slide.dataset.categoryClone = 'true';
+      slide.setAttribute('aria-hidden', 'true');
+      slide.querySelectorAll('a').forEach((link) => link.setAttribute('tabindex', '-1'));
+    };
+
+    if (!track.dataset.categoryLoopReady) {
+      const beforeFrag = document.createDocumentFragment();
+      const afterFrag = document.createDocumentFragment();
+      originals.forEach((slide) => {
+        const before = slide.cloneNode(true);
+        const after = slide.cloneNode(true);
+        markClone(before);
+        markClone(after);
+        beforeFrag.appendChild(before);
+        afterFrag.appendChild(after);
+      });
+      track.insertBefore(beforeFrag, track.firstChild);
+      track.appendChild(afterFrag);
+      track.dataset.categoryLoopReady = 'true';
+    }
+
+    const count = originals.length;
+    const offsetStart = count;
     const autoplayEnabled = section.dataset.autoplay === 'true';
     const autoplaySpeed = Number(section.dataset.autoplaySpeed) || 4000;
-    let pageIndex = 0;
+    let logicalIndex = 0;
     let autoplayTimer = null;
+    let isResetting = false;
     let dots = [];
 
-    const getPerView = () => {
-      if (window.matchMedia('(min-width: 990px)').matches) return Math.min(4, slides.length);
-      if (window.matchMedia('(min-width: 750px)').matches) return Math.min(2, slides.length);
-      return 1;
+    const scrollToPhysical = (physicalIndex, smooth = true) => {
+      const child = track.children[physicalIndex];
+      if (!child) return;
+      track.scrollTo({
+        left: child.offsetLeft - track.offsetLeft,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
     };
 
-    const getPageCount = () => {
-      const perView = getPerView();
-      return Math.max(1, Math.ceil(slides.length / perView));
+    const afterScroll = (callback) => {
+      if ('onscrollend' in track) {
+        track.addEventListener('scrollend', callback, { once: true });
+      } else {
+        window.setTimeout(callback, 520);
+      }
     };
 
-    const scrollToPage = (index, smooth = true) => {
-      const perView = getPerView();
-      const maxPage = getPageCount() - 1;
-      pageIndex = ((index % (maxPage + 1)) + (maxPage + 1)) % (maxPage + 1);
-      const targetSlide = slides[pageIndex * perView] || slides[0];
-      const offset = targetSlide.offsetLeft - track.offsetLeft;
-      track.scrollTo({ left: offset, behavior: smooth ? 'smooth' : 'auto' });
+    const scrollToLogical = (index, smooth = true) => {
+      logicalIndex = ((index % count) + count) % count;
+      scrollToPhysical(offsetStart + logicalIndex, smooth);
       updateUI();
+    };
+
+    const loopForward = () => {
+      scrollToPhysical(offsetStart + count, true);
+      afterScroll(() => {
+        isResetting = true;
+        scrollToPhysical(offsetStart, false);
+        logicalIndex = 0;
+        isResetting = false;
+        updateUI();
+      });
+    };
+
+    const loopBackward = () => {
+      scrollToPhysical(count - 1, true);
+      afterScroll(() => {
+        isResetting = true;
+        scrollToPhysical(offsetStart + count - 1, false);
+        logicalIndex = count - 1;
+        isResetting = false;
+        updateUI();
+      });
+    };
+
+    const goNext = () => {
+      if (isResetting || count <= 1) return;
+      if (logicalIndex < count - 1) {
+        scrollToLogical(logicalIndex + 1);
+      } else {
+        loopForward();
+      }
+    };
+
+    const goPrev = () => {
+      if (isResetting || count <= 1) return;
+      if (logicalIndex > 0) {
+        scrollToLogical(logicalIndex - 1);
+      } else {
+        loopBackward();
+      }
     };
 
     const buildDots = () => {
       if (!dotsWrap) return;
       dotsWrap.innerHTML = '';
       dots = [];
-      const count = getPageCount();
       for (let i = 0; i < count; i += 1) {
         const dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'lame-cosmetic-categories__dot';
         dot.setAttribute('role', 'tab');
-        dot.setAttribute('aria-label', `Category page ${i + 1}`);
+        dot.setAttribute('aria-label', `Category ${i + 1}`);
         dot.addEventListener('click', () => {
-          scrollToPage(i);
+          scrollToLogical(i);
           restartAutoplay();
         });
         dotsWrap.appendChild(dot);
@@ -187,21 +255,18 @@
     };
 
     const updateUI = () => {
-      const maxPage = getPageCount() - 1;
-      const needsNav = slides.length > getPerView();
-
+      const showControls = count > 1;
       if (prev) {
-        prev.hidden = !needsNav;
-        prev.disabled = pageIndex <= 0;
+        prev.hidden = !showControls;
+        prev.disabled = false;
       }
       if (next) {
-        next.hidden = !needsNav;
-        next.disabled = pageIndex >= maxPage;
+        next.hidden = !showControls;
+        next.disabled = false;
       }
-
       dots.forEach((dot, i) => {
-        dot.classList.toggle('is-active', i === pageIndex);
-        dot.setAttribute('aria-selected', i === pageIndex ? 'true' : 'false');
+        dot.classList.toggle('is-active', i === logicalIndex);
+        dot.setAttribute('aria-selected', i === logicalIndex ? 'true' : 'false');
       });
     };
 
@@ -214,11 +279,8 @@
 
     const startAutoplay = () => {
       stopAutoplay();
-      if (!autoplayEnabled || slides.length <= getPerView()) return;
-      autoplayTimer = window.setInterval(() => {
-        const maxPage = getPageCount() - 1;
-        scrollToPage(pageIndex >= maxPage ? 0 : pageIndex + 1);
-      }, autoplaySpeed);
+      if (!autoplayEnabled || count <= 1) return;
+      autoplayTimer = window.setInterval(goNext, autoplaySpeed);
     };
 
     const restartAutoplay = () => {
@@ -226,36 +288,55 @@
       startAutoplay();
     };
 
+    const syncFromScroll = () => {
+      if (isResetting) return;
+      const trackLeft = track.scrollLeft;
+      let nearest = logicalIndex;
+      let nearestDist = Infinity;
+      for (let i = 0; i < count; i += 1) {
+        const child = track.children[offsetStart + i];
+        if (!child) continue;
+        const dist = Math.abs(child.offsetLeft - track.offsetLeft - trackLeft);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = i;
+        }
+      }
+      logicalIndex = nearest;
+      updateUI();
+    };
+
     prev?.addEventListener('click', () => {
-      scrollToPage(pageIndex - 1);
+      goPrev();
       restartAutoplay();
     });
 
     next?.addEventListener('click', () => {
-      scrollToPage(pageIndex + 1);
+      goNext();
       restartAutoplay();
     });
 
-    track.addEventListener('scroll', () => {
-      const perView = getPerView();
-      const slideWidth = slides[0]?.offsetWidth || 1;
-      const gap = parseFloat(getComputedStyle(track).gap || '0');
-      const approx = Math.round(track.scrollLeft / (slideWidth + gap));
-      pageIndex = Math.min(Math.max(Math.floor(approx / perView), 0), getPageCount() - 1);
-      updateUI();
-    }, { passive: true });
+    track.addEventListener('scroll', syncFromScroll, { passive: true });
 
     section.addEventListener('mouseenter', stopAutoplay);
     section.addEventListener('mouseleave', startAutoplay);
 
-    buildDots();
-    updateUI();
-    startAutoplay();
-
-    window.addEventListener('resize', () => {
+    const init = () => {
+      isResetting = true;
+      scrollToPhysical(offsetStart, false);
+      logicalIndex = 0;
+      isResetting = false;
       buildDots();
-      scrollToPage(pageIndex, false);
-      restartAutoplay();
+      updateUI();
+      startAutoplay();
+    };
+
+    init();
+    window.addEventListener('resize', () => {
+      isResetting = true;
+      scrollToPhysical(offsetStart + logicalIndex, false);
+      isResetting = false;
+      updateUI();
     });
   })();
 </script>

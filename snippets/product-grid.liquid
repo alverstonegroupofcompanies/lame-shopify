@@ -9,6 +9,7 @@
   @param {boolean} [enable_infinite_scroll] - Whether to enable infinite scroll (default: true)
   @param {boolean} [grouped_by_brand] - When true, children is brand sections markup (not a flat list)
   @param {boolean} [lame_paginated_collection] - Our Products: 12 per page, next/prev replaces grid
+  @param {boolean} [category_shop_grid] - Category shop pages: custom grid class, standard pagination
 {%- enddoc -%}
 
 {% capture product_card_size %}
@@ -130,7 +131,7 @@
         </div>
       {% else %}
         <ul
-          class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} {% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
+          class="{% if category_shop_grid %}lame-category-shop__grid {% endif %}product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} {% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
           data-testid="product-grid"
           product-grid-view="default"
           ref="grid"

@@ -1,0 +1,339 @@
+/**
+ * Individual category collection pages — unique grids, no filters, price sort only
+ */
+
+.lame-category-shop-page {
+  --lame-cat-forest: 45 74 34;
+  --lame-cat-cream: #fdfbf7;
+  --lame-cat-radius: 14px;
+  --lame-cat-gap: clamp(1rem, 2vw, 1.5rem);
+  background: var(--lame-cat-cream);
+}
+
+.lame-category-shop-page .lame-collection-shell {
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding-inline: max(1rem, var(--page-margin));
+}
+
+.lame-category-shop-page .collection-wrapper {
+  display: block;
+}
+
+.lame-category-shop-page .facets-block-wrapper,
+.lame-category-shop-page .facets,
+.lame-category-shop-page .lame-collection-brand-nav-wrap {
+  display: none !important;
+}
+
+/* Toolbar */
+.lame-category-shop__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgb(var(--lame-cat-forest) / 0.12);
+}
+
+.lame-category-shop__count {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgb(90 96 86);
+}
+
+.lame-category-shop__sort-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.lame-category-shop__sort-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--lame-cat-forest));
+}
+
+.lame-category-shop__sort-select {
+  min-width: 11rem;
+  padding: 0.45rem 2rem 0.45rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid rgb(var(--lame-cat-forest) / 0.2);
+  border-radius: 8px;
+  background: #fff;
+  color: rgb(var(--lame-cat-forest));
+  cursor: pointer;
+}
+
+/* Product grid — base */
+.lame-category-shop__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lame-cat-gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .lame-category-shop__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.lame-category-shop__item {
+  min-width: 0;
+}
+
+/* Card base */
+.lame-cat-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border-radius: var(--lame-cat-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lame-cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.1);
+}
+
+.lame-cat-card__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: rgb(var(--lame-cat-forest) / 0.04);
+}
+
+.lame-cat-card__media-link {
+  display: block;
+  height: 100%;
+}
+
+.lame-cat-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.lame-cat-card:hover .lame-cat-card__image {
+  transform: scale(1.04);
+}
+
+.lame-cat-card__image--placeholder {
+  background: linear-gradient(145deg, rgb(var(--lame-cat-forest) / 0.08), rgb(var(--lame-cat-forest) / 0.02));
+}
+
+.lame-cat-card__badge {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: rgb(var(--lame-cat-forest));
+  border-radius: 6px;
+}
+
+.lame-cat-card__media .lame-op-wishlist-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.92);
+  color: rgb(var(--lame-cat-forest));
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+}
+
+.lame-cat-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem 1rem;
+}
+
+.lame-cat-card__vendor {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(120 128 115);
+}
+
+.lame-cat-card__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.lame-cat-card__title a {
+  color: rgb(var(--lame-cat-forest));
+  text-decoration: none;
+}
+
+.lame-cat-card__title a:hover {
+  text-decoration: underline;
+}
+
+.lame-cat-card__price {
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.lame-cat-card__actions {
+  margin-top: 0.5rem;
+}
+
+.lame-cat-card__atc,
+.lame-cat-card__view {
+  width: 100%;
+  font-size: 0.8rem;
+}
+
+.lame-cat-card__form {
+  margin: 0;
+}
+
+/* ——— Per-category unique layouts ——— */
+
+/* Skin care: soft green, spacious 3-col */
+.lame-category-shop-page--skin-care {
+  --lame-cat-accent: 120 155 110;
+  --lame-cat-radius: 18px;
+}
+.lame-category-shop-page--skin-care .lame-cat-card {
+  border: 1px solid rgb(var(--lame-cat-accent) / 0.2);
+  box-shadow: none;
+}
+.lame-category-shop-page--skin-care .lame-cat-card__media {
+  aspect-ratio: 1 / 1;
+  border-radius: 18px 18px 0 0;
+}
+
+/* Fragrance: tall editorial cards, 2-col desktop */
+.lame-category-shop-page--fragrance {
+  --lame-cat-accent: 75 55 45;
+}
+@media screen and (min-width: 750px) {
+  .lame-category-shop-page--fragrance .lame-category-shop__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.75rem;
+  }
+}
+.lame-category-shop-page--fragrance .lame-cat-card {
+  border-radius: 4px;
+  background: linear-gradient(180deg, #faf8f4 0%, #fff 35%);
+}
+.lame-category-shop-page--fragrance .lame-cat-card__media {
+  aspect-ratio: 3 / 4;
+}
+.lame-category-shop-page--fragrance .lame-cat-card__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+}
+
+/* Makeup: compact 4-col, blush accent */
+.lame-category-shop-page--make-up {
+  --lame-cat-accent: 195 140 130;
+}
+@media screen and (min-width: 990px) {
+  .lame-category-shop-page--make-up .lame-category-shop__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.lame-category-shop-page--make-up .lame-cat-card__badge {
+  background: rgb(var(--lame-cat-accent));
+}
+.lame-category-shop-page--make-up .lame-cat-card__media {
+  aspect-ratio: 1 / 1;
+  border-radius: 50% 50% 12px 12px;
+}
+
+/* Bath & body: horizontal card on tablet+ */
+.lame-category-shop-page--bath-body {
+  --lame-cat-accent: 130 175 165;
+}
+@media screen and (min-width: 750px) {
+  .lame-category-shop-page--bath-body .lame-category-shop__grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .lame-category-shop-page--bath-body .lame-cat-card {
+    flex-direction: row;
+  }
+  .lame-category-shop-page--bath-body .lame-cat-card__media {
+    flex: 0 0 38%;
+    aspect-ratio: 4 / 3;
+  }
+  .lame-category-shop-page--bath-body .lame-cat-card__body {
+    justify-content: center;
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+/* Hair care: masonry-style stagger (visual only) */
+.lame-category-shop-page--hair-care {
+  --lame-cat-accent: 90 70 55;
+}
+.lame-category-shop-page--hair-care .lame-cat-card:nth-child(3n + 2) .lame-cat-card__media {
+  aspect-ratio: 5 / 6;
+}
+.lame-category-shop-page--hair-care .lame-cat-card__media {
+  aspect-ratio: 4 / 5;
+}
+
+/* Baby & mom: soft rounded, 2-col max */
+.lame-category-shop-page--baby-mom {
+  --lame-cat-accent: 220 190 200;
+  --lame-cat-radius: 22px;
+}
+.lame-category-shop-page--baby-mom .lame-cat-card {
+  background: #fffaf8;
+  border: 2px solid rgb(var(--lame-cat-accent) / 0.35);
+}
+@media screen and (min-width: 750px) {
+  .lame-category-shop-page--baby-mom .lame-category-shop__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 52rem;
+    margin-inline: auto;
+  }
+}
+
+/* Wellness: earthy, icon-style badge */
+.lame-category-shop-page--wellness {
+  --lame-cat-accent: 85 120 75;
+}
+.lame-category-shop-page--wellness .lame-cat-card {
+  border-radius: 8px;
+  border-left: 4px solid rgb(var(--lame-cat-accent));
+}
+.lame-category-shop-page--wellness .lame-category-shop__sort-select {
+  border-color: rgb(var(--lame-cat-accent) / 0.4);
+}
+
+/* Pagination on category pages */
+.lame-category-shop-page .pagination {
+  margin-top: 2.5rem;
+}

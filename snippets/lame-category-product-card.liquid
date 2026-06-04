@@ -1,0 +1,88 @@
+{%- doc -%}
+  Product card for individual category shop pages (unique layout per collection handle).
+
+  @param {object} product
+  @param {object} section - Parent section (product form)
+  @param {string} collection_handle - Collection handle for BEM modifier
+  @param {boolean} [show_wishlist] - Show wishlist toggle on image
+{%- enddoc -%}
+
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign can_add = false
+  if product.has_only_default_variant and variant.available
+    assign can_add = true
+  endif
+  assign show_wishlist = show_wishlist | default: true
+
+  assign lame_discount_percent = 0
+  assign compare_at = variant.compare_at_price
+  assign price_amount = variant.price
+  if compare_at > price_amount
+    assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+  endif
+  assign atc_label = 'actions.add_to_cart' | t
+-%}
+
+<article class="lame-cat-card lame-cat-card--{{ collection_handle }}">
+  <div class="lame-cat-card__media">
+    <a href="{{ product.url }}" class="lame-cat-card__media-link" tabindex="-1" aria-hidden="true">
+      {% if product.featured_media %}
+        {{
+          product.featured_media
+          | image_url: width: 720
+          | image_tag:
+            class: 'lame-cat-card__image',
+            loading: 'lazy',
+            widths: '360, 540, 720',
+            sizes: '(min-width: 990px) 28vw, (min-width: 750px) 40vw, 88vw',
+            alt: product.featured_media.alt | default: product.title
+        }}
+      {% else %}
+        <div class="lame-cat-card__image lame-cat-card__image--placeholder" aria-hidden="true"></div>
+      {% endif %}
+    </a>
+    {% if lame_discount_percent > 0 %}
+      <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
+    {% endif %}
+    {% if show_wishlist %}
+      {% render 'lame-our-products-wishlist-btn', product: product %}
+    {% endif %}
+  </div>
+
+  <div class="lame-cat-card__body">
+    {% if product.vendor != blank %}
+      <p class="lame-cat-card__vendor">{{ product.vendor | escape }}</p>
+    {% endif %}
+    <h3 class="lame-cat-card__title">
+      <a href="{{ product.url }}">{{ product.title | escape }}</a>
+    </h3>
+    <div class="lame-cat-card__price">
+      {% render 'price', product_resource: product, show_sale_price_first: true %}
+    </div>
+    <div class="lame-cat-card__actions">
+      {% if can_add %}
+        {%- assign cat_form_id = 'CategoryCard-Form-' | append: product.id -%}
+        <product-form-component
+          data-section-id="{{ section.id }}"
+          data-product-id="{{ product.id }}"
+          data-product-url="{{ product.url }}"
+        >
+          {%- form 'product', product, id: cat_form_id, class: 'lame-cat-card__form' -%}
+            <input type="hidden" name="id" value="{{ variant.id }}">
+            {% render 'add-to-cart-button',
+              product: product,
+              can_add_to_cart: true,
+              class: 'button button-secondary lame-cat-card__atc',
+              add_to_cart_text: atc_label
+            %}
+          {%- endform -%}
+        </product-form-component>
+      {% else %}
+        <a href="{{ product.url }}" class="button button-secondary lame-cat-card__view">
+          {{ 'lame_category_shop.view_product' | t }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</article>

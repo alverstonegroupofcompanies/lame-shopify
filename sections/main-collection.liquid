@@ -22,16 +22,24 @@
 
 {% liquid
   assign lame_cosmetic_collection = false
+  assign lame_category_shop_page = false
+  assign lame_category_hero_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
+
   if template.name == 'collection' and collection != blank
-    assign lame_cosmetic_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care,frontpage' | split: ','
-    assign lame_category_hero_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
-    if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
-      assign lame_cosmetic_collection = true
-    elsif lame_cosmetic_handles contains collection.handle
-      assign lame_cosmetic_collection = true
-    elsif section.settings.use_our_products_layout
-      assign lame_cosmetic_collection = true
+    if lame_category_hero_handles contains collection.handle
+      assign lame_category_shop_page = true
     endif
+
+    unless lame_category_shop_page
+      assign lame_cosmetic_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care,frontpage' | split: ','
+      if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+        assign lame_cosmetic_collection = true
+      elsif lame_cosmetic_handles contains collection.handle
+        assign lame_cosmetic_collection = true
+      elsif section.settings.use_our_products_layout
+        assign lame_cosmetic_collection = true
+      endif
+    endunless
   endif
 
   if lame_cosmetic_collection
@@ -41,7 +49,7 @@
   endif
 %}
 
-{% if template.name == 'collection' %}
+{% if template.name == 'collection' and lame_category_shop_page == false %}
   {% render 'lame-collection-premium' %}
 {% endif %}
 
@@ -52,27 +60,30 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section section--full-width product-grid-container premium-products-shell color-{{ section.settings.color_scheme }} uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}"
+  class="section section--full-width product-grid-container premium-products-shell color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ collection.handle }}{% else %} uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
-  infinite-scroll="{% if lame_cosmetic_collection %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
+  infinite-scroll="{% if lame_cosmetic_collection or lame_category_shop_page %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
   {% if lame_cosmetic_collection %}data-lame-our-products="true" data-lame-collection-layout="our-products"{% endif %}
+  {% if lame_category_shop_page %}data-lame-category-shop="true"{% endif %}
 >
   {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
 
   <div class="lame-collection-shell">
     <div
-      class="collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection %} collection-wrapper--grid-full-width{% endif %}"
+      class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
     >
-      {% content_for 'block',
-        type: 'filters',
-        id: 'filters',
-        results: collection,
-        results_size: collection.products_count
-      %}
+      {% unless lame_category_shop_page %}
+        {% content_for 'block',
+          type: 'filters',
+          id: 'filters',
+          results: collection,
+          results_size: collection.products_count
+        %}
+      {% endunless %}
 
       {% liquid
-        if lame_cosmetic_collection
+        if lame_category_shop_page or lame_cosmetic_collection
           assign products_per_page = 12
           assign use_infinite_scroll = false
         else
@@ -87,7 +98,9 @@
       {% paginate collection.products by products_per_page %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
-          if lame_cosmetic_collection
+          if lame_category_shop_page
+            assign group_by_brand = false
+          elsif lame_cosmetic_collection
             if section.settings.group_products_by_brand_our_products
               assign group_by_brand = true
             else
@@ -161,15 +174,19 @@
             </div>
           {% endif %}
 
-          <div class="lame-collection-brand-nav-wrap">
-            {% render 'lame-collection-brand-filter',
-              collection: collection,
-              products: collection.products,
-              grouped_by_brand: group_by_brand
-            %}
-          </div>
+          {% unless lame_category_shop_page %}
+            <div class="lame-collection-brand-nav-wrap">
+              {% render 'lame-collection-brand-filter',
+                collection: collection,
+                products: collection.products,
+                grouped_by_brand: group_by_brand
+              %}
+            </div>
+          {% endunless %}
 
-          {% if lame_cosmetic_collection %}
+          {% if lame_category_shop_page %}
+            {% render 'lame-category-price-sort', collection: collection, paginate: paginate %}
+          {% elsif lame_cosmetic_collection %}
             {% liquid
               assign lame_filters_block = section.blocks['filters']
               assign lame_enable_sorting = false
@@ -188,7 +205,20 @@
             %}
           {% endif %}
 
-        {% if group_by_brand %}
+        {% if lame_category_shop_page %}
+          {% capture children %}
+            {% for product in collection.products %}
+              <li class="lame-category-shop__item" data-product-id="{{ product.id }}">
+                {% render 'lame-category-product-card',
+                  product: product,
+                  section: section,
+                  collection_handle: collection.handle,
+                  show_wishlist: section.settings.show_wishlist
+                %}
+              </li>
+            {% endfor %}
+          {% endcapture %}
+        {% elsif group_by_brand %}
           {% liquid
             assign brand_slugs_pipe = '|'
             assign brand_labels_json = ''
@@ -350,7 +380,8 @@
             paginate: paginate,
             enable_infinite_scroll: use_infinite_scroll,
             grouped_by_brand: group_by_brand,
-            lame_paginated_collection: lame_cosmetic_collection
+            lame_paginated_collection: lame_cosmetic_collection,
+            category_shop_grid: lame_category_shop_page
           %}
         </div>
       {% endpaginate %}
@@ -362,6 +393,12 @@
   /* Hide default Shopify toolbar (item count, sort, grid density) — filters stay in sidebar / drawer */
   .lame-collection-premium-active .collection-wrapper > .facets.facets-controls-wrapper.facets--horizontal {
     display: none !important;
+  }
+
+  .lame-category-shop-page .product-grid.lame-category-shop__grid {
+    --product-grid-columns-desktop: unset;
+    --product-grid-gap-mobile: unset;
+    --product-grid-gap-desktop: unset;
   }
 {% endstylesheet %}
 
