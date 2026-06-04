@@ -195,33 +195,39 @@
 
   .lame-flash-deal__grid {
     list-style: none;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.65rem 0.85rem;
-    align-items: stretch;
+    justify-content: center;
+    justify-items: center;
+    gap: clamp(0.75rem, 2vw, 1.25rem);
+    max-width: min(100%, 920px);
   }
 
   .lame-flash-deal__item {
+    width: 100%;
+    max-width: 280px;
     min-width: 0;
-    max-width: 100%;
   }
 
   .lame-flash-deal .lame-home-product-card--flash {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    max-width: 100%;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 280px;
+    margin-inline: auto;
     overflow: hidden;
     border: 1px solid rgb(0 0 0 / 0.1);
-    border-radius: 4px;
+    border-radius: 8px;
     background: #fff;
   }
 
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media-link {
     display: block;
-    max-width: 100%;
+    flex: 0 0 48%;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -246,55 +252,109 @@
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media {
     position: relative;
     width: 100%;
-    height: clamp(110px, 20vw, 165px);
-    max-height: 165px;
+    height: 100%;
     margin: 0;
-    padding: 0.35rem;
+    padding: 0.5rem;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     background: #fafafa;
-    border-radius: 2px 2px 0 0;
+    border-radius: 8px 8px 0 0;
   }
 
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__image {
     display: block;
     width: auto;
     height: auto;
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 88%;
+    max-height: 88%;
+    margin: auto;
     object-fit: contain;
-    object-position: center;
+    object-position: center center;
   }
 
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__body {
-    padding: 0.45rem 0.5rem 0.55rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    padding: 0.4rem 0.55rem 0.5rem;
     text-align: center;
   }
 
+  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__type {
+    flex: 0 0 1.1rem;
+    margin: 0;
+    min-height: 1.1rem;
+    font-size: 0.625rem;
+    line-height: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(0 0 0 / 0.55);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__type:empty {
+    visibility: hidden;
+  }
+
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__title {
-    font-size: 0.75rem;
-    line-height: 1.3;
+    flex: 0 0 2.5em;
+    margin: 0;
+    min-height: 2.5em;
+    font-size: 0.7rem;
+    line-height: 1.25;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-align: center;
+  }
+
+  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__rating {
+    flex: 0 0 1rem;
+    min-height: 1rem;
+    margin: 0.1rem 0 0;
+    justify-content: center;
   }
 
   .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__price {
-    font-size: 0.8125rem;
+    flex: 0 0 1.25rem;
+    min-height: 1.25rem;
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    text-align: center;
+  }
+
+  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__atc-form {
+    flex: 0 0 auto;
+    margin-top: auto;
+    width: 100%;
+  }
+
+  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__atc {
+    width: 100%;
+    min-height: 2rem;
+    padding: 0.45rem 0.35rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    border-radius: 4px;
   }
 
   .lame-flash-deal .lame-home-product-card__badge {
-    top: 0.35rem;
-    left: 0.35rem;
+    top: 0.4rem;
+    left: 0.4rem;
     right: auto;
     background: #c41e3a;
-    font-size: 0.625rem;
-    padding: 0.2rem 0.35rem;
-    border-radius: 2px;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
     text-transform: uppercase;
     line-height: 1.2;
     z-index: 2;
@@ -303,32 +363,49 @@
   @media screen and (max-width: 749px) {
     .lame-flash-deal__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.4rem 0.5rem;
+      max-width: 100%;
+      gap: 0.5rem;
+    }
+
+    .lame-flash-deal__item {
+      max-width: none;
+    }
+
+    .lame-flash-deal .lame-home-product-card--flash {
+      max-width: none;
+      border-radius: 6px;
     }
 
     .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media {
-      height: clamp(88px, 26vw, 120px);
-      max-height: 120px;
-      padding: 0.25rem;
+      padding: 0.35rem;
     }
 
     .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__title {
-      font-size: 0.6875rem;
+      font-size: 0.6rem;
+      min-height: 2.4em;
+      flex-basis: 2.4em;
     }
 
     .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__price {
-      font-size: 0.75rem;
+      font-size: 0.65rem;
+    }
+
+    .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__atc {
+      min-height: 1.75rem;
+      font-size: 0.52rem;
+      padding: 0.35rem 0.2rem;
     }
 
     .lame-flash-deal .lame-home-product-card__badge {
-      font-size: 0.5625rem;
-      padding: 0.15rem 0.28rem;
+      font-size: 0.5rem;
+      padding: 0.15rem 0.3rem;
     }
   }
 
   @media screen and (min-width: 750px) {
     .lame-flash-deal__grid {
-      gap: 0.75rem 1rem;
+      grid-template-columns: repeat(3, 260px);
+      gap: 1.25rem;
     }
   }
 
