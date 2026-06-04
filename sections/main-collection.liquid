@@ -23,7 +23,11 @@
 {% liquid
   assign lame_cosmetic_collection = false
   if template.name == 'collection' and collection != blank
+    assign lame_cosmetic_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care,frontpage' | split: ','
+    assign lame_category_hero_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
     if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+      assign lame_cosmetic_collection = true
+    elsif lame_cosmetic_handles contains collection.handle
       assign lame_cosmetic_collection = true
     elsif section.settings.use_our_products_layout
       assign lame_cosmetic_collection = true
@@ -113,11 +117,46 @@
           data-lame-products-scroll
           {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
         >
-          {% if lame_cosmetic_collection and template.suffix != 'our-products' and section.settings.our_products_heading != blank %}
+          {% liquid
+            assign show_inline_header = false
+            if lame_cosmetic_collection and section.settings.our_products_heading != blank
+              assign show_inline_header = true
+              if collection != blank and lame_category_hero_handles contains collection.handle
+                assign show_inline_header = false
+              endif
+            endif
+          %}
+          {% if show_inline_header %}
+            {% liquid
+              assign inline_heading = section.settings.our_products_heading
+              assign inline_subtitle = section.settings.our_products_subtitle
+              if collection != blank
+                case collection.handle
+                  when 'bath-body'
+                    assign inline_heading = 'Bath & Body'
+                    assign inline_subtitle = 'Soothing body care rituals for soft, nourished skin.'
+                  when 'fragrance'
+                    assign inline_heading = 'Fragrance'
+                    assign inline_subtitle = 'Signature scents crafted to leave a lasting impression.'
+                  when 'skin-care'
+                    assign inline_heading = 'Skin Care'
+                    assign inline_subtitle = 'Botanical formulas for radiant, healthy skin every day.'
+                  when 'make-up'
+                    assign inline_heading = 'Makeup'
+                    assign inline_subtitle = 'Clean beauty essentials for your natural glow.'
+                  when 'baby-mom'
+                    assign inline_heading = 'Mom & Baby'
+                    assign inline_subtitle = 'Gentle, safe care for moms and little ones.'
+                  when 'wellness'
+                    assign inline_heading = 'Wellness'
+                    assign inline_subtitle = 'Holistic wellness for your everyday self-care routine.'
+                endcase
+              endif
+            %}
             <div class="lame-our-products-inline-header">
-              <h1 class="lame-our-products-inline-header__title">{{ section.settings.our_products_heading | escape }}</h1>
-              {% if section.settings.our_products_subtitle != blank %}
-                <p class="lame-our-products-inline-header__subtitle">{{ section.settings.our_products_subtitle | escape }}</p>
+              <h1 class="lame-our-products-inline-header__title">{{ inline_heading | escape }}</h1>
+              {% if inline_subtitle != blank %}
+                <p class="lame-our-products-inline-header__subtitle">{{ inline_subtitle | escape }}</p>
               {% endif %}
             </div>
           {% endif %}

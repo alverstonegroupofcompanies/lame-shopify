@@ -299,7 +299,6 @@
 
       connectedCallback() {
         if (this.cards.length > 0) {
-          this.cloneCards();
           this.startAutoSlide();
           this.setupHoverPause();
           this.setupNavButtons();
@@ -382,21 +381,12 @@
       }
 
       slideNext() {
-        this.currentIndex++;
+        if (this.cards.length === 0) return;
+        const maxIndex = Math.max(0, this.cards.length - 1);
+        this.currentIndex = this.currentIndex >= maxIndex ? 0 : this.currentIndex + 1;
         const offset = this.stepPx() * this.currentIndex;
         this.track.style.transition = 'transform 0.5s ease';
         this.track.style.transform = `translateX(-${offset}px)`;
-
-        if (this.currentIndex >= this.cards.length) {
-          setTimeout(() => {
-            this.track.style.transition = 'none';
-            this.currentIndex = 0;
-            this.track.style.transform = 'translateX(0)';
-            setTimeout(() => {
-              this.track.style.transition = 'transform 0.5s ease';
-            }, 50);
-          }, 500);
-        }
       }
 
       disconnectedCallback() {

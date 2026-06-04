@@ -1,6 +1,13 @@
+{%- liquid
+  assign category_count = section.blocks.size
+-%}
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-cosmetic-categories"
+  data-category-carousel
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-autoplay-speed="{{ section.settings.autoplay_speed | times: 1000 }}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-cosmetic-categories__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -13,53 +20,91 @@
       %}
     </header>
 
-    <ul class="lame-cosmetic-categories__grid" role="list">
-      {%- for block in section.blocks -%}
-        {%- liquid
-          assign collection = collections[block.settings.collection]
-          assign card_title = block.settings.title
-          if card_title == blank and collection != blank
-            assign card_title = collection.title
-          endif
-          assign card_link = block.settings.link
-          if card_link == blank and collection != blank
-            assign card_link = collection.url
-          endif
-          assign card_image = block.settings.image
-          if card_image == blank and collection != blank and collection.featured_image
-            assign card_image = collection.featured_image
-          endif
-        -%}
-        <li class="lame-cosmetic-categories__item" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 4 }}" {{ block.shopify_attributes }}>
-          <a href="{{ card_link | default: '#' }}" class="lame-cosmetic-categories__card">
-            <div class="lame-cosmetic-categories__media">
-              {%- if card_image != blank -%}
-                {{
-                  card_image
-                  | image_url: width: 800
-                  | image_tag:
-                    class: 'lame-cosmetic-categories__image',
-                    loading: 'lazy',
-                    widths: '300,400,500,600,800',
-                    sizes: '(min-width: 990px) 22vw, (min-width: 750px) 44vw, 88vw',
-                    alt: card_title | escape
-                }}
-              {%- else -%}
-                {{ 'collection-apparel-1' | placeholder_svg_tag: 'lame-cosmetic-categories__image placeholder-svg' }}
-              {%- endif -%}
-              <div class="lame-cosmetic-categories__overlay">
-                {%- if card_title != blank -%}
-                  <h3 class="lame-cosmetic-categories__title">{{ card_title }}</h3>
-                {%- endif -%}
-                {%- if section.settings.link_label != blank -%}
-                  <span class="lame-cosmetic-categories__link">{{ section.settings.link_label }} <span aria-hidden="true">→</span></span>
-                {%- endif -%}
-              </div>
-            </div>
-          </a>
-        </li>
-      {%- endfor -%}
-    </ul>
+    <div class="lame-cosmetic-categories__carousel">
+      <button
+        type="button"
+        class="lame-cosmetic-categories__nav lame-cosmetic-categories__nav--prev"
+        data-category-prev
+        aria-label="{{ section.settings.prev_label }}"
+      >
+        <span aria-hidden="true">&#8249;</span>
+      </button>
+
+      <div class="lame-cosmetic-categories__viewport" data-category-viewport>
+        <ul class="lame-cosmetic-categories__track" role="list" data-category-track>
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign cat_collection = collections[block.settings.collection]
+              assign card_title = block.settings.title
+              if card_title == blank and cat_collection != blank
+                assign card_title = cat_collection.title
+              endif
+
+              assign card_link = block.settings.link
+              if card_link == blank and cat_collection != blank
+                assign card_link = cat_collection.url
+              endif
+
+              assign card_image = block.settings.image
+              if card_image == blank and cat_collection != blank and cat_collection.image
+                assign card_image = cat_collection.image
+              elsif card_image == blank and cat_collection != blank and cat_collection.featured_image
+                assign card_image = cat_collection.featured_image
+              endif
+            -%}
+            <li
+              class="lame-cosmetic-categories__slide"
+              data-category-slide
+              data-lame-reveal
+              {{ block.shopify_attributes }}
+            >
+              <a href="{{ card_link | default: '#' }}" class="lame-cosmetic-categories__card">
+                <div class="lame-cosmetic-categories__media">
+                  {%- if card_image != blank -%}
+                    {{
+                      card_image
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'lame-cosmetic-categories__image',
+                        loading: 'lazy',
+                        widths: '360,480,600,720,900',
+                        sizes: '(min-width: 990px) 24vw, (min-width: 750px) 44vw, 88vw',
+                        alt: card_title | escape
+                    }}
+                  {%- else -%}
+                    {{ 'collection-apparel-1' | placeholder_svg_tag: 'lame-cosmetic-categories__image placeholder-svg' }}
+                  {%- endif -%}
+                  <div class="lame-cosmetic-categories__overlay">
+                    {%- if card_title != blank -%}
+                      <h3 class="lame-cosmetic-categories__title">{{ card_title }}</h3>
+                    {%- endif -%}
+                    {%- if section.settings.link_label != blank -%}
+                      <span class="lame-cosmetic-categories__link">
+                        {{ section.settings.link_label }}
+                        <span aria-hidden="true">→</span>
+                      </span>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        class="lame-cosmetic-categories__nav lame-cosmetic-categories__nav--next"
+        data-category-next
+        aria-label="{{ section.settings.next_label }}"
+      >
+        <span aria-hidden="true">&#8250;</span>
+      </button>
+    </div>
+
+    {%- if category_count > 1 and section.settings.show_dots -%}
+      <div class="lame-cosmetic-categories__dots" data-category-dots role="tablist" aria-label="{{ section.settings.dots_label }}"></div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -67,23 +112,151 @@
   (() => {
     const section = document.getElementById('shopify-section-{{ section.id }}');
     if (!section) return;
-    const nodes = section.querySelectorAll('[data-lame-reveal]');
-    if (!nodes.length) return;
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries, obs) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
-          });
-        },
-        { threshold: 0.12 }
-      );
-      nodes.forEach((node) => observer.observe(node));
-    } else {
-      nodes.forEach((node) => node.classList.add('is-visible'));
-    }
+
+    section.querySelectorAll('[data-lame-reveal]').forEach((node) => {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.12 }
+        );
+        observer.observe(node);
+      } else {
+        node.classList.add('is-visible');
+      }
+    });
+
+    const track = section.querySelector('[data-category-track]');
+    const slides = [...section.querySelectorAll('[data-category-slide]')];
+    const prev = section.querySelector('[data-category-prev]');
+    const next = section.querySelector('[data-category-next]');
+    const dotsWrap = section.querySelector('[data-category-dots]');
+
+    if (!track || slides.length === 0) return;
+
+    const autoplayEnabled = section.dataset.autoplay === 'true';
+    const autoplaySpeed = Number(section.dataset.autoplaySpeed) || 4000;
+    let pageIndex = 0;
+    let autoplayTimer = null;
+    let dots = [];
+
+    const getPerView = () => {
+      if (window.matchMedia('(min-width: 990px)').matches) return Math.min(4, slides.length);
+      if (window.matchMedia('(min-width: 750px)').matches) return Math.min(2, slides.length);
+      return 1;
+    };
+
+    const getPageCount = () => {
+      const perView = getPerView();
+      return Math.max(1, Math.ceil(slides.length / perView));
+    };
+
+    const scrollToPage = (index, smooth = true) => {
+      const perView = getPerView();
+      const maxPage = getPageCount() - 1;
+      pageIndex = ((index % (maxPage + 1)) + (maxPage + 1)) % (maxPage + 1);
+      const targetSlide = slides[pageIndex * perView] || slides[0];
+      const offset = targetSlide.offsetLeft - track.offsetLeft;
+      track.scrollTo({ left: offset, behavior: smooth ? 'smooth' : 'auto' });
+      updateUI();
+    };
+
+    const buildDots = () => {
+      if (!dotsWrap) return;
+      dotsWrap.innerHTML = '';
+      dots = [];
+      const count = getPageCount();
+      for (let i = 0; i < count; i += 1) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'lame-cosmetic-categories__dot';
+        dot.setAttribute('role', 'tab');
+        dot.setAttribute('aria-label', `Category page ${i + 1}`);
+        dot.addEventListener('click', () => {
+          scrollToPage(i);
+          restartAutoplay();
+        });
+        dotsWrap.appendChild(dot);
+        dots.push(dot);
+      }
+    };
+
+    const updateUI = () => {
+      const maxPage = getPageCount() - 1;
+      const needsNav = slides.length > getPerView();
+
+      if (prev) {
+        prev.hidden = !needsNav;
+        prev.disabled = pageIndex <= 0;
+      }
+      if (next) {
+        next.hidden = !needsNav;
+        next.disabled = pageIndex >= maxPage;
+      }
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === pageIndex);
+        dot.setAttribute('aria-selected', i === pageIndex ? 'true' : 'false');
+      });
+    };
+
+    const stopAutoplay = () => {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (!autoplayEnabled || slides.length <= getPerView()) return;
+      autoplayTimer = window.setInterval(() => {
+        const maxPage = getPageCount() - 1;
+        scrollToPage(pageIndex >= maxPage ? 0 : pageIndex + 1);
+      }, autoplaySpeed);
+    };
+
+    const restartAutoplay = () => {
+      stopAutoplay();
+      startAutoplay();
+    };
+
+    prev?.addEventListener('click', () => {
+      scrollToPage(pageIndex - 1);
+      restartAutoplay();
+    });
+
+    next?.addEventListener('click', () => {
+      scrollToPage(pageIndex + 1);
+      restartAutoplay();
+    });
+
+    track.addEventListener('scroll', () => {
+      const perView = getPerView();
+      const slideWidth = slides[0]?.offsetWidth || 1;
+      const gap = parseFloat(getComputedStyle(track).gap || '0');
+      const approx = Math.round(track.scrollLeft / (slideWidth + gap));
+      pageIndex = Math.min(Math.max(Math.floor(approx / perView), 0), getPageCount() - 1);
+      updateUI();
+    }, { passive: true });
+
+    section.addEventListener('mouseenter', stopAutoplay);
+    section.addEventListener('mouseleave', startAutoplay);
+
+    buildDots();
+    updateUI();
+    startAutoplay();
+
+    window.addEventListener('resize', () => {
+      buildDots();
+      scrollToPage(pageIndex, false);
+      restartAutoplay();
+    });
   })();
 </script>
 
@@ -92,12 +265,51 @@
   "name": "Cosmetic categories",
   "tag": "section",
   "class": "section-wrapper",
-  "max_blocks": 6,
+  "max_blocks": 8,
   "enabled_on": { "templates": ["index"] },
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by Category" },
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "Natural care for every you." },
     { "type": "text", "id": "link_label", "label": "Card link label", "default": "Shop now" },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate carousel",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Auto-rotate speed (seconds)",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "prev_label",
+      "label": "Previous button label",
+      "default": "Previous categories"
+    },
+    {
+      "type": "text",
+      "id": "next_label",
+      "label": "Next button label",
+      "default": "Next categories"
+    },
+    {
+      "type": "text",
+      "id": "dots_label",
+      "label": "Pagination label",
+      "default": "Category pages"
+    },
     {
       "type": "select",
       "id": "section_width",
@@ -151,10 +363,10 @@
     {
       "name": "Cosmetic categories",
       "blocks": [
-        { "type": "category", "settings": { "title": "Makeup" } },
-        { "type": "category", "settings": { "title": "Mom & Baby" } },
-        { "type": "category", "settings": { "title": "Skin Care" } },
-        { "type": "category", "settings": { "title": "Hair Care" } }
+        { "type": "category", "settings": { "title": "Bath & Body", "collection": "bath-body" } },
+        { "type": "category", "settings": { "title": "Fragrance", "collection": "fragrance" } },
+        { "type": "category", "settings": { "title": "Hair Care", "collection": "skin-care" } },
+        { "type": "category", "settings": { "title": "Makeup", "collection": "make-up" } }
       ]
     }
   ]
