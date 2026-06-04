@@ -1,3 +1,5 @@
+{{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
+
 {% liquid
   assign deal_collection = collections[section.settings.collection]
   assign discount_target = section.settings.discount_percent
@@ -13,11 +15,32 @@
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal"
+  data-flash-deal-carousel
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     <header class="lame-flash-deal__header" data-lame-reveal>
-      {% render 'lame-section-heading', title: section.settings.heading, alignment: 'center', size: 'large' %}
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lame-flash-deal__eyebrow">
+          <span class="lame-flash-deal__eyebrow-diamond" aria-hidden="true">&#9670;</span>
+          {{ section.settings.eyebrow | escape }}
+          <span class="lame-flash-deal__eyebrow-diamond" aria-hidden="true">&#9670;</span>
+        </p>
+      {%- endif -%}
+
+      <h2 class="lame-flash-deal__title">
+        <span class="lame-flash-deal__leaf" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c4-5 6-9 6-13a6 6 0 1 0-12 0c0 4 2 8 6 13Z" stroke="currentColor" stroke-width="1.3"/></svg>
+        </span>
+        <span>{{ section.settings.heading | escape }}</span>
+        <span class="lame-flash-deal__leaf" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c4-5 6-9 6-13a6 6 0 1 0-12 0c0 4 2 8 6 13Z" stroke="currentColor" stroke-width="1.3"/></svg>
+        </span>
+      </h2>
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="lame-flash-deal__subtitle">{{ section.settings.subtitle | escape }}</p>
+      {%- endif -%}
 
       {% if section.settings.show_countdown %}
         <div
@@ -32,17 +55,17 @@
           {% endif %}
           <div class="lame-flash-deal__countdown-units" role="timer">
             <div class="lame-flash-deal__unit">
-              <span data-hours>00</span>
+              <span class="lame-flash-deal__unit-value" data-hours>00</span>
               <small>{{ section.settings.label_hours }}</small>
             </div>
             <span class="lame-flash-deal__sep" aria-hidden="true">:</span>
             <div class="lame-flash-deal__unit">
-              <span data-minutes>00</span>
+              <span class="lame-flash-deal__unit-value" data-minutes>00</span>
               <small>{{ section.settings.label_minutes }}</small>
             </div>
             <span class="lame-flash-deal__sep" aria-hidden="true">:</span>
             <div class="lame-flash-deal__unit">
-              <span data-seconds>00</span>
+              <span class="lame-flash-deal__unit-value" data-seconds>00</span>
               <small>{{ section.settings.label_seconds }}</small>
             </div>
           </div>
@@ -50,371 +73,113 @@
       {% endif %}
     </header>
 
-    <ul class="lame-flash-deal__grid" role="list">
-      {% if product_source == 'manual' %}
-        {% for block in section.blocks %}
-          {% if products_shown >= products_limit %}
-            {% break %}
-          {% endif %}
-          {% if block.type != 'product' or block.settings.product == blank %}
-            {% continue %}
-          {% endif %}
+    <div class="lame-flash-deal__carousel">
+      <button
+        type="button"
+        class="lame-flash-deal__nav lame-flash-deal__nav--prev"
+        data-flash-prev
+        aria-label="{{ section.settings.prev_label }}"
+      >
+        <span aria-hidden="true">&#8249;</span>
+      </button>
 
-          {% assign product = block.settings.product %}
-          {% render 'lame-flash-deal-product',
-            product: product,
-            badge_label: section.settings.badge_label,
-            add_to_cart_label: section.settings.add_to_cart_label,
-            reveal_delay: products_shown | modulo: 2,
-            block_attributes: block.shopify_attributes
-          %}
-          {% assign products_shown = products_shown | plus: 1 %}
-        {% endfor %}
-      {% elsif deal_collection != blank %}
-        {% for product in deal_collection.products %}
-          {% if products_shown >= products_limit %}
-            {% break %}
-          {% endif %}
+      <div class="lame-flash-deal__viewport" data-flash-viewport>
+        <ul class="lame-flash-deal__track" role="list" data-flash-track>
+          {% if product_source == 'manual' %}
+            {% for block in section.blocks %}
+              {% if products_shown >= products_limit %}
+                {% break %}
+              {% endif %}
+              {% if block.type != 'product' or block.settings.product == blank %}
+                {% continue %}
+              {% endif %}
 
-          {% liquid
-            assign selected_variant = product.selected_or_first_available_variant
-            assign compare_at = selected_variant.compare_at_price
-            assign price = selected_variant.price
-            assign qualifies = true
+              {% assign product = block.settings.product %}
+              {% render 'lame-flash-deal-product',
+                product: product,
+                product_index: products_shown,
+                products_limit: products_limit,
+                badge_label: section.settings.badge_label,
+                best_deal_label: section.settings.best_deal_label,
+                add_to_cart_label: section.settings.add_to_cart_label,
+                review_count_fallback: section.settings.review_count_fallback,
+                reveal_delay: products_shown | modulo: 2,
+                block_attributes: block.shopify_attributes
+              %}
+              {% assign products_shown = products_shown | plus: 1 %}
+            {% endfor %}
+          {% elsif deal_collection != blank %}
+            {% for product in deal_collection.products %}
+              {% if products_shown >= products_limit %}
+                {% break %}
+              {% endif %}
 
-            if filter_mode == 'on_sale' or filter_mode == 'compare_at_range'
-              assign qualifies = false
-              if compare_at > price
-                if filter_mode == 'on_sale'
-                  assign qualifies = true
-                else
-                  assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
-                  if discount_percent >= min_discount and discount_percent <= max_discount
-                    assign qualifies = true
+              {% liquid
+                assign selected_variant = product.selected_or_first_available_variant
+                assign compare_at = selected_variant.compare_at_price
+                assign price = selected_variant.price
+                assign qualifies = true
+
+                if filter_mode == 'on_sale' or filter_mode == 'compare_at_range'
+                  assign qualifies = false
+                  if compare_at > price
+                    if filter_mode == 'on_sale'
+                      assign qualifies = true
+                    else
+                      assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
+                      if discount_percent >= min_discount and discount_percent <= max_discount
+                        assign qualifies = true
+                      endif
+                    endif
                   endif
                 endif
-              endif
-            endif
-          %}
+              %}
 
-          {% unless qualifies %}
-            {% continue %}
-          {% endunless %}
+              {% unless qualifies %}
+                {% continue %}
+              {% endunless %}
 
-          {% render 'lame-flash-deal-product',
-            product: product,
-            badge_label: section.settings.badge_label,
-            add_to_cart_label: section.settings.add_to_cart_label,
-            reveal_delay: products_shown | modulo: 2
-          %}
-          {% assign products_shown = products_shown | plus: 1 %}
-        {% endfor %}
-      {% endif %}
+              {% render 'lame-flash-deal-product',
+                product: product,
+                product_index: products_shown,
+                products_limit: products_limit,
+                badge_label: section.settings.badge_label,
+                best_deal_label: section.settings.best_deal_label,
+                add_to_cart_label: section.settings.add_to_cart_label,
+                review_count_fallback: section.settings.review_count_fallback,
+                reveal_delay: products_shown | modulo: 2
+              %}
+              {% assign products_shown = products_shown | plus: 1 %}
+            {% endfor %}
+          {% endif %}
 
-      {% if products_shown == 0 %}
-        {% for i in (1..products_limit) %}
-          <li class="lame-flash-deal__item" data-lame-reveal>
-            <article class="lame-flash-deal__empty">
-              <p>{{ section.settings.empty_text }}</p>
-            </article>
-          </li>
-        {% endfor %}
-      {% endif %}
-    </ul>
+          {% if products_shown == 0 %}
+            {% for i in (1..products_limit) %}
+              <li class="lame-flash-deal__item" data-lame-reveal>
+                <article class="lame-flash-deal__empty">
+                  <p>{{ section.settings.empty_text }}</p>
+                </article>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        class="lame-flash-deal__nav lame-flash-deal__nav--next"
+        data-flash-next
+        aria-label="{{ section.settings.next_label }}"
+      >
+        <span aria-hidden="true">&#8250;</span>
+      </button>
+    </div>
+
+    {%- if section.settings.show_trust_bar -%}
+      {% render 'lame-flash-deal-trust-bar' %}
+    {%- endif -%}
   </div>
 </section>
-
-{% stylesheet %}
-  .lame-flash-deal__wrap {
-    width: 100%;
-    max-width: 100%;
-    margin-inline: auto;
-  }
-
-  .lame-flash-deal__header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .lame-flash-deal__header .lame-section-heading {
-    margin-bottom: 0.85rem;
-  }
-
-  .lame-flash-deal__countdown {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .lame-flash-deal__countdown-label {
-    margin: 0;
-    font-size: 0.8125rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgb(0 0 0 / 0.78);
-  }
-
-  .lame-flash-deal__countdown-units {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-  }
-
-  .lame-flash-deal__unit {
-    min-width: 3.25rem;
-    text-align: center;
-  }
-
-  .lame-flash-deal__unit span {
-    display: block;
-    font-size: 1.35rem;
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: #111;
-  }
-
-  .lame-flash-deal__unit small {
-    display: block;
-    margin-top: 0.2rem;
-    font-size: 0.6875rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: rgb(0 0 0 / 0.72);
-  }
-
-  .lame-flash-deal__sep {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: rgb(0 0 0 / 0.55);
-    line-height: 1;
-    padding-bottom: 0.85rem;
-  }
-
-  .lame-flash-deal__grid {
-    list-style: none;
-    margin: 0 auto;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    justify-content: center;
-    justify-items: center;
-    gap: clamp(0.75rem, 2vw, 1.25rem);
-    max-width: min(100%, 920px);
-  }
-
-  .lame-flash-deal__item {
-    width: 100%;
-    max-width: 280px;
-    min-width: 0;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    aspect-ratio: 1;
-    max-width: 280px;
-    margin-inline: auto;
-    overflow: hidden;
-    border: 1px solid rgb(0 0 0 / 0.1);
-    border-radius: 8px;
-    background: #fff;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media-link {
-    display: block;
-    flex: 0 0 48%;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .lame-flash-deal__empty {
-    margin: 0;
-    min-height: 200px;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    padding: 1rem;
-    border: 1px dashed rgb(0 0 0 / 0.12);
-    background: rgb(0 0 0 / 0.02);
-  }
-
-  .lame-flash-deal__empty p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: rgb(0 0 0 / 0.78);
-    line-height: 1.45;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0.5rem;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: #fafafa;
-    border-radius: 8px 8px 0 0;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__image {
-    display: block;
-    width: auto;
-    height: auto;
-    max-width: 88%;
-    max-height: 88%;
-    margin: auto;
-    object-fit: contain;
-    object-position: center center;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    min-height: 0;
-    padding: 0.4rem 0.55rem 0.5rem;
-    text-align: center;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__type {
-    flex: 0 0 1.1rem;
-    margin: 0;
-    min-height: 1.1rem;
-    font-size: 0.625rem;
-    line-height: 1.1rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: rgb(0 0 0 / 0.55);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__type:empty {
-    visibility: hidden;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__title {
-    flex: 0 0 2.5em;
-    margin: 0;
-    min-height: 2.5em;
-    font-size: 0.7rem;
-    line-height: 1.25;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-align: center;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__rating {
-    flex: 0 0 1rem;
-    min-height: 1rem;
-    margin: 0.1rem 0 0;
-    justify-content: center;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__price {
-    flex: 0 0 1.25rem;
-    min-height: 1.25rem;
-    margin: 0.15rem 0 0;
-    font-size: 0.75rem;
-    line-height: 1.25rem;
-    text-align: center;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__atc-form {
-    flex: 0 0 auto;
-    margin-top: auto;
-    width: 100%;
-  }
-
-  .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__atc {
-    width: 100%;
-    min-height: 2rem;
-    padding: 0.45rem 0.35rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    border-radius: 4px;
-  }
-
-  .lame-flash-deal .lame-home-product-card__badge {
-    top: 0.4rem;
-    left: 0.4rem;
-    right: auto;
-    background: #c41e3a;
-    font-size: 0.6rem;
-    padding: 0.2rem 0.4rem;
-    border-radius: 3px;
-    text-transform: uppercase;
-    line-height: 1.2;
-    z-index: 2;
-  }
-
-  @media screen and (max-width: 749px) {
-    .lame-flash-deal__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      max-width: 100%;
-      gap: 0.5rem;
-    }
-
-    .lame-flash-deal__item {
-      max-width: none;
-    }
-
-    .lame-flash-deal .lame-home-product-card--flash {
-      max-width: none;
-      border-radius: 6px;
-    }
-
-    .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__media {
-      padding: 0.35rem;
-    }
-
-    .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__title {
-      font-size: 0.6rem;
-      min-height: 2.4em;
-      flex-basis: 2.4em;
-    }
-
-    .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__price {
-      font-size: 0.65rem;
-    }
-
-    .lame-flash-deal .lame-home-product-card--flash .lame-home-product-card__atc {
-      min-height: 1.75rem;
-      font-size: 0.52rem;
-      padding: 0.35rem 0.2rem;
-    }
-
-    .lame-flash-deal .lame-home-product-card__badge {
-      font-size: 0.5rem;
-      padding: 0.15rem 0.3rem;
-    }
-  }
-
-  @media screen and (min-width: 750px) {
-    .lame-flash-deal__grid {
-      grid-template-columns: repeat(3, 260px);
-      gap: 1.25rem;
-    }
-  }
-
-  @media screen and (max-width: 549px) {
-    .lame-flash-deal__unit span {
-      font-size: 1.15rem;
-    }
-  }
-{% endstylesheet %}
 
 <script>
   (() => {
@@ -474,6 +239,24 @@
       window.setInterval(tick, 1000);
     });
 
+    const viewport = section.querySelector('[data-flash-viewport]');
+    const track = section.querySelector('[data-flash-track]');
+    const prev = section.querySelector('[data-flash-prev]');
+    const next = section.querySelector('[data-flash-next]');
+    const scrollEl = viewport || track;
+
+    if (scrollEl && track) {
+      const scrollBySlide = (dir) => {
+        const slide = track.querySelector('.lame-flash-deal__item');
+        if (!slide) return;
+        const gap = parseFloat(getComputedStyle(track).gap) || 16;
+        scrollEl.scrollBy({ left: dir * (slide.offsetWidth + gap), behavior: 'smooth' });
+      };
+
+      prev?.addEventListener('click', () => scrollBySlide(-1));
+      next?.addEventListener('click', () => scrollBySlide(1));
+    }
+
     section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -514,8 +297,16 @@
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index"] },
   "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Limited time offer" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Flash Deal" },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Unbeatable offers on your favourite essentials. Hurry, deals won't last long!"
+    },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
+    { "type": "text", "id": "best_deal_label", "label": "Featured card ribbon", "default": "Best Deal" },
     {
       "type": "select",
       "id": "product_source",
@@ -556,8 +347,16 @@
     {
       "type": "text",
       "id": "badge_label",
-      "label": "Discount badge",
-      "default": "10% OFF"
+      "label": "Discount badge fallback",
+      "default": "10% OFF",
+      "info": "Shown when product has no compare-at price."
+    },
+    {
+      "type": "text",
+      "id": "review_count_fallback",
+      "label": "Review count fallback",
+      "default": "120",
+      "info": "Used when product has no review metafield."
     },
     {
       "type": "range",
@@ -585,14 +384,18 @@
       "label": "Empty state text",
       "default": "Select a collection with products, or add product blocks. Theme editor → Flash deal → Collection."
     },
-    { "type": "header", "content": "24-hour countdown" },
+    { "type": "header", "content": "Carousel" },
+    { "type": "text", "id": "prev_label", "label": "Previous label", "default": "Previous products" },
+    { "type": "text", "id": "next_label", "label": "Next label", "default": "Next products" },
+    { "type": "checkbox", "id": "show_trust_bar", "label": "Show trust bar", "default": true },
+    { "type": "header", "content": "Countdown" },
     { "type": "checkbox", "id": "show_countdown", "label": "Show countdown", "default": true },
     {
       "type": "text",
       "id": "countdown_start",
       "label": "Deal start (YYYY-MM-DD HH:MM)",
       "default": "2026-05-17 00:00",
-      "info": "Timer counts down for 24 hours from this date and time (store timezone)."
+      "info": "Timer counts down from this date and time (store timezone)."
     },
     {
       "type": "range",
@@ -636,7 +439,7 @@
       "max": 80,
       "step": 4,
       "unit": "px",
-      "default": 32
+      "default": 48
     },
     {
       "type": "range",
@@ -646,7 +449,7 @@
       "max": 80,
       "step": 4,
       "unit": "px",
-      "default": 32
+      "default": 48
     }
   ],
   "blocks": [
@@ -668,7 +471,7 @@
       "category": "Products",
       "settings": {
         "product_source": "collection",
-        "filter_mode": "all"
+        "filter_mode": "on_sale"
       }
     }
   ]
