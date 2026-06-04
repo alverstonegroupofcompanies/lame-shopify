@@ -132,11 +132,13 @@
     });
 
     const track = section.querySelector('[data-category-track]');
+    const viewport = section.querySelector('[data-category-viewport]');
+    const scrollEl = viewport || track;
     const prev = section.querySelector('[data-category-prev]');
     const next = section.querySelector('[data-category-next]');
     const dotsWrap = section.querySelector('[data-category-dots]');
 
-    if (!track) return;
+    if (!track || !scrollEl) return;
 
     const originals = [...track.querySelectorAll('[data-category-slide]:not([data-category-clone])')];
     if (originals.length === 0) return;
@@ -175,15 +177,16 @@
     const scrollToPhysical = (physicalIndex, smooth = true) => {
       const child = track.children[physicalIndex];
       if (!child) return;
-      track.scrollTo({
-        left: child.offsetLeft - track.offsetLeft,
+      const scrollLeft = child.offsetLeft - track.offsetLeft;
+      scrollEl.scrollTo({
+        left: scrollLeft,
         behavior: smooth ? 'smooth' : 'auto',
       });
     };
 
     const afterScroll = (callback) => {
-      if ('onscrollend' in track) {
-        track.addEventListener('scrollend', callback, { once: true });
+      if ('onscrollend' in scrollEl) {
+        scrollEl.addEventListener('scrollend', callback, { once: true });
       } else {
         window.setTimeout(callback, 520);
       }
@@ -290,13 +293,13 @@
 
     const syncFromScroll = () => {
       if (isResetting) return;
-      const trackLeft = track.scrollLeft;
+      const scrollLeft = scrollEl.scrollLeft;
       let nearest = logicalIndex;
       let nearestDist = Infinity;
       for (let i = 0; i < count; i += 1) {
         const child = track.children[offsetStart + i];
         if (!child) continue;
-        const dist = Math.abs(child.offsetLeft - track.offsetLeft - trackLeft);
+        const dist = Math.abs(child.offsetLeft - track.offsetLeft - scrollLeft);
         if (dist < nearestDist) {
           nearestDist = dist;
           nearest = i;
@@ -316,7 +319,7 @@
       restartAutoplay();
     });
 
-    track.addEventListener('scroll', syncFromScroll, { passive: true });
+    scrollEl.addEventListener('scroll', syncFromScroll, { passive: true });
 
     section.addEventListener('mouseenter', stopAutoplay);
     section.addEventListener('mouseleave', startAutoplay);
