@@ -1,17 +1,17 @@
 {%- doc -%}
-  Product card for individual category shop pages (unique layout per collection handle).
+  Compact cosmetic grid card for category collection pages.
 
   @param {object} product
   @param {object} section - Parent section (product form)
-  @param {string} collection_handle - Collection handle for BEM modifier
+  @param {string} collection_handle - Collection handle for accent modifier
   @param {boolean} [show_wishlist] - Show wishlist toggle on image
 {%- enddoc -%}
 
 {%- liquid
   assign variant = product.selected_or_first_available_variant
-  assign can_add = false
+  assign can_quick_add = false
   if product.has_only_default_variant and variant.available
-    assign can_add = true
+    assign can_quick_add = true
   endif
   assign show_wishlist = show_wishlist | default: true
 
@@ -21,47 +21,58 @@
   if compare_at > price_amount
     assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
   endif
-  assign atc_label = 'actions.add_to_cart' | t
+
+  assign card_label = product.type
+  if card_label == blank
+    assign card_label = product.vendor
+  endif
 -%}
 
 <article class="lame-cat-card lame-cat-card--{{ collection_handle }}">
   <div class="lame-cat-card__media">
-    <a href="{{ product.url }}" class="lame-cat-card__media-link" tabindex="-1" aria-hidden="true">
+    <a href="{{ product.url }}" class="lame-cat-card__media-link">
       {% if product.featured_media %}
         {{
           product.featured_media
-          | image_url: width: 720
+          | image_url: width: 600
           | image_tag:
             class: 'lame-cat-card__image',
             loading: 'lazy',
-            widths: '360, 540, 720',
-            sizes: '(min-width: 990px) 28vw, (min-width: 750px) 40vw, 88vw',
+            widths: '200,300,400,500,600',
+            sizes: '(min-width: 1200px) 22vw, (min-width: 750px) 30vw, 46vw',
             alt: product.featured_media.alt | default: product.title
         }}
       {% else %}
         <div class="lame-cat-card__image lame-cat-card__image--placeholder" aria-hidden="true"></div>
       {% endif %}
     </a>
+
     {% if lame_discount_percent > 0 %}
       <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
     {% endif %}
+
     {% if show_wishlist %}
       {% render 'lame-our-products-wishlist-btn', product: product %}
     {% endif %}
   </div>
 
   <div class="lame-cat-card__body">
-    {% if product.vendor != blank %}
-      <p class="lame-cat-card__vendor">{{ product.vendor | escape }}</p>
+    {% if card_label != blank %}
+      <p class="lame-cat-card__label">{{ card_label | escape }}</p>
+    {% else %}
+      <p class="lame-cat-card__label lame-cat-card__label--empty" aria-hidden="true">&#8203;</p>
     {% endif %}
+
     <h3 class="lame-cat-card__title">
       <a href="{{ product.url }}">{{ product.title | escape }}</a>
     </h3>
+
     <div class="lame-cat-card__price">
       {% render 'price', product_resource: product, show_sale_price_first: true %}
     </div>
+
     <div class="lame-cat-card__actions">
-      {% if can_add %}
+      {% if can_quick_add %}
         {%- assign cat_form_id = 'CategoryCard-Form-' | append: product.id -%}
         <product-form-component
           data-section-id="{{ section.id }}"
@@ -70,16 +81,13 @@
         >
           {%- form 'product', product, id: cat_form_id, class: 'lame-cat-card__form' -%}
             <input type="hidden" name="id" value="{{ variant.id }}">
-            {% render 'add-to-cart-button',
-              product: product,
-              can_add_to_cart: true,
-              class: 'button button-secondary lame-cat-card__atc',
-              add_to_cart_text: atc_label
-            %}
+            <button type="submit" name="add" class="lame-cat-card__btn">
+              {{ 'actions.add_to_cart' | t }}
+            </button>
           {%- endform -%}
         </product-form-component>
       {% else %}
-        <a href="{{ product.url }}" class="button button-secondary lame-cat-card__view">
+        <a href="{{ product.url }}" class="lame-cat-card__btn lame-cat-card__btn--outline">
           {{ 'lame_category_shop.view_product' | t }}
         </a>
       {% endif %}
