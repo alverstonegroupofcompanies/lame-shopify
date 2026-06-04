@@ -38,20 +38,24 @@
   {% endif %}
 >
   {% if cart.empty? or force_empty %}
-    {%- if shop.customer_accounts_enabled and customer == null -%}
-      <p>
-        {{ 'actions.log_in_html' | t: link: routes.account_login_url }}
-      </p>
-    {%- endif -%}
+    {%- if template.name == 'cart' -%}
+      {% render 'lame-cart-empty' %}
+    {%- else -%}
+      {%- if shop.customer_accounts_enabled and customer == null -%}
+        <p>
+          {{ 'actions.log_in_html' | t: link: routes.account_login_url }}
+        </p>
+      {%- endif -%}
 
-    <a
-      class="button cart-items__empty-button"
-      href="{{ settings.empty_cart_button_link | default: routes.all_products_collection_url }}"
-    >
-      <span class="button-text">
-        {{ 'actions.continue_shopping' | t }}
-      </span>
-    </a>
+      <a
+        class="button cart-items__empty-button"
+        href="{{ settings.empty_cart_button_link | default: routes.all_products_collection_url }}"
+      >
+        <span class="button-text">
+          {{ 'actions.continue_shopping' | t }}
+        </span>
+      </a>
+    {%- endif -%}
   {%- else -%}
     <span
       class="visually-hidden"
@@ -146,6 +150,8 @@
                       endif
                       if block_settings.image_ratio == 'portrait'
                         assign ratio = 0.8
+                      elsif block_settings.image_ratio == 'square'
+                        assign ratio = 1
                       elsif block_settings.image_ratio == 'adapt'
                         assign ratio = item.image.aspect_ratio
                       endif
@@ -167,6 +173,13 @@
                   headers="productInformation"
                 >
                   <div class="cart-items__product-info">
+                    {% if template.name == 'cart' %}
+                      {% if item.product.vendor != blank %}
+                        <p class="cart-items__vendor">{{ item.product.vendor | escape }}</p>
+                      {% endif %}
+                    {% elsif item.product.vendor and block_settings.vendor %}
+                      <p>{{ item.product.vendor }}</p>
+                    {% endif %}
                     <p>
                       <a
                         href="{{ item.url }}"
@@ -178,10 +191,11 @@
                         {{- item.product.title -}}
                       </a>
                     </p>
-                    {% if item.product.vendor and block_settings.vendor %}
-                      <p>
-                        {{ item.product.vendor }}
-                      </p>
+                    {% if template.name == 'cart' and item.product.description != blank %}
+                      <p class="cart-items__excerpt">{{ item.product.description | strip_html | truncate: 120 }}</p>
+                    {% endif %}
+                    {% if template.name == 'cart' and item.variant.available %}
+                      <span class="cart-items__in-stock">{{ 'lame_cart.in_stock' | t }}</span>
                     {% endif %}
 
                     {%- if item.item_components.size != 0 -%}

@@ -13,14 +13,13 @@
       class="section color-{{ section.settings.color_scheme }} section--{{ section.settings.section_width }}"
     >
       <div
-        class="cart-page spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
+        class="cart-page cart-page--cosmetic spacing-style cart-page--empty"
         style="{% render 'spacing-style', settings: section.settings %}"
       >
-        <div class="cart-page__title">
-          {%- content_for 'block', id: 'cart-page-title', type: '_cart-title', force_empty: true %}
-        </div>
-        <div class="cart-page__items">
-          {%- content_for 'block', id: 'cart-page-items', type: '_cart-products', force_empty: true %}
+        <div class="cart-page__col-main cart-page__col-main--empty">
+          <div class="cart-page__items">
+            {%- content_for 'block', id: 'cart-page-items', type: '_cart-products', force_empty: true %}
+          </div>
         </div>
         {{ cart_page_more_blocks_content }}
       </div>
@@ -33,26 +32,40 @@
     class="section color-{{ section.settings.color_scheme }} section--{{ section.settings.section_width }}"
   >
     <div
-      class="cart-page spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
+      class="cart-page cart-page--cosmetic spacing-style{% if cart.empty? %} cart-page--empty{% endif %}"
       style="{% render 'spacing-style', settings: section.settings %}"
     >
-      <div class="cart-page__title">
-        {%- content_for 'block', id: 'cart-page-title', type: '_cart-title' %}
-      </div>
-
-      <div class="cart-page__items">
-        {%- content_for 'block', id: 'cart-page-items', type: '_cart-products' %}
-      </div>
-
-      {%- unless cart.empty? -%}
-        <div class="cart-page__trust">
-          {% render 'lame-cart-trust' %}
+      <div class="cart-page__col-main">
+        <div class="cart-page__title" hidden aria-hidden="true">
+          {%- content_for 'block', id: 'cart-page-title', type: '_cart-title' %}
         </div>
-      {%- endunless -%}
+
+        {%- unless cart.empty? -%}
+          {% render 'lame-cart-page-header',
+            title: section.settings.cart_heading,
+            subtitle: section.settings.cart_subtitle,
+            show_count: true
+          %}
+        {%- endunless -%}
+
+        <div class="cart-page__items">
+          {%- content_for 'block', id: 'cart-page-items', type: '_cart-products' %}
+        </div>
+
+        {%- unless cart.empty? -%}
+          {% liquid
+            assign free_ship_threshold = section.settings.free_shipping_threshold | default: 500 | times: 100
+          %}
+          {% render 'lame-cart-free-shipping-banner', threshold_cents: free_ship_threshold %}
+        {%- endunless -%}
+      </div>
 
       {%- unless cart.empty? -%}
-        <div class="cart-page__summary">
-          {%- content_for 'block', id: 'cart-page-summary', type: '_cart-summary' -%}
+        <div class="cart-page__col-summary">
+          <div class="cart-page__summary">
+            {%- content_for 'block', id: 'cart-page-summary', type: '_cart-summary' -%}
+          </div>
+          {% render 'lame-cart-payment-methods' %}
         </div>
       {%- endunless -%}
 
@@ -64,30 +77,20 @@
 {% render 'cart-items-component', children: cart_items_children, section_id: section.id %}
 
 {% stylesheet %}
-  .cart-page {
+  .cart-page:not(.cart-page--cosmetic) {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0 var(--padding-5xl);
   }
 
-  .cart-page--empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .cart-page--empty .cart-page__title,
-  .cart-page--empty .cart-page__more-blocks {
-    margin-top: var(--margin-6xl);
+  .cart-page--cosmetic.cart-page--empty {
+    display: block;
+    max-width: var(--page-width);
+    margin-inline: auto;
   }
 
   .cart-page__more-blocks {
     width: 100%;
-  }
-
-  .cart-page--empty .cart-title {
-    text-align: center;
   }
 
   .cart-page__main {
@@ -121,7 +124,7 @@
       position: relative;
     }
 
-    .section--page-width .cart-page:has(.cart-summary--extend) {
+    .section--page-width .cart-page:not(.cart-page--cosmetic):has(.cart-summary--extend) {
       grid-column: 2 / 4;
       grid-template-columns: 1fr minmax(
           var(--sidebar-width),
@@ -131,7 +134,7 @@
   }
 
   @media screen and (min-width: 1400px) {
-    .cart-page {
+    .cart-page:not(.cart-page--cosmetic) {
       grid-template-columns: 1fr var(--sidebar-width);
     }
   }
@@ -173,6 +176,24 @@
     }
   ],
   "settings": [
+    {
+      "type": "text",
+      "id": "cart_heading",
+      "label": "Cart heading",
+      "default": "Your Cart"
+    },
+    {
+      "type": "text",
+      "id": "cart_subtitle",
+      "label": "Cart subtitle",
+      "default": "Review your items and proceed to checkout."
+    },
+    {
+      "type": "number",
+      "id": "free_shipping_threshold",
+      "label": "Free shipping threshold (store currency, e.g. 500 for ₹500)",
+      "default": 500
+    },
     {
       "type": "select",
       "id": "section_width",

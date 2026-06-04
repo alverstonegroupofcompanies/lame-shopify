@@ -5,6 +5,28 @@
   @param {string} [section_id] - The section ID for cart discount component.
 {%- enddoc -%}
 
+{%- if template.name == 'cart' -%}
+  <h2 class="lame-cart-summary-heading">{{ 'lame_cart.order_summary' | t }}</h2>
+  <div class="lame-cart-summary-lines">
+    <div class="lame-cart-summary-line">
+      <span>{{ 'content.cart_subtotal' | t }}</span>
+      <span class="lame-cart-summary-line__value">{{ cart.items_subtotal_price | money }}</span>
+    </div>
+    <div class="lame-cart-summary-line">
+      <span>{{ 'content.discount' | t }}</span>
+      {%- if settings.show_add_discount_code -%}
+        <a href="#cart-discount-disclosure" class="lame-cart-summary-line__link">{{ 'lame_cart.apply_coupon' | t }}</a>
+      {%- else -%}
+        <span class="lame-cart-summary-line__value">—</span>
+      {%- endif -%}
+    </div>
+    <div class="lame-cart-summary-line">
+      <span>{{ 'lame_cart.shipping_label' | t }}</span>
+      <span class="lame-cart-summary-line__value">{{ 'lame_cart.shipping_at_checkout' | t }}</span>
+    </div>
+  </div>
+{%- endif -%}
+
 <div class="cart-totals">
   {% # We need to keep this node in place to allow morphing to work properly # %}
   <div class="cart-totals__original-container cart-primary-typography">
@@ -232,7 +254,13 @@
       class="cart-totals__item cart-totals__total"
       role="status"
     >
-      <span class="cart-totals__total-label cart-primary-typography">{{ 'content.cart_estimated_total' | t }}</span>
+      <span class="cart-totals__total-label cart-primary-typography">
+        {%- if template.name == 'cart' -%}
+          {{ 'lame_cart.estimated_total' | t }}
+        {%- else -%}
+          {{ 'content.cart_estimated_total' | t }}
+        {%- endif -%}
+      </span>
       <text-component
         ref="cartTotal"
         value="{{ total_price | strip_html }}"
@@ -298,9 +326,19 @@
       form="cart-form"
     >
       <span class="button-text">
-        {{ 'content.checkout' | t }}
+        {%- if template.name == 'cart' -%}
+          {{ 'lame_cart.proceed_checkout' | t }}
+        {%- else -%}
+          {{ 'content.checkout' | t }}
+        {%- endif -%}
       </span>
     </button>
+
+    {%- if template.name == 'cart' -%}
+      <a href="{{ routes.all_products_collection_url }}" class="cart__secondary-button">
+        {{ 'actions.continue_shopping' | t }}
+      </a>
+    {%- endif -%}
 
     {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
       <div

@@ -1,0 +1,25 @@
+{%- doc -%}
+  Cart page header: title, count, subtitle, continue shopping link.
+{%- enddoc -%}
+
+{%- unless cart.empty? -%}
+  <div class="lame-cart-header">
+    <div class="lame-cart-header__main">
+      <h1 class="lame-cart-header__title">
+        {{ title | default: 'Your Cart' | escape }}
+        {%- if show_count -%}
+          <span class="lame-cart-header__count" aria-label="{{ 'content.cart_count' | t: count: cart.item_count }}">
+            {{ cart.item_count }}
+          </span>
+        {%- endif -%}
+      </h1>
+      {%- if subtitle != blank -%}
+        <p class="lame-cart-header__subtitle">{{ subtitle | escape }}</p>
+      {%- endif -%}
+    </div>
+    <a href="{{ routes.all_products_collection_url }}" class="lame-cart-header__continue">
+      <span aria-hidden="true">‹</span>
+      {{ 'actions.continue_shopping' | t }}
+    </a>
+  </div>
+{%- endunless -%}

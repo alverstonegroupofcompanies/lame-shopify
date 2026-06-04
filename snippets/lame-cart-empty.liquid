@@ -1,0 +1,25 @@
+{%- doc -%}
+  Empty cart state for cosmetic cart page.
+{%- enddoc -%}
+
+<div class="lame-cart-empty">
+  <div class="lame-cart-empty__icon" aria-hidden="true">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" focusable="false">
+      <path d="M6 6h15l-1.5 9h-12L6 6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M6 6 5 3H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="9" cy="20" r="1.25" fill="currentColor"/>
+      <circle cx="17" cy="20" r="1.25" fill="currentColor"/>
+    </svg>
+  </div>
+  <h1 class="lame-cart-empty__title">{{ 'lame_cart.empty_title' | t }}</h1>
+  <p class="lame-cart-empty__text">{{ 'lame_cart.empty_message' | t }}</p>
+  {%- if shop.customer_accounts_enabled and customer == null -%}
+    <p class="lame-cart-empty__login">{{ 'actions.log_in_html' | t: link: routes.account_login_url }}</p>
+  {%- endif -%}
+  <a
+    class="lame-cart-empty__cta button"
+    href="{{ settings.empty_cart_button_link | default: routes.all_products_collection_url }}"
+  >
+    {{ 'lame_cart.empty_cta' | t }}
+  </a>
+</div>
