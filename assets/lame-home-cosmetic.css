@@ -284,10 +284,21 @@ body.template-index .lame-section-heading__divider {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  background: var(--lame-cos-white);
+}
+
+.lame-cosmetic-categories__viewport.is-centered {
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+.lame-cosmetic-categories__viewport.is-centered .lame-cosmetic-categories__track {
+  width: auto;
 }
 
 .lame-cosmetic-categories__viewport::-webkit-scrollbar {
@@ -295,29 +306,34 @@ body.template-index .lame-section-heading__divider {
 }
 
 .lame-cosmetic-categories__track {
+  --lame-cat-slide-width: clamp(260px, 32vw, 360px);
   list-style: none;
   margin: 0;
   padding: 0 0 0.15rem;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: min(360px, calc((100% - 1rem * 2) / 3));
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
   gap: 1rem;
   width: max-content;
-  max-width: none;
 }
 
 .lame-cosmetic-categories__slide[data-category-clone] {
   pointer-events: none;
+  user-select: none;
 }
 
 .lame-cosmetic-categories__slide {
-  min-width: 0;
+  flex: 0 0 var(--lame-cat-slide-width);
+  width: var(--lame-cat-slide-width);
+  min-width: var(--lame-cat-slide-width);
   scroll-snap-align: start;
 }
 
 .lame-cosmetic-categories__card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  height: 100%;
   text-decoration: none;
   color: inherit;
   border-radius: var(--lame-cos-radius-lg);
@@ -333,6 +349,8 @@ body.template-index .lame-section-heading__divider {
 
 .lame-cosmetic-categories__media {
   position: relative;
+  flex: 1 1 auto;
+  min-height: 200px;
   overflow: hidden;
   background: var(--lame-cos-cream-soft);
   line-height: 0;
@@ -440,7 +458,7 @@ body.template-index .lame-section-heading__divider {
 
 @media screen and (max-width: 989px) {
   .lame-cosmetic-categories__track {
-    grid-auto-columns: min(300px, calc((100% - 1rem) / 2));
+    --lame-cat-slide-width: clamp(240px, 46vw, 320px);
   }
 }
 
@@ -455,9 +473,8 @@ body.template-index .lame-section-heading__divider {
   }
 
   .lame-cosmetic-categories__track {
-    grid-auto-columns: min(92%, 340px);
+    --lame-cat-slide-width: min(88vw, 340px);
     gap: 0.85rem;
-    padding-inline: 0;
   }
 }
 

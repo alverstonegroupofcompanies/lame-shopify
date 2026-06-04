@@ -141,7 +141,8 @@
     if (!track || !scrollEl) return;
 
     const originals = [...track.querySelectorAll('[data-category-slide]:not([data-category-clone])')];
-    if (originals.length === 0) return;
+    const count = originals.length;
+    if (count === 0) return;
 
     const markClone = (slide) => {
       slide.dataset.categoryClone = 'true';
@@ -149,38 +150,70 @@
       slide.querySelectorAll('a').forEach((link) => link.setAttribute('tabindex', '-1'));
     };
 
-    if (!track.dataset.categoryLoopReady) {
+    const appendCloneSet = (target) => {
+      originals.forEach((slide) => {
+        const clone = slide.cloneNode(true);
+        markClone(clone);
+        target.appendChild(clone);
+      });
+    };
+
+    if (!track.dataset.categoryLoopReady && count > 1) {
       const beforeFrag = document.createDocumentFragment();
       const afterFrag = document.createDocumentFragment();
-      originals.forEach((slide) => {
-        const before = slide.cloneNode(true);
-        const after = slide.cloneNode(true);
-        markClone(before);
-        markClone(after);
-        beforeFrag.appendChild(before);
-        afterFrag.appendChild(after);
-      });
+      appendCloneSet(beforeFrag);
+      appendCloneSet(afterFrag);
       track.insertBefore(beforeFrag, track.firstChild);
       track.appendChild(afterFrag);
       track.dataset.categoryLoopReady = 'true';
     }
 
-    const count = originals.length;
     const offsetStart = count;
+    const offsetEnd = count * 2 - 1;
+
     const autoplayEnabled = section.dataset.autoplay === 'true';
     const autoplaySpeed = Number(section.dataset.autoplaySpeed) || 4000;
     let logicalIndex = 0;
     let autoplayTimer = null;
     let isResetting = false;
     let dots = [];
+    let loopStart = 0;
+    let loopEnd = 0;
+
+    const getSlideSpan = () => {
+      const slide = track.children[offsetStart];
+      if (!slide) return 280;
+      const gap = parseFloat(getComputedStyle(track).gap) || 16;
+      return slide.offsetWidth + gap;
+    };
+
+    const getSlideScrollLeft = (child) => {
+      if (!child) return 0;
+      return Math.max(0, child.offsetLeft - track.offsetLeft);
+    };
+
+    const canScrollLoop = () => track.scrollWidth > scrollEl.clientWidth + 4;
+
+    const ensureExtraClones = () => {
+      if (count <= 1) return;
+      let guard = 0;
+      while (!canScrollLoop() && guard < 12) {
+        appendCloneSet(track);
+        guard += 1;
+      }
+    };
+
+    const measureLoopBounds = () => {
+      loopStart = getSlideScrollLeft(track.children[offsetStart]);
+      loopEnd = getSlideScrollLeft(track.children[offsetEnd]) + track.children[offsetEnd].offsetWidth;
+    };
 
     const scrollToPhysical = (physicalIndex, smooth = true) => {
       const child = track.children[physicalIndex];
       if (!child) return;
-      const scrollLeft = child.offsetLeft - track.offsetLeft;
       scrollEl.scrollTo({
-        left: scrollLeft,
-        behavior: smooth ? 'smooth' : 'auto',
+        left: getSlideScrollLeft(child),
+        behavior: smooth && !isResetting ? 'smooth' : 'auto',
       });
     };
 
@@ -188,7 +221,7 @@
       if ('onscrollend' in scrollEl) {
         scrollEl.addEventListener('scrollend', callback, { once: true });
       } else {
-        window.setTimeout(callback, 520);
+        window.setTimeout(callback, 480);
       }
     };
 
@@ -199,25 +232,60 @@
     };
 
     const loopForward = () => {
-      scrollToPhysical(offsetStart + count, true);
+      measureLoopBounds();
+      scrollEl.scrollBy({ left: getSlideSpan(), behavior: 'smooth' });
       afterScroll(() => {
-        isResetting = true;
-        scrollToPhysical(offsetStart, false);
-        logicalIndex = 0;
-        isResetting = false;
-        updateUI();
+        normalizeLoopPosition();
+        syncFromScroll();
+        if (logicalIndex === count - 1) {
+          isResetting = true;
+          scrollToPhysical(offsetStart, false);
+          logicalIndex = 0;
+          isResetting = false;
+          updateUI();
+        }
       });
     };
 
     const loopBackward = () => {
-      scrollToPhysical(count - 1, true);
+      measureLoopBounds();
+      scrollEl.scrollBy({ left: -getSlideSpan(), behavior: 'smooth' });
       afterScroll(() => {
-        isResetting = true;
-        scrollToPhysical(offsetStart + count - 1, false);
-        logicalIndex = count - 1;
-        isResetting = false;
-        updateUI();
+        normalizeLoopPosition();
+        syncFromScroll();
+        if (logicalIndex === 0) {
+          isResetting = true;
+          scrollToPhysical(offsetEnd, false);
+          logicalIndex = count - 1;
+          isResetting = false;
+          updateUI();
+        }
       });
+    };
+
+    const normalizeLoopPosition = () => {
+      if (isResetting || count <= 1 || !canScrollLoop()) return;
+      measureLoopBounds();
+      const x = scrollEl.scrollLeft;
+      const span = loopEnd - loopStart;
+      const threshold = getSlideSpan() * 0.4;
+      const firstAfterClone = track.children[count * 2];
+      const lastBeforeClone = track.children[count - 1];
+
+      if (firstAfterClone && x >= getSlideScrollLeft(firstAfterClone) - threshold) {
+        isResetting = true;
+        scrollEl.scrollLeft = x - span;
+        isResetting = false;
+        syncFromScroll();
+        return;
+      }
+
+      if (lastBeforeClone && x <= getSlideScrollLeft(lastBeforeClone) + threshold) {
+        isResetting = true;
+        scrollEl.scrollLeft = x + span;
+        isResetting = false;
+        syncFromScroll();
+      }
     };
 
     const goNext = () => {
@@ -236,6 +304,10 @@
       } else {
         loopBackward();
       }
+    };
+
+    const updateViewportMode = () => {
+      scrollEl.classList.toggle('is-centered', count <= 1 && !canScrollLoop());
     };
 
     const buildDots = () => {
@@ -293,13 +365,16 @@
 
     const syncFromScroll = () => {
       if (isResetting) return;
+      normalizeLoopPosition();
+      if (isResetting) return;
+
       const scrollLeft = scrollEl.scrollLeft;
       let nearest = logicalIndex;
       let nearestDist = Infinity;
       for (let i = 0; i < count; i += 1) {
         const child = track.children[offsetStart + i];
         if (!child) continue;
-        const dist = Math.abs(child.offsetLeft - track.offsetLeft - scrollLeft);
+        const dist = Math.abs(getSlideScrollLeft(child) - scrollLeft);
         if (dist < nearestDist) {
           nearestDist = dist;
           nearest = i;
@@ -325,9 +400,12 @@
     section.addEventListener('mouseleave', startAutoplay);
 
     const init = () => {
+      ensureExtraClones();
+      measureLoopBounds();
+      updateViewportMode();
       isResetting = true;
-      scrollToPhysical(offsetStart, false);
       logicalIndex = 0;
+      scrollToPhysical(offsetStart, false);
       isResetting = false;
       buildDots();
       updateUI();
@@ -336,6 +414,9 @@
 
     init();
     window.addEventListener('resize', () => {
+      ensureExtraClones();
+      measureLoopBounds();
+      updateViewportMode();
       isResetting = true;
       scrollToPhysical(offsetStart + logicalIndex, false);
       isResetting = false;
