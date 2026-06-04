@@ -1,5 +1,5 @@
 {%- doc -%}
-  Flash deal product card — premium deal layout with badge, ribbon, wishlist, rating.
+  Flash deal product card — mockup layout (green standard / pink best deal).
 
   @param {object} product
   @param {boolean} [is_featured] - Center "Best Deal" highlight
@@ -21,14 +21,8 @@
     assign on_sale = true
     assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
     assign card_badge = discount_percent | append: '% OFF'
-    assign savings_amount = compare_at | minus: price
   elsif badge_label != blank
     assign card_badge = badge_label
-  endif
-
-  assign brand_label = product.vendor
-  if brand_label == blank
-    assign brand_label = product.type
   endif
 
   assign review_count = product.metafields.reviews.rating_count.value | default: product.metafields.custom.review_count.value
@@ -36,20 +30,12 @@
     assign review_count = review_count_fallback
   endif
 
-  assign rating_value = product.metafields.reviews.rating.value.rating
-  if rating_value == blank
-    assign rating_value = 4.8
-  endif
-  assign rating_percent = rating_value | times: 20
-
   if settings.currency_code_enabled
     assign display_price = price | money_with_currency
     assign display_compare = compare_at | money_with_currency
-    assign display_savings = savings_amount | money_with_currency
   else
     assign display_price = price | money
     assign display_compare = compare_at | money
-    assign display_savings = savings_amount | money
   endif
 
   assign sold_out_label = sold_out_label | default: 'Sold out'
@@ -58,7 +44,8 @@
 <article class="lame-flash-card{% if is_featured %} lame-flash-card--featured{% endif %}">
   {%- if is_featured and best_deal_label != blank -%}
     <span class="lame-flash-card__ribbon">
-      <span class="lame-flash-card__ribbon-text">{{ best_deal_label | escape }}</span>
+      <span class="lame-flash-card__ribbon-text" aria-hidden="true">&#128081;</span>
+      {{ best_deal_label | escape }}
     </span>
   {%- endif -%}
 
@@ -72,54 +59,41 @@
     </div>
 
     <a href="{{ product.url }}" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
-      <span class="lame-flash-card__image-wrap">
-        {%- if product.featured_media -%}
-          {{
-            product.featured_media
-            | image_url: width: 720
-            | image_tag:
-              class: 'lame-flash-card__image',
-              loading: 'lazy',
-              widths: '240,360,480,600,720',
-              sizes: '(min-width: 990px) 280px, 78vw',
-              alt: product.title
-          }}
-        {%- else -%}
-          {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
-        {%- endif -%}
-      </span>
+      {%- if product.featured_media -%}
+        {{
+          product.featured_media
+          | image_url: width: 600
+          | image_tag:
+            class: 'lame-flash-card__image',
+            loading: 'lazy',
+            widths: '200,300,400,500,600',
+            sizes: '(min-width: 990px) 260px, 78vw',
+            alt: product.title
+        }}
+      {%- else -%}
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
+      {%- endif -%}
     </a>
   </div>
 
   <div class="lame-flash-card__body">
-    {%- if brand_label != blank -%}
-      <p class="lame-flash-card__brand">{{ brand_label | escape }}</p>
-    {%- endif -%}
-
     <h3 class="lame-flash-card__title">
       <a href="{{ product.url }}">{{ product.title | escape }}</a>
     </h3>
 
-    <div class="lame-flash-card__rating" aria-label="{{ rating_value }} out of 5 stars">
-      <span
-        class="lame-flash-card__stars"
-        style="--rating-percent: {{ rating_percent }}%;"
-        aria-hidden="true"
-      ></span>
+    <div class="lame-flash-card__rating" aria-hidden="true">
+      <span class="lame-flash-card__stars">
+        {%- for i in (1..5) -%}&#9733;{%- endfor -%}
+      </span>
       {%- if review_count != blank -%}
         <span class="lame-flash-card__reviews">({{ review_count }})</span>
       {%- endif -%}
     </div>
 
-    <div class="lame-flash-card__price-block">
-      <div class="lame-flash-card__price-row">
-        <span class="lame-flash-card__price{% if on_sale %} lame-flash-card__price--sale{% endif %}">{{ display_price }}</span>
-        {%- if on_sale -%}
-          <span class="lame-flash-card__compare">{{ display_compare }}</span>
-        {%- endif -%}
-      </div>
-      {%- if on_sale and display_savings != blank -%}
-        <p class="lame-flash-card__savings">Save {{ display_savings }}</p>
+    <div class="lame-flash-card__price-row">
+      <span class="lame-flash-card__price">{{ display_price }}</span>
+      {%- if on_sale -%}
+        <span class="lame-flash-card__compare">{{ display_compare }}</span>
       {%- endif -%}
     </div>
 
@@ -128,21 +102,15 @@
         <input type="hidden" name="id" value="{{ selected_variant.id }}">
         <input type="hidden" name="quantity" value="1">
         <button type="submit" class="lame-flash-card__atc" {% unless product.available %}disabled{% endunless %}>
-          <span class="lame-flash-card__atc-inner">
-            <svg class="lame-flash-card__atc-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M6 6h15l-1.5 9H7.4L6 6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
-              <path d="M9 6V5a3 3 0 0 1 6 0v1" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <circle cx="9.5" cy="19" r="1.25" fill="currentColor"/>
-              <circle cx="17.5" cy="19" r="1.25" fill="currentColor"/>
-            </svg>
-            <span class="lame-flash-card__atc-label">
-              {%- if product.available -%}
-                {{ add_to_cart_label | default: 'Add to cart' }}
-              {%- else -%}
-                {{ sold_out_label }}
-              {%- endif -%}
-            </span>
-          </span>
+          <svg class="lame-flash-card__atc-icon" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 6h14l-1.2 8H7.4L6 6Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M9 6V5a3 3 0 0 1 6 0v1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+          {%- if product.available -%}
+            {{ add_to_cart_label | default: 'Add to cart' }}
+          {%- else -%}
+            {{ sold_out_label }}
+          {%- endif -%}
         </button>
       </form>
     {%- endif -%}
