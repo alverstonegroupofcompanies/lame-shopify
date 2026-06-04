@@ -1,0 +1,66 @@
+{%- doc -%}
+  Recommendation product card for cart page carousel.
+
+  @param {object} product
+  @param {string} [badge_type] - bestseller, sale, or blank
+  @param {string} add_to_cart_label
+{%- enddoc -%}
+
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign compare_at = selected_variant.compare_at_price
+  assign price = selected_variant.price
+  assign on_sale = false
+  if compare_at > price
+    assign on_sale = true
+  endif
+  if badge_type == blank and on_sale
+    assign badge_type = 'sale'
+  endif
+-%}
+
+<article class="lame-cart-rec-card">
+  <a href="{{ product.url }}" class="lame-cart-rec-card__media-link" tabindex="-1" aria-hidden="true">
+    <div class="lame-cart-rec-card__media">
+      {% if product.featured_media %}
+        {{
+          product.featured_media
+          | image_url: width: 480
+          | image_tag:
+            class: 'lame-cart-rec-card__image',
+            loading: 'lazy',
+            widths: '200,300,400,480',
+            sizes: '220px',
+            alt: product.title
+        }}
+      {% else %}
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-cart-rec-card__image placeholder-svg' }}
+      {% endif %}
+      {% if badge_type == 'bestseller' %}
+        <span class="lame-cart-rec-card__badge lame-cart-rec-card__badge--bestseller">{{ 'lame_cart.badge_bestseller' | t }}</span>
+      {% elsif badge_type == 'sale' %}
+        <span class="lame-cart-rec-card__badge lame-cart-rec-card__badge--sale">{{ 'lame_cart.badge_sale' | t }}</span>
+      {% endif %}
+    </div>
+  </a>
+  <div class="lame-cart-rec-card__body">
+    {% if product.vendor != blank %}
+      <p class="lame-cart-rec-card__brand">{{ product.vendor | escape }}</p>
+    {% endif %}
+    <h3 class="lame-cart-rec-card__title">
+      <a href="{{ product.url }}">{{ product.title | escape }}</a>
+    </h3>
+    <p class="lame-cart-rec-card__price">
+      {% render 'price', product_resource: product, show_sale_price_first: true %}
+    </p>
+    {% if selected_variant %}
+      <form method="post" action="{{ routes.cart_add_url }}" class="lame-cart-rec-card__form" data-lame-home-atc>
+        <input type="hidden" name="id" value="{{ selected_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="lame-cart-rec-card__atc" {% unless product.available %}disabled{% endunless %}>
+          {{ add_to_cart_label | default: 'Add to cart' }}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</article>

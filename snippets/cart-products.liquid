@@ -333,19 +333,21 @@
                       can_update_quantity: can_update_quantity
                     %}
 
-                    <button
-                      class="button cart-items__remove"
-                      type="button"
-                      aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
-                      on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
-                      {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
-                      {% if can_remove == false %}
-                        hidden
-                      {% endif %}
-                    >
-                      {{- 'icon-delete.svg' | inline_asset_content -}}
-                      <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
-                    </button>
+                    {%- unless template.name == 'cart' -%}
+                      <button
+                        class="button cart-items__remove"
+                        type="button"
+                        aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                        on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                        {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                        {% if can_remove == false %}
+                          hidden
+                        {% endif %}
+                      >
+                        {{- 'icon-delete.svg' | inline_asset_content -}}
+                        <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
+                      </button>
+                    {%- endunless -%}
                   </div>
                 </td>
                 <td
@@ -381,7 +383,24 @@
                   role="cell"
                   headers="productTotal"
                 >
-                  <text-component value="{{ price | strip_html }}">{{ price }}</text-component>
+                  <div class="cart-items__price-end">
+                    {%- if template.name == 'cart' -%}
+                      {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
+                      <button
+                        class="button cart-items__remove"
+                        type="button"
+                        aria-label="{{ 'accessibility.remove_item' | t: title: item.title | escape }}"
+                        on:click="/onLineItemRemove/{{ item.index | plus: 1 }}"
+                        {% if can_remove == false %}
+                          hidden
+                        {% endif %}
+                      >
+                        {{- 'icon-delete.svg' | inline_asset_content -}}
+                        <span class="visually-hidden">{{ 'accessibility.remove' | t }}</span>
+                      </button>
+                    {%- endif -%}
+                    <text-component class="cart-items__line-total" value="{{ price | strip_html }}">{{ price }}</text-component>
+                  </div>
                   {%- if item.unit_price_measurement -%}
                     <div class="cart-items__price-unit cart-secondary-typography">
                       {% render 'unit-price', price: unit_price, measurement: item.unit_price_measurement %}
