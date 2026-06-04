@@ -1,0 +1,272 @@
+{%- liquid
+  assign slide_blocks = section.blocks | where: 'type', 'slide'
+  assign badge_blocks = section.blocks | where: 'type', 'badge'
+  assign slide_count = 0
+  for block in slide_blocks
+    if block.settings.image != blank
+      assign slide_count = slide_count | plus: 1
+    endif
+  endfor
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--full-width color-{{ section.settings.color_scheme }} lame-cosmetic-hero"
+  style="--lame-cosmetic-hero-height: {{ section.settings.banner_height }}px;"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-cosmetic-hero__inner spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {%- if slide_count == 0 and request.design_mode -%}
+      <div class="lame-cosmetic-hero__placeholder">
+        <p>Add slide blocks with images to build your hero banner.</p>
+      </div>
+    {%- else -%}
+      <div class="lame-cosmetic-hero__slider" data-cosmetic-hero-slider>
+        <div class="lame-cosmetic-hero__track" data-cosmetic-hero-track>
+          {%- for block in slide_blocks -%}
+            {%- if block.settings.image == blank -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- liquid
+              assign slide_loading = 'lazy'
+              assign slide_fetchpriority = 'auto'
+              if forloop.first
+                assign slide_loading = 'eager'
+                assign slide_fetchpriority = 'high'
+              endif
+            -%}
+            <article
+              class="lame-cosmetic-hero__slide{% if forloop.first %} is-active{% endif %}"
+              data-cosmetic-hero-slide
+              {{ block.shopify_attributes }}
+            >
+              <div class="lame-cosmetic-hero__media">
+                {{
+                  block.settings.image
+                  | image_url: width: 2400
+                  | image_tag:
+                    class: 'lame-cosmetic-hero__image',
+                    loading: slide_loading,
+                    fetchpriority: slide_fetchpriority,
+                    widths: '750, 990, 1200, 1600, 2000, 2400',
+                    sizes: '100vw',
+                    alt: block.settings.image.alt | default: block.settings.heading | escape
+                }}
+              </div>
+              <div class="lame-cosmetic-hero__overlay">
+                <div class="lame-cosmetic-hero__content">
+                  {%- if block.settings.eyebrow != blank -%}
+                    <p class="lame-cosmetic-hero__eyebrow">{{ block.settings.eyebrow }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.heading != blank -%}
+                    <h2 class="lame-cosmetic-hero__heading">{{ block.settings.heading }}</h2>
+                  {%- endif -%}
+                  {%- if block.settings.description != blank -%}
+                    <p class="lame-cosmetic-hero__description">{{ block.settings.description }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.button_label != blank -%}
+                    <a
+                      class="lame-cosmetic-hero__cta"
+                      href="{{ block.settings.button_link | default: routes.collections_url }}"
+                    >
+                      {{ block.settings.button_label }}
+                    </a>
+                  {%- endif -%}
+                </div>
+              </div>
+            </article>
+          {%- endfor -%}
+        </div>
+
+        {%- if slide_count > 1 -%}
+          <button type="button" class="lame-cosmetic-hero__arrow lame-cosmetic-hero__arrow--prev" data-cosmetic-hero-prev aria-label="{{ section.settings.prev_label }}">
+            <span aria-hidden="true">&#8249;</span>
+          </button>
+          <button type="button" class="lame-cosmetic-hero__arrow lame-cosmetic-hero__arrow--next" data-cosmetic-hero-next aria-label="{{ section.settings.next_label }}">
+            <span aria-hidden="true">&#8250;</span>
+          </button>
+        {%- endif -%}
+      </div>
+
+      {%- if badge_blocks.size > 0 -%}
+        <ul class="lame-cosmetic-hero__badges" role="list">
+          {%- for block in badge_blocks -%}
+            <li class="lame-cosmetic-hero__badge" {{ block.shopify_attributes }}>
+              <span class="lame-cosmetic-hero__badge-icon" aria-hidden="true">
+                {%- case block.settings.icon -%}
+                  {%- when 'leaf' -%}
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c4-5 6-9 6-13a6 6 0 1 0-12 0c0 4 2 8 6 13Z" stroke="currentColor" stroke-width="1.3"/><path d="M12 11v10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  {%- when 'shield' -%}
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.3"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  {%- when 'heart' -%}
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.65-7 10-7 10Z" stroke="currentColor" stroke-width="1.3"/></svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.3"/><path d="M9 12h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                {%- endcase -%}
+              </span>
+              {%- if block.settings.label != blank -%}
+                <span class="lame-cosmetic-hero__badge-label">{{ block.settings.label }}</span>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    const slides = [...section.querySelectorAll('[data-cosmetic-hero-slide]')];
+    if (slides.length <= 1) return;
+
+    let index = 0;
+    const prev = section.querySelector('[data-cosmetic-hero-prev]');
+    const next = section.querySelector('[data-cosmetic-hero-next]');
+    const autoplay = {{ section.settings.autoplay | json }};
+    const speed = {{ section.settings.autoplay_speed | times: 1000 }};
+
+    const show = (i) => {
+      slides.forEach((slide, idx) => slide.classList.toggle('is-active', idx === i));
+      index = i;
+    };
+
+    prev?.addEventListener('click', () => show((index - 1 + slides.length) % slides.length));
+    next?.addEventListener('click', () => show((index + 1) % slides.length));
+
+    if (autoplay) {
+      window.setInterval(() => show((index + 1) % slides.length), speed);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Cosmetic hero",
+  "tag": "section",
+  "class": "section-wrapper",
+  "max_blocks": 12,
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    {
+      "type": "range",
+      "id": "banner_height",
+      "label": "Banner height (desktop)",
+      "min": 400,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "default": 560
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Auto-rotate speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "prev_label",
+      "label": "Previous slide label",
+      "default": "Previous slide"
+    },
+    {
+      "type": "text",
+      "id": "next_label",
+      "label": "Next slide label",
+      "default": "Next slide"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Background image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NOURISH • STRENGTHEN • SHINE" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Good Hair Every Day, Every Way" },
+        { "type": "textarea", "id": "description", "label": "Description", "default": "Plant-powered care for healthy hair that shines naturally." },
+        { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop Hair Care" },
+        { "type": "url", "id": "button_link", "label": "Button link" }
+      ]
+    },
+    {
+      "type": "badge",
+      "name": "Trust badge",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "leaf", "label": "Natural" },
+            { "value": "shield", "label": "Tested" },
+            { "value": "heart", "label": "Cruelty free" },
+            { "value": "check", "label": "Paraben free" }
+          ],
+          "default": "leaf"
+        },
+        { "type": "text", "id": "label", "label": "Label", "default": "Natural Ingredients" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cosmetic hero",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "NOURISH • STRENGTHEN • SHINE",
+            "heading": "Good Hair Every Day, Every Way",
+            "description": "Plant-powered care for healthy hair that shines naturally.",
+            "button_label": "Shop Hair Care"
+          }
+        },
+        { "type": "badge", "settings": { "icon": "leaf", "label": "Natural Ingredients" } },
+        { "type": "badge", "settings": { "icon": "shield", "label": "Dermatologically Tested" } },
+        { "type": "badge", "settings": { "icon": "check", "label": "Paraben Free" } },
+        { "type": "badge", "settings": { "icon": "heart", "label": "Cruelty Free" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

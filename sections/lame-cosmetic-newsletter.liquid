@@ -1,0 +1,137 @@
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--full-width color-{{ section.settings.color_scheme }} lame-cosmetic-newsletter"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-cosmetic-newsletter__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    <div class="lame-cosmetic-newsletter__grid">
+      <div class="lame-cosmetic-newsletter__content" data-lame-reveal>
+        {% if section.settings.heading != blank %}
+          <h2 class="lame-cosmetic-newsletter__heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.description != blank %}
+          <p class="lame-cosmetic-newsletter__description">{{ section.settings.description }}</p>
+        {% endif %}
+
+        {% form 'customer', class: 'lame-cosmetic-newsletter__form' %}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="lame-cosmetic-newsletter__field">
+            <label class="visually-hidden" for="NewsletterEmail-{{ section.id }}">{{ section.settings.placeholder }}</label>
+            <input
+              id="NewsletterEmail-{{ section.id }}"
+              type="email"
+              name="contact[email]"
+              value="{{ form.email }}"
+              placeholder="{{ section.settings.placeholder }}"
+              autocorrect="off"
+              autocapitalize="off"
+              autocomplete="email"
+              required
+            >
+            <button type="submit" name="commit">{{ section.settings.button_label }}</button>
+          </div>
+          {% if form.posted_successfully? %}
+            <p class="lame-cosmetic-newsletter__success">{{ section.settings.success_message }}</p>
+          {% endif %}
+          {% if form.errors %}
+            <p class="lame-cosmetic-newsletter__error">{{ form.errors.messages.email }}</p>
+          {% endif %}
+        {% endform %}
+      </div>
+
+      <div class="lame-cosmetic-newsletter__media" data-lame-reveal data-lame-delay="1">
+        {% if section.settings.image != blank %}
+          {{
+            section.settings.image
+            | image_url: width: 900
+            | image_tag:
+              class: 'lame-cosmetic-newsletter__image',
+              loading: 'lazy',
+              widths: '400,600,800,900',
+              sizes: '(min-width: 990px) 40vw, 88vw',
+              alt: section.settings.image.alt | default: section.settings.heading | escape
+          }}
+        {% else %}
+          <div class="lame-cosmetic-newsletter__image-placeholder" aria-hidden="true"></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    section.querySelectorAll('[data-lame-reveal]').forEach((node) => {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.15 }
+        );
+        observer.observe(node);
+      } else {
+        node.classList.add('is-visible');
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Cosmetic newsletter",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Stay Glowing, Always!" },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Subscribe for exclusive offers, skincare tips, and early access to new arrivals."
+    },
+    { "type": "text", "id": "placeholder", "label": "Email placeholder", "default": "Enter your email address" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Subscribe" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "Welcome! You're on the list." },
+    { "type": "image_picker", "id": "image", "label": "Decorative image" },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cosmetic newsletter"
+    }
+  ]
+}
+{% endschema %}

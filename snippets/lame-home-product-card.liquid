@@ -76,6 +76,35 @@
       <h3 class="lame-home-product-card__title">
         <a href="{{ product.url }}">{{ product.title }}</a>
       </h3>
+      <p class="lame-home-product-card__price">
+        {% render 'price', product_resource: product, show_sale_price_first: true %}
+      </p>
+      {% if show_add_to_cart and selected_variant %}
+        <form
+          method="post"
+          action="{{ routes.cart_add_url }}"
+          class="lame-home-product-card__atc-form"
+          data-lame-home-atc
+        >
+          <input type="hidden" name="id" value="{{ selected_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button
+            type="submit"
+            class="lame-home-product-card__atc"
+            {% unless product.available %}
+              disabled
+              data-sold-out
+            {% endunless %}
+          >
+            {% if product.available %}
+              {{ add_to_cart_label }}
+            {% else %}
+              {{ sold_out_label }}
+            {% endif %}
+          </button>
+          <span class="lame-home-product-card__atc-status" aria-live="polite"></span>
+        </form>
+      {% endif %}
     {% else %}
     {% if show_type and product.type != blank %}
       <p class="lame-home-product-card__type">{{ product.type }}</p>

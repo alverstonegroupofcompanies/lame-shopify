@@ -64,6 +64,7 @@
           {% render 'lame-flash-deal-product',
             product: product,
             badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
             reveal_delay: products_shown | modulo: 2,
             block_attributes: block.shopify_attributes
           %}
@@ -103,6 +104,7 @@
           {% render 'lame-flash-deal-product',
             product: product,
             badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
             reveal_delay: products_shown | modulo: 2
           %}
           {% assign products_shown = products_shown | plus: 1 %}
@@ -394,6 +396,37 @@
       tick();
       window.setInterval(tick, 1000);
     });
+
+    section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        if (button?.disabled) return;
+        const formData = new FormData(form);
+        try {
+          if (button) button.disabled = true;
+          const response = await fetch('{{ routes.cart_add_url }}.js', {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formData,
+          });
+          const data = await response.json();
+          if (!response.ok || data?.status) throw new Error(data?.message);
+          const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
+          const cartData = await cartResponse.json();
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: { resource: cartData, sourceId: '{{ section.id }}', data: { source: 'flash-deal-atc' } },
+            })
+          );
+        } catch (error) {
+          console.error('Add to cart failed', error);
+        } finally {
+          if (button) button.disabled = false;
+        }
+      });
+    });
   })();
 </script>
 
@@ -405,6 +438,7 @@
   "enabled_on": { "templates": ["index"] },
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Flash Deal" },
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
     {
       "type": "select",
       "id": "product_source",
