@@ -1,0 +1,37 @@
+{%- doc -%}
+  Wishlist toggle for category collection product cards.
+
+  @param {object} product - Product object
+{%- enddoc -%}
+
+{%- unless settings.lame_enable_wishlist -%}
+{%- else -%}
+  {%- liquid
+    assign lame_wl_image = ''
+    if product.featured_media
+      assign lame_wl_image = product.featured_media.preview_image | image_url: width: 480
+    endif
+    assign lame_wl_price = product.price_min | money
+  -%}
+
+  <button
+    type="button"
+    class="lame-cat-wishlist-btn"
+    aria-label="{{ 'lame_wishlist.toggle' | t }}"
+    aria-pressed="false"
+    data-lame-wishlist-toggle
+    data-product-id="{{ product.id }}"
+    data-product-handle="{{ product.handle }}"
+    data-product-url="{{ product.url }}"
+    data-product-title="{{ product.title | escape }}"
+    data-product-image="{{ lame_wl_image }}"
+    data-product-price="{{ lame_wl_price | escape }}"
+  >
+    <svg class="lame-cat-wishlist-btn__svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        class="lame-cat-wishlist-btn__heart"
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      />
+    </svg>
+  </button>
+{%- endunless -%}

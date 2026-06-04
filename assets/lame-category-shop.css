@@ -157,6 +157,7 @@
   padding: 1rem;
   box-sizing: border-box;
   text-decoration: none;
+  pointer-events: none;
 }
 
 .lame-cat-card__image {
@@ -196,31 +197,71 @@
   border-radius: 4px;
 }
 
-.lame-cat-card__media .lame-op-wishlist-btn {
+.lame-cat-card__media-link .lame-cat-card__image,
+.lame-cat-card__media-link .lame-cat-card__image--placeholder {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.lame-cat-wishlist-btn {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  z-index: 2;
-  width: 2rem;
-  height: 2rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.95);
+  background: #fff;
   color: rgb(var(--lame-cat-forest));
   cursor: pointer;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
-  opacity: 0;
-  transform: translateY(-4px);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.12);
+  pointer-events: auto;
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.lame-cat-card:hover .lame-cat-card__media .lame-op-wishlist-btn,
-.lame-cat-card__media .lame-op-wishlist-btn:focus-visible {
-  opacity: 1;
-  transform: translateY(0);
+.lame-cat-wishlist-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.14);
+}
+
+.lame-cat-wishlist-btn:focus-visible {
+  outline: 2px solid rgb(var(--lame-cat-forest));
+  outline-offset: 2px;
+}
+
+.lame-cat-wishlist-btn__svg {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+.lame-cat-wishlist-btn__heart {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  transition:
+    fill 0.2s ease,
+    stroke 0.2s ease;
+}
+
+.lame-cat-wishlist-btn.is-active {
+  background: rgb(var(--lame-cat-forest));
+  color: #fff;
+}
+
+.lame-cat-wishlist-btn.is-active .lame-cat-wishlist-btn__heart {
+  fill: currentColor;
+  stroke: currentColor;
 }
 
 .lame-cat-card__body {
@@ -376,12 +417,6 @@
   margin-top: 2.5rem;
 }
 
-@media (hover: none) {
-  .lame-cat-card__media .lame-op-wishlist-btn {
-    opacity: 1;
-    transform: none;
-  }
-}
 
 @media screen and (max-width: 549px) {
   .lame-cat-card__title {

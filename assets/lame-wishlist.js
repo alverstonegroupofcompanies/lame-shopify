@@ -269,6 +269,7 @@
       const toggle = e.target instanceof Element ? e.target.closest('[data-lame-wishlist-toggle]') : null;
       if (toggle instanceof HTMLElement) {
         e.preventDefault();
+        e.stopPropagation();
         toggleButton(toggle);
         return;
       }
