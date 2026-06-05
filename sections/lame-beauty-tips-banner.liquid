@@ -1,0 +1,241 @@
+{%- liquid
+  assign banner_image = section.settings.image
+  assign mobile_image = section.settings.image_mobile
+  assign banner_alt = section.settings.image_alt | default: 'Daily skincare tips' | escape
+  assign use_theme_asset = false
+
+  if banner_image == blank
+    assign use_theme_asset = true
+  endif
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-beauty-tips-banner"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-beauty-tips-banner__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    <div class="lame-beauty-tips-banner__frame">
+      {%- if section.settings.link != blank -%}
+        <a
+          href="{{ section.settings.link }}"
+          class="lame-beauty-tips-banner__link"
+          {% if section.settings.open_in_new_tab %}
+            target="_blank"
+            rel="noopener"
+          {% endif %}
+        >
+      {%- endif -%}
+
+      {%- if use_theme_asset -%}
+        <picture>
+          {%- if mobile_image != blank -%}
+            {{
+              mobile_image
+              | image_url: width: 1200
+              | image_tag:
+                class: 'lame-beauty-tips-banner__image lame-beauty-tips-banner__image--mobile',
+                loading: 'lazy',
+                widths: '375, 550, 750',
+                sizes: '100vw',
+                alt: banner_alt
+            }}
+          {%- endif -%}
+          <img
+            src="{{ 'lame-beauty-tips-banner.png' | asset_url }}"
+            class="lame-beauty-tips-banner__image{% if mobile_image != blank %} lame-beauty-tips-banner__image--desktop{% endif %}"
+            alt="{{ banner_alt }}"
+            width="1920"
+            height="640"
+            loading="lazy"
+            decoding="async"
+          >
+        </picture>
+      {%- else -%}
+        {%- liquid
+          assign desktop_image_class = 'lame-beauty-tips-banner__image'
+          if mobile_image != blank
+            assign desktop_image_class = desktop_image_class | append: ' lame-beauty-tips-banner__image--desktop'
+          endif
+        -%}
+        <picture>
+          {%- if mobile_image != blank -%}
+            {{
+              mobile_image
+              | image_url: width: 1200
+              | image_tag:
+                class: 'lame-beauty-tips-banner__image lame-beauty-tips-banner__image--mobile',
+                loading: 'lazy',
+                widths: '375, 550, 750',
+                sizes: '100vw',
+                alt: banner_alt
+            }}
+          {%- endif -%}
+          {{
+            banner_image
+            | image_url: width: 3840
+            | image_tag:
+              class: desktop_image_class,
+              loading: 'lazy',
+              widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+              sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
+              alt: banner_alt
+          }}
+        </picture>
+      {%- endif -%}
+
+      {%- if section.settings.link != blank -%}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-beauty-tips-banner {
+    --lame-beauty-tips-radius: 12px;
+    width: 100%;
+  }
+
+  .lame-beauty-tips-banner__wrap {
+    width: 100%;
+    max-width: min(100%, var(--page-width, 1200px));
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  .section--full-width .lame-beauty-tips-banner__wrap {
+    max-width: 100%;
+    padding-inline: clamp(0.75rem, 3vw, 1.5rem);
+  }
+
+  .lame-beauty-tips-banner__frame {
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--lame-beauty-tips-radius);
+    box-shadow: 0 8px 28px rgb(42 58 48 / 0.08);
+    line-height: 0;
+    background: #e8f0eb;
+  }
+
+  .lame-beauty-tips-banner__link {
+    display: block;
+    width: 100%;
+    line-height: 0;
+    text-decoration: none;
+  }
+
+  .lame-beauty-tips-banner__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    border: none;
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .lame-beauty-tips-banner__image--mobile {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-beauty-tips-banner__frame {
+      border-radius: 10px;
+    }
+
+    .lame-beauty-tips-banner:has(.lame-beauty-tips-banner__image--mobile) .lame-beauty-tips-banner__image--desktop {
+      display: none;
+    }
+
+    .lame-beauty-tips-banner:has(.lame-beauty-tips-banner__image--mobile) .lame-beauty-tips-banner__image--mobile {
+      display: block;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Beauty tips banner",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["index", "page"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner image",
+      "info": "Replace with your own beauty tips graphic. Leave empty to use the built-in daily skincare tips banner. Recommended: wide image (~1920×640px)."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile banner image",
+      "info": "Optional. Shown on phones instead of the main banner."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "Daily skincare tips — cleanse gently, hydrate daily, wear sunscreen, exfoliate weekly, and get enough sleep"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Banner link",
+      "info": "Optional. Makes the whole banner clickable."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "Open link in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Beauty tips banner",
+      "category": "Banners"
+    }
+  ]
+}
+{% endschema %}
