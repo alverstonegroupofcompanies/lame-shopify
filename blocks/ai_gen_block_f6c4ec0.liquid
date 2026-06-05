@@ -106,19 +106,19 @@
   .ai-category-carousel__track-{{ ai_gen_id }} {
     display: flex;
     gap: {{ block.settings.card_gap }}px;
-    transition: transform 0.5s ease;
-    width: 100%;
+    width: max-content;
   }
 
   .ai-category-carousel__card-{{ ai_gen_id }} {
-    flex: 0 0 calc((100% - ({{ block.settings.card_gap }}px * 3)) / 4);
+    flex: 0 0 var(--ai-category-card-width);
+    width: var(--ai-category-card-width);
     min-width: 0;
-    width: calc((100% - ({{ block.settings.card_gap }}px * 3)) / 4);
     position: relative;
     overflow: hidden;
     border-radius: {{ block.settings.card_border_radius }}px;
     cursor: pointer;
     transition: transform 0.3s ease;
+    scroll-snap-align: start;
   }
 
   .ai-category-carousel__card-{{ ai_gen_id }}:hover {
@@ -179,17 +179,55 @@
     text-shadow: 0 1px 4px rgb(0 0 0 / 0.6);
   }
 
-  @media screen and (max-width: 989px) {
-    .ai-category-carousel__card-{{ ai_gen_id }} {
-      flex: 0 0 calc((100% - {{ block.settings.card_gap }}px) / 2);
-      width: calc((100% - {{ block.settings.card_gap }}px) / 2);
+  /* Native scroll + snapping for touch + trackpad */
+  .ai-category-carousel__track-wrapper-{{ ai_gen_id }} {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    cursor: grab;
+  }
+
+  .ai-category-carousel__track-wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-category-carousel__track-wrapper-{{ ai_gen_id }}:active {
+    cursor: grabbing;
+  }
+
+  /* Card widths by breakpoint (mobile: 2 visible) */
+  .ai-category-carousel-{{ ai_gen_id }} {
+    --ai-category-card-width: calc((100% - {{ block.settings.card_gap }}px) / 2);
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-card-width: calc((100% - ({{ block.settings.card_gap }}px * 2)) / 3);
     }
   }
 
+  /* 13-inch laptops: 4 smaller cards often feels cramped — prefer 3 wider */
+  @media screen and (min-width: 990px) and (max-width: 1439px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-card-width: calc((100% - ({{ block.settings.card_gap }}px * 2)) / 3);
+    }
+  }
+
+  @media screen and (min-width: 1440px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-card-width: calc((100% - ({{ block.settings.card_gap }}px * 3)) / 4);
+    }
+  }
+
+  /* No arrows on mobile (gesture scroll instead) */
   @media screen and (max-width: 749px) {
-    .ai-category-carousel__card-{{ ai_gen_id }} {
-      flex: 0 0 100%;
-      width: 100%;
+    .ai-category-carousel__nav-{{ ai_gen_id }} {
+      display: none !important;
     }
   }
 {% endstyle %}
@@ -291,18 +329,20 @@
       constructor() {
         super();
         this.track = this.querySelector('.ai-category-carousel__track-{{ ai_gen_id }}');
-        this.cards = this.querySelectorAll('.ai-category-carousel__card-{{ ai_gen_id }}');
-        this.currentIndex = 0;
+        this.wrapper = this.querySelector('.ai-category-carousel__track-wrapper-{{ ai_gen_id }}');
+        this.originalCards = Array.from(this.querySelectorAll('.ai-category-carousel__card-{{ ai_gen_id }}'));
+        this.cloneCount = 0;
         this.autoSlideInterval = null;
         this.autoSlideDelay = {{ block.settings.auto_slide_speed | times: 1000 }};
       }
 
       connectedCallback() {
-        if (this.cards.length > 0) {
-          this.startAutoSlide();
-          this.setupHoverPause();
-          this.setupNavButtons();
-        }
+        if (!this.track || !this.wrapper || this.originalCards.length === 0) return;
+        this.setupInfiniteLoop();
+        this.setupHoverPause();
+        this.setupNavButtons();
+        this.setupLoopGuards();
+        this.startAutoSlide();
       }
 
       setupNavButtons() {
@@ -312,7 +352,7 @@
           prev.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.slidePrev();
+            this.scrollByCards(-1);
             this.restartAutoSlide();
           });
         }
@@ -320,7 +360,7 @@
           next.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.slideNext();
+            this.scrollByCards(1);
             this.restartAutoSlide();
           });
         }
@@ -332,35 +372,54 @@
       }
 
       stepPx() {
-        const cardWidth = this.cards[0].offsetWidth;
+        const first = this.track.querySelector('.ai-category-carousel__card-{{ ai_gen_id }}');
+        if (!first) return 0;
+        const cardWidth = first.offsetWidth;
         const gap = {{ block.settings.card_gap }};
         return cardWidth + gap;
       }
 
-      slidePrev() {
-        if (this.cards.length === 0) return;
-        if (this.currentIndex <= 0) {
-          this.currentIndex = this.cards.length - 1;
-        } else {
-          this.currentIndex--;
-        }
-        const offset = this.stepPx() * this.currentIndex;
-        this.track.style.transition = 'transform 0.5s ease';
-        this.track.style.transform = `translateX(-${offset}px)`;
+      scrollByCards(n) {
+        const step = this.stepPx();
+        if (!step) return;
+        this.wrapper.scrollBy({ left: step * n, behavior: 'smooth' });
       }
 
-      cloneCards() {
-        const cardsArray = Array.from(this.cards);
-        cardsArray.forEach(card => {
-          const clone = card.cloneNode(true);
-          this.track.appendChild(clone);
+      visibleCount() {
+        const w = window.innerWidth || 0;
+        if (w >= 1440) return 4;
+        if (w >= 990) return 3;
+        if (w >= 750) return 3;
+        return 2;
+      }
+
+      setupInfiniteLoop() {
+        // Build: [tail clones][original][head clones]
+        const originals = this.originalCards;
+        const cloneCount = Math.min(Math.max(this.visibleCount() + 1, 3), originals.length);
+        this.cloneCount = cloneCount;
+
+        // Clear track and rebuild with deep clones to preserve markup.
+        this.track.innerHTML = '';
+
+        const tail = originals.slice(-cloneCount).map((el) => el.cloneNode(true));
+        const head = originals.slice(0, cloneCount).map((el) => el.cloneNode(true));
+
+        tail.forEach((el) => this.track.appendChild(el));
+        originals.forEach((el) => this.track.appendChild(el));
+        head.forEach((el) => this.track.appendChild(el));
+
+        // Jump into the "original" region.
+        requestAnimationFrame(() => {
+          const step = this.stepPx();
+          this.wrapper.scrollLeft = step * cloneCount;
         });
       }
 
       startAutoSlide() {
-        this.autoSlideInterval = setInterval(() => {
-          this.slideNext();
-        }, this.autoSlideDelay);
+        // Don’t auto-slide if speed is 0/blank.
+        if (!this.autoSlideDelay || this.autoSlideDelay < 500) return;
+        this.autoSlideInterval = setInterval(() => this.scrollByCards(1), this.autoSlideDelay);
       }
 
       stopAutoSlide() {
@@ -380,13 +439,58 @@
         });
       }
 
-      slideNext() {
-        if (this.cards.length === 0) return;
-        const maxIndex = Math.max(0, this.cards.length - 1);
-        this.currentIndex = this.currentIndex >= maxIndex ? 0 : this.currentIndex + 1;
-        const offset = this.stepPx() * this.currentIndex;
-        this.track.style.transition = 'transform 0.5s ease';
-        this.track.style.transform = `translateX(-${offset}px)`;
+      setupLoopGuards() {
+        let ticking = false;
+        const onScroll = () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            ticking = false;
+            this.guardLoop();
+          });
+        };
+        this.wrapper.addEventListener('scroll', onScroll, { passive: true });
+
+        // Rebuild on resize so cloneCount matches breakpoint.
+        let resizeTimer = null;
+        window.addEventListener(
+          'resize',
+          () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+              this.originalCards = Array.from(this.originalCards); // keep reference stable
+              this.setupInfiniteLoop();
+            }, 150);
+          },
+          { passive: true }
+        );
+      }
+
+      guardLoop() {
+        const step = this.stepPx();
+        if (!step || !this.cloneCount) return;
+
+        const originalsCount = this.originalCards.length;
+        const start = step * this.cloneCount;
+        const end = step * (this.cloneCount + originalsCount);
+        const x = this.wrapper.scrollLeft;
+
+        // If we scroll into the cloned head/tail zones, jump by one originals length.
+        if (x <= start - step * 0.5) {
+          const delta = step * originalsCount;
+          this.jumpScroll(x + delta);
+        } else if (x >= end + step * 0.5) {
+          const delta = step * originalsCount;
+          this.jumpScroll(x - delta);
+        }
+      }
+
+      jumpScroll(newLeft) {
+        const prev = this.wrapper.style.scrollBehavior;
+        this.wrapper.style.scrollBehavior = 'auto';
+        this.wrapper.scrollLeft = newLeft;
+        // restore
+        this.wrapper.style.scrollBehavior = prev || '';
       }
 
       disconnectedCallback() {
