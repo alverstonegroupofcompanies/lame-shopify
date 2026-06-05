@@ -37,16 +37,17 @@
   --lame-op-price-size: 0.9375rem;
 
   /* Button */
-  --lame-op-btn-height: 42px;
-  --lame-op-btn-padding-x: 14px;
+  --lame-op-btn-height: 40px;
+  --lame-op-btn-padding-x: 16px;
   --lame-op-btn-size: 0.75rem;
-  --lame-op-btn-bg: #ffffff;
-  --lame-op-btn-bg-hover: #f7faf8;
-  --lame-op-btn-color: #2a3a30;
+  --lame-op-btn-bg: #2a3a30;
+  --lame-op-btn-bg-hover: #1f2e26;
+  --lame-op-btn-color: #ffffff;
   --lame-op-btn-border: #2a3a30;
   --lame-op-btn-sold-bg: #e8e0d4;
   --lame-op-btn-sold-color: #6b635c;
-  --lame-op-btn-radius: 6px;
+  --lame-op-btn-radius: 999px;
+  --lame-op-btn-gap: 8px;
 
   /* Colors */
   --lame-op-ink: #1a1614;
@@ -500,7 +501,7 @@
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons {
   display: flex;
   align-items: stretch;
-  gap: 0.4rem;
+  gap: var(--lame-op-btn-gap);
   width: 100%;
   margin: 0;
   padding: 0;
@@ -516,13 +517,13 @@
   flex: 1 1 0;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0;
   width: auto;
   min-width: 0;
   min-height: var(--lame-op-btn-height);
   height: var(--lame-op-btn-height);
   margin: 0;
-  padding: 0 calc(var(--lame-op-btn-padding-x) + 4px);
+  padding: 0 var(--lame-op-btn-padding-x);
   box-sizing: border-box;
   border: 1px solid var(--lame-op-btn-border);
   border-radius: var(--lame-op-btn-radius);
@@ -531,28 +532,38 @@
   font-family: var(--lame-font-body, var(--font-body--family));
   font-size: var(--lame-op-btn-size);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   line-height: 1;
-  text-transform: none;
+  text-transform: uppercase;
   box-shadow: none;
   cursor: pointer;
   transition:
     background 0.22s ease,
     border-color 0.22s ease,
-    transform 0.22s ease;
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-icon,
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-text {
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-icon {
+  display: none;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-text,
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-text__content {
   color: var(--lame-op-btn-color);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button:not(:disabled):hover {
   background: var(--lame-op-btn-bg-hover);
   color: var(--lame-op-btn-color);
-  border-color: var(--lame-op-btn-border);
+  border-color: var(--lame-op-btn-bg-hover);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgb(42 58 48 / 0.1);
+  box-shadow: 0 4px 12px rgb(42 58 48 / 0.16);
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button:focus-visible {
+  outline: 2px solid var(--lame-op-green);
+  outline-offset: 2px;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button:disabled {
@@ -575,26 +586,45 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--lame-op-btn-radius);
-  border: 1px solid var(--lame-op-card-border);
+  border-radius: 999px;
+  border: 1px solid rgb(42 58 48 / 0.16);
   background: #fff;
-  color: var(--lame-op-green);
+  color: rgb(42 58 48 / 0.65);
   box-shadow: none;
   cursor: pointer;
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease;
 }
 
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn .lame-wishlist-toggle__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn .lame-wishlist-toggle__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn:hover {
-  border-color: var(--lame-op-green);
-  background: #f7faf8;
+  border-color: rgb(42 58 48 / 0.35);
+  background: rgb(42 58 48 / 0.04);
+  color: var(--lame-op-green);
   transform: translateY(-1px);
 }
 
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn:focus-visible {
+  outline: 2px solid var(--lame-op-green);
+  outline-offset: 2px;
+}
+
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active {
-  border-color: var(--lame-op-green);
+  border-color: rgb(42 58 48 / 0.28);
   background: var(--lame-op-discount-bg);
   color: var(--lame-op-green);
 }
@@ -610,8 +640,10 @@
     --lame-op-grid-gap: 12px;
     --lame-op-image-height: clamp(148px, 42vw, 180px);
     --lame-op-image-padding: 12px;
-    --lame-op-btn-height: 38px;
-    --lame-op-btn-size: 0.6875rem;
+    --lame-op-btn-height: 36px;
+    --lame-op-btn-size: 0.625rem;
+    --lame-op-btn-padding-x: 12px;
+    --lame-op-btn-gap: 6px;
     --lame-op-title-size: 0.8125rem;
     --lame-op-body-padding-x: 14px;
     --lame-op-body-padding-y: 10px;
