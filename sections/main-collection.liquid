@@ -23,10 +23,15 @@
 {% liquid
   assign lame_cosmetic_collection = false
   assign lame_category_shop_page = false
+  assign lame_category_handle = collection.handle
   assign lame_category_hero_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
 
   if template.name == 'collection' and collection != blank
-    if lame_category_hero_handles contains collection.handle
+    if collection.handle == 'frontpage'
+      assign lame_category_handle = 'hair-care'
+    endif
+
+    if lame_category_hero_handles contains lame_category_handle
       assign lame_category_shop_page = true
     endif
 
@@ -60,7 +65,7 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ collection.handle }}{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}{% endif %}"
+  class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{% if lame_cosmetic_collection or lame_category_shop_page %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
@@ -134,7 +139,7 @@
             assign show_inline_header = false
             if lame_cosmetic_collection and section.settings.our_products_heading != blank
               assign show_inline_header = true
-              if collection != blank and lame_category_hero_handles contains collection.handle
+              if collection != blank and lame_category_hero_handles contains lame_category_handle
                 assign show_inline_header = false
               endif
             endif
@@ -144,7 +149,7 @@
               assign inline_heading = section.settings.our_products_heading
               assign inline_subtitle = section.settings.our_products_subtitle
               if collection != blank
-                case collection.handle
+                case lame_category_handle
                   when 'bath-body'
                     assign inline_heading = 'Bath & Body'
                     assign inline_subtitle = 'Soothing body care rituals for soft, nourished skin.'
@@ -215,7 +220,7 @@
                 {% render 'lame-category-product-card',
                   product: product,
                   section: section,
-                  collection_handle: collection.handle,
+                  collection_handle: lame_category_handle,
                   show_wishlist: section.settings.show_wishlist
                 %}
               </li>

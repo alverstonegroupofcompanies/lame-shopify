@@ -3,6 +3,10 @@
   assign hero_subtitle = section.settings.subtitle
   assign hero_eyebrow = section.settings.eyebrow
   assign hero_image = section.settings.image
+  assign lame_category_handle = collection.handle
+  if collection.handle == 'frontpage'
+    assign lame_category_handle = 'hair-care'
+  endif
 
   if collection != blank
     if hero_heading == blank
@@ -13,7 +17,7 @@
       assign hero_image = collection.image
     endif
 
-    case collection.handle
+    case lame_category_handle
       when 'bath-body'
         if hero_subtitle == blank
           assign hero_subtitle = 'Soothing body care rituals for soft, nourished skin from head to toe.'
@@ -74,7 +78,7 @@
 {%- liquid
   assign cosmetic_hero_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
   assign show_category_hero = false
-  if collection != blank and cosmetic_hero_handles contains collection.handle
+  if collection != blank and cosmetic_hero_handles contains lame_category_handle
     assign show_category_hero = true
   endif
   if section.settings.heading != blank or section.settings.image != blank
@@ -85,7 +89,7 @@
 {%- if show_category_hero and collection != blank -%}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-cosmetic-category-hero lame-cosmetic-category-hero--{{ collection.handle }}"
+    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-cosmetic-category-hero lame-cosmetic-category-hero--{{ lame_category_handle }}"
     {{ section.shopify_attributes }}
   >
     <div class="lame-cosmetic-category-hero__inner spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
