@@ -1,11 +1,12 @@
 {%- doc -%}
-  Account control that links to the themed profile at /account instead of Shopify’s default account UI.
+  Account control with themed popover linking to profile and orders pages.
 
-  @param {object} section - Header section (profile_page setting)
+  @param {object} section - Header section (profile_page / orders_page settings)
   @param {string} [display_style] - icon or text
 {%- enddoc -%}
 
 {%- capture profile_url -%}{%- render 'lame-customer-profile-url', section: section -%}{%- endcapture -%}
+{%- capture orders_url -%}{%- render 'lame-customer-orders-url', section: section -%}{%- endcapture -%}
 
 <div class="lame-account header-actions__action{% if display_style == 'text' %} lame-account--text{% endif %}">
   {%- if customer -%}
@@ -20,20 +21,30 @@
         </span>
       </summary>
       <div
-        class="lame-account__panel color-{{ settings.popover_color_scheme }}"
+        class="lame-account__panel lame-account__panel--rich color-{{ settings.popover_color_scheme }}"
         role="menu"
       >
+        <div class="lame-account__panel-head">
+          <p class="lame-account__greeting">
+            {{ 'lame_customer.account_greeting' | t: name: customer.first_name | default: customer.name }}
+          </p>
+          <p class="lame-account__email" title="{{ customer.email }}">{{ customer.email | truncate: 34 }}</p>
+        </div>
+
+        <div class="lame-account__panel-actions">
+          <a class="lame-account__action-btn" href="{{ orders_url }}" role="menuitem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+              <path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+            </svg>
+            <span>{{ 'customer.orders.title' | t }}</span>
+          </a>
+          <a class="lame-account__action-btn" href="{{ profile_url }}" role="menuitem">
+            <span>{{ 'lame_customer.my_profile' | t }}</span>
+          </a>
+        </div>
+
         <ul class="lame-account__menu list-unstyled" role="list">
-          <li role="none">
-            <a class="lame-account__link" href="{{ profile_url }}" role="menuitem">
-              {{ 'content.account_title' | t }}
-            </a>
-          </li>
-          <li role="none">
-            <a class="lame-account__link" href="{{ profile_url }}#orders" role="menuitem">
-              {{ 'customer.orders.title' | t }}
-            </a>
-          </li>
           {% if settings.lame_enable_wishlist %}
             <li role="none">
               <button type="button" class="lame-account__link" data-lame-wishlist-open role="menuitem">
@@ -42,7 +53,7 @@
             </li>
           {% endif %}
           <li role="none">
-            <a class="lame-account__link" href="{{ routes.account_addresses_url }}" role="menuitem">
+            <a class="lame-account__link" href="{{ profile_url }}#addresses" role="menuitem">
               {{ 'customer.addresses.title' | t }}
             </a>
           </li>

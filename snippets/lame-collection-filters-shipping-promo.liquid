@@ -1,0 +1,27 @@
+{%- doc -%}
+  Sidebar free-shipping promo for Our Products collection filters.
+
+  @param {string} [threshold] - Display threshold (default ₹499)
+{%- enddoc -%}
+
+{%- liquid
+  assign promo_threshold = threshold | default: '₹499'
+-%}
+
+<aside class="lame-collection-filters-promo" aria-label="{{ 'lame_collection.filters_shipping_promo_label' | t }}">
+  <span class="lame-collection-filters-promo__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+      <path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M14 10h3.2L19 13v2h-5v-5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      <circle cx="7" cy="17" r="1.5" stroke="currentColor" stroke-width="1.4"/>
+      <circle cx="16" cy="17" r="1.5" stroke="currentColor" stroke-width="1.4"/>
+    </svg>
+  </span>
+  <div class="lame-collection-filters-promo__content">
+    <p class="lame-collection-filters-promo__title">{{ 'lame_collection.filters_shipping_promo_title' | t }}</p>
+    <p class="lame-collection-filters-promo__text">
+      {{ 'lame_collection.filters_shipping_promo_text' | t: threshold: promo_threshold }}
+    </p>
+  </div>
+  <span class="lame-collection-filters-promo__arrow" aria-hidden="true">→</span>
+</aside>

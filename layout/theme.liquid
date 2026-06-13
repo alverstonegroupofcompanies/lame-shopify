@@ -35,14 +35,15 @@
     {%- render 'stylesheets' -%}
     {%- liquid
       assign lame_load_op_css = false
+      assign lame_op_collection_handles = 'all,our-products,products,frontpage' | split: ','
       if template.name == 'collection'
         if template.suffix == 'our-products'
           assign lame_load_op_css = true
         elsif collection != blank
-          if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+          if lame_op_collection_handles contains collection.handle
             assign lame_load_op_css = true
           endif
-        elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products'
+        elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products' or request.path contains '/collections/frontpage'
           assign lame_load_op_css = true
         endif
       endif
@@ -59,11 +60,7 @@
       assign lame_load_category_shop_css = false
       if template.name == 'collection' and collection != blank
         assign lame_category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
-        assign lame_theme_category_handle = collection.handle
-        if collection.handle == 'frontpage'
-          assign lame_theme_category_handle = 'hair-care'
-        endif
-        if lame_category_shop_handles contains lame_theme_category_handle
+        if lame_category_shop_handles contains collection.handle
           assign lame_load_category_shop_css = true
         endif
       endif
@@ -93,26 +90,23 @@
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if template.name == 'index' %} template-index{% endif %}{% if template.name == 'collection' %} template-collection{% endif %}{% liquid
     assign lame_body_our_products = false
     assign lame_body_category_shop = false
+    assign lame_op_collection_handles = 'all,our-products,products,frontpage' | split: ','
     if template.name == 'collection'
       if template.suffix == 'our-products'
         assign lame_body_our_products = true
       elsif collection != blank
-        if collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+        if lame_op_collection_handles contains collection.handle
           assign lame_body_our_products = true
         endif
         assign lame_category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
-        assign lame_body_category_handle = collection.handle
-        if collection.handle == 'frontpage'
-          assign lame_body_category_handle = 'hair-care'
-        endif
-        if lame_category_shop_handles contains lame_body_category_handle
+        if lame_category_shop_handles contains collection.handle
           assign lame_body_category_shop = true
         endif
-      elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products'
+      elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products' or request.path contains '/collections/frontpage'
         assign lame_body_our_products = true
       endif
     endif
-  %}{% if lame_body_our_products %} template-collection-our-products{% endif %}{% if lame_body_category_shop %} template-collection-category-shop template-collection-category-shop--{{ lame_body_category_handle }}{% endif %}">
+  %}{% if lame_body_our_products %} template-collection-our-products{% endif %}{% if lame_body_category_shop %} template-collection-category-shop template-collection-category-shop--{{ collection.handle }}{% endif %}">
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
     <div id="header-group">
       {% sections 'header-group' %}

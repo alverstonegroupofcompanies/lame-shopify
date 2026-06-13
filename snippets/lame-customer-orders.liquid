@@ -2,16 +2,25 @@
   Premium order history cards for the customer account page.
 
   @param {number} [orders_per_page] - Orders per page (default 8)
+  @param {string} [orders_url] - Themed orders page URL for on-site detail links
+  @param {boolean} [show_heading] - Show section heading (default true)
 {%- enddoc -%}
 
 {%- liquid
   assign per_page = orders_per_page | default: 8
+  if orders_url == blank
+    capture orders_url
+      render 'lame-customer-orders-url'
+    endcapture
+  endif
 -%}
 
 <section class="lame-acct-card lame-acct-card--orders lame-profile__panel" aria-labelledby="ProfileOrdersHeading">
-  <div class="lame-acct-card__head">
-    <h2 id="ProfileOrdersHeading" class="lame-acct-card__title">{{ 'customer.orders.title' | t }}</h2>
-  </div>
+  {% unless show_heading == false %}
+    <div class="lame-acct-card__head">
+      <h2 id="ProfileOrdersHeading" class="lame-acct-card__title">{{ 'customer.orders.title' | t }}</h2>
+    </div>
+  {% endunless %}
 
   <div class="lame-acct-card__body">
   {% paginate customer.orders by per_page %}
@@ -29,9 +38,17 @@
               assign status_label = 'lame_customer.order_cancelled' | t
             endif
           -%}
+          {%- capture order_detail_url -%}{{ orders_url }}?order={{ order.id }}{%- endcapture -%}
           <li class="lame-orders__item">
             <article class="lame-orders__card">
-              <a href="{{ order.customer_url }}" class="lame-orders__thumb" tabindex="-1" aria-hidden="true">
+              <a
+                href="{{ order_detail_url }}"
+                class="lame-orders__thumb"
+                data-order-link
+                data-order-id="{{ order.id }}"
+                tabindex="-1"
+                aria-hidden="true"
+              >
                 {% if thumb != blank %}
                   {{
                     thumb
@@ -73,7 +90,12 @@
                   </p>
                 </div>
 
-                <a href="{{ order.customer_url }}" class="lame-orders__cta button button-secondary">
+                <a
+                  href="{{ order_detail_url }}"
+                  class="lame-orders__cta button button-secondary"
+                  data-order-link
+                  data-order-id="{{ order.id }}"
+                >
                   {{ 'lame_customer.view_order' | t }}
                 </a>
               </div>

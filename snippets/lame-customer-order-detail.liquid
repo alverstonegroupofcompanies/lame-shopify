@@ -1,0 +1,162 @@
+{%- doc -%}
+  On-site order detail panel for the themed orders page.
+
+  @param {object} order - Customer order object
+  @param {string} orders_url - Base orders page URL
+{%- enddoc -%}
+
+{%- liquid
+  assign status_key = order.fulfillment_status | default: 'unfulfilled'
+  if order.cancelled
+    assign status_key = 'cancelled'
+  endif
+  assign status_label = order.fulfillment_status_label
+  if order.cancelled
+    assign status_label = 'lame_customer.order_cancelled' | t
+  endif
+-%}
+
+<article
+  class="lame-order-detail"
+  data-order-detail
+  data-order-id="{{ order.id }}"
+  hidden
+>
+  <header class="lame-order-detail__head">
+    <a href="{{ orders_url }}" class="lame-order-detail__back" data-order-back>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>{{ 'lame_customer.back_to_orders' | t }}</span>
+    </a>
+    <div class="lame-order-detail__title-row">
+      <div>
+        <h2 class="lame-order-detail__title">{{ 'lame_customer.order_number' | t: number: order.name }}</h2>
+        <time class="lame-order-detail__date" datetime="{{ order.created_at | date: '%Y-%m-%d' }}">
+          {{ order.created_at | time_tag: format: 'date_at_time' }}
+        </time>
+      </div>
+      <span class="lame-order-detail__badge lame-order-detail__badge--{{ status_key }}">{{ status_label }}</span>
+    </div>
+  </header>
+
+  <div class="lame-order-detail__grid">
+    <section class="lame-order-detail__card" aria-labelledby="OrderItems-{{ order.id }}">
+      <h3 id="OrderItems-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.order_items' | t }}</h3>
+      <ul class="lame-order-detail__items" role="list">
+        {%- for line_item in order.line_items -%}
+          <li class="lame-order-detail__item">
+            <a
+              href="{{ line_item.url }}"
+              class="lame-order-detail__item-thumb"
+              {% if line_item.url == blank %}tabindex="-1" aria-hidden="true"{% endif %}
+            >
+              {% if line_item.image != blank %}
+                {{
+                  line_item.image
+                  | image_url: width: 160
+                  | image_tag:
+                    widths: '80, 120, 160',
+                    sizes: '72px',
+                    class: 'lame-order-detail__item-img',
+                    loading: 'lazy',
+                    alt: line_item.title
+                }}
+              {% else %}
+                <span class="lame-order-detail__item-fallback" aria-hidden="true"></span>
+              {% endif %}
+            </a>
+            <div class="lame-order-detail__item-main">
+              <p class="lame-order-detail__item-title">
+                {% if line_item.url != blank %}
+                  <a href="{{ line_item.url }}">{{ line_item.title }}</a>
+                {% else %}
+                  {{ line_item.title }}
+                {% endif %}
+              </p>
+              {% if line_item.variant_title != blank and line_item.variant_title != 'Default Title' %}
+                <p class="lame-order-detail__item-variant">{{ line_item.variant_title }}</p>
+              {% endif %}
+              <p class="lame-order-detail__item-qty">{{ 'lame_customer.order_qty' | t: qty: line_item.quantity }}</p>
+            </div>
+            <p class="lame-order-detail__item-price">
+              {%- if line_item.final_line_price != blank -%}
+                {{ line_item.final_line_price | money_with_currency }}
+              {%- else -%}
+                {{ line_item.line_price | money_with_currency }}
+              {%- endif -%}
+            </p>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </section>
+
+    <aside class="lame-order-detail__aside">
+      <section class="lame-order-detail__card" aria-labelledby="OrderSummary-{{ order.id }}">
+        <h3 id="OrderSummary-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.order_summary' | t }}</h3>
+        <dl class="lame-order-detail__summary">
+          <div class="lame-order-detail__summary-row">
+            <dt>{{ 'lame_customer.order_subtotal' | t }}</dt>
+            <dd>{{ order.subtotal_price | money_with_currency }}</dd>
+          </div>
+          {% if order.shipping_price > 0 %}
+            <div class="lame-order-detail__summary-row">
+              <dt>{{ 'lame_customer.order_shipping' | t }}</dt>
+              <dd>{{ order.shipping_price | money_with_currency }}</dd>
+            </div>
+          {% endif %}
+          {% if order.tax_price > 0 %}
+            <div class="lame-order-detail__summary-row">
+              <dt>{{ 'lame_customer.order_tax' | t }}</dt>
+              <dd>{{ order.tax_price | money_with_currency }}</dd>
+            </div>
+          {% endif %}
+          <div class="lame-order-detail__summary-row lame-order-detail__summary-row--total">
+            <dt>{{ 'lame_customer.order_total' | t }}</dt>
+            <dd>
+              {%- if order.total_net_amount != blank -%}
+                {{ order.total_net_amount | money_with_currency }}
+              {%- else -%}
+                {{ order.total_price | money_with_currency }}
+              {%- endif -%}
+            </dd>
+          </div>
+        </dl>
+        {% if order.financial_status_label != blank %}
+          <p class="lame-order-detail__payment">
+            <span class="lame-order-detail__payment-label">{{ 'lame_customer.payment_status' | t }}</span>
+            <span>{{ order.financial_status_label }}</span>
+          </p>
+        {% endif %}
+      </section>
+
+      {% if order.shipping_address != blank %}
+        <section class="lame-order-detail__card" aria-labelledby="OrderShip-{{ order.id }}">
+          <h3 id="OrderShip-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.shipping_address' | t }}</h3>
+          <address class="lame-order-detail__address">{{ order.shipping_address | format_address }}</address>
+        </section>
+      {% endif %}
+
+      {% if order.fulfillments.size > 0 %}
+        <section class="lame-order-detail__card" aria-labelledby="OrderTrack-{{ order.id }}">
+          <h3 id="OrderTrack-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.tracking' | t }}</h3>
+          <ul class="lame-order-detail__tracking" role="list">
+            {%- for fulfillment in order.fulfillments -%}
+              <li class="lame-order-detail__tracking-item">
+                {% if fulfillment.tracking_url != blank %}
+                  <a href="{{ fulfillment.tracking_url }}" class="lame-order-detail__track-link" target="_blank" rel="noopener">
+                    {{ 'lame_customer.track_shipment' | t }}
+                  </a>
+                {% elsif fulfillment.tracking_number != blank %}
+                  <span class="lame-order-detail__track-num">{{ fulfillment.tracking_number }}</span>
+                {% else %}
+                  <span>{{ 'lame_customer.shipped' | t }}</span>
+                {% endif %}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </section>
+      {% endif %}
+    </aside>
+  </div>
+</article>

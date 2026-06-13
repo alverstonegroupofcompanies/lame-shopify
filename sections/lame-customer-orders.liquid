@@ -1,0 +1,220 @@
+{% if template.directory == 'customers' and template.name == 'account' and pages['my-orders'] != blank and request.design_mode == false %}
+  <div class="section page-width-content" style="padding: 3rem 1rem; text-align: center;">
+    <script>window.location.replace({{ pages['my-orders'].url | json }});</script>
+    <meta http-equiv="refresh" content="0;url={{ pages['my-orders'].url }}">
+    <p>
+      <a href="{{ pages['my-orders'].url }}">{{ 'customer.orders.title' | t }}</a>
+    </p>
+  </div>
+{% else %}
+
+{{ 'lame-customer-account.css' | asset_url | stylesheet_tag }}
+{{ 'lame-customer-profile-layout.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'lame-customer-orders.js' | asset_url }}" defer></script>
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-customer-orders-page"
+  data-lame-customer-orders
+  {{ section.shopify_attributes }}
+>
+  {%- capture lame_profile_url -%}{%- render 'lame-customer-profile-url' -%}{%- endcapture -%}
+  {%- capture lame_orders_url -%}{%- render 'lame-customer-orders-url' -%}{%- endcapture -%}
+  {%- liquid
+    assign avatar_letter = ''
+    if customer
+      assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
+      if avatar_letter == blank
+        assign avatar_letter = customer.email | slice: 0, 1 | upcase
+      endif
+    endif
+  -%}
+
+  <div class="lame-acct-page spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {% unless customer %}
+      <div class="lame-profile__guest lame-acct-card">
+        <span class="lame-profile__empty-icon" aria-hidden="true">
+          {% render 'lame-account-icon', size: 36, class: '' %}
+        </span>
+        <h1 class="lame-profile__page-title">{{ 'customer.orders.title' | t }}</h1>
+        <p>{{ 'lame_customer.orders_login_required' | t }}</p>
+        <a href="{{ routes.account_login_url }}" class="button lame-profile__btn-primary">
+          {{ 'customer.log_in' | t }}
+        </a>
+        <p class="lame-profile__hint">
+          {{ 'lame_customer.create_account_html' | t: link: routes.account_register_url }}
+        </p>
+      </div>
+    {% else %}
+      <div class="lame-acct-layout">
+        {% render 'lame-profile-sidebar',
+          section: section,
+          profile_url: lame_profile_url,
+          orders_url: lame_orders_url,
+          active_nav: 'orders',
+          show_wishlist: section.settings.show_wishlist
+        %}
+
+        <div class="lame-acct-main">
+          <section class="lame-acct-card lame-acct-card--orders-hero lame-profile__panel" aria-labelledby="OrdersPageHeading">
+            <div class="lame-acct-orders-hero">
+              <div class="lame-acct-orders-hero__icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
+                  <path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <h1 id="OrdersPageHeading" class="lame-acct-orders-hero__title">{{ 'customer.orders.title' | t }}</h1>
+                <p class="lame-acct-orders-hero__desc">{{ 'lame_customer.orders_page_desc' | t }}</p>
+              </div>
+            </div>
+          </section>
+
+          <div data-orders-list-view>
+            {% render 'lame-customer-orders',
+              orders_per_page: section.settings.orders_per_page,
+              orders_url: lame_orders_url,
+              show_heading: false
+            %}
+          </div>
+
+          <div data-orders-detail-view hidden>
+            {% paginate customer.orders by section.settings.orders_per_page %}
+              {%- for order in customer.orders -%}
+                {% render 'lame-customer-order-detail', order: order, orders_url: lame_orders_url %}
+              {%- endfor -%}
+            {% endpaginate %}
+          </div>
+        </div>
+      </div>
+
+      {% if section.settings.show_trust_bar %}
+        {% render 'lame-profile-trust-bar' %}
+      {% endif %}
+    {% endunless %}
+  </div>
+</section>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Customer orders",
+  "tag": "section",
+  "class": "lame-customer-orders-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Dedicated orders page for your store. Create a Shopify page with handle “my-orders” and assign this template (page.my-orders)."
+    },
+    {
+      "type": "range",
+      "id": "orders_per_page",
+      "label": "Orders per page",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "label": "Show wishlist in sidebar",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_bar",
+      "label": "Show trust badges",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Sidebar logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "sidebar_logo",
+      "label": "Profile sidebar logo"
+    },
+    {
+      "type": "header",
+      "content": "Sidebar promo card"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image",
+      "label": "Promo image"
+    },
+    {
+      "type": "text",
+      "id": "promo_heading",
+      "label": "Promo heading",
+      "default": "Glow with self care"
+    },
+    {
+      "type": "text",
+      "id": "promo_text",
+      "label": "Promo text",
+      "default": "Premium care for your beautiful you."
+    },
+    {
+      "type": "text",
+      "id": "promo_button_label",
+      "label": "Promo button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "promo_link",
+      "label": "Promo button link"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        { "value": "page-width", "label": "t:options.page" },
+        { "value": "full-width", "label": "t:options.full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer orders"
+    }
+  ]
+}
+{% endschema %}

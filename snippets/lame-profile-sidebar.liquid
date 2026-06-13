@@ -2,11 +2,19 @@
   Profile page sidebar: logo, navigation, promo card.
 
   @param {object} section - Section with promo settings
-  @param {string} profile_url - Base URL for hash links
+  @param {string} profile_url - Profile page URL
+  @param {string} [orders_url] - Orders page URL
+  @param {string} [active_nav] - Active nav item: profile, orders, wishlist, addresses, settings
   @param {boolean} [show_wishlist] - Show wishlist nav item
 {%- enddoc -%}
 
 {%- liquid
+  if orders_url == blank
+    capture orders_url
+      render 'lame-customer-orders-url'
+    endcapture
+  endif
+  assign active_nav = active_nav | default: 'profile'
   assign profile_logo = section.settings.sidebar_logo
   assign profile_logo_asset = false
   assign profile_logo_class = 'lame-acct-sidebar__logo lame-acct-sidebar__logo--brand'
@@ -62,7 +70,11 @@
   </div>
 
   <nav class="lame-acct-sidebar__nav">
-    <a href="#profile-overview" class="lame-acct-sidebar__link is-active" data-profile-nav>
+    <a
+      href="{{ profile_url }}"
+      class="lame-acct-sidebar__link{% if active_nav == 'profile' %} is-active{% endif %}"
+      {% if active_nav == 'profile' %}aria-current="page"{% endif %}
+    >
       <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
       </span>
@@ -72,7 +84,11 @@
       </span>
     </a>
 
-    <a href="#orders" class="lame-acct-sidebar__link" data-profile-nav>
+    <a
+      href="{{ orders_url }}"
+      class="lame-acct-sidebar__link{% if active_nav == 'orders' %} is-active{% endif %}"
+      {% if active_nav == 'orders' %}aria-current="page"{% endif %}
+    >
       <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
       </span>
@@ -83,7 +99,11 @@
     </a>
 
     {% if show_wishlist and settings.lame_enable_wishlist %}
-      <a href="#wishlist" class="lame-acct-sidebar__link" data-profile-nav>
+      <a
+        href="{{ profile_url }}#wishlist"
+        class="lame-acct-sidebar__link{% if active_nav == 'wishlist' %} is-active{% endif %}"
+        {% if active_nav != 'orders' %}data-profile-nav{% endif %}
+      >
         <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393ZM10.765 3.06343C12.8777 0.978857 16.3029 0.978856 18.4155 3.06343C20.5282 5.148 20.5282 8.52779 18.4155 10.6124L10.72 18.2057C10.3224 18.5981 9.67763 18.5981 9.27996 18.2057L1.58446 10.6124C-0.528154 8.52779 -0.528154 5.14801 1.58446 3.06343C3.69708 0.978859 7.12233 0.978858 9.23495 3.06343L10 3.81832L10.765 3.06343Z" fill-rule="evenodd" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>
         </span>
@@ -94,7 +114,11 @@
       </a>
     {% endif %}
 
-    <a href="#addresses" class="lame-acct-sidebar__link" data-profile-nav>
+    <a
+      href="{{ profile_url }}#addresses"
+      class="lame-acct-sidebar__link{% if active_nav == 'addresses' %} is-active{% endif %}"
+      {% if active_nav != 'orders' %}data-profile-nav{% endif %}
+    >
       <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10.5a6 6 0 1 0-12 0C6 15.8 12 21 12 21Z" stroke="currentColor" stroke-width="1.25"/><circle cx="12" cy="10.5" r="2" stroke="currentColor" stroke-width="1.25"/></svg>
       </span>
@@ -104,7 +128,11 @@
       </span>
     </a>
 
-    <a href="#account-settings" class="lame-acct-sidebar__link" data-profile-nav>
+    <a
+      href="{{ profile_url }}#account-settings"
+      class="lame-acct-sidebar__link{% if active_nav == 'settings' %} is-active{% endif %}"
+      {% if active_nav != 'orders' %}data-profile-nav{% endif %}
+    >
       <span class="lame-acct-sidebar__link-icon" aria-hidden="true">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="2.75" stroke="currentColor" stroke-width="1.25"/><path d="M12 14.5v2.5M8.2 8.2 6.8 6.8M15.8 8.2l1.4-1.4M6.8 17.2l-1.4 1.4M17.2 17.2l1.4 1.4M4.5 12H2M22 12h-2.5M12 4.5V2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
       </span>

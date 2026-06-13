@@ -27,12 +27,9 @@
   assign lame_category_hero_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
 
   if template.name == 'collection' and collection != blank
-    if collection.handle == 'frontpage'
-      assign lame_category_handle = 'hair-care'
-    endif
-
-    if lame_category_hero_handles contains lame_category_handle
+    if lame_category_hero_handles contains collection.handle
       assign lame_category_shop_page = true
+      assign lame_category_handle = collection.handle
     endif
 
     unless lame_category_shop_page
@@ -169,6 +166,9 @@
                     assign inline_heading = 'Wellness'
                     assign inline_subtitle = 'Holistic wellness for your everyday self-care routine.'
                   when 'hair-care'
+                    assign inline_heading = 'Hair Care'
+                    assign inline_subtitle = 'Plant-powered care for healthy hair that shines naturally.'
+                  when 'frontpage'
                     assign inline_heading = 'Hair Care'
                     assign inline_subtitle = 'Plant-powered care for healthy hair that shines naturally.'
                 endcase

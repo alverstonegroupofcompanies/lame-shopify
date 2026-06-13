@@ -2,16 +2,22 @@
   Compact recent orders list for the profile dashboard.
 
   @param {number} [limit] - Max orders to show (default 3)
+  @param {string} [orders_url] - Themed orders page URL
 {%- enddoc -%}
 
 {%- liquid
   assign order_limit = limit | default: 3
+  if orders_url == blank
+    capture orders_url
+      render 'lame-customer-orders-url'
+    endcapture
+  endif
 -%}
 
 <section id="recent-orders" class="lame-acct-card lame-profile__panel" aria-labelledby="RecentOrdersHeading">
   <div class="lame-acct-card__head">
     <h2 id="RecentOrdersHeading" class="lame-acct-card__title">{{ 'lame_customer.recent_orders' | t }}</h2>
-    <a href="#orders" class="lame-acct-card__action-link" data-profile-nav>{{ 'lame_customer.view_all_orders' | t }}</a>
+    <a href="{{ orders_url }}" class="lame-acct-card__action-link">{{ 'lame_customer.view_all_orders' | t }}</a>
   </div>
 
   <div class="lame-acct-card__body">
@@ -29,9 +35,15 @@
               assign status_label = 'lame_customer.order_cancelled' | t
             endif
           -%}
+          {%- capture order_detail_url -%}{{ orders_url }}?order={{ order.id }}{%- endcapture -%}
           <li class="lame-acct-order-list__item">
             <article class="lame-acct-order-row">
-              <a href="{{ order.customer_url }}" class="lame-acct-order-row__thumb" tabindex="-1" aria-hidden="true">
+              <a
+                href="{{ order_detail_url }}"
+                class="lame-acct-order-row__thumb"
+                tabindex="-1"
+                aria-hidden="true"
+              >
                 {% if thumb != blank %}
                   {{
                     thumb
@@ -66,7 +78,7 @@
                   </p>
                 </div>
               </div>
-              <a href="{{ order.customer_url }}" class="lame-acct-order-row__cta">
+              <a href="{{ order_detail_url }}" class="lame-acct-order-row__cta">
                 <span>{{ 'lame_customer.view_order' | t }}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </a>
