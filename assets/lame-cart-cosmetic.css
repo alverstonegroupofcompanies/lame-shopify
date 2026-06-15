@@ -179,10 +179,13 @@
 
 .cart-page--cosmetic .cart-items__table-row {
   display: grid !important;
-  grid-template-columns: 5.5rem minmax(0, 1fr) auto minmax(4.75rem, auto);
-  grid-template-areas: 'media details quantity price';
-  align-items: center;
-  gap: 0.85rem 1rem;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    'media details price'
+    'media details quantity';
+  align-items: start;
+  gap: 0.45rem 1rem;
   padding: 0.95rem 1rem;
   margin-bottom: 0.75rem;
   border-radius: var(--lame-cart-radius);
@@ -205,6 +208,8 @@
 
 .cart-page--cosmetic .cart-items__media {
   grid-area: media;
+  grid-row: 1 / -1;
+  align-self: start;
   width: 5.5rem;
   height: 5.5rem;
   flex: none;
@@ -244,8 +249,14 @@
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  align-self: center;
+  gap: 0.25rem;
+  align-self: start;
+  min-width: 0;
+  overflow: visible;
+}
+
+.cart-page--cosmetic .cart-items__table-row--full-width-variants .cart-items__details {
+  display: flex !important;
 }
 
 .cart-page--cosmetic .cart-items__product-info {
@@ -269,19 +280,31 @@
 
 .cart-page--cosmetic .cart-items__title-wrap {
   margin: 0;
+  min-width: 0;
+  width: 100%;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1.4em * 2);
 }
 
 .cart-page--cosmetic .cart-items__title {
   font-family: var(--font-body--family);
-  font-size: 0.9rem;
+  font-size: 0.9rem !important;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
   color: var(--lame-cart-ink);
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin: 0 !important;
+  padding: 0;
+  display: inline;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-decoration: none;
 }
 
 .cart-page--cosmetic .cart-items__excerpt {
@@ -324,8 +347,8 @@
   grid-area: quantity;
   flex: none;
   margin: 0;
-  align-self: center;
-  justify-self: center;
+  align-self: end;
+  justify-self: end;
 }
 
 .cart-page--cosmetic .cart-items__quantity-controls {
@@ -337,8 +360,8 @@
 .cart-page--cosmetic .cart-items__price {
   grid-area: price;
   flex: none;
-  min-width: 4.75rem;
-  align-self: center;
+  min-width: 4.5rem;
+  align-self: start;
   justify-self: end;
   text-align: right;
 }
@@ -358,9 +381,12 @@
 @container cart-items (min-width: 720px) {
   .cart-page--cosmetic .cart-items__table-row {
     display: grid !important;
-    grid-template-columns: 5.5rem minmax(0, 1fr) auto minmax(4.75rem, auto) !important;
-    grid-template-areas: 'media details quantity price' !important;
-    grid-template-rows: auto !important;
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    grid-template-areas:
+      'media details price'
+      'media details quantity' !important;
+    align-items: start !important;
   }
 
   .cart-page--cosmetic .cart-items__quantity,
@@ -370,6 +396,8 @@
 
   .cart-page--cosmetic .cart-items__quantity {
     grid-area: quantity;
+    align-self: end;
+    justify-self: end;
   }
 
   .cart-page--cosmetic .cart-items__price {
@@ -377,12 +405,19 @@
     display: block;
     flex-direction: unset;
     align-items: flex-end;
+    align-self: start;
+    justify-self: end;
     min-height: 0;
   }
 }
 
-.cart-page--cosmetic .cart-items__details > * + * {
+.cart-page--cosmetic .cart-items__details > * + *,
+.cart-page--cosmetic .cart-items__details * {
   margin-block-start: 0;
+}
+
+.cart-page--cosmetic .cart-items__details .cart-items__title {
+  margin-block-start: 0 !important;
 }
 
 .cart-page--cosmetic .cart-items__line-total {
@@ -1012,11 +1047,11 @@
   }
 
   .cart-page--cosmetic .cart-items__table-row {
-    grid-template-columns: 4.75rem minmax(0, 1fr);
+    grid-template-columns: 4.75rem minmax(0, 1fr) auto;
     grid-template-areas:
-      'media details'
-      'quantity price';
-    gap: 0.65rem 0.85rem;
+      'media details price'
+      'media details quantity';
+    gap: 0.45rem 0.85rem;
     padding: 0.85rem;
   }
 
@@ -1025,8 +1060,17 @@
     height: 4.75rem;
   }
 
+  .cart-page--cosmetic .cart-items__title-wrap {
+    min-height: calc(1.4em * 2);
+  }
+
+  .cart-page--cosmetic .cart-items__title {
+    font-size: 0.85rem !important;
+    line-height: 1.4;
+  }
+
   .cart-page--cosmetic .cart-items__quantity {
-    justify-self: start;
+    justify-self: end;
   }
 
   .cart-page--cosmetic .cart-items__price {
