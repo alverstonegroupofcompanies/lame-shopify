@@ -1,0 +1,24 @@
+{%- doc -%}
+  URL of the dedicated order tracking page (page handle: track-order).
+
+  @param {object} [section] - Optional section with tracking_page setting
+{%- enddoc -%}
+
+{%- liquid
+  assign lame_tracking_url = ''
+
+  if section != blank and section.settings.tracking_page != blank
+    assign lame_tracking_url = section.settings.tracking_page.url
+  elsif pages['track-order'] != blank
+    assign lame_tracking_url = pages['track-order'].url
+  elsif pages['order-tracking'] != blank
+    assign lame_tracking_url = pages['order-tracking'].url
+  endif
+
+  if lame_tracking_url == blank
+    capture lame_orders_url
+      render 'lame-customer-orders-url', section: section
+    endcapture
+    assign lame_tracking_url = lame_orders_url
+  endif
+-%}{{- lame_tracking_url -}}

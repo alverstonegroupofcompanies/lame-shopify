@@ -3,7 +3,6 @@
 
   @param {number} [limit] - Max orders to show (default 3)
   @param {string} [orders_url] - Orders list page URL ("View all orders")
-  @param {string} [order_detail_base_url] - Base URL for track-order links (defaults to orders_url)
 {%- enddoc -%}
 
 {%- liquid
@@ -13,7 +12,10 @@
       render 'lame-customer-orders-url'
     endcapture
   endif
-  assign detail_base_url = order_detail_base_url | default: orders_url
+
+  capture detail_base_url
+    render 'lame-customer-tracking-url'
+  endcapture
 -%}
 
 <section id="recent-orders" class="lame-acct-card lame-profile__panel" aria-labelledby="RecentOrdersHeading">
@@ -45,8 +47,6 @@
               <a
                 href="{{ order_detail_url }}"
                 class="lame-acct-order-row__thumb"
-                data-order-link
-                data-order-id="{{ order.id }}"
                 tabindex="-1"
                 aria-hidden="true"
               >
@@ -87,8 +87,6 @@
               <a
                 href="{{ order_detail_url }}"
                 class="lame-acct-order-row__cta"
-                data-order-link
-                data-order-id="{{ order.id }}"
               >
                 <span>{{ 'lame_customer.track_order' | t }}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>

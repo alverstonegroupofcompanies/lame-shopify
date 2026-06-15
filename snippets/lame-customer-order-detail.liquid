@@ -2,7 +2,8 @@
   On-site order detail panel for the themed orders page.
 
   @param {object} order - Customer order object
-  @param {string} orders_url - Base orders page URL
+  @param {string} orders_url - Back / orders list URL
+  @param {boolean} [standalone] - Render without outer article wrapper (for tracking page)
 {%- enddoc -%}
 
 {%- liquid
@@ -16,19 +17,23 @@
   endif
 -%}
 
+{%- unless standalone -%}
 <article
   class="lame-order-detail"
   data-order-detail
   data-order-id="{{ order.id }}"
   hidden
 >
+{%- endunless -%}
   <header class="lame-order-detail__head">
+    {%- unless standalone -%}
     <a href="{{ orders_url }}" class="lame-order-detail__back" data-order-back>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span>{{ 'lame_customer.back_to_orders' | t }}</span>
     </a>
+    {%- endunless -%}
     <div class="lame-order-detail__title-row">
       <div>
         <h2 class="lame-order-detail__title">{{ 'lame_customer.order_number' | t: number: order.name }}</h2>
@@ -140,4 +145,6 @@
       {% endif %}
     </aside>
   </div>
+{%- unless standalone -%}
 </article>
+{%- endunless -%}

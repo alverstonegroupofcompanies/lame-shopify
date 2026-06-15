@@ -10,6 +10,20 @@
 
 {{ 'lame-customer-account.css' | asset_url | stylesheet_tag }}
 {{ 'lame-customer-profile-layout.css' | asset_url | stylesheet_tag }}
+{%- capture lame_tracking_redirect_url -%}{%- render 'lame-customer-tracking-url', section: section -%}{%- endcapture -%}
+{% if lame_tracking_redirect_url != blank %}
+  <script>
+    (function () {
+      var orderId = new URLSearchParams(window.location.search).get('order');
+      if (!orderId) return;
+      var base = {{ lame_tracking_redirect_url | json }};
+      var trackingPath = new URL(base, window.location.origin).pathname;
+      if (window.location.pathname === trackingPath) return;
+      var joiner = base.indexOf('?') === -1 ? '?' : '&';
+      window.location.replace(base + joiner + 'order=' + encodeURIComponent(orderId));
+    })();
+  </script>
+{% endif %}
 <script src="{{ 'lame-customer-orders.js' | asset_url }}" defer></script>
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>

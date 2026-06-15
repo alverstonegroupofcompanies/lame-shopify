@@ -7,6 +7,12 @@
 
 {%- liquid
   assign detail_base = base_url | default: ''
+
+  if detail_base == blank
+    capture detail_base
+      render 'lame-customer-tracking-url'
+    endcapture
+  endif
   assign detail_hash = ''
 
   if detail_base contains '#'
