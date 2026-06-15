@@ -1320,12 +1320,72 @@
   pointer-events: auto;
 }
 
-.lame-account__user,
-.lame-account__guest-head {
+.lame-account__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0.85rem 0.9rem 1.1rem;
+}
+
+.lame-account__header-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.lame-account__header-user {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.25rem 1.1rem 0.85rem;
+}
+
+.lame-account__close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(var(--lame-acct-gold) / 0.1);
+  color: rgb(var(--lame-acct-forest));
+  cursor: pointer;
+  transition:
+    background 0.22s var(--lame-acct-ease),
+    color 0.22s var(--lame-acct-ease),
+    transform 0.22s var(--lame-acct-ease);
+}
+
+.lame-account__close:hover,
+.lame-account__close:focus-visible {
+  background: rgb(var(--lame-acct-gold) / 0.2);
+  color: rgb(var(--lame-acct-gold-strong));
+  outline: none;
+}
+
+.lame-account__heading {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: rgb(var(--lame-acct-forest));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lame-account__email {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: rgb(var(--lame-acct-ink) / 0.62);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lame-account__user-avatar {
@@ -1358,27 +1418,6 @@
 .lame-account__user-meta {
   min-width: 0;
   flex: 1;
-}
-
-.lame-account__user-name {
-  margin: 0 0 0.15rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.25;
-  color: rgb(var(--lame-acct-forest));
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lame-account__user-email {
-  margin: 0;
-  font-size: 0.76rem;
-  line-height: 1.35;
-  color: rgb(var(--lame-acct-ink) / 0.62);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .lame-account__divider {
@@ -1498,9 +1537,8 @@
     transform: translateX(0);
   }
 
-  .lame-account__user,
-  .lame-account__guest-head {
-    padding-inline: 1.15rem;
+  .lame-account__header {
+    padding-inline: 1.15rem 1rem;
   }
 
   .lame-account__menu {
