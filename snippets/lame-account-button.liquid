@@ -1,5 +1,5 @@
 {%- doc -%}
-  Account control with themed popover linking to profile and orders pages.
+  Premium account menu — mobile slide-in drawer and desktop dropdown.
 
   @param {object} section - Header section (profile_page / orders_page settings)
   @param {string} [display_style] - icon or text
@@ -8,75 +8,174 @@
 {%- capture profile_url -%}{%- render 'lame-customer-profile-url', section: section -%}{%- endcapture -%}
 {%- capture orders_url -%}{%- render 'lame-customer-orders-url', section: section -%}{%- endcapture -%}
 
-<div class="lame-account header-actions__action{% if display_style == 'text' %} lame-account--text{% endif %}">
-  {%- if customer -%}
-    <details class="lame-account__details">
-      <summary
-        class="lame-account__trigger account-button"
-        aria-label="{{ 'content.account_title' | t }}"
-      >
-        <span class="lame-account__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0, 1 | upcase }}</span>
-        <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
-          {{ 'content.account_title' | t }}
-        </span>
-      </summary>
-      <div
-        class="lame-account__panel lame-account__panel--rich color-{{ settings.popover_color_scheme }}"
-        role="menu"
-      >
-        <div class="lame-account__panel-head">
-          <p class="lame-account__greeting">
-            {{ 'lame_customer.account_greeting' | t: name: customer.first_name | default: customer.name }}
-          </p>
-          <p class="lame-account__email" title="{{ customer.email }}">{{ customer.email | truncate: 34 }}</p>
-        </div>
+{%- liquid
+  assign wishlist_url = '/pages/wishlist'
+  if pages['wishlist'] != blank
+    assign wishlist_url = pages['wishlist'].url
+  endif
 
-        <div class="lame-account__panel-actions">
-          <a class="lame-account__action-btn" href="{{ orders_url }}" role="menuitem">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
-              <path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
-            </svg>
-            <span>{{ 'customer.orders.title' | t }}</span>
-          </a>
-          <a class="lame-account__action-btn" href="{{ profile_url }}" role="menuitem">
-            <span>{{ 'lame_customer.my_profile' | t }}</span>
-          </a>
-        </div>
+  assign avatar_letter = ''
+  if customer
+    assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
+    if avatar_letter == blank
+      assign avatar_letter = customer.email | slice: 0, 1 | upcase
+    endif
+  endif
 
-        <ul class="lame-account__menu list-unstyled" role="list">
-          {% if settings.lame_enable_wishlist %}
-            <li role="none">
-              <button type="button" class="lame-account__link" data-lame-wishlist-open role="menuitem">
-                {{ 'lame_wishlist.title' | t }}
-              </button>
-            </li>
-          {% endif %}
-          <li role="none">
-            <a class="lame-account__link" href="{{ profile_url }}#addresses" role="menuitem">
-              {{ 'customer.addresses.title' | t }}
-            </a>
-          </li>
-          <li role="none">
-            <a class="lame-account__link lame-account__link--logout" href="{{ routes.account_logout_url }}" role="menuitem">
-              {{ 'actions.log_out' | t }}
-            </a>
-          </li>
-        </ul>
-      </div>
-    </details>
-  {%- else -%}
-    <a
-      class="lame-account__trigger account-button"
-      href="{{ routes.account_login_url }}"
-      aria-label="{{ 'content.account_title' | t }}"
-    >
+  assign menu_id = 'lame-account-menu-header'
+  if section.id != blank
+    assign menu_id = 'lame-account-menu-' | append: section.id
+  endif
+-%}
+
+<script
+  type="module"
+  src="{{ 'lame-account-menu.js' | asset_url }}"
+  fetchpriority="low"
+></script>
+
+<account-menu-component class="lame-account header-actions__action{% if display_style == 'text' %} lame-account--text{% endif %}">
+  <button
+    type="button"
+    ref="trigger"
+    class="lame-account__trigger account-button"
+    aria-label="{{ 'content.account_title' | t }}"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-controls="{{ menu_id }}"
+    on:click="/toggle"
+  >
+    {%- if customer -%}
+      <span class="lame-account__avatar" aria-hidden="true">{{ avatar_letter }}</span>
+    {%- else -%}
       <span class="lame-account__icon-wrap {% if display_style != 'icon' %}desktop:hidden{% endif %}" aria-hidden="true">
         {% render 'lame-account-icon', size: 18, class: 'account-button__icon' %}
       </span>
-      <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
-        {{ 'content.account_title' | t }}
-      </span>
-    </a>
-  {%- endif -%}
-</div>
+    {%- endif -%}
+    <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+      {{ 'content.account_title' | t }}
+    </span>
+  </button>
+
+  <div
+    ref="backdrop"
+    class="lame-account__backdrop"
+    aria-hidden="true"
+    on:click="/close"
+  ></div>
+
+  <div
+    ref="panel"
+    id="{{ menu_id }}"
+    class="lame-account__panel color-{{ settings.popover_color_scheme }}"
+    role="menu"
+    aria-label="{{ 'content.account_title' | t }}"
+  >
+    {%- if customer -%}
+      <div class="lame-account__user">
+        <div class="lame-account__user-avatar" aria-hidden="true">{{ avatar_letter }}</div>
+        <div class="lame-account__user-meta">
+          <p class="lame-account__user-name">{{ customer.name }}</p>
+          <p class="lame-account__user-email" title="{{ customer.email }}">{{ customer.email }}</p>
+        </div>
+      </div>
+
+      <div class="lame-account__divider" role="separator" aria-hidden="true"></div>
+
+      <ul class="lame-account__menu list-unstyled" role="none">
+        <li role="none">
+          <a class="lame-account__row" href="{{ profile_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'lame_customer.my_profile' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+        <li role="none">
+          <a class="lame-account__row" href="{{ orders_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'lame_customer.my_orders' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+        <li role="none">
+          <a class="lame-account__row" href="{{ wishlist_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393Z" fill-rule="evenodd" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'lame_wishlist.title' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+        <li role="none">
+          <a class="lame-account__row" href="{{ routes.account_addresses_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10.5a6 6 0 1 0-12 0C6 15.8 12 21 12 21Z" stroke="currentColor" stroke-width="1.25"/><circle cx="12" cy="10.5" r="2" stroke="currentColor" stroke-width="1.25"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'customer.addresses.title' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+        <li role="none">
+          <a class="lame-account__row lame-account__row--logout" href="{{ routes.account_logout_url }}" role="menuitem" ref="menuitem[]">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'actions.log_out' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+      </ul>
+    {%- else -%}
+      <div class="lame-account__guest-head">
+        <div class="lame-account__user-avatar lame-account__user-avatar--guest" aria-hidden="true">
+          {% render 'lame-account-icon', size: 22, class: 'lame-account__guest-icon' %}
+        </div>
+        <div class="lame-account__user-meta">
+          <p class="lame-account__user-name">{{ 'lame_customer.drawer_guest_title' | t }}</p>
+          <p class="lame-account__user-email">{{ 'lame_customer.drawer_guest_hint' | t }}</p>
+        </div>
+      </div>
+
+      <div class="lame-account__divider" role="separator" aria-hidden="true"></div>
+
+      <ul class="lame-account__menu list-unstyled" role="none">
+        <li role="none">
+          <a class="lame-account__row" href="{{ routes.account_login_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'customer.log_in' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+        <li role="none">
+          <a class="lame-account__row" href="{{ routes.account_register_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__row-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M19 8v6M22 11h-6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <span class="lame-account__row-label">{{ 'lame_customer.create_account' | t }}</span>
+            <span class="lame-account__row-chevron" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </li>
+      </ul>
+    {%- endif -%}
+  </div>
+</account-menu-component>
