@@ -1,0 +1,185 @@
+{%- doc -%}
+  Premium order tracking timeline for themed order detail pages.
+
+  @param {object} order - Customer order object
+{%- enddoc -%}
+
+{%- liquid
+  assign is_cancelled = order.cancelled
+  assign fulfillment_status = order.fulfillment_status | default: 'unfulfilled'
+  assign has_fulfillments = false
+  if order.fulfillments.size > 0
+    assign has_fulfillments = true
+  endif
+
+  assign step_confirmed = false
+  if order.financial_status == 'paid' or order.financial_status == 'authorized' or order.financial_status == 'partially_paid' or order.financial_status == 'partially_refunded' or order.financial_status == 'refunded'
+    assign step_confirmed = true
+  endif
+
+  assign step_shipped = has_fulfillments
+  assign step_delivered = false
+  if fulfillment_status == 'fulfilled'
+    assign step_delivered = true
+  endif
+
+  assign current_step = 'placed'
+  if is_cancelled
+    assign current_step = 'cancelled'
+  elsif step_delivered
+    assign current_step = 'delivered'
+  elsif step_shipped
+    assign current_step = 'shipped'
+  elsif step_confirmed
+    assign current_step = 'processing'
+  endif
+
+  assign latest_fulfillment = order.fulfillments.first
+-%}
+
+<section class="lame-order-track" aria-labelledby="OrderTrackHeading-{{ order.id }}">
+  <div class="lame-order-track__head">
+    <h3 id="OrderTrackHeading-{{ order.id }}" class="lame-order-track__title">{{ 'lame_customer.tracking_history' | t }}</h3>
+    {% unless is_cancelled %}
+      <p class="lame-order-track__subtitle">{{ 'lame_customer.tracking_history_desc' | t }}</p>
+    {% endunless %}
+  </div>
+
+  {% if is_cancelled %}
+    <div class="lame-order-track__cancelled" role="status">
+      <span class="lame-order-track__cancelled-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.25"/><path d="M8 8l8 8M16 8l-8 8" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+      </span>
+      <div>
+        <p class="lame-order-track__cancelled-title">{{ 'lame_customer.order_cancelled' | t }}</p>
+        {% if order.cancelled_at != blank %}
+          <time class="lame-order-track__cancelled-date" datetime="{{ order.cancelled_at | date: '%Y-%m-%d' }}">
+            {{ order.cancelled_at | time_tag: format: 'date_at_time' }}
+          </time>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <ol class="lame-order-track__timeline" role="list">
+      <li class="lame-order-track__step lame-order-track__step--complete" data-step="placed">
+        <span class="lame-order-track__dot" aria-hidden="true"></span>
+        <div class="lame-order-track__step-body">
+          <p class="lame-order-track__step-label">{{ 'lame_customer.track_step_placed' | t }}</p>
+          <time class="lame-order-track__step-date" datetime="{{ order.created_at | date: '%Y-%m-%d' }}">
+            {{ order.created_at | time_tag: format: 'date_at_time' }}
+          </time>
+        </div>
+      </li>
+
+      <li class="lame-order-track__step{% if step_confirmed %} lame-order-track__step--complete{% endif %}{% if current_step == 'processing' %} lame-order-track__step--current{% endif %}" data-step="confirmed">
+        <span class="lame-order-track__dot" aria-hidden="true"></span>
+        <div class="lame-order-track__step-body">
+          <p class="lame-order-track__step-label">{{ 'lame_customer.track_step_confirmed' | t }}</p>
+          {% if step_confirmed %}
+            <time class="lame-order-track__step-date" datetime="{{ order.created_at | date: '%Y-%m-%d' }}">
+              {{ order.created_at | time_tag: format: 'date_at_time' }}
+            </time>
+          {% else %}
+            <span class="lame-order-track__step-pending">{{ 'lame_customer.track_step_pending' | t }}</span>
+          {% endif %}
+        </div>
+      </li>
+
+      <li class="lame-order-track__step{% if step_shipped %} lame-order-track__step--complete{% endif %}{% if current_step == 'shipped' %} lame-order-track__step--current{% endif %}" data-step="shipped">
+        <span class="lame-order-track__dot" aria-hidden="true"></span>
+        <div class="lame-order-track__step-body">
+          <p class="lame-order-track__step-label">{{ 'lame_customer.track_step_shipped' | t }}</p>
+          {% if step_shipped and latest_fulfillment.created_at != blank %}
+            <time class="lame-order-track__step-date" datetime="{{ latest_fulfillment.created_at | date: '%Y-%m-%d' }}">
+              {{ latest_fulfillment.created_at | time_tag: format: 'date_at_time' }}
+            </time>
+          {% else %}
+            <span class="lame-order-track__step-pending">{{ 'lame_customer.track_step_pending' | t }}</span>
+          {% endif %}
+        </div>
+      </li>
+
+      <li class="lame-order-track__step{% if step_delivered %} lame-order-track__step--complete{% endif %}{% if current_step == 'delivered' %} lame-order-track__step--current{% endif %}" data-step="delivered">
+        <span class="lame-order-track__dot" aria-hidden="true"></span>
+        <div class="lame-order-track__step-body">
+          <p class="lame-order-track__step-label">{{ 'lame_customer.track_step_delivered' | t }}</p>
+          {% if step_delivered %}
+            {% if latest_fulfillment.updated_at != blank %}
+              <time class="lame-order-track__step-date" datetime="{{ latest_fulfillment.updated_at | date: '%Y-%m-%d' }}">
+                {{ latest_fulfillment.updated_at | time_tag: format: 'date_at_time' }}
+              </time>
+            {% else %}
+              <span class="lame-order-track__step-date">{{ 'lame_customer.track_step_delivered_note' | t }}</span>
+            {% endif %}
+          {% else %}
+            <span class="lame-order-track__step-pending">{{ 'lame_customer.track_step_pending' | t }}</span>
+          {% endif %}
+        </div>
+      </li>
+    </ol>
+
+    {% if has_fulfillments %}
+      <div class="lame-order-track__shipments">
+        {%- for fulfillment in order.fulfillments -%}
+          <article class="lame-order-track__shipment">
+            <div class="lame-order-track__shipment-head">
+              <span class="lame-order-track__shipment-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+              </span>
+              <div class="lame-order-track__shipment-meta">
+                <p class="lame-order-track__shipment-title">
+                  {% if fulfillment.tracking_company != blank %}
+                    {{ fulfillment.tracking_company }}
+                  {% else %}
+                    {{ 'lame_customer.shipment' | t }}
+                  {% endif %}
+                </p>
+                {% if fulfillment.created_at != blank %}
+                  <time class="lame-order-track__shipment-date" datetime="{{ fulfillment.created_at | date: '%Y-%m-%d' }}">
+                    {{ fulfillment.created_at | time_tag: format: 'date' }}
+                  </time>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if fulfillment.tracking_number != blank %}
+              <div class="lame-order-track__tracking-row">
+                <div class="lame-order-track__tracking-info">
+                  <span class="lame-order-track__tracking-label">{{ 'lame_customer.tracking_number' | t }}</span>
+                  <code class="lame-order-track__tracking-code" data-tracking-number>{{ fulfillment.tracking_number }}</code>
+                </div>
+                <button
+                  type="button"
+                  class="lame-order-track__copy"
+                  data-copy-tracking="{{ fulfillment.tracking_number }}"
+                  data-copied-label="{{ 'lame_customer.copied' | t }}"
+                  aria-label="{{ 'lame_customer.copy_tracking' | t }}"
+                >
+                  {{ 'lame_customer.copy' | t }}
+                </button>
+              </div>
+            {% endif %}
+
+            <div class="lame-order-track__shipment-actions">
+              {% if fulfillment.tracking_url != blank %}
+                <a
+                  href="{{ fulfillment.tracking_url }}"
+                  class="button lame-profile__btn-primary lame-order-track__track-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ 'lame_customer.track_on_carrier' | t }}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              {% elsif fulfillment.tracking_number != blank %}
+                <p class="lame-order-track__tracking-hint">{{ 'lame_customer.tracking_carrier_hint' | t }}</p>
+              {% endif %}
+            </div>
+          </article>
+        {%- endfor -%}
+      </div>
+    {% elsif fulfillment_status == 'unfulfilled' or fulfillment_status == blank %}
+      <p class="lame-order-track__empty">{{ 'lame_customer.tracking_not_shipped' | t }}</p>
+    {% endif %}
+  {% endif %}
+</section>

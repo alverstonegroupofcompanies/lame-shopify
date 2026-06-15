@@ -5,6 +5,7 @@ const selectors = {
   detailPanel: '[data-order-detail]',
   orderLink: '[data-order-link]',
   backLink: '[data-order-back]',
+  copyTracking: '[data-copy-tracking]',
 };
 
 class LameCustomerOrders {
@@ -17,6 +18,7 @@ class LameCustomerOrders {
 
     this._bindLinks();
     this._bindBack();
+    this._bindCopyTracking();
     this._syncFromUrl();
     window.addEventListener('popstate', () => this._syncFromUrl());
   }
@@ -37,6 +39,28 @@ class LameCustomerOrders {
       link.addEventListener('click', (event) => {
         event.preventDefault();
         this._showList(true);
+      });
+    });
+  }
+
+  _bindCopyTracking() {
+    this.root.querySelectorAll(selectors.copyTracking).forEach((button) => {
+      button.addEventListener('click', async () => {
+        const value = button.getAttribute('data-copy-tracking');
+        if (!value) return;
+
+        try {
+          await navigator.clipboard.writeText(value);
+          const label = button.textContent;
+          button.textContent = button.dataset.copiedLabel || 'Copied';
+          button.classList.add('is-copied');
+          window.setTimeout(() => {
+            button.textContent = label;
+            button.classList.remove('is-copied');
+          }, 1800);
+        } catch {
+          /* clipboard unavailable */
+        }
       });
     });
   }
@@ -62,7 +86,8 @@ class LameCustomerOrders {
       item.hidden = item !== panel;
     });
 
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const trackSection = panel.querySelector('.lame-order-track');
+    (trackSection || panel).scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     if (pushState) {
       const url = new URL(window.location.href);

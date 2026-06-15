@@ -40,6 +40,8 @@
     </div>
   </header>
 
+  {% render 'lame-order-tracking-timeline', order: order %}
+
   <div class="lame-order-detail__grid">
     <section class="lame-order-detail__card" aria-labelledby="OrderItems-{{ order.id }}">
       <h3 id="OrderItems-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.order_items' | t }}</h3>
@@ -134,27 +136,6 @@
         <section class="lame-order-detail__card" aria-labelledby="OrderShip-{{ order.id }}">
           <h3 id="OrderShip-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.shipping_address' | t }}</h3>
           <address class="lame-order-detail__address">{{ order.shipping_address | format_address }}</address>
-        </section>
-      {% endif %}
-
-      {% if order.fulfillments.size > 0 %}
-        <section class="lame-order-detail__card" aria-labelledby="OrderTrack-{{ order.id }}">
-          <h3 id="OrderTrack-{{ order.id }}" class="lame-order-detail__card-title">{{ 'lame_customer.tracking' | t }}</h3>
-          <ul class="lame-order-detail__tracking" role="list">
-            {%- for fulfillment in order.fulfillments -%}
-              <li class="lame-order-detail__tracking-item">
-                {% if fulfillment.tracking_url != blank %}
-                  <a href="{{ fulfillment.tracking_url }}" class="lame-order-detail__track-link" target="_blank" rel="noopener">
-                    {{ 'lame_customer.track_shipment' | t }}
-                  </a>
-                {% elsif fulfillment.tracking_number != blank %}
-                  <span class="lame-order-detail__track-num">{{ fulfillment.tracking_number }}</span>
-                {% else %}
-                  <span>{{ 'lame_customer.shipped' | t }}</span>
-                {% endif %}
-              </li>
-            {%- endfor -%}
-          </ul>
         </section>
       {% endif %}
     </aside>
