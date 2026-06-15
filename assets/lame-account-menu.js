@@ -1,5 +1,5 @@
 import { Component } from '@theme/component';
-import { isClickedOutside, isMobileBreakpoint } from '@theme/utilities';
+import { debounce, isClickedOutside, isMobileBreakpoint } from '@theme/utilities';
 
 /**
  * Premium account menu — mobile slide-in drawer and desktop dropdown.
@@ -22,28 +22,36 @@ class AccountMenuComponent extends Component {
     super.connectedCallback();
     document.addEventListener('click', this.#handleDocumentClick);
     document.addEventListener('keydown', this.#handleDocumentKeyDown);
+    window.addEventListener('resize', this.#handleReposition);
+    window.addEventListener('scroll', this.#handleReposition, true);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener('click', this.#handleDocumentClick);
     document.removeEventListener('keydown', this.#handleDocumentKeyDown);
+    window.removeEventListener('resize', this.#handleReposition);
+    window.removeEventListener('scroll', this.#handleReposition, true);
     this.#unlockScroll();
+    this.#clearPanelPosition();
   }
 
   open() {
     if (this.classList.contains('is-open')) return;
 
     this.classList.add('is-open');
+    document.documentElement.classList.add('lame-account-menu-open');
     this.refs.trigger.setAttribute('aria-expanded', 'true');
 
     if (isMobileBreakpoint()) {
       this.#lockScroll();
     }
 
-    const items = this.#menuItems;
     requestAnimationFrame(() => {
-      items[0]?.focus();
+      if (!isMobileBreakpoint()) {
+        this.#positionPanel();
+        requestAnimationFrame(() => this.#positionPanel());
+      }
     });
   }
 
@@ -51,8 +59,10 @@ class AccountMenuComponent extends Component {
     if (!this.classList.contains('is-open')) return;
 
     this.classList.remove('is-open');
+    document.documentElement.classList.remove('lame-account-menu-open');
     this.refs.trigger.setAttribute('aria-expanded', 'false');
     this.#unlockScroll();
+    this.#clearPanelPosition();
     this.refs.trigger.focus();
   }
 
@@ -69,6 +79,54 @@ class AccountMenuComponent extends Component {
     if (!items) return [];
     return Array.isArray(items) ? items : [items];
   }
+
+  #positionPanel() {
+    const { trigger, panel } = this.refs;
+    if (!trigger || !panel || isMobileBreakpoint()) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const gap = 12;
+    const viewportPadding = 12;
+    const panelWidth = panel.offsetWidth || 280;
+
+    let right = window.innerWidth - rect.right;
+    right = Math.max(viewportPadding, Math.min(right, window.innerWidth - panelWidth - viewportPadding));
+
+    panel.style.position = 'fixed';
+    panel.style.right = `${right}px`;
+    panel.style.left = 'auto';
+    panel.style.width = `${panelWidth}px`;
+
+    const panelHeight = panel.offsetHeight;
+    let top = rect.bottom + gap;
+
+    if (top + panelHeight > window.innerHeight - viewportPadding) {
+      const topAbove = rect.top - gap - panelHeight;
+      if (topAbove >= viewportPadding) {
+        top = topAbove;
+      } else {
+        top = Math.max(viewportPadding, window.innerHeight - panelHeight - viewportPadding);
+      }
+    }
+
+    panel.style.top = `${top}px`;
+  }
+
+  #clearPanelPosition() {
+    const { panel } = this.refs;
+    if (!panel) return;
+
+    panel.style.removeProperty('position');
+    panel.style.removeProperty('top');
+    panel.style.removeProperty('right');
+    panel.style.removeProperty('left');
+    panel.style.removeProperty('width');
+  }
+
+  #handleReposition = debounce(() => {
+    if (!this.classList.contains('is-open') || isMobileBreakpoint()) return;
+    this.#positionPanel();
+  }, 50);
 
   #lockScroll() {
     this.#scrollY = window.scrollY;
@@ -140,7 +198,6 @@ class AccountMenuComponent extends Component {
       }
     }
   };
-
 }
 
 if (!customElements.get('account-menu-component')) {

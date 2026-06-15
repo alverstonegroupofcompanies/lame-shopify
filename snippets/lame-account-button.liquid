@@ -73,31 +73,6 @@
     aria-label="{{ 'content.account_title' | t }}"
   >
     <header class="lame-account__header">
-      {%- if customer -%}
-        <div class="lame-account__header-content lame-account__header-content--has-email">
-          <div class="lame-account__header-user">
-            <div class="lame-account__user-avatar" aria-hidden="true">{{ avatar_letter }}</div>
-            <div class="lame-account__user-meta">
-              <h2 class="lame-account__heading" id="{{ menu_id }}-heading">
-                {{ 'lame_customer.account_greeting' | t: name: customer.first_name | default: customer.name }}
-              </h2>
-              <p class="lame-account__email" title="{{ customer.email }}">{{ customer.email }}</p>
-            </div>
-          </div>
-        </div>
-      {%- else -%}
-        <div class="lame-account__header-content">
-          <div class="lame-account__header-user">
-            <div class="lame-account__user-avatar lame-account__user-avatar--guest" aria-hidden="true">
-              {% render 'lame-account-icon', size: 22, class: 'lame-account__guest-icon' %}
-            </div>
-            <div class="lame-account__user-meta">
-              <h2 class="lame-account__heading" id="{{ menu_id }}-heading">{{ 'lame_customer.drawer_guest_title' | t }}</h2>
-              <p class="lame-account__email">{{ 'lame_customer.drawer_guest_hint' | t }}</p>
-            </div>
-          </div>
-        </div>
-      {%- endif -%}
       <button
         type="button"
         ref="closeButton"
@@ -105,10 +80,32 @@
         aria-label="{{ 'actions.close_dialog' | t }}"
         on:click="/close"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
           <path fill="currentColor" d="M15.97 17.03a.75.75 0 1 0 1.06-1.06L13.06 12l3.97-3.97a.75.75 0 0 0-1.06-1.06L12 10.94 8.03 6.97a.75.75 0 0 0-1.06 1.06L10.94 12l-3.97 3.97a.75.75 0 1 0 1.06 1.06L12 13.06l3.97 3.97Z"/>
         </svg>
       </button>
+
+      {%- if customer -%}
+        <div class="lame-account__header-user">
+          <div class="lame-account__user-avatar" aria-hidden="true">{{ avatar_letter }}</div>
+          <div class="lame-account__user-meta">
+            <p class="lame-account__heading" id="{{ menu_id }}-heading">
+              {{ 'lame_customer.account_greeting' | t: name: customer.first_name | default: customer.name }}
+            </p>
+            <p class="lame-account__email" title="{{ customer.email }}">{{ customer.email }}</p>
+          </div>
+        </div>
+      {%- else -%}
+        <div class="lame-account__header-user">
+          <div class="lame-account__user-avatar lame-account__user-avatar--guest" aria-hidden="true">
+            {% render 'lame-account-icon', size: 20, class: 'lame-account__guest-icon' %}
+          </div>
+          <div class="lame-account__user-meta">
+            <p class="lame-account__heading" id="{{ menu_id }}-heading">{{ 'lame_customer.drawer_guest_title' | t }}</p>
+            <p class="lame-account__email">{{ 'lame_customer.drawer_guest_hint' | t }}</p>
+          </div>
+        </div>
+      {%- endif -%}
     </header>
 
     <div class="lame-account__divider" role="separator" aria-hidden="true"></div>
@@ -159,6 +156,7 @@
             </span>
           </a>
         </li>
+        <li class="lame-account__menu-divider" role="separator" aria-hidden="true"></li>
         <li role="none">
           <a class="lame-account__row lame-account__row--logout" href="{{ routes.account_logout_url }}" role="menuitem" ref="menuitem[]">
             <span class="lame-account__row-icon" aria-hidden="true">
