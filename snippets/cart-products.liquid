@@ -139,33 +139,33 @@
                   role="cell"
                   headers="productImage"
                 >
-                  {% if item.image -%}
-                    {% liquid
-                      assign ratio = 1
-                      assign border_opacity = settings.cart_thumbnail_border_opacity | divided_by: 100.0
-                      assign border_override = '--border-width: [cart_thumbnail_border_width]px; --border-style: [cart_thumbnail_border_style]; --border-color: rgb(var(--color-border-rgb) / [cart_thumbnail_border_opacity]); --border-radius: [cart_thumbnail_border_radius]px;' | replace: '[cart_thumbnail_border_width]', settings.cart_thumbnail_border_width | replace: '[cart_thumbnail_border_style]', settings.cart_thumbnail_border | replace: '[cart_thumbnail_border_opacity]', border_opacity | replace: '[cart_thumbnail_border_radius]', settings.cart_thumbnail_border_radius
+                  <a
+                    href="{{ item.url }}"
+                    class="cart-items__media-container"
+                  >
+                    {%- if item.image -%}
+                      {% liquid
+                        assign border_opacity = settings.cart_thumbnail_border_opacity | divided_by: 100.0
+                        assign border_override = '--border-width: [cart_thumbnail_border_width]px; --border-style: [cart_thumbnail_border_style]; --border-color: rgb(var(--color-border-rgb) / [cart_thumbnail_border_opacity]); --border-radius: [cart_thumbnail_border_radius]px;' | replace: '[cart_thumbnail_border_width]', settings.cart_thumbnail_border_width | replace: '[cart_thumbnail_border_style]', settings.cart_thumbnail_border | replace: '[cart_thumbnail_border_opacity]', border_opacity | replace: '[cart_thumbnail_border_radius]', settings.cart_thumbnail_border_radius
 
-                      if settings.cart_thumbnail_border_radius > 0
-                        assign border_override = border_override | append: ' overflow: hidden;'
-                      endif
-                      if block_settings.image_ratio == 'portrait'
-                        assign ratio = 0.8
-                      elsif block_settings.image_ratio == 'square'
-                        assign ratio = 1
-                      elsif block_settings.image_ratio == 'adapt'
-                        assign ratio = item.image.aspect_ratio
-                      endif
-                    %}
-                    <a
-                      href="{{ item.url }}"
-                      class="cart-items__media-container"
-                      style="--ratio:{{ ratio }};"
-                    >
-                      {%- liquid
-                        echo item.image | image_url: width: 250 | image_tag: class: 'cart-items__media-image border-style', style: border_override
-                      -%}
-                    </a>
-                  {%- endif %}
+                        if settings.cart_thumbnail_border_radius > 0
+                          assign border_override = border_override | append: ' overflow: hidden;'
+                        endif
+                      %}
+                      {{
+                        item.image
+                        | image_url: width: 240
+                        | image_tag:
+                          class: 'cart-items__media-image border-style',
+                          style: border_override,
+                          loading: 'lazy',
+                          widths: '120, 180, 240',
+                          sizes: '88px'
+                      }}
+                    {%- else -%}
+                      <span class="cart-items__media-placeholder" aria-hidden="true"></span>
+                    {%- endif -%}
+                  </a>
                 </td>
                 <td
                   class="cart-items__details cart-primary-typography"
@@ -180,7 +180,7 @@
                     {% elsif item.product.vendor and block_settings.vendor %}
                       <p>{{ item.product.vendor }}</p>
                     {% endif %}
-                    <p>
+                    <p class="cart-items__title-wrap">
                       <a
                         href="{{ item.url }}"
                         class="cart-items__title"
@@ -191,9 +191,6 @@
                         {{- item.product.title -}}
                       </a>
                     </p>
-                    {% if template.name == 'cart' and item.product.description != blank %}
-                      <p class="cart-items__excerpt">{{ item.product.description | strip_html | truncate: 120 }}</p>
-                    {% endif %}
                     {% if template.name == 'cart' and item.variant.available %}
                       <span class="cart-items__in-stock">{{ 'lame_cart.in_stock' | t }}</span>
                     {% endif %}
