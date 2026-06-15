@@ -13,6 +13,7 @@
 <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
 <script src="{{ 'lame-customer-profile.js' | asset_url }}" defer></script>
 {%- capture lame_tracking_redirect_url -%}{%- render 'lame-customer-tracking-url' -%}{%- endcapture -%}
+{% if lame_tracking_redirect_url != blank %}
 <script>
   (function () {
     var orderId = new URLSearchParams(window.location.search).get('order');
@@ -26,6 +27,7 @@
     window.location.replace(base + joiner + 'order=' + encodeURIComponent(orderId));
   })();
 </script>
+{% endif %}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section

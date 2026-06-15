@@ -1,5 +1,6 @@
 {%- doc -%}
-  URL of the dedicated order tracking page (page handle: track-order).
+  URL of the order tracking page. Prefers pages/track-order when it exists in admin;
+  otherwise falls back to pages/my-orders (same theme, works without extra setup).
 
   @param {object} [section] - Optional section with tracking_page setting
 {%- enddoc -%}
@@ -13,9 +14,7 @@
     assign lame_tracking_url = pages['track-order'].url
   elsif pages['order-tracking'] != blank
     assign lame_tracking_url = pages['order-tracking'].url
-  endif
-
-  if lame_tracking_url == blank
-    assign lame_tracking_url = '/pages/track-order'
+  elsif pages['my-orders'] != blank
+    assign lame_tracking_url = pages['my-orders'].url
   endif
 -%}{{- lame_tracking_url -}}
