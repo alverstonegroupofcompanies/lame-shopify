@@ -1,6 +1,7 @@
 const selectors = {
   root: '[data-lame-order-tracking]',
   panel: '[data-order-tracking]',
+  picker: '[data-order-tracking-picker]',
   empty: '[data-order-tracking-empty]',
   copyTracking: '[data-copy-tracking]',
   loginLink: '[data-tracking-login]',
@@ -11,6 +12,7 @@ class LameOrderTrackingPage {
   constructor(root) {
     this.root = root;
     this.emptyState = root.querySelector(selectors.empty);
+    this.picker = root.querySelector(selectors.picker);
     this._setLoginReturnUrl();
     this._bindCopyTracking();
     this._showOrderFromUrl();
@@ -66,13 +68,13 @@ class LameOrderTrackingPage {
       }
     });
 
+    if (this.picker instanceof HTMLElement) {
+      this.picker.hidden = Boolean(orderId && matched);
+    }
+
     if (this.emptyState instanceof HTMLElement) {
-      this.emptyState.hidden = Boolean(orderId && matched) || !orderId;
-      if (!orderId || !matched) {
-        this.emptyState.removeAttribute('hidden');
-      } else {
-        this.emptyState.setAttribute('hidden', '');
-      }
+      const showEmpty = Boolean(orderId && !matched);
+      this.emptyState.hidden = !showEmpty;
     }
 
     if (matched) {

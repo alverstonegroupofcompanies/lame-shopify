@@ -69,6 +69,42 @@
             {% endif %}
           </header>
 
+          <div class="lame-tracking-page__picker lame-acct-card" data-order-tracking-picker>
+            <h2 class="lame-acct-card__title">{{ 'lame_customer.tracking_pick_order' | t }}</h2>
+            <p class="lame-tracking-page-head__desc">{{ 'lame_customer.tracking_pick_order_desc' | t }}</p>
+            {% if customer.orders.size > 0 %}
+              <ul class="lame-acct-order-list lame-tracking-page__picker-list" role="list">
+                {%- for order in customer.orders limit: 12 -%}
+                  {%- capture order_track_url -%}
+                    {%- render 'lame-customer-order-detail-url', order: order, base_url: request.path -%}
+                  {%- endcapture -%}
+                  <li class="lame-acct-order-row">
+                    <div class="lame-acct-order-row__main">
+                      <p class="lame-acct-order-row__number">{{ 'lame_customer.order_number' | t: number: order.name }}</p>
+                      <time class="lame-acct-order-row__date" datetime="{{ order.created_at | date: '%Y-%m-%d' }}">
+                        {{ order.created_at | time_tag: format: 'date' }}
+                      </time>
+                    </div>
+                    <a href="{{ order_track_url }}" class="lame-acct-order-row__cta">
+                      <span>{{ 'lame_customer.track_order' | t }}</span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+              <a href="{{ lame_orders_url }}" class="lame-acct-card__action-link lame-tracking-page__picker-all">
+                {{ 'lame_customer.view_all_orders' | t }}
+              </a>
+            {% else %}
+              <div class="lame-profile__empty-state">
+                <p class="lame-profile__empty-title">{{ 'lame_customer.orders_empty_title' | t }}</p>
+                <p class="lame-profile__empty-desc">{{ 'lame_customer.orders_empty' | t }}</p>
+                <a href="{{ routes.all_products_collection_url }}" class="button lame-profile__btn-primary">
+                  {{ 'lame_customer.shop_now' | t }}
+                </a>
+              </div>
+            {% endif %}
+          </div>
+
           <div class="lame-tracking-page__empty lame-acct-card" data-order-tracking-empty hidden>
             <p class="lame-profile__empty-title">{{ 'lame_customer.tracking_order_not_found' | t }}</p>
             <p class="lame-profile__empty-desc">{{ 'lame_customer.tracking_order_not_found_desc' | t }}</p>
@@ -109,7 +145,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Dedicated order tracking page. In Shopify admin, create a page with handle “track-order” and assign template “order-tracking”. Links use /pages/track-order?order=ORDER_ID."
+      "content": "Dedicated order tracking page. Create a page with handle “track-order” and assign template “track-order” (not the default page template). Links use /pages/track-order?order=ORDER_ID."
     },
     {
       "type": "text",
