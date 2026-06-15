@@ -13,19 +13,19 @@
 <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
 <script src="{{ 'lame-customer-profile.js' | asset_url }}" defer></script>
 {%- capture lame_tracking_redirect_url -%}{%- render 'lame-customer-tracking-url' -%}{%- endcapture -%}
-{% if lame_tracking_redirect_url != blank %}
-  <script>
-    (function () {
-      var orderId = new URLSearchParams(window.location.search).get('order');
-      if (!orderId) return;
-      var base = {{ lame_tracking_redirect_url | json }};
-      var trackingPath = new URL(base, window.location.origin).pathname;
-      if (window.location.pathname === trackingPath) return;
-      var joiner = base.indexOf('?') === -1 ? '?' : '&';
-      window.location.replace(base + joiner + 'order=' + encodeURIComponent(orderId));
-    })();
-  </script>
-{% endif %}
+<script>
+  (function () {
+    var orderId = new URLSearchParams(window.location.search).get('order');
+    if (!orderId) return;
+    var profilePath = {{ request.path | json }};
+    if (window.location.pathname !== profilePath) return;
+    var base = {{ lame_tracking_redirect_url | json }};
+    var trackingPath = new URL(base, window.location.origin).pathname;
+    if (window.location.pathname === trackingPath) return;
+    var joiner = base.indexOf('?') === -1 ? '?' : '&';
+    window.location.replace(base + joiner + 'order=' + encodeURIComponent(orderId));
+  })();
+</script>
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
