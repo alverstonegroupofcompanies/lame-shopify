@@ -38,7 +38,9 @@
               assign status_label = 'lame_customer.order_cancelled' | t
             endif
           -%}
-          {%- capture order_detail_url -%}{{ orders_url }}?order={{ order.id }}{%- endcapture -%}
+          {%- capture order_detail_url -%}
+            {%- render 'lame-customer-order-detail-url', order: order, base_url: orders_url -%}
+          {%- endcapture -%}
           <li class="lame-orders__item">
             <article class="lame-orders__card">
               <a

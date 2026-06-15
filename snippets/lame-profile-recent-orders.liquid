@@ -2,7 +2,8 @@
   Compact recent orders list for the profile dashboard.
 
   @param {number} [limit] - Max orders to show (default 3)
-  @param {string} [orders_url] - Themed orders page URL
+  @param {string} [orders_url] - Orders list page URL ("View all orders")
+  @param {string} [order_detail_base_url] - Base URL for track-order links (defaults to orders_url)
 {%- enddoc -%}
 
 {%- liquid
@@ -12,6 +13,7 @@
       render 'lame-customer-orders-url'
     endcapture
   endif
+  assign detail_base_url = order_detail_base_url | default: orders_url
 -%}
 
 <section id="recent-orders" class="lame-acct-card lame-profile__panel" aria-labelledby="RecentOrdersHeading">
@@ -35,7 +37,9 @@
               assign status_label = 'lame_customer.order_cancelled' | t
             endif
           -%}
-          {%- capture order_detail_url -%}{{ orders_url }}?order={{ order.id }}{%- endcapture -%}
+          {%- capture order_detail_url -%}
+            {%- render 'lame-customer-order-detail-url', order: order, base_url: detail_base_url -%}
+          {%- endcapture -%}
           <li class="lame-acct-order-list__item">
             <article class="lame-acct-order-row">
               <a

@@ -25,9 +25,18 @@ class LameCustomerOrders {
 
   _bindLinks() {
     this.root.querySelectorAll(selectors.orderLink).forEach((link) => {
+      if (!(link instanceof HTMLAnchorElement)) return;
+
       link.addEventListener('click', (event) => {
         const orderId = link.getAttribute('data-order-id');
         if (!orderId) return;
+
+        const panel = this._findPanel(orderId);
+        if (!panel) return;
+
+        const linkUrl = new URL(link.href, window.location.origin);
+        if (linkUrl.pathname !== window.location.pathname) return;
+
         event.preventDefault();
         this._showOrder(orderId, true);
       });
@@ -75,19 +84,46 @@ class LameCustomerOrders {
   }
 
   /** @param {string} orderId */
+  _findPanel(orderId) {
+    const panels = this.detailView?.querySelectorAll(selectors.detailPanel);
+    if (!panels?.length) return null;
+
+    for (const panel of panels) {
+      if (!(panel instanceof HTMLElement)) continue;
+      if (panel.dataset.orderId === orderId) return panel;
+    }
+
+    return null;
+  }
+
+  /** @param {string} orderId */
   _showOrder(orderId, pushState) {
-    const panel = this.detailView?.querySelector(`${selectors.detailPanel}[data-order-id="${orderId}"]`);
-    if (!panel) return;
+    const panel = this._findPanel(orderId);
+    if (!panel) {
+      this._showList(false);
+      return;
+    }
 
     this.listView.hidden = true;
     this.detailView.hidden = false;
+    this.detailView.removeAttribute('hidden');
+    this.root.classList.add('is-order-detail');
 
     this.detailView.querySelectorAll(selectors.detailPanel).forEach((item) => {
-      item.hidden = item !== panel;
+      if (!(item instanceof HTMLElement)) return;
+      const isActive = item === panel;
+      item.hidden = !isActive;
+      if (isActive) {
+        item.removeAttribute('hidden');
+      } else {
+        item.setAttribute('hidden', '');
+      }
     });
 
-    const trackSection = panel.querySelector('.lame-order-track');
-    (trackSection || panel).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.requestAnimationFrame(() => {
+      const trackSection = panel.querySelector('.lame-order-track');
+      (trackSection || panel).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     if (pushState) {
       const url = new URL(window.location.href);
@@ -99,6 +135,15 @@ class LameCustomerOrders {
   _showList(pushState) {
     this.listView.hidden = false;
     this.detailView.hidden = true;
+    this.detailView.setAttribute('hidden', '');
+    this.root.classList.remove('is-order-detail');
+
+    this.detailView.querySelectorAll(selectors.detailPanel).forEach((item) => {
+      if (item instanceof HTMLElement) {
+        item.hidden = true;
+        item.setAttribute('hidden', '');
+      }
+    });
 
     if (pushState) {
       const url = new URL(window.location.href);

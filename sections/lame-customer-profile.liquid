@@ -12,6 +12,7 @@
 {{ 'lame-customer-profile-layout.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
 <script src="{{ 'lame-customer-profile.js' | asset_url }}" defer></script>
+<script src="{{ 'lame-customer-orders.js' | asset_url }}" defer></script>
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
@@ -61,7 +62,8 @@
           show_wishlist: section.settings.show_wishlist
         %}
 
-        <div class="lame-acct-main">
+        <div class="lame-acct-main" data-lame-customer-orders>
+          <div data-orders-list-view>
           {% render 'lame-profile-overview-card', section: section, avatar_letter: avatar_letter %}
 
           <section id="addresses" class="lame-acct-card lame-profile__panel" aria-labelledby="ProfileAddressesHeading" data-customer-addresses>
@@ -144,7 +146,11 @@
             </div>
           </section>
 
-          {% render 'lame-profile-recent-orders', limit: section.settings.recent_orders_limit, orders_url: lame_orders_url %}
+          {% render 'lame-profile-recent-orders',
+            limit: section.settings.recent_orders_limit,
+            orders_url: lame_orders_url,
+            order_detail_base_url: lame_profile_url
+          %}
 
           {% if section.settings.show_wishlist %}
             {% render 'lame-customer-wishlist-panel' %}
@@ -425,6 +431,13 @@
           {% endif %}
             </div>
           </section>
+          </div>
+
+          <div data-orders-detail-view hidden>
+            {%- for order in customer.orders -%}
+              {% render 'lame-customer-order-detail', order: order, orders_url: lame_profile_url %}
+            {%- endfor -%}
+          </div>
         </div>
       </div>
 
