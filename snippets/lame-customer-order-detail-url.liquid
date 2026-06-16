@@ -1,29 +1,7 @@
 {%- doc -%}
-  Builds an order detail URL with the query string before any hash fragment.
+  Outputs Shopify default customer order detail URL.
 
   @param {object} order - Customer order
-  @param {string} base_url - Orders or profile page URL
 {%- enddoc -%}
 
-{%- liquid
-  assign detail_base = base_url | default: ''
-
-  if detail_base == blank
-    capture detail_base
-      render 'lame-customer-tracking-url'
-    endcapture
-  endif
-  assign detail_hash = ''
-
-  if detail_base contains '#'
-    assign url_parts = detail_base | split: '#'
-    assign detail_base = url_parts | first
-    assign detail_hash = url_parts | last
-  endif
-
-  assign detail_url = detail_base | append: '?order=' | append: order.id
-
-  if detail_hash != blank and detail_hash != detail_base
-    assign detail_url = detail_url | append: '#' | append: detail_hash
-  endif
--%}{{- detail_url -}}
+{{- order.customer_url -}}
