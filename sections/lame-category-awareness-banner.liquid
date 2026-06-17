@@ -1,0 +1,249 @@
+{%- liquid
+  assign category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
+  assign banner_image = section.settings.image
+  assign mobile_image = section.settings.image_mobile
+  assign banner_alt = section.settings.image_alt
+  if banner_alt == blank and collection != blank
+    assign banner_alt = collection.title | append: ' awareness'
+  endif
+  assign banner_alt = banner_alt | escape
+
+  assign show_banner = false
+  if collection != blank and category_shop_handles contains collection.handle and banner_image != blank
+    assign show_banner = true
+  endif
+-%}
+
+{%- if show_banner -%}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <section
+    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-category-awareness lame-category-awareness--{{ collection.handle }}"
+    {{ section.shopify_attributes }}
+  >
+    <div
+      class="lame-category-awareness__wrap spacing-style"
+      style="{% render 'spacing-padding', settings: section.settings %}"
+    >
+      {%- if section.settings.heading != blank -%}
+        <h2 class="lame-category-awareness__heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+
+      <div class="lame-category-awareness__frame">
+        {%- if section.settings.link != blank -%}
+          <a
+            href="{{ section.settings.link }}"
+            class="lame-category-awareness__link"
+            {% if section.settings.open_in_new_tab %}
+              target="_blank"
+              rel="noopener"
+            {% endif %}
+          >
+        {%- endif -%}
+
+        {%- liquid
+          assign desktop_image_class = 'lame-category-awareness__image'
+          if mobile_image != blank
+            assign desktop_image_class = desktop_image_class | append: ' lame-category-awareness__image--desktop'
+          endif
+        -%}
+        <picture>
+          {%- if mobile_image != blank -%}
+            {{
+              mobile_image
+              | image_url: width: 1200
+              | image_tag:
+                class: 'lame-category-awareness__image lame-category-awareness__image--mobile',
+                loading: 'lazy',
+                widths: '375, 550, 750',
+                sizes: '100vw',
+                alt: banner_alt
+            }}
+          {%- endif -%}
+          {{
+            banner_image
+            | image_url: width: 3840
+            | image_tag:
+              class: desktop_image_class,
+              loading: 'lazy',
+              widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+              sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
+              alt: banner_alt
+          }}
+        </picture>
+
+        {%- if section.settings.link != blank -%}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-category-awareness {
+    --lame-awareness-radius: 14px;
+    width: 100%;
+  }
+
+  .lame-category-awareness__wrap {
+    width: 100%;
+    max-width: min(100%, var(--page-width, 1200px));
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  .section--full-width .lame-category-awareness__wrap {
+    max-width: 100%;
+    padding-inline: clamp(0.75rem, 3vw, 1.5rem);
+  }
+
+  .lame-category-awareness__heading {
+    margin: 0 0 1rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(var(--lame-cos-forest, 45 74 34));
+    text-align: center;
+  }
+
+  .lame-category-awareness__frame {
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--lame-awareness-radius);
+    box-shadow: 0 10px 32px rgb(45 74 34 / 0.1);
+    line-height: 0;
+    background: #e8f0eb;
+  }
+
+  .lame-category-awareness__link {
+    display: block;
+    width: 100%;
+    line-height: 0;
+    text-decoration: none;
+  }
+
+  .lame-category-awareness__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    border: none;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .lame-category-awareness__image--mobile {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-category-awareness__frame {
+      border-radius: 10px;
+    }
+
+    .lame-category-awareness:has(.lame-category-awareness__image--mobile) .lame-category-awareness__image--desktop {
+      display: none;
+    }
+
+    .lame-category-awareness:has(.lame-category-awareness__image--mobile) .lame-category-awareness__image--mobile {
+      display: block;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Category awareness banner",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shown below the product grid on cosmetic category pages (Bath & Body, Skin Care, etc.). Open the theme editor on each category collection to upload a different image — settings are saved per collection."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Awareness image",
+      "info": "Required. Recommended wide banner (~1920×640px or similar)."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile image",
+      "info": "Optional. Shown on phones instead of the desktop image."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading above image",
+      "info": "Optional. Leave blank for image only."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "info": "Optional. Defaults to the collection name."
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Banner link",
+      "info": "Optional. Makes the whole banner clickable."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "Open link in new tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category awareness banner"
+    }
+  ]
+}
+{% endschema %}
