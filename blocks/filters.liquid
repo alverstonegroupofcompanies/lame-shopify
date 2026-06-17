@@ -60,6 +60,14 @@
     assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
   endif
 
+  capture lame_our_products_active_capture
+    render 'lame-our-products-active', section: section
+  endcapture
+  assign lame_our_products_active = false
+  if lame_our_products_active_capture contains 'true'
+    assign lame_our_products_active = true
+  endif
+
   assign is_active = false
   assign should_show_pane = true
   if block_settings.filter_style == 'vertical'
@@ -198,6 +206,10 @@
                       -%}
                     {% else %}
                       {% liquid
+                        if lame_our_products_active and filter.param_name == 'filter.p.vendor'
+                          continue
+                        endif
+
                         if filter.active_values.size > 0
                           assign is_active = true
                         endif
@@ -244,6 +256,13 @@
                   %}
                 {% else %}
                   {{ rendered_filters }}
+                  {% if lame_our_products_active and template.name == 'collection' and block_settings.enable_filtering %}
+                    {% render 'lame-collection-vendor-filter',
+                      collection: collection,
+                      section_id: section.id,
+                      filter_style: block_settings.filter_style
+                    %}
+                  {% endif %}
                 {% endif %}
               </div>
 

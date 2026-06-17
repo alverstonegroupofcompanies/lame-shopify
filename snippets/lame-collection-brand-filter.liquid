@@ -25,7 +25,32 @@
   assign fallback_slugs_pipe = '|'
   assign fallback_labels_json = ''
 
-  if vendor_filter == blank and products != blank
+  if vendor_filter == blank
+    for vendor_name in shop.vendors
+      assign raw_vendor = vendor_name | strip
+      assign raw_down = raw_vendor | downcase
+
+      if raw_vendor == blank
+        continue
+      endif
+
+      if raw_down contains 'lamstone'
+        assign brand_slug = 'lamstone-healthcare'
+        assign brand_label = 'Lamstone Healthcare'
+      else
+        assign brand_slug = raw_vendor | handleize
+        assign brand_label = raw_vendor
+      endif
+
+      assign slug_token = '|' | append: brand_slug | append: '|'
+      unless fallback_slugs_pipe contains slug_token
+        assign fallback_slugs_pipe = fallback_slugs_pipe | append: brand_slug | append: '|'
+        assign fallback_labels_json = fallback_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
+      endunless
+    endfor
+  endif
+
+  if vendor_filter == blank and fallback_slugs_pipe == '|' and products != blank
     for product in products
       assign raw_vendor = product.vendor | strip
       assign raw_down = raw_vendor | downcase
