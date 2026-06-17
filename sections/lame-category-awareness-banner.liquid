@@ -2,6 +2,14 @@
   assign category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
   assign banner_image = section.settings.image
   assign mobile_image = section.settings.image_mobile
+  assign display_image = banner_image
+  if display_image == blank
+    assign display_image = mobile_image
+  endif
+  assign show_mobile_variant = false
+  if mobile_image != blank and banner_image != blank
+    assign show_mobile_variant = true
+  endif
   assign banner_alt = section.settings.image_alt
   if banner_alt == blank and collection != blank
     assign banner_alt = collection.title | append: ' awareness'
@@ -9,7 +17,7 @@
   assign banner_alt = banner_alt | escape
 
   assign show_banner = false
-  if banner_image != blank and collection != blank
+  if display_image != blank and collection != blank
     if template.suffix == collection.handle
       assign show_banner = true
     elsif template.suffix == blank and category_shop_handles contains collection.handle
@@ -46,12 +54,12 @@
 
         {%- liquid
           assign desktop_image_class = 'lame-category-awareness__image'
-          if mobile_image != blank
+          if show_mobile_variant
             assign desktop_image_class = desktop_image_class | append: ' lame-category-awareness__image--desktop'
           endif
         -%}
         <picture>
-          {%- if mobile_image != blank -%}
+          {%- if show_mobile_variant -%}
             {{
               mobile_image
               | image_url: width: 1200
@@ -64,7 +72,7 @@
             }}
           {%- endif -%}
           {{
-            banner_image
+            display_image
             | image_url: width: 3840
             | image_tag:
               class: desktop_image_class,
