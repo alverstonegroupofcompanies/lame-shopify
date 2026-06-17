@@ -9,8 +9,12 @@
   assign banner_alt = banner_alt | escape
 
   assign show_banner = false
-  if collection != blank and category_shop_handles contains collection.handle and banner_image != blank
-    assign show_banner = true
+  if banner_image != blank and collection != blank
+    if template.suffix == collection.handle
+      assign show_banner = true
+    elsif template.suffix == blank and category_shop_handles contains collection.handle
+      assign show_banner = true
+    endif
   endif
 -%}
 
@@ -165,7 +169,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Shown below the product grid on cosmetic category pages (Bath & Body, Skin Care, etc.). Open the theme editor on each category collection to upload a different image — settings are saved per collection."
+      "content": "Dedicated to one category template only (e.g. collection.skin-care). Assign that template to the matching collection in Shopify admin, then upload the awareness image here. Each category template has its own banner — changes here do not affect other categories."
     },
     {
       "type": "image_picker",
