@@ -1,5 +1,9 @@
 {%- liquid
-  assign category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
+  assign target_handle = section.settings.category_handle
+  if target_handle == blank and template.suffix != blank
+    assign target_handle = template.suffix
+  endif
+
   assign banner_image = section.settings.image
   assign mobile_image = section.settings.image_mobile
   assign display_image = banner_image
@@ -16,11 +20,14 @@
   endif
   assign banner_alt = banner_alt | escape
 
+  assign is_target_collection = false
+  if collection != blank and target_handle != blank and collection.handle == target_handle
+    assign is_target_collection = true
+  endif
+
   assign show_banner = false
-  if display_image != blank and collection != blank
-    if template.suffix == collection.handle
-      assign show_banner = true
-    elsif template.suffix == blank and category_shop_handles contains collection.handle
+  if is_target_collection
+    if display_image != blank or request.design_mode
       assign show_banner = true
     endif
   endif
@@ -41,7 +48,7 @@
       {%- endif -%}
 
       <div class="lame-category-awareness__frame">
-        {%- if section.settings.link != blank -%}
+        {%- if section.settings.link != blank and display_image != blank -%}
           <a
             href="{{ section.settings.link }}"
             class="lame-category-awareness__link"
@@ -52,38 +59,44 @@
           >
         {%- endif -%}
 
-        {%- liquid
-          assign desktop_image_class = 'lame-category-awareness__image'
-          if show_mobile_variant
-            assign desktop_image_class = desktop_image_class | append: ' lame-category-awareness__image--desktop'
-          endif
-        -%}
-        <picture>
-          {%- if show_mobile_variant -%}
+        {%- if display_image != blank -%}
+          {%- liquid
+            assign desktop_image_class = 'lame-category-awareness__image'
+            if show_mobile_variant
+              assign desktop_image_class = desktop_image_class | append: ' lame-category-awareness__image--desktop'
+            endif
+          -%}
+          <picture>
+            {%- if show_mobile_variant -%}
+              {{
+                mobile_image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'lame-category-awareness__image lame-category-awareness__image--mobile',
+                  loading: 'lazy',
+                  widths: '375, 550, 750',
+                  sizes: '100vw',
+                  alt: banner_alt
+              }}
+            {%- endif -%}
             {{
-              mobile_image
-              | image_url: width: 1200
+              display_image
+              | image_url: width: 3840
               | image_tag:
-                class: 'lame-category-awareness__image lame-category-awareness__image--mobile',
+                class: desktop_image_class,
                 loading: 'lazy',
-                widths: '375, 550, 750',
-                sizes: '100vw',
+                widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+                sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
                 alt: banner_alt
             }}
-          {%- endif -%}
-          {{
-            display_image
-            | image_url: width: 3840
-            | image_tag:
-              class: desktop_image_class,
-              loading: 'lazy',
-              widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
-              sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
-              alt: banner_alt
-          }}
-        </picture>
+          </picture>
+        {%- elsif request.design_mode -%}
+          <div class="lame-category-awareness__placeholder">
+            <p>Upload an awareness image for this category.</p>
+          </div>
+        {%- endif -%}
 
-        {%- if section.settings.link != blank -%}
+        {%- if section.settings.link != blank and display_image != blank -%}
           </a>
         {%- endif -%}
       </div>
@@ -151,6 +164,22 @@
     display: none;
   }
 
+  .lame-category-awareness__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 10rem;
+    padding: 2rem;
+    text-align: center;
+    color: rgb(var(--lame-cos-forest, 45 74 34));
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .lame-category-awareness__placeholder p {
+    margin: 0;
+  }
+
   @media screen and (max-width: 749px) {
     .lame-category-awareness__frame {
       border-radius: 10px;
@@ -177,7 +206,22 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Dedicated to one category template only (e.g. collection.skin-care). Assign that template to the matching collection in Shopify admin, then upload the awareness image here. Each category template has its own banner — changes here do not affect other categories."
+      "content": "Each category has its own awareness section. This section only appears on the collection matching the category below."
+    },
+    {
+      "type": "select",
+      "id": "category_handle",
+      "label": "Category",
+      "options": [
+        { "value": "bath-body", "label": "Bath & Body" },
+        { "value": "fragrance", "label": "Fragrance" },
+        { "value": "make-up", "label": "Makeup" },
+        { "value": "skin-care", "label": "Skin Care" },
+        { "value": "baby-mom", "label": "Mom & Baby" },
+        { "value": "wellness", "label": "Wellness" },
+        { "value": "hair-care", "label": "Hair Care" }
+      ],
+      "default": "skin-care"
     },
     {
       "type": "image_picker",
@@ -254,7 +298,60 @@
   ],
   "presets": [
     {
-      "name": "Category awareness banner"
+      "name": "Bath & Body awareness",
+      "settings": {
+        "category_handle": "bath-body",
+        "heading": "Bath & Body awareness",
+        "image_alt": "Bath & Body awareness banner"
+      }
+    },
+    {
+      "name": "Fragrance awareness",
+      "settings": {
+        "category_handle": "fragrance",
+        "heading": "Fragrance awareness",
+        "image_alt": "Fragrance awareness banner"
+      }
+    },
+    {
+      "name": "Makeup awareness",
+      "settings": {
+        "category_handle": "make-up",
+        "heading": "Makeup awareness",
+        "image_alt": "Makeup awareness banner"
+      }
+    },
+    {
+      "name": "Skin Care awareness",
+      "settings": {
+        "category_handle": "skin-care",
+        "heading": "Skin Care awareness",
+        "image_alt": "Skin Care awareness banner"
+      }
+    },
+    {
+      "name": "Mom & Baby awareness",
+      "settings": {
+        "category_handle": "baby-mom",
+        "heading": "Mom & Baby awareness",
+        "image_alt": "Mom & Baby awareness banner"
+      }
+    },
+    {
+      "name": "Wellness awareness",
+      "settings": {
+        "category_handle": "wellness",
+        "heading": "Wellness awareness",
+        "image_alt": "Wellness awareness banner"
+      }
+    },
+    {
+      "name": "Hair Care awareness",
+      "settings": {
+        "category_handle": "hair-care",
+        "heading": "Hair Care awareness",
+        "image_alt": "Hair Care awareness banner"
+      }
     }
   ]
 }
