@@ -205,24 +205,22 @@
                         render 'price-filter', filter: filter, filter_style: block_settings.filter_style, should_render_clear: should_render_clear, id_prefix: 'horizontal'
                       -%}
                     {% else %}
-                      {% liquid
-                        if lame_our_products_active and filter.param_name == 'filter.p.vendor'
-                          continue
-                        endif
+                      {% unless lame_our_products_active and filter.param_name == 'filter.p.vendor' %}
+                        {% liquid
+                          if filter.active_values.size > 0
+                            assign is_active = true
+                          endif
 
-                        if filter.active_values.size > 0
-                          assign is_active = true
-                        endif
-
-                        assign active_value_count = filter.active_values | size
-                        assign total_active_values = total_active_values | plus: active_value_count
-                        if block_settings.filter_style != 'vertical'
-                          assign should_render_clear = true
-                        else
-                          assign should_render_clear = false
-                        endif
-                        render 'list-filter', filter: filter, filter_style: block_settings.filter_style, active_value_count: active_value_count, should_render_clear: should_render_clear, show_swatch_label: block_settings.show_swatch_label, sectionId: section.id
-                      %}
+                          assign active_value_count = filter.active_values | size
+                          assign total_active_values = total_active_values | plus: active_value_count
+                          if block_settings.filter_style != 'vertical'
+                            assign should_render_clear = true
+                          else
+                            assign should_render_clear = false
+                          endif
+                          render 'list-filter', filter: filter, filter_style: block_settings.filter_style, active_value_count: active_value_count, should_render_clear: should_render_clear, show_swatch_label: block_settings.show_swatch_label, sectionId: section.id
+                        %}
+                      {% endunless %}
                   {% endcase %}
                 {%- endfor -%}
               {% endcapture %}

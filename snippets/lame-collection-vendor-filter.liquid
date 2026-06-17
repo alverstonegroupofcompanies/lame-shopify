@@ -24,33 +24,7 @@
   if vendor_filter == blank
     for vendor_name in shop.vendors
       assign raw_vendor = vendor_name | strip
-      if raw_vendor == blank
-        continue
-      endif
-
-      assign raw_down = raw_vendor | downcase
-      if raw_down contains 'lamstone'
-        assign brand_slug = 'lamstone-healthcare'
-        assign brand_label = 'Lamstone Healthcare'
-      else
-        assign brand_slug = raw_vendor | handleize
-        assign brand_label = raw_vendor
-      endif
-
-      assign slug_token = '|' | append: brand_slug | append: '|'
-      unless vendor_slugs_pipe contains slug_token
-        assign vendor_slugs_pipe = vendor_slugs_pipe | append: brand_slug | append: '|'
-        assign vendor_labels_json = vendor_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
-      endunless
-    endfor
-
-    if vendor_slugs_pipe == '|'
-      for product in collection.products
-        assign raw_vendor = product.vendor | strip
-        if raw_vendor == blank
-          continue
-        endif
-
+      if raw_vendor != blank
         assign raw_down = raw_vendor | downcase
         if raw_down contains 'lamstone'
           assign brand_slug = 'lamstone-healthcare'
@@ -65,6 +39,28 @@
           assign vendor_slugs_pipe = vendor_slugs_pipe | append: brand_slug | append: '|'
           assign vendor_labels_json = vendor_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
         endunless
+      endif
+    endfor
+
+    if vendor_slugs_pipe == '|'
+      for product in collection.products
+        assign raw_vendor = product.vendor | strip
+        if raw_vendor != blank
+          assign raw_down = raw_vendor | downcase
+          if raw_down contains 'lamstone'
+            assign brand_slug = 'lamstone-healthcare'
+            assign brand_label = 'Lamstone Healthcare'
+          else
+            assign brand_slug = raw_vendor | handleize
+            assign brand_label = raw_vendor
+          endif
+
+          assign slug_token = '|' | append: brand_slug | append: '|'
+          unless vendor_slugs_pipe contains slug_token
+            assign vendor_slugs_pipe = vendor_slugs_pipe | append: brand_slug | append: '|'
+            assign vendor_labels_json = vendor_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
+          endunless
+        endif
       endfor
     endif
   endif
@@ -90,10 +86,10 @@
       <div class="facets__status-wrapper">
         <facet-status-component class="facets__status" facet-type="list" data-filter-style="{{ filter_style }}">
           <span
-            class="{% if vendor_filter.active_values.size > 0 %}bubble facets__bubble{% endif %} hide-when-empty"
+            class="{% if vendor_filter != blank and vendor_filter.active_values.size > 0 %}bubble facets__bubble{% endif %} hide-when-empty"
             ref="facetStatus"
           >
-            {%- if vendor_filter.active_values.size > 0 -%}
+            {%- if vendor_filter != blank and vendor_filter.active_values.size > 0 -%}
               {{- vendor_filter.active_values.size -}}
             {%- endif -%}
           </span>
