@@ -120,6 +120,8 @@
                 assign is_checked = false
                 assign facet_count = blank
                 assign raw_down = brand_label | downcase
+                assign checkbox_name = 'filter.p.vendor'
+                assign checkbox_value = brand_label
 
                 if raw_down contains 'lamstone'
                   assign display_label = 'Lamstone Healthcare'
@@ -129,15 +131,17 @@
 
                 if vendor_filter != blank
                   for value in vendor_filter.active_values
-                    if value.label == brand_label
+                    if value.label == brand_label or value.value == brand_label
                       assign is_checked = true
                       break
                     endif
                   endfor
 
                   for value in vendor_filter.values
-                    if value.label == brand_label
+                    if value.label == brand_label or value.value == brand_label
                       assign facet_count = value.count
+                      assign checkbox_name = value.param_name
+                      assign checkbox_value = value.value
                       break
                     endif
                   endfor
@@ -148,16 +152,18 @@
                 endif
 
                 assign input_id = 'Filter-filter-p-vendor-' | append: forloop.index | append: '-' | append: filter_style
+                assign desktop_form_id = 'FacetFiltersForm--' | append: section_id | append: '-desktop'
               %}
 
-              <li data-skip-node-update="true" class="facets__inputs-list-item">
+              <li class="facets__inputs-list-item">
                 {% render 'checkbox',
-                  name: 'filter.p.vendor',
-                  value: brand_label,
+                  name: checkbox_name,
+                  value: checkbox_value,
                   label: display_label,
                   checked: is_checked,
                   id: input_id,
                   disabled: false,
+                  formId: desktop_form_id,
                   inputRef: 'facetInputs[]',
                   events: 'on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"'
                 %}

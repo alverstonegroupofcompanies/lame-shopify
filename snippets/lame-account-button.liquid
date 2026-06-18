@@ -96,10 +96,7 @@
           </div>
         </div>
       {%- else -%}
-        <div class="lame-account__header-user">
-          <div class="lame-account__user-avatar lame-account__user-avatar--guest" aria-hidden="true">
-            {% render 'lame-account-icon', size: 20, class: 'lame-account__guest-icon' %}
-          </div>
+        <div class="lame-account__header-user lame-account__header-user--guest">
           <div class="lame-account__user-meta">
             <p class="lame-account__heading" id="{{ menu_id }}-heading">{{ 'lame_customer.drawer_guest_title' | t }}</p>
             <p class="lame-account__email">{{ 'lame_customer.drawer_guest_hint' | t }}</p>
@@ -111,89 +108,85 @@
     <div class="lame-account__divider" role="separator" aria-hidden="true"></div>
 
     {%- if customer -%}
-      <ul class="lame-account__menu list-unstyled" role="none">
-        <li role="none">
-          <a class="lame-account__row" href="{{ profile_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+      <div class="lame-account__body">
+        <div class="lame-account__quick-links" role="group" aria-label="{{ 'lame_customer.account_nav' | t }}">
+          <a class="lame-account__quick-link" href="{{ orders_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__quick-link-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
             </span>
-            <span class="lame-account__row-label">{{ 'lame_customer.my_profile' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
+            <span class="lame-account__quick-link-label">{{ 'lame_customer.my_orders' | t }}</span>
           </a>
-        </li>
-        <li role="none">
-          <a class="lame-account__row" href="{{ orders_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+          <a class="lame-account__quick-link" href="{{ profile_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__quick-link-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
             </span>
-            <span class="lame-account__row-label">{{ 'lame_customer.my_orders' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
+            <span class="lame-account__quick-link-label">{{ 'lame_customer.my_profile' | t }}</span>
           </a>
-        </li>
-        <li role="none">
-          <a class="lame-account__row" href="{{ wishlist_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393Z" fill-rule="evenodd" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>
-            </span>
-            <span class="lame-account__row-label">{{ 'lame_wishlist.title' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </a>
-        </li>
-        <li role="none">
-          <a class="lame-account__row" href="{{ routes.account_addresses_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10.5a6 6 0 1 0-12 0C6 15.8 12 21 12 21Z" stroke="currentColor" stroke-width="1.25"/><circle cx="12" cy="10.5" r="2" stroke="currentColor" stroke-width="1.25"/></svg>
-            </span>
-            <span class="lame-account__row-label">{{ 'customer.addresses.title' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </a>
-        </li>
-        <li class="lame-account__menu-divider" role="separator" aria-hidden="true"></li>
-        <li role="none">
-          <a class="lame-account__row lame-account__row--logout" href="{{ routes.account_logout_url }}" role="menuitem" ref="menuitem[]">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-            <span class="lame-account__row-label">{{ 'actions.log_out' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </a>
-        </li>
-      </ul>
+        </div>
+
+        <ul class="lame-account__menu list-unstyled" role="none">
+          <li role="none">
+            <a class="lame-account__row" href="{{ wishlist_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+              <span class="lame-account__row-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393Z" fill-rule="evenodd" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="lame-account__row-label">{{ 'lame_wishlist.title' | t }}</span>
+              <span class="lame-account__row-chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </li>
+          <li role="none">
+            <a class="lame-account__row" href="{{ routes.account_addresses_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+              <span class="lame-account__row-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10.5a6 6 0 1 0-12 0C6 15.8 12 21 12 21Z" stroke="currentColor" stroke-width="1.25"/><circle cx="12" cy="10.5" r="2" stroke="currentColor" stroke-width="1.25"/></svg>
+              </span>
+              <span class="lame-account__row-label">{{ 'customer.addresses.title' | t }}</span>
+              <span class="lame-account__row-chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </li>
+          <li class="lame-account__menu-divider" role="separator" aria-hidden="true"></li>
+          <li role="none">
+            <a class="lame-account__row lame-account__row--logout" href="{{ routes.account_logout_url }}" role="menuitem" ref="menuitem[]">
+              <span class="lame-account__row-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="lame-account__row-label">{{ 'actions.log_out' | t }}</span>
+              <span class="lame-account__row-chevron" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
     {%- else -%}
-      <ul class="lame-account__menu list-unstyled" role="none">
-        <li role="none">
-          <a class="lame-account__row" href="{{ routes.account_login_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-            <span class="lame-account__row-label">{{ 'customer.log_in' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
+      <div class="lame-account__body lame-account__body--guest">
+        <div class="lame-account__auth">
+          <a class="lame-account__auth-primary button" href="{{ routes.account_login_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            {{ 'customer.log_in' | t }}
           </a>
-        </li>
-        <li role="none">
-          <a class="lame-account__row" href="{{ routes.account_register_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
-            <span class="lame-account__row-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M19 8v6M22 11h-6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
-            </span>
-            <span class="lame-account__row-label">{{ 'lame_customer.create_account' | t }}</span>
-            <span class="lame-account__row-chevron" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
+          <a class="lame-account__auth-secondary button button-secondary" href="{{ routes.account_register_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            {{ 'lame_customer.create_account' | t }}
           </a>
-        </li>
-      </ul>
+        </div>
+
+        <div class="lame-account__quick-links" role="group" aria-label="{{ 'lame_customer.account_nav' | t }}">
+          <a class="lame-account__quick-link" href="{{ orders_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__quick-link-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7.5h16l-1.4 10.2a1.5 1.5 0 0 1-1.48 1.3H6.88a1.5 1.5 0 0 1-1.48-1.3L4 7.5Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M9 11V8a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <span class="lame-account__quick-link-label">{{ 'lame_customer.my_orders' | t }}</span>
+          </a>
+          <a class="lame-account__quick-link" href="{{ profile_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+            <span class="lame-account__quick-link-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.25" stroke="currentColor" stroke-width="1.25"/><path d="M5.5 19c0-3.2 2.9-5.25 6.5-5.25S18.5 15.8 18.5 19" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>
+            </span>
+            <span class="lame-account__quick-link-label">{{ 'lame_customer.my_profile' | t }}</span>
+          </a>
+        </div>
+      </div>
     {%- endif -%}
   </div>
 </account-menu-component>

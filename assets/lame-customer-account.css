@@ -1222,8 +1222,8 @@
   --lame-acct-gold-strong: var(--brand-gold-strong, 168 137 74);
   --lame-acct-ink: var(--brand-ink, 26 42 36);
   --lame-acct-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --lame-acct-menu-radius: 18px;
-  --lame-acct-menu-width: 17.5rem;
+  --lame-acct-menu-radius: 20px;
+  --lame-acct-menu-width: 19.5rem;
   --lame-acct-menu-drawer-width: min(20rem, 90vw);
   --lame-acct-menu-z: calc(var(--lame-mobile-menu-z, 100000) + 3);
 
@@ -1378,13 +1378,22 @@
 
 .lame-account__heading {
   margin: 0 0 0.15rem;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.3;
-  color: rgb(var(--lame-acct-forest));
+  letter-spacing: 0.01em;
+  color: rgb(var(--lame-acct-gold-strong));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.lame-account__header-user--guest .lame-account__heading {
+  white-space: normal;
+}
+
+.lame-account__header-user--guest {
+  padding-right: 1.75rem;
 }
 
 .lame-account__email {
@@ -1430,12 +1439,117 @@
 .lame-account__divider {
   height: 1px;
   margin: 0;
-  background: rgb(var(--lame-acct-gold) / 0.16);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(var(--lame-acct-gold) / 0.28) 18%,
+    rgb(var(--lame-acct-gold) / 0.28) 82%,
+    transparent 100%
+  );
+}
+
+.lame-account__body {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.lame-account__body--guest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.lame-account__auth {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.lame-account__auth-primary,
+.lame-account__auth-secondary {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lame-account__auth-primary {
+  border: none;
+  background: rgb(var(--lame-acct-forest)) !important;
+  color: #fff !important;
+}
+
+.lame-account__auth-primary:hover {
+  background: rgb(var(--lame-acct-forest) / 0.92) !important;
+}
+
+.lame-account__auth-secondary {
+  border: 1px solid rgb(var(--lame-acct-gold) / 0.45) !important;
+  background: #fff !important;
+  color: rgb(var(--lame-acct-gold-strong)) !important;
+}
+
+.lame-account__auth-secondary:hover {
+  border-color: rgb(var(--lame-acct-gold-strong) / 0.65) !important;
+  background: rgb(var(--lame-acct-cream) / 0.65) !important;
+}
+
+.lame-account__quick-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.lame-account__quick-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 4.25rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: 14px;
+  border: 1px solid rgb(var(--lame-acct-gold) / 0.28);
+  background: rgb(var(--lame-acct-cream) / 0.45);
+  color: rgb(var(--lame-acct-forest));
+  text-decoration: none;
+  text-align: center;
+  transition:
+    background 0.2s var(--lame-acct-ease),
+    border-color 0.2s var(--lame-acct-ease),
+    transform 0.2s var(--lame-acct-ease);
+}
+
+.lame-account__quick-link:hover,
+.lame-account__quick-link:focus-visible {
+  border-color: rgb(var(--lame-acct-gold-strong) / 0.55);
+  background: rgb(var(--lame-acct-cream) / 0.85);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.lame-account__quick-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--lame-acct-gold-strong));
+}
+
+.lame-account__quick-link-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgb(var(--lame-acct-forest));
 }
 
 .lame-account__menu {
-  margin: 0;
-  padding: 0.35rem 0.5rem 0.5rem;
+  margin: 0.65rem 0 0;
+  padding: 0;
   list-style: none;
 }
 
@@ -1525,8 +1639,12 @@
     padding: max(1rem, env(safe-area-inset-top)) 1rem 0.9rem;
   }
 
+  .lame-account__body {
+    padding: 0.85rem 1rem max(1rem, env(safe-area-inset-bottom));
+  }
+
   .lame-account__menu {
-    padding: 0.35rem 0.55rem max(0.75rem, env(safe-area-inset-bottom));
+    padding: 0;
   }
 
   .lame-account__row {

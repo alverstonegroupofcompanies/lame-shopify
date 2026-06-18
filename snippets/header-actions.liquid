@@ -65,6 +65,11 @@
 >
   {% if shop.customer_accounts_enabled %}
     {% liquid
+      assign use_lame_profile_menu = true
+      if section and section.settings.use_lame_profile_menu == false
+        assign use_lame_profile_menu = false
+      endif
+
       assign account_actions_style = ''
       if display_style == 'text' and section
         assign actions_font = section.settings.actions_font | default: 'body'
@@ -82,6 +87,9 @@
         assign account_actions_style = '--header-actions-font-family: ' | append: font_family_safe | append: '; --header-actions-font-weight: ' | append: font_obj.weight | append: ';'
       endif
     %}
+    {% if use_lame_profile_menu and section %}
+      {% render 'lame-account-button', section: section, display_style: display_style %}
+    {% else %}
     <div
       class="account-button header-actions__action{% if display_style == 'text' %} account-button--text{% endif %} color-{{ settings.popover_color_scheme }}"
     >
@@ -111,6 +119,7 @@
         {% endif %}
       </shopify-account>
     </div>
+    {% endif %}
   {% endif %}
 
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
@@ -293,14 +302,18 @@
     --shopify-account-font-heading-weight: var(--font-heading--weight);
     --shopify-account-font-body: var(--font-body--family);
     --shopify-account-font-body-weight: var(--font-body--weight);
-    --shopify-account-radius-base: var(--style-border-radius-popover);
-    --shopify-account-radius-button: var(--style-border-radius-buttons-primary);
-    --shopify-account-radius-button-small: var(--style-border-radius-buttons-primary);
-    --shopify-account-radius-input: var(--style-border-radius-buttons-primary);
-    --shopify-account-color-background: var(--color-background);
-    --shopify-account-color-text: var(--color-foreground);
-    --shopify-account-color-accent: var(--color-primary-button-background);
-    --shopify-account-color-accent-text: var(--color-primary-button-text);
+    --shopify-account-radius-base: 16px;
+    --shopify-account-radius-button: 999px;
+    --shopify-account-radius-button-small: 12px;
+    --shopify-account-radius-input: 12px;
+    --shopify-account-radius-dialog: 20px;
+    --shopify-account-color-background: rgb(var(--brand-cream, 250 246 238));
+    --shopify-account-color-background-subdued: rgb(var(--brand-cream, 250 246 238) / 0.65);
+    --shopify-account-color-text: rgb(var(--brand-ink, 26 42 36));
+    --shopify-account-color-text-subdued: rgb(var(--brand-ink, 26 42 36) / 0.62);
+    --shopify-account-color-border: rgb(var(--brand-gold, 201 169 98) / 0.28);
+    --shopify-account-color-accent: rgb(var(--brand-forest, 26 58 48));
+    --shopify-account-color-accent-text: #fff;
     --shopify-account-dialog-position-top: var(--account-offset-top);
 
     &:not(:defined) {

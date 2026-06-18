@@ -125,6 +125,29 @@ if (!customElements.get('facets-form-component')) {
  * @extends {Component<FacetInputsRefs>}
  */
 class FacetInputsComponent extends Component {
+  /** @type {AbortController | undefined} */
+  #abortController;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.#abortController = new AbortController();
+    this.addEventListener('change', this.#handleInputChange, { signal: this.#abortController.signal });
+  }
+
+  disconnectedCallback() {
+    this.#abortController?.abort();
+    this.#abortController = undefined;
+    super.disconnectedCallback();
+  }
+
+  #handleInputChange = (event) => {
+    const { target } = event;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.type !== 'checkbox' && target.type !== 'radio') return;
+
+    this.updateFilters();
+  };
+
   get sectionId() {
     const id = this.closest('.shopify-section')?.id;
     if (!id) throw new Error('FacetInputs component must be a child of a section');
@@ -134,14 +157,14 @@ class FacetInputsComponent extends Component {
   /**
    * Updates filters and the selected facet summary
    */
-  updateFilters() {
+  updateFilters = debounce(() => {
     const facetsForm = this.closest('facets-form-component');
 
     if (!(facetsForm instanceof FacetsFormComponent)) return;
 
     facetsForm.updateFilters();
     this.#updateSelectedFacetSummary();
-  }
+  }, 100);
 
   /**
    * Handles keydown events for the facets form
@@ -235,12 +258,8 @@ class PriceFacetComponent extends Component {
   currency;
   /** @type {string} */
   moneyFormat;
-  /** @type {string | undefined} */
-  #wholeMoneyFormat;
   /** @type {boolean} */
   #rangeSliderReady = false;
-
-  static #SLIDER_STEP = 100;
 
   connectedCallback() {
     super.connectedCallback();
@@ -324,83 +343,30 @@ class PriceFacetComponent extends Component {
   }
 
   /**
-   * @param {number} value
-   * @param {number} sliderMax
-   * @returns {number}
-   */
-  #snapToStep(value, sliderMax) {
-    const stepped = Math.round(value / PriceFacetComponent.#SLIDER_STEP) * PriceFacetComponent.#SLIDER_STEP;
-    return Math.max(0, Math.min(stepped, sliderMax));
-  }
-
-  /**
-   * @returns {number}
-   */
-  #getRawSliderMax() {
-    const { maxRange, maxInput } = this.refs;
-    const rawMax = maxRange?.max || maxInput?.getAttribute('data-max') || maxInput?.placeholder || '0';
-    const parsed = parseFloat(String(rawMax).replace(/[^\d.,]/g, '').replace(',', '.'));
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-  }
-
-  /**
-   * @returns {number}
-   */
-  #getSnappedSliderMax() {
-    const rawMax = this.#getRawSliderMax();
-    if (!rawMax) return 0;
-
-    return Math.ceil(rawMax / PriceFacetComponent.#SLIDER_STEP) * PriceFacetComponent.#SLIDER_STEP;
-  }
-
-  /**
-   * @returns {string}
-   */
-  #getWholeMoneyFormat() {
-    if (!this.#wholeMoneyFormat) {
-      this.#wholeMoneyFormat = this.moneyFormat
-        .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, '{{amount_no_decimals_with_comma_separator}}')
-        .replace(/\{\{\s*amount_with_space_separator\s*\}\}/g, '{{amount_no_decimals_with_space_separator}}')
-        .replace(/\{\{\s*amount_with_period_and_space_separator\s*\}\}/g, '{{amount_no_decimals}}')
-        .replace(/\{\{\s*amount_with_apostrophe_separator\s*\}\}/g, '{{amount_no_decimals}}')
-        .replace(/\{\{\s*amount\s*\}\}/g, '{{amount_no_decimals}}');
-    }
-
-    return this.#wholeMoneyFormat;
-  }
-
-  /**
-   * @param {number} displayValue
-   * @returns {string}
-   */
-  #formatWholeMoney(displayValue) {
-    if (!Number.isFinite(displayValue) || displayValue < 0) return '';
-
-    const wholeValue = Math.round(displayValue);
-    const zeroDecimal = new Set([
-      'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
-    ]);
-    const minorUnits = zeroDecimal.has(this.currency.toUpperCase()) ? wholeValue : wholeValue * 100;
-
-    return formatMoney(minorUnits, this.#getWholeMoneyFormat(), this.currency);
-  }
-
-  /**
    * @param {number} displayValue
    * @returns {string}
    */
   #formatDisplayValue(displayValue) {
     if (!displayValue || displayValue <= 0) return '';
 
-    const snapped = this.#snapToStep(displayValue, this.#getSnappedSliderMax() || displayValue);
-    return this.#formatWholeMoney(snapped);
+    const zeroDecimal = new Set([
+      'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+    ]);
+    const minorUnits = zeroDecimal.has(this.currency.toUpperCase())
+      ? Math.round(displayValue)
+      : Math.round(displayValue * 100);
+
+    return formatMoney(minorUnits, this.moneyFormat, this.currency);
   }
 
   /**
    * @returns {number}
    */
   #getSliderMax() {
-    return this.#getSnappedSliderMax();
+    const { maxRange, maxInput } = this.refs;
+    const rawMax = maxRange?.max || maxInput?.getAttribute('data-max') || maxInput?.placeholder || '0';
+    const parsed = parseFloat(String(rawMax).replace(/[^\d.,]/g, '').replace(',', '.'));
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
   }
 
   #initRangeSlider() {
@@ -413,14 +379,19 @@ class PriceFacetComponent extends Component {
     maxRange.addEventListener('input', this.#handleRangeInput);
   }
 
-  #handleRangeInput = debounce((event) => {
+  #commitRangeFilter = debounce(() => {
+    this.#setMinAndMaxValues();
+    this.updatePriceFilterAndResults();
+  }, 150);
+
+  #handleRangeInput = (event) => {
     const { minRange, maxRange, minInput, maxInput } = this.refs;
     if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
     if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) return;
 
     const sliderMax = this.#getSliderMax();
-    let minValue = this.#snapToStep(parseFloat(minRange.value), sliderMax);
-    let maxValue = this.#snapToStep(parseFloat(maxRange.value), sliderMax);
+    let minValue = parseFloat(minRange.value);
+    let maxValue = parseFloat(maxRange.value);
 
     if (!Number.isFinite(minValue)) minValue = 0;
     if (!Number.isFinite(maxValue)) maxValue = sliderMax;
@@ -428,20 +399,19 @@ class PriceFacetComponent extends Component {
     if (minValue > maxValue) {
       if (event?.target === minRange) {
         maxValue = minValue;
+        maxRange.value = String(maxValue);
       } else {
         minValue = maxValue;
+        minRange.value = String(minValue);
       }
     }
 
-    minRange.value = String(minValue);
-    maxRange.value = String(maxValue);
     minInput.value = minValue > 0 ? this.#formatDisplayValue(minValue) : '';
     maxInput.value = maxValue < sliderMax ? this.#formatDisplayValue(maxValue) : '';
 
-    this.#setMinAndMaxValues();
     this.#updateRangeVisuals();
-    this.updatePriceFilterAndResults();
-  }, 150);
+    this.#commitRangeFilter();
+  };
 
   #syncRangesFromInputs() {
     const { minRange, maxRange, minInput, maxInput } = this.refs;
@@ -451,8 +421,8 @@ class PriceFacetComponent extends Component {
     const sliderMax = this.#getSliderMax();
     if (!sliderMax) return;
 
-    const minValue = this.#snapToStep(this.#parseSliderNumber(minInput.value) ?? 0, sliderMax);
-    const maxValue = this.#snapToStep(this.#parseSliderNumber(maxInput.value) ?? sliderMax, sliderMax);
+    const minValue = this.#parseSliderNumber(minInput.value) ?? 0;
+    const maxValue = this.#parseSliderNumber(maxInput.value) ?? sliderMax;
 
     const clampedMin = Math.max(0, Math.min(minValue, sliderMax));
     const clampedMax = Math.max(clampedMin, Math.min(maxValue, sliderMax));
@@ -467,7 +437,16 @@ class PriceFacetComponent extends Component {
    * @returns {string}
    */
   #formatThumbLabel(displayValue) {
-    return this.#formatWholeMoney(this.#snapToStep(displayValue, this.#getSnappedSliderMax() || displayValue));
+    if (!Number.isFinite(displayValue)) return '';
+
+    const zeroDecimal = new Set([
+      'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+    ]);
+    const minorUnits = zeroDecimal.has(this.currency.toUpperCase())
+      ? Math.round(displayValue)
+      : Math.round(displayValue * 100);
+
+    return formatMoney(minorUnits, this.moneyFormat, this.currency);
   }
 
   /**
@@ -492,8 +471,8 @@ class PriceFacetComponent extends Component {
     if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
 
     const sliderMax = this.#getSliderMax() || parseFloat(maxRange.max) || 1;
-    const minValue = this.#snapToStep(parseFloat(minRange.value) || 0, sliderMax);
-    const maxValue = this.#snapToStep(parseFloat(maxRange.value) || sliderMax, sliderMax);
+    const minValue = parseFloat(minRange.value) || 0;
+    const maxValue = parseFloat(maxRange.value) || sliderMax;
     const left = (minValue / sliderMax) * 100;
     const right = 100 - (maxValue / sliderMax) * 100;
 
@@ -503,11 +482,11 @@ class PriceFacetComponent extends Component {
     }
 
     if (rangeMinBound instanceof HTMLElement) {
-      rangeMinBound.textContent = this.#formatWholeMoney(0);
+      rangeMinBound.textContent = formatMoney(0, this.moneyFormat, this.currency);
     }
 
     if (rangeMaxBound instanceof HTMLElement) {
-      rangeMaxBound.textContent = this.#formatWholeMoney(sliderMax);
+      rangeMaxBound.textContent = this.#formatThumbLabel(sliderMax);
     }
 
     if (minRangeLabel instanceof HTMLElement) {
@@ -539,23 +518,16 @@ class PriceFacetComponent extends Component {
   #adjustToValidValues(input) {
     if (input.value.trim() === '') return;
 
-    const { currency } = this;
-    const sliderMax = this.#getSnappedSliderMax();
-    const parsedMajor = this.#parseSliderNumber(input.value) ?? 0;
-    const snappedMajor = this.#snapToStep(parsedMajor, sliderMax);
-
-    if (snappedMajor > 0) {
-      input.value = this.#formatDisplayValue(snappedMajor);
-    }
-
+    const { currency, moneyFormat } = this;
     const value = this.#parseDisplayValue(input.value, currency);
+
     const min = this.#parseDisplayValue(input.getAttribute('data-min') ?? '0', currency);
     const max = this.#parseDisplayValue(input.getAttribute('data-max') ?? '0', currency);
 
     if (value < min) {
-      input.value = this.#formatWholeMoney(this.#snapToStep(this.#parseSliderNumber(input.getAttribute('data-min') ?? '0') ?? 0, sliderMax));
+      input.value = formatMoney(min, moneyFormat, currency);
     } else if (value > max) {
-      input.value = this.#formatWholeMoney(this.#snapToStep(this.#parseSliderNumber(input.getAttribute('data-max') ?? '0') ?? sliderMax, sliderMax));
+      input.value = formatMoney(max, moneyFormat, currency);
     }
   }
 
