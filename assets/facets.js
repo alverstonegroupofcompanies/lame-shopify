@@ -26,6 +26,201 @@ function vendorLabelToSlug(vendor) {
     .replace(/^-+|-+$/g, '');
 }
 
+/** @type {boolean} */
+let lameVendorFilterHandlersReady = false;
+
+/**
+ * @returns {HTMLInputElement[]}
+ */
+function getAllVendorFilterInputs() {
+  return [
+    ...document.querySelectorAll('[data-lame-vendor-filter] input[type="checkbox"][name="filter.p.vendor"]'),
+  ].filter((input) => input instanceof HTMLInputElement);
+}
+
+/**
+ * @returns {{ slugs: Set<string>, vendors: Set<string> }}
+ */
+function getCheckedVendorSelections() {
+  const slugs = new Set();
+  const vendors = new Set();
+
+  for (const input of getAllVendorFilterInputs()) {
+    if (!input.checked) continue;
+
+    const value = input.value.trim();
+    if (value) vendors.add(value.toLowerCase());
+
+    const slug = input.dataset.brandSlug ?? vendorLabelToSlug(value);
+    if (slug) slugs.add(slug.toLowerCase());
+  }
+
+  return { slugs, vendors };
+}
+
+/**
+ * @param {string} slug
+ * @param {string} brand
+ * @param {{ slugs: Set<string>, vendors: Set<string> }} selection
+ * @returns {boolean}
+ */
+function matchesVendorSelection(slug, brand, selection) {
+  const { slugs, vendors } = selection;
+  const brandDown = brand.trim().toLowerCase();
+  const slugDown = slug.trim().toLowerCase();
+
+  if (slugDown && slugs.has(slugDown)) return true;
+  if (brandDown && vendors.has(brandDown)) return true;
+  if (slugDown && [...vendors].some((vendor) => vendorLabelToSlug(vendor) === slugDown)) return true;
+  if (brandDown && slugs.has(vendorLabelToSlug(brandDown))) return true;
+
+  return false;
+}
+
+function applyLameVendorBrandFilter() {
+  const selection = getCheckedVendorSelections();
+  const hasSelection = selection.slugs.size > 0 || selection.vendors.size > 0;
+  const productsColumn = document.querySelector('.lame-collection-products-column');
+
+  if (!productsColumn) return;
+
+  productsColumn.querySelectorAll('.lame-collection-brand-section').forEach((section) => {
+    if (!(section instanceof HTMLElement)) return;
+
+    const slug = section.dataset.brandSlug ?? '';
+    section.hidden = hasSelection ? !matchesVendorSelection(slug, '', selection) : false;
+  });
+
+  productsColumn.querySelectorAll('li[data-brand-slug]').forEach((item) => {
+    if (!(item instanceof HTMLElement)) return;
+
+    const parentSection = item.closest('.lame-collection-brand-section');
+    if (parentSection instanceof HTMLElement && parentSection.hidden) return;
+
+    if (!hasSelection) {
+      item.hidden = false;
+      return;
+    }
+
+    const slug = item.dataset.brandSlug ?? '';
+    const brand = item.dataset.brand ?? '';
+    item.hidden = !matchesVendorSelection(slug, brand, selection);
+  });
+
+  if (selection.slugs.size === 1) {
+    const [slug] = [...selection.slugs];
+    productsColumn.classList.add('lame-collection-products-column--brand-selected');
+    productsColumn.setAttribute('data-active-brand', slug);
+  } else {
+    productsColumn.classList.remove('lame-collection-products-column--brand-selected');
+    productsColumn.removeAttribute('data-active-brand');
+  }
+}
+
+/**
+ * @param {URLSearchParams} [queryParams]
+ */
+function syncVendorInputsFromUrl(queryParams) {
+  const selectedVendors = queryParams
+    ? queryParams.getAll('filter.p.vendor')
+    : new URL(window.location.href).searchParams.getAll('filter.p.vendor');
+  const selectedDown = new Set(selectedVendors.map((value) => value.trim().toLowerCase()));
+  const selectedSlugs = new Set(selectedVendors.map((value) => vendorLabelToSlug(value)));
+
+  for (const input of getAllVendorFilterInputs()) {
+    const valueDown = input.value.trim().toLowerCase();
+    const slug = input.dataset.brandSlug ?? vendorLabelToSlug(input.value);
+    const slugDown = slug.toLowerCase();
+
+    input.checked =
+      selectedDown.has(valueDown) ||
+      selectedSlugs.has(slugDown) ||
+      [...selectedDown].some((selected) => vendorLabelToSlug(selected) === slugDown);
+  }
+
+  document.querySelectorAll('[data-lame-vendor-filter]').forEach((component) => {
+    if (component instanceof FacetInputsComponent) {
+      component.updateVendorSummary();
+    }
+  });
+}
+
+/**
+ * @param {HTMLInputElement} input
+ */
+function updateVendorFilterUrl(input) {
+  const facetsForm = input.closest('facets-form-component');
+  if (!(facetsForm instanceof FacetsFormComponent)) return;
+
+  facetsForm.updateFiltersWithoutRender();
+}
+
+/**
+ * @param {HTMLInputElement} changedInput
+ */
+function syncVendorCheckboxGroup(changedInput) {
+  const valueDown = changedInput.value.trim().toLowerCase();
+
+  for (const input of getAllVendorFilterInputs()) {
+    if (input.value.trim().toLowerCase() === valueDown) {
+      input.checked = changedInput.checked;
+    }
+  }
+}
+
+/**
+ * @param {Event} event
+ */
+function handleLameVendorFilterClick(event) {
+  if (!(event.target instanceof Element)) return;
+
+  const root = event.target.closest('[data-lame-vendor-filter]');
+  if (!root) return;
+
+  const input =
+    event.target instanceof HTMLInputElement && event.target.name === 'filter.p.vendor'
+      ? event.target
+      : (() => {
+          const label = event.target.closest('.checkbox__label');
+          const forId = label?.getAttribute('for');
+          const linked = forId ? document.getElementById(forId) : null;
+          return linked instanceof HTMLInputElement ? linked : null;
+        })();
+
+  if (!(input instanceof HTMLInputElement) || !root.contains(input) || input.disabled) return;
+
+  if (event.target !== input) {
+    event.preventDefault();
+    input.checked = !input.checked;
+  }
+
+  syncVendorCheckboxGroup(input);
+  applyLameVendorBrandFilter();
+  updateVendorFilterUrl(input);
+
+  document.querySelectorAll('[data-lame-vendor-filter]').forEach((component) => {
+    if (component instanceof FacetInputsComponent) {
+      component.updateVendorSummary();
+    }
+  });
+}
+
+function ensureLameVendorFilterHandlers() {
+  if (lameVendorFilterHandlersReady) return;
+  lameVendorFilterHandlersReady = true;
+
+  document.addEventListener('click', handleLameVendorFilterClick, true);
+  window.addEventListener('popstate', () => {
+    syncVendorInputsFromUrl();
+    applyLameVendorBrandFilter();
+  });
+
+  document.addEventListener(ThemeEvents.FilterUpdate, (event) => {
+    if (!(event.target instanceof FacetsFormComponent)) return;
+    applyLameVendorBrandFilter();
+  });
+}
+
 /**
  * Handles the main facets form functionality
  *
@@ -159,11 +354,9 @@ class FacetInputsComponent extends Component {
     this.addEventListener('change', this.#handleInputChange, { signal });
 
     if (this.hasAttribute('data-lame-vendor-filter')) {
-      document.addEventListener(ThemeEvents.FilterUpdate, this.#handleVendorFilterUpdate, { signal });
-      window.addEventListener('popstate', this.#handleVendorPopState, { signal });
-      this.addEventListener('click', this.#handleVendorClick, { signal });
-      this.#syncVendorInputsFromUrl();
-      this.#applyClientBrandFilter();
+      ensureLameVendorFilterHandlers();
+      syncVendorInputsFromUrl();
+      applyLameVendorBrandFilter();
     }
   }
 
@@ -177,158 +370,26 @@ class FacetInputsComponent extends Component {
     super.updatedCallback();
 
     if (this.hasAttribute('data-lame-vendor-filter')) {
-      this.#syncVendorInputsFromUrl();
-      this.#applyClientBrandFilter();
+      syncVendorInputsFromUrl();
+      applyLameVendorBrandFilter();
     }
+  }
+
+  /**
+   * Updates the selected facet summary for the vendor filter.
+   */
+  updateVendorSummary() {
+    this.#updateSelectedFacetSummary();
   }
 
   #handleInputChange = (event) => {
     const { target } = event;
     if (!(target instanceof HTMLInputElement)) return;
     if (target.type !== 'checkbox' && target.type !== 'radio') return;
-
-    if (this.hasAttribute('data-lame-vendor-filter')) {
-      this.#applyClientBrandFilter();
-    }
+    if (this.hasAttribute('data-lame-vendor-filter')) return;
 
     this.updateFilters();
   };
-
-  #handleVendorFilterUpdate = (event) => {
-    const queryParams = event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined;
-    this.#syncVendorInputsFromUrl(queryParams);
-    this.#applyClientBrandFilter();
-  };
-
-  #handleVendorPopState = () => {
-    this.#syncVendorInputsFromUrl();
-    this.#applyClientBrandFilter();
-  };
-
-  #handleVendorClick = (event) => {
-    const input = event.target instanceof Element ? event.target.closest('input[type="checkbox"][name="filter.p.vendor"]') : null;
-    if (!(input instanceof HTMLInputElement)) return;
-
-    requestAnimationFrame(() => {
-      this.#applyClientBrandFilter();
-    });
-  };
-
-  /**
-   * @returns {HTMLInputElement[]}
-   */
-  #getAllVendorFilterInputs() {
-    return [
-      ...document.querySelectorAll('[data-lame-vendor-filter] input[type="checkbox"][name="filter.p.vendor"]'),
-    ].filter((input) => input instanceof HTMLInputElement);
-  }
-
-  /**
-   * @returns {{ slugs: Set<string>, vendors: Set<string> }}
-   */
-  #getCheckedVendorSelections() {
-    const slugs = new Set();
-    const vendors = new Set();
-
-    for (const input of this.#getAllVendorFilterInputs()) {
-      if (!input.checked) continue;
-
-      const value = input.value.trim();
-      if (value) vendors.add(value.toLowerCase());
-
-      const slug = input.dataset.brandSlug ?? vendorLabelToSlug(value);
-      if (slug) slugs.add(slug.toLowerCase());
-    }
-
-    return { slugs, vendors };
-  }
-
-  /**
-   * @param {string} slug
-   * @param {string} brand
-   * @param {{ slugs: Set<string>, vendors: Set<string> }} selection
-   * @returns {boolean}
-   */
-  #matchesVendorSelection(slug, brand, selection) {
-    const { slugs, vendors } = selection;
-    const brandDown = brand.trim().toLowerCase();
-    const slugDown = slug.trim().toLowerCase();
-
-    if (slugDown && slugs.has(slugDown)) return true;
-    if (brandDown && vendors.has(brandDown)) return true;
-    if (slugDown && [...vendors].some((vendor) => vendorLabelToSlug(vendor) === slugDown)) return true;
-    if (brandDown && slugs.has(vendorLabelToSlug(brandDown))) return true;
-
-    return false;
-  }
-
-  /**
-   * @param {URLSearchParams} [queryParams]
-   */
-  #syncVendorInputsFromUrl(queryParams) {
-    const selectedVendors = queryParams
-      ? queryParams.getAll('filter.p.vendor')
-      : new URL(window.location.href).searchParams.getAll('filter.p.vendor');
-    const selectedDown = new Set(selectedVendors.map((value) => value.trim().toLowerCase()));
-    const selectedSlugs = new Set(selectedVendors.map((value) => vendorLabelToSlug(value)));
-
-    for (const input of this.#getAllVendorFilterInputs()) {
-      const valueDown = input.value.trim().toLowerCase();
-      const slug = input.dataset.brandSlug ?? vendorLabelToSlug(input.value);
-      const slugDown = slug.toLowerCase();
-
-      input.checked =
-        selectedDown.has(valueDown) ||
-        selectedSlugs.has(slugDown) ||
-        [...selectedDown].some((selected) => vendorLabelToSlug(selected) === slugDown);
-    }
-
-    document.querySelectorAll('[data-lame-vendor-filter]').forEach((component) => {
-      if (component instanceof FacetInputsComponent) {
-        component.#updateSelectedFacetSummary();
-      }
-    });
-  }
-
-  #applyClientBrandFilter() {
-    const selection = this.#getCheckedVendorSelections();
-    const hasSelection = selection.slugs.size > 0 || selection.vendors.size > 0;
-    const productsColumn = document.querySelector('.lame-collection-products-column');
-
-    if (!productsColumn) return;
-
-    productsColumn.querySelectorAll('.lame-collection-brand-section').forEach((section) => {
-      if (!(section instanceof HTMLElement)) return;
-
-      const slug = section.dataset.brandSlug ?? '';
-      section.hidden = hasSelection ? !this.#matchesVendorSelection(slug, '', selection) : false;
-    });
-
-    productsColumn.querySelectorAll('li[data-brand-slug]').forEach((item) => {
-      if (!(item instanceof HTMLElement)) return;
-
-      const parentSection = item.closest('.lame-collection-brand-section');
-      if (parentSection instanceof HTMLElement && parentSection.hidden) return;
-
-      if (!hasSelection) {
-        item.hidden = false;
-        return;
-      }
-
-      const slug = item.dataset.brandSlug ?? '';
-      const brand = item.dataset.brand ?? '';
-      item.hidden = !this.#matchesVendorSelection(slug, brand, selection);
-    });
-
-    if (selection.slugs.size === 1) {
-      const [slug] = [...selection.slugs];
-      productsColumn.classList.add('lame-collection-products-column--brand-selected');
-      productsColumn.setAttribute('data-active-brand', slug);
-    } else {
-      productsColumn.classList.remove('lame-collection-products-column--brand-selected');
-      productsColumn.removeAttribute('data-active-brand');
-    }
-  }
 
   get sectionId() {
     const id = this.closest('.shopify-section')?.id;
@@ -343,14 +404,7 @@ class FacetInputsComponent extends Component {
     const facetsForm = this.closest('facets-form-component');
 
     if (!(facetsForm instanceof FacetsFormComponent)) return;
-
-    if (this.hasAttribute('data-lame-vendor-filter')) {
-      facetsForm.updateFiltersWithoutRender();
-      this.#syncVendorInputsFromUrl();
-      this.#applyClientBrandFilter();
-      this.#updateSelectedFacetSummary();
-      return;
-    }
+    if (this.hasAttribute('data-lame-vendor-filter')) return;
 
     facetsForm.updateFilters();
     this.#updateSelectedFacetSummary();
@@ -1258,3 +1312,5 @@ class FacetStatusComponent extends Component {
 if (!customElements.get('facet-status-component')) {
   customElements.define('facet-status-component', FacetStatusComponent);
 }
+
+ensureLameVendorFilterHandlers();

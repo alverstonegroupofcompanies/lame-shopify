@@ -8,6 +8,12 @@ const OFFSET = 40;
  */
 export class FloatingPanelComponent extends Component {
   #updatePosition = async () => {
+    if (this.closest('.facets--vertical') || this.dataset.disableFloatPosition === 'true') {
+      this.style.removeProperty('top');
+      this.style.removeProperty('left');
+      return;
+    }
+
     // Wait for any view transitions to finish
     if (viewTransition.current) await viewTransition.current;
 

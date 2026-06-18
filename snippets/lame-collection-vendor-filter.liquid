@@ -102,10 +102,13 @@
       </div>
     </summary>
 
-    <floating-panel-component class="facets__inputs facets__panel-content details-content" id="facet-inputs-filter-p-vendor-{{ id_prefix }}">
+    <floating-panel-component
+      data-disable-float-position="true"
+      class="facets__inputs facets__panel-content details-content"
+      id="facet-inputs-filter-p-vendor-{{ id_prefix }}"
+    >
       <facet-inputs-component
         data-lame-vendor-filter
-        on:change="/updateFilters"
         id="facet-inputs-component-filter-p-vendor-{{ id_prefix }}"
       >
         <div class="facets__inputs-wrapper">
@@ -161,20 +164,21 @@
                 endif
 
                 assign input_id = 'Filter-filter-p-vendor-' | append: forloop.index | append: '-' | append: id_prefix
+                assign vendor_form_id = 'FacetFiltersForm--' | append: section_id | append: '-desktop'
+                if id_prefix == 'dialog'
+                  assign vendor_form_id = 'FacetFiltersForm--' | append: section_id | append: '-overflow'
+                endif
               %}
 
               <li class="facets__inputs-list-item">
-                <div
-                  class="checkbox"
-                  on:pointerenter="/prefetchPage"
-                  on:pointerleave="/cancelPrefetchPage"
-                >
+                <div class="checkbox">
                   <input
                     type="checkbox"
                     name="{{ checkbox_name }}"
                     value="{{ checkbox_value | escape }}"
                     id="{{ input_id }}"
                     class="checkbox__input"
+                    form="{{ vendor_form_id }}"
                     data-label="{{ display_label | escape }}"
                     data-brand="{{ brand_label | escape }}"
                     data-brand-slug="{{ brand_slug }}"
