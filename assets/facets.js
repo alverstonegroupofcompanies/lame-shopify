@@ -88,11 +88,18 @@ class FacetsFormComponent extends Component {
   }
 
   /**
+   * Updates the URL and filter state without re-rendering the section.
+   */
+  updateFiltersWithoutRender() {
+    this.#updateURLHash();
+    this.dispatchEvent(new FilterUpdateEvent(this.createURLParameters()));
+  }
+
+  /**
    * Updates filters and renders the section
    */
   updateFilters = () => {
-    this.#updateURLHash();
-    this.dispatchEvent(new FilterUpdateEvent(this.createURLParameters()));
+    this.updateFiltersWithoutRender();
     this.#updateSection();
   };
 
@@ -154,6 +161,7 @@ class FacetInputsComponent extends Component {
     if (this.hasAttribute('data-lame-vendor-filter')) {
       document.addEventListener(ThemeEvents.FilterUpdate, this.#handleVendorFilterUpdate, { signal });
       window.addEventListener('popstate', this.#handleVendorPopState, { signal });
+      this.addEventListener('click', this.#handleVendorClick, { signal });
       this.#syncVendorInputsFromUrl();
       this.#applyClientBrandFilter();
     }
@@ -186,8 +194,10 @@ class FacetInputsComponent extends Component {
     this.updateFilters();
   };
 
-  #handleVendorFilterUpdate = () => {
-    this.#syncVendorInputsFromUrl();
+  #handleVendorFilterUpdate = (event) => {
+    const queryParams = event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined;
+    this.#syncVendorInputsFromUrl(queryParams);
+    this.#applyClientBrandFilter();
   };
 
   #handleVendorPopState = () => {
@@ -195,71 +205,128 @@ class FacetInputsComponent extends Component {
     this.#applyClientBrandFilter();
   };
 
-  #syncVendorInputsFromUrl() {
-    const url = new URL(window.location.href);
-    const selectedVendors = url.searchParams.getAll('filter.p.vendor');
+  #handleVendorClick = (event) => {
+    const input = event.target instanceof Element ? event.target.closest('input[type="checkbox"][name="filter.p.vendor"]') : null;
+    if (!(input instanceof HTMLInputElement)) return;
+
+    requestAnimationFrame(() => {
+      this.#applyClientBrandFilter();
+    });
+  };
+
+  /**
+   * @returns {HTMLInputElement[]}
+   */
+  #getAllVendorFilterInputs() {
+    return [
+      ...document.querySelectorAll('[data-lame-vendor-filter] input[type="checkbox"][name="filter.p.vendor"]'),
+    ].filter((input) => input instanceof HTMLInputElement);
+  }
+
+  /**
+   * @returns {{ slugs: Set<string>, vendors: Set<string> }}
+   */
+  #getCheckedVendorSelections() {
+    const slugs = new Set();
+    const vendors = new Set();
+
+    for (const input of this.#getAllVendorFilterInputs()) {
+      if (!input.checked) continue;
+
+      const value = input.value.trim();
+      if (value) vendors.add(value.toLowerCase());
+
+      const slug = input.dataset.brandSlug ?? vendorLabelToSlug(value);
+      if (slug) slugs.add(slug.toLowerCase());
+    }
+
+    return { slugs, vendors };
+  }
+
+  /**
+   * @param {string} slug
+   * @param {string} brand
+   * @param {{ slugs: Set<string>, vendors: Set<string> }} selection
+   * @returns {boolean}
+   */
+  #matchesVendorSelection(slug, brand, selection) {
+    const { slugs, vendors } = selection;
+    const brandDown = brand.trim().toLowerCase();
+    const slugDown = slug.trim().toLowerCase();
+
+    if (slugDown && slugs.has(slugDown)) return true;
+    if (brandDown && vendors.has(brandDown)) return true;
+    if (slugDown && [...vendors].some((vendor) => vendorLabelToSlug(vendor) === slugDown)) return true;
+    if (brandDown && slugs.has(vendorLabelToSlug(brandDown))) return true;
+
+    return false;
+  }
+
+  /**
+   * @param {URLSearchParams} [queryParams]
+   */
+  #syncVendorInputsFromUrl(queryParams) {
+    const selectedVendors = queryParams
+      ? queryParams.getAll('filter.p.vendor')
+      : new URL(window.location.href).searchParams.getAll('filter.p.vendor');
     const selectedDown = new Set(selectedVendors.map((value) => value.trim().toLowerCase()));
     const selectedSlugs = new Set(selectedVendors.map((value) => vendorLabelToSlug(value)));
 
-    for (const input of this.refs.facetInputs ?? []) {
-      if (!(input instanceof HTMLInputElement) || input.name !== 'filter.p.vendor') continue;
-
+    for (const input of this.#getAllVendorFilterInputs()) {
       const valueDown = input.value.trim().toLowerCase();
       const slug = input.dataset.brandSlug ?? vendorLabelToSlug(input.value);
+      const slugDown = slug.toLowerCase();
 
       input.checked =
         selectedDown.has(valueDown) ||
-        selectedSlugs.has(slug) ||
-        [...selectedDown].some((selected) => vendorLabelToSlug(selected) === slug);
+        selectedSlugs.has(slugDown) ||
+        [...selectedDown].some((selected) => vendorLabelToSlug(selected) === slugDown);
     }
 
-    this.#updateSelectedFacetSummary();
+    document.querySelectorAll('[data-lame-vendor-filter]').forEach((component) => {
+      if (component instanceof FacetInputsComponent) {
+        component.#updateSelectedFacetSummary();
+      }
+    });
   }
 
   #applyClientBrandFilter() {
-    const checkedInputs = (this.refs.facetInputs ?? []).filter(
-      (input) => input instanceof HTMLInputElement && input.type === 'checkbox' && input.checked
-    );
-
-    const selectedSlugs = new Set(
-      checkedInputs.map((input) => input.dataset.brandSlug ?? vendorLabelToSlug(input.value)).filter(Boolean)
-    );
-
+    const selection = this.#getCheckedVendorSelections();
+    const hasSelection = selection.slugs.size > 0 || selection.vendors.size > 0;
     const productsColumn = document.querySelector('.lame-collection-products-column');
-    const brandSections = document.querySelectorAll('.lame-collection-brand-section');
 
-    if (selectedSlugs.size === 0) {
-      brandSections.forEach((section) => {
-        section.hidden = false;
-      });
+    if (!productsColumn) return;
 
-      document.querySelectorAll('.product-grid__item[data-brand-slug]').forEach((item) => {
-        item.hidden = false;
-      });
+    productsColumn.querySelectorAll('.lame-collection-brand-section').forEach((section) => {
+      if (!(section instanceof HTMLElement)) return;
 
-      productsColumn?.classList.remove('lame-collection-products-column--brand-selected');
-      productsColumn?.removeAttribute('data-active-brand');
-      return;
-    }
-
-    brandSections.forEach((section) => {
-      const slug = section instanceof HTMLElement ? section.dataset.brandSlug : '';
-      section.hidden = Boolean(slug && !selectedSlugs.has(slug));
+      const slug = section.dataset.brandSlug ?? '';
+      section.hidden = hasSelection ? !this.#matchesVendorSelection(slug, '', selection) : false;
     });
 
-    document.querySelectorAll('.product-grid__item[data-brand-slug]').forEach((item) => {
+    productsColumn.querySelectorAll('li[data-brand-slug]').forEach((item) => {
       if (!(item instanceof HTMLElement)) return;
+
+      const parentSection = item.closest('.lame-collection-brand-section');
+      if (parentSection instanceof HTMLElement && parentSection.hidden) return;
+
+      if (!hasSelection) {
+        item.hidden = false;
+        return;
+      }
+
       const slug = item.dataset.brandSlug ?? '';
-      item.hidden = Boolean(slug && !selectedSlugs.has(slug));
+      const brand = item.dataset.brand ?? '';
+      item.hidden = !this.#matchesVendorSelection(slug, brand, selection);
     });
 
-    if (selectedSlugs.size === 1) {
-      const [slug] = [...selectedSlugs];
-      productsColumn?.classList.add('lame-collection-products-column--brand-selected');
-      productsColumn?.setAttribute('data-active-brand', slug);
+    if (selection.slugs.size === 1) {
+      const [slug] = [...selection.slugs];
+      productsColumn.classList.add('lame-collection-products-column--brand-selected');
+      productsColumn.setAttribute('data-active-brand', slug);
     } else {
-      productsColumn?.classList.remove('lame-collection-products-column--brand-selected');
-      productsColumn?.removeAttribute('data-active-brand');
+      productsColumn.classList.remove('lame-collection-products-column--brand-selected');
+      productsColumn.removeAttribute('data-active-brand');
     }
   }
 
@@ -277,12 +344,16 @@ class FacetInputsComponent extends Component {
 
     if (!(facetsForm instanceof FacetsFormComponent)) return;
 
+    if (this.hasAttribute('data-lame-vendor-filter')) {
+      facetsForm.updateFiltersWithoutRender();
+      this.#syncVendorInputsFromUrl();
+      this.#applyClientBrandFilter();
+      this.#updateSelectedFacetSummary();
+      return;
+    }
+
     facetsForm.updateFilters();
     this.#updateSelectedFacetSummary();
-
-    if (this.hasAttribute('data-lame-vendor-filter')) {
-      this.#applyClientBrandFilter();
-    }
   }, 100);
 
   /**
