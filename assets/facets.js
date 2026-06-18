@@ -94,6 +94,9 @@ function ensureLameVendorFilterHandlers() {
       event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined
     );
   });
+
+  syncVendorCheckboxesFromUrl();
+  applyVendorBrandFilter();
 }
 
 /**
