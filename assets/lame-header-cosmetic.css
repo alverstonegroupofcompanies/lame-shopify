@@ -6,6 +6,39 @@
 #header-group {
   max-width: 100%;
   overflow-x: clip;
+  margin-bottom: 0;
+}
+
+/* One promo strip only: header utility bar replaces duplicate announcement sections */
+body:has(#header-component.header--cosmetic-luxury .header__row--utility) #header-group > .shopify-section:has(.announcement-bar--luxury),
+body:has(#header-component.header--cosmetic-luxury .header__row--utility) #header-group > .shopify-section:has(.lame-utility-bar-section) {
+  display: none !important;
+}
+
+/* Flush header stack — no gap or extra strip between nav, utility, and page content */
+#header-group > .shopify-section {
+  margin-block: 0;
+}
+
+#header-group > .shopify-section + .shopify-section {
+  margin-block-start: 0;
+}
+
+#header-component.header--cosmetic-luxury > .header__row--top {
+  margin-block-end: 0;
+}
+
+#header-component.header--cosmetic-luxury > .header__row--utility {
+  margin-block: 0;
+  border-block-end: none;
+}
+
+#header-component.header--cosmetic-luxury > .header__navigation-bar-row:empty {
+  display: none !important;
+}
+
+body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .shopify-section:first-child {
+  margin-block-start: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -225,12 +258,13 @@
 #header-group {
   position: relative;
   z-index: var(--layer-sticky, 8);
-  box-shadow: 0 4px 24px rgb(20 16 12 / 0.06);
 }
 
 #header-group .header-section {
   position: relative;
   z-index: inherit;
+  margin-block-end: 0;
+  padding-block-end: 0;
 }
 
 #header-component.header--cosmetic-luxury {
@@ -553,7 +587,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 #header-component.header--cosmetic-luxury .header__row--utility {
   background: linear-gradient(90deg, rgb(42 58 48) 0%, rgb(52 72 58) 50%, rgb(42 58 48) 100%);
   border-block-start: none;
-  border-block-end: 1px solid rgb(255 255 255 / 0.08);
+  border-block-end: none;
   color: rgb(255 255 255 / 0.9);
   font-family: var(--lame-font-menu, var(--font-body--family));
   font-size: 0.72rem;

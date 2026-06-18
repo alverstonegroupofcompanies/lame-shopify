@@ -211,6 +211,10 @@
             %}
           {% endif %}
 
+          <p class="lame-brand-filter-empty" data-lame-brand-filter-empty hidden>
+            {{ 'lame_collection.brand_filter_no_results' | t }}
+          </p>
+
         {% if lame_category_shop_page %}
           {% capture children %}
             {% for product in collection.products %}
@@ -292,6 +296,7 @@
                 <section
                   class="lame-collection-brand-section{% if show_brand_section_header %} lame-collection-brand-section--show-header{% endif %}"
                   id="brand-{{ brand_slug }}"
+                  data-brand-slug="{{ brand_slug }}"
                   {% if show_brand_section_header %}aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"{% else %}aria-label="{{ brand_label }}"{% endif %}
                 >
                   {% if show_brand_section_header %}
@@ -334,6 +339,7 @@
                           data-page="{{ paginate.current_page }}"
                           data-product-id="{{ product.id }}"
                           data-brand="{{ brand_label | escape }}"
+                          data-brand-slug="{{ brand_slug }}"
                           ref="cards[]"
                         >
                           {% if lame_cosmetic_collection %}
@@ -372,13 +378,13 @@
                   assign product_brand_slug = raw_vendor | handleize
                 endif
               %}
-              {% if lame_active_brand_slug == blank or product_brand_slug == lame_active_brand_slug %}
                 <li
                   id="{{ section.id }}-{{ product.id }}"
                   class="{{ lame_product_grid_item_class }} product-grid__item--{{ flat_grid_index }}"
                   data-page="{{ paginate.current_page }}"
                   data-product-id="{{ product.id }}"
                   data-brand="{{ product.vendor | escape }}"
+                  data-brand-slug="{{ product_brand_slug }}"
                   ref="cards[]"
                 >
                   {% if lame_cosmetic_collection %}
@@ -395,7 +401,6 @@
                   {% endif %}
                 </li>
                 {% assign flat_grid_index = flat_grid_index | plus: 1 %}
-              {% endif %}
             {% endfor %}
           {% endcapture %}
         {% endif %}

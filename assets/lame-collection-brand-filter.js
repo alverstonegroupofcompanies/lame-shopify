@@ -1,7 +1,9 @@
 /**
- * Brand dropdown + sidebar Brand facet for Our Products.
- * Always applies client-side filtering; persists via facets AJAX when available.
+ * Brand filter — Our Products collection.
+ * Client-side show/hide by data-brand-slug; URL kept in sync for pagination.
  */
+
+const LAME_BRAND_FILTER_HIDDEN = 'lame-brand-filter-hidden';
 
 /** @param {string} vendor */
 function lameBrandSlugFromVendor(vendor) {
@@ -13,12 +15,17 @@ function lameBrandSlugFromVendor(vendor) {
     .replace(/^-+|-+$/g, '');
 }
 
+/** @returns {HTMLElement | null} */
+function lameGetProductsColumn() {
+  return document.querySelector('.lame-collection-products-column');
+}
+
 /** @param {string} slug */
 function lameApplyBrandFilter(slug) {
-  const productsColumn = document.querySelector('.lame-collection-products-column');
+  const productsColumn = lameGetProductsColumn();
   if (!productsColumn) return;
 
-  const normalizedSlug = slug || '';
+  const normalizedSlug = (slug || '').trim();
   const isFiltered = normalizedSlug !== '';
 
   productsColumn.classList.toggle('lame-collection-products-column--brand-selected', isFiltered);
@@ -29,26 +36,31 @@ function lameApplyBrandFilter(slug) {
     delete productsColumn.dataset.activeBrand;
   }
 
-  productsColumn.querySelectorAll('.lame-collection-brand-section').forEach((section) => {
-    const sectionSlug = section.id.replace(/^brand-/, '');
-    const show = !isFiltered || sectionSlug === normalizedSlug;
-    /** @type {HTMLElement} */ (section).classList.toggle('lame-brand-filter-hidden', !show);
-    /** @type {HTMLElement} */ (section).hidden = !show;
+  const items = productsColumn.querySelectorAll('[data-brand-slug]');
+  let visibleCount = 0;
+
+  items.forEach((item) => {
+    const itemSlug = (item.getAttribute('data-brand-slug') || '').trim();
+    const show = !isFiltered || itemSlug === normalizedSlug;
+    /** @type {HTMLElement} */ (item).classList.toggle(LAME_BRAND_FILTER_HIDDEN, !show);
+    if (show) visibleCount += 1;
   });
 
-  productsColumn.querySelectorAll('[data-brand]').forEach((item) => {
-    const itemSlug = lameBrandSlugFromVendor(item.getAttribute('data-brand'));
-    const show = !isFiltered || itemSlug === normalizedSlug;
-    /** @type {HTMLElement} */ (item).classList.toggle('lame-brand-filter-hidden', !show);
-    /** @type {HTMLElement} */ (item).hidden = !show;
-  });
+  const emptyEl = productsColumn.querySelector('[data-lame-brand-filter-empty]');
+  if (emptyEl instanceof HTMLElement) {
+    emptyEl.hidden = !isFiltered || visibleCount > 0;
+  }
 }
 
 /** @param {HTMLSelectElement} select */
-function lameVendorLabelFromOption(select) {
+function lameSelectedBrandFromDropdown(select) {
   const selected = select.options[select.selectedIndex];
-  if (!selected || !selected.dataset.brandSlug) return '';
-  return selected.textContent?.replace(/\s*\(\d+\)\s*$/, '').trim() || '';
+  if (!selected) return { slug: '', vendorLabel: '' };
+
+  const slug = (selected.dataset.brandSlug || '').trim();
+  const vendorLabel = (selected.dataset.vendorLabel || selected.textContent?.replace(/\s*\(\d+\)\s*$/, '').trim() || '').trim();
+
+  return { slug, vendorLabel };
 }
 
 /** @param {HTMLSelectElement} select */
@@ -63,25 +75,11 @@ function lameBuildBrandFilterUrl(select) {
     }
   }
 
-  const selected = select.options[select.selectedIndex];
-  const filterUrl = selected?.dataset.filterUrl;
+  url.searchParams.delete('page');
 
-  if (filterUrl) {
-    try {
-      const resolved = new URL(filterUrl, window.location.origin);
-      for (const [key, value] of url.searchParams.entries()) {
-        if (key.startsWith('filter.') && key !== 'filter.p.vendor' && !resolved.searchParams.has(key)) {
-          resolved.searchParams.set(key, value);
-        }
-      }
-      return resolved.toString();
-    } catch {
-      // fall through
-    }
-  }
+  const { slug, vendorLabel } = lameSelectedBrandFromDropdown(select);
 
-  const vendorLabel = lameVendorLabelFromOption(select);
-  if (vendorLabel) {
+  if (slug && vendorLabel) {
     url.searchParams.set('filter.p.vendor', vendorLabel);
   } else {
     url.searchParams.delete('filter.p.vendor');
@@ -95,11 +93,13 @@ function lameSyncBrandDropdown(slug) {
   const select = document.querySelector('[data-brand-filter]');
   if (!(select instanceof HTMLSelectElement)) return;
 
-  const option = Array.from(select.options).find((opt) => opt.dataset.brandSlug === slug);
+  const normalizedSlug = (slug || '').trim();
+  const option = Array.from(select.options).find((opt) => (opt.dataset.brandSlug || '').trim() === normalizedSlug);
+
   if (option) {
     select.value = option.value;
-  } else if (!slug) {
-    select.value = '';
+  } else if (!normalizedSlug) {
+    select.selectedIndex = 0;
   }
 }
 
@@ -108,142 +108,134 @@ function lameSyncSidebarBrandCheckboxes(vendorLabel) {
   const panel = document.querySelector('#facet-inputs-filter-p-vendor');
   if (!panel) return;
 
+  const normalizedLabel = (vendorLabel || '').trim();
+
   panel.querySelectorAll('input[name="filter.p.vendor"]').forEach((input) => {
     if (!(input instanceof HTMLInputElement)) return;
     const label = (input.dataset.label || input.value || '').trim();
-    input.checked = Boolean(vendorLabel) && label === vendorLabel;
+    input.checked = Boolean(normalizedLabel) && label === normalizedLabel;
   });
 }
 
 /** @param {HTMLSelectElement} select */
-function lameSyncBrandFilterFromUrl(select) {
+function lameReadBrandSlugFromPage(select) {
   const params = new URLSearchParams(window.location.search);
   const vendorParam = params.get('filter.p.vendor');
 
-  if (!vendorParam) {
-    const hashMatch = window.location.hash.match(/^#brand-(.+)$/);
-    if (hashMatch) {
-      const slug = hashMatch[1];
-      const option = Array.from(select.options).find((opt) => opt.dataset.brandSlug === slug);
-      if (option) {
-        select.value = option.value;
-        return option.dataset.brandSlug || '';
-      }
-    }
-    return '';
+  if (vendorParam) {
+    const vendorDecoded = decodeURIComponent(vendorParam.replace(/\+/g, ' '));
+    const slug = lameBrandSlugFromVendor(vendorDecoded);
+
+    const option = Array.from(select.options).find((opt) => {
+      const optLabel = (opt.dataset.vendorLabel || opt.textContent?.replace(/\s*\(\d+\)\s*$/, '').trim() || '').trim();
+      const optSlug = (opt.dataset.brandSlug || '').trim();
+      return optSlug === slug || optLabel === vendorDecoded;
+    });
+
+    if (option) select.value = option.value;
+    return slug;
   }
 
-  const vendorDecoded = decodeURIComponent(vendorParam.replace(/\+/g, ' '));
-  const slug = lameBrandSlugFromVendor(vendorDecoded);
-  const option = Array.from(select.options).find((opt) => {
-    const optLabel = opt.textContent?.replace(/\s*\(\d+\)\s*$/, '').trim() || '';
-    return opt.dataset.brandSlug === slug || optLabel === vendorDecoded;
-  });
-  if (option) select.value = option.value;
-  return slug;
-}
-
-/** @param {string} url */
-function lamePersistBrandFilterUrl(url) {
-  const facetsForm = document.querySelector(
-    '.collection-template-our-products facets-form-component, .all-products-page facets-form-component'
-  );
-
-  if (facetsForm && typeof facetsForm.updateFiltersByURL === 'function') {
-    facetsForm.updateFiltersByURL(url);
-    return;
+  const productsColumn = lameGetProductsColumn();
+  const columnSlug = productsColumn?.dataset.activeBrand?.trim();
+  if (columnSlug) {
+    lameSyncBrandDropdown(columnSlug);
+    return columnSlug;
   }
 
-  window.location.assign(url);
+  const hashMatch = window.location.hash.match(/^#brand-(.+)$/);
+  if (hashMatch) {
+    const slug = hashMatch[1];
+    lameSyncBrandDropdown(slug);
+    return slug;
+  }
+
+  return '';
 }
 
 /** @param {HTMLSelectElement} select */
-function lameInitBrandFilterSelect(select) {
-  if (select.dataset.brandFilterInit === 'true') return;
-  select.dataset.brandFilterInit = 'true';
+function lameHandleBrandDropdownChange(select) {
+  const { slug, vendorLabel } = lameSelectedBrandFromDropdown(select);
 
-  const applyFromSelect = (persist = true) => {
-    const selected = select.options[select.selectedIndex];
-    const slug = selected?.dataset.brandSlug || '';
-    const vendorLabel = lameVendorLabelFromOption(select);
+  lameApplyBrandFilter(slug);
+  lameSyncSidebarBrandCheckboxes(vendorLabel);
 
-    lameApplyBrandFilter(slug);
-    lameSyncSidebarBrandCheckboxes(vendorLabel);
+  const url = lameBuildBrandFilterUrl(select);
 
-    if (!persist) return;
+  if (select.hasAttribute('data-server-vendor-facet')) {
+    const facetsForm = document.querySelector(
+      '.collection-template-our-products facets-form-component, .all-products-page facets-form-component'
+    );
 
-    const url = lameBuildBrandFilterUrl(select);
-    if (url !== window.location.href) {
-      lamePersistBrandFilterUrl(url);
+    if (facetsForm && typeof facetsForm.updateFiltersByURL === 'function') {
+      facetsForm.updateFiltersByURL(url);
+      return;
     }
-  };
 
-  const initialSlug = lameSyncBrandFilterFromUrl(select);
-  lameApplyBrandFilter(initialSlug);
-  lameSyncSidebarBrandCheckboxes(
-    initialSlug
-      ? lameVendorLabelFromOption(select) ||
-          decodeURIComponent(
-            new URLSearchParams(window.location.search).get('filter.p.vendor')?.replace(/\+/g, ' ') || ''
-          )
-      : ''
-  );
+    window.location.assign(url);
+    return;
+  }
 
-  select.addEventListener('change', () => applyFromSelect(true));
-}
-
-function lameInitSidebarBrandFacet() {
-  const panel = document.querySelector('#facet-inputs-filter-p-vendor');
-  if (!panel || panel.dataset.brandFacetInit === 'true') return;
-  panel.dataset.brandFacetInit = 'true';
-
-  panel.addEventListener('change', (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    if (target.name !== 'filter.p.vendor') return;
-
-    const checked = panel.querySelector('input[name="filter.p.vendor"]:checked');
-    const vendorLabel = checked instanceof HTMLInputElement ? (checked.dataset.label || checked.value || '').trim() : '';
-    const slug = vendorLabel ? lameBrandSlugFromVendor(vendorLabel) : '';
-
-    lameApplyBrandFilter(slug);
-    lameSyncBrandDropdown(slug);
-  });
+  if (url !== window.location.href) {
+    history.replaceState({ lameBrandFilter: slug }, '', url);
+  }
 }
 
 function lameReapplyBrandFilterFromPage() {
   const select = document.querySelector('[data-brand-filter]');
   if (!(select instanceof HTMLSelectElement)) return;
 
-  const slug = lameSyncBrandFilterFromUrl(select);
+  const slug = lameReadBrandSlugFromPage(select);
+  const { vendorLabel } = lameSelectedBrandFromDropdown(select);
+
   lameApplyBrandFilter(slug);
-  lameSyncSidebarBrandCheckboxes(
-    slug
-      ? lameVendorLabelFromOption(select) ||
-          decodeURIComponent(
-            new URLSearchParams(window.location.search).get('filter.p.vendor')?.replace(/\+/g, ' ') || ''
-          )
-      : ''
-  );
+  lameSyncSidebarBrandCheckboxes(vendorLabel);
+}
+
+function lameScheduleBrandFilterReapply() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      lameReapplyBrandFilterFromPage();
+    });
+  });
 }
 
 function lameInitBrandFilters() {
-  document.querySelectorAll('[data-brand-filter]').forEach((element) => {
-    if (element instanceof HTMLSelectElement) lameInitBrandFilterSelect(element);
-  });
-  lameInitSidebarBrandFacet();
   lameReapplyBrandFilterFromPage();
 }
 
-lameInitBrandFilters();
-document.addEventListener('shopify:section:load', () => {
-  document.querySelectorAll('[data-brand-filter]').forEach((element) => {
-    if (element instanceof HTMLSelectElement) {
-      delete element.dataset.brandFilterInit;
-    }
-  });
-  const panel = document.querySelector('#facet-inputs-filter-p-vendor');
-  if (panel) delete panel.dataset.brandFacetInit;
+if (!document.documentElement.dataset.lameBrandFilterBound) {
+  document.documentElement.dataset.lameBrandFilterBound = 'true';
 
-  lameInitBrandFilters();
-});
+  document.addEventListener('change', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    if (!target.matches('[data-brand-filter]')) return;
+    lameHandleBrandDropdownChange(target);
+  });
+
+  document.addEventListener('change', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    if (target.name !== 'filter.p.vendor') return;
+    if (!target.closest('#facet-inputs-filter-p-vendor')) return;
+
+    const panel = target.closest('#facet-inputs-filter-p-vendor');
+    const checked = panel?.querySelector('input[name="filter.p.vendor"]:checked');
+    const vendorLabel =
+      checked instanceof HTMLInputElement ? (checked.dataset.label || checked.value || '').trim() : '';
+    const slug = vendorLabel ? lameBrandSlugFromVendor(vendorLabel) : '';
+
+    lameApplyBrandFilter(slug);
+    lameSyncBrandDropdown(slug);
+  });
+
+  document.addEventListener('filter:update', lameScheduleBrandFilterReapply);
+
+  window.addEventListener('popstate', () => {
+    lameScheduleBrandFilterReapply();
+  });
+}
+
+lameInitBrandFilters();
+document.addEventListener('shopify:section:load', lameScheduleBrandFilterReapply);

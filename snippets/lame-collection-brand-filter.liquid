@@ -92,10 +92,12 @@
         name="brand"
         data-brand-filter
         data-collection-url="{{ collection.url }}"
+        {% if vendor_filter != blank %}data-server-vendor-facet{% endif %}
       >
         <option
           value=""
           data-brand-slug=""
+          data-vendor-label=""
           data-filter-url="{{ collection.url }}"
           {% if active_vendor == blank %}selected{% endif %}
         >
@@ -114,6 +116,7 @@
             <option
               value="{{ value_brand_slug }}"
               data-brand-slug="{{ value_brand_slug }}"
+              data-vendor-label="{{ value.label | escape }}"
               data-filter-url="{{ value.url_to_add }}"
               {% if value.active %}selected{% endif %}
               {% if value.count == 0 %}disabled{% endif %}
@@ -138,6 +141,7 @@
               <option
                 value="{{ brand_slug }}"
                 data-brand-slug="{{ brand_slug }}"
+                data-vendor-label="{{ brand_label | escape }}"
                 data-filter-url="{{ collection.url }}?filter.p.vendor={{ brand_label | url_encode }}"
                 {% if active_vendor == brand_label %}selected{% endif %}
               >
