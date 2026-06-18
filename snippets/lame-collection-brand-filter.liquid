@@ -1,21 +1,28 @@
 {%- doc -%}
-  Brand quick-filter pills for collection pages.
-  Uses Shopify vendor facet when enabled; otherwise normalized vendors from the current page.
+  Brand dropdown filter for collection pages.
+  Uses Shopify vendor facet when enabled; otherwise client-side filtering via JS.
 
   @param {object} collection - Collection object
   @param {object} [products] - Products on the current page (for fallback list)
-  @param {boolean} [grouped_by_brand] - If true, link pills to on-page brand anchors
+  @param {boolean} [grouped_by_brand] - Deprecated; filter URLs always used for selection
 {%- enddoc -%}
 
 {% liquid
   assign vendor_filter = blank
   assign active_vendor = blank
+  assign active_brand_slug = blank
 
   for filter in collection.filters
     if filter.param_name == 'filter.p.vendor'
       assign vendor_filter = filter
       for value in filter.active_values
         assign active_vendor = value.label
+        assign raw_down = active_vendor | downcase
+        if raw_down contains 'lamstone'
+          assign active_brand_slug = 'lamstone-healthcare'
+        else
+          assign active_brand_slug = active_vendor | handleize
+        endif
         break
       endfor
       break
@@ -70,69 +77,81 @@
       endif
     endfor
   endif
+
+  assign use_client_filter = false
+  if vendor_filter == blank and fallback_slugs_pipe != '|'
+    assign use_client_filter = true
+  endif
 %}
 
 {% if vendor_filter != blank or fallback_slugs_pipe != '|' %}
-  <nav class="lame-collection-brand-nav" aria-label="{{ 'lame_collection.shop_by_brand' | t }}">
-    <p class="lame-collection-brand-nav__label">{{ 'lame_collection.shop_by_brand' | t }}</p>
-    <ul class="lame-collection-brand-nav__list" role="list">
-      <li class="lame-collection-brand-nav__item">
-        <a
-          href="{{ collection.url }}"
-          class="lame-collection-brand-nav__pill{% if active_vendor == blank %} lame-collection-brand-nav__pill--active{% endif %}"
+  <div class="lame-collection-brand-nav" aria-label="{{ 'lame_collection.shop_by_brand' | t }}">
+    <label class="lame-collection-brand-nav__label" for="lame-brand-filter-{{ collection.id }}">
+      {{ 'lame_collection.shop_by_brand' | t }}
+    </label>
+    <div class="lame-collection-brand-nav__control">
+      <select
+        id="lame-brand-filter-{{ collection.id }}"
+        class="lame-collection-brand-nav__select"
+        name="brand"
+        data-brand-filter
+        {% if use_client_filter %}data-client-filter{% endif %}
+        data-collection-url="{{ collection.url }}"
+      >
+        <option
+          value=""
+          data-brand-slug=""
+          data-filter-url="{{ collection.url }}"
+          {% if active_vendor == blank %}selected{% endif %}
         >
           {{ 'lame_collection.all_brands' | t }}
-        </a>
-      </li>
+        </option>
 
-      {% if vendor_filter != blank %}
-        {% for value in vendor_filter.values %}
-          {% liquid
-            assign value_brand_slug = value.label | handleize
-            assign value_brand_down = value.label | downcase
-            if value_brand_down contains 'lamstone'
-              assign value_brand_slug = 'lamstone-healthcare'
-            endif
-          %}
-          <li class="lame-collection-brand-nav__item">
-            <a
-              href="{% if grouped_by_brand %}{{ collection.url }}#brand-{{ value_brand_slug }}{% else %}{{ value.url_to_add }}{% endif %}"
-              class="lame-collection-brand-nav__pill{% if value.active %} lame-collection-brand-nav__pill--active{% endif %}"
-              {% if value.count == 0 %}aria-disabled="true"{% endif %}
-            >
-              <span class="lame-collection-brand-nav__name">{{ value.label }}</span>
-              <span class="lame-collection-brand-nav__count">({{ value.count }})</span>
-            </a>
-          </li>
-        {% endfor %}
-      {% else %}
-        {% assign fallback_slugs = fallback_slugs_pipe | split: '|' %}
-        {% for brand_slug in fallback_slugs %}
-          {% if brand_slug != blank %}
+        {% if vendor_filter != blank %}
+          {% for value in vendor_filter.values %}
             {% liquid
-              assign brand_label = brand_slug
-              assign label_chunks = fallback_labels_json | split: '||'
-              for chunk in label_chunks
-                if chunk contains brand_slug
-                  assign brand_label = chunk | split: '::' | last
-                  break
-                endif
-              endfor
+              assign value_brand_slug = value.label | handleize
+              assign value_brand_down = value.label | downcase
+              if value_brand_down contains 'lamstone'
+                assign value_brand_slug = 'lamstone-healthcare'
+              endif
             %}
-            <li class="lame-collection-brand-nav__item">
-              <a
-                href="{% if grouped_by_brand %}{{ collection.url }}#brand-{{ brand_slug }}{% else %}{{ collection.url }}?filter.p.vendor={{ brand_label | url_encode }}{% endif %}"
-                class="lame-collection-brand-nav__pill{% if active_vendor == brand_label %} lame-collection-brand-nav__pill--active{% endif %}"
+            <option
+              value="{{ value_brand_slug }}"
+              data-brand-slug="{{ value_brand_slug }}"
+              data-filter-url="{{ value.url_to_add }}"
+              {% if value.active %}selected{% endif %}
+              {% if value.count == 0 %}disabled{% endif %}
+            >
+              {{ value.label }}{% if value.count > 0 %} ({{ value.count }}){% endif %}
+            </option>
+          {% endfor %}
+        {% else %}
+          {% assign fallback_slugs = fallback_slugs_pipe | split: '|' %}
+          {% for brand_slug in fallback_slugs %}
+            {% if brand_slug != blank %}
+              {% liquid
+                assign brand_label = brand_slug
+                assign label_chunks = fallback_labels_json | split: '||'
+                for chunk in label_chunks
+                  if chunk contains brand_slug
+                    assign brand_label = chunk | split: '::' | last
+                    break
+                  endif
+                endfor
+              %}
+              <option
+                value="{{ brand_slug }}"
+                data-brand-slug="{{ brand_slug }}"
+                data-filter-url="{{ collection.url }}?filter.p.vendor={{ brand_label | url_encode }}"
+                {% if active_vendor == brand_label %}selected{% endif %}
               >
-                <span class="lame-collection-brand-nav__name">{{ brand_label }}</span>
-              </a>
-            </li>
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-    </ul>
-    {% if vendor_filter == blank and fallback_slugs_pipe != '|' %}
-      <p class="lame-collection-brand-nav__hint">{{ 'lame_collection.brand_filter_hint' | t }}</p>
-    {% endif %}
-  </nav>
+                {{ brand_label }}
+              </option>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </select>
+    </div>
+  </div>
 {% endif %}

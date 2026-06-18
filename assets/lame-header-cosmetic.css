@@ -1031,18 +1031,87 @@ html.lame-account-menu-open .lame-account__backdrop {
   display: flex;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer__header,
-#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer__body,
-#header-component.header--cosmetic-luxury .menu-drawer-container.menu-open .menu-drawer__navigation {
+/* Portaled to body so fixed positioning is always viewport-relative when scrolled */
+body > .menu-drawer.menu-drawer--luxury.menu-drawer--portaled {
+  --drawer-padding: 1.375rem;
+  --drawer-width: 100vw;
+  --drawer-max-width: 100%;
+  --menu-drawer-item-gap: 0.875rem;
+  --menu-drawer-cream: 255 251 245;
+  --menu-drawer-cream-deep: 250 244 234;
+  --menu-drawer-ink: 28 24 20;
+  --menu-drawer-muted: 28 24 20;
+  position: fixed;
+  inset: 0;
+  z-index: var(--lame-mobile-menu-z, 100000);
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--menu-drawer-cream)) 0%,
+    rgb(var(--menu-drawer-cream-deep)) 100%
+  ) !important;
+  color: rgb(var(--menu-drawer-ink));
+  border: none;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-100%);
+  transition:
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.28s ease;
+}
+
+body > .menu-drawer.menu-drawer--luxury.menu-drawer--portaled.menu-drawer--open {
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+body > .menu-drawer__backdrop.menu-drawer__backdrop--portaled {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  z-index: calc(var(--lame-mobile-menu-z, 100000) - 1);
+  background: rgb(20 16 12 / 0.42);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body > .menu-drawer__backdrop.menu-drawer__backdrop--portaled.menu-drawer__backdrop--open {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.menu-drawer.menu-drawer--luxury .menu-drawer__header,
+.menu-drawer.menu-drawer--luxury .menu-drawer__body,
+.menu-drawer.menu-drawer--luxury .menu-drawer__navigation {
   position: relative;
   z-index: 1;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {
+.menu-drawer.menu-drawer--luxury {
   --drawer-padding: 1.375rem;
   --drawer-width: 100vw;
   --drawer-max-width: 100%;
-  --menu-drawer-item-gap: 1.125rem;
+  --menu-drawer-item-gap: 0.875rem;
+  --menu-drawer-section-gap: 0;
   --menu-drawer-cream: 255 251 245;
   --menu-drawer-cream-deep: 250 244 234;
   --menu-drawer-ink: 28 24 20;
@@ -1072,7 +1141,7 @@ html.lame-account-menu-open .lame-account__backdrop {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {
+  .menu-drawer.menu-drawer--luxury {
     transition-duration: 0.15s;
   }
 }
@@ -1090,14 +1159,14 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   pointer-events: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__backdrop {
+.menu-drawer.menu-drawer--luxury .menu-drawer__backdrop {
   background: rgb(20 16 12 / 0.42);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__header {
+.menu-drawer.menu-drawer--luxury .menu-drawer__header {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -1110,7 +1179,7 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   background: rgb(var(--menu-drawer-cream) / 0.98);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__header-title {
+.menu-drawer.menu-drawer--luxury .menu-drawer__header-title {
   margin: 0;
   font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
   font-size: 0.7rem;
@@ -1120,7 +1189,7 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   color: rgb(var(--brand-gold-strong));
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__close-button--header {
+.menu-drawer.menu-drawer--luxury .menu-drawer__close-button--header {
   position: relative;
   top: auto;
   left: auto;
@@ -1145,21 +1214,21 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
     transform 0.22s ease;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__close-button--header:hover,
-#header-component.header--cosmetic-luxury .menu-drawer__close-button--header:focus-visible {
+.menu-drawer.menu-drawer--luxury .menu-drawer__close-button--header:hover,
+.menu-drawer.menu-drawer--luxury .menu-drawer__close-button--header:focus-visible {
   background: rgb(var(--brand-gold) / 0.16);
   border-color: rgb(var(--brand-gold) / 0.45);
   opacity: 1;
   transform: scale(1.03);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__close-button--header .header-drawer-icon,
-#header-component.header--cosmetic-luxury .menu-drawer__close-button--header svg {
+.menu-drawer.menu-drawer--luxury .menu-drawer__close-button--header .header-drawer-icon,
+.menu-drawer.menu-drawer--luxury .menu-drawer__close-button--header svg {
   width: 1.0625rem;
   height: 1.0625rem;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__body {
+.menu-drawer.menu-drawer--luxury .menu-drawer__body {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -1167,7 +1236,7 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   overflow: hidden;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__navigation {
+.menu-drawer.menu-drawer--luxury .menu-drawer__navigation {
   --menu-top-level-font-size: 1.0625rem;
   --menu-top-level-font-line-height: 1.45;
   --menu-top-level-font-case: none;
@@ -1182,24 +1251,25 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   scroll-behavior: smooth;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__sections {
+.menu-drawer.menu-drawer--luxury .menu-drawer__sections {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--menu-drawer-section-gap);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__section {
-  padding-block: 0.85rem 0.25rem;
+.menu-drawer.menu-drawer--luxury .menu-drawer__section {
+  padding-block: 1rem;
   padding-inline: var(--drawer-padding);
   border-block-end: 1px solid rgb(var(--brand-gold) / 0.14);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__section:last-of-type {
+.menu-drawer.menu-drawer--luxury .menu-drawer__section:last-of-type {
   border-block-end: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__section-heading {
-  margin: 0 0 0.65rem;
+.menu-drawer.menu-drawer--luxury .menu-drawer__section-heading {
+  margin: 0 0 0.75rem;
+  padding: 0;
   font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -1209,41 +1279,41 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   line-height: 1.3;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu {
   padding-inline: 0;
   margin-block: 0;
   list-style: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu > .menu-drawer__list-item,
-#header-component.header--cosmetic-luxury .menu-drawer__menu > li {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu > .menu-drawer__list-item,
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu > li {
   min-height: unset;
   margin-block-end: var(--menu-drawer-item-gap);
   border-block-end: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu > .menu-drawer__list-item:last-child,
-#header-component.header--cosmetic-luxury .menu-drawer__menu > li:last-child {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu > .menu-drawer__list-item:last-child,
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu > li:last-child {
   margin-block-end: 0;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist,
-#header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-item--mainlist,
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 0.75rem;
   width: 100%;
   min-height: 2.75rem;
-  padding: 0.5rem 0.65rem;
-  margin-inline: -0.65rem;
-  border-radius: 6px;
+  padding: 0.625rem 0;
+  margin: 0;
+  border-radius: 0;
   border-bottom: none;
-  font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: var(--menu-top-level-font-size, 1.0625rem);
-  line-height: var(--menu-top-level-font-line-height, 1.45);
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 1rem;
+  line-height: 1.4;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-transform: none;
   color: rgb(var(--menu-drawer-ink));
   transition:
@@ -1252,27 +1322,27 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
 }
 
 @media (hover: hover) {
-  #header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist:hover,
-  #header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist:hover {
-    background: rgb(var(--brand-gold) / 0.08);
-    color: rgb(var(--menu-drawer-ink));
+  .menu-drawer.menu-drawer--luxury .menu-drawer__menu-item--mainlist:hover,
+  .menu-drawer.menu-drawer--luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist:hover {
+    background: transparent;
+    color: rgb(var(--brand-gold-strong));
     opacity: 1;
   }
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active,
-#header-component.header--cosmetic-luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active,
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu summary.menu-drawer__menu-item--mainlist.menu-drawer__menu-item--active {
   color: rgb(var(--brand-gold-strong));
   font-weight: 600;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu-item-text {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-item-text {
   flex: 1 1 auto;
   text-align: start;
   line-height: inherit;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu .icon-caret--forward {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu .icon-caret--forward {
   flex-shrink: 0;
   margin-inline-start: auto;
   padding: 0;
@@ -1285,83 +1355,85 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   color: rgb(var(--brand-gold-strong));
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu .icon-caret--forward svg {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu .icon-caret--forward svg {
   width: 0.5rem;
   height: 0.5rem;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu-item--child {
-  font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: var(--menu-child-font-size, 0.9375rem);
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-item--child {
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 0.9375rem;
   font-weight: 400;
-  letter-spacing: 0.02em;
-  line-height: var(--menu-child-font-line-height, 1.5);
+  letter-spacing: 0.01em;
+  line-height: 1.45;
   text-transform: none;
-  color: rgb(var(--menu-drawer-muted) / 0.72);
-  padding: 0.4rem 0.65rem 0.4rem 1.35rem;
-  margin-inline: -0.65rem;
+  color: rgb(var(--menu-drawer-muted) / 0.78);
+  padding: 0.5rem 0 0.5rem 0.75rem;
+  margin: 0;
   min-height: 2.5rem;
-  border-radius: 4px;
+  border-radius: 0;
+  border-inline-start: 1px solid rgb(var(--brand-gold) / 0.22);
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 @media (hover: hover) {
-  #header-component.header--cosmetic-luxury .menu-drawer__menu-item--child:hover {
+  .menu-drawer.menu-drawer--luxury .menu-drawer__menu-item--child:hover {
     background: rgb(var(--brand-gold) / 0.06);
     color: rgb(var(--menu-drawer-ink) / 0.88);
   }
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu-item--child.menu-drawer__menu-item--active {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-item--child.menu-drawer__menu-item--active {
   color: rgb(var(--brand-gold-strong));
   font-weight: 600;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__list-item--divider,
-#header-component.header--cosmetic-luxury .menu-drawer__menu-container--divider {
+.menu-drawer.menu-drawer--luxury .menu-drawer__list-item--divider,
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-container--divider {
   border-block-end: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu .icon-plus {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu .icon-plus {
   display: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu--childlist {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu--childlist {
   padding-inline: 0;
   margin-block: 0.15rem 0;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__menu--childlist .menu-drawer__list-item {
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu--childlist .menu-drawer__list-item {
   margin-block-end: 0.35rem;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__social {
+.menu-drawer.menu-drawer--luxury .menu-drawer__social {
   display: none;
 }
 
 /* Newsletter */
-#header-component.header--cosmetic-luxury .menu-drawer__section--newsletter {
+.menu-drawer.menu-drawer--luxury .menu-drawer__section--newsletter {
   flex-shrink: 0;
-  padding-block: 1.15rem 1.25rem;
+  padding-block: 1rem 1.125rem;
+  padding-inline: var(--drawer-padding);
   border-block-start: 1px solid rgb(var(--brand-gold) / 0.14);
   border-block-end: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-text {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-text {
   margin: 0 0 0.85rem;
   font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
   font-size: 0.8125rem;
   line-height: 1.55;
   color: rgb(var(--menu-drawer-ink) / 0.68);
-  max-width: 28ch;
+  max-width: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-form {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-form {
   display: grid;
   gap: 0.5rem;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-row {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-row {
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
@@ -1372,7 +1444,7 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   background: rgb(255 255 255 / 0.55);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-input {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-input {
   flex: 1 1 auto;
   min-width: 0;
   border: none;
@@ -1384,17 +1456,17 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   color: rgb(var(--menu-drawer-ink));
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-input::placeholder {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-input::placeholder {
   color: rgb(var(--menu-drawer-ink) / 0.45);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-input:focus-visible {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-input:focus-visible {
   outline: 2px solid rgb(var(--brand-gold) / 0.55);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-btn {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-btn {
   flex-shrink: 0;
   min-height: 2.5rem;
   padding: 0.5rem 1rem;
@@ -1411,26 +1483,26 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-btn:hover {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-btn:hover {
   opacity: 0.92;
   transform: translateY(-1px);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-message {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-message {
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.45;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-message--error {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-message--error {
   color: #9a3412;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__newsletter-message--success {
+.menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-message--success {
   color: rgb(var(--brand-gold-readable));
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__utility-links {
+.menu-drawer.menu-drawer--luxury .menu-drawer__utility-links {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
@@ -1441,43 +1513,43 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   border-block-start: none;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__utility-links .drawer-localization,
-#header-component.header--cosmetic-luxury .menu-drawer__utility-links .menu-drawer__localization,
-#header-component.header--cosmetic-luxury .menu-drawer__utility-links drawer-localization-component {
+.menu-drawer.menu-drawer--luxury .menu-drawer__utility-links .drawer-localization,
+.menu-drawer.menu-drawer--luxury .menu-drawer__utility-links .menu-drawer__localization,
+.menu-drawer.menu-drawer--luxury .menu-drawer__utility-links drawer-localization-component {
   display: none !important;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__section--account {
-  padding-block: 1rem 1.25rem;
+.menu-drawer.menu-drawer--luxury .menu-drawer__section--account {
+  padding-block: 0.875rem 1.125rem;
   padding-inline: var(--drawer-padding);
   border-block-start: 1px solid rgb(var(--brand-gold) / 0.14);
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__footer-account {
+.menu-drawer.menu-drawer--luxury .menu-drawer__footer-account {
   padding: 0;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__account--luxury {
+.menu-drawer.menu-drawer--luxury .menu-drawer__account--luxury {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
   min-height: 2.75rem;
-  padding: 0.35rem 0.65rem;
-  margin-inline: -0.65rem;
-  border-radius: 6px;
+  padding: 0.35rem 0;
+  margin: 0;
+  border-radius: 0;
   text-decoration: none;
   color: rgb(var(--menu-drawer-ink));
   transition: background 0.2s ease;
 }
 
 @media (hover: hover) {
-  #header-component.header--cosmetic-luxury .menu-drawer__account--luxury:hover {
+  .menu-drawer.menu-drawer--luxury .menu-drawer__account--luxury:hover {
     background: rgb(var(--brand-gold) / 0.08);
     opacity: 1;
   }
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__account-icon {
+.menu-drawer.menu-drawer--luxury .menu-drawer__account-icon {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
@@ -1487,48 +1559,57 @@ body:has(#header-component .menu-drawer-container.menu-open) .lame-wishlist-fab 
   color: rgb(var(--brand-gold-strong));
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__account-icon svg {
+.menu-drawer.menu-drawer--luxury .menu-drawer__account-icon svg {
   width: 100%;
   height: 100%;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer__account-label {
-  font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
-  font-size: 1rem;
+.menu-drawer.menu-drawer--luxury .menu-drawer__account-label {
+  font-family: var(--font-body--family, 'Jost', system-ui, sans-serif);
+  font-size: 0.9375rem;
   font-weight: 500;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.01em;
   text-transform: none;
   line-height: 1.35;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__menu-item > .svg-wrapper {
+/* Profile block — align with drawer grid */
+.menu-drawer.menu-drawer--luxury .lame-drawer-profile,
+body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
+  padding: 0;
+  padding-inline: var(--drawer-padding);
+  padding-block: 0.875rem 0;
+  flex-shrink: 0;
+}
+
+.menu-drawer.menu-drawer--luxury .menu-drawer__menu-item > .svg-wrapper {
   padding: 0;
   width: auto;
   height: auto;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__list-item--flat {
+.menu-drawer.menu-drawer--luxury .menu-drawer__list-item--flat {
   margin-block-end: 0;
 }
 
-#header-component.header--cosmetic-luxury .menu-drawer--luxury .menu-drawer__list-item--flat .menu-drawer__menu--childlist {
+.menu-drawer.menu-drawer--luxury .menu-drawer__list-item--flat .menu-drawer__menu--childlist {
   margin-block-start: 0.25rem;
   padding-inline-start: 0.25rem;
   border-inline-start: 1px solid rgb(var(--brand-gold) / 0.2);
 }
 
 @media screen and (max-width: 380px) {
-  #header-component.header--cosmetic-luxury .menu-drawer.menu-drawer--luxury {
+  .menu-drawer.menu-drawer--luxury {
     --drawer-padding: 1.125rem;
   }
 
-  #header-component.header--cosmetic-luxury .menu-drawer__newsletter-row {
+  .menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-row {
     flex-wrap: wrap;
     border-radius: 12px;
     padding: 0.5rem;
   }
 
-  #header-component.header--cosmetic-luxury .menu-drawer__newsletter-btn {
+  .menu-drawer.menu-drawer--luxury .menu-drawer__newsletter-btn {
     width: 100%;
     justify-content: center;
   }

@@ -14,6 +14,15 @@ import { onAnimationEnd, removeWillChangeOnAnimationEnd } from '@theme/utilities
 class HeaderDrawer extends Component {
   requiredRefs = ['details', 'menuDrawer'];
 
+  /** @type {Comment | null} */
+  #drawerAnchor = null;
+
+  /** @type {Comment | null} */
+  #backdropAnchor = null;
+
+  /** @type {HTMLElement | null} */
+  #backdrop = null;
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -88,10 +97,15 @@ class HeaderDrawer extends Component {
     }
 
     this.preventInitialAccordionAnimations(details);
+    this.#portalDrawer();
 
-    // Wait for the drawer animation to complete before trapping focus
-    const drawer = details.querySelector('.menu-drawer, .menu-drawer__submenu');
-    onAnimationEnd(drawer || details, () => trapFocus(details), { subtree: false });
+    const mainDrawer = this.refs.menuDrawer;
+
+    requestAnimationFrame(() => {
+      mainDrawer.classList.add('menu-drawer--open');
+      this.#getBackdrop()?.classList.add('menu-drawer__backdrop--open');
+      onAnimationEnd(mainDrawer, () => trapFocus(details), { subtree: false });
+    });
   }
 
   /**
@@ -122,17 +136,20 @@ class HeaderDrawer extends Component {
     summary.setAttribute('aria-expanded', 'false');
     summary.removeAttribute('aria-hidden');
     details.classList.remove('menu-open');
-    this.refs.menuDrawer.classList.remove('menu-drawer--has-submenu-opened');
+    this.refs.menuDrawer.classList.remove('menu-drawer--has-submenu-opened', 'menu-drawer--open');
+    this.#getBackdrop()?.classList.remove('menu-drawer__backdrop--open');
 
-    // Wait for the .menu-drawer element's transition, not the entire details subtree
-    // This avoids waiting for child accordion/resource-card animations which can cause issues on Firefox
-    const drawer = details.querySelector('.menu-drawer, .menu-drawer__submenu');
+    const drawer =
+      details === this.refs.details
+        ? this.refs.menuDrawer
+        : details.querySelector('.menu-drawer__submenu');
 
     onAnimationEnd(
       drawer || details,
       () => {
         reset(details);
         if (details === this.refs.details) {
+          this.#unportalDrawer();
           removeTrapFocus();
           const openDetails = this.querySelectorAll('details[open]:not(accordion-custom > details)');
           openDetails.forEach(reset);
@@ -142,6 +159,70 @@ class HeaderDrawer extends Component {
       },
       { subtree: false }
     );
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  #shouldPortalDrawer() {
+    return this.refs.menuDrawer.classList.contains('menu-drawer--luxury');
+  }
+
+  /**
+   * @returns {HTMLElement | null}
+   */
+  #getBackdrop() {
+    if (this.#backdrop) return this.#backdrop;
+    const backdrop = this.refs.details.querySelector('.menu-drawer__backdrop');
+    if (backdrop instanceof HTMLElement) {
+      this.#backdrop = backdrop;
+    }
+    return this.#backdrop;
+  }
+
+  #portalDrawer() {
+    if (!this.#shouldPortalDrawer()) return;
+
+    const drawer = this.refs.menuDrawer;
+    if (drawer.parentElement === document.body) return;
+
+    const parent = drawer.parentElement;
+    if (!parent) return;
+
+    this.#drawerAnchor = document.createComment('menu-drawer-anchor');
+    parent.insertBefore(this.#drawerAnchor, drawer);
+
+    const backdrop = this.#getBackdrop();
+    if (backdrop?.parentElement) {
+      this.#backdropAnchor = document.createComment('menu-drawer-backdrop-anchor');
+      backdrop.parentElement.insertBefore(this.#backdropAnchor, backdrop);
+      backdrop.classList.add('menu-drawer__backdrop--portaled');
+      document.body.appendChild(backdrop);
+    }
+
+    drawer.classList.add('menu-drawer--portaled');
+    document.body.appendChild(drawer);
+  }
+
+  #unportalDrawer() {
+    const drawer = this.refs.menuDrawer;
+    if (!drawer.classList.contains('menu-drawer--portaled')) return;
+
+    if (this.#drawerAnchor?.parentElement) {
+      this.#drawerAnchor.parentElement.insertBefore(drawer, this.#drawerAnchor);
+      this.#drawerAnchor.remove();
+    }
+    this.#drawerAnchor = null;
+
+    const backdrop = this.#getBackdrop();
+    if (backdrop && this.#backdropAnchor?.parentElement) {
+      this.#backdropAnchor.parentElement.insertBefore(backdrop, this.#backdropAnchor);
+      this.#backdropAnchor.remove();
+      backdrop.classList.remove('menu-drawer__backdrop--portaled', 'menu-drawer__backdrop--open');
+    }
+    this.#backdropAnchor = null;
+
+    drawer.classList.remove('menu-drawer--portaled', 'menu-drawer--open');
   }
 
   /**
