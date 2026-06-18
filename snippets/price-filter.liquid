@@ -86,14 +86,17 @@
         on:change="/updatePriceFilterAndResults"
       >
         {% liquid
-          assign slider_max = filter.range_max | money_without_currency
+          assign slider_max_raw = filter.range_max | money_without_currency
+          assign slider_max = slider_max_raw | plus: 99 | divided_by: 100 | times: 100
           assign slider_min_value = 0
           if filter.min_value.value != null
-            assign slider_min_value = filter.min_value.value | money_without_currency
+            assign slider_min_raw = filter.min_value.value | money_without_currency
+            assign slider_min_value = slider_min_raw | plus: 50 | divided_by: 100 | times: 100
           endif
           assign slider_max_value = slider_max
           if filter.max_value.value != null
-            assign slider_max_value = filter.max_value.value | money_without_currency
+            assign slider_max_raw_selected = filter.max_value.value | money_without_currency
+            assign slider_max_value = slider_max_raw_selected | plus: 50 | divided_by: 100 | times: 100
           endif
         %}
         <div class="price-facet__range" ref="rangeSlider">
@@ -111,7 +114,7 @@
               ref="minRange"
               min="0"
               max="{{ slider_max }}"
-              step="any"
+              step="100"
               value="{{ slider_min_value }}"
               aria-label="{{ 'accessibility.price_filter_low' | t }}"
             >
@@ -121,7 +124,7 @@
               ref="maxRange"
               min="0"
               max="{{ slider_max }}"
-              step="any"
+              step="100"
               value="{{ slider_max_value }}"
               aria-label="{{ 'accessibility.price_filter_high' | t }}"
             >
