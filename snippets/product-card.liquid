@@ -155,6 +155,22 @@
       </a>
     {% endif %}
     {{ children }}
+    {% liquid
+      assign lame_render_card_price = false
+      unless onboarding
+        unless children contains 'product-price'
+          assign lame_render_card_price = true
+        endunless
+      endunless
+    %}
+    {% if lame_render_card_price %}
+      <product-price
+        class="lame-product-card__price text-block h6 spacing-style"
+        data-product-id="{{ product.id }}"
+      >
+        {% render 'price', product_resource: product, show_sale_price_first: true %}
+      </product-price>
+    {% endif %}
   </div>
 </product-card>
 

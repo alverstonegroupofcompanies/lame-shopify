@@ -403,6 +403,38 @@ class PriceFacetComponent extends Component {
     this.#updateRangeVisuals();
   }
 
+  /**
+   * @param {number} displayValue
+   * @returns {string}
+   */
+  #formatThumbLabel(displayValue) {
+    const zeroDecimal = new Set([
+      'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+    ]);
+    const minorUnits = zeroDecimal.has(this.currency.toUpperCase())
+      ? Math.round(displayValue)
+      : Math.round(displayValue * 100);
+
+    return formatMoney(minorUnits, this.moneyFormat, this.currency);
+  }
+
+  /**
+   * @param {HTMLElement} label
+   * @param {number} percent
+   */
+  #positionThumbLabel(label, percent) {
+    const clamped = Math.max(0, Math.min(100, percent));
+    label.style.left = `${clamped}%`;
+
+    if (clamped <= 8) {
+      label.style.transform = 'translateX(0)';
+    } else if (clamped >= 92) {
+      label.style.transform = 'translateX(-100%)';
+    } else {
+      label.style.transform = 'translateX(-50%)';
+    }
+  }
+
   #updateRangeVisuals() {
     const { minRange, maxRange, rangeFill, minRangeLabel, maxRangeLabel } = this.refs;
     if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
@@ -419,11 +451,13 @@ class PriceFacetComponent extends Component {
     }
 
     if (minRangeLabel instanceof HTMLElement) {
-      minRangeLabel.textContent = this.#formatDisplayValue(minValue) || this.#formatDisplayValue(0);
+      this.#positionThumbLabel(minRangeLabel, left);
+      minRangeLabel.textContent = minValue > 0 ? this.#formatThumbLabel(minValue) : '';
     }
 
     if (maxRangeLabel instanceof HTMLElement) {
-      maxRangeLabel.textContent = this.#formatDisplayValue(maxValue) || this.#formatDisplayValue(sliderMax);
+      this.#positionThumbLabel(maxRangeLabel, 100 - right);
+      maxRangeLabel.textContent = this.#formatThumbLabel(maxValue);
     }
   }
 

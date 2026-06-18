@@ -1,5 +1,5 @@
 {%- doc -%}
-  Apply / Clear actions for vertical collection filters.
+  Clear-all action for vertical collection filters (instant apply on selection).
 
   @param {string} results_url - URL when filters cleared
   @param {boolean} is_active - Any active filters
@@ -7,14 +7,6 @@
 {%- enddoc -%}
 
 <div class="lame-collection-facet-actions">
-  <button
-    type="submit"
-    class="button lame-collection-facet-actions__apply"
-    form="FacetFiltersForm--{{ section_id }}-desktop"
-  >
-    {{ 'lame_collection.apply_filters' | t }}
-  </button>
-
   <facet-remove-component
     class="lame-collection-facet-actions__clear-wrap"
     data-url="{{ results_url }}"
@@ -28,7 +20,7 @@
       on:keydown="/removeFilter?form=FacetFiltersForm--{{ section_id }}-desktop"
       {% unless is_active %}disabled{% endunless %}
     >
-      {{ 'lame_collection.clear_filters' | t }}
+      {{ 'actions.clear_all' | t }}
     </button>
   </facet-remove-component>
 </div>

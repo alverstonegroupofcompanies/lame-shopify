@@ -97,11 +97,11 @@
           endif
         %}
         <div class="price-facet__range" ref="rangeSlider">
-          <div class="price-facet__range-labels">
-            <span class="price-facet__range-value" ref="minRangeLabel">{{ cart.currency.symbol }}{{ slider_min_value }}</span>
-            <span class="price-facet__range-value" ref="maxRangeLabel">{{ cart.currency.symbol }}{{ slider_max_value }}</span>
-          </div>
           <div class="price-facet__range-track-wrap">
+            <div class="price-facet__range-thumb-labels" aria-hidden="true">
+              <span class="price-facet__range-thumb-label price-facet__range-thumb-label--min" ref="minRangeLabel"></span>
+              <span class="price-facet__range-thumb-label price-facet__range-thumb-label--max" ref="maxRangeLabel"></span>
+            </div>
             <div class="price-facet__range-track" aria-hidden="true">
               <div class="price-facet__range-fill" ref="rangeFill"></div>
             </div>
@@ -126,9 +126,17 @@
               aria-label="{{ 'accessibility.price_filter_high' | t }}"
             >
           </div>
+          <div class="price-facet__range-bounds" aria-hidden="true">
+            <span class="price-facet__range-bound price-facet__range-bound--min" ref="rangeMinBound">
+              {{- 0 | money | strip_html -}}
+            </span>
+            <span class="price-facet__range-bound price-facet__range-bound--max" ref="rangeMaxBound">
+              {{- filter.range_max | money | strip_html -}}
+            </span>
+          </div>
         </div>
 
-        <div class="facets__inputs-wrapper facets__inputs-wrapper--row">
+        <div class="facets__inputs-wrapper facets__inputs-wrapper--row visually-hidden">
           <div
             class="price-facet__inputs-wrapper"
           >
@@ -294,23 +302,43 @@
   .price-facet__range {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    gap: 0.45rem;
     padding: 0.35rem var(--padding-xs) 0.85rem;
-  }
-
-  .price-facet__range-labels {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-foreground);
   }
 
   .price-facet__range-track-wrap {
     position: relative;
     height: 1.5rem;
+    margin-top: 1.65rem;
+  }
+
+  .price-facet__range-thumb-labels {
+    position: absolute;
+    inset: 0;
+    top: -1.65rem;
+    height: 1.25rem;
+    pointer-events: none;
+  }
+
+  .price-facet__range-thumb-label {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-foreground);
+    white-space: nowrap;
+  }
+
+  .price-facet__range-bounds {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: rgb(var(--color-foreground-rgb) / 0.62);
   }
 
   .price-facet__range-track {
