@@ -1,0 +1,17 @@
+{%- doc -%}
+  Outputs a stable brand slug for a product vendor string.
+  Must stay in sync with lame-vendor-brand-filter.js (handleize-style).
+
+  @param {string} vendor
+{%- enddoc -%}
+{%- liquid
+  assign raw_vendor = vendor | default: '' | strip
+  assign raw_down = raw_vendor | downcase
+-%}
+{%- if raw_vendor == blank -%}
+  other
+{%- elsif raw_down contains 'lamstone' -%}
+  lamstone-healthcare
+{%- else -%}
+  {{- raw_vendor | handleize -}}
+{%- endif -%}

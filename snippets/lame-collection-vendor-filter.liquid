@@ -1,7 +1,6 @@
 {%- doc -%}
   Brand / vendor sidebar facet for Our Products collection pages.
-  Lists all vendors in the collection (collection.all_vendors) plus shop vendors,
-  merged with Shopify facet data when available.
+  Vendors are deduplicated by slug so Femisafe / FEMISAFE appear once.
 
   @param {object} collection
   @param {string} section_id
@@ -21,61 +20,85 @@
     endif
   endfor
 
-  assign vendor_labels_pipe = '||'
+  assign vendor_entries = ''
+  assign vendor_slugs_seen = '|'
 
   for vendor_name in collection.all_vendors
     assign raw_vendor = vendor_name | strip
-    if raw_vendor != blank
-      assign label_token = '||' | append: raw_vendor | append: '||'
-      unless vendor_labels_pipe contains label_token
-        assign vendor_labels_pipe = vendor_labels_pipe | append: raw_vendor | append: '||'
-      endunless
+    if raw_vendor == blank
+      continue
     endif
+
+    capture vendor_slug_capture
+      render 'lame-vendor-slug', vendor: raw_vendor
+    endcapture
+    assign vendor_slug = vendor_slug_capture | strip
+    assign slug_token = '|' | append: vendor_slug | append: '|'
+
+    unless vendor_slugs_seen contains slug_token
+      assign vendor_slugs_seen = vendor_slugs_seen | append: vendor_slug | append: '|'
+
+      assign display_label = raw_vendor
+      assign filter_value = raw_vendor
+      assign facet_count = blank
+      assign is_checked = false
+      assign raw_down = raw_vendor | downcase
+
+      if raw_down contains 'lamstone'
+        assign display_label = 'Lamstone Healthcare'
+      endif
+
+      if vendor_filter != blank
+        for value in vendor_filter.values
+          capture value_slug_capture
+            render 'lame-vendor-slug', vendor: value.label
+          endcapture
+          assign value_slug = value_slug_capture | strip
+          assign value_label_down = value.label | downcase
+          assign value_value_down = value.value | downcase
+
+          if value_slug == vendor_slug or value_label_down == raw_down or value_value_down == raw_down
+            assign display_label = value.label
+            assign filter_value = value.value
+            assign facet_count = value.count
+            break
+          endif
+        endfor
+
+        for value in vendor_filter.active_values
+          capture active_slug_capture
+            render 'lame-vendor-slug', vendor: value.label
+          endcapture
+          assign active_slug = active_slug_capture | strip
+          if active_slug == vendor_slug or value.label == raw_vendor or value.value == raw_vendor
+            assign is_checked = true
+            break
+          endif
+        endfor
+      endif
+
+      if facet_count != blank and facet_count > 0
+        assign display_label = display_label | append: ' (' | append: facet_count | append: ')'
+      endif
+
+      if is_checked
+        assign checked_token = 'true'
+      else
+        assign checked_token = 'false'
+      endif
+
+      assign vendor_entries = vendor_entries | append: vendor_slug | append: '~~' | append: display_label | append: '~~' | append: filter_value | append: '~~' | append: checked_token | append: '||'
+    endunless
   endfor
 
-  for vendor_name in shop.vendors
-    assign raw_vendor = vendor_name | strip
-    if raw_vendor != blank
-      assign label_token = '||' | append: raw_vendor | append: '||'
-      unless vendor_labels_pipe contains label_token
-        assign vendor_labels_pipe = vendor_labels_pipe | append: raw_vendor | append: '||'
-      endunless
-    endif
-  endfor
-
-  if vendor_filter != blank
-    for value in vendor_filter.values
-      assign raw_vendor = value.label | strip
-      if raw_vendor != blank
-        assign label_token = '||' | append: raw_vendor | append: '||'
-        unless vendor_labels_pipe contains label_token
-          assign vendor_labels_pipe = vendor_labels_pipe | append: raw_vendor | append: '||'
-        endunless
-      endif
-    endfor
-  endif
-
-  if vendor_labels_pipe == '||'
-    for product in collection.products
-      assign raw_vendor = product.vendor | strip
-      if raw_vendor != blank
-        assign label_token = '||' | append: raw_vendor | append: '||'
-        unless vendor_labels_pipe contains label_token
-          assign vendor_labels_pipe = vendor_labels_pipe | append: raw_vendor | append: '||'
-        endunless
-      endif
-    endfor
-  endif
-
-  assign vendor_labels = vendor_labels_pipe | split: '||' | sort_natural
-
+  assign vendor_entry_list = vendor_entries | split: '||'
   assign active_vendor_count = 0
   if vendor_filter != blank
     assign active_vendor_count = vendor_filter.active_values.size
   endif
 %}
 
-{% if vendor_labels.size > 0 %}
+{% if vendor_entries != blank %}
   <details
     id="Facet-Details-{{ section_id }}-filter-p-vendor-{{ id_prefix }}"
     class="facets__panel"
@@ -117,50 +140,19 @@
             class="facets__inputs-list list-unstyled"
             name="{{ 'lame_collection.filter_brand' | t }}"
           >
-            {% for brand_label in vendor_labels %}
-              {% if brand_label == blank %}
+            {% for entry in vendor_entry_list %}
+              {% if entry == blank %}
                 {% continue %}
               {% endif %}
 
               {% liquid
+                assign entry_parts = entry | split: '~~'
+                assign brand_slug = entry_parts[0]
+                assign display_label = entry_parts[1]
+                assign filter_value = entry_parts[2]
                 assign is_checked = false
-                assign facet_count = blank
-                assign brand_down = brand_label | downcase
-                assign checkbox_name = 'filter.p.vendor'
-                assign checkbox_value = brand_label
-
-                if brand_down contains 'lamstone'
-                  assign display_label = 'Lamstone Healthcare'
-                  assign brand_slug = 'lamstone-healthcare'
-                else
-                  assign display_label = brand_label
-                  assign brand_slug = brand_label | handleize
-                endif
-
-                if vendor_filter != blank
-                  for value in vendor_filter.active_values
-                    assign active_label_down = value.label | downcase
-                    assign active_value_down = value.value | downcase
-                    if value.label == brand_label or value.value == brand_label or active_label_down == brand_down or active_value_down == brand_down
-                      assign is_checked = true
-                      break
-                    endif
-                  endfor
-
-                  for value in vendor_filter.values
-                    assign value_label_down = value.label | downcase
-                    assign value_value_down = value.value | downcase
-                    if value.label == brand_label or value.value == brand_label or value_label_down == brand_down or value_value_down == brand_down
-                      assign facet_count = value.count
-                      assign checkbox_name = value.param_name
-                      assign checkbox_value = value.value
-                      break
-                    endif
-                  endfor
-                endif
-
-                if facet_count != blank and facet_count > 0
-                  assign display_label = display_label | append: ' (' | append: facet_count | append: ')'
+                if entry_parts[3] == 'true'
+                  assign is_checked = true
                 endif
 
                 assign input_id = 'Filter-filter-p-vendor-' | append: forloop.index | append: '-' | append: id_prefix
@@ -174,13 +166,13 @@
                 <div class="checkbox">
                   <input
                     type="checkbox"
-                    name="{{ checkbox_name }}"
-                    value="{{ checkbox_value | escape }}"
+                    name="filter.p.vendor"
+                    value="{{ filter_value | escape }}"
                     id="{{ input_id }}"
                     class="checkbox__input"
                     form="{{ vendor_form_id }}"
                     data-label="{{ display_label | escape }}"
-                    data-brand="{{ brand_label | escape }}"
+                    data-brand="{{ filter_value | escape }}"
                     data-brand-slug="{{ brand_slug }}"
                     {% if is_checked %}
                       checked

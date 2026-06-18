@@ -113,12 +113,10 @@
             if filter.param_name == 'filter.p.vendor'
               for value in filter.active_values
                 assign raw_vendor = value.label | strip
-                assign raw_down = raw_vendor | downcase
-                if raw_down contains 'lamstone'
-                  assign lame_active_brand_slug = 'lamstone-healthcare'
-                else
-                  assign lame_active_brand_slug = raw_vendor | handleize
-                endif
+                capture active_slug_capture
+                  render 'lame-vendor-slug', vendor: raw_vendor
+                endcapture
+                assign lame_active_brand_slug = active_slug_capture | strip
                 break
               endfor
               break
@@ -130,6 +128,9 @@
           data-lame-products-scroll
           {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
         >
+          <p class="lame-brand-filter-empty" data-lame-brand-filter-empty hidden>
+            {{ 'lame_collection.brand_filter_no_results' | t | default: 'No products match the selected brands.' }}
+          </p>
           {% liquid
             assign show_inline_header = false
             if lame_cosmetic_collection and section.settings.our_products_heading != blank
@@ -220,15 +221,13 @@
             assign brand_labels_json = ''
             for product in collection.products
               assign raw_vendor = product.vendor | strip
-              assign raw_down = raw_vendor | downcase
+              capture product_slug_capture
+                render 'lame-vendor-slug', vendor: raw_vendor
+              endcapture
+              assign brand_slug = product_slug_capture | strip
               if raw_vendor == blank
-                assign brand_slug = 'other'
                 assign brand_label = 'Other'
-              elsif raw_down contains 'lamstone'
-                assign brand_slug = 'lamstone-healthcare'
-                assign brand_label = 'Lamstone Healthcare'
               else
-                assign brand_slug = raw_vendor | handleize
                 assign brand_label = raw_vendor
               endif
               assign slug_token = '|' | append: brand_slug | append: '|'
@@ -257,14 +256,10 @@
                 assign brand_product_count = 0
                 for product in collection.products
                   assign raw_vendor = product.vendor | strip
-                  assign raw_down = raw_vendor | downcase
-                  if raw_vendor == blank
-                    assign product_slug = 'other'
-                  elsif raw_down contains 'lamstone'
-                    assign product_slug = 'lamstone-healthcare'
-                  else
-                    assign product_slug = raw_vendor | handleize
-                  endif
+                  capture product_slug_capture
+                    render 'lame-vendor-slug', vendor: raw_vendor
+                  endcapture
+                  assign product_slug = product_slug_capture | strip
                   if product_slug == brand_slug
                     assign brand_product_count = brand_product_count | plus: 1
                   endif
@@ -310,14 +305,10 @@
                     {% for product in collection.products %}
                       {% liquid
                         assign raw_vendor = product.vendor | strip
-                        assign raw_down = raw_vendor | downcase
-                        if raw_vendor == blank
-                          assign product_slug = 'other'
-                        elsif raw_down contains 'lamstone'
-                          assign product_slug = 'lamstone-healthcare'
-                        else
-                          assign product_slug = raw_vendor | handleize
-                        endif
+                        capture product_slug_capture
+                          render 'lame-vendor-slug', vendor: raw_vendor
+                        endcapture
+                        assign product_slug = product_slug_capture | strip
                       %}
                       {% if product_slug == brand_slug %}
                         <li
@@ -325,7 +316,7 @@
                           class="{{ lame_product_grid_item_class }} product-grid__item--{{ item_index }}"
                           data-page="{{ paginate.current_page }}"
                           data-product-id="{{ product.id }}"
-                          data-brand="{{ brand_label | escape }}"
+                          data-brand="{{ raw_vendor | escape }}"
                           data-brand-slug="{{ brand_slug }}"
                           ref="cards[]"
                         >
@@ -356,21 +347,17 @@
             {% for product in collection.products %}
               {% liquid
                 assign raw_vendor = product.vendor | strip
-                assign raw_down = raw_vendor | downcase
-                if raw_vendor == blank
-                  assign product_brand_slug = 'other'
-                elsif raw_down contains 'lamstone'
-                  assign product_brand_slug = 'lamstone-healthcare'
-                else
-                  assign product_brand_slug = raw_vendor | handleize
-                endif
+                capture product_slug_capture
+                  render 'lame-vendor-slug', vendor: raw_vendor
+                endcapture
+                assign product_brand_slug = product_slug_capture | strip
               %}
                 <li
                   id="{{ section.id }}-{{ product.id }}"
                   class="{{ lame_product_grid_item_class }} product-grid__item--{{ flat_grid_index }}"
                   data-page="{{ paginate.current_page }}"
                   data-product-id="{{ product.id }}"
-                  data-brand="{{ product.vendor | escape }}"
+                  data-brand="{{ raw_vendor | escape }}"
                   data-brand-slug="{{ product_brand_slug }}"
                   ref="cards[]"
                 >
