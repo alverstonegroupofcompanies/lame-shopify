@@ -7,6 +7,7 @@ import {
   applyVendorBrandFilter,
   syncVendorCheckboxGroup,
   syncVendorCheckboxesFromUrl,
+  syncVendorParamsToUrlSearchParams,
 } from '@theme/lame-vendor-brand-filter';
 /**
  * Search query parameter.
@@ -19,6 +20,16 @@ let lameVendorFilterHandlersReady = false;
 
 /** @type {ReturnType<typeof debounce<(form: FacetsFormComponent) => void>> | undefined} */
 let debouncedVendorSectionUpdate;
+
+/**
+ * @param {FacetsFormComponent} form
+ */
+async function runVendorSectionUpdate(form) {
+  form.updateFiltersWithoutRender();
+  await sectionRenderer.renderSection(form.sectionId, { cache: false });
+  syncVendorCheckboxesFromUrl();
+  applyVendorBrandFilter();
+}
 
 /**
  * @param {FacetInputsComponent} component
@@ -40,7 +51,7 @@ function scheduleVendorSectionUpdate(input) {
 
   if (!debouncedVendorSectionUpdate) {
     debouncedVendorSectionUpdate = debounce((form) => {
-      form.updateFilters();
+      runVendorSectionUpdate(form);
     }, 250);
   }
 
@@ -82,7 +93,6 @@ function ensureLameVendorFilterHandlers() {
     syncVendorCheckboxesFromUrl(
       event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined
     );
-    applyVendorBrandFilter();
   });
 }
 
@@ -110,6 +120,8 @@ class FacetsFormComponent extends Component {
     if (newParameters.get('filter.v.price.lte') === '') newParameters.delete('filter.v.price.lte');
 
     newParameters.delete('page');
+
+    syncVendorParamsToUrlSearchParams(newParameters);
 
     const searchQuery = this.#getSearchQuery();
     if (searchQuery) newParameters.set(SEARCH_QUERY, searchQuery);

@@ -1,4 +1,5 @@
 import { morph, MORPH_OPTIONS } from '@theme/morph';
+import { onSectionMorphComplete } from '@theme/lame-vendor-brand-filter';
 
 /**
  * A class to re-render sections using the Section Rendering API
@@ -49,6 +50,7 @@ class SectionRenderer {
       this.#abortControllersBySectionId.delete(sectionId);
 
       morphSection(sectionId, sectionHTML, { mode });
+      onSectionMorphComplete();
     }
 
     return sectionHTML;

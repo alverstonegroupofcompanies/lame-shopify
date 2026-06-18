@@ -1,4 +1,4 @@
-import { ThemeEvents } from '@theme/events';
+const VENDOR_FILTER_HIDDEN_CLASS = 'lame-brand-filter--hidden';
 
 /**
  * @param {string} vendor
@@ -25,6 +25,34 @@ export function getVendorFilterInputs() {
   return [
     ...document.querySelectorAll('[data-lame-vendor-filter] input[type="checkbox"][name="filter.p.vendor"]'),
   ].filter((input) => input instanceof HTMLInputElement);
+}
+
+/**
+ * @param {URLSearchParams} params
+ */
+export function syncVendorParamsToUrlSearchParams(params) {
+  params.delete('filter.p.vendor');
+
+  const added = new Set();
+
+  for (const input of getVendorFilterInputs()) {
+    if (!input.checked) continue;
+
+    const value = input.value.trim();
+    if (!value || added.has(value)) continue;
+
+    added.add(value);
+    params.append('filter.p.vendor', value);
+  }
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {boolean} hide
+ */
+function setVendorFilterHidden(element, hide) {
+  element.hidden = hide;
+  element.classList.toggle(VENDOR_FILTER_HIDDEN_CLASS, hide);
 }
 
 /**
@@ -94,22 +122,22 @@ export function applyVendorBrandFilter(productsColumn = document.querySelector('
 
     const slug = section.dataset.brandSlug ?? '';
     const show = !hasSelection || productMatchesVendorFilter(slug, '', selected);
-    section.hidden = !show;
+    setVendorFilterHidden(section, !show);
     if (show) {
       visibleCount += section.querySelectorAll('li[data-brand-slug]').length;
     }
   });
 
-  productsColumn.querySelectorAll('li[data-brand-slug]').forEach((item) => {
+  productsColumn.querySelectorAll('li[data-brand-slug], .lame-category-shop__item[data-brand-slug]').forEach((item) => {
     if (!(item instanceof HTMLElement)) return;
 
     const parentSection = item.closest('.lame-collection-brand-section');
-    if (parentSection instanceof HTMLElement && parentSection.hidden) return;
+    if (parentSection instanceof HTMLElement && parentSection.classList.contains(VENDOR_FILTER_HIDDEN_CLASS)) return;
 
     const slug = item.dataset.brandSlug ?? '';
     const brand = item.dataset.brand ?? '';
     const show = !hasSelection || productMatchesVendorFilter(slug, brand, selected);
-    item.hidden = !show;
+    setVendorFilterHidden(item, !show);
     if (show) visibleCount += 1;
   });
 
@@ -163,4 +191,12 @@ export function syncVendorCheckboxGroup(changedInput) {
       input.checked = changedInput.checked;
     }
   }
+}
+
+/**
+ * Re-sync vendor UI after section morph or pagination.
+ */
+export function onSectionMorphComplete() {
+  syncVendorCheckboxesFromUrl();
+  applyVendorBrandFilter();
 }
