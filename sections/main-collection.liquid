@@ -44,7 +44,11 @@
     endunless
   endif
 
-  assign lame_product_grid_item_class = 'product-grid__item product-grid__item--premium'
+  if lame_cosmetic_collection
+    assign lame_product_grid_item_class = 'lame-category-shop__item'
+  else
+    assign lame_product_grid_item_class = 'product-grid__item product-grid__item--premium'
+  endif
 %}
 
 {% if template.name == 'collection' and lame_category_shop_page == false %}
@@ -58,7 +62,7 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% endif %}{% endif %}"
+  class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid lame-our-products--category-cards{% endif %}{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{% if lame_cosmetic_collection or lame_category_shop_page %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
@@ -298,7 +302,7 @@
                     </header>
                   {% endif %}
                   <ul
-                    class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
+                    class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }}{% if lame_cosmetic_collection %} lame-category-shop__grid{% endif %} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
                     data-testid="product-grid-brand-{{ brand_slug }}"
                     role="list"
                   >
@@ -325,9 +329,18 @@
                           data-brand-slug="{{ brand_slug }}"
                           ref="cards[]"
                         >
-                          {% # theme-check-disable %}
-                          {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
-                          {% # theme-check-enable %}
+                          {% if lame_cosmetic_collection %}
+                            {% render 'lame-category-product-card',
+                              product: product,
+                              section: section,
+                              collection_handle: 'our-products',
+                              show_wishlist: section.settings.show_wishlist
+                            %}
+                          {% else %}
+                            {% # theme-check-disable %}
+                            {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+                            {% # theme-check-enable %}
+                          {% endif %}
                         </li>
                         {% assign item_index = item_index | plus: 1 %}
                       {% endif %}
@@ -361,9 +374,18 @@
                   data-brand-slug="{{ product_brand_slug }}"
                   ref="cards[]"
                 >
-                  {% # theme-check-disable %}
-                  {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
-                  {% # theme-check-enable %}
+                  {% if lame_cosmetic_collection %}
+                    {% render 'lame-category-product-card',
+                      product: product,
+                      section: section,
+                      collection_handle: 'our-products',
+                      show_wishlist: section.settings.show_wishlist
+                    %}
+                  {% else %}
+                    {% # theme-check-disable %}
+                    {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+                    {% # theme-check-enable %}
+                  {% endif %}
                 </li>
                 {% assign flat_grid_index = flat_grid_index | plus: 1 %}
             {% endfor %}
@@ -378,7 +400,7 @@
             enable_infinite_scroll: use_infinite_scroll,
             grouped_by_brand: group_by_brand,
             lame_paginated_collection: lame_cosmetic_collection,
-            category_shop_grid: lame_category_shop_page
+            category_shop_grid: lame_category_shop_page or lame_cosmetic_collection
           %}
         </div>
       {% endpaginate %}

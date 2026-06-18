@@ -418,6 +418,7 @@ class PriceFacetComponent extends Component {
     if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
     if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) return;
 
+    const sliderMax = this.#getSliderMax();
     let minValue = this.#snapToStep(parseFloat(minRange.value), sliderMax);
     let maxValue = this.#snapToStep(parseFloat(maxRange.value), sliderMax);
 
@@ -538,22 +539,23 @@ class PriceFacetComponent extends Component {
   #adjustToValidValues(input) {
     if (input.value.trim() === '') return;
 
-    const { currency, moneyFormat } = this;
+    const { currency } = this;
     const sliderMax = this.#getSnappedSliderMax();
     const parsedMajor = this.#parseSliderNumber(input.value) ?? 0;
     const snappedMajor = this.#snapToStep(parsedMajor, sliderMax);
-    const value = this.#parseDisplayValue(String(snappedMajor), currency);
 
-    // data-min and data-max now contain raw minor unit values (not formatted)
+    if (snappedMajor > 0) {
+      input.value = this.#formatDisplayValue(snappedMajor);
+    }
+
+    const value = this.#parseDisplayValue(input.value, currency);
     const min = this.#parseDisplayValue(input.getAttribute('data-min') ?? '0', currency);
     const max = this.#parseDisplayValue(input.getAttribute('data-max') ?? '0', currency);
 
     if (value < min) {
-      input.value = formatMoney(min, moneyFormat, currency);
+      input.value = this.#formatWholeMoney(this.#snapToStep(this.#parseSliderNumber(input.getAttribute('data-min') ?? '0') ?? 0, sliderMax));
     } else if (value > max) {
-      input.value = formatMoney(max, moneyFormat, currency);
-    } else if (snappedMajor > 0) {
-      input.value = this.#formatDisplayValue(snappedMajor);
+      input.value = this.#formatWholeMoney(this.#snapToStep(this.#parseSliderNumber(input.getAttribute('data-max') ?? '0') ?? sliderMax, sliderMax));
     }
   }
 
