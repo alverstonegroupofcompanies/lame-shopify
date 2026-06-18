@@ -85,6 +85,21 @@ export function getSelectedVendorFilters() {
 }
 
 /**
+ * @param {string} a
+ * @param {string} b
+ * @returns {boolean}
+ */
+function slugFamilyMatch(a, b) {
+  const left = a.trim().toLowerCase();
+  const right = b.trim().toLowerCase();
+  if (!left || !right) return false;
+  if (left === right) return true;
+  if (right.startsWith(`${left}-`)) return true;
+  if (left.startsWith(`${right}-`)) return true;
+  return false;
+}
+
+/**
  * @param {string} slug
  * @param {string} brandName
  * @param {{ slugs: Set<string>, names: Set<string> }} selected
@@ -93,15 +108,24 @@ export function getSelectedVendorFilters() {
 export function productMatchesVendorFilter(slug, brandName, selected) {
   const slugDown = slug.trim().toLowerCase();
   const brandDown = brandName.trim().toLowerCase();
+  const brandSlug = brandDown ? vendorToSlug(brandDown) : '';
 
   if (selected.slugs.size === 0 && selected.names.size === 0) return true;
-  if (slugDown && selected.slugs.has(slugDown)) return true;
+
+  for (const selectedSlug of selected.slugs) {
+    if (slugDown && slugFamilyMatch(selectedSlug, slugDown)) return true;
+    if (brandSlug && slugFamilyMatch(selectedSlug, brandSlug)) return true;
+  }
+
   if (brandDown && selected.names.has(brandDown)) return true;
-  if (brandDown && selected.slugs.has(vendorToSlug(brandDown))) return true;
+  if (brandDown && selected.slugs.has(brandSlug)) return true;
 
   for (const name of selected.names) {
-    if (vendorToSlug(name) === slugDown) return true;
+    const nameSlug = vendorToSlug(name);
     if (name === brandDown) return true;
+    if (nameSlug && slugDown && slugFamilyMatch(nameSlug, slugDown)) return true;
+    if (nameSlug && brandSlug && slugFamilyMatch(nameSlug, brandSlug)) return true;
+    if (brandDown && (brandDown.includes(name) || name.includes(brandDown))) return true;
   }
 
   return false;
@@ -175,8 +199,8 @@ export function syncVendorCheckboxesFromUrl(queryParams) {
     input.checked =
       selectedNames.has(valueDown) ||
       selectedNames.has(brandDown) ||
-      selectedSlugs.has(slug) ||
-      [...selectedNames].some((name) => vendorToSlug(name) === slug);
+      [...selectedSlugs].some((s) => slugFamilyMatch(s, slug)) ||
+      [...selectedNames].some((name) => slugFamilyMatch(vendorToSlug(name), slug));
   }
 }
 

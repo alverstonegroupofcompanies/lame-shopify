@@ -1,6 +1,7 @@
 {%- doc -%}
   Brand / vendor sidebar facet for Our Products collection pages.
-  Vendors are deduplicated by slug so Femisafe / FEMISAFE appear once.
+  Uses Search & Discovery facet values first (exact filter.p.vendor strings),
+  then merges any collection vendors missing from the facet list.
 
   @param {object} collection
   @param {string} section_id
@@ -22,8 +23,69 @@
 
   assign vendor_entries = ''
   assign vendor_slugs_seen = '|'
+  assign known_vendor_by_slug = '|'
 
-  for vendor_name in collection.all_vendors
+  for product in collection.products limit: 250
+    assign product_vendor = product.vendor | strip
+    if product_vendor == blank
+      continue
+    endif
+
+    capture product_slug_capture
+      render 'lame-vendor-slug', vendor: product_vendor
+    endcapture
+    assign product_slug = product_slug_capture | strip
+    assign product_slug_token = '|' | append: product_slug | append: '::'
+
+    unless known_vendor_by_slug contains product_slug_token
+      assign known_vendor_by_slug = known_vendor_by_slug | append: product_slug | append: '::' | append: product_vendor | append: '|'
+    endunless
+  endfor
+%}
+
+{% if vendor_filter != blank %}
+  {% for value in vendor_filter.values %}
+    {% liquid
+      assign raw_label = value.label | strip
+      if raw_label == blank
+        continue
+      endif
+
+      capture vendor_slug_capture
+        render 'lame-vendor-slug', vendor: raw_label
+      endcapture
+      assign vendor_slug = vendor_slug_capture | strip
+      assign slug_token = '|' | append: vendor_slug | append: '|'
+
+      unless vendor_slugs_seen contains slug_token
+        assign vendor_slugs_seen = vendor_slugs_seen | append: vendor_slug | append: '|'
+
+        assign display_label = raw_label
+        assign filter_value = value.value
+        assign raw_down = raw_label | downcase
+
+        if raw_down contains 'lamstone'
+          assign display_label = 'Lamstone Healthcare'
+        endif
+
+        if value.count > 0
+          assign display_label = display_label | append: ' (' | append: value.count | append: ')'
+        endif
+
+        if value.active
+          assign checked_token = 'true'
+        else
+          assign checked_token = 'false'
+        endif
+
+        assign vendor_entries = vendor_entries | append: vendor_slug | append: '~~' | append: display_label | append: '~~' | append: filter_value | append: '~~' | append: checked_token | append: '||'
+      endunless
+    %}
+  {% endfor %}
+{% endif %}
+
+{% for vendor_name in collection.all_vendors %}
+  {% liquid
     assign raw_vendor = vendor_name | strip
     if raw_vendor == blank
       continue
@@ -54,24 +116,55 @@
             render 'lame-vendor-slug', vendor: value.label
           endcapture
           assign value_slug = value_slug_capture | strip
-          assign value_label_down = value.label | downcase
-          assign value_value_down = value.value | downcase
 
-          if value_slug == vendor_slug or value_label_down == raw_down or value_value_down == raw_down
+          capture value_value_slug_capture
+            render 'lame-vendor-slug', vendor: value.value
+          endcapture
+          assign value_value_slug = value_value_slug_capture | strip
+
+          assign value_label_down = value.label | downcase | strip
+          assign value_value_down = value.value | downcase | strip
+
+          if value_slug == vendor_slug or value_value_slug == vendor_slug or value_label_down == raw_down or value_value_down == raw_down
             assign display_label = value.label
             assign filter_value = value.value
             assign facet_count = value.count
+            if value.active
+              assign is_checked = true
+            endif
             break
           endif
         endfor
 
-        for value in vendor_filter.active_values
-          capture active_slug_capture
-            render 'lame-vendor-slug', vendor: value.label
-          endcapture
-          assign active_slug = active_slug_capture | strip
-          if active_slug == vendor_slug or value.label == raw_vendor or value.value == raw_vendor
-            assign is_checked = true
+        unless is_checked
+          for value in vendor_filter.active_values
+            capture active_slug_capture
+              render 'lame-vendor-slug', vendor: value.label
+            endcapture
+            assign active_slug = active_slug_capture | strip
+            if active_slug == vendor_slug or value.label == raw_vendor or value.value == raw_vendor
+              assign is_checked = true
+              assign filter_value = value.value
+              break
+            endif
+          endfor
+        endunless
+      endif
+
+      assign product_slug_lookup = '|' | append: vendor_slug | append: '::'
+      if known_vendor_by_slug contains product_slug_lookup
+        assign known_chunks = known_vendor_by_slug | split: '|'
+        for known_chunk in known_chunks
+          if known_chunk == blank
+            continue
+          endif
+          assign known_parts = known_chunk | split: '::'
+          if known_parts[0] == vendor_slug and known_parts[1] != blank
+            if vendor_filter == blank
+              assign filter_value = known_parts[1]
+            elsif filter_value == raw_vendor
+              assign filter_value = known_parts[1]
+            endif
             break
           endif
         endfor
@@ -89,8 +182,10 @@
 
       assign vendor_entries = vendor_entries | append: vendor_slug | append: '~~' | append: display_label | append: '~~' | append: filter_value | append: '~~' | append: checked_token | append: '||'
     endunless
-  endfor
+  %}
+{% endfor %}
 
+{% liquid
   assign vendor_entry_list = vendor_entries | split: '||'
   assign active_vendor_count = 0
   if vendor_filter != blank
