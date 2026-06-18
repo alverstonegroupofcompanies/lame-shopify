@@ -1,0 +1,48 @@
+{%- doc -%}
+  Footer info links for luxury mobile drawer (no chevrons).
+{%- enddoc -%}
+
+{%- liquid
+  assign has_info_links = false
+  if pages.about != blank or pages.contact != blank or pages.faq != blank
+    assign has_info_links = true
+  endif
+-%}
+
+{%- if has_info_links -%}
+  <ul class="menu-drawer__menu lame-drawer-nav__menu lame-drawer-nav__menu--info list-unstyled" role="list">
+    {%- if pages.about != blank -%}
+      <li class="menu-drawer__list-item lame-drawer-nav__item">
+        <a
+          href="{{ pages.about.url }}"
+          class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row lame-drawer-nav__row--plain focus-inset{% if pages.about.handle == page.handle %} menu-drawer__menu-item--active{% endif %}"
+        >
+          {% render 'lame-drawer-nav-icon', handle: 'about' %}
+          <span class="menu-drawer__menu-item-text">{{ pages.about.title | escape }}</span>
+        </a>
+      </li>
+    {%- endif -%}
+    {%- if pages.contact != blank -%}
+      <li class="menu-drawer__list-item lame-drawer-nav__item">
+        <a
+          href="{{ pages.contact.url }}"
+          class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row lame-drawer-nav__row--plain focus-inset{% if pages.contact.handle == page.handle %} menu-drawer__menu-item--active{% endif %}"
+        >
+          {% render 'lame-drawer-nav-icon', handle: 'contact' %}
+          <span class="menu-drawer__menu-item-text">{{ pages.contact.title | escape }}</span>
+        </a>
+      </li>
+    {%- endif -%}
+    {%- if pages.faq != blank -%}
+      <li class="menu-drawer__list-item lame-drawer-nav__item">
+        <a
+          href="{{ pages.faq.url }}"
+          class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row lame-drawer-nav__row--plain focus-inset{% if pages.faq.handle == page.handle %} menu-drawer__menu-item--active{% endif %}"
+        >
+          {% render 'lame-drawer-nav-icon', handle: 'faq' %}
+          <span class="menu-drawer__menu-item-text">{{ pages.faq.title | escape }}</span>
+        </a>
+      </li>
+    {%- endif -%}
+  </ul>
+{%- endif -%}

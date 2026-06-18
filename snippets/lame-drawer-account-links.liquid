@@ -1,0 +1,65 @@
+{%- doc -%}
+  Account rows for luxury mobile drawer.
+  @param {object} section - Header section
+{%- enddoc -%}
+
+{%- capture account_url -%}{%- render 'lame-customer-profile-url', section: section -%}{%- endcapture -%}
+{%- capture orders_url -%}{%- render 'lame-customer-orders-url', section: section -%}{%- endcapture -%}
+
+<ul class="menu-drawer__menu lame-drawer-nav__menu list-unstyled" role="list">
+  <li class="menu-drawer__list-item lame-drawer-nav__item">
+    <a href="{{ account_url }}" class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset">
+      {% render 'lame-drawer-nav-icon', handle: 'account' %}
+      <span class="menu-drawer__menu-item-text">{{ 'content.account_title' | t }}</span>
+      <span class="lame-drawer-nav__trail">
+        <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </span>
+    </a>
+  </li>
+  <li class="menu-drawer__list-item lame-drawer-nav__item">
+    <a href="{{ orders_url }}" class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset">
+      {% render 'lame-drawer-nav-icon', handle: 'orders' %}
+      <span class="menu-drawer__menu-item-text">{{ 'content.account_orders' | t }}</span>
+      <span class="lame-drawer-nav__trail">
+        <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </span>
+    </a>
+  </li>
+  {%- if settings.lame_enable_wishlist -%}
+    <li class="menu-drawer__list-item lame-drawer-nav__item">
+      <button
+        type="button"
+        class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset button-unstyled"
+        data-lame-wishlist-open
+      >
+        {% render 'lame-drawer-nav-icon', handle: 'wishlist' %}
+        <span class="menu-drawer__menu-item-text">{{ 'lame_wishlist.title' | t }}</span>
+        <span class="lame-drawer-nav__trail">
+          <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </span>
+        </span>
+      </button>
+    </li>
+  {%- endif -%}
+  <li class="menu-drawer__list-item lame-drawer-nav__item">
+    <a href="{{ routes.cart_url }}" class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset">
+      {% render 'lame-drawer-nav-icon', handle: 'cart' %}
+      <span class="menu-drawer__menu-item-text">{{ 'content.cart_title' | t }}</span>
+      <span class="lame-drawer-nav__trail">
+        {%- if cart.item_count > 0 -%}
+          <span class="lame-drawer-nav__badge" aria-label="{{ 'content.cart_count' | t: count: cart.item_count }}">
+            {%- if cart.item_count > 99 -%}99+{%- else -%}{{ cart.item_count }}{%- endif -%}
+          </span>
+        {%- endif -%}
+        <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </span>
+    </a>
+  </li>
+</ul>

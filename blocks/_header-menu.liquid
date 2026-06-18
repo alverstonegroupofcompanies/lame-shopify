@@ -97,6 +97,12 @@
           if menu_link_title_down == 'our products'
             assign menu_link_title = 'Shop'
           endif
+          assign use_shop_mega_menu = false
+          if menu_link_title_down == 'shop' or menu_link_title_down == 'our products'
+            if link.links != blank
+              assign use_shop_mega_menu = true
+            endif
+          endif
         %}
         <li
           role="presentation"
@@ -130,6 +136,13 @@
                 style="{% render 'submenu-font-styles', settings: block_settings %}"
               >
                 {% assign list_id = 'MegaMenuList-' | append: forloop.index %}
+                {% if use_shop_mega_menu %}
+                  {% render 'lame-shop-mega-menu',
+                    parent_link: link,
+                    section: section,
+                    block_settings: block_settings
+                  %}
+                {% else %}
                 <div class="mega-menu section section--full-width-margin section--{{ section.settings.section_width }}">
                   <div
                     class="mega-menu__grid"
@@ -148,6 +161,7 @@
                     %}
                   </div>
                 </div>
+                {% endif %}
               </div>
             </div>
           {%- endif -%}

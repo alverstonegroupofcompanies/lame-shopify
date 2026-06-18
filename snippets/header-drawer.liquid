@@ -72,6 +72,7 @@
 ></script>
 
 <header-drawer
+  id="HeaderMenuDrawer"
   class="header-drawer {{ class }}"
   style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px;"
 >
@@ -101,25 +102,41 @@
       "
     >
       {% if drawer_luxury_layout %}
-        <div class="menu-drawer__header">
-          <p class="menu-drawer__header-title">{{ shop.name | escape }}</p>
+        <div class="menu-drawer__header menu-drawer__header--luxury-nav">
           <button
             class="button close-button menu-drawer__close-button menu-drawer__close-button--header"
             type="button"
             aria-label="{{ 'actions.close' | t }}"
-            on:click="/close"
+            on:click="#HeaderMenuDrawer/close"
           >
             <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
               {{- 'icon-close.svg' | inline_asset_content -}}
             </span>
           </button>
+          <a href="{{ routes.root_url }}" class="menu-drawer__header-logo focus-inset">
+            {%- if settings.logo != blank -%}
+              {{
+                settings.logo
+                | image_url: width: 280
+                | image_tag:
+                  class: 'menu-drawer__header-logo-image',
+                  widths: '140, 200, 280',
+                  sizes: '140px',
+                  alt: shop.name,
+                  loading: 'eager'
+              }}
+            {%- else -%}
+              <span class="menu-drawer__header-title">{{ shop.name | escape }}</span>
+            {%- endif -%}
+          </a>
+          <span class="menu-drawer__header-spacer" aria-hidden="true"></span>
         </div>
       {% else %}
         <button
           class="button close-button menu-drawer__close-button"
           type="button"
           aria-label="{{ 'actions.close' | t }}"
-          on:click="/close"
+          on:click="#HeaderMenuDrawer/close"
         >
           <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
             {{- 'icon-close.svg' | inline_asset_content -}}
@@ -127,9 +144,6 @@
         </button>
       {% endif %}
       <div class="menu-drawer__body">
-      {%- if drawer_luxury_layout and shop.customer_accounts_enabled -%}
-        {% render 'lame-drawer-profile', section: section %}
-      {%- endif -%}
       <nav
         class="menu-drawer__navigation"
         style="
@@ -138,37 +152,25 @@
         "
         aria-label="{{ 'accessibility.header_navigation_label' | t }}"
       >
-        {% if linklist.levels < 3 %}
-          {% if drawer_luxury_layout %}
-            <div class="menu-drawer__sections">
-              {% if drawer_has_category_links %}
-                <div class="menu-drawer__section menu-drawer__section--categories">
-                  <h2 class="menu-drawer__section-heading">{{ drawer_categories_title | escape }}</h2>
-                  <ul class="menu-drawer__menu has-submenu" role="list">
-                    {% render 'menu-drawer-links-flat',
-                      linklist: linklist,
-                      block_settings: block_settings,
-                      drawer_simple_menu: drawer_simple_menu,
-                      link_filter: 'with_children'
-                    %}
-                  </ul>
+        {% if drawer_luxury_layout %}
+            <div class="menu-drawer__sections lame-drawer-nav">
+              <div class="menu-drawer__section menu-drawer__section--primary">
+                <ul class="menu-drawer__menu lame-drawer-nav__menu has-submenu list-unstyled" role="list">
+                  {% render 'lame-drawer-menu-links', linklist: linklist, block_settings: block_settings %}
+                </ul>
+              </div>
+
+              {%- if shop.customer_accounts_enabled -%}
+                <div class="menu-drawer__section menu-drawer__section--account">
+                  {% render 'lame-drawer-account-links', section: section %}
                 </div>
-              {% endif %}
-              {% if drawer_has_nav_links %}
-                <div class="menu-drawer__section menu-drawer__section--nav">
-                  <h2 class="menu-drawer__section-heading">{{ drawer_nav_title | escape }}</h2>
-                  <ul class="menu-drawer__menu has-submenu" role="list">
-                    {% render 'menu-drawer-links-flat',
-                      linklist: linklist,
-                      block_settings: block_settings,
-                      drawer_simple_menu: drawer_simple_menu,
-                      link_filter: 'without_children'
-                    %}
-                  </ul>
-                </div>
-              {% endif %}
+              {%- endif -%}
+
+              <div class="menu-drawer__section menu-drawer__section--info">
+                {% render 'lame-drawer-info-links' %}
+              </div>
             </div>
-          {% else %}
+        {% elsif linklist.levels < 3 %}
             <ul class="menu-drawer__menu has-submenu" role="list">
               {% render 'menu-drawer-links-flat',
                 linklist: linklist,
@@ -177,7 +179,6 @@
                 link_filter: 'all'
               %}
             </ul>
-          {% endif %}
         {% else %}
           <ul
             class="menu-drawer__menu has-submenu"
@@ -211,7 +212,7 @@
                     <summary
                       id="HeaderDrawer-{{ link.handle }}"
                       class="menu-drawer__menu-item menu-drawer__menu-item--mainlist menu-drawer__animated-element focus-inset{% if link.child_active %} menu-drawer__menu-item--active{% endif %}"
-                      on:click="header-drawer/open/submenu"
+                      on:click="#HeaderMenuDrawer/open/submenu"
                     >
                       <span class="menu-drawer__menu-item-text wrap-text">{{ menu_link_title | escape }}</span>
                       <span class="svg-wrapper icon-caret icon-caret--forward">
@@ -228,7 +229,7 @@
                         <div class="menu-drawer__nav-buttons">
                           <button
                             class="button menu-drawer__back-button focus-inset"
-                            on:click="header-drawer/back"
+                            on:click="#HeaderMenuDrawer/back"
                             aria-label="{{ 'actions.back_to' | t: title: menu_link_title }}"
                           >
                             <span class="svg-wrapper icon-caret icon-caret--backward">
@@ -240,7 +241,7 @@
                             class="button button-unstyled close-button menu-drawer__close-button"
                             type="button"
                             aria-label="{{ 'actions.close' | t }}"
-                            on:click="header-drawer/close"
+                            on:click="#HeaderMenuDrawer/close"
                           >
                             <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
                               {{- 'icon-close.svg' | inline_asset_content -}}
@@ -515,12 +516,12 @@
         {% endif %}
       </nav>
 
-      {% if drawer_luxury_layout %}
+      {% if drawer_luxury_layout == false %}
         {% render 'menu-drawer-newsletter', block: block %}
       {% endif %}
 
       <div
-        class="menu-drawer__utility-links menu-drawer__animated-element"
+        class="menu-drawer__utility-links menu-drawer__animated-element{% if drawer_luxury_layout %} menu-drawer__utility-links--hidden{% endif %}"
         style="--menu-drawer-animation-index: {{ linklist.links.size }};"
       >
         {% liquid
@@ -568,7 +569,7 @@
                   id="HeaderDrawer-localization"
                   class="drawer-localization__button h3 link focus-inset"
                   aria-expanded="false"
-                  on:click="header-drawer/open/submenu"
+                  on:click="#HeaderMenuDrawer/open/submenu"
                   style="{{ form_style }}"
                 >
                   <div class="drawer-localization__button--label h6">
@@ -617,7 +618,7 @@
                   >
                     <button
                       class="button menu-drawer__back-button link focus-inset"
-                      on:click="header-drawer/back"
+                      on:click="#HeaderMenuDrawer/back"
                     >
                       <span class="svg-wrapper icon-caret icon-caret--backward">
                         {{- 'icon-caret.svg' | inline_asset_content -}}
@@ -628,7 +629,7 @@
                       class="button close-button menu-drawer__close-button"
                       type="button"
                       aria-label="{{ 'actions.close' | t }}"
-                      on:click="header-drawer/close"
+                      on:click="#HeaderMenuDrawer/close"
                     >
                       <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
                         {{- 'icon-close.svg' | inline_asset_content -}}
@@ -649,7 +650,7 @@
           {% endif %}
         {%- endif -%}
 
-        {%- if shop.customer_accounts_enabled and data_header_drawer_type == 'mobile-drawer' -%}
+        {%- if shop.customer_accounts_enabled and data_header_drawer_type == 'mobile-drawer' and drawer_luxury_layout == false -%}
           <div class="menu-drawer__section menu-drawer__section--account{% if drawer_luxury_layout %} menu-drawer__section--account--compact{% endif %}">
             {% unless drawer_luxury_layout %}
               <h2 class="menu-drawer__section-heading">{{ drawer_account_title | escape }}</h2>
@@ -690,7 +691,7 @@
       </div>
       </div>
 
-      {% if data_header_drawer_type == 'mobile-drawer' %}
+      {% if data_header_drawer_type == 'mobile-drawer' and drawer_luxury_layout == false %}
         {% render 'menu-drawer-social-icons', block: block, linklist: linklist %}
       {% endif %}
 
@@ -752,7 +753,7 @@
     </div>
     <div
       class="menu-drawer__backdrop"
-      on:click="header-drawer/close"
+      on:click="#HeaderMenuDrawer/close"
     ></div>
   </details>
 </header-drawer>

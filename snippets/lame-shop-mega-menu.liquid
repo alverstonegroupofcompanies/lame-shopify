@@ -1,0 +1,128 @@
+{%- doc -%}
+  Three-column mega menu for the Shop nav item only.
+  Menu structure (nested):
+    Shop → Column group 1 → links (categories with icons)
+    Shop → Column group 2 → links (text links)
+  Flat menu: all Shop children render in column 1 as categories.
+
+  @param {object} parent_link - Shop link from main menu
+  @param {object} section - Header section
+  @param {object} [block_settings] - Header menu block settings
+{%- enddoc -%}
+
+{%- liquid
+  assign column_one = blank
+  assign column_two = blank
+  assign flat_category_links = blank
+
+  for link in parent_link.links
+    if link.links != blank
+      if column_one == blank
+        assign column_one = link
+      elsif column_two == blank
+        assign column_two = link
+      endif
+    endif
+  endfor
+
+  if column_one == blank
+    assign flat_category_links = parent_link.links
+  endif
+
+  assign featured_collection = collections.all
+  for link in parent_link.links
+    if link.type == 'collection_link' and link.object != blank
+      assign featured_collection = link.object
+      break
+    endif
+  endfor
+
+  assign max_products = 3
+  assign view_all_label = 'View all ' | append: parent_link.title
+-%}
+
+<div class="mega-menu section section--full-width-margin section--{{ section.settings.section_width }} lame-shop-mega">
+  <div class="lame-shop-mega__grid">
+    <div class="lame-shop-mega__col lame-shop-mega__col--categories">
+      <p class="lame-shop-mega__heading">
+        {%- if column_one != blank -%}
+          {{- column_one.title | escape -}}
+        {%- else -%}
+          Categories
+        {%- endif -%}
+      </p>
+      <ul class="lame-shop-mega__list list-unstyled" role="list">
+        {%- if column_one != blank -%}
+          {%- for link in column_one.links -%}
+            <li>
+              <a href="{{ link.url }}" class="lame-shop-mega__link">
+                {% render 'lame-shop-mega-menu-icon', handle: link.handle %}
+                <span>{{ link.title | escape }}</span>
+              </a>
+            </li>
+          {%- endfor -%}
+        {%- elsif flat_category_links != blank -%}
+          {%- for link in flat_category_links -%}
+            <li>
+              <a href="{{ link.url }}" class="lame-shop-mega__link">
+                {% render 'lame-shop-mega-menu-icon', handle: link.handle %}
+                <span>{{ link.title | escape }}</span>
+              </a>
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+    </div>
+
+    {%- if column_two != blank -%}
+      <div class="lame-shop-mega__col lame-shop-mega__col--secondary">
+        <p class="lame-shop-mega__heading">{{ column_two.title | escape }}</p>
+        <ul class="lame-shop-mega__list lame-shop-mega__list--plain list-unstyled" role="list">
+          {%- for link in column_two.links -%}
+            <li>
+              <a href="{{ link.url }}" class="lame-shop-mega__link lame-shop-mega__link--plain">
+                <span>{{ link.title | escape }}</span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    <div class="lame-shop-mega__col lame-shop-mega__col--products{% if column_two == blank %} lame-shop-mega__col--products-wide{% endif %}">
+      <p class="lame-shop-mega__heading">Best sellers</p>
+      <ul class="lame-shop-mega__products list-unstyled" role="list">
+        {%- if featured_collection != blank -%}
+          {%- paginate featured_collection.products by max_products -%}
+            {%- for product in featured_collection.products limit: max_products -%}
+              <li>
+                <a href="{{ product.url }}" class="lame-shop-mega__product">
+                  <span class="lame-shop-mega__product-media">
+                    {%- if product.featured_image != blank -%}
+                      {{
+                        product.featured_image
+                        | image_url: width: 120
+                        | image_tag:
+                          loading: 'lazy',
+                          widths: '60, 80, 120',
+                          sizes: '56px',
+                          alt: product.featured_image.alt | default: product.title | escape
+                      }}
+                    {%- endif -%}
+                  </span>
+                  <span class="lame-shop-mega__product-info">
+                    <span class="lame-shop-mega__product-title">{{ product.title | escape }}</span>
+                    <span class="lame-shop-mega__product-price">{{ product.price | money }}</span>
+                  </span>
+                </a>
+              </li>
+            {%- endfor -%}
+          {%- endpaginate -%}
+        {%- endif -%}
+      </ul>
+      <a href="{{ parent_link.url }}" class="lame-shop-mega__view-all">
+        {{ view_all_label | escape }}
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+{%- doc -%}
+  Reference-style mobile drawer main navigation.
+  @param {object} linklist
+  @param {object} block_settings
+{%- enddoc -%}
+
+{%- assign animation_index = 0 -%}
+{%- for link in linklist.links -%}
+  {%- liquid
+    assign menu_link_title = link.title
+    assign menu_link_title_down = link.title | downcase
+    if menu_link_title_down == 'our products'
+      assign menu_link_title = 'Shop'
+    endif
+    assign animation_index = animation_index | plus: 1
+  -%}
+  <li
+    class="menu-drawer__list-item lame-drawer-nav__item"
+    style="--menu-drawer-animation-index: {{ animation_index }};"
+  >
+    {%- if link.links != blank -%}
+      <details
+        id="Details-menu-drawer-menu-item-{{ forloop.index }}"
+        class="menu-drawer__menu-container"
+      >
+        <summary
+          id="HeaderDrawer-{{ link.handle }}"
+          class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset{% if link.child_active or link.active %} menu-drawer__menu-item--active{% endif %}"
+          on:click="#HeaderMenuDrawer/open/submenu"
+        >
+          {% render 'lame-drawer-nav-icon', handle: link.handle %}
+          <span class="menu-drawer__menu-item-text wrap-text">{{ menu_link_title | escape }}</span>
+          <span class="lame-drawer-nav__trail">
+            <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
+              {{- 'icon-caret.svg' | inline_asset_content -}}
+            </span>
+          </span>
+        </summary>
+        <div
+          id="link-{{ link.handle | escape }}"
+          class="menu-drawer__submenu has-submenu"
+          tabindex="-1"
+          style="--menu-drawer-animation-index: {{ animation_index }};"
+        >
+          <div class="menu-drawer__inner-submenu">
+            <div class="menu-drawer__nav-buttons">
+              <button
+                class="button menu-drawer__back-button focus-inset"
+                on:click="#HeaderMenuDrawer/back"
+                aria-label="{{ 'actions.back_to' | t: title: menu_link_title }}"
+              >
+                <span class="svg-wrapper icon-caret icon-caret--backward">
+                  {{- 'icon-caret.svg' | inline_asset_content -}}
+                </span>
+                <span class="menu-drawer__menu-item-text wrap-text">{{ menu_link_title | escape }}</span>
+              </button>
+              <button
+                class="button button-unstyled close-button menu-drawer__close-button"
+                type="button"
+                aria-label="{{ 'actions.close' | t }}"
+                on:click="#HeaderMenuDrawer/close"
+              >
+                <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
+                  {{- 'icon-close.svg' | inline_asset_content -}}
+                </span>
+              </button>
+            </div>
+            <ul class="menu-drawer__menu menu-drawer__menu--childlist lame-drawer-nav__submenu-list" role="list">
+              {%- for childlink in link.links -%}
+                <li class="menu-drawer__list-item lame-drawer-nav__item">
+                  <a
+                    href="{{ childlink.url }}"
+                    class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset{% if childlink.current %} menu-drawer__menu-item--active{% endif %}"
+                    {% if childlink.current %}
+                      aria-current="page"
+                    {% endif %}
+                  >
+                    {% render 'lame-drawer-nav-icon', handle: childlink.handle %}
+                    <span class="menu-drawer__menu-item-text wrap-text">{{ childlink.title | escape }}</span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      </details>
+    {%- else -%}
+      <a
+        id="HeaderDrawer-{{ link.handle }}"
+        href="{{ link.url }}"
+        class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"
+        {% if link.current %}
+          aria-current="page"
+        {% endif %}
+      >
+        {% render 'lame-drawer-nav-icon', handle: link.handle %}
+        <span class="menu-drawer__menu-item-text wrap-text">{{ menu_link_title | escape }}</span>
+      </a>
+    {%- endif -%}
+  </li>
+{%- endfor -%}
