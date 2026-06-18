@@ -180,16 +180,6 @@
             </div>
           {% endif %}
 
-          {% unless lame_category_shop_page %}
-            <div class="lame-collection-brand-nav-wrap">
-              {% render 'lame-collection-brand-filter',
-                collection: collection,
-                products: collection.products,
-                grouped_by_brand: group_by_brand
-              %}
-            </div>
-          {% endunless %}
-
           {% if lame_category_shop_page %}
             {% render 'lame-category-price-sort', collection: collection, paginate: paginate %}
           {% elsif lame_cosmetic_collection %}
@@ -210,10 +200,6 @@
               enable_grid_density: lame_enable_grid_density
             %}
           {% endif %}
-
-          <p class="lame-brand-filter-empty" data-lame-brand-filter-empty hidden>
-            {{ 'lame_collection.brand_filter_no_results' | t }}
-          </p>
 
         {% if lame_category_shop_page %}
           {% capture children %}
@@ -262,7 +248,8 @@
                 assign brand_label = brand_slug
                 assign label_chunks = brand_labels_json | split: '||'
                 for chunk in label_chunks
-                  if chunk contains brand_slug
+                  assign chunk_slug = chunk | split: '::' | first
+                  if chunk_slug == brand_slug
                     assign brand_label = chunk | split: '::' | last
                     break
                   endif

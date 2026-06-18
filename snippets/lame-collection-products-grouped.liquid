@@ -45,7 +45,8 @@
     assign brand_label = brand_slug
     assign label_chunks = brand_labels_json | split: '||'
     for chunk in label_chunks
-      if chunk contains brand_slug
+      assign chunk_slug = chunk | split: '::' | first
+      if chunk_slug == brand_slug
         assign brand_label = chunk | split: '::' | last
         break
       endif
