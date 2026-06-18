@@ -10,6 +10,23 @@ import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 const SEARCH_QUERY = 'q';
 
 /**
+ * @param {string} vendor
+ * @returns {string}
+ */
+function vendorLabelToSlug(vendor) {
+  const trimmed = vendor.trim();
+  const down = trimmed.toLowerCase();
+
+  if (!trimmed) return 'other';
+  if (down.includes('lamstone')) return 'lamstone-healthcare';
+
+  return trimmed
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
  * Handles the main facets form functionality
  *
  * @typedef {Object} FacetsFormRefs
@@ -131,7 +148,15 @@ class FacetInputsComponent extends Component {
   connectedCallback() {
     super.connectedCallback();
     this.#abortController = new AbortController();
-    this.addEventListener('change', this.#handleInputChange, { signal: this.#abortController.signal });
+    const { signal } = this.#abortController;
+    this.addEventListener('change', this.#handleInputChange, { signal });
+
+    if (this.hasAttribute('data-lame-vendor-filter')) {
+      document.addEventListener(ThemeEvents.FilterUpdate, this.#handleVendorFilterUpdate, { signal });
+      window.addEventListener('popstate', this.#handleVendorPopState, { signal });
+      this.#syncVendorInputsFromUrl();
+      this.#applyClientBrandFilter();
+    }
   }
 
   disconnectedCallback() {
@@ -140,13 +165,103 @@ class FacetInputsComponent extends Component {
     super.disconnectedCallback();
   }
 
+  updatedCallback() {
+    super.updatedCallback();
+
+    if (this.hasAttribute('data-lame-vendor-filter')) {
+      this.#syncVendorInputsFromUrl();
+      this.#applyClientBrandFilter();
+    }
+  }
+
   #handleInputChange = (event) => {
     const { target } = event;
     if (!(target instanceof HTMLInputElement)) return;
     if (target.type !== 'checkbox' && target.type !== 'radio') return;
 
+    if (this.hasAttribute('data-lame-vendor-filter')) {
+      this.#applyClientBrandFilter();
+    }
+
     this.updateFilters();
   };
+
+  #handleVendorFilterUpdate = () => {
+    this.#syncVendorInputsFromUrl();
+  };
+
+  #handleVendorPopState = () => {
+    this.#syncVendorInputsFromUrl();
+    this.#applyClientBrandFilter();
+  };
+
+  #syncVendorInputsFromUrl() {
+    const url = new URL(window.location.href);
+    const selectedVendors = url.searchParams.getAll('filter.p.vendor');
+    const selectedDown = new Set(selectedVendors.map((value) => value.trim().toLowerCase()));
+    const selectedSlugs = new Set(selectedVendors.map((value) => vendorLabelToSlug(value)));
+
+    for (const input of this.refs.facetInputs ?? []) {
+      if (!(input instanceof HTMLInputElement) || input.name !== 'filter.p.vendor') continue;
+
+      const valueDown = input.value.trim().toLowerCase();
+      const slug = input.dataset.brandSlug ?? vendorLabelToSlug(input.value);
+
+      input.checked =
+        selectedDown.has(valueDown) ||
+        selectedSlugs.has(slug) ||
+        [...selectedDown].some((selected) => vendorLabelToSlug(selected) === slug);
+    }
+
+    this.#updateSelectedFacetSummary();
+  }
+
+  #applyClientBrandFilter() {
+    const checkedInputs = (this.refs.facetInputs ?? []).filter(
+      (input) => input instanceof HTMLInputElement && input.type === 'checkbox' && input.checked
+    );
+
+    const selectedSlugs = new Set(
+      checkedInputs.map((input) => input.dataset.brandSlug ?? vendorLabelToSlug(input.value)).filter(Boolean)
+    );
+
+    const productsColumn = document.querySelector('.lame-collection-products-column');
+    const brandSections = document.querySelectorAll('.lame-collection-brand-section');
+
+    if (selectedSlugs.size === 0) {
+      brandSections.forEach((section) => {
+        section.hidden = false;
+      });
+
+      document.querySelectorAll('.product-grid__item[data-brand-slug]').forEach((item) => {
+        item.hidden = false;
+      });
+
+      productsColumn?.classList.remove('lame-collection-products-column--brand-selected');
+      productsColumn?.removeAttribute('data-active-brand');
+      return;
+    }
+
+    brandSections.forEach((section) => {
+      const slug = section instanceof HTMLElement ? section.dataset.brandSlug : '';
+      section.hidden = Boolean(slug && !selectedSlugs.has(slug));
+    });
+
+    document.querySelectorAll('.product-grid__item[data-brand-slug]').forEach((item) => {
+      if (!(item instanceof HTMLElement)) return;
+      const slug = item.dataset.brandSlug ?? '';
+      item.hidden = Boolean(slug && !selectedSlugs.has(slug));
+    });
+
+    if (selectedSlugs.size === 1) {
+      const [slug] = [...selectedSlugs];
+      productsColumn?.classList.add('lame-collection-products-column--brand-selected');
+      productsColumn?.setAttribute('data-active-brand', slug);
+    } else {
+      productsColumn?.classList.remove('lame-collection-products-column--brand-selected');
+      productsColumn?.removeAttribute('data-active-brand');
+    }
+  }
 
   get sectionId() {
     const id = this.closest('.shopify-section')?.id;
@@ -164,6 +279,10 @@ class FacetInputsComponent extends Component {
 
     facetsForm.updateFilters();
     this.#updateSelectedFacetSummary();
+
+    if (this.hasAttribute('data-lame-vendor-filter')) {
+      this.#applyClientBrandFilter();
+    }
   }, 100);
 
   /**

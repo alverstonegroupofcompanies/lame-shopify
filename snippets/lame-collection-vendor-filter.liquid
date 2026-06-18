@@ -6,10 +6,12 @@
   @param {object} collection
   @param {string} section_id
   @param {string} [filter_style] - vertical | horizontal
+  @param {string} [id_prefix] - unique id segment (e.g. desktop, dialog)
 {%- enddoc -%}
 
 {% liquid
   assign filter_style = filter_style | default: 'vertical'
+  assign id_prefix = id_prefix | default: filter_style
   assign vendor_filter = blank
 
   for filter in collection.filters
@@ -75,7 +77,7 @@
 
 {% if vendor_labels.size > 0 %}
   <details
-    id="Facet-Details-{{ section_id }}-filter-p-vendor"
+    id="Facet-Details-{{ section_id }}-filter-p-vendor-{{ id_prefix }}"
     class="facets__panel"
     {% if filter_style == 'vertical' %}
       open
@@ -100,14 +102,15 @@
       </div>
     </summary>
 
-    <floating-panel-component class="facets__inputs facets__panel-content details-content" id="facet-inputs-filter-p-vendor">
+    <floating-panel-component class="facets__inputs facets__panel-content details-content" id="facet-inputs-filter-p-vendor-{{ id_prefix }}">
       <facet-inputs-component
+        data-lame-vendor-filter
         on:change="/updateFilters"
-        id="facet-inputs-component-filter-p-vendor"
+        id="facet-inputs-component-filter-p-vendor-{{ id_prefix }}"
       >
         <div class="facets__inputs-wrapper">
           <ul
-            id="filters-list-{{ section_id }}-filter-p-vendor"
+            id="filters-list-{{ section_id }}-filter-p-vendor-{{ id_prefix }}"
             class="facets__inputs-list list-unstyled"
             name="{{ 'lame_collection.filter_brand' | t }}"
           >
@@ -119,26 +122,32 @@
               {% liquid
                 assign is_checked = false
                 assign facet_count = blank
-                assign raw_down = brand_label | downcase
+                assign brand_down = brand_label | downcase
                 assign checkbox_name = 'filter.p.vendor'
                 assign checkbox_value = brand_label
 
-                if raw_down contains 'lamstone'
+                if brand_down contains 'lamstone'
                   assign display_label = 'Lamstone Healthcare'
+                  assign brand_slug = 'lamstone-healthcare'
                 else
                   assign display_label = brand_label
+                  assign brand_slug = brand_label | handleize
                 endif
 
                 if vendor_filter != blank
                   for value in vendor_filter.active_values
-                    if value.label == brand_label or value.value == brand_label
+                    assign active_label_down = value.label | downcase
+                    assign active_value_down = value.value | downcase
+                    if value.label == brand_label or value.value == brand_label or active_label_down == brand_down or active_value_down == brand_down
                       assign is_checked = true
                       break
                     endif
                   endfor
 
                   for value in vendor_filter.values
-                    if value.label == brand_label or value.value == brand_label
+                    assign value_label_down = value.label | downcase
+                    assign value_value_down = value.value | downcase
+                    if value.label == brand_label or value.value == brand_label or value_label_down == brand_down or value_value_down == brand_down
                       assign facet_count = value.count
                       assign checkbox_name = value.param_name
                       assign checkbox_value = value.value
@@ -151,22 +160,33 @@
                   assign display_label = display_label | append: ' (' | append: facet_count | append: ')'
                 endif
 
-                assign input_id = 'Filter-filter-p-vendor-' | append: forloop.index | append: '-' | append: filter_style
-                assign desktop_form_id = 'FacetFiltersForm--' | append: section_id | append: '-desktop'
+                assign input_id = 'Filter-filter-p-vendor-' | append: forloop.index | append: '-' | append: id_prefix
               %}
 
               <li class="facets__inputs-list-item">
-                {% render 'checkbox',
-                  name: checkbox_name,
-                  value: checkbox_value,
-                  label: display_label,
-                  checked: is_checked,
-                  id: input_id,
-                  disabled: false,
-                  formId: desktop_form_id,
-                  inputRef: 'facetInputs[]',
-                  events: 'on:pointerenter="/prefetchPage" on:pointerleave="/cancelPrefetchPage"'
-                %}
+                <div
+                  class="checkbox"
+                  on:pointerenter="/prefetchPage"
+                  on:pointerleave="/cancelPrefetchPage"
+                >
+                  <input
+                    type="checkbox"
+                    name="{{ checkbox_name }}"
+                    value="{{ checkbox_value | escape }}"
+                    id="{{ input_id }}"
+                    class="checkbox__input"
+                    data-label="{{ display_label | escape }}"
+                    data-brand-slug="{{ brand_slug }}"
+                    {% if is_checked %}
+                      checked
+                    {% endif %}
+                    ref="facetInputs[]"
+                  >
+                  <label class="checkbox__label" for="{{ input_id }}">
+                    {{ 'icon-checkmark.svg' | inline_asset_content }}
+                    <span class="checkbox__label-text">{{ display_label }}</span>
+                  </label>
+                </div>
               </li>
             {% endfor %}
           </ul>
