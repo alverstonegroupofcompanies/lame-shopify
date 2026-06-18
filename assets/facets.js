@@ -80,6 +80,14 @@ class FacetsFormComponent extends Component {
   };
 
   /**
+   * @param {SubmitEvent} event
+   */
+  handleFormSubmit = (event) => {
+    event.preventDefault();
+    this.updateFilters();
+  };
+
+  /**
    * Updates the section
    */
   #updateSection() {
@@ -209,6 +217,11 @@ if (!customElements.get('facet-inputs-component')) {
  * @typedef {Object} PriceFacetRefs
  * @property {HTMLInputElement} minInput - The minimum price input
  * @property {HTMLInputElement} maxInput - The maximum price input
+ * @property {HTMLInputElement} [minRange] - Minimum range thumb
+ * @property {HTMLInputElement} [maxRange] - Maximum range thumb
+ * @property {HTMLElement} [rangeFill] - Active range track fill
+ * @property {HTMLElement} [minRangeLabel] - Minimum price label
+ * @property {HTMLElement} [maxRangeLabel] - Maximum price label
  */
 
 /**
@@ -220,12 +233,16 @@ class PriceFacetComponent extends Component {
   currency;
   /** @type {string} */
   moneyFormat;
+  /** @type {boolean} */
+  #rangeSliderReady = false;
 
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('keydown', this.#onKeyDown);
     this.currency = this.dataset.currency ?? 'USD';
     this.moneyFormat = this.#extractMoneyPlaceholder(this.dataset.moneyFormat ?? '{{amount}}');
+    this.#initRangeSlider();
+    this.#syncRangesFromInputs();
   }
 
   disconnectedCallback() {
@@ -262,6 +279,7 @@ class PriceFacetComponent extends Component {
 
     this.#adjustToValidValues(minInput);
     this.#adjustToValidValues(maxInput);
+    this.#syncRangesFromInputs();
 
     const facetsForm = this.closest('facets-form-component');
     if (!(facetsForm instanceof FacetsFormComponent)) return;
@@ -269,6 +287,144 @@ class PriceFacetComponent extends Component {
     facetsForm.updateFilters();
     this.#setMinAndMaxValues();
     this.#updateSummary();
+  }
+
+  /**
+   * Syncs the dual-thumb slider while typing in price fields.
+   */
+  handlePriceInput = debounce(() => {
+    this.#syncRangesFromInputs();
+    this.updatePriceFilterAndResults();
+  }, 300);
+
+  /**
+   * @param {string | number | null | undefined} value
+   * @returns {number | null}
+   */
+  #parseSliderNumber(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return null;
+
+    const minorUnits = convertMoneyToMinorUnits(String(value), this.currency);
+    if (minorUnits !== null) {
+      const zeroDecimal = new Set([
+        'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+      ]);
+      return zeroDecimal.has(this.currency.toUpperCase()) ? minorUnits : minorUnits / 100;
+    }
+
+    const cleaned = String(value).replace(/[^\d.,]/g, '').replace(',', '.');
+    const parsed = parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /**
+   * @param {number} displayValue
+   * @returns {string}
+   */
+  #formatDisplayValue(displayValue) {
+    if (!displayValue || displayValue <= 0) return '';
+
+    const zeroDecimal = new Set([
+      'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+    ]);
+    const minorUnits = zeroDecimal.has(this.currency.toUpperCase())
+      ? Math.round(displayValue)
+      : Math.round(displayValue * 100);
+
+    return formatMoney(minorUnits, this.moneyFormat, this.currency);
+  }
+
+  /**
+   * @returns {number}
+   */
+  #getSliderMax() {
+    const { maxRange, maxInput } = this.refs;
+    const rawMax = maxRange?.max || maxInput?.getAttribute('data-max') || maxInput?.placeholder || '0';
+    const parsed = parseFloat(String(rawMax).replace(/[^\d.,]/g, '').replace(',', '.'));
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  }
+
+  #initRangeSlider() {
+    const { minRange, maxRange } = this.refs;
+    if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
+    if (this.#rangeSliderReady) return;
+
+    this.#rangeSliderReady = true;
+    minRange.addEventListener('input', this.#handleRangeInput);
+    maxRange.addEventListener('input', this.#handleRangeInput);
+  }
+
+  #handleRangeInput = debounce((event) => {
+    const { minRange, maxRange, minInput, maxInput } = this.refs;
+    if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
+    if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) return;
+
+    let minValue = parseFloat(minRange.value);
+    let maxValue = parseFloat(maxRange.value);
+    const sliderMax = this.#getSliderMax();
+
+    if (!Number.isFinite(minValue)) minValue = 0;
+    if (!Number.isFinite(maxValue)) maxValue = sliderMax;
+
+    if (minValue > maxValue) {
+      if (event?.target === minRange) {
+        maxValue = minValue;
+        maxRange.value = String(maxValue);
+      } else {
+        minValue = maxValue;
+        minRange.value = String(minValue);
+      }
+    }
+
+    minInput.value = minValue > 0 ? this.#formatDisplayValue(minValue) : '';
+    maxInput.value = maxValue < sliderMax ? this.#formatDisplayValue(maxValue) : '';
+
+    this.#setMinAndMaxValues();
+    this.#updateRangeVisuals();
+    this.updatePriceFilterAndResults();
+  }, 150);
+
+  #syncRangesFromInputs() {
+    const { minRange, maxRange, minInput, maxInput } = this.refs;
+    if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
+    if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) return;
+
+    const sliderMax = this.#getSliderMax();
+    if (!sliderMax) return;
+
+    const minValue = this.#parseSliderNumber(minInput.value) ?? 0;
+    const maxValue = this.#parseSliderNumber(maxInput.value) ?? sliderMax;
+
+    const clampedMin = Math.max(0, Math.min(minValue, sliderMax));
+    const clampedMax = Math.max(clampedMin, Math.min(maxValue, sliderMax));
+
+    minRange.value = String(clampedMin);
+    maxRange.value = String(clampedMax);
+    this.#updateRangeVisuals();
+  }
+
+  #updateRangeVisuals() {
+    const { minRange, maxRange, rangeFill, minRangeLabel, maxRangeLabel } = this.refs;
+    if (!(minRange instanceof HTMLInputElement) || !(maxRange instanceof HTMLInputElement)) return;
+
+    const sliderMax = this.#getSliderMax() || parseFloat(maxRange.max) || 1;
+    const minValue = parseFloat(minRange.value) || 0;
+    const maxValue = parseFloat(maxRange.value) || sliderMax;
+    const left = (minValue / sliderMax) * 100;
+    const right = 100 - (maxValue / sliderMax) * 100;
+
+    if (rangeFill instanceof HTMLElement) {
+      rangeFill.style.left = `${left}%`;
+      rangeFill.style.right = `${right}%`;
+    }
+
+    if (minRangeLabel instanceof HTMLElement) {
+      minRangeLabel.textContent = this.#formatDisplayValue(minValue) || this.#formatDisplayValue(0);
+    }
+
+    if (maxRangeLabel instanceof HTMLElement) {
+      maxRangeLabel.textContent = this.#formatDisplayValue(maxValue) || this.#formatDisplayValue(sliderMax);
+    }
   }
 
   /**

@@ -170,6 +170,7 @@
           id="FacetFiltersForm--{{ section.id }}-desktop"
           class="facets__form"
           ref="facetsForm"
+          on:submit="/handleFormSubmit"
         >
           {% if should_show_pane %}
             {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering %}
@@ -256,7 +257,7 @@
                   {{ rendered_filters }}
                   {% if lame_our_products_active and template.name == 'collection' and block_settings.enable_filtering %}
                     {% render 'lame-collection-vendor-filter',
-                      collection: collection,
+                      collection: results,
                       section_id: section.id,
                       filter_style: block_settings.filter_style
                     %}
@@ -266,6 +267,14 @@
 
               {% if block_settings.filter_style == 'vertical' and template.name == 'collection' %}
                 {% liquid
+                  if lame_our_products_active
+                    for filter in filters
+                      if filter.param_name == 'filter.p.vendor'
+                        assign total_active_values = total_active_values | plus: filter.active_values.size
+                      endif
+                    endfor
+                  endif
+
                   assign filters_active = false
                   if total_active_values > 0
                     assign filters_active = true
@@ -395,6 +404,7 @@
             action="{{ results_url }}"
             id="FacetFiltersForm--{{ section.id }}-mobile-sorting-only"
             ref="facetsForm"
+            on:submit="/handleFormSubmit"
           >
             {% render 'sorting',
               results: results,
@@ -440,6 +450,7 @@
           id="FacetFiltersForm--{{ section.id }}-overflow"
           class="facets__form"
           ref="facetsForm"
+          on:submit="/handleFormSubmit"
         >
           <div
             class="facets__title-wrapper"
