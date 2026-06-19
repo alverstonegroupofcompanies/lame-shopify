@@ -17,7 +17,48 @@
   --hc-radius-lg: 14px;
   --hc-thumb: 72px;
   --hc-pad: max(1rem, var(--page-margin));
+  --hc-border: 1px solid rgb(0 0 0 / 0.1);
+  --hc-border-active: 1px solid var(--hc-green);
+  /* Typography — mobile-first; desktop bumps in @media below */
+  --hc-fs-2xs: 0.6875rem;
+  --hc-fs-xs: 0.75rem;
+  --hc-fs-sm: 0.8125rem;
+  --hc-fs-md: 0.875rem;
+  --hc-fs-base: 0.9375rem;
+  --hc-fs-title: clamp(1.125rem, 1.65vw, 1.375rem);
+  --hc-fs-price: clamp(1.25rem, 1.8vw, 1.5rem);
+  --hc-fs-section: clamp(1.35rem, 2.4vw, 1.65rem);
   width: 100%;
+}
+
+@media screen and (min-width: 750px) {
+  .lame-product-healthcare-wrap {
+    --hc-fs-2xs: 0.8125rem;
+    --hc-fs-xs: 0.875rem;
+    --hc-fs-sm: 1rem;
+    --hc-fs-md: 1rem;
+    --hc-fs-base: 1.0625rem;
+    --hc-fs-title: clamp(1.3rem, 1.5vw, 1.625rem);
+    --hc-fs-price: clamp(1.375rem, 1.7vw, 1.75rem);
+    --hc-fs-section: clamp(1.4rem, 2vw, 1.75rem);
+  }
+
+  .lame-pdp-description__content,
+  .lame-product-healthcare-wrap .product-details .text-block.rte,
+  .lame-product-healthcare-wrap .product-details .product-description,
+  .lame-product-healthcare-wrap .product-details .accordion .details-content {
+    line-height: 1.65;
+  }
+
+  .lame-pdp-trust-row__copy span,
+  .lame-pdp-media-features__copy span {
+    line-height: 1.45;
+  }
+
+  .lame-product-healthcare-wrap .variant-option__button-label,
+  .lame-product-healthcare-wrap .variant-option legend {
+    font-size: var(--hc-fs-sm);
+  }
 }
 
 .lame-product-healthcare-wrap media-gallery.sticky-content {
@@ -144,14 +185,27 @@
     aspect-ratio: 1;
     padding: 0;
     border-radius: var(--hc-radius);
-    border: 1.5px solid var(--pdp-border);
+    border: var(--hc-border);
     background: #fff;
     overflow: hidden;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button:focus-visible {
+    outline: 2px solid var(--hc-green);
+    outline-offset: 2px;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button[aria-current='true'] {
-    border-color: var(--hc-green);
-    box-shadow: 0 0 0 1px var(--hc-green);
+    border: var(--hc-border-active);
+    box-shadow: none;
+    outline: none;
+  }
+
+  .lame-product-healthcare-wrap .media-gallery--carousel .slideshow-controls__thumbnail-badge {
+    box-shadow: none;
+    border: var(--hc-border);
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button img {
@@ -164,7 +218,9 @@
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
     grid-area: container;
     background: var(--hc-grey);
+    border: var(--hc-border);
     border-radius: var(--hc-radius-lg);
+    box-shadow: none;
     aspect-ratio: 1 / 1;
     width: 100%;
     height: auto;
@@ -239,13 +295,13 @@
   padding: 0.45rem 0.85rem 0.45rem 0.65rem;
   border-radius: 999px;
   background: #fff;
-  border: 1px solid var(--pdp-border);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.06);
+  border: var(--hc-border);
+  box-shadow: none;
   cursor: zoom-in;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.6875rem;
+  font-size: var(--hc-fs-xs);
   font-weight: 500;
   color: var(--hc-muted);
   pointer-events: auto;
@@ -293,8 +349,9 @@
   margin-top: 0;
   padding: 1rem 1.25rem;
   background: var(--hc-grey);
-  border: 0;
+  border: var(--hc-border);
   border-radius: var(--hc-radius);
+  box-shadow: none;
 }
 
 .lame-pdp-media-features__item {
@@ -326,7 +383,7 @@
 }
 
 .lame-pdp-media-features__copy strong {
-  font-size: 0.6875rem;
+  font-size: var(--hc-fs-xs);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -335,7 +392,7 @@
 }
 
 .lame-pdp-media-features__copy span {
-  font-size: 0.625rem;
+  font-size: var(--hc-fs-2xs);
   color: var(--hc-muted);
   line-height: 1.35;
 }
@@ -355,7 +412,7 @@
   align-items: center;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.625rem;
+  font-size: var(--hc-fs-2xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -378,7 +435,7 @@
 .lame-product-healthcare-wrap .product-details .text-block.paragraph > * {
   margin: 0;
   font-family: var(--font-body--family);
-  font-size: clamp(1.125rem, 1.65vw, 1.375rem);
+  font-size: var(--hc-fs-title);
   font-weight: 500;
   letter-spacing: 0;
   line-height: 1.35;
@@ -409,7 +466,7 @@
 
 .lame-product-healthcare-wrap product-price .price,
 .lame-product-healthcare-wrap .price {
-  font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+  font-size: var(--hc-fs-price);
   font-weight: 700;
   color: var(--hc-ink);
 }
@@ -419,7 +476,7 @@
   align-items: center;
   gap: 0.4rem;
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--hc-fs-md);
   font-weight: 500;
   color: var(--hc-green-muted);
 }
@@ -468,14 +525,14 @@
 }
 
 .lame-pdp-trust-row__copy strong {
-  font-size: 0.75rem;
+  font-size: var(--hc-fs-xs);
   font-weight: 600;
   color: var(--hc-ink);
   line-height: 1.3;
 }
 
 .lame-pdp-trust-row__copy span {
-  font-size: 0.6875rem;
+  font-size: var(--hc-fs-xs);
   color: var(--hc-muted);
   line-height: 1.35;
 }
@@ -492,7 +549,7 @@
 }
 
 .lame-product-healthcare-wrap .quantity-selector-wrapper .label {
-  font-size: 0.8125rem;
+  font-size: var(--hc-fs-sm);
   font-weight: 500;
   color: var(--hc-ink);
   margin-bottom: 0.35rem;
@@ -513,7 +570,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-size: 0.8125rem;
+  font-size: var(--hc-fs-sm);
   background: var(--hc-green);
   color: #fff;
   border-color: var(--hc-green);
@@ -541,7 +598,7 @@
   font-weight: 600 !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
-  font-size: 0.8125rem !important;
+  font-size: var(--hc-fs-sm) !important;
   background: var(--hc-cream) !important;
   color: var(--hc-ink) !important;
   border: 1px solid var(--pdp-border) !important;
@@ -558,7 +615,7 @@
   align-items: center;
   gap: 0.45rem;
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--hc-fs-sm);
   font-weight: 600;
   color: var(--hc-ink);
 }
@@ -580,14 +637,14 @@
 .lame-pdp-description__heading {
   margin: 0 0 0.65rem;
   font-family: var(--lame-font-display, var(--font-heading--family));
-  font-size: clamp(1.35rem, 2.4vw, 1.65rem);
+  font-size: var(--hc-fs-section);
   font-weight: 600;
   line-height: 1.15;
   color: var(--hc-ink);
 }
 
 .lame-pdp-description__content {
-  font-size: 0.9375rem;
+  font-size: var(--hc-fs-base);
   line-height: 1.7;
   color: var(--hc-muted);
 }
@@ -623,14 +680,14 @@
 
 .lame-pdp-delivery__title {
   margin: 0 0 0.2rem;
-  font-size: 0.875rem;
+  font-size: var(--hc-fs-md);
   font-weight: 700;
   color: var(--hc-ink);
 }
 
 .lame-pdp-delivery__text {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--hc-fs-sm);
   line-height: 1.55;
   color: var(--hc-muted);
 }
@@ -653,14 +710,14 @@
 .lame-pdp-similar__heading {
   margin: 0;
   font-family: var(--lame-font-display, var(--font-heading--family));
-  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  font-size: var(--hc-fs-section);
   font-weight: 600;
   color: var(--hc-ink);
 }
 
 .lame-pdp-similar__subheading {
   margin: 0.35rem 0 0;
-  font-size: 0.875rem;
+  font-size: var(--hc-fs-md);
   color: var(--hc-muted);
 }
 
@@ -682,7 +739,7 @@
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.06);
+  box-shadow: none;
 }
 
 .lame-pdp-similar__nav:hover {
@@ -752,7 +809,7 @@
 
 .lame-pdp-similar .lame-cart-rec-card__brand {
   margin: 0 0 0.2rem;
-  font-size: 0.625rem;
+  font-size: var(--hc-fs-2xs);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -761,7 +818,7 @@
 
 .lame-pdp-similar .lame-cart-rec-card__title {
   margin: 0 0 0.35rem;
-  font-size: 0.8125rem;
+  font-size: var(--hc-fs-sm);
   line-height: 1.35;
 }
 
@@ -772,7 +829,7 @@
 
 .lame-pdp-similar .lame-cart-rec-card__price {
   margin: 0 0 0.55rem;
-  font-size: 0.875rem;
+  font-size: var(--hc-fs-md);
   font-weight: 700;
 }
 
@@ -783,7 +840,7 @@
   border-radius: 999px;
   background: var(--hc-green);
   color: #fff;
-  font-size: 0.6875rem;
+  font-size: var(--hc-fs-xs);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -797,7 +854,7 @@
 
 .lame-product-healthcare-wrap .product-details .text-block.rte,
 .lame-product-healthcare-wrap .product-details .product-description {
-  font-size: 0.9375rem;
+  font-size: var(--hc-fs-base);
   line-height: 1.7;
   color: var(--hc-muted);
   max-width: 100%;
@@ -820,7 +877,7 @@
 
 .lame-product-healthcare-wrap .product-details .accordion .details__header {
   padding-block: 0.9rem;
-  font-size: 0.875rem;
+  font-size: var(--hc-fs-md);
   font-weight: 600;
   color: var(--hc-ink);
   gap: 0.5rem;
@@ -833,7 +890,7 @@
 
 .lame-product-healthcare-wrap .product-details .accordion .details-content {
   padding-block-end: 1rem;
-  font-size: 0.875rem;
+  font-size: var(--hc-fs-base);
   line-height: 1.65;
   color: var(--hc-muted);
 }
@@ -888,7 +945,9 @@
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
     background: var(--hc-grey);
+    border: var(--hc-border);
     border-radius: var(--hc-radius-lg);
+    box-shadow: none;
     aspect-ratio: 1 / 1;
     width: 100%;
     min-height: auto;
