@@ -113,14 +113,20 @@
           for filter in collection.filters
             if filter.param_name == 'filter.p.vendor'
               for value in filter.active_values
-                assign raw_vendor = value.label | strip
+                assign raw_vendor = value.value | strip
                 if raw_vendor == blank
-                  assign raw_vendor = value.value | strip
+                  assign raw_vendor = value.label | strip
                 endif
                 capture active_slug_capture
                   render 'lame-vendor-slug', vendor: raw_vendor
                 endcapture
                 assign active_slug = active_slug_capture | strip
+                if active_slug == blank or active_slug == 'other'
+                  capture active_slug_capture
+                    render 'lame-vendor-slug', vendor: value.label
+                  endcapture
+                  assign active_slug = active_slug_capture | strip
+                endif
                 assign active_slug_token = '|' | append: active_slug | append: '|'
                 unless lame_active_brand_slugs_pipe contains active_slug_token
                   assign lame_active_brand_slugs_pipe = lame_active_brand_slugs_pipe | append: active_slug | append: '|'
@@ -150,6 +156,7 @@
         <div
           class="lame-collection-products-column{% if has_active_brand_filter %} lame-collection-products-column--brand-selected{% endif %}"
           data-lame-products-scroll
+          {% if has_active_brand_filter %}data-server-vendor-filter="true"{% endif %}
           {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
         >
           <p class="lame-brand-filter-empty" data-lame-brand-filter-empty hidden>
@@ -290,12 +297,6 @@
                 endfor
               %}
               {% if brand_product_count > 0 %}
-                {% if has_active_brand_filter %}
-                  {% assign brand_slug_token = '|' | append: brand_slug | append: '|' %}
-                  {% unless lame_active_brand_slugs_pipe contains brand_slug_token %}
-                    {% continue %}
-                  {% endunless %}
-                {% endif %}
                 {% liquid
                   assign show_brand_section_header = false
                   if lame_active_brand_slug != blank and brand_slug == lame_active_brand_slug

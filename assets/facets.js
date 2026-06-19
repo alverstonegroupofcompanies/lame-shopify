@@ -68,6 +68,10 @@ function handleLameVendorFilterChange(event) {
   if (!target.closest('[data-lame-vendor-filter]')) return;
 
   syncVendorCheckboxGroup(target);
+  const facetsForm = target.closest('facets-form-component');
+  if (facetsForm instanceof FacetsFormComponent) {
+    facetsForm.updateFiltersWithoutRender();
+  }
   applyVendorBrandFilter();
   scheduleVendorSectionUpdate(target);
 

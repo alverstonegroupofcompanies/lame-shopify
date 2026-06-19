@@ -136,10 +136,63 @@ export function productMatchesVendorFilter(slug, brandName, selected) {
 }
 
 /**
+ * @param {URLSearchParams} [params]
+ * @returns {boolean}
+ */
+export function urlHasVendorFilter(params) {
+  const searchParams = params ?? new URL(window.location.href).searchParams;
+  return searchParams.getAll('filter.p.vendor').some((value) => value.trim() !== '');
+}
+
+/**
+ * @param {HTMLElement} productsColumn
+ */
+function revealAllVendorFilteredProducts(productsColumn) {
+  productsColumn.querySelectorAll('.lame-collection-brand-section').forEach((section) => {
+    if (section instanceof HTMLElement) setVendorFilterHidden(section, false);
+  });
+
+  productsColumn
+    .querySelectorAll('li[data-brand-slug], .lame-category-shop__item[data-brand-slug]')
+    .forEach((item) => {
+      if (item instanceof HTMLElement) setVendorFilterHidden(item, false);
+    });
+}
+
+/**
+ * @param {HTMLElement} productsColumn
+ */
+function updateBrandSelectedColumnState(productsColumn) {
+  const selected = getSelectedVendorFilters();
+  const hasSelection = selected.slugs.size > 0 || selected.names.size > 0;
+
+  if (hasSelection && selected.slugs.size === 1) {
+    const [slug] = [...selected.slugs];
+    productsColumn.classList.add('lame-collection-products-column--brand-selected');
+    productsColumn.setAttribute('data-active-brand', slug);
+    return;
+  }
+
+  productsColumn.classList.remove('lame-collection-products-column--brand-selected');
+  productsColumn.removeAttribute('data-active-brand');
+}
+
+/**
  * @param {HTMLElement} productsColumn
  */
 export function applyVendorBrandFilter(productsColumn = document.querySelector('.lame-collection-products-column')) {
   if (!(productsColumn instanceof HTMLElement)) return;
+
+  const emptyState = productsColumn.querySelector('[data-lame-brand-filter-empty]');
+  const serverFiltered =
+    productsColumn.dataset.serverVendorFilter === 'true' || urlHasVendorFilter();
+
+  if (serverFiltered) {
+    revealAllVendorFilteredProducts(productsColumn);
+    updateBrandSelectedColumnState(productsColumn);
+    if (emptyState instanceof HTMLElement) emptyState.hidden = true;
+    return;
+  }
 
   const selected = getSelectedVendorFilters();
   const hasSelection = selected.slugs.size > 0 || selected.names.size > 0;
@@ -179,7 +232,6 @@ export function applyVendorBrandFilter(productsColumn = document.querySelector('
     productsColumn.removeAttribute('data-active-brand');
   }
 
-  const emptyState = productsColumn.querySelector('[data-lame-brand-filter-empty]');
   if (emptyState instanceof HTMLElement) {
     emptyState.hidden = !hasSelection || visibleCount > 0;
   }
