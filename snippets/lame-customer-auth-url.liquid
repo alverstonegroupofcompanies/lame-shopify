@@ -1,5 +1,7 @@
 {%- doc -%}
-  Builds login or register URLs with return_url for post-auth redirect.
+  Builds login or register URLs with return redirect for post-auth.
+
+  New customer accounts have no /account/register page — register links use the sign-in flow.
 
   @param {string} type - 'login' or 'register'
   @param {string} [return_url] - Override destination after auth
@@ -7,8 +9,14 @@
 
 {%- liquid
   assign auth_type = type | default: 'login'
+
+  assign uses_new_customer_accounts = false
+  if routes.account_login_url contains 'customer_authentication'
+    assign uses_new_customer_accounts = true
+  endif
+
   assign auth_base = routes.account_login_url
-  if auth_type == 'register'
+  if auth_type == 'register' and uses_new_customer_accounts == false
     assign auth_base = routes.account_register_url
   endif
 
@@ -16,7 +24,20 @@
   if auth_return == blank and request.params.return_url != blank
     assign auth_return = request.params.return_url
   endif
+  if auth_return == blank and request.params.return_to != blank
+    assign auth_return = request.params.return_to
+  endif
   if auth_return == blank
     assign auth_return = routes.account_url
   endif
--%}{{- auth_base -}}?return_url={{ auth_return | url_encode }}
+
+  assign return_param = 'return_url'
+  if uses_new_customer_accounts
+    assign return_param = 'return_to'
+  endif
+
+  assign auth_query_sep = '?'
+  if auth_base contains '?'
+    assign auth_query_sep = '&'
+  endif
+-%}{{- auth_base -}}{{- auth_query_sep -}}{{- return_param -}}={{- auth_return | url_encode -}}

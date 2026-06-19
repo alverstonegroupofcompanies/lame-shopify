@@ -293,9 +293,12 @@
   assign lame_checkout_login_required = false
   if shop.customer_accounts_enabled and customer == blank
     assign lame_checkout_login_required = true
-    assign lame_checkout_return_url = routes.cart_url | url_encode
-    assign lame_checkout_login_url = routes.account_login_url | append: '?return_url=' | append: lame_checkout_return_url
-    assign lame_checkout_register_url = routes.account_register_url | append: '?return_url=' | append: lame_checkout_return_url
+    capture lame_checkout_login_url
+      render 'lame-customer-auth-url', type: 'login', return_url: routes.cart_url
+    endcapture
+    capture lame_checkout_register_url
+      render 'lame-customer-auth-url', type: 'register', return_url: routes.cart_url
+    endcapture
   endif
 -%}
 

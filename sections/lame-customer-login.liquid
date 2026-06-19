@@ -19,7 +19,10 @@
   endif
 -%}
 
-{% if customer and request.design_mode == false %}
+{% if routes.account_login_url contains 'customer_authentication' and request.design_mode == false %}
+  {%- capture login_redirect_url -%}{%- render 'lame-customer-auth-url', type: 'login' -%}{%- endcapture -%}
+  <script>window.location.replace({{ login_redirect_url | json }});</script>
+{% elsif customer and request.design_mode == false %}
   <script>window.location.replace({{ return_url | json }});</script>
 {% else %}
 

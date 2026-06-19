@@ -163,7 +163,7 @@ class FacetInputsComponent extends Component {
     if (!(target instanceof HTMLInputElement)) return;
     if (target.type !== 'checkbox' && target.type !== 'radio') return;
 
-    if (this.hasAttribute('data-lame-vendor-filter') && target.name === 'filter.p.vendor') {
+    if (target.name === 'filter.p.vendor') {
       syncVendorCheckboxGroup(target);
     }
 

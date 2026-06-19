@@ -682,7 +682,8 @@
                   {% endif %}
                   <a href="{{ routes.account_logout_url }}">{{ 'actions.log_out' | t }}</a>
                 {% else %}
-                  <a href="{{ routes.account_register_url }}">{{ 'lame_customer.create_account' | t }}</a>
+                  {%- capture lame_register_url -%}{%- render 'lame-customer-auth-url', type: 'register' -%}{%- endcapture -%}
+                  <a href="{{ lame_register_url }}">{{ 'lame_customer.create_account' | t }}</a>
                 {% endif %}
               </nav>
             {% endunless %}

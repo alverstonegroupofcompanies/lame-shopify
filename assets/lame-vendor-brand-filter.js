@@ -7,22 +7,23 @@
  * @returns {HTMLInputElement[]}
  */
 export function getVendorFilterInputs() {
-  return [
-    ...document.querySelectorAll(
-      'facet-inputs-component[data-lame-vendor-filter] input[type="checkbox"][name="filter.p.vendor"]'
-    ),
-  ].filter((input) => input instanceof HTMLInputElement);
+  return [...document.querySelectorAll('input[type="checkbox"][name="filter.p.vendor"]')].filter(
+    (input) => input instanceof HTMLInputElement
+  );
 }
 
 /**
  * @param {URLSearchParams} params
  */
 export function syncVendorParamsToUrlSearchParams(params) {
+  const vendorInputs = getVendorFilterInputs();
+  if (!vendorInputs.length) return;
+
   params.delete('filter.p.vendor');
 
   const added = new Set();
 
-  for (const input of getVendorFilterInputs()) {
+  for (const input of vendorInputs) {
     if (!input.checked) continue;
 
     const value = input.value.trim();
