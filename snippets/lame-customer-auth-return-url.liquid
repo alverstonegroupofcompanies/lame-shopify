@@ -1,0 +1,19 @@
+{%- doc -%}
+  Resolves the post-authentication redirect URL from query params or theme defaults.
+
+  @param {string} [return_url] - Optional override
+{%- enddoc -%}
+
+{%- liquid
+  assign resolved_return = return_url
+  if resolved_return == blank and request.params.return_url != blank
+    assign resolved_return = request.params.return_url
+  endif
+  if resolved_return == blank
+    if pages['my-profile'] != blank
+      assign resolved_return = pages['my-profile'].url
+    else
+      assign resolved_return = routes.account_url
+    endif
+  endif
+-%}{{- resolved_return -}}

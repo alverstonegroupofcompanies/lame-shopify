@@ -1,0 +1,26 @@
+{%- doc -%}
+  Builds login or register URLs with return_url for post-auth redirect.
+
+  @param {string} type - 'login' or 'register'
+  @param {string} [return_url] - Override destination after auth
+{%- enddoc -%}
+
+{%- liquid
+  assign auth_type = type | default: 'login'
+  assign auth_base = routes.account_login_url
+  if auth_type == 'register'
+    assign auth_base = routes.account_register_url
+  endif
+
+  assign auth_return = return_url
+  if auth_return == blank and request.params.return_url != blank
+    assign auth_return = request.params.return_url
+  endif
+  if auth_return == blank
+    if pages['my-profile'] != blank
+      assign auth_return = pages['my-profile'].url
+    else
+      assign auth_return = routes.account_url
+    endif
+  endif
+-%}{{- auth_base | append: '?return_url=' | append: auth_return | url_encode -}}

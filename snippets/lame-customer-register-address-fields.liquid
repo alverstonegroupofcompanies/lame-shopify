@@ -1,0 +1,93 @@
+{% doc %}
+  Registration address fields (no name attributes — captured by JS before account creation).
+
+  @param {string} prefix - ID prefix for fields
+{% enddoc %}
+
+<fieldset class="lame-auth__fieldset" data-lame-register-address>
+  <legend class="lame-auth__legend">{{ 'lame_customer.auth_address_heading' | t }}</legend>
+
+  <div class="lame-profile__field">
+    <label for="RegAddress1_{{ prefix }}">{{ 'customer.addresses.address1' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+    <input
+      type="text"
+      id="RegAddress1_{{ prefix }}"
+      data-lame-reg-field="address1"
+      autocomplete="address-line1"
+      class="lame-profile__input"
+      required
+      aria-required="true"
+    >
+  </div>
+
+  <div class="lame-profile__field">
+    <label for="RegAddress2_{{ prefix }}">{{ 'customer.addresses.address2' | t }}</label>
+    <input
+      type="text"
+      id="RegAddress2_{{ prefix }}"
+      data-lame-reg-field="address2"
+      autocomplete="address-line2"
+      class="lame-profile__input"
+    >
+  </div>
+
+  <div class="lame-profile__field-row">
+    <div class="lame-profile__field">
+      <label for="RegCity_{{ prefix }}">{{ 'customer.addresses.city' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+      <input
+        type="text"
+        id="RegCity_{{ prefix }}"
+        data-lame-reg-field="city"
+        autocomplete="address-level2"
+        class="lame-profile__input"
+        required
+        aria-required="true"
+      >
+    </div>
+    <div class="lame-profile__field">
+      <label for="RegZip_{{ prefix }}">{{ 'customer.addresses.zip' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+      <input
+        type="text"
+        id="RegZip_{{ prefix }}"
+        data-lame-reg-field="zip"
+        autocomplete="postal-code"
+        class="lame-profile__input"
+        required
+        aria-required="true"
+      >
+    </div>
+  </div>
+
+  <div class="lame-profile__field-row">
+    <div class="lame-profile__field">
+      <label for="RegCountry_{{ prefix }}">{{ 'customer.addresses.country' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+      <select
+        id="RegCountry_{{ prefix }}"
+        data-lame-reg-field="country"
+        data-address-country-select
+        autocomplete="country"
+        class="lame-profile__input lame-profile__select"
+        required
+        aria-required="true"
+      >
+        {{ all_country_option_tags }}
+      </select>
+    </div>
+    <div id="RegProvinceContainer_{{ prefix }}" class="lame-profile__field">
+      <label for="RegProvince_{{ prefix }}">{{ 'customer.addresses.province' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+      <select
+        id="RegProvince_{{ prefix }}"
+        data-lame-reg-field="province"
+        autocomplete="address-level1"
+        class="lame-profile__input lame-profile__select"
+        required
+        aria-required="true"
+      ></select>
+    </div>
+  </div>
+
+  <label class="lame-profile__checkbox">
+    <input type="checkbox" id="RegDefault_{{ prefix }}" data-lame-reg-field="default_address" checked>
+    <span>{{ 'customer.addresses.set_default' | t }}</span>
+  </label>
+</fieldset>

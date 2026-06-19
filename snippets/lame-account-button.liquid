@@ -6,6 +6,8 @@
 {%- enddoc -%}
 
 {%- capture profile_url -%}{%- render 'lame-customer-profile-url', section: section -%}{%- endcapture -%}
+{%- capture login_url -%}{%- render 'lame-customer-auth-url', type: 'login' -%}{%- endcapture -%}
+{%- capture register_url -%}{%- render 'lame-customer-auth-url', type: 'register' -%}{%- endcapture -%}
 {%- capture orders_url -%}{%- render 'lame-customer-orders-url', section: section -%}{%- endcapture -%}
 
 {%- liquid
@@ -164,10 +166,10 @@
     {%- else -%}
       <div class="lame-account__body lame-account__body--guest">
         <div class="lame-account__auth">
-          <a class="lame-account__auth-primary button" href="{{ routes.account_login_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+          <a class="lame-account__auth-primary button" href="{{ login_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
             {{ 'customer.log_in' | t }}
           </a>
-          <a class="lame-account__auth-secondary button button-secondary" href="{{ routes.account_register_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
+          <a class="lame-account__auth-secondary button button-secondary" href="{{ register_url }}" role="menuitem" ref="menuitem[]" on:click="/close">
             {{ 'lame_customer.create_account' | t }}
           </a>
         </div>

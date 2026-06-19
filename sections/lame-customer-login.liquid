@@ -1,0 +1,235 @@
+{%- liquid
+  capture return_url
+    render 'lame-customer-auth-return-url'
+  endcapture
+
+  capture register_url
+    render 'lame-customer-auth-url', type: 'register'
+  endcapture
+
+  assign page_title = section.settings.heading
+  if page_title == blank
+    assign page_title = 'customer.login_page.title' | t
+  endif
+
+  assign page_subtitle = section.settings.subheading
+  assign show_recover = false
+  if request.params.recover == '1' or form.posted_successfully? and form.email != blank
+    assign show_recover = true
+  endif
+-%}
+
+{% if customer and request.design_mode == false %}
+  <script>window.location.replace({{ return_url | json }});</script>
+{% else %}
+
+{%- capture auth_body -%}
+  <div class="lame-auth__tabs" role="tablist" aria-label="{{ 'lame_customer.auth_login_modes' | t }}">
+    <button
+      type="button"
+      class="lame-auth__tab{% unless show_recover %} lame-auth__tab--active{% endunless %}"
+      role="tab"
+      aria-selected="{% unless show_recover %}true{% else %}false{% endunless %}"
+      aria-controls="LameLoginPanel"
+      data-lame-auth-tab="login"
+    >
+      {{ 'customer.log_in' | t }}
+    </button>
+    <button
+      type="button"
+      class="lame-auth__tab{% if show_recover %} lame-auth__tab--active{% endif %}"
+      role="tab"
+      aria-selected="{% if show_recover %}true{% else %}false{% endif %}"
+      aria-controls="LameRecoverPanel"
+      data-lame-auth-tab="recover"
+    >
+      {{ 'lame_customer.auth_forgot_password' | t }}
+    </button>
+  </div>
+
+  <div
+    id="LameLoginPanel"
+    class="lame-auth__panel{% unless show_recover %} lame-auth__panel--active{% endunless %}"
+    role="tabpanel"
+    data-lame-auth-panel="login"
+    {% if show_recover %}hidden{% endif %}
+  >
+    {%- form 'customer_login', return_to: return_url, class: 'lame-profile__form lame-auth__form', id: 'LameLoginForm' -%}
+      {%- if form.errors -%}
+        <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus role="alert">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      <div class="lame-profile__message lame-profile__message--error" data-lame-login-errors hidden role="alert"></div>
+
+      <div class="lame-profile__field">
+        <label for="LoginEmail">{{ 'customer.login_page.email' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+        <input
+          type="email"
+          id="LoginEmail"
+          name="customer[email]"
+          value="{{ form.email }}"
+          autocomplete="email"
+          spellcheck="false"
+          autocapitalize="off"
+          class="lame-profile__input"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="lame-profile__field">
+        <div class="lame-auth__label-row">
+          <label for="LoginPassword">{{ 'lame_customer.auth_password' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+          <button type="button" class="lame-auth__text-link" data-lame-auth-tab="recover">{{ 'lame_customer.auth_forgot_password' | t }}</button>
+        </div>
+        <input
+          type="password"
+          id="LoginPassword"
+          name="customer[password]"
+          autocomplete="current-password"
+          class="lame-profile__input"
+          required
+          aria-required="true"
+        >
+      </div>
+
+      <div class="lame-profile__form-actions lame-auth__actions">
+        <button type="submit" class="button lame-profile__btn-primary lame-auth__submit">
+          {{ 'customer.login_page.sign_in' | t }}
+        </button>
+      </div>
+    {%- endform -%}
+
+    <p class="lame-auth__footer">
+      {{ 'lame_customer.auth_no_account_html' | t: link: register_url }}
+    </p>
+  </div>
+
+  <div
+    id="LameRecoverPanel"
+    class="lame-auth__panel{% if show_recover %} lame-auth__panel--active{% endif %}"
+    role="tabpanel"
+    data-lame-auth-panel="recover"
+    {% unless show_recover %}hidden{% endunless %}
+  >
+    {%- form 'recover_customer_password', class: 'lame-profile__form lame-auth__form', id: 'LameRecoverForm' -%}
+      {%- if form.errors -%}
+        <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus role="alert">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      {%- if form.posted_successfully? -%}
+        <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus role="status">
+          {{ 'lame_customer.auth_recover_success' | t }}
+        </div>
+      {%- else -%}
+        <p class="lame-auth__recover-intro">{{ 'lame_customer.auth_recover_intro' | t }}</p>
+
+        <div class="lame-profile__field">
+          <label for="RecoverEmail">{{ 'customer.login_page.email' | t }} <span class="lame-auth__required" aria-hidden="true">*</span></label>
+          <input
+            type="email"
+            id="RecoverEmail"
+            name="email"
+            value="{{ form.email }}"
+            autocomplete="email"
+            spellcheck="false"
+            autocapitalize="off"
+            class="lame-profile__input"
+            required
+            aria-required="true"
+          >
+        </div>
+
+        <div class="lame-profile__form-actions lame-auth__actions">
+          <button type="submit" class="button lame-profile__btn-primary lame-auth__submit">
+            {{ 'lame_customer.auth_send_reset' | t }}
+          </button>
+        </div>
+      {%- endif -%}
+    {%- endform -%}
+
+    <p class="lame-auth__footer">
+      <a href="{{ routes.account_login_url }}" data-lame-auth-tab-link="login">{{ 'lame_customer.auth_back_to_login' | t }}</a>
+    </p>
+  </div>
+{%- endcapture -%}
+
+{% render 'lame-customer-auth-shell',
+  page_title: page_title,
+  page_subtitle: page_subtitle,
+  body: auth_body,
+  section: section
+%}
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Customer login",
+  "tag": "section",
+  "class": "lame-customer-login-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Welcome back"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Sign in to view orders, manage addresses, and update your profile."
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "t:settings.width",
+      "options": [
+        { "value": "page-width", "label": "t:options.page" },
+        { "value": "full-width", "label": "t:options.full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-golden"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer login"
+    }
+  ]
+}
+{% endschema %}

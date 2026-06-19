@@ -17,6 +17,7 @@
   --hc-radius-lg: 14px;
   --hc-thumb: 72px;
   --hc-pad: max(1rem, var(--page-margin));
+  width: 100%;
 }
 
 .lame-product-healthcare-wrap media-gallery.sticky-content {
@@ -25,10 +26,14 @@
   z-index: auto;
 }
 
-/* Prevent full-viewport hero image (theme constrain-height) */
+/* PDP main gallery — always 1:1 square */
+.lame-product-healthcare-wrap media-gallery {
+  --gallery-aspect-ratio: 1;
+}
+
 .lame-product-healthcare-wrap .product-media-container.constrain-height {
-  --constrained-height: min(480px, 52vh) !important;
-  max-height: min(480px, 52vh) !important;
+  --constrained-height: unset !important;
+  max-height: none !important;
 }
 
 .lame-product-healthcare-wrap .product-information--healthcare {
@@ -36,27 +41,30 @@
   --pdp-border: rgb(45 74 54 / 0.12);
   --pdp-muted: var(--hc-muted);
   --pdp-gap: clamp(2rem, 4vw, 3.5rem);
-  padding-inline: var(--hc-pad);
-  max-width: var(--page-width);
+  --pdp-content-max: min(1120px, 100%);
+  width: 100%;
   margin-inline: auto;
+  padding-inline: var(--hc-pad);
 }
 
-/* Two-column hero: wider gallery, narrower buy box */
 .lame-product-healthcare-wrap .product-information--healthcare .product-information__grid {
   gap: var(--pdp-gap);
   align-items: start;
+  width: 100%;
+  max-width: var(--pdp-content-max);
+  margin-inline: auto;
 }
 
 @media screen and (min-width: 750px) {
   .lame-product-healthcare-wrap .product-information--healthcare.product-information--redesign .product-information__grid {
     grid-column: 1 / -1 !important;
-    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) !important;
+    grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr) !important;
     gap: clamp(2rem, 3.5vw, 3rem) !important;
     align-items: start !important;
   }
 
   .lame-product-healthcare-wrap .product-information--healthcare .product-information__grid--half {
-    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
   }
 
   .lame-product-healthcare-wrap .product-information--healthcare .product-information__media-column,
@@ -70,7 +78,8 @@
   .lame-product-healthcare-wrap .product-information--healthcare .product-details {
     grid-column: auto !important;
     padding: 0 !important;
-    max-width: 420px;
+    max-width: none;
+    width: 100%;
   }
 }
 
@@ -151,13 +160,16 @@
     object-fit: cover;
   }
 
-  /* Main image — light grey box */
+  /* Main image — light grey box, 1:1 square */
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
     grid-area: container;
     background: var(--hc-grey);
     border-radius: var(--hc-radius-lg);
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: auto;
     min-height: auto;
-    max-height: min(520px, 58vh);
+    max-height: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -167,44 +179,10 @@
 
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media-container,
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media-container.constrain-height {
-    max-height: min(500px, 56vh) !important;
-    --constrained-height: min(500px, 56vh) !important;
-    aspect-ratio: auto;
-  }
-
-  /* 1:1 square gallery */
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel slideshow-container {
-    aspect-ratio: 1 / 1;
-    max-height: none;
-    width: 100%;
-    height: auto;
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media-container,
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media-container.constrain-height {
     aspect-ratio: 1 / 1 !important;
     max-height: none !important;
     --constrained-height: unset !important;
     width: 100%;
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media {
-    aspect-ratio: 1 / 1;
-    max-height: none;
-    min-height: 0;
-    padding: clamp(1rem, 2vw, 1.5rem);
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media img,
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media video {
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    object-fit: contain;
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel slideshow-controls[thumbnails] button {
-    aspect-ratio: 1 / 1;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-slide {
@@ -226,19 +204,21 @@
 
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media {
     background: transparent;
-    min-height: auto;
-    max-height: min(480px, 54vh);
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    max-height: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(1.25rem, 2.5vw, 2rem);
+    padding: clamp(1rem, 2vw, 1.5rem);
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media img,
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media video {
     object-fit: contain;
-    max-height: min(460px, 52vh);
-    width: auto;
+    width: 100%;
+    height: 100%;
+    max-height: none;
     max-width: 100%;
     margin-inline: auto;
   }
@@ -661,7 +641,7 @@
 }
 
 .lame-pdp-similar__wrap {
-  max-width: var(--page-width);
+  max-width: min(1120px, 100%);
   margin-inline: auto;
   padding-inline: var(--hc-pad);
 }
@@ -909,45 +889,31 @@
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
     background: var(--hc-grey);
     border-radius: var(--hc-radius-lg);
+    aspect-ratio: 1 / 1;
+    width: 100%;
     min-height: auto;
-    max-height: min(380px, 50vh);
+    max-height: none;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media-container,
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media-container.constrain-height {
-    max-height: min(360px, 48vh) !important;
-    --constrained-height: min(360px, 48vh) !important;
-    aspect-ratio: auto;
+    aspect-ratio: 1 / 1 !important;
+    max-height: none !important;
+    --constrained-height: unset !important;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media {
-    min-height: auto;
-    max-height: min(340px, 46vh);
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    max-height: none;
     padding: 1rem;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel .product-media img {
-    max-height: min(320px, 44vh);
-    width: auto;
-    max-width: 100%;
-    object-fit: contain;
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel slideshow-container {
-    aspect-ratio: 1 / 1;
-    max-height: none;
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media-container,
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media {
-    max-height: none !important;
-    aspect-ratio: 1 / 1;
-  }
-
-  .lame-product-healthcare-wrap media-gallery[style*='--gallery-aspect-ratio: 1'] .media-gallery--carousel .product-media img {
-    max-height: none;
     width: 100%;
     height: 100%;
+    max-height: none;
+    max-width: 100%;
     object-fit: contain;
   }
 

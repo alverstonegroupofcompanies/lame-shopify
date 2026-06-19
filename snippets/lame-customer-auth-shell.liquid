@@ -1,0 +1,60 @@
+{%- doc -%}
+  Shared chrome for custom customer auth pages (login, register, reset).
+
+  @param {string} page_title - Main heading text
+  @param {string} [page_subtitle] - Optional supporting text
+  @param {string} body - Rendered form HTML
+  @param {object} section - Section object for settings
+{%- enddoc -%}
+
+{{ 'lame-customer-account.css' | asset_url | stylesheet_tag }}
+{{ 'lame-customer-profile-layout.css' | asset_url | stylesheet_tag }}
+{{ 'lame-customer-auth.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer></script>
+<script src="{{ 'lame-customer-auth.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign profile_logo = settings.logo
+  if profile_logo == blank
+    assign profile_logo = settings.logo_inverse
+  endif
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-customer-auth"
+  data-lame-customer-auth
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-acct-page spacing-style lame-auth-page" style="{% render 'spacing-padding', settings: section.settings %}">
+    <header class="lame-profile__topbar lame-auth__topbar" aria-label="{{ 'lame_customer.auth_topbar' | t }}">
+      <div class="lame-profile__topbar-start">
+        {% if profile_logo != blank %}
+          <a href="{{ routes.root_url }}" class="lame-profile__topbar-logo-link">
+            {% render 'image',
+              image: profile_logo,
+              height: 36,
+              class: 'lame-profile__topbar-logo',
+              alt_text_fallback: shop.name,
+              text_fallback: shop.name
+            %}
+          </a>
+        {% else %}
+          <a href="{{ routes.root_url }}" class="lame-profile__topbar-name">{{ shop.name }}</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="lame-auth__card lame-acct-card">
+      <div class="lame-auth__card-head">
+        <h1 class="lame-auth__title">{{ page_title }}</h1>
+        {% if page_subtitle != blank %}
+          <p class="lame-auth__subtitle">{{ page_subtitle }}</p>
+        {% endif %}
+      </div>
+      <div class="lame-auth__card-body">
+        {{ body }}
+      </div>
+    </div>
+  </div>
+</section>
