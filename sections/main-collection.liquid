@@ -107,61 +107,8 @@
               assign group_by_brand = false
             endif
           endif
-
-          assign lame_active_brand_slugs_pipe = '|'
-          assign lame_active_brand_count = 0
-          for filter in collection.filters
-            if filter.param_name == 'filter.p.vendor'
-              for value in filter.active_values
-                assign raw_vendor = value.value | strip
-                if raw_vendor == blank
-                  assign raw_vendor = value.label | strip
-                endif
-                capture active_slug_capture
-                  render 'lame-vendor-slug', vendor: raw_vendor
-                endcapture
-                assign active_slug = active_slug_capture | strip
-                if active_slug == blank or active_slug == 'other'
-                  capture active_slug_capture
-                    render 'lame-vendor-slug', vendor: value.label
-                  endcapture
-                  assign active_slug = active_slug_capture | strip
-                endif
-                assign active_slug_token = '|' | append: active_slug | append: '|'
-                unless lame_active_brand_slugs_pipe contains active_slug_token
-                  assign lame_active_brand_slugs_pipe = lame_active_brand_slugs_pipe | append: active_slug | append: '|'
-                  assign lame_active_brand_count = lame_active_brand_count | plus: 1
-                endunless
-              endfor
-              break
-            endif
-          endfor
-
-          assign has_active_brand_filter = false
-          if lame_active_brand_count > 0
-            assign has_active_brand_filter = true
-          endif
-
-          assign lame_active_brand_slug = blank
-          if lame_active_brand_count == 1
-            assign slug_parts = lame_active_brand_slugs_pipe | split: '|'
-            for slug_part in slug_parts
-              if slug_part != blank
-                assign lame_active_brand_slug = slug_part
-                break
-              endif
-            endfor
-          endif
         %}
-        <div
-          class="lame-collection-products-column{% if has_active_brand_filter %} lame-collection-products-column--brand-selected{% endif %}"
-          data-lame-products-scroll
-          {% if has_active_brand_filter %}data-server-vendor-filter="true"{% endif %}
-          {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
-        >
-          <p class="lame-brand-filter-empty" data-lame-brand-filter-empty hidden>
-            {{ 'lame_collection.brand_filter_no_results' | t | default: 'No products match the selected brands.' }}
-          </p>
+        <div class="lame-collection-products-column" data-lame-products-scroll>
           {% liquid
             assign show_inline_header = false
             if lame_cosmetic_collection and section.settings.our_products_heading != blank
@@ -297,34 +244,13 @@
                 endfor
               %}
               {% if brand_product_count > 0 %}
-                {% liquid
-                  assign show_brand_section_header = false
-                  if lame_active_brand_slug != blank and brand_slug == lame_active_brand_slug
-                    assign show_brand_section_header = true
-                  endif
-                %}
                 <section
-                  class="lame-collection-brand-section{% if show_brand_section_header %} lame-collection-brand-section--show-header{% endif %}"
+                  class="lame-collection-brand-section"
                   id="brand-{{ brand_slug }}"
                   data-brand-slug="{{ brand_slug }}"
                   data-brand="{{ brand_label | escape }}"
-                  {% if show_brand_section_header %}aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"{% else %}aria-label="{{ brand_label }}"{% endif %}
+                  aria-label="{{ brand_label }}"
                 >
-                  {% if show_brand_section_header %}
-                    <header class="lame-collection-brand-section__header">
-                      <div class="lame-collection-brand-section__heading">
-                        <h2
-                          class="lame-collection-brand-section__title"
-                          id="brand-heading-{{ section.id }}-{{ brand_slug }}"
-                        >
-                          {{ brand_label }}
-                        </h2>
-                        <p class="lame-collection-brand-section__count">
-                          {{ 'lame_collection.brand_product_count' | t: count: brand_product_count }}
-                        </p>
-                      </div>
-                    </header>
-                  {% endif %}
                   <ul
                     class="product-grid product-grid--{{ section.id }} product-grid--{{ section.settings.layout_type }}{% if lame_cosmetic_collection %} lame-category-shop__grid{% endif %} lame-collection-brand-section__grid{% if section.settings.mobile_product_card_size == 'large' %} product-grid-mobile--large{% endif %}"
                     data-testid="product-grid-brand-{{ brand_slug }}"

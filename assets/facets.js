@@ -4,9 +4,7 @@ import { FilterUpdateEvent, ThemeEvents } from '@theme/events';
 import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 import {
-  applyVendorBrandFilter,
   syncVendorCheckboxGroup,
-  syncVendorCheckboxesFromUrl,
   syncVendorParamsToUrlSearchParams,
 } from '@theme/lame-vendor-brand-filter';
 /**
@@ -14,94 +12,6 @@ import {
  * @type {string}
  */
 const SEARCH_QUERY = 'q';
-
-/** @type {boolean} */
-let lameVendorFilterHandlersReady = false;
-
-/** @type {ReturnType<typeof debounce<(form: FacetsFormComponent) => void>> | undefined} */
-let debouncedVendorSectionUpdate;
-
-/**
- * @param {FacetsFormComponent} form
- */
-async function runVendorSectionUpdate(form) {
-  form.updateFiltersWithoutRender();
-  await sectionRenderer.renderSection(form.sectionId, { cache: false });
-  syncVendorCheckboxesFromUrl();
-  applyVendorBrandFilter();
-}
-
-/**
- * @param {FacetInputsComponent} component
- */
-function updateVendorSummaries(component) {
-  document.querySelectorAll('[data-lame-vendor-filter]').forEach((el) => {
-    if (el instanceof FacetInputsComponent) {
-      el.updateVendorSummary();
-    }
-  });
-}
-
-/**
- * @param {HTMLInputElement} input
- */
-function scheduleVendorSectionUpdate(input) {
-  const facetsForm = input.closest('facets-form-component');
-  if (!(facetsForm instanceof FacetsFormComponent)) return;
-
-  if (!debouncedVendorSectionUpdate) {
-    debouncedVendorSectionUpdate = debounce((form) => {
-      runVendorSectionUpdate(form);
-    }, 250);
-  }
-
-  debouncedVendorSectionUpdate(facetsForm);
-}
-
-/**
- * @param {Event} event
- */
-function handleLameVendorFilterChange(event) {
-  const { target } = event;
-  if (!(target instanceof HTMLInputElement)) return;
-  if (target.type !== 'checkbox' || target.name !== 'filter.p.vendor') return;
-  if (!target.closest('[data-lame-vendor-filter]')) return;
-
-  syncVendorCheckboxGroup(target);
-  const facetsForm = target.closest('facets-form-component');
-  if (facetsForm instanceof FacetsFormComponent) {
-    facetsForm.updateFiltersWithoutRender();
-  }
-  applyVendorBrandFilter();
-  scheduleVendorSectionUpdate(target);
-
-  const component = target.closest('facet-inputs-component');
-  if (component instanceof FacetInputsComponent) {
-    updateVendorSummaries(component);
-  }
-}
-
-function ensureLameVendorFilterHandlers() {
-  if (lameVendorFilterHandlersReady) return;
-  lameVendorFilterHandlersReady = true;
-
-  document.addEventListener('change', handleLameVendorFilterChange, true);
-
-  window.addEventListener('popstate', () => {
-    syncVendorCheckboxesFromUrl();
-    applyVendorBrandFilter();
-  });
-
-  document.addEventListener(ThemeEvents.FilterUpdate, (event) => {
-    if (!(event.target instanceof FacetsFormComponent)) return;
-    syncVendorCheckboxesFromUrl(
-      event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined
-    );
-  });
-
-  syncVendorCheckboxesFromUrl();
-  applyVendorBrandFilter();
-}
 
 /**
  * Handles the main facets form functionality
@@ -236,12 +146,6 @@ class FacetInputsComponent extends Component {
     this.#abortController = new AbortController();
     const { signal } = this.#abortController;
     this.addEventListener('change', this.#handleInputChange, { signal });
-
-    if (this.hasAttribute('data-lame-vendor-filter')) {
-      ensureLameVendorFilterHandlers();
-      syncVendorCheckboxesFromUrl();
-      applyVendorBrandFilter();
-    }
   }
 
   disconnectedCallback() {
@@ -252,25 +156,16 @@ class FacetInputsComponent extends Component {
 
   updatedCallback() {
     super.updatedCallback();
-
-    if (this.hasAttribute('data-lame-vendor-filter')) {
-      syncVendorCheckboxesFromUrl();
-      applyVendorBrandFilter();
-    }
-  }
-
-  /**
-   * Updates the selected facet summary for the vendor filter.
-   */
-  updateVendorSummary() {
-    this.#updateSelectedFacetSummary();
   }
 
   #handleInputChange = (event) => {
     const { target } = event;
     if (!(target instanceof HTMLInputElement)) return;
     if (target.type !== 'checkbox' && target.type !== 'radio') return;
-    if (this.hasAttribute('data-lame-vendor-filter')) return;
+
+    if (this.hasAttribute('data-lame-vendor-filter') && target.name === 'filter.p.vendor') {
+      syncVendorCheckboxGroup(target);
+    }
 
     this.updateFilters();
   };
@@ -288,7 +183,6 @@ class FacetInputsComponent extends Component {
     const facetsForm = this.closest('facets-form-component');
 
     if (!(facetsForm instanceof FacetsFormComponent)) return;
-    if (this.hasAttribute('data-lame-vendor-filter')) return;
 
     facetsForm.updateFilters();
     this.#updateSelectedFacetSummary();
@@ -1202,5 +1096,3 @@ class FacetStatusComponent extends Component {
 if (!customElements.get('facet-status-component')) {
   customElements.define('facet-status-component', FacetStatusComponent);
 }
-
-ensureLameVendorFilterHandlers();
