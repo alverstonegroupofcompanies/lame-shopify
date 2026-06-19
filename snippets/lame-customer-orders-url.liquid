@@ -1,5 +1,15 @@
 {%- doc -%}
-  Outputs Shopify default customer orders/account URL.
+  Outputs the themed customer orders URL.
+
+  @param {object} [section] - Header section with orders_page setting
 {%- enddoc -%}
 
-{{- routes.account_url -}}
+{%- liquid
+  assign lame_orders_url = routes.account_url
+
+  if section != blank and section.settings.orders_page != blank
+    assign lame_orders_url = section.settings.orders_page.url
+  elsif pages['my-orders'] != blank
+    assign lame_orders_url = pages['my-orders'].url
+  endif
+-%}{{- lame_orders_url -}}
