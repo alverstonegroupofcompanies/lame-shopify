@@ -256,6 +256,10 @@
     --lame-sig-gold-hover: 193 151 31;
     --lame-sig-mint: 180 210 170;
     --lame-sig-cream: #fdfbf7;
+    --lame-sig-panel-bg: rgb(236 242 232);
+    --lame-sig-panel-bg-soft: rgb(228 238 222);
+    --lame-sig-panel-text: rgb(var(--lame-sig-forest));
+    --lame-sig-panel-muted: rgb(var(--lame-sig-forest) / 0.72);
     --lame-sig-vector-green: rgb(var(--lame-sig-forest) / 0.22);
     --lame-sig-vector-mint: rgb(var(--lame-sig-mint) / 0.35);
     position: relative;
@@ -395,6 +399,7 @@
 
   .lame-signature__carousel {
     --signature-card-height: clamp(220px, 22vw, 280px);
+    width: 100%;
   }
 
   .lame-signature__track {
@@ -403,7 +408,7 @@
     padding: 0 0 0.25rem;
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: min(88vw, 340px);
+    grid-auto-columns: min(85vw, 320px);
     align-items: stretch;
     gap: clamp(0.75rem, 2vw, 1.1rem);
     overflow-x: auto;
@@ -469,7 +474,8 @@
     padding: 1rem 0.85rem;
     gap: 0.35rem;
     overflow: hidden;
-    background: rgb(var(--lame-sig-forest));
+    background: linear-gradient(165deg, var(--lame-sig-panel-bg) 0%, var(--lame-sig-panel-bg-soft) 100%);
+    border-inline-start: 1px solid rgb(var(--lame-sig-forest) / 0.08);
   }
 
   .lame-signature__brand {
@@ -477,7 +483,7 @@
     font-size: 0.75rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.78);
+    color: var(--lame-sig-panel-muted);
     font-family: var(--lame-font-display, var(--font-heading--family));
   }
 
@@ -487,7 +493,7 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     line-height: 1.15;
-    color: #fff;
+    color: var(--lame-sig-panel-text);
     font-family: var(--lame-font-display, var(--font-heading--family));
     font-weight: 400;
   }
@@ -496,12 +502,12 @@
     margin: 0;
     font-size: 0.875rem;
     line-height: 1.45;
-    color: rgb(255 255 255 / 0.88);
+    color: rgb(var(--lame-sig-forest) / 0.82);
     max-width: 22ch;
   }
 
   .lame-signature__crest {
-    color: rgb(255 255 255 / 0.85);
+    color: rgb(var(--lame-sig-forest) / 0.55);
     width: 1.1rem;
     height: 1.1rem;
     display: inline-flex;
@@ -517,7 +523,7 @@
     font-size: 0.6875rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.72);
+    color: rgb(var(--lame-sig-forest) / 0.62);
   }
 
   .lame-signature__cta {
@@ -670,23 +676,90 @@
     }
   }
 
-  @media screen and (max-width: 549px) {
+  @media screen and (max-width: 749px) {
+    .lame-signature__wrap {
+      padding-inline: max(1rem, var(--page-margin, 1rem));
+    }
+
     .lame-signature__carousel {
       --signature-card-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lame-signature__track {
+      width: 100%;
+      max-width: min(360px, 100%);
+      margin-inline: auto;
+      padding-inline: 0;
+      grid-auto-columns: 100%;
+      gap: 1rem;
+      scroll-padding-inline: 0;
     }
 
     .lame-signature__slide {
       height: auto;
+      scroll-snap-align: center;
+      justify-content: center;
     }
 
     .lame-signature__card {
       grid-template-columns: 1fr;
-      grid-template-rows: minmax(180px, 42vw) 1fr;
-      min-height: 320px;
+      grid-template-rows: minmax(200px, 52vw) auto;
+      min-height: 0;
+      width: 100%;
+      max-width: min(360px, 100%);
+      margin-inline: auto;
     }
 
     .lame-signature__media {
       height: auto;
+      min-height: 200px;
+    }
+
+    .lame-signature__content {
+      border-inline-start: 0;
+      border-block-start: 1px solid rgb(var(--lame-sig-forest) / 0.08);
+      padding: 1.15rem 1rem 1.25rem;
+      align-items: center;
+      text-align: center;
+    }
+
+    .lame-signature__description {
+      max-width: 28ch;
+      margin-inline: auto;
+    }
+
+    .lame-signature__controls {
+      width: 100%;
+      max-width: min(360px, 100%);
+      margin-inline: auto;
+      justify-content: center;
+    }
+
+    .lame-signature__values {
+      text-align: center;
+    }
+
+    .lame-signature__value {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.65rem;
+    }
+
+    .lame-signature__value-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  @media screen and (max-width: 549px) {
+    .lame-signature__card {
+      grid-template-rows: minmax(180px, 42vw) auto;
     }
   }
 {% endstylesheet %}

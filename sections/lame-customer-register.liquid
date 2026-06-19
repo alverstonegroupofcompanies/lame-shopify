@@ -3,7 +3,8 @@
     render 'lame-customer-auth-return-url'
   endcapture
 
-  assign register_return = routes.account_register_url | append: '?registered=1&return_url=' | append: return_url | url_encode
+  assign encoded_return = return_url | url_encode
+  assign register_return = routes.account_register_url | append: '?registered=1&return_url=' | append: encoded_return
   assign address_step_return = register_return | append: '&step=address'
 
   capture login_url
