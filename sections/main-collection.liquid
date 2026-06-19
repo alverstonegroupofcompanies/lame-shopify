@@ -197,25 +197,28 @@
           {% liquid
             assign brand_slugs_pipe = '|'
             assign brand_labels_json = ''
-            for product in collection.products
-              assign raw_vendor = product.vendor | strip
-              capture product_slug_capture
-                render 'lame-vendor-slug', vendor: raw_vendor
-              endcapture
-              assign brand_slug = product_slug_capture | strip
-              if raw_vendor == blank
-                assign brand_label = 'Other'
-              else
-                assign brand_label = raw_vendor
-              endif
-              assign slug_token = '|' | append: brand_slug | append: '|'
-              unless brand_slugs_pipe contains slug_token
-                assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|'
-                assign brand_labels_json = brand_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||'
-              endunless
-            endfor
-            assign brand_slugs = brand_slugs_pipe | split: '|'
           %}
+          {% for product in collection.products %}
+            {% capture product_brand_capture %}
+              {% render 'lame-product-brand-name', product: product %}
+            {% endcapture %}
+            {% assign raw_vendor = product_brand_capture | strip %}
+            {% capture product_slug_capture %}
+              {% render 'lame-vendor-slug', vendor: raw_vendor %}
+            {% endcapture %}
+            {% assign brand_slug = product_slug_capture | strip %}
+            {% if raw_vendor == blank %}
+              {% assign brand_label = 'Other' %}
+            {% else %}
+              {% assign brand_label = raw_vendor %}
+            {% endif %}
+            {% assign slug_token = '|' | append: brand_slug | append: '|' %}
+            {% unless brand_slugs_pipe contains slug_token %}
+              {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
+              {% assign brand_labels_json = brand_labels_json | append: brand_slug | append: '::' | append: brand_label | append: '||' %}
+            {% endunless %}
+          {% endfor %}
+          {% assign brand_slugs = brand_slugs_pipe | split: '|' %}
           {% capture children %}
             {% for brand_slug in brand_slugs %}
               {% if brand_slug == blank %}
@@ -232,17 +235,20 @@
                   endif
                 endfor
                 assign brand_product_count = 0
-                for product in collection.products
-                  assign raw_vendor = product.vendor | strip
-                  capture product_slug_capture
-                    render 'lame-vendor-slug', vendor: raw_vendor
-                  endcapture
-                  assign product_slug = product_slug_capture | strip
-                  if product_slug == brand_slug
-                    assign brand_product_count = brand_product_count | plus: 1
-                  endif
-                endfor
               %}
+              {% for product in collection.products %}
+                {% capture product_brand_capture %}
+                  {% render 'lame-product-brand-name', product: product %}
+                {% endcapture %}
+                {% assign raw_vendor = product_brand_capture | strip %}
+                {% capture product_slug_capture %}
+                  {% render 'lame-vendor-slug', vendor: raw_vendor %}
+                {% endcapture %}
+                {% assign product_slug = product_slug_capture | strip %}
+                {% if product_slug == brand_slug %}
+                  {% assign brand_product_count = brand_product_count | plus: 1 %}
+                {% endif %}
+              {% endfor %}
               {% if brand_product_count > 0 %}
                 <section
                   class="lame-collection-brand-section"
@@ -258,13 +264,14 @@
                   >
                     {% assign item_index = 0 %}
                     {% for product in collection.products %}
-                      {% liquid
-                        assign raw_vendor = product.vendor | strip
-                        capture product_slug_capture
-                          render 'lame-vendor-slug', vendor: raw_vendor
-                        endcapture
-                        assign product_slug = product_slug_capture | strip
-                      %}
+                      {% capture product_brand_capture %}
+                        {% render 'lame-product-brand-name', product: product %}
+                      {% endcapture %}
+                      {% assign raw_vendor = product_brand_capture | strip %}
+                      {% capture product_slug_capture %}
+                        {% render 'lame-vendor-slug', vendor: raw_vendor %}
+                      {% endcapture %}
+                      {% assign product_slug = product_slug_capture | strip %}
                       {% if product_slug == brand_slug %}
                         <li
                           id="{{ section.id }}-{{ product.id }}"
@@ -300,13 +307,14 @@
           {% capture children %}
             {% assign flat_grid_index = 0 %}
             {% for product in collection.products %}
-              {% liquid
-                assign raw_vendor = product.vendor | strip
-                capture product_slug_capture
-                  render 'lame-vendor-slug', vendor: raw_vendor
-                endcapture
-                assign product_brand_slug = product_slug_capture | strip
-              %}
+              {% capture product_brand_capture %}
+                {% render 'lame-product-brand-name', product: product %}
+              {% endcapture %}
+              {% assign raw_vendor = product_brand_capture | strip %}
+              {% capture product_slug_capture %}
+                {% render 'lame-vendor-slug', vendor: raw_vendor %}
+              {% endcapture %}
+              {% assign product_brand_slug = product_slug_capture | strip %}
                 <li
                   id="{{ section.id }}-{{ product.id }}"
                   class="{{ lame_product_grid_item_class }} product-grid__item--{{ flat_grid_index }}"

@@ -22,9 +22,12 @@
     assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
   endif
 
-  assign card_label = product.type
+  assign card_label = product.vendor | strip
+  if card_label == blank and product.metafields.custom.brand.value != blank
+    assign card_label = product.metafields.custom.brand.value | strip
+  endif
   if card_label == blank
-    assign card_label = product.vendor
+    assign card_label = product.type
   endif
 -%}
 

@@ -166,9 +166,83 @@ function toggleProductItems(root, selectedSlugs) {
 }
 
 /**
+ * Add Brand filter checkboxes for vendors present on the grid but missing from Liquid list.
+ */
+export function augmentVendorFilterFromGrid() {
+  const root = getCollectionFilterRoot();
+  if (!root) return;
+
+  /** @type {Map<string, string>} */
+  const brandsFromGrid = new Map();
+
+  root.querySelectorAll('[data-brand-slug][data-brand]').forEach((element) => {
+    if (!(element instanceof HTMLElement)) return;
+
+    const slug = (element.getAttribute('data-brand-slug') || '').trim();
+    const name = (element.getAttribute('data-brand') || '').trim();
+    if (!slug || !name || slug === 'other') return;
+
+    if (!brandsFromGrid.has(slug)) brandsFromGrid.set(slug, name);
+  });
+
+  if (!brandsFromGrid.size) return;
+
+  const filterComponents = document.querySelectorAll('[data-lame-vendor-filter]');
+  if (!filterComponents.length) return;
+
+  for (const filterComponent of filterComponents) {
+    const list = filterComponent.querySelector('ul.facets__inputs-list');
+    if (!(list instanceof HTMLUListElement)) continue;
+
+    const templateItem = list.querySelector('.facets__inputs-list-item:not([data-lame-vendor-augmented])');
+    if (!(templateItem instanceof HTMLLIElement)) continue;
+
+    const existingSlugs = new Set(
+      [...list.querySelectorAll('input[type="checkbox"][name="filter.p.vendor"]')].map((input) =>
+        vendorToSlug(input instanceof HTMLInputElement ? input.value : '')
+      )
+    );
+
+    let augmentIndex = list.querySelectorAll('[data-lame-vendor-augmented]').length;
+
+    for (const [slug, name] of brandsFromGrid) {
+      const alreadyListed = [...existingSlugs].some((existing) => slugFamilyMatch(existing, slug));
+      if (alreadyListed) continue;
+
+      const clone = templateItem.cloneNode(true);
+      if (!(clone instanceof HTMLLIElement)) continue;
+
+      const input = clone.querySelector('input[type="checkbox"]');
+      const labelText = clone.querySelector('.checkbox__label-text');
+      const label = clone.querySelector('label.checkbox__label');
+      if (!(input instanceof HTMLInputElement) || !(labelText instanceof HTMLElement)) continue;
+
+      augmentIndex += 1;
+      const componentId = filterComponent.id || 'vendor-filter';
+      const inputId = `Filter-filter-p-vendor-augment-${augmentIndex}-${componentId}`;
+
+      input.value = name;
+      input.checked = false;
+      input.disabled = false;
+      input.id = inputId;
+      input.removeAttribute('disabled');
+      if (label instanceof HTMLLabelElement) label.htmlFor = inputId;
+      labelText.textContent = name;
+
+      clone.setAttribute('data-lame-vendor-augmented', 'true');
+      clone.setAttribute('data-skip-node-update', 'true');
+      list.appendChild(clone);
+      existingSlugs.add(slug);
+    }
+  }
+}
+
+/**
  * Show/hide products and brand sections for the current checkbox selection.
  */
 export function applyVendorBrandFilter() {
+  augmentVendorFilterFromGrid();
+
   const root = getCollectionFilterRoot();
   if (!root) return;
 
@@ -245,7 +319,12 @@ export function syncVendorCheckboxGroup(changedInput) {
  * Re-apply brand filter after section morph replaces the product grid.
  */
 export function onSectionMorphComplete() {
-  if (!shouldRunVendorBrandFilter()) return;
+  const root = getCollectionFilterRoot();
+  if (!root) return;
+
+  augmentVendorFilterFromGrid();
+
+  if (!getVendorFilterInputs().length) return;
 
   syncVendorCheckboxesFromUrl();
   applyVendorBrandFilter();

@@ -1,0 +1,13 @@
+{%- doc -%}
+  Resolves display/filter brand name for a product.
+  Primary: Shopify Vendor field. Fallback: custom.brand metafield.
+
+  @param {object} product
+{%- enddoc -%}
+{%- liquid
+  assign brand_name = product.vendor | strip
+  if brand_name == blank and product.metafields.custom.brand.value != blank
+    assign brand_name = product.metafields.custom.brand.value | strip
+  endif
+-%}
+{{- brand_name -}}

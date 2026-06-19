@@ -5,6 +5,7 @@ import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 import {
   applyVendorBrandFilter,
+  augmentVendorFilterFromGrid,
   getCollectionFilterRoot,
   shouldRunVendorBrandFilter,
   syncVendorCheckboxGroup,
@@ -1140,6 +1141,11 @@ if (!customElements.get('facet-status-component')) {
 }
 
 function initVendorBrandFilter() {
+  const root = getCollectionFilterRoot();
+  if (!root) return;
+
+  augmentVendorFilterFromGrid();
+
   if (!shouldRunVendorBrandFilter()) return;
 
   syncVendorCheckboxesFromUrl();
