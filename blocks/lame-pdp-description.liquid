@@ -1,0 +1,36 @@
+{%- liquid
+  assign heading = block.settings.heading | default: 'Description'
+  assign description_html = closest.product.description
+-%}
+
+{% if description_html != blank %}
+  <div class="lame-pdp-description product-description" {{ block.shopify_attributes }}>
+    {% if heading != blank %}
+      <h2 class="lame-pdp-description__heading">{{ heading | escape }}</h2>
+    {% endif %}
+    <div class="lame-pdp-description__content rte">
+      {{ description_html }}
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product description",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product description",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
