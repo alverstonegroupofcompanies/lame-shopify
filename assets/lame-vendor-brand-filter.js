@@ -60,7 +60,11 @@ function setVendorFilterHidden(element, hide) {
  * @returns {string}
  */
 function inputSlug(input) {
-  return (input.dataset.brandSlug || vendorToSlug(input.value)).toLowerCase();
+  const fromDataset = input.dataset.brandSlug?.trim().toLowerCase();
+  if (fromDataset) return fromDataset;
+  const fromBrand = input.dataset.brand?.trim();
+  if (fromBrand) return vendorToSlug(fromBrand);
+  return vendorToSlug(input.value);
 }
 
 /**
@@ -145,7 +149,8 @@ export function applyVendorBrandFilter(productsColumn = document.querySelector('
     if (!(section instanceof HTMLElement)) return;
 
     const slug = section.dataset.brandSlug ?? '';
-    const show = !hasSelection || productMatchesVendorFilter(slug, '', selected);
+    const brand = section.dataset.brand ?? '';
+    const show = !hasSelection || productMatchesVendorFilter(slug, brand, selected);
     setVendorFilterHidden(section, !show);
     if (show) {
       visibleCount += section.querySelectorAll('li[data-brand-slug]').length;

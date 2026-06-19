@@ -108,23 +108,47 @@
             endif
           endif
 
-          assign lame_active_brand_slug = blank
+          assign lame_active_brand_slugs_pipe = '|'
+          assign lame_active_brand_count = 0
           for filter in collection.filters
             if filter.param_name == 'filter.p.vendor'
               for value in filter.active_values
                 assign raw_vendor = value.label | strip
+                if raw_vendor == blank
+                  assign raw_vendor = value.value | strip
+                endif
                 capture active_slug_capture
                   render 'lame-vendor-slug', vendor: raw_vendor
                 endcapture
-                assign lame_active_brand_slug = active_slug_capture | strip
-                break
+                assign active_slug = active_slug_capture | strip
+                assign active_slug_token = '|' | append: active_slug | append: '|'
+                unless lame_active_brand_slugs_pipe contains active_slug_token
+                  assign lame_active_brand_slugs_pipe = lame_active_brand_slugs_pipe | append: active_slug | append: '|'
+                  assign lame_active_brand_count = lame_active_brand_count | plus: 1
+                endunless
               endfor
               break
             endif
           endfor
+
+          assign has_active_brand_filter = false
+          if lame_active_brand_count > 0
+            assign has_active_brand_filter = true
+          endif
+
+          assign lame_active_brand_slug = blank
+          if lame_active_brand_count == 1
+            assign slug_parts = lame_active_brand_slugs_pipe | split: '|'
+            for slug_part in slug_parts
+              if slug_part != blank
+                assign lame_active_brand_slug = slug_part
+                break
+              endif
+            endfor
+          endif
         %}
         <div
-          class="lame-collection-products-column{% if lame_active_brand_slug != blank %} lame-collection-products-column--brand-selected{% endif %}"
+          class="lame-collection-products-column{% if has_active_brand_filter %} lame-collection-products-column--brand-selected{% endif %}"
           data-lame-products-scroll
           {% if lame_active_brand_slug != blank %}data-active-brand="{{ lame_active_brand_slug }}"{% endif %}
         >
@@ -266,8 +290,11 @@
                 endfor
               %}
               {% if brand_product_count > 0 %}
-                {% if lame_active_brand_slug != blank and brand_slug != lame_active_brand_slug %}
-                  {% continue %}
+                {% if has_active_brand_filter %}
+                  {% assign brand_slug_token = '|' | append: brand_slug | append: '|' %}
+                  {% unless lame_active_brand_slugs_pipe contains brand_slug_token %}
+                    {% continue %}
+                  {% endunless %}
                 {% endif %}
                 {% liquid
                   assign show_brand_section_header = false
@@ -279,6 +306,7 @@
                   class="lame-collection-brand-section{% if show_brand_section_header %} lame-collection-brand-section--show-header{% endif %}"
                   id="brand-{{ brand_slug }}"
                   data-brand-slug="{{ brand_slug }}"
+                  data-brand="{{ brand_label | escape }}"
                   {% if show_brand_section_header %}aria-labelledby="brand-heading-{{ section.id }}-{{ brand_slug }}"{% else %}aria-label="{{ brand_label }}"{% endif %}
                 >
                   {% if show_brand_section_header %}

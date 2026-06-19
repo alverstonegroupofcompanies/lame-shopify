@@ -52,9 +52,15 @@
       endif
 
       capture vendor_slug_capture
-        render 'lame-vendor-slug', vendor: raw_label
+        render 'lame-vendor-slug', vendor: value.value
       endcapture
       assign vendor_slug = vendor_slug_capture | strip
+      if vendor_slug == blank or vendor_slug == 'other'
+        capture vendor_slug_capture
+          render 'lame-vendor-slug', vendor: raw_label
+        endcapture
+        assign vendor_slug = vendor_slug_capture | strip
+      endif
       assign slug_token = '|' | append: vendor_slug | append: '|'
 
       unless vendor_slugs_seen contains slug_token
