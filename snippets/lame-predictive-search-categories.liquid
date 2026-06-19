@@ -1,0 +1,44 @@
+{%- doc -%}
+  Shop by category row for the Lame predictive search empty state.
+{%- enddoc -%}
+
+{%- liquid
+  assign category_defs = 'skin-care:Skincare|hair-care:Hair Care|bath-body:Personal Care|wellness:Wellness|make-up:Make-up|baby-mom:Baby Care' | split: '|'
+-%}
+
+<section class="lame-search-section lame-search-section--categories" aria-label="{{ 'lame_search.shop_by_category' | t }}">
+  <div class="lame-search-section__header">
+    <h3 class="lame-search-section__title">
+      <span class="lame-search-section__icon lame-search-section__icon--grid" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.25"/><rect x="9.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.25"/><rect x="1.5" y="9.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.25"/><rect x="9.5" y="9.5" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.25"/></svg>
+      </span>
+      {{ 'lame_search.shop_by_category' | t }}
+    </h3>
+  </div>
+
+  <div class="lame-search-categories">
+    <ul class="lame-search-categories__list list-unstyled" role="list">
+      {% for category_def in category_defs %}
+        {% liquid
+          assign parts = category_def | split: ':'
+          assign handle = parts[0]
+          assign label = parts[1]
+          assign cat_collection = collections[handle]
+        %}
+        {% if cat_collection != blank %}
+          <li class="lame-search-categories__item">
+            <a href="{{ cat_collection.url }}" class="lame-search-categories__pill">
+              <span class="lame-search-categories__pill-icon" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3 4 9v12h16V9l-8-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="lame-search-categories__pill-label">{{ label }}</span>
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+    <button type="button" class="lame-search-categories__scroll-btn" data-lame-search-cat-scroll aria-label="{{ 'lame_search.scroll_categories' | t }}" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</section>

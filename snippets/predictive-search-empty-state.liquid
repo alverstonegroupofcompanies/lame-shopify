@@ -11,34 +11,62 @@
 
 <div
   id="predictive-search-results"
-  class="predictive-search-dropdown"
+  class="predictive-search-dropdown lame-search-dropdown"
   role="listbox"
   aria-expanded="true"
   style="--color-shadow: rgb(var(--color-foreground-rgb) / {{ shadow_opacity }});"
 >
   {% if load_empty_state %}
-    <div class="predictive-search-results__inner">
+    <div class="predictive-search-results__inner lame-search-panel">
       {% liquid
         assign collection = settings.empty_state_collection | default: collections.all
-        assign default_title = 'content.search_results_resource_products' | t
-        assign title = settings.empty_state_collection.title | default: default_title
+        assign popular_collection_url = collection.url | default: routes.all_products_collection_url
       %}
-      {% paginate collection.products by 4 %}
-        {% assign products = collection.products %}
-        {% comment %} Only show products section if there are products to display {% endcomment %}
-        {% if products.size > 0 %}
-          {% render 'predictive-search-products-list',
-            products_test_id: products_test_id,
-            title: title,
-            products: products,
-            limit: 4
-          %}
-        {% else %}
-          <div class="predictive-search-results__no-results">
-            <p>{{ 'content.no_products_found' | t }}</p>
-          </div>
+
+      <div
+        id="predictive-search-products"
+        class="lame-search-products-stack"
+        {% if products_test_id %}
+          data-testid="{{ products_test_id }}"
         {% endif %}
-      {% endpaginate %}
+      >
+        {% paginate collection.products by 4 %}
+          {% if collection.products.size > 0 %}
+            <section class="lame-search-section lame-search-section--popular">
+              <div class="lame-search-section__header">
+                <h3 class="lame-search-section__title">
+                  <span class="lame-search-section__icon" aria-hidden="true">🔥</span>
+                  {{ 'lame_search.popular_products' | t }}
+                </h3>
+                <a href="{{ popular_collection_url }}" class="lame-search-section__link">
+                  {{ 'lame_search.view_all' | t }}
+                </a>
+              </div>
+              <ul class="lame-search-popular-grid list-unstyled" role="list">
+                {% for product in collection.products limit: 4 %}
+                  <li class="predictive-search-results__card predictive-search-results__card--product">
+                    {% render 'lame-predictive-search-product-card', product: product, section: section %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+          {% else %}
+            <div class="predictive-search-results__no-results">
+              <p>{{ 'content.no_products_found' | t }}</p>
+            </div>
+          {% endif %}
+        {% endpaginate %}
+      </div>
+
+      {% render 'lame-predictive-search-categories' %}
+
+      <div class="lame-search-footer">
+        <p>
+          {{ 'lame_search.footer_prompt' | t }}
+          <a href="{{ routes.all_products_collection_url }}">{{ 'lame_search.view_all_products' | t }}</a>
+          →
+        </p>
+      </div>
     </div>
   {% endif %}
 </div>

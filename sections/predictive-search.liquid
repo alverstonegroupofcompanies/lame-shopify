@@ -3,14 +3,14 @@
 {%- if predictive_search.performed or search.performed -%}
   <div
     id="predictive-search-results"
-    class="predictive-search-dropdown"
+    class="predictive-search-dropdown lame-search-dropdown"
     role="listbox"
     aria-label="{{ 'content.search_results_label' | t }}"
     data-transition-container
     style="--color-shadow: rgb(var(--color-foreground-rgb) / var(--opacity-10-25));"
   >
     <div
-      class="predictive-search-results__inner"
+      class="predictive-search-results__inner lame-search-panel"
       data-search-results
     >
       {% if predictive_search.performed %}
@@ -66,7 +66,7 @@
             {%- liquid
               assign title = 'content.search_results_resource_products' | t
               assign products = predictive_search.resources.products
-              render 'predictive-search-products-list', title: title, products: products
+              render 'predictive-search-products-list', title: title, products: products, use_lame_cards: true
             -%}
           {% endif %}
 
@@ -116,7 +116,7 @@
           if search.terms contains 'id:'
             assign new_products_ids = search.terms | replace: 'id:', '' | split: ' OR '
           endif
-          render 'predictive-search-products-list', title: title, products: products, order_ids: new_products_ids, limit: 4
+          render 'predictive-search-products-list', title: title, products: products, order_ids: new_products_ids, limit: 4, use_lame_cards: true
         -%}
       {% endif %}
 

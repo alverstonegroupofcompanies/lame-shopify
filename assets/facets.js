@@ -4,9 +4,37 @@ import { FilterUpdateEvent, ThemeEvents } from '@theme/events';
 import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 import {
+  applyVendorBrandFilter,
   syncVendorCheckboxGroup,
+  syncVendorCheckboxesFromUrl,
   syncVendorParamsToUrlSearchParams,
 } from '@theme/lame-vendor-brand-filter';
+
+/** @type {ReturnType<typeof debounce<(form: FacetsFormComponent) => void>> | undefined} */
+let debouncedVendorSectionUpdate;
+
+/**
+ * @param {FacetsFormComponent} form
+ */
+function scheduleVendorSectionUpdate(form) {
+  if (!debouncedVendorSectionUpdate) {
+    debouncedVendorSectionUpdate = debounce((/** @type {FacetsFormComponent} */ f) => {
+      runVendorSectionUpdate(f);
+    }, 200);
+  }
+
+  debouncedVendorSectionUpdate(form);
+}
+
+/**
+ * @param {FacetsFormComponent} form
+ */
+async function runVendorSectionUpdate(form) {
+  form.updateFiltersWithoutRender();
+  await sectionRenderer.renderSection(form.sectionId, { cache: false });
+  syncVendorCheckboxesFromUrl();
+  applyVendorBrandFilter();
+}
 /**
  * Search query parameter.
  * @type {string}
@@ -165,6 +193,14 @@ class FacetInputsComponent extends Component {
 
     if (target.name === 'filter.p.vendor') {
       syncVendorCheckboxGroup(target);
+      applyVendorBrandFilter();
+
+      const facetsForm = this.closest('facets-form-component');
+      if (facetsForm instanceof FacetsFormComponent) {
+        scheduleVendorSectionUpdate(facetsForm);
+        this.#updateSelectedFacetSummary();
+        return;
+      }
     }
 
     this.updateFilters();
@@ -1096,3 +1132,24 @@ class FacetStatusComponent extends Component {
 if (!customElements.get('facet-status-component')) {
   customElements.define('facet-status-component', FacetStatusComponent);
 }
+
+function initVendorBrandFilter() {
+  if (!document.querySelector('[data-lame-vendor-filter]')) return;
+
+  syncVendorCheckboxesFromUrl();
+  applyVendorBrandFilter();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initVendorBrandFilter, { once: true });
+} else {
+  initVendorBrandFilter();
+}
+
+document.addEventListener(ThemeEvents.FilterUpdate, (event) => {
+  if (!(event.target instanceof FacetsFormComponent)) return;
+
+  syncVendorCheckboxesFromUrl(
+    event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined
+  );
+});
