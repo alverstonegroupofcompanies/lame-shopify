@@ -5,14 +5,6 @@
   @param {object} section
 {%- enddoc -%}
 
-{%- liquid
-  assign variant = product.selected_or_first_available_variant
-  assign can_quick_add = false
-  if product.has_only_default_variant and variant.available
-    assign can_quick_add = true
-  endif
--%}
-
 <article class="lame-search-card">
   <div class="lame-search-card__media">
     <a href="{{ product.url }}" class="lame-search-card__media-link" tabindex="-1" aria-hidden="true">
@@ -31,27 +23,6 @@
         <div class="lame-search-card__image lame-search-card__image--placeholder" aria-hidden="true"></div>
       {% endif %}
     </a>
-
-    {% if can_quick_add %}
-      {%- assign search_form_id = 'LameSearchCard-Form-' | append: product.id -%}
-      <product-form-component
-        data-section-id="{{ section.id }}"
-        data-product-id="{{ product.id }}"
-        data-product-url="{{ product.url }}"
-        class="lame-search-card__quick-add"
-      >
-        {%- form 'product', product, id: search_form_id, class: 'lame-search-card__form' -%}
-          <input type="hidden" name="id" value="{{ variant.id }}">
-          <button type="submit" name="add" class="lame-search-card__add" aria-label="{{ 'actions.add_to_cart' | t }}: {{ product.title | escape }}">
-            <span aria-hidden="true">+</span>
-          </button>
-        {%- endform -%}
-      </product-form-component>
-    {% else %}
-      <a href="{{ product.url }}" class="lame-search-card__add lame-search-card__add--link" aria-label="{{ product.title | escape }}">
-        <span aria-hidden="true">+</span>
-      </a>
-    {% endif %}
   </div>
 
   <div class="lame-search-card__body">
