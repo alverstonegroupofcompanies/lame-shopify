@@ -10,6 +10,7 @@
   @param {boolean} [grouped_by_brand] - When true, children is brand sections markup (not a flat list)
   @param {boolean} [lame_paginated_collection] - Our Products: 12 per page, next/prev replaces grid
   @param {boolean} [category_shop_grid] - Category shop pages: custom grid class, standard pagination
+  @param {boolean} [show_brand_filter_empty] - Show empty state when brand filter matches no products
 {%- enddoc -%}
 
 {% capture product_card_size %}
@@ -171,6 +172,11 @@
 
           {{ children }}
         </ul>
+      {% endif %}
+      {% if show_brand_filter_empty %}
+        <p class="lame-brand-filter-empty" hidden>
+          {{ 'lame_collection.brand_filter_no_results' | t }}
+        </p>
       {% endif %}
       {% if enable_infinite_scroll != false %}
         <span ref="viewMoreNext"></span>

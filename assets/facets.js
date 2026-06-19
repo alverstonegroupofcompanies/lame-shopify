@@ -5,6 +5,8 @@ import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 import {
   applyVendorBrandFilter,
+  getCollectionFilterRoot,
+  shouldRunVendorBrandFilter,
   syncVendorCheckboxGroup,
   syncVendorCheckboxesFromUrl,
   syncVendorParamsToUrlSearchParams,
@@ -197,7 +199,11 @@ class FacetInputsComponent extends Component {
 
       const facetsForm = this.closest('facets-form-component');
       if (facetsForm instanceof FacetsFormComponent) {
-        scheduleVendorSectionUpdate(facetsForm);
+        if (getCollectionFilterRoot()) {
+          scheduleVendorSectionUpdate(facetsForm);
+        } else {
+          facetsForm.updateFilters();
+        }
         this.#updateSelectedFacetSummary();
         return;
       }
@@ -1134,7 +1140,7 @@ if (!customElements.get('facet-status-component')) {
 }
 
 function initVendorBrandFilter() {
-  if (!document.querySelector('[data-lame-vendor-filter]')) return;
+  if (!shouldRunVendorBrandFilter()) return;
 
   syncVendorCheckboxesFromUrl();
   applyVendorBrandFilter();

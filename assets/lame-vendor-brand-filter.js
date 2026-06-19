@@ -4,7 +4,7 @@
  */
 
 const VENDOR_FILTER_HIDDEN_CLASS = 'lame-brand-filter--hidden';
-const OUR_PRODUCTS_ROOT = '.collection-template-our-products';
+const COLLECTION_FILTER_ROOTS = ['.collection-template-our-products', '.lame-collection-premium-active'];
 
 /** @type {(() => void) | undefined} */
 let morphCompleteHandler;
@@ -55,6 +55,26 @@ export function slugFamilyMatch(a, b) {
   }
 
   return false;
+}
+
+/**
+ * @returns {HTMLElement | null}
+ */
+export function getCollectionFilterRoot() {
+  for (const selector of COLLECTION_FILTER_ROOTS) {
+    const root = document.querySelector(selector);
+    if (root instanceof HTMLElement) return root;
+  }
+
+  return null;
+}
+
+/**
+ * @returns {boolean}
+ */
+export function shouldRunVendorBrandFilter() {
+  if (!getVendorFilterInputs().length) return false;
+  return getCollectionFilterRoot() !== null;
 }
 
 /**
@@ -149,7 +169,7 @@ function toggleProductItems(root, selectedSlugs) {
  * Show/hide products and brand sections for the current checkbox selection.
  */
 export function applyVendorBrandFilter() {
-  const root = document.querySelector(OUR_PRODUCTS_ROOT);
+  const root = getCollectionFilterRoot();
   if (!root) return;
 
   const selectedSlugs = getSelectedVendorSlugs();
@@ -225,7 +245,7 @@ export function syncVendorCheckboxGroup(changedInput) {
  * Re-apply brand filter after section morph replaces the product grid.
  */
 export function onSectionMorphComplete() {
-  if (!document.querySelector('[data-lame-vendor-filter]')) return;
+  if (!shouldRunVendorBrandFilter()) return;
 
   syncVendorCheckboxesFromUrl();
   applyVendorBrandFilter();
