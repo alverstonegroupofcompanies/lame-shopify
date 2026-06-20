@@ -5,9 +5,9 @@ import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 import {
   applyVendorBrandFilter,
+  augmentVendorFilterFromCatalog,
   augmentVendorFilterFromGrid,
   getCollectionFilterRoot,
-  shouldRunVendorBrandFilter,
   syncVendorCheckboxGroup,
   syncVendorCheckboxesFromUrl,
   syncVendorParamsToUrlSearchParams,
@@ -34,7 +34,6 @@ function scheduleVendorSectionUpdate(form) {
  */
 async function runVendorSectionUpdate(form) {
   form.updateFiltersWithoutRender();
-  await sectionRenderer.renderSection(form.sectionId, { cache: false });
   syncVendorCheckboxesFromUrl();
   applyVendorBrandFilter();
 }
@@ -1144,9 +1143,10 @@ function initVendorBrandFilter() {
   const root = getCollectionFilterRoot();
   if (!root) return;
 
+  augmentVendorFilterFromCatalog();
   augmentVendorFilterFromGrid();
 
-  if (!shouldRunVendorBrandFilter()) return;
+  if (!getVendorFilterInputs().length) return;
 
   syncVendorCheckboxesFromUrl();
   applyVendorBrandFilter();

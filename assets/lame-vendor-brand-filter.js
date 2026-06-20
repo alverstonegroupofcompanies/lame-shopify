@@ -96,9 +96,15 @@ export function getSelectedVendorSlugs() {
   for (const input of getVendorFilterInputs()) {
     if (!input.checked) continue;
     slugs.add(vendorToSlug(input.value));
+    const trimmed = input.value.trim();
+    if (trimmed) slugs.add(trimmed);
   }
 
   return slugs;
+}
+
+function normalizeVendorName(name) {
+  return (name || '').trim().toLowerCase();
 }
 
 /**
@@ -111,14 +117,36 @@ function productMatchesSelection(productSlug, brandName, selectedSlugs) {
   if (selectedSlugs.size === 0) return true;
 
   const candidates = new Set([productSlug, vendorToSlug(brandName)].filter(Boolean));
+  const brandNormalized = normalizeVendorName(brandName);
 
   for (const selected of selectedSlugs) {
     for (const candidate of candidates) {
       if (slugFamilyMatch(candidate, selected)) return true;
     }
+
+    if (brandNormalized && brandNormalized === normalizeVendorName(selected)) return true;
   }
 
   return false;
+}
+
+/**
+ * @param {Element} root
+ */
+function resetVendorBrandFilterVisibility(root) {
+  const selectors = [
+    'li[data-brand-slug]',
+    'li[data-brand]',
+    '.lame-collection-brand-section[data-brand-slug]',
+  ];
+
+  for (const selector of selectors) {
+    for (const element of root.querySelectorAll(selector)) {
+      if (!(element instanceof HTMLElement)) continue;
+      element.classList.remove(VENDOR_FILTER_HIDDEN_CLASS);
+      element.hidden = false;
+    }
+  }
 }
 
 /**
@@ -166,9 +194,96 @@ function toggleProductItems(root, selectedSlugs) {
 }
 
 /**
+ * @param {HTMLUListElement} list
+ * @param {string} name
+ * @param {HTMLElement} filterComponent
+ * @param {Set<string>} existingSlugs
+ * @param {number} augmentIndex
+ * @returns {number}
+ */
+function appendVendorCheckbox(list, name, filterComponent, existingSlugs, augmentIndex) {
+  const slug = vendorToSlug(name);
+  const alreadyListed = [...existingSlugs].some((existing) => slugFamilyMatch(existing, slug));
+  if (alreadyListed || !name) return augmentIndex;
+
+  const templateItem =
+    list.querySelector('.facets__inputs-list-item:not([data-lame-vendor-augmented]):not([data-lame-vendor-template])') ||
+    list.querySelector('[data-lame-vendor-template]');
+  if (!(templateItem instanceof HTMLLIElement)) return augmentIndex;
+
+  const clone = templateItem.cloneNode(true);
+  if (!(clone instanceof HTMLLIElement)) return augmentIndex;
+
+  const input = clone.querySelector('input[type="checkbox"]');
+  const labelText = clone.querySelector('.checkbox__label-text');
+  const label = clone.querySelector('label.checkbox__label');
+  if (!(input instanceof HTMLInputElement) || !(labelText instanceof HTMLElement)) return augmentIndex;
+
+  const nextIndex = augmentIndex + 1;
+  const componentId = filterComponent.id || 'vendor-filter';
+  const inputId = `Filter-filter-p-vendor-augment-${nextIndex}-${componentId}`;
+
+  input.value = name;
+  input.checked = false;
+  input.disabled = false;
+  input.id = inputId;
+  input.removeAttribute('disabled');
+  if (label instanceof HTMLLabelElement) label.htmlFor = inputId;
+  labelText.textContent = name;
+
+  clone.setAttribute('data-lame-vendor-augmented', 'true');
+  clone.setAttribute('data-skip-node-update', 'true');
+  list.appendChild(clone);
+  existingSlugs.add(slug);
+
+  return nextIndex;
+}
+
+/**
+ * Add checkboxes for vendors listed in collection.all_vendors JSON.
+ */
+export function augmentVendorFilterFromCatalog() {
+  const catalogNode = document.getElementById('LameCollectionAllVendors');
+  if (!(catalogNode instanceof HTMLScriptElement)) return;
+
+  /** @type {string[]} */
+  let vendors = [];
+  try {
+    const parsed = JSON.parse(catalogNode.textContent || '[]');
+    if (Array.isArray(parsed)) vendors = parsed.filter((entry) => typeof entry === 'string' && entry.trim());
+  } catch {
+    return;
+  }
+
+  if (!vendors.length) return;
+
+  const filterComponents = document.querySelectorAll('[data-lame-vendor-filter]');
+  if (!filterComponents.length) return;
+
+  for (const filterComponent of filterComponents) {
+    const list = filterComponent.querySelector('ul.facets__inputs-list');
+    if (!(list instanceof HTMLUListElement)) continue;
+
+    const existingSlugs = new Set(
+      [...list.querySelectorAll('input[type="checkbox"][name="filter.p.vendor"]')].map((input) =>
+        vendorToSlug(input instanceof HTMLInputElement ? input.value : '')
+      )
+    );
+
+    let augmentIndex = list.querySelectorAll('[data-lame-vendor-augmented]').length;
+
+    for (const vendorName of vendors) {
+      augmentIndex = appendVendorCheckbox(list, vendorName.trim(), filterComponent, existingSlugs, augmentIndex);
+    }
+  }
+}
+
+/**
  * Add Brand filter checkboxes for vendors present on the grid but missing from Liquid list.
  */
 export function augmentVendorFilterFromGrid() {
+  augmentVendorFilterFromCatalog();
+
   const root = getCollectionFilterRoot();
   if (!root) return;
 
@@ -194,9 +309,6 @@ export function augmentVendorFilterFromGrid() {
     const list = filterComponent.querySelector('ul.facets__inputs-list');
     if (!(list instanceof HTMLUListElement)) continue;
 
-    const templateItem = list.querySelector('.facets__inputs-list-item:not([data-lame-vendor-augmented])');
-    if (!(templateItem instanceof HTMLLIElement)) continue;
-
     const existingSlugs = new Set(
       [...list.querySelectorAll('input[type="checkbox"][name="filter.p.vendor"]')].map((input) =>
         vendorToSlug(input instanceof HTMLInputElement ? input.value : '')
@@ -206,33 +318,7 @@ export function augmentVendorFilterFromGrid() {
     let augmentIndex = list.querySelectorAll('[data-lame-vendor-augmented]').length;
 
     for (const [slug, name] of brandsFromGrid) {
-      const alreadyListed = [...existingSlugs].some((existing) => slugFamilyMatch(existing, slug));
-      if (alreadyListed) continue;
-
-      const clone = templateItem.cloneNode(true);
-      if (!(clone instanceof HTMLLIElement)) continue;
-
-      const input = clone.querySelector('input[type="checkbox"]');
-      const labelText = clone.querySelector('.checkbox__label-text');
-      const label = clone.querySelector('label.checkbox__label');
-      if (!(input instanceof HTMLInputElement) || !(labelText instanceof HTMLElement)) continue;
-
-      augmentIndex += 1;
-      const componentId = filterComponent.id || 'vendor-filter';
-      const inputId = `Filter-filter-p-vendor-augment-${augmentIndex}-${componentId}`;
-
-      input.value = name;
-      input.checked = false;
-      input.disabled = false;
-      input.id = inputId;
-      input.removeAttribute('disabled');
-      if (label instanceof HTMLLabelElement) label.htmlFor = inputId;
-      labelText.textContent = name;
-
-      clone.setAttribute('data-lame-vendor-augmented', 'true');
-      clone.setAttribute('data-skip-node-update', 'true');
-      list.appendChild(clone);
-      existingSlugs.add(slug);
+      augmentIndex = appendVendorCheckbox(list, name, filterComponent, existingSlugs, augmentIndex);
     }
   }
 }
@@ -245,6 +331,8 @@ export function applyVendorBrandFilter() {
 
   const root = getCollectionFilterRoot();
   if (!root) return;
+
+  resetVendorBrandFilterVisibility(root);
 
   const selectedSlugs = getSelectedVendorSlugs();
   const productsColumn = root.querySelector('.lame-collection-products-column');

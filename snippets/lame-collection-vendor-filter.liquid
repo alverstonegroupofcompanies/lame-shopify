@@ -40,10 +40,13 @@
 {% endfor %}
 
 {% for product in collection.products %}
-  {% capture product_brand_capture %}
-    {% render 'lame-product-brand-name', product: product %}
-  {% endcapture %}
-  {% assign vendor_name_stripped = product_brand_capture | strip %}
+  {% assign vendor_name_stripped = product.vendor | strip %}
+  {% if vendor_name_stripped == blank %}
+    {% capture product_brand_capture %}
+      {% render 'lame-product-brand-name', product: product %}
+    {% endcapture %}
+    {% assign vendor_name_stripped = product_brand_capture | strip %}
+  {% endif %}
   {% if vendor_name_stripped != blank %}
     {% capture vendor_slug_capture %}
       {% render 'lame-vendor-slug', vendor: vendor_name_stripped %}
@@ -190,7 +193,22 @@
   endif
 %}
 
-{% if brand_count > 0 %}
+{% liquid
+  assign show_vendor_filter = false
+  if brand_count > 0
+    assign show_vendor_filter = true
+  elsif collection.products_count > 0
+    assign show_vendor_filter = true
+  endif
+%}
+
+{% if show_vendor_filter and id_prefix == 'desktop' %}
+  <script type="application/json" id="LameCollectionAllVendors">
+    {{- collection.all_vendors | json -}}
+  </script>
+{% endif %}
+
+{% if show_vendor_filter %}
   <details
     id="Facet-Details-{{ section_id }}-filter-p-vendor-{{ id_prefix }}"
     class="facets__panel"
@@ -233,6 +251,19 @@
             class="facets__inputs-list list-unstyled"
             name="{{ 'lame_collection.filter_brand' | t }}"
           >
+            {% if brand_count == 0 %}
+              <li class="facets__inputs-list-item visually-hidden" data-lame-vendor-template hidden>
+                {% render 'checkbox',
+                  name: 'filter.p.vendor',
+                  value: 'template',
+                  label: 'template',
+                  checked: false,
+                  id: 'Filter-filter-p-vendor-template-' | append: id_prefix,
+                  disabled: true,
+                  inputRef: 'facetInputs[]'
+                %}
+              </li>
+            {% endif %}
             {{ brand_filter_markup }}
           </ul>
         </div>
