@@ -3,40 +3,8 @@ import { Component } from '@theme/component';
 import { FilterUpdateEvent, ThemeEvents } from '@theme/events';
 import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
-import {
-  applyVendorBrandFilter,
-  augmentVendorFilterFromCatalog,
-  augmentVendorFilterFromGrid,
-  getCollectionFilterRoot,
-  syncVendorCheckboxGroup,
-  syncVendorCheckboxesFromUrl,
-  syncVendorParamsToUrlSearchParams,
-} from '@theme/lame-vendor-brand-filter';
 
-/** @type {ReturnType<typeof debounce<(form: FacetsFormComponent) => void>> | undefined} */
-let debouncedVendorSectionUpdate;
-
-/**
- * @param {FacetsFormComponent} form
- */
-function scheduleVendorSectionUpdate(form) {
-  if (!debouncedVendorSectionUpdate) {
-    debouncedVendorSectionUpdate = debounce((/** @type {FacetsFormComponent} */ f) => {
-      runVendorSectionUpdate(f);
-    }, 200);
-  }
-
-  debouncedVendorSectionUpdate(form);
-}
-
-/**
- * @param {FacetsFormComponent} form
- */
-async function runVendorSectionUpdate(form) {
-  form.updateFiltersWithoutRender();
-  syncVendorCheckboxesFromUrl();
-  applyVendorBrandFilter();
-}
+const BRAND_FILTER_PARAM = 'brand';
 /**
  * Search query parameter.
  * @type {string}
@@ -68,8 +36,6 @@ class FacetsFormComponent extends Component {
 
     newParameters.delete('page');
 
-    syncVendorParamsToUrlSearchParams(newParameters);
-
     const searchQuery = this.#getSearchQuery();
     if (searchQuery) newParameters.set(SEARCH_QUERY, searchQuery);
 
@@ -95,12 +61,19 @@ class FacetsFormComponent extends Component {
    * Updates the URL hash with current filter parameters
    */
   #updateURLHash() {
+    const currentUrl = new URL(window.location.href);
+    const brandParam = currentUrl.searchParams.get(BRAND_FILTER_PARAM);
+
     const url = new URL(window.location.href);
     const urlParameters = this.createURLParameters();
 
     url.search = '';
     for (const [param, value] of urlParameters.entries()) {
       url.searchParams.append(param, value);
+    }
+
+    if (brandParam) {
+      url.searchParams.set(BRAND_FILTER_PARAM, brandParam);
     }
 
     history.pushState({ urlParameters: urlParameters.toString() }, '', url.toString());
@@ -135,11 +108,15 @@ class FacetsFormComponent extends Component {
    */
   #updateSection() {
     const viewTransition = !this.closest('dialog');
+    const renderSection = () => sectionRenderer.renderSection(this.sectionId);
 
     if (viewTransition) {
-      startViewTransition(() => sectionRenderer.renderSection(this.sectionId), ['product-grid']);
+      const transition = startViewTransition(renderSection, ['product-grid']);
+      if (transition && typeof transition.catch === 'function') {
+        transition.catch(() => renderSection());
+      }
     } else {
-      sectionRenderer.renderSection(this.sectionId);
+      renderSection();
     }
   }
 
@@ -192,22 +169,6 @@ class FacetInputsComponent extends Component {
     const { target } = event;
     if (!(target instanceof HTMLInputElement)) return;
     if (target.type !== 'checkbox' && target.type !== 'radio') return;
-
-    if (target.name === 'filter.p.vendor') {
-      syncVendorCheckboxGroup(target);
-      applyVendorBrandFilter();
-
-      const facetsForm = this.closest('facets-form-component');
-      if (facetsForm instanceof FacetsFormComponent) {
-        if (getCollectionFilterRoot()) {
-          scheduleVendorSectionUpdate(facetsForm);
-        } else {
-          facetsForm.updateFilters();
-        }
-        this.#updateSelectedFacetSummary();
-        return;
-      }
-    }
 
     this.updateFilters();
   };
@@ -753,6 +714,7 @@ class FacetRemoveComponent extends Component {
     if (!(facetsForm instanceof FacetsFormComponent)) return;
 
     facetsForm.updateFiltersByURL(url);
+    document.dispatchEvent(new CustomEvent('lame:clear-brand-filter'));
   }
 
   /**
@@ -1138,30 +1100,3 @@ class FacetStatusComponent extends Component {
 if (!customElements.get('facet-status-component')) {
   customElements.define('facet-status-component', FacetStatusComponent);
 }
-
-function initVendorBrandFilter() {
-  const root = getCollectionFilterRoot();
-  if (!root) return;
-
-  augmentVendorFilterFromCatalog();
-  augmentVendorFilterFromGrid();
-
-  if (!getVendorFilterInputs().length) return;
-
-  syncVendorCheckboxesFromUrl();
-  applyVendorBrandFilter();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initVendorBrandFilter, { once: true });
-} else {
-  initVendorBrandFilter();
-}
-
-document.addEventListener(ThemeEvents.FilterUpdate, (event) => {
-  if (!(event.target instanceof FacetsFormComponent)) return;
-
-  syncVendorCheckboxesFromUrl(
-    event instanceof FilterUpdateEvent ? event.detail.queryParams : undefined
-  );
-});

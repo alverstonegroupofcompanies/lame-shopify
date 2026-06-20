@@ -1,5 +1,4 @@
 import { morph, MORPH_OPTIONS } from '@theme/morph';
-import { onSectionMorphComplete } from '@theme/lame-vendor-brand-filter';
 
 /**
  * A class to re-render sections using the Section Rendering API
@@ -186,7 +185,11 @@ export async function morphSection(sectionId, html, options = {}) {
     hydrationMode: mode === 'hydration',
   });
 
-  onSectionMorphComplete();
+  document.dispatchEvent(
+    new CustomEvent('lame:section-morph-complete', {
+      detail: { sectionId: normalizeSectionId(sectionId) },
+    })
+  );
 
   if (injectStylesheet) {
     injectSectionStylesheet(fragment, existingElement);

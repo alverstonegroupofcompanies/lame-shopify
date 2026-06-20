@@ -1,0 +1,117 @@
+{%- doc -%}
+  Client-side brand filter for Our Products collections.
+  Vendor list from collection.all_vendors only — no filter.p.vendor form inputs.
+
+  @param {object} collection
+  @param {string} section_id
+  @param {string} [filter_style] - vertical | horizontal
+  @param {string} [id_prefix] - unique id segment (e.g. desktop, dialog)
+{%- enddoc -%}
+
+{% liquid
+  assign filter_style = filter_style | default: 'vertical'
+  assign id_prefix = id_prefix | default: filter_style
+  assign vendor_slugs_pipe = '|'
+  assign brand_count = 0
+%}
+
+{% capture brand_filter_markup %}
+  {% assign input_index = 0 %}
+  {% assign vendors_sorted = collection.all_vendors | sort %}
+  {% for vendor_name in vendors_sorted %}
+    {% assign vendor_name_stripped = vendor_name | strip %}
+    {% if vendor_name_stripped == blank %}
+      {% continue %}
+    {% endif %}
+
+    {% capture vendor_slug_capture %}
+      {% render 'lame-vendor-slug', vendor: vendor_name_stripped %}
+    {% endcapture %}
+    {% assign vendor_slug = vendor_slug_capture | strip %}
+    {% assign slug_token = '|' | append: vendor_slug | append: '|' %}
+    {% unless vendor_slugs_pipe contains slug_token %}
+      {% assign vendor_slugs_pipe = vendor_slugs_pipe | append: vendor_slug | append: '|' %}
+      {% assign brand_count = brand_count | plus: 1 %}
+
+      {% liquid
+        assign display_label = vendor_name_stripped
+        assign label_down = vendor_name_stripped | downcase
+        if label_down contains 'lamstone'
+          assign display_label = 'Lamstone Healthcare'
+        endif
+      %}
+
+      {% assign input_index = input_index | plus: 1 %}
+      {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
+
+      <li class="facets__inputs-list-item" data-skip-node-update="true">
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="{{ input_id }}"
+            class="checkbox__input"
+            data-brand-slug="{{ vendor_slug | escape }}"
+            data-brand-label="{{ vendor_name_stripped | escape }}"
+            data-label="{{ display_label | escape }}"
+          >
+          <label class="checkbox__label" for="{{ input_id }}">
+            {{ 'icon-checkmark.svg' | inline_asset_content }}
+            <span class="checkbox__label-text">{{ display_label }}</span>
+          </label>
+        </div>
+      </li>
+    {% endunless %}
+  {% endfor %}
+{% endcapture %}
+
+{% if brand_count > 0 %}
+  <lame-brand-filter
+    data-section-id="{{ section_id }}"
+    data-id-prefix="{{ id_prefix }}"
+  >
+    <details
+      id="Facet-Details-{{ section_id }}-brand-{{ id_prefix }}"
+      class="facets__panel"
+      {% if filter_style == 'vertical' %}
+        open
+      {% endif %}
+    >
+      <summary class="facets__summary">
+        <span class="facets__label">{{ 'lame_collection.filter_brand' | t }}</span>
+        <div class="facets__status-wrapper">
+          <span
+            class="facets__status facets__bubble hide-when-empty"
+            data-brand-filter-status
+          ></span>
+          <span class="svg-wrapper icon-caret icon-animated">
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </span>
+        </div>
+      </summary>
+
+      <floating-panel-component
+        data-disable-float-position="true"
+        class="facets__inputs facets__panel-content details-content"
+        id="facet-inputs-brand-{{ id_prefix }}"
+      >
+        <div class="facets__inputs-wrapper">
+          <ul
+            id="filters-list-{{ section_id }}-brand-{{ id_prefix }}"
+            class="facets__inputs-list list-unstyled"
+            name="{{ 'lame_collection.filter_brand' | t }}"
+          >
+            {{ brand_filter_markup }}
+          </ul>
+        </div>
+      </floating-panel-component>
+    </details>
+  </lame-brand-filter>
+
+  {% if id_prefix == 'desktop' %}
+    <script
+      src="{{ 'lame-brand-filter.js' | asset_url }}"
+      type="module"
+      fetchpriority="low"
+    ></script>
+  {% endif %}
+{% endif %}
