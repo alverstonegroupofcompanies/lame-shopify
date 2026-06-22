@@ -1,6 +1,6 @@
 {%- doc -%}
-  Client-side brand filter for Our Products collections.
-  Vendor list from collection.all_vendors only — no filter.p.vendor form inputs.
+  Brand filter for Our Products collections.
+  Merges collection.all_vendors with product-resolved brands (vendor + custom.brand metafield).
 
   @param {object} collection
   @param {string} section_id
@@ -11,12 +11,13 @@
 {% liquid
   assign filter_style = filter_style | default: 'vertical'
   assign id_prefix = id_prefix | default: filter_style
-  assign vendor_slugs_pipe = '|'
+  assign brand_slugs_pipe = '|'
   assign brand_count = 0
 %}
 
 {% capture brand_filter_markup %}
   {% assign input_index = 0 %}
+
   {% assign vendors_sorted = collection.all_vendors | sort %}
   {% for vendor_name in vendors_sorted %}
     {% assign vendor_name_stripped = vendor_name | strip %}
@@ -27,10 +28,10 @@
     {% capture vendor_slug_capture %}
       {% render 'lame-vendor-slug', vendor: vendor_name_stripped %}
     {% endcapture %}
-    {% assign vendor_slug = vendor_slug_capture | strip %}
-    {% assign slug_token = '|' | append: vendor_slug | append: '|' %}
-    {% unless vendor_slugs_pipe contains slug_token %}
-      {% assign vendor_slugs_pipe = vendor_slugs_pipe | append: vendor_slug | append: '|' %}
+    {% assign brand_slug = vendor_slug_capture | strip %}
+    {% assign slug_token = '|' | append: brand_slug | append: '|' %}
+    {% unless brand_slugs_pipe contains slug_token %}
+      {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
       {% assign brand_count = brand_count | plus: 1 %}
 
       {% liquid
@@ -50,8 +51,56 @@
             type="checkbox"
             id="{{ input_id }}"
             class="checkbox__input"
-            data-brand-slug="{{ vendor_slug | escape }}"
+            data-brand-slug="{{ brand_slug | escape }}"
             data-brand-label="{{ vendor_name_stripped | escape }}"
+            data-label="{{ display_label | escape }}"
+          >
+          <label class="checkbox__label" for="{{ input_id }}">
+            {{ 'icon-checkmark.svg' | inline_asset_content }}
+            <span class="checkbox__label-text">{{ display_label }}</span>
+          </label>
+        </div>
+      </li>
+    {% endunless %}
+  {% endfor %}
+
+  {% for product in collection.products %}
+    {% capture product_brand_capture %}
+      {% render 'lame-product-brand-name', product: product %}
+    {% endcapture %}
+    {% assign brand_name = product_brand_capture | strip %}
+    {% if brand_name == blank %}
+      {% continue %}
+    {% endif %}
+
+    {% capture brand_slug_capture %}
+      {% render 'lame-vendor-slug', vendor: brand_name %}
+    {% endcapture %}
+    {% assign brand_slug = brand_slug_capture | strip %}
+    {% assign slug_token = '|' | append: brand_slug | append: '|' %}
+    {% unless brand_slugs_pipe contains slug_token %}
+      {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
+      {% assign brand_count = brand_count | plus: 1 %}
+
+      {% liquid
+        assign display_label = brand_name
+        assign label_down = brand_name | downcase
+        if label_down contains 'lamstone'
+          assign display_label = 'Lamstone Healthcare'
+        endif
+      %}
+
+      {% assign input_index = input_index | plus: 1 %}
+      {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
+
+      <li class="facets__inputs-list-item" data-skip-node-update="true">
+        <div class="checkbox">
+          <input
+            type="checkbox"
+            id="{{ input_id }}"
+            class="checkbox__input"
+            data-brand-slug="{{ brand_slug | escape }}"
+            data-brand-label="{{ brand_name | escape }}"
             data-label="{{ display_label | escape }}"
           >
           <label class="checkbox__label" for="{{ input_id }}">
@@ -68,6 +117,10 @@
   <lame-brand-filter
     data-section-id="{{ section_id }}"
     data-id-prefix="{{ id_prefix }}"
+    data-msg-no-results="{{ 'lame_collection.brand_filter_no_results' | t | escape }}"
+    data-msg-loading="{{ 'lame_collection.brand_filter_error_loading' | t | escape }}"
+    data-msg-mismatch="{{ 'lame_collection.brand_filter_error_mismatch' | t | escape }}"
+    data-msg-no-root="{{ 'lame_collection.brand_filter_error_no_root' | t | escape }}"
   >
     <details
       id="Facet-Details-{{ section_id }}-brand-{{ id_prefix }}"

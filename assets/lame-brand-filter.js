@@ -1,14 +1,20 @@
 /**
- * Client-side brand filter for Our Products / premium collection pages.
- * Filters visible products by data-brand-slug. Uses ?brand=slug1,slug2 URL param only.
+ * Brand filter for Our Products / premium collection pages.
+ * Client-side hide for instant feedback + server-side filter.p.vendor reload for full catalog.
  */
+
+import { sectionRenderer } from '@theme/section-renderer';
+import { debounce, startViewTransition } from '@theme/utilities';
 
 const HIDDEN_CLASS = 'lame-brand-filter--hidden';
 const BRAND_PARAM = 'brand';
-const LEGACY_VENDOR_PARAM = 'filter.p.vendor';
+const VENDOR_PARAM = 'filter.p.vendor';
 const STORAGE_PREFIX = 'lame-brand-filter:';
 const CLEAR_EVENT = 'lame:clear-brand-filter';
 const MORPH_EVENT = 'lame:section-morph-complete';
+
+/** @type {boolean} */
+let isReloading = false;
 
 /**
  * @returns {HTMLElement | null}
@@ -21,11 +27,28 @@ function getCollectionRoot() {
 }
 
 /**
+ * @returns {string | null}
+ */
+function getSectionId() {
+  const resultsList = document.querySelector('results-list[section-id]');
+  const sectionId = resultsList?.getAttribute('section-id');
+  return sectionId || null;
+}
+
+/**
  * @param {string | null | undefined} slug
  * @returns {string}
  */
 function normalizeSlug(slug) {
   return (slug || '').trim().toLowerCase();
+}
+
+/**
+ * @param {string | null | undefined} name
+ * @returns {string}
+ */
+function normalizeName(name) {
+  return (name || '').trim().toLowerCase();
 }
 
 /**
@@ -49,6 +72,41 @@ function getSelectedSlugs() {
   }
 
   return slugs;
+}
+
+/**
+ * @returns {string[]}
+ */
+function getSelectedVendorLabels() {
+  /** @type {Set<string>} */
+  const labels = new Set();
+
+  for (const input of getAllBrandInputs()) {
+    if (!input.checked) continue;
+    const label = (input.getAttribute('data-brand-label') || '').trim();
+    if (label) labels.add(label);
+  }
+
+  return [...labels];
+}
+
+/**
+ * @returns {{ noResults: string, loading: string, mismatch: string, noRoot: string }}
+ */
+function getFilterMessages() {
+  const el = document.querySelector('lame-brand-filter');
+
+  return {
+    noResults:
+      el?.getAttribute('data-msg-no-results') || 'No products match the selected brands.',
+    loading: el?.getAttribute('data-msg-loading') || 'Loading matching products...',
+    mismatch:
+      el?.getAttribute('data-msg-mismatch') ||
+      'Brand filter mismatch. Try clearing filters and selecting again.',
+    noRoot:
+      el?.getAttribute('data-msg-no-root') ||
+      'Brand filter could not find the product grid.',
+  };
 }
 
 /**
@@ -106,6 +164,22 @@ function loadPersistedSlugs() {
 }
 
 /**
+ * @param {HTMLElement} root
+ * @returns {Set<string>}
+ */
+function getDomSlugs(root) {
+  /** @type {Set<string>} */
+  const slugs = new Set();
+
+  root.querySelectorAll('[data-brand-slug]').forEach((element) => {
+    const slug = normalizeSlug(element.getAttribute('data-brand-slug'));
+    if (slug) slugs.add(slug);
+  });
+
+  return slugs;
+}
+
+/**
  * @param {URL} [url]
  */
 function syncFromUrl(url = new URL(window.location.href)) {
@@ -127,19 +201,54 @@ function syncFromUrl(url = new URL(window.location.href)) {
   updateActiveCount();
 }
 
-function syncToUrl() {
+/**
+ * @param {URL} [url]
+ * @returns {boolean}
+ */
+function syncFromVendorUrl(url = new URL(window.location.href)) {
+  const vendors = url.searchParams.getAll(VENDOR_PARAM);
+  if (!vendors.length) return false;
+
+  const vendorSet = new Set(vendors.map((vendor) => normalizeName(vendor)));
+
+  for (const input of getAllBrandInputs()) {
+    const label = normalizeName(input.getAttribute('data-brand-label'));
+    input.checked = Boolean(label && vendorSet.has(label));
+  }
+
+  syncBrandParamsToUrl(url);
+  updateActiveCount();
+  return true;
+}
+
+/**
+ * @param {URL} [baseUrl]
+ */
+function syncBrandParamsToUrl(baseUrl = new URL(window.location.href)) {
   const slugs = [...getSelectedSlugs()];
-  const url = new URL(window.location.href);
+  const url = new URL(baseUrl.toString());
 
   url.searchParams.delete(BRAND_PARAM);
+  url.searchParams.delete(VENDOR_PARAM);
+  url.searchParams.delete('page');
 
   if (slugs.length) {
     url.searchParams.set(BRAND_PARAM, slugs.join(','));
   }
 
+  for (const label of getSelectedVendorLabels()) {
+    url.searchParams.append(VENDOR_PARAM, label);
+  }
+
   history.replaceState(history.state, '', url.toString());
   persistSlugs(slugs);
   updateClearAllButton();
+
+  return url;
+}
+
+function syncToUrl() {
+  syncBrandParamsToUrl();
 }
 
 function updateActiveCount() {
@@ -168,19 +277,200 @@ function updateClearAllButton() {
   clearButton.disabled = !(facetsActive || brandActive);
 }
 
-export function applyBrandFilter() {
+/**
+ * @param {HTMLElement | null} root
+ * @param {Set<string>} selected
+ * @param {number} visibleCount
+ * @param {boolean} hasFilter
+ */
+function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
+  const emptyState = root?.querySelector('.lame-brand-filter-empty');
+  if (!(emptyState instanceof HTMLElement)) return;
+
+  const messages = getFilterMessages();
+
+  const resetClasses = () => {
+    emptyState.classList.remove('lame-brand-filter-empty--error', 'lame-brand-filter-empty--loading');
+  };
+
+  if (!hasFilter) {
+    emptyState.hidden = true;
+    emptyState.removeAttribute('data-brand-filter-error');
+    emptyState.textContent = messages.noResults;
+    resetClasses();
+    return;
+  }
+
+  if (isReloading) {
+    emptyState.hidden = false;
+    emptyState.textContent = messages.loading;
+    emptyState.setAttribute('data-brand-filter-error', 'loading');
+    emptyState.setAttribute('role', 'alert');
+    emptyState.classList.add('lame-brand-filter-empty--loading');
+    emptyState.classList.remove('lame-brand-filter-empty--error');
+    return;
+  }
+
+  if (visibleCount > 0) {
+    emptyState.hidden = true;
+    emptyState.removeAttribute('data-brand-filter-error');
+    resetClasses();
+    return;
+  }
+
+  if (!root) {
+    emptyState.hidden = false;
+    emptyState.textContent = messages.noRoot;
+    emptyState.setAttribute('data-brand-filter-error', 'no_root');
+    emptyState.setAttribute('role', 'alert');
+    emptyState.classList.add('lame-brand-filter-empty--error');
+    console.error('[lame-brand-filter] Collection root not found');
+    return;
+  }
+
+  const domSlugs = getDomSlugs(root);
+  const selectedArray = [...selected];
+  const missingFromDom = selectedArray.filter((slug) => !domSlugs.has(slug));
+  const vendorParams = new URL(window.location.href).searchParams.getAll(VENDOR_PARAM);
+
+  emptyState.hidden = false;
+  emptyState.setAttribute('role', 'alert');
+
+  if (missingFromDom.length > 0 && vendorParams.length === 0) {
+    emptyState.textContent = messages.loading;
+    emptyState.setAttribute('data-brand-filter-error', 'loading');
+    emptyState.classList.add('lame-brand-filter-empty--loading');
+    emptyState.classList.remove('lame-brand-filter-empty--error');
+    console.warn('[lame-brand-filter] Selected brands not on current page; server reload expected', {
+      selected: selectedArray,
+      domSlugs: [...domSlugs],
+      missingFromDom,
+    });
+    return;
+  }
+
+  if (missingFromDom.length > 0 && vendorParams.length > 0) {
+    emptyState.textContent = messages.mismatch;
+    emptyState.setAttribute('data-brand-filter-error', 'mismatch');
+    emptyState.classList.add('lame-brand-filter-empty--error');
+    emptyState.classList.remove('lame-brand-filter-empty--loading');
+    console.warn('[lame-brand-filter] Slug/vendor mismatch after server filter', {
+      selected: selectedArray,
+      domSlugs: [...domSlugs],
+      vendorParams,
+      missingFromDom,
+    });
+    return;
+  }
+
+  emptyState.textContent = messages.noResults;
+  emptyState.setAttribute('data-brand-filter-error', 'no_results');
+  emptyState.classList.add('lame-brand-filter-empty--error');
+  emptyState.classList.remove('lame-brand-filter-empty--loading');
+  console.info('[lame-brand-filter] No visible products for selected brands', {
+    selected: selectedArray,
+    domSlugs: [...domSlugs],
+    vendorParams,
+  });
+}
+
+/**
+ * @param {string} slug
+ * @param {string} label
+ */
+function appendBrandCheckbox(slug, label) {
+  const templateInput = document.querySelector('lame-brand-filter input[data-brand-slug]');
+  if (!(templateInput instanceof HTMLInputElement)) return;
+
+  const templateLi = templateInput.closest('li');
+  if (!templateLi) return;
+
+  for (const component of document.querySelectorAll('lame-brand-filter')) {
+    const ul = component.querySelector('ul.facets__inputs-list');
+    if (!ul) continue;
+
+    const existing = ul.querySelector(`input[data-brand-slug="${CSS.escape(slug)}"]`);
+    if (existing) continue;
+
+    const idPrefix = component.getAttribute('data-id-prefix') || 'desktop';
+    const clone = templateLi.cloneNode(true);
+    const input = clone.querySelector('input[data-brand-slug]');
+    const labelEl = clone.querySelector('label');
+    const labelText = clone.querySelector('.checkbox__label-text');
+    const inputIndex = ul.querySelectorAll('input[data-brand-slug]').length + 1;
+    const inputId = `Filter-brand-augment-${inputIndex}-${idPrefix}-${slug}`;
+
+    if (input instanceof HTMLInputElement) {
+      input.id = inputId;
+      input.checked = false;
+      input.setAttribute('data-brand-slug', slug);
+      input.setAttribute('data-brand-label', label);
+      input.setAttribute('data-label', label);
+    }
+
+    if (labelEl instanceof HTMLLabelElement) {
+      labelEl.setAttribute('for', inputId);
+    }
+
+    if (labelText) {
+      labelText.textContent = label;
+    }
+
+    ul.appendChild(clone);
+  }
+}
+
+export function augmentBrandFilterFromGrid() {
   const root = getCollectionRoot();
   if (!root) return;
 
+  /** @type {Map<string, string>} */
+  const brandsFromGrid = new Map();
+
+  root.querySelectorAll('[data-brand-slug][data-brand]').forEach((element) => {
+    if (!(element instanceof HTMLElement)) return;
+
+    const slug = normalizeSlug(element.getAttribute('data-brand-slug'));
+    const name = (element.getAttribute('data-brand') || '').trim();
+    if (!slug || !name || slug === 'other') return;
+
+    if (!brandsFromGrid.has(slug)) {
+      brandsFromGrid.set(slug, name);
+    }
+  });
+
+  if (!brandsFromGrid.size) return;
+
+  /** @type {Set<string>} */
+  const existingSlugs = new Set();
+
+  for (const input of getAllBrandInputs()) {
+    const slug = normalizeSlug(input.getAttribute('data-brand-slug'));
+    if (slug) existingSlugs.add(slug);
+  }
+
+  for (const [slug, name] of brandsFromGrid) {
+    if (existingSlugs.has(slug)) continue;
+    appendBrandCheckbox(slug, name);
+  }
+}
+
+export function applyBrandFilter() {
+  const root = getCollectionRoot();
+
   const selected = getSelectedSlugs();
   const hasFilter = selected.size > 0;
+
+  if (!root) {
+    diagnoseBrandFilter(null, selected, 0, hasFilter);
+    return;
+  }
 
   const items = root.querySelectorAll(
     '.lame-collection-products-column li[data-brand-slug], .lame-collection-products-column .lame-category-shop__item[data-brand-slug]'
   );
   const sections = root.querySelectorAll('.lame-collection-brand-section[data-brand-slug]');
   const productsColumn = root.querySelector('.lame-collection-products-column');
-  const emptyState = root.querySelector('.lame-brand-filter-empty');
 
   let visibleCount = 0;
 
@@ -202,12 +492,54 @@ export function applyBrandFilter() {
     productsColumn.classList.toggle('lame-collection-products-column--brand-selected', hasFilter);
   }
 
-  if (emptyState instanceof HTMLElement) {
-    emptyState.hidden = !(hasFilter && visibleCount === 0);
-  }
-
+  diagnoseBrandFilter(root, selected, visibleCount, hasFilter);
   updateActiveCount();
 }
+
+async function reloadSectionWithBrandFilter() {
+  const sectionId = getSectionId();
+  if (!sectionId) {
+    console.error('[lame-brand-filter] Missing section-id on results-list');
+    return;
+  }
+
+  const url = syncBrandParamsToUrl();
+  isReloading = true;
+  applyBrandFilter();
+
+  const renderSection = () =>
+    sectionRenderer.renderSection(sectionId, { url, cache: false });
+
+  try {
+    const inDialog = Boolean(document.querySelector('dialog[open]'));
+    if (!inDialog) {
+      const transition = startViewTransition(renderSection, ['product-grid']);
+      if (transition && typeof transition.catch === 'function') {
+        await transition.catch(() => renderSection());
+      } else {
+        await renderSection();
+      }
+    } else {
+      await renderSection();
+    }
+  } catch (error) {
+    console.error('[lame-brand-filter] Section reload failed', error);
+    try {
+      await renderSection();
+    } catch (retryError) {
+      console.error('[lame-brand-filter] Section reload retry failed', retryError);
+    }
+  } finally {
+    isReloading = false;
+    augmentBrandFilterFromGrid();
+    restoreBrandSelection();
+    applyBrandFilter();
+  }
+}
+
+const scheduleServerReload = debounce(() => {
+  reloadSectionWithBrandFilter();
+}, 300);
 
 export function clearBrandFilter() {
   for (const input of getAllBrandInputs()) {
@@ -216,17 +548,12 @@ export function clearBrandFilter() {
 
   const url = new URL(window.location.href);
   url.searchParams.delete(BRAND_PARAM);
+  url.searchParams.delete(VENDOR_PARAM);
+  url.searchParams.delete('page');
   history.replaceState(history.state, '', url.toString());
   persistSlugs([]);
   applyBrandFilter();
-}
-
-function stripLegacyVendorFilterParam() {
-  const url = new URL(window.location.href);
-  if (!url.searchParams.has(LEGACY_VENDOR_PARAM)) return;
-
-  url.searchParams.delete(LEGACY_VENDOR_PARAM);
-  history.replaceState(history.state, '', url.toString());
+  scheduleServerReload();
 }
 
 function restoreBrandSelection() {
@@ -234,6 +561,10 @@ function restoreBrandSelection() {
 
   if (url.searchParams.get(BRAND_PARAM)) {
     syncFromUrl(url);
+    return;
+  }
+
+  if (syncFromVendorUrl(url)) {
     return;
   }
 
@@ -252,12 +583,21 @@ function restoreBrandSelection() {
 }
 
 function initBrandFilter() {
-  stripLegacyVendorFilterParam();
+  augmentBrandFilterFromGrid();
   restoreBrandSelection();
   applyBrandFilter();
+
+  const hasSelection = getSelectedSlugs().size > 0;
+  const hasVendorFilter =
+    new URL(window.location.href).searchParams.getAll(VENDOR_PARAM).length > 0;
+
+  if (hasSelection && !hasVendorFilter) {
+    scheduleServerReload();
+  }
 }
 
 function handleMorphComplete() {
+  augmentBrandFilterFromGrid();
   restoreBrandSelection();
   applyBrandFilter();
 }
@@ -272,6 +612,7 @@ class LameBrandFilter extends HTMLElement {
       syncCheckboxGroups(target);
       syncToUrl();
       applyBrandFilter();
+      scheduleServerReload();
     });
   }
 }

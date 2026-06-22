@@ -5,6 +5,7 @@ import { debounce, startViewTransition } from '@theme/utilities';
 import { convertMoneyToMinorUnits, formatMoney } from '@theme/money-formatting';
 
 const BRAND_FILTER_PARAM = 'brand';
+const VENDOR_FILTER_PARAM = 'filter.p.vendor';
 /**
  * Search query parameter.
  * @type {string}
@@ -63,6 +64,7 @@ class FacetsFormComponent extends Component {
   #updateURLHash() {
     const currentUrl = new URL(window.location.href);
     const brandParam = currentUrl.searchParams.get(BRAND_FILTER_PARAM);
+    const vendorParams = currentUrl.searchParams.getAll(VENDOR_FILTER_PARAM);
 
     const url = new URL(window.location.href);
     const urlParameters = this.createURLParameters();
@@ -74,6 +76,10 @@ class FacetsFormComponent extends Component {
 
     if (brandParam) {
       url.searchParams.set(BRAND_FILTER_PARAM, brandParam);
+    }
+
+    for (const vendor of vendorParams) {
+      url.searchParams.append(VENDOR_FILTER_PARAM, vendor);
     }
 
     history.pushState({ urlParameters: urlParameters.toString() }, '', url.toString());
