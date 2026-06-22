@@ -46,7 +46,7 @@
               data-lame-delay="{{ forloop.index0 | modulo: 3 }}"
               {{ block.shopify_attributes }}
             >
-              <article class="lame-signature__card">
+              <article class="lame-signature__card{% if section.settings.coming_soon %} lame-signature__card--coming-soon{% endif %}">
                 <div class="lame-signature__media">
                   {% if block.settings.image != blank %}
                     {{
@@ -62,7 +62,14 @@
                   {% else %}
                     {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-signature__image placeholder-svg' }}
                   {% endif %}
+                  {% if section.settings.coming_soon %}
+                    {% if block.settings.heading != blank %}
+                      <span class="lame-signature__image-label visually-hidden">{{ block.settings.heading }}</span>
+                    {% endif %}
+                    <span class="lame-signature__badge">{{ section.settings.coming_soon_label }}</span>
+                  {% endif %}
                 </div>
+                {% unless section.settings.coming_soon %}
                 <div class="lame-signature__content">
                   {% if block.settings.brand != blank %}
                     <p class="lame-signature__brand">{{ block.settings.brand }}</p>
@@ -82,13 +89,14 @@
                   {% if block.settings.scent_notes != blank %}
                     <p class="lame-signature__notes">{{ block.settings.scent_notes }}</p>
                   {% endif %}
-                  {% if block.settings.button_label != blank %}
-                    <a class="lame-signature__cta" href="{{ block.settings.link | default: '#' }}">
+                  {% if block.settings.button_label != blank and block.settings.link != blank %}
+                    <a class="lame-signature__cta" href="{{ block.settings.link }}">
                       {{ block.settings.button_label }}
                       <span aria-hidden="true">→</span>
                     </a>
                   {% endif %}
                 </div>
+                {% endunless %}
               </article>
             </li>
           {% endif %}
@@ -397,9 +405,44 @@
     line-height: 1.45;
   }
 
+  .lame-signature__card--coming-soon {
+    grid-template-columns: 1fr;
+  }
+
+  .lame-signature__card--coming-soon:is(:hover, :focus-within) {
+    transform: none;
+  }
+
+  .lame-signature__card--coming-soon .lame-signature__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    height: auto;
+  }
+
+  .lame-signature__badge {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    padding: 0.45rem 0.9rem;
+    border-radius: 2px;
+    background: rgb(var(--lame-sig-forest) / 0.88);
+    color: #fff;
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgb(20 20 20 / 0.2);
+  }
+
   .lame-signature__carousel {
     --signature-card-height: clamp(220px, 22vw, 280px);
     width: 100%;
+  }
+
+  .lame-signature__carousel:has(.lame-signature__card--coming-soon) {
+    --signature-card-height: auto;
   }
 
   .lame-signature__track {
@@ -713,6 +756,15 @@
       margin-inline: auto;
     }
 
+    .lame-signature__card--coming-soon {
+      grid-template-rows: 1fr;
+    }
+
+    .lame-signature__card--coming-soon .lame-signature__media {
+      aspect-ratio: 4 / 5;
+      min-height: 240px;
+    }
+
     .lame-signature__media {
       height: auto;
       min-height: 200px;
@@ -787,7 +839,20 @@
       "type": "text",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Timeless fragrances crafted to leave a lasting impression."
+      "default": "Our signature LAMÉ fragrances — coming soon."
+    },
+    {
+      "type": "checkbox",
+      "id": "coming_soon",
+      "label": "Coming soon mode",
+      "default": true,
+      "info": "Shows product images only with a coming soon badge. Hides shop buttons and product details."
+    },
+    {
+      "type": "text",
+      "id": "coming_soon_label",
+      "label": "Coming soon label",
+      "default": "Coming soon"
     },
     {
       "type": "text",
@@ -889,8 +954,7 @@
             "brand": "LAMÉ",
             "heading": "Sugar Days",
             "description": "A soft, sweet escape wrapped in winter air.",
-            "scent_notes": "FLORAL • FRUITY • MUSK",
-            "button_label": "Shop now"
+            "scent_notes": "FLORAL • FRUITY • MUSK"
           }
         },
         {
@@ -899,8 +963,7 @@
             "brand": "LAMÉ",
             "heading": "Mayscent",
             "description": "Fresh citrus brightness with a golden warmth.",
-            "scent_notes": "CITRUS • GREEN • AMBER",
-            "button_label": "Shop now"
+            "scent_notes": "CITRUS • GREEN • AMBER"
           }
         },
         {
@@ -909,8 +972,7 @@
             "brand": "LAMÉ",
             "heading": "Blue Mirage",
             "description": "Deep oceanic notes with smoky sophistication.",
-            "scent_notes": "AQUATIC • WOODY • MUSK",
-            "button_label": "Shop now"
+            "scent_notes": "AQUATIC • WOODY • MUSK"
           }
         },
         {
