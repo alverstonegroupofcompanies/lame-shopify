@@ -91,7 +91,7 @@ function getSelectedVendorLabels() {
 }
 
 /**
- * @returns {{ noResults: string, loading: string, mismatch: string, noRoot: string }}
+ * @returns {{ noResults: string, loading: string, mismatch: string, noRoot: string, vendorDisabled: string }}
  */
 function getFilterMessages() {
   const el = document.querySelector('lame-brand-filter');
@@ -106,7 +106,48 @@ function getFilterMessages() {
     noRoot:
       el?.getAttribute('data-msg-no-root') ||
       'Brand filter could not find the product grid.',
+    vendorDisabled:
+      el?.getAttribute('data-msg-vendor-disabled') ||
+      'Enable the Vendor filter in Shopify Search & Discovery for brand filtering to work across all products.',
   };
+}
+
+/**
+ * @returns {boolean}
+ */
+function isVendorFilterEnabled() {
+  const el = document.querySelector('lame-brand-filter');
+  return el?.getAttribute('data-vendor-filter-enabled') !== 'false';
+}
+
+/**
+ * @param {HTMLElement} root
+ * @param {string[]} vendorParams
+ * @returns {boolean}
+ */
+function serverFilterMayBeIgnored(root, vendorParams) {
+  if (!vendorParams.length) return false;
+
+  const vendorSet = new Set(vendorParams.map((vendor) => normalizeName(vendor)));
+  const productItems = root.querySelectorAll(
+    'li[data-vendor], .lame-category-shop__item[data-vendor], li[data-brand-slug], .lame-category-shop__item[data-brand-slug]'
+  );
+
+  if (!productItems.length) return false;
+
+  for (const item of productItems) {
+    if (!(item instanceof HTMLElement)) continue;
+    if (item.classList.contains(HIDDEN_CLASS)) continue;
+
+    const vendor = normalizeName(item.getAttribute('data-vendor'));
+    const brand = normalizeName(item.getAttribute('data-brand'));
+    const identity = vendor || brand;
+    if (identity && !vendorSet.has(identity)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -336,6 +377,34 @@ function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
   emptyState.hidden = false;
   emptyState.setAttribute('role', 'alert');
 
+  if (!isVendorFilterEnabled()) {
+    emptyState.textContent = messages.vendorDisabled;
+    emptyState.setAttribute('data-brand-filter-error', 'vendor_filter_disabled');
+    emptyState.classList.add('lame-brand-filter-empty--error');
+    emptyState.classList.remove('lame-brand-filter-empty--loading');
+    console.error(
+      '[lame-brand-filter] filter.p.vendor ignored — enable Vendor in Search & Discovery',
+      { selected: selectedArray, domSlugs: [...domSlugs], vendorParams }
+    );
+    return;
+  }
+
+  if (
+    vendorParams.length > 0 &&
+    !isReloading &&
+    serverFilterMayBeIgnored(root, vendorParams)
+  ) {
+    emptyState.textContent = messages.vendorDisabled;
+    emptyState.setAttribute('data-brand-filter-error', 'vendor_filter_disabled');
+    emptyState.classList.add('lame-brand-filter-empty--error');
+    emptyState.classList.remove('lame-brand-filter-empty--loading');
+    console.error(
+      '[lame-brand-filter] filter.p.vendor ignored — enable Vendor in Search & Discovery',
+      { url: window.location.href, selected: selectedArray, domSlugs: [...domSlugs], vendorParams }
+    );
+    return;
+  }
+
   if (missingFromDom.length > 0 && vendorParams.length === 0) {
     emptyState.textContent = messages.loading;
     emptyState.setAttribute('data-brand-filter-error', 'loading');
@@ -376,9 +445,10 @@ function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
 
 /**
  * @param {string} slug
- * @param {string} label
+ * @param {string} filterLabel - exact value for filter.p.vendor
+ * @param {string} [displayLabel]
  */
-function appendBrandCheckbox(slug, label) {
+function appendBrandCheckbox(slug, filterLabel, displayLabel = filterLabel) {
   const templateInput = document.querySelector('lame-brand-filter input[data-brand-slug]');
   if (!(templateInput instanceof HTMLInputElement)) return;
 
@@ -404,8 +474,8 @@ function appendBrandCheckbox(slug, label) {
       input.id = inputId;
       input.checked = false;
       input.setAttribute('data-brand-slug', slug);
-      input.setAttribute('data-brand-label', label);
-      input.setAttribute('data-label', label);
+      input.setAttribute('data-brand-label', filterLabel);
+      input.setAttribute('data-label', displayLabel);
     }
 
     if (labelEl instanceof HTMLLabelElement) {
@@ -413,7 +483,7 @@ function appendBrandCheckbox(slug, label) {
     }
 
     if (labelText) {
-      labelText.textContent = label;
+      labelText.textContent = displayLabel;
     }
 
     ul.appendChild(clone);
@@ -424,18 +494,22 @@ export function augmentBrandFilterFromGrid() {
   const root = getCollectionRoot();
   if (!root) return;
 
-  /** @type {Map<string, string>} */
+  /** @type {Map<string, { filterLabel: string, displayLabel: string }>} */
   const brandsFromGrid = new Map();
 
-  root.querySelectorAll('[data-brand-slug][data-brand]').forEach((element) => {
+  root.querySelectorAll('[data-brand-slug]').forEach((element) => {
     if (!(element instanceof HTMLElement)) return;
 
     const slug = normalizeSlug(element.getAttribute('data-brand-slug'));
-    const name = (element.getAttribute('data-brand') || '').trim();
-    if (!slug || !name || slug === 'other') return;
+    const vendor = (element.getAttribute('data-vendor') || '').trim();
+    const brand = (element.getAttribute('data-brand') || '').trim();
+    const filterLabel = vendor || brand;
+    const displayLabel = brand || vendor;
+
+    if (!slug || !filterLabel || slug === 'other') return;
 
     if (!brandsFromGrid.has(slug)) {
-      brandsFromGrid.set(slug, name);
+      brandsFromGrid.set(slug, { filterLabel, displayLabel });
     }
   });
 
@@ -449,9 +523,9 @@ export function augmentBrandFilterFromGrid() {
     if (slug) existingSlugs.add(slug);
   }
 
-  for (const [slug, name] of brandsFromGrid) {
+  for (const [slug, { filterLabel, displayLabel }] of brandsFromGrid) {
     if (existingSlugs.has(slug)) continue;
-    appendBrandCheckbox(slug, name);
+    appendBrandCheckbox(slug, filterLabel, displayLabel);
   }
 }
 
