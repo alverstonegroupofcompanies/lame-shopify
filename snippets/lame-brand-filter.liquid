@@ -1,8 +1,8 @@
 {%- doc -%}
   Brand filter for Our Products collections.
-  Primary source: Search & Discovery vendor facet (filter.p.vendor).
-  Fallback: collection.all_vendors + product.vendor.
-
+  Primary source: collection.all_vendors + product brand names.
+  Search & Discovery facet values are excluded (duplicate spellings).
+  When the same label appears twice, the later product entry is kept.
   @param {object} collection
   @param {string} section_id
   @param {object} [filters] - collection.filters / results.filters from facets block
@@ -30,58 +30,11 @@
 {% capture brand_filter_markup %}
   {% assign input_index = 0 %}
 
-  {% for filter in filters_list %}
-    {% if filter.param_name == 'filter.p.vendor' %}
-      {% for value in filter.values %}
-        {% assign vendor_value = value.value | strip %}
-        {% if vendor_value == blank %}
-          {% continue %}
-        {% endif %}
-
-        {% capture vendor_slug_capture %}
-          {% render 'lame-vendor-slug', vendor: vendor_value %}
-        {% endcapture %}
-        {% assign brand_slug = vendor_slug_capture | strip %}
-        {% assign slug_token = '|' | append: brand_slug | append: '|' %}
-
-        {% liquid
-          assign display_label = value.label | default: vendor_value
-          assign label_down = vendor_value | downcase
-          if label_down contains 'lamstone'
-            assign display_label = 'Lamstone Healthcare'
-          endif
-          assign label_key = display_label | downcase | strip
-          assign label_token = '|' | append: label_key | append: '|'
-        %}
-
-        {% unless brand_slugs_pipe contains slug_token or brand_labels_pipe contains label_token %}
-          {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
-          {% assign brand_labels_pipe = brand_labels_pipe | append: label_key | append: '|' %}
-          {% assign brand_count = brand_count | plus: 1 %}
-
-          {% assign input_index = input_index | plus: 1 %}
-          {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
-
-          <li class="facets__inputs-list-item" data-skip-node-update="true">
-            <div class="checkbox">
-              <input
-                type="checkbox"
-                id="{{ input_id }}"
-                class="checkbox__input"
-                data-brand-slug="{{ brand_slug | escape }}"
-                data-brand-label="{{ vendor_value | escape }}"
-                data-label="{{ display_label | escape }}"
-              >
-              <label class="checkbox__label" for="{{ input_id }}">
-                {{ 'icon-checkmark.svg' | inline_asset_content }}
-                <span class="checkbox__label-text">{{ display_label }}</span>
-              </label>
-            </div>
-          </li>
-        {% endunless %}
-      {% endfor %}
-    {% endif %}
-  {% endfor %}
+  {%- comment -%}
+    Brand checkboxes: all_vendors + products only.
+    Skip Search & Discovery facet values — they often duplicate vendors with
+    alternate spellings (e.g. a second "Fair & Lovely" at the top of the list).
+  {%- endcomment -%}
 
   {% assign vendors_sorted = collection.all_vendors | sort %}
   {% for vendor_name in vendors_sorted %}
@@ -158,11 +111,13 @@
       assign label_token = '|' | append: label_key | append: '|'
     %}
 
-    {% unless brand_slugs_pipe contains slug_token or brand_labels_pipe contains label_token %}
+    {%- comment -%} Allow same label as all_vendors when slug differs; JS keeps this (last) entry {%- endcomment -%}
+    {% unless brand_slugs_pipe contains slug_token %}
       {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
-      {% assign brand_labels_pipe = brand_labels_pipe | append: label_key | append: '|' %}
+      {% unless brand_labels_pipe contains label_token %}
+        {% assign brand_labels_pipe = brand_labels_pipe | append: label_key | append: '|' %}
+      {% endunless %}
       {% assign brand_count = brand_count | plus: 1 %}
-
       {% assign input_index = input_index | plus: 1 %}
       {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
 
