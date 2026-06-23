@@ -6,20 +6,23 @@
 /* Fallback: live /collections/all already has .all-products-page before our-products classes deploy */
 .all-products-page.lame-collection-premium-active.uniform-products-page,
 .collection-template-our-products.lame-our-products-grid {
-  --lame-green: #2d472c;
-  --lame-green-hover: #243a24;
+  /* Lamstone brand palette */
+  --lame-ivory: #f7f4ef;
+  --lame-forest: #1f4635;
+  --lame-gold: #c7a46a;
+  --lame-green: var(--lame-forest);
+  --lame-green-hover: #173528;
   --lame-green-soft: #e8f0eb;
-  --lame-gold: var(--lame-green);
-  --lame-gold-hover: var(--lame-green-hover);
-  --lame-cream: #faf9f6;
-  --lame-card-border: #e3ebe6;
-  --lame-image-bg: #f8f8f8;
+  --lame-gold-hover: #b89355;
+  --lame-cream: var(--lame-ivory);
+  --lame-card-border: #e8e4de;
+  --lame-image-bg: #f7f4ef;
   --lame-ink: #1a1614;
   --lame-muted: #6b635c;
-  --lame-card-radius: 8px;
+  --lame-card-radius: 28px;
   --lame-btn-radius: 8px;
-  --lame-card-shadow: 0 1px 4px rgb(0 0 0 / 0.06);
-  --lame-card-shadow-hover: 0 6px 18px rgb(0 0 0 / 0.1);
+  --lame-card-shadow: 0 4px 24px rgb(31 70 53 / 0.06);
+  --lame-card-shadow-hover: 0 16px 40px rgb(31 70 53 / 0.12);
   background: var(--lame-cream) !important;
   font-family: var(--lame-font-body, var(--font-body--family));
 }
@@ -249,10 +252,14 @@
     z-index: 2;
     pointer-events: auto;
     padding: 0;
-    border-radius: 12px;
-    background: #fff;
-    border: 1px solid var(--lame-card-border);
-    box-shadow: var(--lame-card-shadow);
+    border-radius: 32px;
+    background: rgb(255 255 255 / 0.72);
+    backdrop-filter: blur(16px) saturate(1.15);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+    border: 1px solid rgb(255 255 255 / 0.6);
+    box-shadow:
+      0 8px 32px rgb(31 70 53 / 0.08),
+      0 2px 8px rgb(0 0 0 / 0.04);
     overflow: hidden;
   }
 
@@ -279,12 +286,12 @@
   }
 }
 
-/* Filter sidebar — white panel header (reference layout) */
+/* Filter sidebar — glass panel header */
 .collection-template-our-products .lame-collection-filters-head {
   margin: 0;
-  padding: 1rem 1.1rem 0.65rem;
-  background: #fff;
-  border-bottom: 1px solid var(--lame-card-border);
+  padding: 1.15rem 1.25rem 0.75rem;
+  background: transparent;
+  border-bottom: 1px solid rgb(31 70 53 / 0.08);
 }
 
 .collection-template-our-products .lame-collection-filters-head__row {
@@ -365,7 +372,7 @@
 .collection-template-our-products .lame-collection-filters-promo__icon {
   display: flex;
   flex-shrink: 0;
-  color: #d4af37;
+  color: #c7a46a;
 }
 
 .collection-template-our-products .lame-collection-filters-promo__content {
@@ -379,7 +386,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #d4af37;
+  color: #c7a46a;
 }
 
 .collection-template-our-products .lame-collection-filters-promo__text {
@@ -397,7 +404,17 @@
 
 .collection-template-our-products .facets--vertical .facets__summary {
   border-radius: 0;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
+  padding-block: 0.5rem;
+}
+
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .facets__panel[open] .facets__summary {
+  border-bottom-color: rgb(199 164 106 / 0.4);
+}
+
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .facets__label,
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .facets__summary {
+  font-weight: 600;
 }
 
 /* Filter body — readable text on white panel (checkbox labels, counts, price hints) */
@@ -413,6 +430,11 @@
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .facets__clear-filter,
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .price-facet__highest-price {
   color: var(--lame-ink);
+}
+
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .facets__label,
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .facets__summary {
+  color: var(--lame-forest);
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .checkbox--disabled .checkbox__label-text {
@@ -438,8 +460,9 @@
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .checkbox__label .icon-checkmark {
-  border-color: rgb(42 58 48 / 0.35);
-  background: #fff;
+  border-radius: 50%;
+  border-color: rgb(31 70 53 / 0.25);
+  background: rgb(255 255 255 / 0.8);
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical .checkbox__input:checked + .checkbox__label .icon-checkmark {
@@ -479,7 +502,7 @@
   padding: 1rem 1.1rem;
   border-radius: var(--lame-btn-radius);
   border: 1px dashed var(--lame-card-border);
-  background: rgb(42 58 48 / 0.04);
+  background: rgb(31 70 53 / 0.04);
   color: var(--lame-muted);
   font-size: 0.875rem;
   line-height: 1.45;
@@ -491,8 +514,8 @@
 }
 
 .collection-template-our-products .lame-brand-filter-empty--loading {
-  border-color: rgb(42 58 48 / 0.2);
-  background: rgb(42 58 48 / 0.06);
+  border-color: rgb(31 70 53 / 0.2);
+  background: rgb(31 70 53 / 0.06);
   color: var(--lame-ink);
 }
 
@@ -516,10 +539,10 @@
 
 .collection-template-our-products .facets--vertical .price-facet__input,
 .collection-template-our-products .facets--vertical .field.price-facet__field .field__input {
-  border-radius: var(--lame-btn-radius);
-  border-color: var(--lame-card-border);
+  border-radius: 10px;
+  border: 1px solid rgb(31 70 53 / 0.12);
   color: var(--lame-ink);
-  background: #fff;
+  background: rgb(255 255 255 / 0.85);
 }
 
 .collection-template-our-products .facets--vertical .price-facet__range-thumb-label {
@@ -527,11 +550,11 @@
 }
 
 .collection-template-our-products .facets--vertical .price-facet__range-bounds {
-  color: rgb(42 58 48 / 0.62);
+  color: rgb(31 70 53 / 0.62);
 }
 
 .collection-template-our-products .facets--vertical .price-facet__range-track {
-  background: rgb(42 58 48 / 0.14);
+  background: rgb(31 70 53 / 0.14);
 }
 
 .collection-template-our-products .facets--vertical .price-facet__range-fill {
@@ -577,7 +600,7 @@
 }
 
 .collection-template-our-products .lame-our-products-toolbar .sorting-filter__select-wrapper {
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #e0ddd6;
   background: #fff;
   min-width: 11rem;
@@ -590,8 +613,56 @@
   padding-inline: 0.85rem 2rem;
 }
 
+/* Grid / list density toggle */
 .collection-template-our-products .lame-our-products-toolbar .grid-density-controls {
-  display: none !important;
+  display: flex !important;
+  align-items: center;
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-options-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-options {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid #e0ddd6;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-options__option {
+  margin: 0;
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 7px;
+  color: var(--lame-muted);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-options__option-input:checked ~ .column-picker {
+  background: var(--lame-forest);
+  color: #fff;
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-options__option:hover .column-picker {
+  color: var(--lame-forest);
+}
+
+.collection-template-our-products .lame-our-products-toolbar .column-options__option-input:checked ~ .column-picker:hover {
+  color: #fff;
 }
 
 .collection-template-our-products .lame-our-products-toolbar__actions {
@@ -614,7 +685,7 @@
 }
 
 .collection-template-our-products .lame-our-products-toolbar .sorting-filter__select-wrapper {
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #e0ddd6;
   background: #fff;
 }
@@ -744,6 +815,13 @@
   }
 }
 
+@media screen and (min-width: 1400px) {
+  .collection-template-our-products.lame-our-products-card-scope .lame-collection-brand-section__grid,
+  .collection-template-our-products.lame-our-products-card-scope .product-grid {
+    grid-template-columns: repeat(var(--lame-op-columns-wide), minmax(0, 1fr)) !important;
+  }
+}
+
 /* Pagination */
 .collection-template-our-products .lame-our-products-pagination-wrap {
   width: 100%;
@@ -819,7 +897,7 @@
 
 .collection-template-our-products .lame-collection-pagination__btn--prev:hover:not(.lame-collection-pagination__btn--disabled) {
   background: var(--lame-green-soft);
-  border-color: rgb(42 58 48 / 0.28);
+  border-color: rgb(31 70 53 / 0.28);
   transform: translateY(-1px);
   box-shadow: var(--lame-card-shadow-hover);
 }
@@ -846,7 +924,7 @@
 }
 
 .collection-template-our-products .lame-collection-pagination__btn--next.lame-collection-pagination__btn--disabled {
-  background: rgb(42 58 48 / 0.12);
+  background: rgb(31 70 53 / 0.12);
   border-color: transparent;
   color: rgb(26 22 20 / 0.45);
 }
@@ -1112,6 +1190,13 @@
     padding-block: 0.35rem;
   }
 
+  .collection-template-our-products #filters-drawer .facets--vertical {
+    border-radius: 24px;
+    background: rgb(255 255 255 / 0.92);
+    backdrop-filter: blur(16px) saturate(1.15);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  }
+
   .collection-template-our-products #filters-drawer .facets__summary {
     min-height: 2.75rem;
   }
@@ -1203,7 +1288,7 @@ body.template-collection-our-products .shopify-section:has(.collection-template-
 
 body.template-collection-our-products .shopify-section:has(.collection-template-our-products) .section-background,
 body.template-collection-our-products .lame-our-products-hero-section .section-background {
-  background: #faf9f6 !important;
+  background: #f7f4ef !important;
   box-shadow: none !important;
 }
 
