@@ -73,7 +73,7 @@
 .collection-template-our-products .lame-our-products-inline-header__title {
   margin: 0 0 0.5rem;
   font-family: var(--lame-font-display, var(--font-heading--family));
-  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: 0.01em;
@@ -82,10 +82,46 @@
 
 .collection-template-our-products .lame-our-products-inline-header__subtitle {
   margin: 0.35rem 0 0;
-  max-width: 36rem;
-  font-size: 0.9375rem;
-  line-height: 1.5;
+  max-width: 42rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
   color: var(--lame-muted);
+}
+
+/* Page + card typography (Our Products category cards) */
+.collection-template-our-products.lame-our-products--category-cards .lame-collection-products-column {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.collection-template-our-products.lame-our-products--category-cards .lame-cat-card__body {
+  padding: 0.85rem 0.95rem 1rem;
+}
+
+.collection-template-our-products.lame-our-products--category-cards .lame-cat-card__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+.collection-template-our-products.lame-our-products--category-cards .lame-cat-card__title {
+  font-size: 1.05rem;
+  line-height: 1.35;
+  min-height: 2.75em;
+  flex-basis: 2.75em;
+}
+
+.collection-template-our-products.lame-our-products--category-cards .lame-cat-card__price {
+  font-size: 1rem;
+}
+
+.collection-template-our-products.lame-our-products--category-cards .lame-cat-card__price .price {
+  font-size: inherit;
+}
+
+.collection-template-our-products.lame-our-products--category-cards .lame-cat-card__btn {
+  min-height: 2.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
 }
 
 /* —— Shell & layout —— */
@@ -474,7 +510,7 @@
 
 .collection-template-our-products .lame-our-products-toolbar__count {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   color: var(--lame-muted);
 }
@@ -494,7 +530,7 @@
 
 .collection-template-our-products .lame-our-products-toolbar .sorting-filter__select,
 .collection-template-our-products .lame-our-products-toolbar .facets__label {
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   color: var(--lame-ink);
 }
 
@@ -1002,13 +1038,6 @@
   }
 }
 
-@media screen and (min-width: 400px) and (max-width: 749px) {
-  .collection-template-our-products.lame-our-products--category-cards .product-grid.lame-category-shop__grid,
-  .collection-template-our-products.lame-our-products--category-cards .lame-collection-brand-section__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-
 @media screen and (min-width: 750px) and (max-width: 1439px) {
   .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) !important;
@@ -1020,15 +1049,19 @@
 .collection-template-our-products.lame-our-products--category-cards {
   --lame-cat-forest: 45 74 34;
   --lame-cat-gap: clamp(0.85rem, 1.8vw, 1.35rem);
+  --lame-cat-card-min: 168px;
 }
 
-.collection-template-our-products.lame-our-products--category-cards .product-grid.lame-category-shop__grid,
-.collection-template-our-products.lame-our-products--category-cards .lame-collection-brand-section__grid {
+/* Fill the products column — override premium 2-column grid */
+.collection-template-our-products.lame-our-products--category-cards.lame-collection-premium-active
+  .lame-collection-products-column
+  :is(.product-grid.lame-category-shop__grid, .lame-collection-brand-section__grid) {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-content: stretch !important;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--lame-cat-card-min)), 1fr)) !important;
   gap: var(--lame-cat-gap) !important;
-  width: 100%;
-  max-width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1038,16 +1071,26 @@
 }
 
 @media screen and (min-width: 750px) {
-  .collection-template-our-products.lame-our-products--category-cards .product-grid.lame-category-shop__grid,
-  .collection-template-our-products.lame-our-products--category-cards .lame-collection-brand-section__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  .collection-template-our-products.lame-our-products--category-cards {
+    --lame-cat-card-min: 190px;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .collection-template-our-products.lame-our-products--category-cards {
+    --lame-cat-card-min: 200px;
   }
 }
 
 @media screen and (min-width: 1200px) {
-  .collection-template-our-products.lame-our-products--category-cards .product-grid.lame-category-shop__grid,
-  .collection-template-our-products.lame-our-products--category-cards .lame-collection-brand-section__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  .collection-template-our-products.lame-our-products--category-cards {
+    --lame-cat-card-min: 210px;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .collection-template-our-products.lame-our-products--category-cards {
+    --lame-cat-card-min: 220px;
   }
 }
 
