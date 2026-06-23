@@ -14,6 +14,7 @@
   assign filter_style = filter_style | default: 'vertical'
   assign id_prefix = id_prefix | default: filter_style
   assign brand_slugs_pipe = '|'
+  assign brand_labels_pipe = '|'
   assign brand_count = 0
   assign filters_list = filters | default: collection.filters
   assign vendor_facet_present = false
@@ -42,17 +43,21 @@
         {% endcapture %}
         {% assign brand_slug = vendor_slug_capture | strip %}
         {% assign slug_token = '|' | append: brand_slug | append: '|' %}
-        {% unless brand_slugs_pipe contains slug_token %}
-          {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
-          {% assign brand_count = brand_count | plus: 1 %}
 
-          {% liquid
-            assign display_label = value.label | default: vendor_value
-            assign label_down = vendor_value | downcase
-            if label_down contains 'lamstone'
-              assign display_label = 'Lamstone Healthcare'
-            endif
-          %}
+        {% liquid
+          assign display_label = value.label | default: vendor_value
+          assign label_down = vendor_value | downcase
+          if label_down contains 'lamstone'
+            assign display_label = 'Lamstone Healthcare'
+          endif
+          assign label_key = display_label | downcase | strip
+          assign label_token = '|' | append: label_key | append: '|'
+        %}
+
+        {% unless brand_slugs_pipe contains slug_token or brand_labels_pipe contains label_token %}
+          {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
+          {% assign brand_labels_pipe = brand_labels_pipe | append: label_key | append: '|' %}
+          {% assign brand_count = brand_count | plus: 1 %}
 
           {% assign input_index = input_index | plus: 1 %}
           {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
@@ -90,17 +95,21 @@
     {% endcapture %}
     {% assign brand_slug = vendor_slug_capture | strip %}
     {% assign slug_token = '|' | append: brand_slug | append: '|' %}
-    {% unless brand_slugs_pipe contains slug_token %}
-      {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
-      {% assign brand_count = brand_count | plus: 1 %}
 
-      {% liquid
-        assign display_label = vendor_name_stripped
-        assign label_down = vendor_name_stripped | downcase
-        if label_down contains 'lamstone'
-          assign display_label = 'Lamstone Healthcare'
-        endif
-      %}
+    {% liquid
+      assign display_label = vendor_name_stripped
+      assign label_down = vendor_name_stripped | downcase
+      if label_down contains 'lamstone'
+        assign display_label = 'Lamstone Healthcare'
+      endif
+      assign label_key = display_label | downcase | strip
+      assign label_token = '|' | append: label_key | append: '|'
+    %}
+
+    {% unless brand_slugs_pipe contains slug_token or brand_labels_pipe contains label_token %}
+      {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
+      {% assign brand_labels_pipe = brand_labels_pipe | append: label_key | append: '|' %}
+      {% assign brand_count = brand_count | plus: 1 %}
 
       {% assign input_index = input_index | plus: 1 %}
       {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
@@ -125,7 +134,10 @@
   {% endfor %}
 
   {% for product in collection.products %}
-    {% assign vendor_name = product.vendor | strip %}
+    {% capture product_brand_capture %}
+      {% render 'lame-product-brand-name', product: product %}
+    {% endcapture %}
+    {% assign vendor_name = product_brand_capture | strip %}
     {% if vendor_name == blank %}
       {% continue %}
     {% endif %}
@@ -135,17 +147,21 @@
     {% endcapture %}
     {% assign brand_slug = brand_slug_capture | strip %}
     {% assign slug_token = '|' | append: brand_slug | append: '|' %}
-    {% unless brand_slugs_pipe contains slug_token %}
-      {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
-      {% assign brand_count = brand_count | plus: 1 %}
 
-      {% liquid
-        assign display_label = vendor_name
-        assign label_down = vendor_name | downcase
-        if label_down contains 'lamstone'
-          assign display_label = 'Lamstone Healthcare'
-        endif
-      %}
+    {% liquid
+      assign display_label = vendor_name
+      assign label_down = vendor_name | downcase
+      if label_down contains 'lamstone'
+        assign display_label = 'Lamstone Healthcare'
+      endif
+      assign label_key = display_label | downcase | strip
+      assign label_token = '|' | append: label_key | append: '|'
+    %}
+
+    {% unless brand_slugs_pipe contains slug_token or brand_labels_pipe contains label_token %}
+      {% assign brand_slugs_pipe = brand_slugs_pipe | append: brand_slug | append: '|' %}
+      {% assign brand_labels_pipe = brand_labels_pipe | append: label_key | append: '|' %}
+      {% assign brand_count = brand_count | plus: 1 %}
 
       {% assign input_index = input_index | plus: 1 %}
       {% assign input_id = 'Filter-brand-' | append: input_index | append: '-' | append: id_prefix %}
