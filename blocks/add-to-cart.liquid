@@ -11,6 +11,14 @@
 {% liquid
   assign class = 'add-to-cart-button ' | append: block.settings.style_class
   assign id = 'BuyButtons-ProductSubmitButton-' | append: block.id
+
+  capture lame_our_products_active_capture
+    render 'lame-our-products-active', section: section
+  endcapture
+  assign show_cart_icon = true
+  if lame_our_products_active_capture contains 'true'
+    assign show_cart_icon = false
+  endif
 %}
 
 <span
@@ -23,7 +31,8 @@
     can_add_to_cart: can_add_to_cart,
     product: closest.product,
     add_to_cart_text: add_to_cart_text,
-    data_testid: 'standalone-add-to-cart'
+    data_testid: 'standalone-add-to-cart',
+    show_icon: show_cart_icon
   %}
 </span>
 
