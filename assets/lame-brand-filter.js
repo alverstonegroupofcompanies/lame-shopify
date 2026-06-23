@@ -305,14 +305,19 @@ function updateActiveCount() {
 }
 
 function updateClearAllButton() {
-  const clearButton = document.querySelector('.lame-collection-facet-actions__clear');
+  const clearButton =
+    document.querySelector('.lame-collection-filters-head__clear') ||
+    document.querySelector('.lame-collection-facet-actions__clear');
   if (!(clearButton instanceof HTMLButtonElement)) return;
 
   const brandActive = getSelectedSlugs().size > 0;
-  const facetsActive = clearButton.classList.contains('lame-collection-facet-actions__clear--active');
+  const facetsActive =
+    clearButton.classList.contains('lame-collection-facet-actions__clear--active') ||
+    clearButton.classList.contains('lame-collection-filters-head__clear--active');
 
   if (brandActive) {
     clearButton.classList.add('lame-collection-facet-actions__clear--active');
+    clearButton.classList.add('lame-collection-filters-head__clear--active');
   }
 
   clearButton.disabled = !(facetsActive || brandActive);

@@ -174,7 +174,19 @@
         >
           {% if should_show_pane %}
             {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering %}
-              {% render 'lame-collection-filters-panel-head', active_count: total_active_values %}
+              {% liquid
+                assign filters_head_active = false
+                if total_active_values > 0
+                  assign filters_head_active = true
+                endif
+              %}
+              {% render 'lame-collection-filters-panel-head',
+                active_count: total_active_values,
+                show_clear_all: lame_our_products_active,
+                results_url: results_url,
+                section_id: section.id,
+                is_active: filters_head_active
+              %}
             {% endif %}
 
             {% render 'filter-remove-buttons',
@@ -274,12 +286,14 @@
                     assign filters_active = true
                   endif
                 %}
-                {% render 'lame-collection-facet-actions',
-                  results_url: results_url,
-                  is_active: filters_active,
-                  section_id: section.id
-                %}
-                {% render 'lame-collection-filters-shipping-promo' %}
+                {% unless lame_our_products_active %}
+                  {% render 'lame-collection-facet-actions',
+                    results_url: results_url,
+                    is_active: filters_active,
+                    section_id: section.id
+                  %}
+                  {% render 'lame-collection-filters-shipping-promo' %}
+                {% endunless %}
               {% endif %}
 
               {% if block_settings.filter_style == 'horizontal' %}

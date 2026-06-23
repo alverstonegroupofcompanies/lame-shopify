@@ -2,10 +2,34 @@
   Sidebar heading for collection filters.
 
   @param {number} [active_count] - Active filter count
+  @param {boolean} [show_clear_all] - Show clear-all control in header row
+  @param {string} [results_url] - URL when filters cleared
+  @param {string} [section_id] - Section id for form reference
+  @param {boolean} [is_active] - Any active filters
 {%- enddoc -%}
 
 <div class="lame-collection-filters-head">
-  <h2 class="lame-collection-filters-head__title">{{ 'lame_collection.filters_title' | t }}</h2>
+  <div class="lame-collection-filters-head__row">
+    <h2 class="lame-collection-filters-head__title">{{ 'lame_collection.filters_title' | t }}</h2>
+    {% if show_clear_all %}
+      <facet-remove-component
+        class="lame-collection-filters-head__clear-wrap"
+        data-url="{{ results_url }}"
+        active-class="lame-collection-filters-head__clear--active"
+      >
+        <button
+          type="button"
+          class="lame-collection-filters-head__clear{% if is_active %} lame-collection-filters-head__clear--active{% endif %}"
+          ref="clearButton"
+          on:click="/removeFilter?form=FacetFiltersForm--{{ section_id }}-desktop"
+          on:keydown="/removeFilter?form=FacetFiltersForm--{{ section_id }}-desktop"
+          {% unless is_active %}disabled{% endunless %}
+        >
+          {{ 'actions.clear_all' | t }}
+        </button>
+      </facet-remove-component>
+    {% endif %}
+  </div>
   {% if active_count > 0 %}
     <p class="lame-collection-filters-head__active">
       {{ 'lame_collection.filters_active' | t: count: active_count }}
