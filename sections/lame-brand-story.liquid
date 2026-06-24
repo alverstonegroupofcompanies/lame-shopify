@@ -1,0 +1,212 @@
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--full-width color-{{ section.settings.color_scheme }} lame-brand-story"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-brand-story__stage">
+    {%- if section.settings.image != blank -%}
+      {{
+        section.settings.image
+        | image_url: width: 2400
+        | image_tag:
+          class: 'lame-brand-story__bg',
+          loading: 'lazy',
+          widths: '750, 990, 1200, 1600, 2000, 2400',
+          sizes: '100vw',
+          alt: ''
+      }}
+    {%- endif -%}
+    <div class="lame-brand-story__scrim" aria-hidden="true"></div>
+    <div class="lame-brand-story__content spacing-style" style="{% render 'spacing-padding', settings: section.settings %}" data-lame-reveal>
+      {%- if section.settings.heading != blank -%}
+        <h2 class="lame-brand-story__heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.description != blank -%}
+        <div class="lame-brand-story__description rte">{{ section.settings.description }}</div>
+      {%- endif -%}
+      {%- if section.settings.button_label != blank -%}
+        <a
+          class="lame-brand-story__cta"
+          href="{{ section.settings.button_link | default: routes.root_url }}"
+        >
+          {{ section.settings.button_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    const node = section.querySelector('[data-lame-reveal]');
+    if (!node) return;
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.15 }
+      );
+      observer.observe(node);
+    } else {
+      node.classList.add('is-visible');
+    }
+  })();
+</script>
+
+{% stylesheet %}
+  .lame-brand-story {
+    padding: 0 !important;
+  }
+
+  .lame-brand-story > .section-background {
+    display: none;
+  }
+
+  .lame-brand-story__stage {
+    position: relative;
+    min-height: clamp(320px, 38vw, 460px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: rgb(var(--lame-premium-forest, 45 74 34));
+  }
+
+  .lame-brand-story__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .lame-brand-story__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--lame-premium-forest-dark, 35 58 28) / 0.55) 0%,
+      rgb(var(--lame-premium-forest, 45 74 34) / 0.72) 100%
+    );
+  }
+
+  .lame-brand-story__content {
+    position: relative;
+    z-index: 1;
+    max-width: 42rem;
+    margin-inline: auto;
+    padding-inline: max(1rem, var(--page-margin));
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+
+  .lame-brand-story__content.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .lame-brand-story__heading {
+    margin: 0;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.15;
+  }
+
+  .lame-brand-story__description {
+    margin: 0;
+    font-family: var(--lame-font-body, 'Jost', sans-serif);
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    line-height: 1.6;
+    color: rgb(255 255 255 / 0.88);
+    max-width: 36ch;
+  }
+
+  .lame-brand-story__description p {
+    margin: 0;
+  }
+
+  .lame-brand-story__cta {
+    display: inline-flex;
+    margin-top: 0.35rem;
+    padding: 0.72rem 1.5rem;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    color: #fff;
+    font-family: var(--lame-font-body, 'Jost', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .lame-brand-story__cta:hover {
+    background: #fff;
+    color: rgb(var(--lame-premium-forest, 45 74 34));
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Brand story",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Background image" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Pure Ingredients. Radiant You." },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>We believe in clean, conscious beauty — formulas rooted in nature and crafted with care for every skin type.</p>"
+    },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Know More" },
+    { "type": "url", "id": "button_link", "label": "Button link" },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [{ "name": "Brand story" }]
+}
+{% endschema %}

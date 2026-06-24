@@ -36,10 +36,59 @@
               endif
             -%}
             <article
-              class="lame-cosmetic-hero__slide{% if forloop.first %} is-active{% endif %}"
+              class="lame-cosmetic-hero__slide{% if forloop.first %} is-active{% endif %}{% if block.settings.layout == 'editorial_split' %} lame-cosmetic-hero__slide--editorial{% endif %}"
               data-cosmetic-hero-slide
               {{ block.shopify_attributes }}
             >
+              {%- if block.settings.layout == 'editorial_split' -%}
+                <div class="lame-cosmetic-hero__editorial">
+                  <div class="lame-cosmetic-hero__editorial-copy">
+                    {%- if block.settings.eyebrow != blank -%}
+                      <p class="lame-cosmetic-hero__eyebrow">{{ block.settings.eyebrow }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.heading != blank -%}
+                      <h2 class="lame-cosmetic-hero__heading">{{ block.settings.heading }}</h2>
+                    {%- endif -%}
+                    {%- if block.settings.subheading != blank -%}
+                      <p class="lame-cosmetic-hero__subheading">{{ block.settings.subheading }}</p>
+                    {%- elsif block.settings.description != blank -%}
+                      <p class="lame-cosmetic-hero__description">{{ block.settings.description }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.button_label != blank -%}
+                      <a class="lame-cosmetic-hero__cta" href="{{ block.settings.button_link | default: routes.collections_url }}">
+                        {{ block.settings.button_label }}
+                      </a>
+                    {%- endif -%}
+                  </div>
+                  {%- if block.settings.inset_image != blank -%}
+                    <div class="lame-cosmetic-hero__editorial-inset">
+                      {{
+                        block.settings.inset_image
+                        | image_url: width: 600
+                        | image_tag:
+                          class: 'lame-cosmetic-hero__inset-image',
+                          loading: slide_loading,
+                          widths: '300, 400, 600',
+                          sizes: '(min-width: 990px) 18vw, 40vw',
+                          alt: block.settings.inset_image.alt | default: block.settings.heading | escape
+                      }}
+                    </div>
+                  {%- endif -%}
+                  <div class="lame-cosmetic-hero__editorial-media">
+                    {{
+                      block.settings.image
+                      | image_url: width: 2400
+                      | image_tag:
+                        class: 'lame-cosmetic-hero__image',
+                        loading: slide_loading,
+                        fetchpriority: slide_fetchpriority,
+                        widths: '750, 990, 1200, 1600, 2000, 2400',
+                        sizes: '50vw',
+                        alt: block.settings.image.alt | default: block.settings.heading | escape
+                    }}
+                  </div>
+                </div>
+              {%- else -%}
               <div class="lame-cosmetic-hero__media">
                 {{
                   block.settings.image
@@ -74,6 +123,7 @@
                   {%- endif -%}
                 </div>
               </div>
+              {%- endif -%}
             </article>
           {%- endfor -%}
         </div>
@@ -220,9 +270,21 @@
       "type": "slide",
       "name": "Slide",
       "settings": [
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Layout",
+          "options": [
+            { "value": "full_bleed", "label": "Full bleed with text overlay" },
+            { "value": "editorial_split", "label": "Editorial split (text + inset + photo)" }
+          ],
+          "default": "full_bleed"
+        },
         { "type": "image_picker", "id": "image", "label": "Background image" },
+        { "type": "image_picker", "id": "inset_image", "label": "Inset product image", "info": "Editorial split layout only" },
         { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NOURISH • STRENGTHEN • SHINE" },
         { "type": "text", "id": "heading", "label": "Heading", "default": "Good Hair Every Day, Every Way" },
+        { "type": "text", "id": "subheading", "label": "Subheading", "info": "Editorial split layout" },
         { "type": "textarea", "id": "description", "label": "Description", "default": "Plant-powered care for healthy hair that shines naturally." },
         { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop Hair Care" },
         { "type": "url", "id": "button_link", "label": "Button link" }

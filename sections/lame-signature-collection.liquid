@@ -1,6 +1,6 @@
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature{% if section.settings.layout == 'editorial_grid' %} lame-signature--editorial{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-signature__vector-art" aria-hidden="true">
@@ -12,6 +12,61 @@
   <div class="lame-signature__decor lame-signature__decor--right" aria-hidden="true"></div>
 
   <div class="lame-signature__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {% if section.settings.layout == 'editorial_grid' %}
+      <div class="lame-signature__editorial" data-lame-reveal>
+        <div class="lame-signature__editorial-intro">
+          {% if section.settings.heading_line_1 != blank or section.settings.heading_line_2 != blank %}
+            <h2 class="lame-signature__title lame-signature__title--editorial">
+              {% if section.settings.heading_line_1 != blank %}
+                <span class="lame-signature__title-line">{{ section.settings.heading_line_1 }}</span>
+              {% endif %}
+              {% if section.settings.heading_line_2 != blank %}
+                <span class="lame-signature__title-main">{{ section.settings.heading_line_2 }}</span>
+              {% endif %}
+            </h2>
+          {% endif %}
+          {% if section.settings.view_all_label != blank %}
+            <a class="lame-signature__view-all lame-btn--forest-outline" href="{{ section.settings.view_all_link | default: routes.collections_url }}">
+              {{ section.settings.view_all_label }}
+            </a>
+          {% endif %}
+        </div>
+        <ul class="lame-signature__grid" role="list">
+          {% for block in section.blocks %}
+            {% if block.type == 'collection_card' %}
+              <li class="lame-signature__grid-item" {{ block.shopify_attributes }}>
+                <a class="lame-signature__explore-card" href="{{ block.settings.link | default: '#' }}">
+                  <div class="lame-signature__explore-media">
+                    {% if block.settings.image != blank %}
+                      {{
+                        block.settings.image
+                        | image_url: width: 800
+                        | image_tag:
+                          class: 'lame-signature__explore-image',
+                          loading: 'lazy',
+                          widths: '360,480,600,800',
+                          sizes: '(min-width: 990px) 16vw, 42vw',
+                          alt: block.settings.title | escape
+                      }}
+                    {% else %}
+                      {{ 'collection-apparel-1' | placeholder_svg_tag: 'lame-signature__explore-image placeholder-svg' }}
+                    {% endif %}
+                    <div class="lame-signature__explore-overlay">
+                      {% if block.settings.title != blank %}
+                        <h3 class="lame-signature__explore-title">{{ block.settings.title }}</h3>
+                      {% endif %}
+                      {% if block.settings.explore_label != blank %}
+                        <span class="lame-signature__explore-link">{{ block.settings.explore_label }} →</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% else %}
     <header class="lame-signature__header" data-lame-reveal>
       {% if section.settings.heading_line_1 != blank or section.settings.heading_line_2 != blank %}
         <h2 class="lame-signature__title">
@@ -113,6 +168,8 @@
         </button>
       </div>
     </div>
+
+    {% endif %}
 
     {% assign value_blocks = section.blocks | where: 'type', 'value' %}
     {% if value_blocks.size > 0 %}
@@ -814,6 +871,106 @@
       grid-template-rows: minmax(180px, 42vw) auto;
     }
   }
+
+  .lame-signature--editorial .lame-signature__vector-art,
+  .lame-signature--editorial .lame-signature__decor {
+    display: none;
+  }
+
+  .lame-signature__editorial {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: start;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-signature__editorial {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 2.1fr);
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+    }
+  }
+
+  .lame-signature__editorial-intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding-top: 0.5rem;
+  }
+
+  .lame-signature__title--editorial {
+    text-align: left;
+    margin: 0;
+  }
+
+  .lame-signature__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-signature__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  .lame-signature__explore-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+  }
+
+  .lame-signature__explore-media {
+    position: relative;
+    aspect-ratio: 3 / 5;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgb(20 20 20 / 0.08);
+  }
+
+  .lame-signature__explore-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.45s ease;
+  }
+
+  .lame-signature__explore-card:hover .lame-signature__explore-image {
+    transform: scale(1.04);
+  }
+
+  .lame-signature__explore-overlay {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    padding: 1rem 0.85rem;
+    background: linear-gradient(180deg, transparent 0%, rgb(var(--lame-sig-forest, 45 74 34) / 0.88) 100%);
+    color: #fff;
+    text-align: center;
+  }
+
+  .lame-signature__explore-title {
+    margin: 0 0 0.35rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .lame-signature__explore-link {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -823,6 +980,23 @@
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index"] },
   "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "carousel", "label": "Product carousel" },
+        { "value": "editorial_grid", "label": "Editorial grid (explore cards)" }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "View all label",
+      "default": "View All Collections"
+    },
+    { "type": "url", "id": "view_all_link", "label": "View all link" },
     {
       "type": "text",
       "id": "heading_line_1",
@@ -920,6 +1094,16 @@
         { "type": "text", "id": "description", "label": "Description" },
         { "type": "text", "id": "scent_notes", "label": "Scent notes", "default": "FLORAL • FRUITY • MUSK" },
         { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop now" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    },
+    {
+      "type": "collection_card",
+      "name": "Collection card",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Luxury Perfumes" },
+        { "type": "text", "id": "explore_label", "label": "Explore label", "default": "Explore" },
         { "type": "url", "id": "link", "label": "Link" }
       ]
     },
