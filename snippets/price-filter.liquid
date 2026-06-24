@@ -5,6 +5,7 @@
   @param {string} filter_style - The filter style, can be 'horizontal' or 'vertical'.
   @param {boolean} [should_render_clear] - Whether to render the clear button.
   @param {string} [id_prefix] - Unique prefix to avoid duplicate IDs when rendered multiple times.
+  @param {boolean} [our_products_price_slider] - Our Products: 0–2000 range, step 100, integer labels.
 
   @example
   {% render 'price-filter', filter: filter, filter_style: 'vertical', id_prefix: 'dialog' %}
@@ -17,6 +18,15 @@
     assign is_horizontal = true
   elsif filter_style == 'vertical'
     assign is_vertical = true
+  endif
+
+  assign price_slider_max = filter.range_max | money_without_currency
+  assign price_slider_step = 'any'
+  assign price_label_format = 'money'
+  if our_products_price_slider
+    assign price_slider_max = 2000
+    assign price_slider_step = 100
+    assign price_label_format = 'integer'
   endif
 -%}
 {% capture accordion_children %}
@@ -73,6 +83,11 @@
     >
       {% assign min_input_max_value = filter.max_value.value | default: filter.range_max %}
       {% assign max_input_min_value = filter.min_value.value | default: 0 %}
+      {% if our_products_price_slider %}
+        {% assign price_input_max = 2000 %}
+      {% else %}
+        {% assign price_input_max = filter.range_max | money_without_currency %}
+      {% endif %}
 
       <price-facet-component
         class="
@@ -80,15 +95,21 @@
           {%- if filter_style == 'horizontal' %}
             price-facet--horizontal
           {%- endif %}
+          {%- if our_products_price_slider %}
+            price-facet--our-products
+          {%- endif %}
         "
         id="facet-inputs-{{ filter.param_name | escape | replace: '.', '-' }}"
         data-money-format="{{ shop.money_format | strip_html }}"
         data-currency="{{ localization.country.currency.iso_code }}"
         data-range-max="{{ filter.range_max }}"
+        data-slider-max="{{ price_slider_max }}"
+        data-slider-step="{{ price_slider_step }}"
+        data-label-format="{{ price_label_format }}"
         on:change="/updatePriceFilterAndResults"
       >
         {% liquid
-          assign slider_max = filter.range_max | money_without_currency
+          assign slider_max = price_slider_max
           assign slider_min_value = 0
           if filter.min_value.value != null
             assign slider_min_value = filter.min_value.value | money_without_currency
@@ -113,7 +134,7 @@
               ref="minRange"
               min="0"
               max="{{ slider_max }}"
-              step="any"
+              step="{{ price_slider_step }}"
               value="{{ slider_min_value }}"
               aria-label="{{ 'accessibility.price_filter_low' | t }}"
             >
@@ -123,17 +144,17 @@
               ref="maxRange"
               min="0"
               max="{{ slider_max }}"
-              step="any"
+              step="{{ price_slider_step }}"
               value="{{ slider_max_value }}"
               aria-label="{{ 'accessibility.price_filter_high' | t }}"
             >
           </div>
           <div class="price-facet__range-bounds" aria-hidden="true">
             <span class="price-facet__range-bound price-facet__range-bound--min" ref="rangeMinBound">
-              {{- 0 | money | strip_html -}}
+              {%- if our_products_price_slider -%}0{%- else -%}{{- 0 | money | strip_html -}}{%- endif -%}
             </span>
             <span class="price-facet__range-bound price-facet__range-bound--max" ref="rangeMaxBound">
-              {{- filter.range_max | money | strip_html -}}
+              {%- if our_products_price_slider -%}2000{%- else -%}{{- filter.range_max | money | strip_html -}}{%- endif -%}
             </span>
           </div>
         </div>
@@ -154,7 +175,7 @@
                 inputmode="decimal"
                 placeholder="0"
                 data-min="0"
-                data-max="{{ min_input_max_value | money_without_currency }}"
+                data-max="{{ price_input_max }}"
                 ref="minInput"
                 autocomplete="off"
                 aria-label="{{ 'accessibility.price_filter_low' | t }}"
@@ -181,9 +202,9 @@
                 {%- endif -%}
                 type="text"
                 inputmode="decimal"
-                placeholder="{{ filter.range_max | money_without_currency }}"
+                placeholder="{{ price_input_max }}"
                 data-min="{{ max_input_min_value | money_without_currency }}"
-                data-max="{{ filter.range_max | money_without_currency }}"
+                data-max="{{ price_input_max }}"
                 ref="maxInput"
                 autocomplete="off"
                 aria-label="{{ 'accessibility.price_filter_high' | t }}"
@@ -199,17 +220,19 @@
           </div>
         </div>
 
-        <div
-          class="
-            price-facet__highest-price
-            {%- if filter_style == 'horizontal' %}
-              price-facet__highest-price--horizontal
-            {%- endif %}
-          "
-        >
-          {%- assign formatted_highest_price = filter.range_max | money -%}
-          {{ 'content.price_filter_html' | t: price: formatted_highest_price }}
-        </div>
+        {% unless our_products_price_slider %}
+          <div
+            class="
+              price-facet__highest-price
+              {%- if filter_style == 'horizontal' %}
+                price-facet__highest-price--horizontal
+              {%- endif %}
+            "
+          >
+            {%- assign formatted_highest_price = filter.range_max | money -%}
+            {{ 'content.price_filter_html' | t: price: formatted_highest_price }}
+          </div>
+        {% endunless %}
 
         {% if filter.min_value.value != null or filter.max_value.value != null %}
           {% assign has_active_values = true %}

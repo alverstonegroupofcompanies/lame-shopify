@@ -386,6 +386,10 @@ class PriceFacetComponent extends Component {
   #formatDisplayValue(displayValue) {
     if (!displayValue || displayValue <= 0) return '';
 
+    if (this.#usesIntegerLabels()) {
+      return String(Math.round(displayValue));
+    }
+
     const zeroDecimal = new Set([
       'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
     ]);
@@ -400,10 +404,44 @@ class PriceFacetComponent extends Component {
    * @returns {number}
    */
   #getSliderMax() {
+    const override = this.dataset.sliderMax;
+    if (override) {
+      const parsed = parseFloat(String(override).replace(/[^\d.,]/g, '').replace(',', '.'));
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+
     const { maxRange, maxInput } = this.refs;
     const rawMax = maxRange?.max || maxInput?.getAttribute('data-max') || maxInput?.placeholder || '0';
     const parsed = parseFloat(String(rawMax).replace(/[^\d.,]/g, '').replace(',', '.'));
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  }
+
+  /**
+   * @returns {number}
+   */
+  #getSliderStep() {
+    const step = parseFloat(this.dataset.sliderStep || '1');
+    return Number.isFinite(step) && step > 0 ? step : 1;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  #usesIntegerLabels() {
+    return this.dataset.labelFormat === 'integer';
+  }
+
+  /**
+   * @param {number} value
+   * @param {number} max
+   * @returns {number}
+   */
+  #snapToStep(value, max) {
+    const step = this.#getSliderStep();
+    if (step <= 1 && this.dataset.sliderStep === 'any') return value;
+
+    const snapped = Math.round(value / step) * step;
+    return Math.max(0, Math.min(max, snapped));
   }
 
   #initRangeSlider() {
@@ -412,6 +450,13 @@ class PriceFacetComponent extends Component {
     if (this.#rangeSliderReady) return;
 
     this.#rangeSliderReady = true;
+
+    const sliderMax = this.#getSliderMax();
+    if (sliderMax) {
+      minRange.max = String(sliderMax);
+      maxRange.max = String(sliderMax);
+    }
+
     minRange.addEventListener('input', this.#handleRangeInput);
     maxRange.addEventListener('input', this.#handleRangeInput);
   }
@@ -432,6 +477,11 @@ class PriceFacetComponent extends Component {
 
     if (!Number.isFinite(minValue)) minValue = 0;
     if (!Number.isFinite(maxValue)) maxValue = sliderMax;
+
+    minValue = this.#snapToStep(minValue, sliderMax);
+    maxValue = this.#snapToStep(maxValue, sliderMax);
+    minRange.value = String(minValue);
+    maxRange.value = String(maxValue);
 
     if (minValue > maxValue) {
       if (event?.target === minRange) {
@@ -458,8 +508,8 @@ class PriceFacetComponent extends Component {
     const sliderMax = this.#getSliderMax();
     if (!sliderMax) return;
 
-    const minValue = this.#parseSliderNumber(minInput.value) ?? 0;
-    const maxValue = this.#parseSliderNumber(maxInput.value) ?? sliderMax;
+    const minValue = this.#snapToStep(this.#parseSliderNumber(minInput.value) ?? 0, sliderMax);
+    const maxValue = this.#snapToStep(this.#parseSliderNumber(maxInput.value) ?? sliderMax, sliderMax);
 
     const clampedMin = Math.max(0, Math.min(minValue, sliderMax));
     const clampedMax = Math.max(clampedMin, Math.min(maxValue, sliderMax));
@@ -475,6 +525,10 @@ class PriceFacetComponent extends Component {
    */
   #formatThumbLabel(displayValue) {
     if (!Number.isFinite(displayValue)) return '';
+
+    if (this.#usesIntegerLabels()) {
+      return String(Math.round(displayValue));
+    }
 
     const zeroDecimal = new Set([
       'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
@@ -519,16 +573,24 @@ class PriceFacetComponent extends Component {
     }
 
     if (rangeMinBound instanceof HTMLElement) {
-      rangeMinBound.textContent = formatMoney(0, this.moneyFormat, this.currency);
+      rangeMinBound.textContent = this.#usesIntegerLabels()
+        ? '0'
+        : formatMoney(0, this.moneyFormat, this.currency);
     }
 
     if (rangeMaxBound instanceof HTMLElement) {
-      rangeMaxBound.textContent = this.#formatThumbLabel(sliderMax);
+      rangeMaxBound.textContent = this.#usesIntegerLabels()
+        ? String(Math.round(sliderMax))
+        : this.#formatThumbLabel(sliderMax);
     }
 
     if (minRangeLabel instanceof HTMLElement) {
       this.#positionThumbLabel(minRangeLabel, left);
-      minRangeLabel.textContent = minValue > 0 ? this.#formatThumbLabel(minValue) : '';
+      if (this.#usesIntegerLabels()) {
+        minRangeLabel.textContent = String(Math.round(minValue));
+      } else {
+        minRangeLabel.textContent = minValue > 0 ? this.#formatThumbLabel(minValue) : '';
+      }
     }
 
     if (maxRangeLabel instanceof HTMLElement) {
