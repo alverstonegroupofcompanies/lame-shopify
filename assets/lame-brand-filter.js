@@ -52,6 +52,15 @@ function normalizeName(name) {
 }
 
 /**
+ * Collapse spacing/ampersand variants so "Fair & Lovely" matches "Fair  & Lovely".
+ * @param {string | null | undefined} name
+ * @returns {string}
+ */
+function normalizeBrandLabel(name) {
+  return normalizeName(name).replace(/\s+/g, ' ').replace(/\s*&\s*/g, ' & ');
+}
+
+/**
  * @returns {NodeListOf<HTMLInputElement>}
  */
 function getAllBrandInputs() {
@@ -449,6 +458,53 @@ function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
 }
 
 /**
+ * @param {HTMLInputElement} input
+ * @returns {string}
+ */
+function getDisplayLabelForInput(input) {
+  const label =
+    input.getAttribute('data-label') ||
+    input.closest('li')?.querySelector('.checkbox__label-text')?.textContent ||
+    input.getAttribute('data-brand-label') ||
+    '';
+  return normalizeBrandLabel(label);
+}
+
+/** Remove duplicate brand checkboxes; keep the last entry (correct vendor string). */
+function dedupeBrandFilterLabels() {
+  for (const component of document.querySelectorAll('lame-brand-filter')) {
+    const ul = component.querySelector('ul.facets__inputs-list');
+    if (!ul) continue;
+
+    const items = Array.from(ul.querySelectorAll('li.facets__inputs-list-item'));
+    /** @type {Map<string, HTMLLIElement>} */
+    const lastByLabel = new Map();
+
+    for (const li of items) {
+      const input = li.querySelector('input[data-brand-slug]');
+      if (!(input instanceof HTMLInputElement)) continue;
+
+      const labelKey = getDisplayLabelForInput(input);
+      if (!labelKey) continue;
+
+      lastByLabel.set(labelKey, li);
+    }
+
+    for (const li of items) {
+      const input = li.querySelector('input[data-brand-slug]');
+      if (!(input instanceof HTMLInputElement)) continue;
+
+      const labelKey = getDisplayLabelForInput(input);
+      if (!labelKey) continue;
+
+      if (lastByLabel.get(labelKey) !== li) {
+        li.remove();
+      }
+    }
+  }
+}
+
+/**
  * @param {string} slug
  * @param {string} filterLabel - exact value for filter.p.vendor
  * @param {string} [displayLabel]
@@ -460,12 +516,26 @@ function appendBrandCheckbox(slug, filterLabel, displayLabel = filterLabel) {
   const templateLi = templateInput.closest('li');
   if (!templateLi) return;
 
+  const normalizedDisplayLabel = normalizeBrandLabel(displayLabel);
+
   for (const component of document.querySelectorAll('lame-brand-filter')) {
     const ul = component.querySelector('ul.facets__inputs-list');
     if (!ul) continue;
 
     const existing = ul.querySelector(`input[data-brand-slug="${CSS.escape(slug)}"]`);
     if (existing) continue;
+
+    const items = Array.from(ul.querySelectorAll('input[data-brand-slug]'));
+    const duplicateIndex = items.findIndex(
+      (element) =>
+        element instanceof HTMLInputElement &&
+        getDisplayLabelForInput(element) === normalizedDisplayLabel
+    );
+    if (duplicateIndex !== -1) {
+      const duplicateInput = items[duplicateIndex];
+      const duplicateLi = duplicateInput.closest('li');
+      duplicateLi?.remove();
+    }
 
     const idPrefix = component.getAttribute('data-id-prefix') || 'desktop';
     const clone = templateLi.cloneNode(true);
@@ -522,16 +592,24 @@ export function augmentBrandFilterFromGrid() {
 
   /** @type {Set<string>} */
   const existingSlugs = new Set();
+  /** @type {Set<string>} */
+  const existingLabels = new Set();
 
   for (const input of getAllBrandInputs()) {
     const slug = normalizeSlug(input.getAttribute('data-brand-slug'));
     if (slug) existingSlugs.add(slug);
+
+    const label = getDisplayLabelForInput(input);
+    if (label) existingLabels.add(label);
   }
 
   for (const [slug, { filterLabel, displayLabel }] of brandsFromGrid) {
     if (existingSlugs.has(slug)) continue;
+    if (existingLabels.has(normalizeBrandLabel(displayLabel))) continue;
     appendBrandCheckbox(slug, filterLabel, displayLabel);
   }
+
+  dedupeBrandFilterLabels();
 }
 
 export function applyBrandFilter() {
@@ -611,6 +689,7 @@ async function reloadSectionWithBrandFilter() {
   } finally {
     isReloading = false;
     augmentBrandFilterFromGrid();
+    dedupeBrandFilterLabels();
     restoreBrandSelection();
     applyBrandFilter();
   }
@@ -663,6 +742,7 @@ function restoreBrandSelection() {
 
 function initBrandFilter() {
   augmentBrandFilterFromGrid();
+  dedupeBrandFilterLabels();
   restoreBrandSelection();
   applyBrandFilter();
 
@@ -677,6 +757,7 @@ function initBrandFilter() {
 
 function handleMorphComplete() {
   augmentBrandFilterFromGrid();
+  dedupeBrandFilterLabels();
   restoreBrandSelection();
   applyBrandFilter();
 }
