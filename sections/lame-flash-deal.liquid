@@ -52,20 +52,15 @@
             {% endif %}
             <div class="lame-flash-deal__countdown-units" role="timer">
               <div class="lame-flash-deal__unit">
-                <span class="lame-flash-deal__unit-value" data-days>00</span>
-                <small>{{ section.settings.label_days }}</small>
-              </div>
-              <span class="lame-flash-deal__unit-divider" aria-hidden="true">:</span>
-              <div class="lame-flash-deal__unit">
                 <span class="lame-flash-deal__unit-value" data-hours>00</span>
                 <small>{{ section.settings.label_hours }}</small>
               </div>
-              <span class="lame-flash-deal__unit-divider" aria-hidden="true">:</span>
+              <span class="lame-flash-deal__unit-divider" aria-hidden="true"></span>
               <div class="lame-flash-deal__unit">
                 <span class="lame-flash-deal__unit-value" data-minutes>00</span>
                 <small>{{ section.settings.label_minutes }}</small>
               </div>
-              <span class="lame-flash-deal__unit-divider" aria-hidden="true">:</span>
+              <span class="lame-flash-deal__unit-divider" aria-hidden="true"></span>
               <div class="lame-flash-deal__unit">
                 <span class="lame-flash-deal__unit-value" data-seconds>00</span>
                 <small>{{ section.settings.label_seconds }}</small>
@@ -219,7 +214,6 @@
       if (Number.isNaN(start.getTime())) return;
 
       const end = new Date(start.getTime() + durationSeconds * 1000);
-      const daysNode = root.querySelector('[data-days]');
       const hoursNode = root.querySelector('[data-hours]');
       const minutesNode = root.querySelector('[data-minutes]');
       const secondsNode = root.querySelector('[data-seconds]');
@@ -227,18 +221,15 @@
       const tick = () => {
         const diff = end.getTime() - Date.now();
         if (diff <= 0) {
-          if (daysNode) daysNode.textContent = '00';
           if (hoursNode) hoursNode.textContent = '00';
           if (minutesNode) minutesNode.textContent = '00';
           if (secondsNode) secondsNode.textContent = '00';
           return;
         }
         const totalSeconds = Math.floor(diff / 1000);
-        const days = Math.floor(totalSeconds / 86400);
-        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
-        if (daysNode) daysNode.textContent = pad(days);
         if (hoursNode) hoursNode.textContent = pad(hours);
         if (minutesNode) minutesNode.textContent = pad(minutes);
         if (secondsNode) secondsNode.textContent = pad(seconds);
@@ -447,7 +438,6 @@
       "label": "Countdown label",
       "default": "ENDS IN"
     },
-    { "type": "text", "id": "label_days", "label": "Days label", "default": "Days" },
     { "type": "text", "id": "label_hours", "label": "Hours label", "default": "Hrs" },
     { "type": "text", "id": "label_minutes", "label": "Minutes label", "default": "Min" },
     { "type": "text", "id": "label_seconds", "label": "Seconds label", "default": "Sec" },
