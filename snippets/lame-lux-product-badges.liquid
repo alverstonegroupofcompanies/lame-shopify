@@ -1,0 +1,53 @@
+{%- doc -%}
+  Premium Best Seller / New Arrival badges for collection cards.
+
+  @param {object} product - Product object
+{%- enddoc -%}
+
+{%- liquid
+  assign show_best_seller = false
+  assign show_new_arrival = false
+
+  unless product == blank
+    assign tag_list = product.tags | join: ',' | downcase
+
+    if tag_list contains 'best-seller' or tag_list contains 'bestseller' or tag_list contains 'best seller'
+      assign show_best_seller = true
+    endif
+
+    if product.metafields.custom.badge.value != blank
+      assign badge_value = product.metafields.custom.badge.value | downcase | strip
+      if badge_value == 'best-seller' or badge_value == 'bestseller' or badge_value == 'best seller'
+        assign show_best_seller = true
+      endif
+      if badge_value == 'new-arrival' or badge_value == 'new arrival' or badge_value == 'newarrival'
+        assign show_new_arrival = true
+      endif
+    endif
+
+    if tag_list contains 'new-arrival' or tag_list contains 'new arrival' or tag_list contains 'newarrival'
+      assign show_new_arrival = true
+    endif
+
+    unless show_new_arrival
+      assign created_ts = product.created_at | date: '%s' | plus: 0
+      assign now_ts = 'now' | date: '%s' | plus: 0
+      assign age_seconds = now_ts | minus: created_ts
+      assign thirty_days = 2592000
+      if age_seconds < thirty_days
+        assign show_new_arrival = true
+      endif
+    endunless
+  endunless
+-%}
+
+{%- if show_best_seller or show_new_arrival -%}
+  <div class="lame-lux-card__badges">
+    {%- if show_best_seller -%}
+      <span class="lame-lux-card__badge lame-lux-card__badge--bestseller">Best Seller</span>
+    {%- endif -%}
+    {%- if show_new_arrival -%}
+      <span class="lame-lux-card__badge lame-lux-card__badge--new">New Arrival</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}

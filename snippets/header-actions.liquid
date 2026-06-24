@@ -122,6 +122,28 @@
     {% endif %}
   {% endif %}
 
+  {% if settings.lame_enable_wishlist %}
+    <button
+      type="button"
+      class="header-actions__action header-actions__wishlist lame-header-wishlist-btn"
+      aria-label="{{ 'lame_wishlist.toggle' | t }}"
+      data-lame-wishlist-open
+    >
+      <span class="svg-wrapper" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" focusable="false">
+          <path
+            d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.35"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <span class="header-actions__wishlist-count cart-bubble" data-wishlist-header-count hidden>0</span>
+    </button>
+  {% endif %}
+
   {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
     <script
       src="{{ 'cart-drawer.js' | asset_url }}"
@@ -588,6 +610,26 @@
     --cart-bubble-right: 2.5px;
 
     position: relative;
+  }
+
+  .header-actions__wishlist {
+    position: relative;
+  }
+
+  .header-actions__wishlist-count {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #264734;
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
   }
 
   .header-actions__cart-icon .cart-bubble {

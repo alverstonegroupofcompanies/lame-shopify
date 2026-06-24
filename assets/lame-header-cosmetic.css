@@ -378,17 +378,23 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury .header-logo {
-  max-width: min(14rem, 44vw);
+  max-width: min(16rem, 48vw);
 }
 
 #header-component.header--cosmetic-luxury .header-logo__image {
   width: auto;
   max-width: 100%;
+  max-height: clamp(3.25rem, 5vw, 4rem);
+  height: auto;
+}
+
+#header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top {
+  box-shadow: 0 4px 24px rgb(38 71 52 / 0.08);
 }
 
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
   position: relative;
-  font-family: var(--lame-font-menu, 'Cormorant Garamond', Georgia, serif);
+  font-family: var(--lame-lux-font-display, 'Playfair Display', Georgia, serif);
   font-size: clamp(0.875rem, 1.05vw, 1rem);
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -412,8 +418,19 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link.menu-list__link--active {
-  color: rgb(var(--brand-gold-strong));
+  color: var(--op-hero-gold, #d4af37);
   background: transparent;
+}
+
+#header-component.header--cosmetic-luxury .header-menu .menu-list__link.menu-list__link--active::before {
+  content: '';
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.15rem;
+  height: 2px;
+  background: var(--op-hero-gold, #d4af37);
+  border-radius: 2px;
 }
 
 @media (hover: hover) {
@@ -2012,4 +2029,108 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
 .menu-drawer.menu-drawer--luxury .menu-drawer__submenu {
   background: rgb(var(--menu-drawer-cream));
+}
+
+/* Inline search bar (desktop) */
+#header-component.header--cosmetic-luxury .lame-header-search-inline {
+  display: none;
+}
+
+@media screen and (min-width: 990px) {
+  #header-component.header--cosmetic-luxury .search-action {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(28rem, 36vw);
+    z-index: 1;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    min-height: 2.65rem;
+    padding: 0 1rem 0 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgb(38 71 52 / 0.12);
+    background: rgb(255 255 255 / 0.92);
+    color: rgb(38 71 52 / 0.55);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-inline:hover {
+    border-color: rgb(38 71 52 / 0.22);
+    box-shadow: 0 4px 16px rgb(38 71 52 / 0.08);
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-inline__icon {
+    color: #264734;
+    flex-shrink: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-inline__placeholder {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 989px) {
+  #header-component.header--cosmetic-luxury .lame-header-search-inline {
+    display: none !important;
+  }
+}
+
+/* Header wishlist + cart counters */
+#header-component.header--cosmetic-luxury .header-actions__wishlist {
+  position: relative;
+}
+
+#header-component.header--cosmetic-luxury .header-actions__wishlist-count {
+  --cart-bubble-size: 18px;
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: var(--cart-bubble-size);
+  height: var(--cart-bubble-size);
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #264734;
+  color: #fff;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: var(--cart-bubble-size);
+  text-align: center;
+}
+
+#header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble {
+  background: #264734;
+  color: #fff;
+  border: 2px solid #fff;
+  animation: lame-cart-pulse 0.35s ease;
+}
+
+@keyframes lame-cart-pulse {
+  0% {
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }

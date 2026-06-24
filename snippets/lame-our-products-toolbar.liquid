@@ -18,6 +18,18 @@
 -%}
 
 <div class="lame-our-products-toolbar">
+  <nav class="lame-our-products-breadcrumbs" aria-label="Breadcrumb">
+    <ol class="lame-our-products-breadcrumbs__list">
+      <li class="lame-our-products-breadcrumbs__item">
+        <a href="{{ routes.root_url }}">Home</a>
+      </li>
+      <li class="lame-our-products-breadcrumbs__sep" aria-hidden="true">›</li>
+      <li class="lame-our-products-breadcrumbs__item lame-our-products-breadcrumbs__item--current" aria-current="page">
+        <span>{{ collection.title | default: 'Shop' }}</span>
+      </li>
+    </ol>
+  </nav>
+  <div class="lame-our-products-toolbar__row">
   <p class="lame-our-products-toolbar__count" role="status">
     {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
   </p>
@@ -36,5 +48,6 @@
     {% if enable_grid_density %}
       {% render 'grid-density-controls', viewport: 'desktop' %}
     {% endif %}
+  </div>
   </div>
 </div>

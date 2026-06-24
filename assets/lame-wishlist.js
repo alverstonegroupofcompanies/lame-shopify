@@ -157,14 +157,20 @@
   function updateFabCount() {
     const n = readItems().length;
     const fab = fabEl || document.querySelector('[data-lame-wishlist-open].lame-wishlist-fab');
-    if (!(fab instanceof HTMLElement)) return;
+    if (fab instanceof HTMLElement) {
+      fabEl = fab;
+      fab.hidden = n === 0 || isHomepage();
+      fab.setAttribute('data-count', String(n));
 
-    fabEl = fab;
-    fab.hidden = n === 0 || isHomepage();
-    fab.setAttribute('data-count', String(n));
+      const badge = fab.querySelector('[data-wishlist-count]');
+      if (badge instanceof HTMLElement) badge.textContent = String(n);
+    }
 
-    const badge = fab.querySelector('[data-wishlist-count]');
-    if (badge instanceof HTMLElement) badge.textContent = String(n);
+    document.querySelectorAll('[data-wishlist-header-count]').forEach((node) => {
+      if (!(node instanceof HTMLElement)) return;
+      node.textContent = String(n);
+      node.hidden = n === 0;
+    });
   }
 
   /** @type {HTMLElement | null} */
