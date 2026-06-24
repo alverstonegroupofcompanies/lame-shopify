@@ -16,18 +16,18 @@
 
   /* Card shell */
   --lame-op-card-min-height: 100%;
-  --lame-op-card-radius: 20px;
+  --lame-op-card-radius: 16px;
   --lame-op-card-bg: #ffffff;
-  --lame-op-card-border: rgb(38 71 52 / 0.1);
-  --lame-op-card-shadow: 0 4px 24px rgb(38 71 52 / 0.07);
-  --lame-op-card-shadow-hover: 0 12px 36px rgb(38 71 52 / 0.12);
+  --lame-op-card-border: rgb(38 71 52 / 0.08);
+  --lame-op-card-shadow: 0 2px 16px rgb(38 71 52 / 0.06);
+  --lame-op-card-shadow-hover: 0 10px 28px rgb(38 71 52 / 0.11);
 
-  /* Image area — soft green panel like reference mockup */
+  /* Image — soft mint well, full card width */
   --lame-op-image-height: auto;
-  --lame-op-image-padding: clamp(14px, 2vw, 20px);
-  --lame-op-image-bg: #e8f0eb;
-  --lame-op-image-inset: clamp(12px, 1.5vw, 16px);
-  --lame-op-image-panel-radius: 14px;
+  --lame-op-image-padding: clamp(16px, 2.5vw, 24px);
+  --lame-op-image-bg: #f4f8f6;
+  --lame-op-image-inset: 0;
+  --lame-op-image-panel-radius: 0;
 
   /* Body text */
   --lame-op-body-padding-x: 18px;
@@ -48,8 +48,8 @@
   --lame-op-btn-border: #264734;
   --lame-op-btn-sold-bg: #5a7a68;
   --lame-op-btn-sold-color: #ffffff;
-  --lame-op-btn-radius: 12px;
-  --lame-op-cart-circle-size: 46px;
+  --lame-op-btn-radius: 10px;
+  --lame-op-cart-circle-size: 0;
 
   /* Colors — premium green only */
   --lame-op-ink: #1a2e24;
@@ -259,17 +259,18 @@
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery {
   position: relative;
   flex: 0 0 auto;
-  width: calc(100% - (var(--lame-op-image-inset) * 2));
+  width: 100%;
   height: auto;
   min-height: 0;
   max-height: none;
-  margin: var(--lame-op-image-inset) var(--lame-op-image-inset) 0;
+  margin: 0;
   padding: var(--lame-op-image-padding) !important;
   box-sizing: border-box;
   --gallery-aspect-ratio: 1;
   aspect-ratio: 1 / 1;
   border: 0;
-  border-radius: var(--lame-op-image-panel-radius);
+  border-bottom: 1px solid rgb(38 71 52 / 0.06);
+  border-radius: var(--lame-op-card-radius) var(--lame-op-card-radius) 0 0;
   background: var(--lame-op-image-bg) !important;
   background-image: none !important;
   overflow: hidden;
@@ -428,7 +429,7 @@
   font-style: normal;
   line-height: 1.45;
   letter-spacing: 0.01em;
-  color: #1a1a1a;
+  color: var(--lame-op-ink);
   text-align: left;
   display: -webkit-box;
   -webkit-line-clamp: var(--lame-op-title-lines);
@@ -438,17 +439,18 @@
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .product-title {
-  margin-bottom: 4px;
-  min-height: 2.6em;
+  margin-bottom: 6px;
+  min-height: 2.75em;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .rating-wrapper {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 0.35rem;
-  margin: 0 0 6px;
+  gap: 0.3rem;
+  margin: 0 0 8px;
   padding: 0;
+  min-height: 1.1rem;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .rating-wrapper.justify-center {
@@ -456,13 +458,14 @@
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .rating .stars {
-  font-size: 0.8125rem;
-  color: #e8a317;
+  font-size: 0.75rem;
+  color: #c9a227;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .rating-count,
 .lame-our-products-card-scope .lame-op-card__inner .rating-count-separator {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
   color: var(--lame-op-muted);
 }
 
@@ -505,35 +508,34 @@
 .lame-our-products-card-scope .lame-op-card__inner .product-badges {
   position: absolute;
   z-index: 6;
-  top: auto;
-  bottom: 10px;
+  top: 10px;
   left: 10px;
   right: auto;
+  bottom: auto;
   margin: 0;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge {
   margin: 0;
   padding: 4px 10px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  border-radius: 999px;
-  border: 1px solid rgb(38 71 52 / 0.12);
-  background: rgb(255 255 255 / 0.92);
-  color: var(--lame-op-green);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  border: 0;
+  background: var(--lame-op-green);
+  color: #fff;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.lame-op-stock-badge {
-  background: rgb(255 255 255 / 0.92);
-  border-color: rgb(38 71 52 / 0.12);
-  color: var(--lame-op-green);
+  display: none;
 }
+
+.lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.color-scheme-sale,
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge[class*='sale'] {
-  background: #fde8e6;
-  border-color: rgb(180 60 50 / 0.2);
-  color: #9a3b32;
+  background: var(--lame-op-green-soft);
+  color: #fff;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .quick-add {
@@ -568,10 +570,9 @@
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  gap: 0;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -591,16 +592,15 @@
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons.product-form-buttons--stacked {
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: nowrap;
-  gap: 8px;
+  gap: 0;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons.product-form-buttons--stacked add-to-cart-component,
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons.product-form-buttons--stacked > span:has(add-to-cart-component) {
-  flex: 1 1 auto;
-  width: auto;
-  min-width: 0;
+  flex: 1 1 100%;
+  width: 100%;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button,
@@ -625,9 +625,9 @@
   font-family: var(--lame-font-body, var(--font-body--family));
   font-size: var(--lame-op-btn-size);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
   line-height: 1;
-  text-transform: none;
+  text-transform: uppercase;
   cursor: pointer;
   transition:
     background 0.22s ease,
@@ -655,42 +655,7 @@
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .lame-op-cart-circle-btn {
-  display: inline-flex !important;
-  flex: 0 0 var(--lame-op-cart-circle-size);
-  align-items: center;
-  justify-content: center;
-  width: var(--lame-op-cart-circle-size);
-  min-width: var(--lame-op-cart-circle-size);
-  height: var(--lame-op-btn-height);
-  margin: 0;
-  padding: 0;
-  border: 1.5px solid var(--lame-op-green) !important;
-  border-radius: var(--lame-op-btn-radius);
-  background: #ffffff !important;
-  color: var(--lame-op-green) !important;
-  box-shadow: none !important;
-  cursor: pointer;
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    color 0.22s ease;
-}
-
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .lame-op-cart-circle-btn:not(:disabled):hover {
-  background: var(--lame-op-discount-bg) !important;
-  border-color: var(--lame-op-green) !important;
-  color: var(--lame-op-green) !important;
-}
-
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .lame-op-cart-circle-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .lame-op-cart-circle-btn .svg-wrapper {
-  display: inline-flex;
-  width: 1.1rem;
-  height: 1.1rem;
+  display: none !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button:not(:disabled):hover,
@@ -737,6 +702,45 @@
     --lame-op-body-padding-x: 16px;
     --lame-op-body-padding-y: 12px;
     --lame-op-card-padding-bottom: 16px;
-    --lame-op-card-radius: 18px;
+    --lame-op-card-radius: 14px;
   }
+}
+
+/* Kill theme gold / gray gallery leaks inside Our Products cards */
+.lame-our-products-card-scope .product-grid-container .card-gallery,
+.lame-our-products-card-scope.uniform-products-page .product-grid__item .card-gallery,
+.lame-our-products-card-scope.all-products-page .product-grid__item .card-gallery {
+  background: var(--lame-op-image-bg) !important;
+  background-image: none !important;
+}
+
+.lame-our-products-card-scope .product-grid-container .card-gallery .product-media-container {
+  background: transparent !important;
+}
+
+.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
+  .buy-buttons-block
+  .add-to-cart-button,
+.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
+  .lame-op-card__inner
+  .buy-buttons-block
+  .add-to-cart-button {
+  background: #264734 !important;
+  border: 1px solid #264734 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
+  .buy-buttons-block
+  .add-to-cart-button:not(:disabled):hover,
+.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
+  .lame-op-card__inner
+  .buy-buttons-block
+  .add-to-cart-button:not(:disabled):hover {
+  background: #3f6b52 !important;
+  border-color: #3f6b52 !important;
+  color: #ffffff !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
