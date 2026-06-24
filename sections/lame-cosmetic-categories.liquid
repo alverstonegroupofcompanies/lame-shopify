@@ -11,13 +11,23 @@
   {{ section.shopify_attributes }}
 >
   <div class="lame-cosmetic-categories__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    <header class="lame-cosmetic-categories__header" data-lame-reveal>
-      {% render 'lame-section-heading',
-        title: section.settings.heading,
-        subtitle: section.settings.subheading,
-        alignment: 'center',
-        show_divider: false
-      %}
+    <header class="lame-cosmetic-categories__header lame-cosmetic-categories__header--split" data-lame-reveal>
+      <div class="lame-cosmetic-categories__header-main">
+        {% render 'lame-section-heading',
+          title: section.settings.heading,
+          subtitle: section.settings.subheading,
+          alignment: 'left',
+          show_divider: false
+        %}
+      </div>
+      {%- if section.settings.view_all_label != blank -%}
+        <a
+          class="lame-cosmetic-categories__view-all"
+          href="{{ section.settings.view_all_link | default: routes.collections_url }}"
+        >
+          {{ section.settings.view_all_label }}
+        </a>
+      {%- endif -%}
     </header>
 
     <div class="lame-cosmetic-categories__carousel">
@@ -59,7 +69,7 @@
               {{ block.shopify_attributes }}
             >
               <a href="{{ card_link | default: '#' }}" class="lame-cosmetic-categories__card">
-                <div class="lame-cosmetic-categories__media">
+                <div class="lame-cosmetic-categories__media lame-cosmetic-categories__media--arch">
                   {%- if card_image != blank -%}
                     {{
                       card_image
@@ -74,17 +84,14 @@
                   {%- else -%}
                     {{ 'collection-apparel-1' | placeholder_svg_tag: 'lame-cosmetic-categories__image placeholder-svg' }}
                   {%- endif -%}
-                  <div class="lame-cosmetic-categories__overlay">
-                    {%- if card_title != blank -%}
-                      <h3 class="lame-cosmetic-categories__title">{{ card_title }}</h3>
-                    {%- endif -%}
-                    {%- if section.settings.link_label != blank -%}
-                      <span class="lame-cosmetic-categories__link">
-                        {{ section.settings.link_label }}
-                        <span aria-hidden="true">→</span>
-                      </span>
-                    {%- endif -%}
-                  </div>
+                </div>
+                <div class="lame-cosmetic-categories__meta">
+                  {%- if card_title != blank -%}
+                    <h3 class="lame-cosmetic-categories__title">{{ card_title }}</h3>
+                  {%- endif -%}
+                  {%- if block.settings.discount_text != blank -%}
+                    <p class="lame-cosmetic-categories__discount">{{ block.settings.discount_text }}</p>
+                  {%- endif -%}
                 </div>
               </a>
             </li>
@@ -435,6 +442,8 @@
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by Category" },
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "Natural care for every you." },
+    { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View All" },
+    { "type": "url", "id": "view_all_link", "label": "View all link" },
     { "type": "text", "id": "link_label", "label": "Card link label", "default": "Shop now" },
     {
       "type": "checkbox",
@@ -518,6 +527,7 @@
       "name": "Category",
       "settings": [
         { "type": "text", "id": "title", "label": "Title", "default": "Skin Care" },
+        { "type": "text", "id": "discount_text", "label": "Discount text", "default": "Upto 40% OFF" },
         { "type": "collection", "id": "collection", "label": "Collection" },
         { "type": "image_picker", "id": "image", "label": "Image (optional)" },
         { "type": "url", "id": "link", "label": "Link (optional)" }

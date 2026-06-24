@@ -1,6 +1,9 @@
+{%- liquid
+  assign sig_layout = section.settings.layout | default: 'carousel'
+-%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature{% if sig_layout == 'editorial_grid' %} lame-signature--editorial{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-signature__vector-art" aria-hidden="true">
@@ -12,6 +15,68 @@
   <div class="lame-signature__decor lame-signature__decor--right" aria-hidden="true"></div>
 
   <div class="lame-signature__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {%- if sig_layout == 'editorial_grid' -%}
+      <div class="lame-signature__editorial" data-lame-reveal>
+        <div class="lame-signature__editorial-aside">
+          {%- if section.settings.heading_line_1 != blank or section.settings.heading_line_2 != blank -%}
+            <h2 class="lame-signature__editorial-title">
+              {%- if section.settings.heading_line_1 != blank -%}
+                <span class="lame-signature__title-line">{{ section.settings.heading_line_1 }}</span>
+              {%- endif -%}
+              {%- if section.settings.heading_line_2 != blank -%}
+                <span class="lame-signature__title-main">{{ section.settings.heading_line_2 }}</span>
+              {%- endif -%}
+            </h2>
+          {%- endif -%}
+          {%- if section.settings.subheading != blank -%}
+            <p class="lame-signature__editorial-sub">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+          {%- if section.settings.view_all_label != blank -%}
+            <a
+              class="lame-btn--outline-forest lame-signature__editorial-cta"
+              href="{{ section.settings.view_all_link | default: routes.collections_url }}"
+            >
+              {{ section.settings.view_all_label }}
+            </a>
+          {%- endif -%}
+        </div>
+
+        <ul class="lame-signature__editorial-grid" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'collection_card' -%}
+              <li class="lame-signature__editorial-card" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 4 }}" {{ block.shopify_attributes }}>
+                <a href="{{ block.settings.link | default: '#' }}" class="lame-signature__editorial-link">
+                  <div class="lame-signature__editorial-media">
+                    {%- if block.settings.image != blank -%}
+                      {{
+                        block.settings.image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'lame-signature__image',
+                          loading: 'lazy',
+                          widths: '360,480,600,720,900',
+                          sizes: '(min-width: 990px) 16vw, (min-width: 750px) 22vw, 44vw',
+                          alt: block.settings.title | escape
+                      }}
+                    {%- else -%}
+                      {{ 'collection-apparel-2' | placeholder_svg_tag: 'lame-signature__image placeholder-svg' }}
+                    {%- endif -%}
+                    <div class="lame-signature__editorial-overlay">
+                      {%- if block.settings.title != blank -%}
+                        <h3 class="lame-signature__editorial-name">{{ block.settings.title }}</h3>
+                      {%- endif -%}
+                      <span class="lame-signature__editorial-explore">
+                        {{ block.settings.explore_label | default: 'Explore' }}
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- else -%}
     <header class="lame-signature__header" data-lame-reveal>
       {% if section.settings.heading_line_1 != blank or section.settings.heading_line_2 != blank %}
         <h2 class="lame-signature__title">
@@ -143,6 +208,7 @@
         {% endfor %}
       </ul>
     {% endif %}
+    {%- endif -%}
   </div>
 </section>
 
@@ -824,6 +890,16 @@
   "enabled_on": { "templates": ["index"] },
   "settings": [
     {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "carousel", "label": "Product carousel" },
+        { "value": "editorial_grid", "label": "Editorial grid" }
+      ],
+      "default": "editorial_grid"
+    },
+    {
       "type": "text",
       "id": "heading_line_1",
       "label": "Heading line 1",
@@ -833,14 +909,21 @@
       "type": "text",
       "id": "heading_line_2",
       "label": "Heading line 2",
-      "default": "Collection"
+      "default": "Collections"
     },
     {
       "type": "text",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Our signature LAMÉ fragrances — coming soon."
+      "default": "Curated luxury for every ritual."
     },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "View all label",
+      "default": "View All Collections"
+    },
+    { "type": "url", "id": "view_all_link", "label": "View all link" },
     {
       "type": "checkbox",
       "id": "coming_soon",
@@ -910,6 +993,16 @@
     }
   ],
   "blocks": [
+    {
+      "type": "collection_card",
+      "name": "Collection card",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Luxury Perfumes" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "text", "id": "explore_label", "label": "Explore label", "default": "Explore" }
+      ]
+    },
     {
       "type": "product",
       "name": "Product card",
