@@ -50,9 +50,12 @@
   endif
 
   assign card_has_badge = false
+  assign card_show_in_stock_badge = false
   unless product == blank
     if product.available == false or product.compare_at_price > product.price
       assign card_has_badge = true
+    elsif lame_our_products_active and product.available
+      assign card_show_in_stock_badge = true
     endif
   endunless
 %}
@@ -80,6 +83,12 @@
           {%- else -%}
             {{ 'content.product_badge_sale' | t }}
           {%- endif -%}
+        </div>
+      </div>
+    {% elsif card_show_in_stock_badge %}
+      <div class="product-badges product-badges--bottom-left">
+        <div class="product-badges__badge product-badges__badge--rectangle lame-op-stock-badge">
+          {{ 'content.inventory_in_stock' | t }}
         </div>
       </div>
     {% endif %}
