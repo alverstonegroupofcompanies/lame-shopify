@@ -1,0 +1,87 @@
+{%- doc -%}
+  Shop by category dropdown for the header nav row.
+  @param {object} menu - Main navigation linklist
+  @param {object} section - Header section
+{%- enddoc -%}
+
+{%- liquid
+  assign shop_nav_link = blank
+  for link in menu.links
+    assign link_down = link.title | downcase
+    if link_down == 'shop' or link_down == 'our products'
+      assign shop_nav_link = link
+      break
+    endif
+  endfor
+
+  assign view_all_url = routes.collections_url
+  if shop_nav_link != blank
+    assign view_all_url = shop_nav_link.url
+  endif
+
+  assign category_handles = 'bath-body,fragrance,make-up,baby-mom,skin-care,wellness,hair-care,frontpage' | split: ','
+  assign rendered_handles = ''
+-%}
+
+<div class="lame-header-shop-category" data-lame-category-dropdown>
+  <button
+    type="button"
+    class="lame-header-shop-category-btn"
+    aria-expanded="false"
+    aria-haspopup="true"
+    aria-controls="LameHeaderCategoryPanel"
+    data-lame-category-trigger
+  >
+    <span class="lame-header-shop-category-btn__icon" aria-hidden="true">
+      <svg viewBox="0 0 20 20" fill="none" width="16" height="16" focusable="false">
+        <rect x="2.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+        <rect x="11.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+        <rect x="2.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+        <rect x="11.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+      </svg>
+    </span>
+    <span class="lame-header-shop-category-btn__text">{{ 'lame_search.shop_by_category' | t }}</span>
+    <span class="lame-header-shop-category-btn__caret" aria-hidden="true">▾</span>
+  </button>
+
+  <div
+    id="LameHeaderCategoryPanel"
+    class="lame-header-shop-category-panel"
+    role="region"
+    aria-label="{{ 'lame_search.shop_by_category' | t }}"
+    hidden
+    data-lame-category-panel
+  >
+    <ul class="lame-header-shop-category-panel__list list-unstyled" role="list">
+      {%- for handle in category_handles -%}
+        {%- assign category_collection = collections[handle] -%}
+        {%- if category_collection != blank -%}
+          <li>
+            <a href="{{ category_collection.url }}" class="lame-header-shop-category-panel__link">
+              {% render 'lame-shop-mega-menu-icon', handle: category_collection.handle %}
+              <span>{{ category_collection.title | escape }}</span>
+            </a>
+          </li>
+          {%- assign rendered_handles = rendered_handles | append: handle | append: ',' -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- for collection in collections -%}
+        {%- assign handle_token = collection.handle | append: ',' -%}
+        {%- unless collection.handle == 'all' or rendered_handles contains handle_token -%}
+          <li>
+            <a href="{{ collection.url }}" class="lame-header-shop-category-panel__link">
+              {% render 'lame-shop-mega-menu-icon', handle: collection.handle %}
+              <span>{{ collection.title | escape }}</span>
+            </a>
+          </li>
+        {%- endunless -%}
+      {%- endfor -%}
+    </ul>
+    <a href="{{ view_all_url }}" class="lame-header-shop-category-panel__view-all">
+      {{ 'lame_search.view_all' | t }}
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</div>
+
+<script src="{{ 'lame-header-category-dropdown.js' | asset_url }}" type="module" fetchpriority="low"></script>
