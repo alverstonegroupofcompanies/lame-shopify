@@ -74,8 +74,14 @@
     assign search_class = 'search-action--hidden-on-drawer'
   endif
 
-  # Handle localization positioning
-  if section.settings.localization_position == 'left'
+  # Handle localization and search positioning
+  if section.settings.search_position == 'center'
+    if shop.customer_accounts_enabled
+      assign order = 'drawer_search,logo,search,localization,actions'
+    else
+      assign order = 'logo,search,localization,drawer_search,actions'
+    endif
+  elsif section.settings.localization_position == 'left'
     if section.settings.search_position == 'left'
       if shop.customer_accounts_enabled
         assign order = 'drawer_search,logo,menu,search,localization,actions'
@@ -299,6 +305,8 @@
 <header-component
   id="header-component"
   class="{{ class }} header--cosmetic-luxury"
+  data-search-position="{{ section.settings.search_position }}"
+  data-menu-row="{{ section.settings.menu_row }}"
   data-theme-color="rgb({{ section.settings.color_scheme_top.settings.background.rgb }})"
   {% if transparent %}
     transparent="{{ transparent }}"
@@ -1392,11 +1400,15 @@
           "label": "t:options.left"
         },
         {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
           "value": "right",
           "label": "t:options.right"
         }
       ],
-      "default": "right",
+      "default": "center",
       "visible_if": "{{ section.settings.show_search }}"
     },
     {
@@ -1726,14 +1738,21 @@
         { "value": "below", "label": "Below main navigation" },
         { "value": "above", "label": "Above main navigation" }
       ],
-      "default": "below",
+      "default": "above",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "richtext",
+      "id": "utility_left_text",
+      "label": "Left message",
+      "default": "<p>Free Delivery on orders above ₹999</p>",
       "visible_if": "{{ section.settings.show_utility_bar }}"
     },
     {
       "type": "checkbox",
       "id": "utility_show_contact",
       "label": "Show phone",
-      "default": true,
+      "default": false,
       "visible_if": "{{ section.settings.show_utility_bar }}"
     },
     {
@@ -1760,8 +1779,15 @@
     {
       "type": "richtext",
       "id": "utility_promo_text",
-      "label": "Promo message",
-      "default": "<p>Sign up and GET 25% OFF for your first order.</p>",
+      "label": "Center promo message",
+      "default": "<p>Curated Luxury For Your Everyday Glow ✨</p>",
+      "visible_if": "{{ section.settings.show_utility_bar }}"
+    },
+    {
+      "type": "text",
+      "id": "utility_end_text",
+      "label": "Right message",
+      "default": "100% Authentic • Premium Quality",
       "visible_if": "{{ section.settings.show_utility_bar }}"
     },
     {

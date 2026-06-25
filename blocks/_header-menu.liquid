@@ -184,11 +184,43 @@
 
     <header-menu
       ref="headerMenu"
-      class="header-menu"
+      class="header-menu{% if section.settings.menu_row == 'bottom' %} header-menu--nav-row{% endif %}"
       {{ block.shopify_attributes }}
       data-hydration-key="header-menu"
     >
       <div class="header-menu__inner">
+        {% if section.settings.menu_row == 'bottom' %}
+          {% liquid
+            assign shop_nav_link = blank
+            for link in block_settings.menu.links
+              assign link_down = link.title | downcase
+              if link_down == 'shop' or link_down == 'our products'
+                assign shop_nav_link = link
+                break
+              endif
+            endfor
+          %}
+          {% if shop_nav_link != blank %}
+            <a
+              href="{{ shop_nav_link.url }}"
+              class="lame-header-shop-category-btn"
+              {% if shop_nav_link.links != blank %}
+                aria-haspopup="true"
+              {% endif %}
+            >
+              <span class="lame-header-shop-category-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" width="16" height="16" focusable="false">
+                  <rect x="2.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                  <rect x="11.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                  <rect x="2.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                  <rect x="11.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                </svg>
+              </span>
+              <span class="lame-header-shop-category-btn__text">{{ 'lame_search.shop_by_category' | t }}</span>
+              <span class="lame-header-shop-category-btn__caret" aria-hidden="true">▾</span>
+            </a>
+          {% endif %}
+        {% endif %}
         <nav
           class="menu-list"
           aria-label="{{ 'accessibility.header_navigation_label' | t }}"
