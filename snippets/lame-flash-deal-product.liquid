@@ -1,16 +1,5 @@
-{%- liquid
-  assign best_deal_index = 1
-  if products_limit < 3
-    assign best_deal_index = 0
-  endif
-  assign is_featured = false
-  if product_index == best_deal_index
-    assign is_featured = true
-  endif
--%}
-
 <li
-  class="lame-flash-deal__item{% if is_featured %} lame-flash-deal__item--featured{% endif %}"
+  class="lame-flash-deal__item"
   data-lame-reveal
   {% if reveal_delay != blank %}
     data-lame-delay="{{ reveal_delay }}"
@@ -19,11 +8,10 @@
 >
   {% render 'lame-flash-deal-card',
     product: product,
-    is_featured: is_featured,
     badge_label: badge_label,
-    best_deal_label: best_deal_label,
     add_to_cart_label: add_to_cart_label,
     sold_out_label: sold_out_label,
-    review_count_fallback: review_count_fallback
+    review_count_fallback: review_count_fallback,
+    save_label_prefix: save_label_prefix
   %}
 </li>

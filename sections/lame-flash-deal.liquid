@@ -103,10 +103,10 @@
                 product_index: products_shown,
                 products_limit: products_limit,
                 badge_label: section.settings.badge_label,
-                best_deal_label: section.settings.best_deal_label,
                 add_to_cart_label: section.settings.add_to_cart_label,
                 sold_out_label: section.settings.sold_out_label,
                 review_count_fallback: section.settings.review_count_fallback,
+                save_label_prefix: section.settings.save_label_prefix,
                 reveal_delay: products_shown | modulo: 2,
                 block_attributes: block.shopify_attributes
               %}
@@ -148,10 +148,10 @@
                 product_index: products_shown,
                 products_limit: products_limit,
                 badge_label: section.settings.badge_label,
-                best_deal_label: section.settings.best_deal_label,
                 add_to_cart_label: section.settings.add_to_cart_label,
                 sold_out_label: section.settings.sold_out_label,
                 review_count_fallback: section.settings.review_count_fallback,
+                save_label_prefix: section.settings.save_label_prefix,
                 reveal_delay: products_shown | modulo: 2
               %}
               {% assign products_shown = products_shown | plus: 1 %}
@@ -258,17 +258,10 @@
       const updateCarouselLayout = () => {
         const overflows = track.scrollWidth > scrollEl.clientWidth + 4;
         scrollEl.classList.toggle('is-scrollable', overflows);
+        scrollEl.classList.toggle('is-centered', !overflows);
         if (!overflows) {
           scrollEl.scrollLeft = 0;
         }
-      };
-
-      const centerFeaturedCard = () => {
-        const featured = track.querySelector('.lame-flash-deal__item--featured');
-        if (!featured) return;
-        const target =
-          featured.offsetLeft - (scrollEl.clientWidth - featured.offsetWidth) / 2;
-        scrollEl.scrollTo({ left: Math.max(0, target), behavior: 'auto' });
       };
 
       const scrollBySlide = (dir) => {
@@ -279,7 +272,6 @@
       };
 
       updateCarouselLayout();
-      centerFeaturedCard();
       window.addEventListener('resize', () => {
         updateCarouselLayout();
         if (!scrollEl.classList.contains('is-scrollable')) {
@@ -332,7 +324,7 @@
   "enabled_on": { "templates": ["index"] },
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Limited time offer" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "FLASH DEAL" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Flash Sale" },
     {
       "type": "textarea",
       "id": "subtitle",
@@ -341,7 +333,7 @@
     },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
-    { "type": "text", "id": "best_deal_label", "label": "Featured card ribbon", "default": "BEST DEAL" },
+    { "type": "text", "id": "save_label_prefix", "label": "Savings label", "default": "You Save" },
     {
       "type": "select",
       "id": "product_source",
@@ -375,9 +367,9 @@
       "id": "products_to_show",
       "label": "Products to show",
       "min": 1,
-      "max": 6,
+      "max": 8,
       "step": 1,
-      "default": 3
+      "default": 4
     },
     {
       "type": "text",
