@@ -1,6 +1,6 @@
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature{% if section.settings.layout == 'editorial_grid' %} lame-signature--editorial{% endif %}"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-signature{% if section.settings.layout == 'editorial_grid' %} lame-signature--editorial{% endif %}{% if section.settings.coming_soon %} lame-signature--showcase{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-signature__vector-art" aria-hidden="true">
@@ -101,7 +101,50 @@
               data-lame-delay="{{ forloop.index0 | modulo: 3 }}"
               {{ block.shopify_attributes }}
             >
-              <article class="lame-signature__card{% if section.settings.coming_soon %} lame-signature__card--coming-soon{% endif %}">
+              <article class="lame-signature__card{% if section.settings.coming_soon %} lame-signature__card--showcase{% endif %}">
+                {% if section.settings.coming_soon %}
+                <div class="lame-signature__showcase-media">
+                  {% if block.settings.image != blank %}
+                    {{
+                      block.settings.image
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'lame-signature__showcase-image',
+                        loading: 'lazy',
+                        widths: '360,480,600,720,900',
+                        sizes: '(min-width: 1200px) 280px, (min-width: 750px) 22vw, 78vw',
+                        alt: block.settings.image.alt | default: block.settings.heading | escape
+                    }}
+                  {% elsif block.settings.image_asset != blank %}
+                    <img
+                      class="lame-signature__showcase-image"
+                      src="{{ block.settings.image_asset | asset_url }}"
+                      alt="{{ block.settings.heading | default: block.settings.brand | escape }}"
+                      loading="lazy"
+                      width="900"
+                      height="900"
+                    >
+                  {% else %}
+                    {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-signature__showcase-image placeholder-svg' }}
+                  {% endif %}
+
+                  {% if block.settings.heading != blank %}
+                    <span class="lame-signature__image-label visually-hidden">{{ block.settings.heading }}</span>
+                  {% endif %}
+                  <div class="lame-signature__showcase-overlay">
+                    {% if block.settings.brand != blank %}
+                      <p class="lame-signature__showcase-brand">{{ block.settings.brand }}</p>
+                    {% endif %}
+                    {% if block.settings.category != blank %}
+                      <span class="lame-signature__showcase-tag">{{ block.settings.category }}</span>
+                    {% endif %}
+                    {% if block.settings.heading != blank %}
+                      <h3 class="lame-signature__showcase-name">{{ block.settings.heading }}</h3>
+                    {% endif %}
+                    <span class="lame-signature__showcase-badge">{{ section.settings.coming_soon_label }}</span>
+                  </div>
+                </div>
+                {% else %}
                 <div class="lame-signature__media">
                   {% if block.settings.image != blank %}
                     {{
@@ -114,16 +157,21 @@
                         sizes: '(min-width: 990px) 18vw, (min-width: 750px) 42vw, 88vw',
                         alt: block.settings.image.alt | default: block.settings.heading | escape
                     }}
+                  {% elsif block.settings.image_asset != blank %}
+                    <img
+                      class="lame-signature__image"
+                      src="{{ block.settings.image_asset | asset_url }}"
+                      alt="{{ block.settings.heading | default: block.settings.brand | escape }}"
+                      loading="lazy"
+                      width="900"
+                      height="900"
+                    >
                   {% else %}
                     {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-signature__image placeholder-svg' }}
                   {% endif %}
-                  {% if section.settings.coming_soon %}
-                    {% if block.settings.heading != blank %}
-                      <span class="lame-signature__image-label visually-hidden">{{ block.settings.heading }}</span>
-                    {% endif %}
-                    <span class="lame-signature__badge">{{ section.settings.coming_soon_label }}</span>
-                  {% endif %}
                 </div>
+                {% endif %}
+
                 {% unless section.settings.coming_soon %}
                 <div class="lame-signature__content">
                   {% if block.settings.brand != blank %}
@@ -466,6 +514,139 @@
     grid-template-columns: 1fr;
   }
 
+  /* Coming soon — full-bleed square showcase */
+  .lame-signature--showcase .lame-signature__wrap {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .lame-signature--showcase .lame-signature__header {
+    padding-inline: max(1rem, var(--page-margin));
+  }
+
+  .lame-signature--showcase .lame-signature__carousel {
+    width: 100%;
+    max-width: none;
+    --signature-card-size: clamp(200px, calc((100vw - 7rem) / 4.5), 280px);
+  }
+
+  .lame-signature--showcase .lame-signature__track {
+    grid-auto-columns: var(--signature-card-size);
+    gap: clamp(0.75rem, 1.4vw, 1rem);
+    padding: 0.35rem max(1rem, var(--page-margin)) 0.5rem;
+    justify-content: safe center;
+  }
+
+  .lame-signature--showcase .lame-signature__slide {
+    height: auto;
+  }
+
+  .lame-signature__card--showcase {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ece8e2;
+    border: 1px solid rgb(var(--lame-sig-forest) / 0.1);
+    box-shadow: 0 8px 26px rgb(20 20 20 / 0.07);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .lame-signature__card--showcase:is(:hover, :focus-within) {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 34px rgb(20 20 20 / 0.1);
+  }
+
+  .lame-signature__showcase-media {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .lame-signature__showcase-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .lame-signature__showcase-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 1rem 0.8rem 0.85rem;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(
+      180deg,
+      transparent 30%,
+      rgb(20 28 18 / 0.42) 62%,
+      rgb(20 28 18 / 0.84) 100%
+    );
+    pointer-events: none;
+  }
+
+  .lame-signature__showcase-brand {
+    margin: 0 0 0.2rem;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.92;
+  }
+
+  .lame-signature__showcase-tag {
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    padding: 0.18rem 0.5rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: 999px;
+    font-size: 0.54rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.95;
+  }
+
+  .lame-signature__showcase-name {
+    margin: 0 0 0.55rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
+    font-size: clamp(0.88rem, 1.35vw, 1.02rem);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
+    max-width: 18ch;
+  }
+
+  .lame-signature__showcase-badge {
+    display: inline-block;
+    padding: 0.34rem 0.72rem;
+    border-radius: 2px;
+    background: rgb(var(--lame-sig-forest) / 0.94);
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.2);
+  }
+
+  .lame-signature--showcase .lame-signature__values {
+    max-width: min(1100px, calc(100% - 2 * max(1rem, var(--page-margin))));
+    margin-inline: auto;
+    padding-inline: max(1rem, var(--page-margin));
+  }
+
+  .lame-signature--showcase .lame-signature__controls {
+    padding-inline: max(1rem, var(--page-margin));
+  }
+
   .lame-signature__card--coming-soon:is(:hover, :focus-within) {
     transform: none;
   }
@@ -498,7 +679,7 @@
     width: 100%;
   }
 
-  .lame-signature__carousel:has(.lame-signature__card--coming-soon) {
+  .lame-signature__carousel:has(.lame-signature__card--showcase) {
     --signature-card-height: auto;
   }
 
@@ -779,6 +960,23 @@
   @media screen and (max-width: 749px) {
     .lame-signature__wrap {
       padding-inline: max(1rem, var(--page-margin, 1rem));
+    }
+
+    .lame-signature--showcase .lame-signature__wrap {
+      padding-inline: 0;
+    }
+
+    .lame-signature--showcase .lame-signature__carousel {
+      --signature-card-size: min(74vw, 280px);
+    }
+
+    .lame-signature--showcase .lame-signature__track {
+      max-width: none;
+      width: max-content;
+      margin-inline: 0;
+      padding-inline: max(1rem, var(--page-margin));
+      grid-auto-columns: var(--signature-card-size);
+      justify-content: flex-start;
     }
 
     .lame-signature__carousel {
@@ -1089,7 +1287,20 @@
       "name": "Product card",
       "settings": [
         { "type": "image_picker", "id": "image", "label": "Image" },
+        {
+          "type": "text",
+          "id": "image_asset",
+          "label": "Theme asset image",
+          "info": "Optional. Filename in theme assets/ (e.g. lame-coming-soon-derma-polish.png). Used when no image is picked above."
+        },
         { "type": "text", "id": "brand", "label": "Brand", "default": "LAMÉ" },
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category tag",
+          "default": "Fragrance",
+          "info": "Shown on coming soon cards (e.g. Fragrance, Skincare)."
+        },
         { "type": "text", "id": "heading", "label": "Product name", "default": "Product name" },
         { "type": "text", "id": "description", "label": "Description" },
         { "type": "text", "id": "scent_notes", "label": "Scent notes", "default": "FLORAL • FRUITY • MUSK" },
