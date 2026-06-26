@@ -1,0 +1,95 @@
+{%- liquid
+  assign decor_image = section.settings.image
+  assign decor_width = section.settings.image_width
+  assign decor_link = section.settings.link
+-%}
+
+{{ 'lame-our-products-side-image.css' | asset_url | stylesheet_tag }}
+
+{%- if decor_image != blank -%}
+  <div
+    class="lame-our-products-side-image section section--full-width"
+    style="--lame-op-side-image-width: {{ decor_width }}px; --lame-op-side-offset-top: {{ section.settings.offset_top }}px;"
+    {{ section.shopify_attributes }}
+  >
+    <aside class="lame-our-products-side-image__aside" aria-hidden="true">
+      {%- if decor_link != blank -%}
+        <a href="{{ decor_link }}" class="lame-our-products-side-image__link">
+      {%- endif -%}
+      {{
+        decor_image
+        | image_url: width: 800
+        | image_tag:
+          class: 'lame-our-products-side-image__img',
+          loading: 'lazy',
+          widths: '200, 280, 360, 480, 600, 800',
+          sizes: '(min-width: 1200px) 140px, 0px',
+          alt: section.settings.image_alt | default: '' | escape
+      }}
+      {%- if decor_link != blank -%}
+        </a>
+      {%- endif -%}
+    </aside>
+  </div>
+{%- else -%}
+  <div class="lame-our-products-side-image lame-our-products-side-image--editor" {{ section.shopify_attributes }}></div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Our Products side image",
+  "tag": "section",
+  "class": "section-wrapper lame-our-products-side-image-section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Vertical decorative image fixed to the right edge of the Our Products page. Hidden on mobile."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text (decorative images can stay empty)",
+      "default": ""
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Optional link"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image width (desktop)",
+      "min": 80,
+      "max": 220,
+      "step": 4,
+      "unit": "px",
+      "default": 140
+    },
+    {
+      "type": "range",
+      "id": "offset_top",
+      "label": "Distance from top",
+      "min": 80,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 140
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Products side image",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}
