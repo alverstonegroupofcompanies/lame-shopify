@@ -4,9 +4,6 @@
   @param {string} [style] - The style of the search action.
   @param {string} [class] - Additional classes for the search action.
   @param {string} [display_style] - The display style ('icon' or 'text').
-
-  @example
-  {% render 'search', style: 'default', class: 'custom-class', display_style: 'icon' %}
 {%- enddoc -%}
 
 {% unless style == 'none' %}
@@ -16,11 +13,24 @@
     <button
       type="button"
       on:click="#search-modal/showDialog"
-      class="lame-header-search-trigger button-unstyled"
+      class="lame-header-search-bar button-unstyled"
       aria-label="{{ 'content.search_input_label' | t }}"
       aria-haspopup="dialog"
     >
-      <span class="lame-header-search-trigger__icon svg-wrapper" aria-hidden="true">
+      <span class="lame-header-search-bar__icon svg-wrapper" aria-hidden="true">
+        {{ 'icon-search.svg' | inline_asset_content }}
+      </span>
+      <span class="lame-header-search-bar__label">{{ 'lame_search.placeholder' | t | default: 'Search' }}</span>
+    </button>
+
+    <button
+      type="button"
+      on:click="#search-modal/showDialog"
+      class="lame-header-search-icon button-unstyled header-actions__action"
+      aria-label="{{ 'content.search_input_label' | t }}"
+      aria-haspopup="dialog"
+    >
+      <span class="svg-wrapper" aria-hidden="true">
         {{ 'icon-search.svg' | inline_asset_content }}
       </span>
     </button>
