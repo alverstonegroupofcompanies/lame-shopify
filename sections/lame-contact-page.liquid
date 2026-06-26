@@ -149,7 +149,11 @@
             </p>
 
           <button type="submit" class="lame-contact-page__submit button">
-            {{ section.settings.submit_label | default: 'lame_contact.submit' | t }}
+            {%- if section.settings.submit_label != blank -%}
+              {{ section.settings.submit_label }}
+            {%- else -%}
+              {{ 'lame_contact.submit' | t }}
+            {%- endif -%}
           </button>
         {%- endform -%}
       </div>
@@ -164,9 +168,14 @@
 
     const recipient = form.dataset.recipientEmail || 'creative@alverstones.com';
     const routePrefix = `Deliver to: ${recipient}\n\n`;
+    const routePattern = /^Deliver to: [^\n]+\n\n/;
+
+    const body = form.querySelector('[name="contact[body]"]');
+    if (body instanceof HTMLTextAreaElement && body.value) {
+      body.value = body.value.replace(routePattern, '');
+    }
 
     form.addEventListener('submit', () => {
-      const body = form.querySelector('[name="contact[body]"]');
       if (!(body instanceof HTMLTextAreaElement)) return;
       if (body.value && !body.value.startsWith('Deliver to:')) {
         body.value = routePrefix + body.value;
