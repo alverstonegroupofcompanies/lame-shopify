@@ -1532,6 +1532,32 @@ body.template-collection-our-products .lame-our-products-page > .lame-collection
   padding-block-start: 0 !important;
 }
 
+/* Wide desktop: expand grid, reserve right strip for side images, larger cards */
+@media screen and (min-width: 1200px) {
+  .collection-template-our-products.lame-our-products-page {
+    --lame-lux-layout-max: min(1680px, calc(100vw - 3rem));
+    --lame-op-side-inset: clamp(1.25rem, 2vw, 2.5rem);
+    --lame-op-side-gap-from-grid: clamp(0.75rem, 1.25vw, 1.25rem);
+  }
+
+  .collection-template-our-products.lame-our-products-page > .lame-collection-shell {
+    max-width: min(100%, var(--lame-lux-layout-max));
+    position: relative;
+  }
+
+  .collection-template-our-products.lame-our-products-page .collection-wrapper:has([data-lame-op-side-slot]) {
+    padding-inline-end: calc(
+      var(--lame-op-side-width, 180px) + var(--lame-op-side-gap-from-grid) + var(--lame-op-side-inset)
+    );
+  }
+
+  .collection-template-our-products.lame-our-products-page
+    .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)):has([data-lame-op-side-slot]) {
+    grid-template-columns: minmax(200px, 18%) minmax(0, 1fr) !important;
+    column-gap: 1.15rem !important;
+  }
+}
+
 /* Default collection.json still mounts category hero for /collections/all — hide it (our-products hero replaces it) */
 body.template-collection-our-products .shopify-section:has(
     .lame-cosmetic-category-hero--all,
