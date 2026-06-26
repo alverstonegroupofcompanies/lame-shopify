@@ -1,0 +1,251 @@
+{{ 'lame-contact-page.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign page_heading = section.settings.heading
+  if page_heading == blank and page != blank
+    assign page_heading = page.title
+  endif
+  if page_heading == blank
+    assign page_heading = 'lame_contact.heading' | t
+  endif
+
+  assign recipient_email = section.settings.recipient_email | default: 'creative@alverstones.com' | strip
+  assign form_id = 'LameContactForm-' | append: section.id
+-%}
+
+<div class="lame-contact-page section spacing-style color-{{ section.settings.color_scheme }}" style="{% render 'spacing-style', settings: section.settings %}">
+  <div class="lame-contact-page__shell page-width">
+    <header class="lame-contact-page__head">
+      <nav class="lame-contact-page__breadcrumbs" aria-label="Breadcrumb">
+        <ol class="lame-contact-page__breadcrumbs-list">
+          <li><a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a></li>
+          <li class="lame-contact-page__breadcrumbs-sep" aria-hidden="true">&bull;</li>
+          <li aria-current="page"><span>{{ page_heading | escape }}</span></li>
+        </ol>
+      </nav>
+      <h1 class="lame-contact-page__title">{{ page_heading | escape }}</h1>
+      {% if section.settings.subheading != blank %}
+        <p class="lame-contact-page__subtitle">{{ section.settings.subheading | escape }}</p>
+      {% endif %}
+    </header>
+
+    <div class="lame-contact-page__layout">
+      <aside class="lame-contact-page__info">
+        <div class="lame-contact-page__info-card">
+          <h2 class="lame-contact-page__info-title">{{ 'lame_contact.email_us' | t }}</h2>
+          <p class="lame-contact-page__info-text">{{ 'lame_contact.email_intro' | t }}</p>
+          <a class="lame-contact-page__email-link" href="mailto:{{ recipient_email }}">{{ recipient_email }}</a>
+        </div>
+
+        {% if section.settings.response_note != blank %}
+          <div class="lame-contact-page__info-card lame-contact-page__info-card--muted">
+            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.response_time' | t }}</h2>
+            <p class="lame-contact-page__info-text">{{ section.settings.response_note | escape }}</p>
+          </div>
+        {% endif %}
+
+        {% if section.settings.phone != blank %}
+          <div class="lame-contact-page__info-card lame-contact-page__info-card--muted">
+            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.phone' | t }}</h2>
+            <a class="lame-contact-page__phone-link" href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}">
+              {{ section.settings.phone | escape }}
+            </a>
+          </div>
+        {% endif %}
+
+        {% if page.content != blank %}
+          <div class="lame-contact-page__page-content rte">{{ page.content }}</div>
+        {% endif %}
+      </aside>
+
+      <div class="lame-contact-page__form-panel">
+        {%- form 'contact', id: form_id, class: 'lame-contact-page__form', data-recipient-email: recipient_email -%}
+          <input type="hidden" name="contact[id]" value="{{ form_id }}">
+          <input type="hidden" name="contact[tags]" value="contact-page">
+
+          {%- if form.errors and form.id == form_id -%}
+            <div class="lame-contact-page__message lame-contact-page__message--error" tabindex="-1" autofocus role="alert">
+              {{- 'icon-error.svg' | inline_asset_content -}}
+              <div>
+                <p class="lame-contact-page__message-title">{{ 'blocks.contact_form.error_heading' | t }}</p>
+                <ul class="lame-contact-page__error-list">
+                  {% for field in form.errors %}
+                    <li>{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- if form.posted_successfully? and form.id == form_id -%}
+            <div class="lame-contact-page__message lame-contact-page__message--success" tabindex="-1" autofocus role="status">
+              {{- 'icon-checkmark.svg' | inline_asset_content -}}
+              <p>{{ 'lame_contact.success_html' | t: email: recipient_email }}</p>
+            </div>
+          {%- endif -%}
+
+          <div class="lame-contact-page__field-row">
+            <div class="lame-contact-page__field">
+              <label for="{{ form_id }}-name">{{ 'blocks.contact_form.name' | t }}</label>
+              <input
+                type="text"
+                id="{{ form_id }}-name"
+                class="lame-contact-page__input"
+                name="contact[name]"
+                autocomplete="name"
+                value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+                placeholder="{{ 'lame_contact.name_placeholder' | t }}"
+                required
+              >
+            </div>
+            <div class="lame-contact-page__field">
+              <label for="{{ form_id }}-email">{{ 'blocks.contact_form.email' | t }} <span aria-hidden="true">*</span></label>
+              <input
+                type="email"
+                id="{{ form_id }}-email"
+                class="lame-contact-page__input"
+                name="contact[email]"
+                autocomplete="email"
+                spellcheck="false"
+                autocapitalize="off"
+                value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                placeholder="{{ 'lame_contact.email_placeholder' | t }}"
+                aria-required="true"
+                required
+                {% if form.errors contains 'email' and form.id == form_id %}
+                  aria-invalid="true"
+                {% endif %}
+              >
+            </div>
+          </div>
+
+          <div class="lame-contact-page__field">
+            <label for="{{ form_id }}-phone">{{ 'blocks.contact_form.phone' | t }}</label>
+            <input
+              type="tel"
+              id="{{ form_id }}-phone"
+              class="lame-contact-page__input"
+              name="contact[phone]"
+              autocomplete="tel"
+              value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+              placeholder="{{ 'lame_contact.phone_placeholder' | t }}"
+            >
+          </div>
+
+          <div class="lame-contact-page__field">
+            <label for="{{ form_id }}-body">{{ 'blocks.contact_form.comment' | t }} <span aria-hidden="true">*</span></label>
+            <textarea
+              id="{{ form_id }}-body"
+              class="lame-contact-page__input lame-contact-page__textarea"
+              name="contact[body]"
+              rows="6"
+              placeholder="{{ 'lame_contact.message_placeholder' | t }}"
+              required
+            >{{- form.body -}}</textarea>
+          </div>
+
+          <p class="lame-contact-page__routing-note">
+              {{ 'lame_contact.routing_note_html' | t: email: recipient_email }}
+            </p>
+
+          <button type="submit" class="lame-contact-page__submit button">
+            {{ section.settings.submit_label | default: 'lame_contact.submit' | t }}
+          </button>
+        {%- endform -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const form = document.getElementById({{ form_id | json }});
+    if (!form) return;
+
+    const recipient = form.dataset.recipientEmail || 'creative@alverstones.com';
+    const routePrefix = `Deliver to: ${recipient}\n\n`;
+
+    form.addEventListener('submit', () => {
+      const body = form.querySelector('[name="contact[body]"]');
+      if (!(body instanceof HTMLTextAreaElement)) return;
+      if (body.value && !body.value.startsWith('Deliver to:')) {
+        body.value = routePrefix + body.value;
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Contact page (premium)",
+  "tag": "section",
+  "class": "lame-contact-page-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Submissions use Shopify’s contact form and are emailed to your store contact address. Set it to creative@alverstones.com in Shopify Admin → Settings → Store details → Store contact email."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Contact Us"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "We’d love to hear from you. Send us a message and our team will respond as soon as possible."
+    },
+    {
+      "type": "text",
+      "id": "recipient_email",
+      "label": "Recipient email (displayed & tagged in message)",
+      "default": "creative@alverstones.com"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "Phone (optional)"
+    },
+    {
+      "type": "text",
+      "id": "response_note",
+      "label": "Response time note",
+      "default": "We typically reply within 1–2 business days."
+    },
+    {
+      "type": "text",
+      "id": "submit_label",
+      "label": "Submit button label",
+      "default": "Send message"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    }
+  ]
+}
+{% endschema %}
