@@ -41,8 +41,10 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   --lame-op-title-weight: 500;
   --lame-op-title-lines: 2;
   --lame-op-brand-size: 0.6875rem;
-  --lame-op-price-size: 1.0625rem;
-  --lame-op-price-color: #111111;
+  --lame-op-price-size: 1.2rem;
+  --lame-op-price-weight: 600;
+  --lame-op-price-font: 'Cormorant Garamond', Georgia, serif;
+  --lame-op-price-color: #1a1a1a;
 
   /* Button row — ATC + wishlist side by side */
   --lame-op-btn-height: 44px;
@@ -470,30 +472,44 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 .lame-our-products-card-scope .lame-op-card__inner product-price,
-.lame-our-products-card-scope .lame-op-card__inner product-price .price {
+.lame-our-products-card-scope .lame-op-card__inner product-price .price,
+.lame-our-products-card-scope .lame-op-card__inner product-price.h6,
+.lame-our-products-card-scope .lame-op-card__inner product-price.h6 > *,
+.lame-our-products-card-scope .lame-op-card__inner product-price :is(.price-item--sale, .price-item--regular, .price, .compare-at-price) {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 4px 8px;
-  margin: 0 0 10px;
+  justify-content: flex-start !important;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0 0 12px;
   padding: 0;
   width: 100%;
-  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-  font-size: var(--lame-op-price-size);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--lame-op-price-color, #111111);
-  text-align: center;
+  font-family: var(--lame-op-price-font) !important;
+  font-size: var(--lame-op-price-size) !important;
+  font-weight: var(--lame-op-price-weight) !important;
+  font-style: normal;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--lame-op-price-color, #1a1a1a) !important;
+  text-align: left !important;
+  text-transform: none !important;
+  --text-align: left;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner product-price.text-center,
+.lame-our-products-card-scope .lame-op-card__inner product-price.text-block--align-center {
+  --text-align: left;
+  text-align: left !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner product-price .price-item--sale,
 .lame-our-products-card-scope .lame-op-card__inner product-price .price-item--regular.price {
-  color: var(--lame-op-price-color, #111111);
+  color: var(--lame-op-price-color, #1a1a1a) !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .compare-at-price {
-  font-size: 12px;
+  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif) !important;
+  font-size: 0.8125rem;
   font-weight: 400;
   color: var(--lame-op-muted);
 }
@@ -514,7 +530,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 .lame-our-products-card-scope .lame-op-card__inner product-price .price__sale {
-  justify-content: center;
+  justify-content: flex-start !important;
   width: 100%;
 }
 
@@ -623,26 +639,50 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   box-shadow: none;
   cursor: pointer;
   transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    background 0.2s ease;
+    border-color 0.28s ease,
+    color 0.28s ease,
+    background 0.28s ease,
+    transform 0.28s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn .lame-wishlist-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn .lame-wishlist-toggle__heart,
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn .lame-wishlist-toggle__outline {
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  transition:
+    fill 0.28s ease,
+    stroke 0.28s ease;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn:hover {
-  border-color: rgb(0 0 0 / 0.28);
-  color: var(--lame-op-wishlist-icon, #1a1a1a);
-  background: #fff;
+  border-color: rgb(45 70 40 / 0.35);
+  color: var(--lame-op-green);
+  background: rgb(45 70 40 / 0.04);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active {
   border-color: var(--lame-op-green);
   color: var(--lame-op-green);
-  background: #fff;
+  background: rgb(45 70 40 / 0.1);
 }
 
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active .lame-wishlist-toggle__icon {
+  transform: scale(1.1);
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active .lame-wishlist-toggle__heart,
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active .lame-wishlist-toggle__outline {
-  fill: var(--lame-op-green);
-  stroke: var(--lame-op-green);
+  fill: currentColor;
+  stroke: currentColor;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn .lame-wishlist-toggle__icon svg {
