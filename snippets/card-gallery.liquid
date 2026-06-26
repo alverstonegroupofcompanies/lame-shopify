@@ -63,19 +63,29 @@
   endif
 %}
 
+{%- capture lame_op_active_check -%}
+  {%- render 'lame-our-products-active', section: section -%}
+{%- endcapture -%}
+{%- assign lame_our_products_gallery_single = false -%}
+{%- if lame_op_active_check contains 'true' -%}
+  {%- assign lame_our_products_gallery_single = true -%}
+{%- endif -%}
+
 <div
   ref="cardGallery"
-  class="card-gallery card-gallery-{{ block.id }} spacing-style border-style{% if has_badges %} card-gallery--badge-{{ badge_position }}{% endif %}"
+  class="card-gallery card-gallery-{{ block.id }} spacing-style border-style{% if has_badges %} card-gallery--badge-{{ badge_position }}{% endif %}{% if lame_our_products_gallery_single %} card-gallery--op-single{% endif %}"
   style="
     {% render 'border-override', settings: block_settings %}
     {% render 'spacing-style', settings: block_settings %}
     --gallery-aspect-ratio: {{ ratio }};
   "
   data-product-id="{{ product.id }}"
+  {% unless lame_our_products_gallery_single %}
   {% if settings.show_second_image_on_hover %}
     on:pointerenter="/previewImage"
     on:pointerleave="/resetImage"
   {% endif %}
+  {% endunless %}
   {% if settings.transition_to_main_product %}
     data-view-transition-to-main-product
   {% endif %}
@@ -94,13 +104,15 @@
       assign other_media = product.media | reject: 'src', product.featured_media
       assign media_list_to_show = product.featured_media | concat: other_media
 
-      if product.media.size > 2 and generic_media_size > 0
+      if product.media.size > 2 and generic_media_size > 0 and lame_our_products_gallery_single == false
         assign show_arrows = true
       endif
 
       # Don't overfetch media if we don't need to
       assign max_visible_slide_count = 1
-      if settings.product_card_carousel
+      if lame_our_products_gallery_single
+        assign max_visible_slide_count = 1
+      elsif settings.product_card_carousel
         assign max_visible_slide_count = 5
       elsif settings.show_second_image_on_hover
         assign max_visible_slide_count = 2
@@ -108,6 +120,9 @@
 
       capture slides
         for media in media_list_to_show
+          if lame_our_products_gallery_single and media.id != product.featured_media.id
+            continue
+          endif
           assign loading = 'lazy'
           assign sizes = 'auto, ' | append: image_sizes
 
@@ -153,8 +168,11 @@
       endcapture
 
       assign slideshow_attributes = 'data-generic-media-size="[generic_media_size]"' | replace: '[generic_media_size]', generic_media_size
-      if settings.product_card_carousel == false
+      if settings.product_card_carousel == false or lame_our_products_gallery_single
         assign slideshow_attributes = slideshow_attributes | append: ' disabled="true"'
+      endif
+      if lame_our_products_gallery_single
+        assign show_arrows = false
       endif
     %}
     <a

@@ -23,9 +23,8 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   --lame-op-card-shadow: 0 2px 14px rgb(20 31 24 / 0.05);
   --lame-op-card-shadow-hover: 0 8px 24px rgb(20 31 24 / 0.08);
 
-  /* Image — white 1:1 square */
-  --lame-op-image-height: auto;
-  --lame-op-image-padding: 20px;
+  /* Image — flush 1:1 square, no padding */
+  --lame-op-image-padding: 0;
   --lame-op-image-bg: #ffffff;
   --lame-op-image-inset: 0;
   --lame-op-image-panel-radius: 0;
@@ -193,7 +192,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
     --lame-op-card-min: 210px;
     --lame-op-grid-gap: clamp(14px, 1.5vw, 20px);
     --lame-op-body-padding-x: 20px;
-    --lame-op-image-padding: 22px;
+    --lame-op-image-padding: 0;
     --lame-op-title-size: 1rem;
     --lame-op-price-size: 1.125rem;
     --lame-op-btn-height: 46px;
@@ -290,7 +289,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   aspect-ratio: 1 / 1;
   border: 0;
   border-bottom: none !important;
-  border-radius: 0;
+  border-radius: var(--lame-op-card-radius) var(--lame-op-card-radius) 0 0;
   background: #ffffff !important;
   background-image: none !important;
   overflow: hidden;
@@ -311,9 +310,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   position: absolute;
   inset: 0;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -322,7 +319,8 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-component,
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-container,
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-slides {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 1;
   display: block;
   width: 100%;
@@ -331,11 +329,25 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   margin: 0;
   padding: 0;
   background: transparent;
+  overflow: hidden !important;
+  scroll-snap-type: none !important;
+  touch-action: none;
+  pointer-events: none;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-arrows,
+.lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-controls {
+  display: none !important;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-slide:not(:first-child) {
+  display: none !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery slideshow-slide {
-  position: relative;
-  flex: 0 0 100%;
+  position: absolute;
+  inset: 0;
+  flex: none;
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -343,20 +355,18 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery .product-media-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 100%;
   height: 100%;
   min-height: 0;
   max-height: none;
   aspect-ratio: 1 / 1;
   margin: 0;
-  padding: var(--lame-op-image-padding);
+  padding: 0 !important;
   border-radius: 0;
   background: #ffffff !important;
   box-shadow: none;
-  --product-media-fit: contain;
+  --product-media-fit: cover;
   --constrained-height: unset !important;
 }
 
@@ -364,11 +374,11 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   display: block;
   width: 100%;
   height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: none;
+  max-height: none;
   margin: 0;
   padding: 0;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   background: #ffffff !important;
   transition: none;
@@ -860,7 +870,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 @media screen and (max-width: 749px) {
   .lame-our-products-card-scope {
     --lame-op-grid-gap: 16px;
-    --lame-op-image-padding: 12px;
+    --lame-op-image-padding: 0;
     --lame-op-wishlist-size: 44px;
     --lame-op-btn-height: 44px;
     --lame-op-btn-size: 0.6875rem;
