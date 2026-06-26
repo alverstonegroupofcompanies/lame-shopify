@@ -19,50 +19,54 @@
 
   /* Card shell */
   --lame-op-card-min-height: 100%;
-  --lame-op-card-radius: 10px;
+  --lame-op-card-radius: 24px;
   --lame-op-card-bg: #ffffff;
-  --lame-op-card-border: rgb(27 48 34 / 0.1);
-  --lame-op-card-shadow: none;
-  --lame-op-card-shadow-hover: 0 6px 20px rgb(27 48 34 / 0.08);
+  --lame-op-card-border: transparent;
+  --lame-op-card-shadow: 0 8px 28px rgb(0 0 0 / 0.08);
+  --lame-op-card-shadow-hover: 0 12px 32px rgb(0 0 0 / 0.1);
 
-  /* Image — clean 1:1 square, no panel background */
+  /* Image — beige well, 1:1 square */
   --lame-op-image-height: auto;
-  --lame-op-image-padding: 12px;
-  --lame-op-image-bg: transparent;
+  --lame-op-image-padding: 16px;
+  --lame-op-image-bg: #f5f2eb;
   --lame-op-image-inset: 0;
   --lame-op-image-panel-radius: 0;
 
   /* Body text */
-  --lame-op-body-padding-x: 16px;
-  --lame-op-body-padding-y: 12px;
-  --lame-op-card-padding-bottom: 16px;
-  --lame-op-title-size: clamp(0.875rem, 1vw, 0.9375rem);
+  --lame-op-body-padding-x: 20px;
+  --lame-op-body-padding-y: 14px;
+  --lame-op-card-padding-bottom: 18px;
+  --lame-op-title-size: 0.9375rem;
+  --lame-op-title-weight: 400;
   --lame-op-title-lines: 2;
   --lame-op-brand-size: 0.6875rem;
-  --lame-op-price-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
+  --lame-op-price-size: 1.0625rem;
+  --lame-op-price-color: #111111;
 
   /* Button row — ATC + wishlist side by side */
-  --lame-op-btn-height: 42px;
-  --lame-op-btn-padding-x: 10px;
+  --lame-op-btn-height: 44px;
+  --lame-op-btn-padding-x: 12px;
   --lame-op-btn-size: 0.6875rem;
-  --lame-op-btn-bg: #1b3022;
-  --lame-op-btn-bg-hover: #2d4a22;
+  --lame-op-btn-bg: #2d4628;
+  --lame-op-btn-bg-hover: #243a20;
   --lame-op-btn-color: #ffffff;
-  --lame-op-btn-border: #1b3022;
+  --lame-op-btn-border: #2d4628;
   --lame-op-btn-sold-bg: #b8c4bc;
   --lame-op-btn-sold-color: #ffffff;
-  --lame-op-btn-radius: 6px;
-  --lame-op-wishlist-size: 42px;
+  --lame-op-btn-radius: 8px;
+  --lame-op-wishlist-size: 44px;
+  --lame-op-wishlist-border: rgb(0 0 0 / 0.18);
+  --lame-op-wishlist-icon: #1a1a1a;
 
-  /* Colors — forest green + gold accents */
-  --lame-op-ink: #1b3022;
+  /* Colors */
+  --lame-op-ink: #111111;
   --lame-op-muted: #6b7d72;
-  --lame-op-green: #1b3022;
-  --lame-op-green-soft: #2d4a22;
+  --lame-op-green: #2d4628;
+  --lame-op-green-soft: #243a20;
   --lame-op-green-light: #3f6b52;
   --lame-op-gold: #d4af37;
   --lame-op-discount-bg: #e8f0eb;
-  --lame-op-discount-color: #1b3022;
+  --lame-op-discount-color: #2d4628;
 }
 
 /* ── Neutralize global uniform / premium card rules inside this scope only ── */
@@ -149,8 +153,6 @@
   background: var(--lame-op-card-bg) !important;
   box-shadow: var(--lame-op-card-shadow) !important;
 }
-
-.lame-our-products-card-scope.uniform-products-page .product-grid__item product-price,
 .lame-our-products-card-scope .product-grid__item product-price {
   margin-top: 0;
   padding-top: 0;
@@ -231,16 +233,13 @@
   border-radius: var(--lame-op-card-radius);
   box-shadow: var(--lame-op-card-shadow);
   overflow: hidden;
-  text-align: center;
-  transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.28s ease,
-    border-color 0.28s ease;
+  text-align: left;
+  transition: box-shadow 0.28s ease;
 }
 
 .lame-our-products-card-scope .lame-op-card:is(:hover, :focus-within) .lame-op-card__inner {
-  transform: translateY(-4px);
-  border-color: rgb(38 71 52 / 0.16);
+  transform: none;
+  border-color: var(--lame-op-card-border);
   box-shadow: var(--lame-op-card-shadow-hover);
 }
 
@@ -274,7 +273,7 @@
   border: 0;
   border-bottom: 0;
   border-radius: 0;
-  background: transparent !important;
+  background: var(--lame-op-image-bg) !important;
   background-image: none !important;
   overflow: hidden;
   --padding-block-start: 0;
@@ -335,7 +334,7 @@
   max-height: none;
   aspect-ratio: 1 / 1;
   margin: 0;
-  padding: 0;
+  padding: var(--lame-op-image-padding);
   border-radius: 0;
   background: transparent;
   box-shadow: none;
@@ -354,11 +353,11 @@
   object-fit: contain;
   object-position: center;
   background: transparent;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: none;
 }
 
 .lame-our-products-card-scope .lame-op-card:is(:hover, :focus-within) .lame-op-card__inner .card-gallery img {
-  transform: scale(1.03);
+  transform: none;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .product-card-gallery__corner-tr {
@@ -396,12 +395,12 @@
   padding: 0;
   font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: var(--lame-op-title-size);
-  font-weight: 500;
+  font-weight: var(--lame-op-title-weight, 400);
   font-style: normal;
   line-height: 1.4;
   letter-spacing: 0.01em;
   color: var(--lame-op-ink);
-  text-align: center;
+  text-align: left;
   display: -webkit-box;
   -webkit-line-clamp: var(--lame-op-title-lines);
   line-clamp: var(--lame-op-title-lines);
@@ -412,8 +411,8 @@
 .lame-our-products-card-scope .lame-op-card__inner .product-title {
   margin: 0;
   padding-bottom: 0;
-  min-height: 2.75em;
-  align-self: center;
+  min-height: 2.6em;
+  align-self: start;
   width: 100%;
 }
 
@@ -448,15 +447,22 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 4px 8px;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   padding: 0;
+  width: 100%;
   font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: var(--lame-op-price-size);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
-  color: var(--lame-op-ink);
+  color: var(--lame-op-price-color, #111111);
   text-align: center;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner product-price .price-item--sale,
+.lame-our-products-card-scope .lame-op-card__inner product-price .price-item--regular.price {
+  color: var(--lame-op-price-color, #111111);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .compare-at-price {
@@ -468,6 +474,7 @@
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-discount-badge {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
   background: var(--lame-op-discount-bg);
@@ -477,6 +484,11 @@
   letter-spacing: 0.02em;
   line-height: 1.2;
   white-space: nowrap;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner product-price .price__sale {
+  justify-content: center;
+  width: 100%;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .product-badges {
@@ -505,7 +517,7 @@
 
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.color-scheme-sale,
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge[class*='sale'] {
-  background: #1b3022;
+  background: #2d4628;
   color: #fff;
 }
 
@@ -577,10 +589,10 @@
   height: var(--lame-op-btn-height);
   margin: 0;
   padding: 0;
-  border: 1px solid rgb(38 71 52 / 0.22);
+  border: 1px solid var(--lame-op-wishlist-border, rgb(0 0 0 / 0.18));
   border-radius: var(--lame-op-btn-radius);
   background: #fff;
-  color: var(--lame-op-muted);
+  color: var(--lame-op-wishlist-icon, #1a1a1a);
   box-shadow: none;
   cursor: pointer;
   transition:
@@ -590,15 +602,15 @@
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn:hover {
-  border-color: var(--lame-op-green);
-  color: var(--lame-op-green);
+  border-color: rgb(0 0 0 / 0.28);
+  color: var(--lame-op-wishlist-icon, #1a1a1a);
   background: #fff;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active {
   border-color: var(--lame-op-green);
   color: var(--lame-op-green);
-  background: var(--lame-op-discount-bg);
+  background: #fff;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active .lame-wishlist-toggle__outline {
@@ -710,8 +722,8 @@
 @media screen and (max-width: 749px) {
   .lame-our-products-card-scope {
     --lame-op-grid-gap: 16px;
-    --lame-op-image-padding: 0;
-    --lame-op-wishlist-size: 42px;
+    --lame-op-image-padding: 12px;
+    --lame-op-wishlist-size: 44px;
     --lame-op-btn-height: 44px;
     --lame-op-btn-size: 0.6875rem;
     --lame-op-title-size: 0.9375rem;
@@ -720,17 +732,17 @@
     --lame-op-body-padding-x: 16px;
     --lame-op-body-padding-y: 12px;
     --lame-op-card-padding-bottom: 16px;
-    --lame-op-card-radius: 14px;
+    --lame-op-card-radius: 20px;
   }
 }
 
-/* Kill theme gold / gray gallery leaks inside Our Products cards */
+/* Beige image well — override theme gallery leaks */
 .collection-template-our-products.lame-our-products-card-scope .lame-op-card__inner .card-gallery,
 .collection-template-our-products.lame-our-products-card-scope .product-grid-container .card-gallery,
 .lame-our-products-card-scope .product-grid-container .card-gallery,
 .lame-our-products-card-scope.uniform-products-page .product-grid__item .card-gallery,
 .lame-our-products-card-scope.all-products-page .product-grid__item .card-gallery {
-  background: transparent !important;
+  background: var(--lame-op-image-bg) !important;
   background-image: none !important;
 }
 
@@ -738,31 +750,4 @@
 .collection-template-our-products.lame-our-products-card-scope .product-grid-container .card-gallery .product-media-container,
 .lame-our-products-card-scope .product-grid-container .card-gallery .product-media-container {
   background: transparent !important;
-}
-
-.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
-  .buy-buttons-block
-  .add-to-cart-button,
-.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
-  .lame-op-card__inner
-  .buy-buttons-block
-  .add-to-cart-button {
-  background: #264734 !important;
-  border: 1px solid #264734 !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-}
-
-.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
-  .buy-buttons-block
-  .add-to-cart-button:not(:disabled):hover,
-.collection-template-our-products.lame-our-products-card-scope.lame-collection-premium-active
-  .lame-op-card__inner
-  .buy-buttons-block
-  .add-to-cart-button:not(:disabled):hover {
-  background: #3f6b52 !important;
-  border-color: #3f6b52 !important;
-  color: #ffffff !important;
-  transform: none !important;
-  box-shadow: none !important;
 }
