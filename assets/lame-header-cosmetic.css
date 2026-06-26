@@ -1051,9 +1051,40 @@ body:has(#header-component.header--cosmetic-luxury) {
     line-height: 1.5;
   }
 
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row {
+    overflow: hidden;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list--mobile {
+    display: block;
+    width: 100%;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__scroll-container {
+    padding-inline: max(0.875rem, env(safe-area-inset-left, 0px)) max(0.875rem, env(safe-area-inset-right, 0px));
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, transparent, #000 10px, #000 calc(100% - 10px), transparent);
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__scroll-container .menu-list__list {
+    justify-content: flex-start;
+    width: max-content;
+    margin-inline: 0;
+    gap: clamp(0.85rem, 3.5vw, 1.35rem);
+  }
+
   #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__item {
-    font-size: 0.8125rem;
-    padding-block: 0.7rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding-block: 0.65rem;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 }
 
@@ -1120,6 +1151,23 @@ html.lame-account-menu-open #header-component.header--cosmetic-luxury > .header_
 html.lame-account-menu-open .lame-account__panel,
 html.lame-account-menu-open .lame-account__backdrop {
   z-index: calc(var(--lame-mobile-menu-z, 100000) + 3);
+}
+
+@media screen and (max-width: 749px) {
+  html.lame-account-menu-open {
+    overflow: hidden;
+  }
+}
+
+body > .lame-account__panel.lame-account__panel--portaled {
+  position: fixed;
+  z-index: calc(var(--lame-mobile-menu-z, 100000) + 3);
+}
+
+body > .lame-account__backdrop.lame-account__backdrop--portaled {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--lame-mobile-menu-z, 100000) + 2);
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container[open] .menu-drawer__backdrop,
@@ -1252,12 +1300,6 @@ body > .menu-drawer__backdrop.menu-drawer__backdrop--portaled.menu-drawer__backd
 @media (prefers-reduced-motion: reduce) {
   .menu-drawer.menu-drawer--luxury {
     transition-duration: 0.15s;
-  }
-}
-
-@media screen and (max-width: 749px) {
-  #header-component.header--cosmetic-luxury[data-menu-style='drawer'] .header__navigation-bar-row {
-    display: none !important;
   }
 }
 

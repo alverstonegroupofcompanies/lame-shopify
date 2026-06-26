@@ -18,6 +18,12 @@ class AccountMenuComponent extends Component {
   /** @type {number} */
   #scrollY = 0;
 
+  /** @type {Comment | null} */
+  #panelAnchor = null;
+
+  /** @type {Comment | null} */
+  #backdropAnchor = null;
+
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('click', this.#handleDocumentClick);
@@ -33,6 +39,7 @@ class AccountMenuComponent extends Component {
     window.removeEventListener('resize', this.#handleReposition);
     window.removeEventListener('scroll', this.#handleReposition, true);
     this.#unlockScroll();
+    this.#unportalPanel();
     this.#clearPanelPosition();
   }
 
@@ -45,6 +52,7 @@ class AccountMenuComponent extends Component {
 
     if (isMobileBreakpoint()) {
       this.#lockScroll();
+      this.#portalPanel();
     }
 
     requestAnimationFrame(() => {
@@ -62,6 +70,7 @@ class AccountMenuComponent extends Component {
     document.documentElement.classList.remove('lame-account-menu-open');
     this.refs.trigger.setAttribute('aria-expanded', 'false');
     this.#unlockScroll();
+    this.#unportalPanel();
     this.#clearPanelPosition();
     this.refs.trigger.focus();
   }
@@ -124,9 +133,66 @@ class AccountMenuComponent extends Component {
   }
 
   #handleReposition = debounce(() => {
-    if (!this.classList.contains('is-open') || isMobileBreakpoint()) return;
+    if (!this.classList.contains('is-open')) return;
+
+    if (isMobileBreakpoint()) {
+      if (document.body.style.position !== 'fixed') {
+        this.#lockScroll();
+      }
+      this.#clearPanelPosition();
+      this.#portalPanel();
+      return;
+    }
+
+    this.#unlockScroll();
+    this.#unportalPanel();
     this.#positionPanel();
   }, 50);
+
+  #portalPanel() {
+    if (!isMobileBreakpoint()) return;
+
+    const { panel, backdrop } = this.refs;
+    if (!panel || panel.parentElement === document.body) return;
+
+    const panelParent = panel.parentElement;
+    if (panelParent) {
+      this.#panelAnchor = document.createComment('lame-account-panel-anchor');
+      panelParent.insertBefore(this.#panelAnchor, panel);
+      panel.classList.add('lame-account__panel--portaled');
+      document.body.appendChild(panel);
+    }
+
+    if (backdrop?.parentElement && backdrop.parentElement !== document.body) {
+      this.#backdropAnchor = document.createComment('lame-account-backdrop-anchor');
+      backdrop.parentElement.insertBefore(this.#backdropAnchor, backdrop);
+      backdrop.classList.add('lame-account__backdrop--portaled');
+      document.body.appendChild(backdrop);
+    }
+  }
+
+  #unportalPanel() {
+    const { panel, backdrop } = this.refs;
+    if (!panel) return;
+
+    if (panel.classList.contains('lame-account__panel--portaled')) {
+      if (this.#panelAnchor?.parentElement) {
+        this.#panelAnchor.parentElement.insertBefore(panel, this.#panelAnchor);
+        this.#panelAnchor.remove();
+      }
+      panel.classList.remove('lame-account__panel--portaled');
+      this.#panelAnchor = null;
+    }
+
+    if (backdrop?.classList.contains('lame-account__backdrop--portaled')) {
+      if (this.#backdropAnchor?.parentElement) {
+        this.#backdropAnchor.parentElement.insertBefore(backdrop, this.#backdropAnchor);
+        this.#backdropAnchor.remove();
+      }
+      backdrop.classList.remove('lame-account__backdrop--portaled');
+      this.#backdropAnchor = null;
+    }
+  }
 
   #lockScroll() {
     this.#scrollY = window.scrollY;
