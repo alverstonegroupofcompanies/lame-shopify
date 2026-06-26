@@ -24,42 +24,35 @@
 -%}
 
 {%- if show_side_images -%}
-<div
-  class="lame-op-side-images section section--full-width"
-  style="--lame-op-side-width: {{ section.settings.column_width }}px; --lame-op-side-top: {{ section.settings.offset_top }}px; --lame-op-side-gap: {{ section.settings.image_gap }}px;"
-  {{ section.shopify_attributes }}
->
-  <aside class="lame-op-side-images__aside" aria-label="{{ section.settings.aria_label | default: 'Promotional images' | escape }}">
-    <div class="lame-op-side-images__column">
-      {%- for block in section.blocks -%}
-        <div class="lame-op-side-images__item" {{ block.shopify_attributes }}>
-          {%- if block.settings.link != blank -%}
-            <a href="{{ block.settings.link }}" class="lame-op-side-images__link">
-          {%- endif -%}
+  {%- render 'lame-our-products-side-images',
+    blocks: section.blocks,
+    column_width: section.settings.column_width,
+    image_gap: section.settings.image_gap,
+    top_spacing: section.settings.offset_top,
+    aria_label: section.settings.aria_label
+  -%}
+  <script>
+    (() => {
+      const relocate = () => {
+        const slot = document.querySelector('[data-lame-op-side-slot]');
+        const root = document.querySelector('.lame-our-products-side-image-section .lame-op-side-images');
+        if (!slot || !root || slot.contains(root)) return;
 
-          {%- if block.settings.image != blank -%}
-            {{
-              block.settings.image
-              | image_url: width: 600
-              | image_tag:
-                class: 'lame-op-side-images__img',
-                loading: 'lazy',
-                widths: '180, 240, 300, 360, 480, 600',
-                sizes: '(min-width: 1200px) var(--lame-op-side-width, 180px), 0px',
-                alt: block.settings.image_alt | escape
-            }}
-          {%- else -%}
-            {{ 'image' | placeholder_svg_tag: 'lame-op-side-images__placeholder' }}
-          {%- endif -%}
+        slot.appendChild(root);
 
-          {%- if block.settings.link != blank -%}
-            </a>
-          {%- endif -%}
-        </div>
-      {%- endfor -%}
-    </div>
-  </aside>
-</div>
+        const wrapper = slot.closest('.collection-wrapper');
+        for (const name of ['--lame-op-side-width', '--lame-op-side-top', '--lame-op-side-gap']) {
+          const value = root.style.getPropertyValue(name);
+          if (!value) continue;
+          slot.style.setProperty(name, value);
+          wrapper?.style.setProperty(name, value);
+        }
+      };
+
+      relocate();
+      document.addEventListener('shopify:section:load', relocate);
+    })();
+  </script>
 {%- endif -%}
 
 {% schema %}
@@ -73,7 +66,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Three promotional images in a vertical column on the right side of the Our Products page. Hidden on mobile and tablet."
+      "content": "Three promotional images in a vertical column beside the product grid. Scrolls with the page. Hidden on mobile and tablet."
     },
     {
       "type": "text",
