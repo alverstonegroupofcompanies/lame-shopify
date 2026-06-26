@@ -1,5 +1,5 @@
 /**
- * Our Products — fixed vertical decorative image (right edge)
+ * Our Products — fixed vertical image column (right gutter)
  */
 
 .lame-our-products-side-image-section {
@@ -15,45 +15,74 @@
   display: none;
 }
 
-.lame-our-products-side-image {
+.lame-op-side-images {
   position: relative;
   margin: 0;
   padding: 0;
   background: transparent;
 }
 
-.lame-our-products-side-image__aside {
+.lame-op-side-images__aside {
   position: fixed;
-  top: var(--lame-op-side-offset-top, 140px);
-  right: clamp(0px, 1.5vw, 16px);
+  top: var(--lame-op-side-top, 12rem);
+  right: max(1.5rem, calc((100vw - 1440px) / 2 + 1rem));
   z-index: 2;
-  width: var(--lame-op-side-image-width, 140px);
-  max-width: min(var(--lame-op-side-image-width, 140px), 18vw);
+  width: var(--lame-op-side-width, 180px);
+  max-width: min(var(--lame-op-side-width, 180px), 20vw);
   pointer-events: auto;
 }
 
-.lame-our-products-side-image__link {
+.lame-op-side-images__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lame-op-side-gap, 1rem);
+  width: 100%;
+}
+
+.lame-op-side-images__item {
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(45, 74, 34, 0.1);
+  background: #fff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lame-op-side-images__link {
   display: block;
   line-height: 0;
   text-decoration: none;
 }
 
-.lame-our-products-side-image__img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: min(72vh, 520px);
-  object-fit: contain;
-  object-position: top center;
-  opacity: 0.92;
+.lame-op-side-images__link:hover .lame-op-side-images__img,
+.lame-op-side-images__link:focus-visible .lame-op-side-images__img {
+  transform: scale(1.03);
 }
 
-.lame-our-products-side-image--editor {
-  display: none;
+.lame-op-side-images__item:has(.lame-op-side-images__link:hover),
+.lame-op-side-images__item:has(.lame-op-side-images__link:focus-visible) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(45, 74, 34, 0.14);
+}
+
+.lame-op-side-images__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.25s ease;
+}
+
+.lame-op-side-images__placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: rgba(45, 74, 34, 0.06);
+  fill: rgba(45, 74, 34, 0.2);
 }
 
 @media screen and (max-width: 1199px) {
-  .lame-our-products-side-image-section .lame-our-products-side-image__aside {
+  .lame-our-products-side-image-section .lame-op-side-images__aside {
     display: none;
   }
 }
