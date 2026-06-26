@@ -15,6 +15,7 @@
     assign range_end = paginate.items
   endif
   assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign active_filter_count = active_filter_count | default: 0
 -%}
 
 <div class="lame-our-products-toolbar">
@@ -23,6 +24,24 @@
       {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
     </p>
     <div class="lame-our-products-toolbar__actions">
+      {% if enable_filtering %}
+        <button
+          type="button"
+          class="lame-our-products-toolbar__filters button button-unstyled button-unstyled--with-icon"
+          on:click="#filters-drawer/showDialog"
+          aria-haspopup="dialog"
+        >
+          <span class="svg-wrapper" aria-hidden="true">
+            {{ 'icon-filter.svg' | inline_asset_content }}
+          </span>
+          <span class="lame-our-products-toolbar__filters-label">{{ 'actions.show_filters' | t }}</span>
+          {% if active_filter_count > 0 %}
+            <span class="lame-our-products-toolbar__filters-count" aria-label="{{ 'accessibility.filter_count' | t: count: active_filter_count }}">
+              {{ active_filter_count }}
+            </span>
+          {% endif %}
+        </button>
+      {% endif %}
       {% if enable_sorting %}
         {% render 'sorting',
           results: collection,

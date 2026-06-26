@@ -32,4 +32,23 @@ function initOurProductsCollectionCart() {
 
 initOurProductsCollectionCart();
 
+function relocateOurProductsSideImages() {
+  const slot = document.querySelector('[data-lame-op-side-slot]');
+  const root = document.querySelector('.lame-our-products-side-image-section .lame-op-side-images');
+  if (!slot || !root || slot.contains(root)) return;
+
+  slot.appendChild(root);
+
+  const wrapper = slot.closest('.collection-wrapper');
+  for (const name of ['--lame-op-side-width', '--lame-op-side-top', '--lame-op-side-gap']) {
+    const value = root.style.getPropertyValue(name);
+    if (!value) continue;
+    slot.style.setProperty(name, value);
+    wrapper?.style.setProperty(name, value);
+  }
+}
+
+relocateOurProductsSideImages();
+
 document.addEventListener('shopify:section:load', initOurProductsCollectionCart);
+document.addEventListener('shopify:section:load', relocateOurProductsSideImages);

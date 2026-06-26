@@ -1,5 +1,5 @@
 /**
- * Our Products — fixed vertical image column (right gutter)
+ * Our Products — vertical image column (scrolls with page)
  */
 
 .lame-our-products-side-image-section {
@@ -15,21 +15,40 @@
   display: none;
 }
 
+.lame-our-products-side-image-section:not(:has(.lame-op-side-images)) {
+  display: none;
+  margin: 0;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .lame-op-side-images {
   position: relative;
   margin: 0;
   padding: 0;
+  padding-top: var(--lame-op-side-top, 0px);
   background: transparent;
+  width: 100%;
 }
 
 .lame-op-side-images__aside {
-  position: fixed;
-  top: var(--lame-op-side-top, 12rem);
-  right: max(1.5rem, calc((100vw - 1440px) / 2 + 1rem));
-  z-index: 2;
-  width: var(--lame-op-side-width, 180px);
-  max-width: min(var(--lame-op-side-width, 180px), 20vw);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--lame-op-side-width, 180px);
   pointer-events: auto;
+}
+
+.lame-op-side-images-slot {
+  display: none;
+  align-self: start;
+  width: var(--lame-op-side-width, 180px);
+  min-width: 0;
+}
+
+.lame-op-side-images-slot:has(.lame-op-side-images) {
+  display: block;
 }
 
 .lame-op-side-images__column {
@@ -82,7 +101,15 @@
 }
 
 @media screen and (max-width: 1199px) {
+  .lame-op-side-images-slot,
   .lame-our-products-side-image-section .lame-op-side-images__aside {
-    display: none;
+    display: none !important;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)):has(.lame-op-side-images-slot .lame-op-side-images) {
+    grid-template-columns: minmax(200px, 20%) minmax(0, 1fr) minmax(120px, var(--lame-op-side-width, 180px)) !important;
+    column-gap: 1.25rem !important;
   }
 }

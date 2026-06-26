@@ -185,9 +185,28 @@
               assign lame_filters_block = section.blocks['filters']
               assign lame_enable_sorting = false
               assign lame_enable_grid_density = false
+              assign lame_enable_filtering = false
+              assign lame_active_filter_count = 0
               if lame_filters_block != blank
                 assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
                 assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
+                assign lame_enable_filtering = lame_filters_block.settings.enable_filtering
+              endif
+              if lame_enable_filtering
+                for filter in collection.filters
+                  case filter.type
+                    when 'price_range'
+                      if filter.min_value.value != null or filter.max_value.value != null
+                        assign lame_active_filter_count = lame_active_filter_count | plus: 1
+                      endif
+                    when 'boolean'
+                      if filter.active_values[0].value
+                        assign lame_active_filter_count = lame_active_filter_count | plus: 1
+                      endif
+                    else
+                      assign lame_active_filter_count = lame_active_filter_count | plus: filter.active_values.size
+                  endcase
+                endfor
               endif
             %}
             {% render 'lame-our-products-toolbar',
@@ -195,7 +214,9 @@
               paginate: paginate,
               section: section,
               enable_sorting: lame_enable_sorting,
-              enable_grid_density: lame_enable_grid_density
+              enable_grid_density: lame_enable_grid_density,
+              enable_filtering: lame_enable_filtering,
+              active_filter_count: lame_active_filter_count
             %}
           {% endif %}
 
@@ -375,6 +396,9 @@
             show_brand_filter_empty: lame_category_shop_page == false
           %}
         </div>
+        {% if lame_our_products_op_cards %}
+          <div class="lame-op-side-images-slot" data-lame-op-side-slot></div>
+        {% endif %}
       </div>
     {% endpaginate %}
   </div>
