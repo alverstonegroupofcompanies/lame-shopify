@@ -17,26 +17,24 @@
   assign sort_by = collection.sort_by | default: collection.default_sort_by
 -%}
 
-<div class="lame-our-products-toolbar">
-  <div class="lame-our-products-toolbar__row">
-    <p class="lame-our-products-toolbar__count" role="status">
-      {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
-    </p>
-    <div class="lame-our-products-toolbar__actions">
-      {% if enable_sorting %}
-        {% render 'sorting',
-          results: collection,
-          sort_by: sort_by,
-          filter_style: 'horizontal',
-          suffix: 'our-products',
-          sort_position: 'desktop',
-          should_use_select_on_mobile: false,
-          section_id: section.id
-        %}
-      {% endif %}
-      {% if enable_grid_density %}
-        {% render 'grid-density-controls', viewport: 'desktop' %}
-      {% endif %}
-    </div>
+<div class="lame-op-page__toolbar lame-our-products-toolbar">
+  <p class="lame-op-page__count lame-our-products-toolbar__count" role="status">
+    {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
+  </p>
+  <div class="lame-op-page__toolbar-actions lame-our-products-toolbar__actions">
+    {% if enable_sorting %}
+      {% render 'sorting',
+        results: collection,
+        sort_by: sort_by,
+        filter_style: 'horizontal',
+        suffix: 'our-products',
+        sort_position: 'desktop',
+        should_use_select_on_mobile: false,
+        section_id: section.id
+      %}
+    {% endif %}
+    {% if enable_grid_density %}
+      {% render 'grid-density-controls', viewport: 'desktop' %}
+    {% endif %}
   </div>
 </div>

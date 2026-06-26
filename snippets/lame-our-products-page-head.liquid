@@ -1,8 +1,9 @@
 {%- doc -%}
-  Our Products — page title and breadcrumbs (full-width above filters + grid).
+  Our Products — page title, optional subtitle, and breadcrumbs.
 
   @param {object} collection - Collection
   @param {string} [heading] - Override heading
+  @param {string} [subtitle] - Optional subtitle
 {%- enddoc -%}
 
 {%- liquid
@@ -15,9 +16,12 @@
   endif
 -%}
 
-<header class="lame-our-products-page-head">
-  <h1 class="lame-our-products-page-head__title">{{ page_heading | escape }}</h1>
-  <nav class="lame-our-products-breadcrumbs" aria-label="Breadcrumb">
+<header class="lame-op-page__head lame-our-products-page-head">
+  <h1 class="lame-op-page__title lame-our-products-page-head__title">{{ page_heading | escape }}</h1>
+  {%- if subtitle != blank -%}
+    <p class="lame-op-page__subtitle">{{ subtitle | escape }}</p>
+  {%- endif -%}
+  <nav class="lame-our-products-breadcrumbs lame-op-page__breadcrumbs" aria-label="Breadcrumb">
     <ol class="lame-our-products-breadcrumbs__list">
       <li class="lame-our-products-breadcrumbs__item">
         <a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a>

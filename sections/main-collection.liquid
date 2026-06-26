@@ -98,12 +98,21 @@
 
     {% paginate collection.products by products_per_page %}
       {% if lame_our_products_op_cards %}
-        {% render 'lame-our-products-page-head', collection: collection, heading: section.settings.our_products_heading %}
-      {% endif %}
-
+        <div class="lame-op-page">
+          <div class="lame-op-page__shell">
+            {% render 'lame-our-products-page-head',
+              collection: collection,
+              heading: section.settings.our_products_heading,
+              subtitle: section.settings.our_products_subtitle
+            %}
+            <div
+              class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left collection-wrapper--grid-full-width"
+            >
+      {% else %}
       <div
         class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
       >
+      {% endif %}
         {% unless lame_category_shop_page %}
           {% content_for 'block',
             type: 'filters',
@@ -124,7 +133,11 @@
             endif
           endif
         %}
+        {% if lame_our_products_op_cards %}
+        <main class="lame-op-page__main lame-collection-products-column" data-lame-products-scroll>
+        {% else %}
         <div class="lame-collection-products-column" data-lame-products-scroll>
+        {% endif %}
           {% liquid
             assign show_inline_header = false
             if lame_cosmetic_collection and section.settings.our_products_heading != blank and lame_our_products_op_cards == false
@@ -374,8 +387,15 @@
             category_shop_grid: lame_category_shop_page or lame_cosmetic_collection and lame_our_products_op_cards == false,
             show_brand_filter_empty: lame_category_shop_page == false
           %}
+        {% if lame_our_products_op_cards %}
+        </main>
+            </div>
+          </div>
+        </div>
+      {% else %}
         </div>
       </div>
+      {% endif %}
     {% endpaginate %}
   </div>
 </results-list>

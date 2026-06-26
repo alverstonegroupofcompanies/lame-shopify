@@ -5,7 +5,9 @@
 
 /* Fallback: scoped to dedicated Our Products page only */
 body.template-collection-our-products .lame-our-products-page,
-body.template-collection-our-products .lame-our-products-page.lame-our-products-grid {
+body.template-collection-our-products .lame-our-products-page.lame-our-products-grid,
+.lame-our-products-page[data-lame-op-cards='true'],
+.lame-op-page {
   --lame-lux-primary: #1b3022;
   --lame-lux-secondary: #2d4a22;
   --lame-lux-accent: #3f6b52;
@@ -109,14 +111,17 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   color: var(--lame-ink);
 }
 
-/* Page header — title + breadcrumbs (mockup style) */
-.collection-template-our-products .lame-our-products-page-head {
-  width: 100%;
-  max-width: min(100%, var(--lame-lux-layout-max, 1440px));
-  margin: 0 auto clamp(1.25rem, 2.5vw, 1.75rem);
-  padding-inline: clamp(16px, 2vw, 32px);
-  box-sizing: border-box;
+/* Our Products page shell — avoid double padding when using lame-op-page */
+.collection-template-our-products > .lame-collection-shell:has(.lame-op-page) {
+  max-width: none;
+  padding: 0;
 }
+
+.collection-template-our-products > .lame-collection-shell:has(.lame-op-page) > .lame-op-page {
+  width: 100%;
+}
+
+/* Legacy page head inside shell (category-cards mode) */
 
 .collection-template-our-products .lame-our-products-page-head__title {
   margin: 0 0 0.45rem;

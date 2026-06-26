@@ -1,0 +1,177 @@
+/**
+ * Our Products — page shell (full-width sidebar + fluid product grid)
+ */
+
+.lame-op-page {
+  --lame-op-shell-max: min(1680px, calc(100vw - 2rem));
+  --lame-op-shell-pad-x: clamp(1rem, 2.5vw, 2rem);
+  --lame-op-sidebar-width: min(260px, 28%);
+  --lame-op-layout-gap: clamp(1rem, 2vw, 1.5rem);
+  --lame-op-card-min: 180px;
+  width: 100%;
+  background: #fff;
+}
+
+.lame-op-page__shell {
+  width: 100%;
+  max-width: var(--lame-op-shell-max);
+  margin-inline: auto;
+  padding-block: clamp(1rem, 2.5vw, 1.75rem) clamp(2rem, 4vw, 3rem);
+  padding-inline: var(--lame-op-shell-pad-x);
+  box-sizing: border-box;
+}
+
+/* Page header */
+.lame-op-page__head {
+  margin-block-end: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.lame-op-page__title {
+  margin: 0 0 0.4rem;
+  font-family: var(--lame-lux-font-display, 'Cormorant Garamond', Georgia, serif);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--lame-ink, #141f18);
+}
+
+.lame-op-page__subtitle {
+  margin: 0 0 0.5rem;
+  max-width: 42rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--lame-muted, #5c6b62);
+}
+
+.lame-op-page__breadcrumbs {
+  margin: 0;
+}
+
+/* Sidebar + main */
+.lame-op-page__layout {
+  display: grid;
+  width: 100%;
+  gap: var(--lame-op-layout-gap);
+  align-items: start;
+}
+
+.lame-op-page__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Toolbar */
+.lame-op-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  width: 100%;
+  padding-block: 0.25rem 0.5rem;
+  border-bottom: 1px solid rgb(27 48 34 / 0.08);
+}
+
+.lame-op-page__count {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--lame-muted, #5c6b62);
+}
+
+.lame-op-page__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* Product grid — fluid fill */
+.lame-op-page .product-grid,
+.lame-op-page .lame-collection-brand-section__grid {
+  display: grid !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  justify-content: stretch !important;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--lame-op-card-min)), 1fr)
+  ) !important;
+  gap: var(--lame-op-grid-gap, clamp(1rem, 2vw, 1.5rem)) !important;
+  align-items: stretch;
+}
+
+.lame-op-page .lame-collection-brand-section {
+  width: 100%;
+}
+
+.lame-op-page .lame-collection-brand-section + .lame-collection-brand-section {
+  margin-block-start: 1.5rem;
+}
+
+/* Hide horizontal facets bar — sidebar only */
+.lame-op-page .facets.facets-controls-wrapper.facets--horizontal {
+  display: none !important;
+}
+
+/* Desktop: sticky filter sidebar */
+@media screen and (min-width: 750px) {
+  .lame-op-page {
+    --lame-op-card-min: 190px;
+  }
+
+  .lame-op-page__layout:has(.facets-block-wrapper--vertical:not(.hidden)) {
+    grid-template-columns: var(--lame-op-sidebar-width) minmax(0, 1fr);
+  }
+
+  .lame-op-page__layout .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
+    position: sticky;
+    top: calc(var(--header-height, 72px) + 16px);
+    max-height: calc(100vh - var(--header-height, 72px) - 32px);
+    overflow-y: auto;
+    align-self: start;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .lame-op-page {
+    --lame-op-card-min: 200px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .lame-op-page {
+    --lame-op-card-min: 210px;
+    --lame-op-sidebar-width: 260px;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .lame-op-page {
+    --lame-op-card-min: 220px;
+  }
+}
+
+/* Mobile: single column, filters via drawer */
+@media screen and (max-width: 749px) {
+  .lame-op-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lame-op-page__shell {
+    padding-inline: max(1rem, env(safe-area-inset-left, 0px)) max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  .lame-op-page__toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
