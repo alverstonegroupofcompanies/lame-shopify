@@ -11,11 +11,8 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   /* Prevent section color scheme from painting gallery dark green */
   --color-background-rgb: 255 255 255;
 
-  /* Grid — max 3 columns on desktop */
-  --lame-op-columns-mobile: 1;
-  --lame-op-columns-tablet: 2;
-  --lame-op-columns-desktop: 3;
-  --lame-op-columns-wide: 3;
+  /* Grid — fluid auto-fill (card min width scales at breakpoints) */
+  --lame-op-card-min: 180px;
   --lame-op-grid-gap: clamp(20px, 2.5vw, 32px);
 
   /* Card shell */
@@ -159,45 +156,53 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   padding-top: 0;
 }
 
-/* ── Product grid (max 3 columns) ── */
+/* ── Product grid (fluid auto-fill) ── */
 .lame-our-products-card-scope .product-grid,
 .lame-our-products-card-scope .lame-collection-brand-section__grid,
 .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
   display: grid;
   width: 100%;
+  max-width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  justify-content: stretch;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--lame-op-card-min)), 1fr)
+  );
   gap: var(--lame-op-grid-gap);
   align-items: stretch;
 }
 
-@media screen and (min-width: 550px) {
-  .lame-our-products-card-scope .product-grid,
-  .lame-our-products-card-scope .lame-collection-brand-section__grid,
-  .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media screen and (min-width: 750px) {
+  .lame-our-products-card-scope {
+    --lame-op-card-min: 190px;
   }
 }
 
 @media screen and (min-width: 990px) {
-  .lame-our-products-card-scope .product-grid,
-  .lame-our-products-card-scope .lame-collection-brand-section__grid,
-  .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .lame-our-products-card-scope {
+    --lame-op-card-min: 200px;
   }
 }
 
 @media screen and (min-width: 1200px) {
   body.template-collection-our-products .lame-our-products-card-scope,
   .collection-template-our-products.lame-our-products-card-scope {
+    --lame-op-card-min: 210px;
     --lame-op-grid-gap: clamp(14px, 1.5vw, 20px);
     --lame-op-body-padding-x: 20px;
     --lame-op-image-padding: 22px;
     --lame-op-title-size: 1rem;
     --lame-op-price-size: 1.125rem;
     --lame-op-btn-height: 46px;
+  }
+}
+
+@media screen and (min-width: 1400px) {
+  .lame-our-products-card-scope {
+    --lame-op-card-min: 220px;
   }
 }
 

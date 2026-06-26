@@ -179,7 +179,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 /* —— Shell & layout —— */
 .collection-template-our-products > .lame-collection-shell {
   width: 100%;
-  max-width: min(100%, var(--lame-lux-layout-max, 1440px));
+  max-width: min(100%, var(--lame-lux-layout-max, min(1680px, calc(100vw - 3rem))));
   margin-inline: auto;
   padding-block: clamp(1rem, 2.5vw, 1.75rem) clamp(2rem, 4vw, 3rem);
   padding-inline: 0;
@@ -277,7 +277,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 @media screen and (min-width: 750px) {
   .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     display: grid !important;
-    grid-template-columns: minmax(240px, 22%) minmax(0, 78%) !important;
+    grid-template-columns: minmax(240px, 22%) minmax(0, 1fr) !important;
     grid-template-rows: minmax(0, 1fr) !important;
     column-gap: 1.5rem !important;
     row-gap: 0 !important;
@@ -1012,25 +1012,24 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   color: var(--lame-lux-secondary, #3f6b52);
 }
 
-/* Override premium grid rules inside our-products card scope — max 3 columns */
-.collection-template-our-products.lame-our-products-card-scope .lame-collection-brand-section__grid,
-.collection-template-our-products.lame-our-products-card-scope .product-grid {
-  grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+/* Override premium grid rules inside our-products card scope — fluid auto-fill */
+.collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
+  :is(.lame-collection-brand-section__grid, .product-grid) {
+  display: grid !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-content: stretch !important;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--lame-op-card-min, 180px)), 1fr)
+  ) !important;
   gap: var(--lame-op-grid-gap) !important;
-}
-
-@media screen and (min-width: 550px) {
-  .collection-template-our-products.lame-our-products-card-scope .lame-collection-brand-section__grid,
-  .collection-template-our-products.lame-our-products-card-scope .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-}
-
-@media screen and (min-width: 990px) {
-  .collection-template-our-products.lame-our-products-card-scope .lame-collection-brand-section__grid,
-  .collection-template-our-products.lame-our-products-card-scope .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  --product-grid-columns-desktop: unset;
+  --product-grid-gap-mobile: unset;
+  --product-grid-gap-desktop: unset;
 }
 
 /* Pagination */
@@ -1532,29 +1531,15 @@ body.template-collection-our-products .lame-our-products-page > .lame-collection
   padding-block-start: 0 !important;
 }
 
-/* Wide desktop: expand grid, reserve right strip for side images, larger cards */
+/* Wide desktop: expand shell and cards */
 @media screen and (min-width: 1200px) {
   .collection-template-our-products.lame-our-products-page {
     --lame-lux-layout-max: min(1680px, calc(100vw - 3rem));
-    --lame-op-side-inset: clamp(1.25rem, 2vw, 2.5rem);
-    --lame-op-side-gap-from-grid: clamp(0.75rem, 1.25vw, 1.25rem);
   }
 
   .collection-template-our-products.lame-our-products-page > .lame-collection-shell {
     max-width: min(100%, var(--lame-lux-layout-max));
     position: relative;
-  }
-
-  .collection-template-our-products.lame-our-products-page .collection-wrapper:has([data-lame-op-side-slot]) {
-    padding-inline-end: calc(
-      var(--lame-op-side-width, 180px) + var(--lame-op-side-gap-from-grid) + var(--lame-op-side-inset)
-    );
-  }
-
-  .collection-template-our-products.lame-our-products-page
-    .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)):has([data-lame-op-side-slot]) {
-    grid-template-columns: minmax(200px, 18%) minmax(0, 1fr) !important;
-    column-gap: 1.15rem !important;
   }
 }
 
