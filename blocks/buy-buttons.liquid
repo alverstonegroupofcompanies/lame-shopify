@@ -226,6 +226,17 @@
               </div>
             </volume-pricing>
           {%- endif -%}
+          {%- liquid
+            assign lame_op_actions_row = false
+            if lame_our_products_active and product != blank
+              assign lame_op_actions_row = true
+            endif
+          -%}
+
+          {%- if lame_op_actions_row -%}
+            <div class="lame-op-card__actions">
+          {%- endif -%}
+
           {% content_for 'block',
             type: 'add-to-cart',
             id: 'add-to-cart',
@@ -239,6 +250,10 @@
             and lame_our_products_active
           -%}
             {% render 'lame-our-products-wishlist-btn', product: product %}
+          {%- endif -%}
+
+          {%- if lame_op_actions_row -%}
+            </div>
           {%- endif -%}
 
           {% content_for 'block',

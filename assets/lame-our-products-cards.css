@@ -580,11 +580,18 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 /* ── Add to cart ── */
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block,
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block product-form-component,
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block form {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block {
   position: relative;
   z-index: 3;
-  display: block;
-  width: 100%;
   margin: 0;
   margin-top: auto;
   padding: var(--lame-op-body-padding-y) var(--lame-op-body-padding-x) var(--lame-op-card-padding-bottom);
@@ -593,51 +600,58 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  gap: 0 !important;
+  width: 100% !important;
   margin: 0;
   padding: 0;
   align-items: stretch;
 }
 
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons:has(.lame-op-wishlist-btn) {
-  grid-template-columns: minmax(0, 1fr) var(--lame-op-wishlist-size);
+/* Neutralize theme flex on product-form-buttons children */
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons
+  > *:not(.quantity-selector-wrapper, .quantity-rules, .quantity-label, .volume-pricing, .product-form-text__error) {
+  flex: unset !important;
+  min-width: 0 !important;
 }
 
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons.product-form-buttons--stacked {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons.product-form-buttons--stacked:has(.lame-op-wishlist-btn) {
-  grid-template-columns: minmax(0, 1fr) var(--lame-op-wishlist-size);
-}
-
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons > span:has(add-to-cart-component) {
-  display: flex;
-  grid-column: 1;
-  grid-row: 1;
+/* ATC + wishlist row */
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch;
+  gap: 8px;
+  width: 100% !important;
   min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  flex: none;
+  margin: 0;
+  padding: 0;
 }
 
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block add-to-cart-component {
-  display: flex;
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions > span:has(add-to-cart-component) {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: none !important;
 }
 
-.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .product-form-buttons > .lame-op-wishlist-btn {
-  grid-column: 2;
-  grid-row: 1;
-  align-self: stretch;
-  justify-self: end;
-  flex: none !important;
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions add-to-cart-component {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions > .lame-op-wishlist-btn {
+  flex: 0 0 var(--lame-op-wishlist-size) !important;
+  width: var(--lame-op-wishlist-size) !important;
+  min-width: var(--lame-op-wishlist-size) !important;
+  max-width: var(--lame-op-wishlist-size) !important;
+  margin: 0 !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn {
@@ -709,15 +723,15 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button,
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions .add-to-cart-button,
 .collection-template-our-products.lame-our-products-card-scope
   .lame-op-card__inner .buy-buttons-block .add-to-cart-button {
   display: flex !important;
-  flex: 1 1 auto;
   align-items: center;
   justify-content: center;
   width: 100% !important;
-  max-width: 100%;
-  min-width: 0;
+  max-width: 100% !important;
+  min-width: 0 !important;
   min-height: var(--lame-op-btn-height);
   height: var(--lame-op-btn-height);
   margin: 0;
@@ -761,6 +775,13 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-text__content span {
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+/* Beat Horizon `button { width: fit-content }` on collection cards */
+.lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block button.add-to-cart-button,
+.lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions button.add-to-cart-button {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-icon,
