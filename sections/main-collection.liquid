@@ -78,32 +78,35 @@
   {% if lame_category_shop_page %}data-lame-category-shop="true"{% endif %}
 >
   <div class="lame-collection-shell">
-    <div
-      class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
-    >
-      {% unless lame_category_shop_page %}
-        {% content_for 'block',
-          type: 'filters',
-          id: 'filters',
-          results: collection,
-          results_size: collection.products_count
-        %}
-      {% endunless %}
-
-      {% liquid
-        if lame_category_shop_page or lame_cosmetic_collection
-          assign products_per_page = 12
-          assign use_infinite_scroll = false
-        else
-          assign products_per_page = 24
-          assign use_infinite_scroll = section.settings.enable_infinite_scroll
-          if use_infinite_scroll == false
-            assign products_per_page = section.settings.products_per_page
-          endif
+    {% liquid
+      if lame_category_shop_page or lame_cosmetic_collection
+        assign products_per_page = 12
+        assign use_infinite_scroll = false
+      else
+        assign products_per_page = 24
+        assign use_infinite_scroll = section.settings.enable_infinite_scroll
+        if use_infinite_scroll == false
+          assign products_per_page = section.settings.products_per_page
         endif
-      %}
+      endif
+    %}
 
-      {% paginate collection.products by products_per_page %}
+    {% paginate collection.products by products_per_page %}
+      {% if lame_our_products_op_cards %}
+        {% render 'lame-our-products-page-head', collection: collection, heading: section.settings.our_products_heading %}
+      {% endif %}
+
+      <div
+        class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
+      >
+        {% unless lame_category_shop_page %}
+          {% content_for 'block',
+            type: 'filters',
+            id: 'filters',
+            results: collection,
+            results_size: collection.products_count
+          %}
+        {% endunless %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
           if lame_category_shop_page
@@ -367,8 +370,8 @@
             show_brand_filter_empty: lame_category_shop_page == false
           %}
         </div>
-      {% endpaginate %}
-    </div>
+      </div>
+    {% endpaginate %}
   </div>
 </results-list>
 
@@ -388,6 +391,19 @@
   .lame-category-shop-page .lame-category-shop__item {
     display: block;
     width: 100%;
+  }
+
+  .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical::after {
+    content: '';
+    position: absolute;
+    right: -12%;
+    bottom: -8%;
+    z-index: 0;
+    width: min(72%, 220px);
+    aspect-ratio: 1;
+    pointer-events: none;
+    opacity: 0.14;
+    background: url('{{ "lame-hero-leaf-left.svg" | asset_url }}') center / contain no-repeat;
   }
 {% endstylesheet %}
 

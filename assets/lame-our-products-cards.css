@@ -19,50 +19,50 @@
 
   /* Card shell */
   --lame-op-card-min-height: 100%;
-  --lame-op-card-radius: 16px;
+  --lame-op-card-radius: 10px;
   --lame-op-card-bg: #ffffff;
-  --lame-op-card-border: rgb(38 71 52 / 0.08);
-  --lame-op-card-shadow: 0 2px 16px rgb(38 71 52 / 0.06);
-  --lame-op-card-shadow-hover: 0 10px 28px rgb(38 71 52 / 0.11);
+  --lame-op-card-border: rgb(27 48 34 / 0.1);
+  --lame-op-card-shadow: none;
+  --lame-op-card-shadow-hover: 0 6px 20px rgb(27 48 34 / 0.08);
 
   /* Image — clean 1:1 square, no panel background */
   --lame-op-image-height: auto;
-  --lame-op-image-padding: 0;
+  --lame-op-image-padding: 12px;
   --lame-op-image-bg: transparent;
   --lame-op-image-inset: 0;
   --lame-op-image-panel-radius: 0;
 
   /* Body text */
-  --lame-op-body-padding-x: 18px;
-  --lame-op-body-padding-y: 14px;
-  --lame-op-card-padding-bottom: 18px;
-  --lame-op-title-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
+  --lame-op-body-padding-x: 16px;
+  --lame-op-body-padding-y: 12px;
+  --lame-op-card-padding-bottom: 16px;
+  --lame-op-title-size: clamp(0.875rem, 1vw, 0.9375rem);
   --lame-op-title-lines: 2;
   --lame-op-brand-size: 0.6875rem;
-  --lame-op-price-size: clamp(1.0625rem, 1.25vw, 1.25rem);
+  --lame-op-price-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
 
   /* Button row — ATC + wishlist side by side */
-  --lame-op-btn-height: 44px;
-  --lame-op-btn-padding-x: 12px;
+  --lame-op-btn-height: 42px;
+  --lame-op-btn-padding-x: 10px;
   --lame-op-btn-size: 0.6875rem;
-  --lame-op-btn-bg: #264734;
-  --lame-op-btn-bg-hover: #3f6b52;
+  --lame-op-btn-bg: #1b3022;
+  --lame-op-btn-bg-hover: #2d4a22;
   --lame-op-btn-color: #ffffff;
-  --lame-op-btn-border: #264734;
-  --lame-op-btn-sold-bg: #9aab9f;
+  --lame-op-btn-border: #1b3022;
+  --lame-op-btn-sold-bg: #b8c4bc;
   --lame-op-btn-sold-color: #ffffff;
   --lame-op-btn-radius: 6px;
-  --lame-op-wishlist-size: 44px;
+  --lame-op-wishlist-size: 42px;
 
-  /* Colors — premium green only */
-  --lame-op-ink: #1a2e24;
-  --lame-op-muted: #5a7264;
-  --lame-op-green: #264734;
-  --lame-op-green-soft: #3f6b52;
-  --lame-op-green-light: #4d7a63;
-  --lame-op-gold: var(--lame-op-green-soft);
+  /* Colors — forest green + gold accents */
+  --lame-op-ink: #1b3022;
+  --lame-op-muted: #6b7d72;
+  --lame-op-green: #1b3022;
+  --lame-op-green-soft: #2d4a22;
+  --lame-op-green-light: #3f6b52;
+  --lame-op-gold: #d4af37;
   --lame-op-discount-bg: #e8f0eb;
-  --lame-op-discount-color: #264734;
+  --lame-op-discount-color: #1b3022;
 }
 
 /* ── Neutralize global uniform / premium card rules inside this scope only ── */
@@ -231,7 +231,7 @@
   border-radius: var(--lame-op-card-radius);
   box-shadow: var(--lame-op-card-shadow);
   overflow: hidden;
-  text-align: left;
+  text-align: center;
   transition:
     transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.28s ease,
@@ -382,6 +382,10 @@
   display: none;
 }
 
+.lame-our-products-card-scope .lame-op-card__inner product-price {
+  display: block;
+}
+
 .lame-our-products-card-scope .lame-op-card__inner .lame-card-brand {
   display: none;
 }
@@ -390,14 +394,14 @@
 .lame-our-products-card-scope .lame-op-card__inner a.contents .text-block {
   margin: 0;
   padding: 0;
-  font-family: var(--lame-font-body, var(--font-body--family));
+  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: var(--lame-op-title-size);
-  font-weight: 600;
+  font-weight: 500;
   font-style: normal;
-  line-height: 1.45;
+  line-height: 1.4;
   letter-spacing: 0.01em;
   color: var(--lame-op-ink);
-  text-align: left;
+  text-align: center;
   display: -webkit-box;
   -webkit-line-clamp: var(--lame-op-title-lines);
   line-clamp: var(--lame-op-title-lines);
@@ -408,8 +412,9 @@
 .lame-our-products-card-scope .lame-op-card__inner .product-title {
   margin: 0;
   padding-bottom: 0;
-  min-height: 2.85em;
-  align-self: start;
+  min-height: 2.75em;
+  align-self: center;
+  width: 100%;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .rating-wrapper {
@@ -442,16 +447,16 @@
 .lame-our-products-card-scope .lame-op-card__inner product-price .price {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 4px 8px;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   padding: 0;
-  font-family: var(--lame-font-body, var(--font-body--family));
+  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: var(--lame-op-price-size);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.2;
-  color: var(--lame-op-green);
-  text-align: left;
+  color: var(--lame-op-ink);
+  text-align: center;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .compare-at-price {
@@ -487,24 +492,31 @@
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge {
   margin: 0;
   padding: 4px 10px;
+  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  border-radius: 6px;
+  border-radius: 999px;
   border: 0;
   background: var(--lame-op-green);
   color: #fff;
 }
 
-.lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.lame-op-stock-badge {
-  display: none;
-}
-
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.color-scheme-sale,
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge[class*='sale'] {
-  background: var(--lame-op-green-soft);
+  background: #1b3022;
   color: #fff;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .product-badges__badge[class*='new'],
+.lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.color-scheme-new {
+  background: #c53030;
+  color: #fff;
+}
+
+.lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.lame-op-stock-badge {
+  display: none;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .quick-add {
@@ -618,7 +630,7 @@
   background: var(--lame-op-btn-bg) !important;
   color: var(--lame-op-btn-color) !important;
   box-shadow: none !important;
-  font-family: var(--lame-font-body, var(--font-body--family));
+  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: var(--lame-op-btn-size);
   font-weight: 600;
   letter-spacing: 0.06em;

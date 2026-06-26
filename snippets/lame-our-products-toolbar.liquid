@@ -1,5 +1,5 @@
 {%- doc -%}
-  Collection toolbar: result count, sort, grid density (Our Products template).
+  Collection toolbar: result count + sort (Our Products template).
 
   @param {object} collection - Collection
   @param {object} paginate - Paginate object
@@ -18,36 +18,25 @@
 -%}
 
 <div class="lame-our-products-toolbar">
-  <nav class="lame-our-products-breadcrumbs" aria-label="Breadcrumb">
-    <ol class="lame-our-products-breadcrumbs__list">
-      <li class="lame-our-products-breadcrumbs__item">
-        <a href="{{ routes.root_url }}">Home</a>
-      </li>
-      <li class="lame-our-products-breadcrumbs__sep" aria-hidden="true">›</li>
-      <li class="lame-our-products-breadcrumbs__item lame-our-products-breadcrumbs__item--current" aria-current="page">
-        <span>{{ collection.title | default: 'Shop' }}</span>
-      </li>
-    </ol>
-  </nav>
   <div class="lame-our-products-toolbar__row">
-  <p class="lame-our-products-toolbar__count" role="status">
-    {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
-  </p>
-  <div class="lame-our-products-toolbar__actions">
-    {% if enable_sorting %}
-      {% render 'sorting',
-        results: collection,
-        sort_by: sort_by,
-        filter_style: 'horizontal',
-        suffix: 'our-products',
-        sort_position: 'desktop',
-        should_use_select_on_mobile: false,
-        section_id: section.id
-      %}
-    {% endif %}
-    {% if enable_grid_density %}
-      {% render 'grid-density-controls', viewport: 'desktop' %}
-    {% endif %}
-  </div>
+    <p class="lame-our-products-toolbar__count" role="status">
+      {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
+    </p>
+    <div class="lame-our-products-toolbar__actions">
+      {% if enable_sorting %}
+        {% render 'sorting',
+          results: collection,
+          sort_by: sort_by,
+          filter_style: 'horizontal',
+          suffix: 'our-products',
+          sort_position: 'desktop',
+          should_use_select_on_mobile: false,
+          section_id: section.id
+        %}
+      {% endif %}
+      {% if enable_grid_density %}
+        {% render 'grid-density-controls', viewport: 'desktop' %}
+      {% endif %}
+    </div>
   </div>
 </div>
