@@ -60,7 +60,11 @@
 %}
 
 {% if template.name == 'collection' and lame_category_shop_page == false %}
-  {% render 'lame-collection-premium' %}
+  {% if lame_our_products_op_cards %}
+    {% render 'lame-our-products-styles' %}
+  {% else %}
+    {% render 'lame-collection-premium' %}
+  {% endif %}
 {% endif %}
 
 {% comment %}
@@ -70,7 +74,7 @@
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
-  class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% if lame_cosmetic_collection %} all-products-page collection-template-our-products lame-our-products-grid{% if lame_our_products_op_cards %} lame-our-products-card-scope{% else %} lame-our-products--category-cards{% endif %}{% endif %}{% endif %}"
+  class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% elsif lame_our_products_op_cards %} lame-our-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% elsif lame_cosmetic_collection %} premium-products-shell uniform-products-page lame-collection-premium-active all-products-page collection-template-our-products lame-our-products--category-cards{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{% if lame_cosmetic_collection or lame_category_shop_page %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
@@ -377,7 +381,8 @@
 </results-list>
 
 {% stylesheet %}
-  /* Hide default Shopify toolbar (item count, sort, grid density) — filters stay in sidebar / drawer */
+  /* Hide default Shopify toolbar — filters stay in sidebar / drawer */
+  .lame-our-products-page .collection-wrapper > .facets.facets-controls-wrapper.facets--horizontal,
   .lame-collection-premium-active .collection-wrapper > .facets.facets-controls-wrapper.facets--horizontal {
     display: none !important;
   }

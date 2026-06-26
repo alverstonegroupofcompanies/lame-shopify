@@ -34,24 +34,6 @@
     >
     {%- render 'stylesheets' -%}
     {{ 'lame-premium-tokens.css' | asset_url | stylesheet_tag }}
-    {%- liquid
-      assign lame_load_op_css = false
-      assign lame_op_collection_handles = 'all,our-products,products,frontpage' | split: ','
-      if template.name == 'collection'
-        if template.suffix == 'our-products'
-          assign lame_load_op_css = true
-        elsif collection != blank
-          if lame_op_collection_handles contains collection.handle
-            assign lame_load_op_css = true
-          endif
-        elsif request.path contains '/collections/all' or request.path contains '/collections/our-products' or request.path contains '/collections/products' or request.path contains '/collections/frontpage'
-          assign lame_load_op_css = true
-        endif
-      endif
-    -%}
-    {%- if lame_load_op_css -%}
-      {{ 'lame-category-shop.css' | asset_url | stylesheet_tag }}
-    {%- endif -%}
     {%- if template.name == 'index' -%}
       {{ 'lame-home-page.css' | asset_url | stylesheet_tag }}
       {{ 'lame-home-cosmetic.css' | asset_url | stylesheet_tag }}
