@@ -98,8 +98,9 @@
 
     {% paginate collection.products by products_per_page %}
       {% if lame_our_products_op_cards %}
-        <h1 class="visually-hidden">{{ collection.title }}</h1>
+        {% render 'lame-our-products-page-head', collection: collection, heading: section.settings.our_products_heading %}
       {% endif %}
+
       <div
         class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
       >
@@ -126,7 +127,7 @@
         <div class="lame-collection-products-column" data-lame-products-scroll>
           {% liquid
             assign show_inline_header = false
-            if lame_cosmetic_collection and section.settings.our_products_heading != blank and lame_our_products_op_cards == false
+            if lame_cosmetic_collection and section.settings.our_products_heading != blank
               assign show_inline_header = true
               if template.suffix == 'our-products'
                 assign show_inline_header = false
