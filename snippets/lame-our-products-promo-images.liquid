@@ -1,0 +1,41 @@
+{%- comment -%}
+  Editable promo images for Our Products — column on desktop, horizontal row on mobile.
+  @param {object} section - main-collection section with promo_image blocks
+{%- endcomment -%}
+{%- assign promo_blocks = section.blocks | where: 'type', 'promo_image' -%}
+{%- if promo_blocks.size > 0 -%}
+  <aside
+    class="lame-op-promo-images"
+    aria-label="{{ section.settings.promo_aria_label | default: 'Promotional images' | escape }}"
+    style="--lame-op-promo-width: {{ section.settings.promo_column_width }}px; --lame-op-promo-gap: {{ section.settings.promo_image_gap }}px;"
+  >
+    <div class="lame-op-promo-images__track">
+      {%- for block in promo_blocks -%}
+        <div class="lame-op-promo-images__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}" class="lame-op-promo-images__link">
+          {%- endif -%}
+
+          {%- if block.settings.image != blank -%}
+            {{
+              block.settings.image
+              | image_url: width: 600
+              | image_tag:
+                class: 'lame-op-promo-images__img',
+                loading: 'lazy',
+                widths: '160, 200, 240, 300, 360, 480, 600',
+                sizes: '(min-width: 750px) var(--lame-op-promo-width, 180px), 42vw',
+                alt: block.settings.image_alt | default: block.settings.image.alt | escape
+            }}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'lame-op-promo-images__placeholder' }}
+          {%- endif -%}
+
+          {%- if block.settings.link != blank -%}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </aside>
+{%- endif -%}

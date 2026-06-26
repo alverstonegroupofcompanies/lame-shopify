@@ -57,6 +57,12 @@
       assign lame_product_grid_item_class = 'product-grid__item product-grid__item--premium'
     endif
   endif
+
+  assign lame_promo_image_blocks = section.blocks | where: 'type', 'promo_image'
+  assign lame_has_promo_images = false
+  if lame_our_products_op_cards and lame_promo_image_blocks.size > 0
+    assign lame_has_promo_images = true
+  endif
 %}
 
 {% if template.name == 'collection' and lame_category_shop_page == false %}
@@ -106,7 +112,10 @@
               subtitle: section.settings.our_products_subtitle
             %}
             <div
-              class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left collection-wrapper--grid-full-width"
+              class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left collection-wrapper--grid-full-width{% if lame_has_promo_images %} lame-op-page__layout--has-promo{% endif %}"
+              {% if lame_has_promo_images %}
+                style="--lame-op-promo-width: {{ section.settings.promo_column_width }}px; --lame-op-promo-gap: {{ section.settings.promo_image_gap }}px;"
+              {% endif %}
             >
       {% else %}
       <div
@@ -134,6 +143,10 @@
           endif
         %}
         {% if lame_our_products_op_cards %}
+        <div class="lame-op-page__content{% if lame_has_promo_images %} lame-op-page__content--has-promo{% endif %}">
+          {% if lame_has_promo_images %}
+            {% render 'lame-our-products-promo-images', section: section %}
+          {% endif %}
         <main class="lame-op-page__main lame-collection-products-column" data-lame-products-scroll>
         {% else %}
         <div class="lame-collection-products-column" data-lame-products-scroll>
@@ -389,6 +402,7 @@
           %}
         {% if lame_our_products_op_cards %}
         </main>
+        </div>
             </div>
           </div>
         </div>
@@ -609,6 +623,40 @@
     },
     {
       "type": "header",
+      "content": "Promo images (Our Products)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Add Image blocks below. Desktop: vertical column on the right of the product grid. Mobile: horizontal scrollable row above products."
+    },
+    {
+      "type": "text",
+      "id": "promo_aria_label",
+      "label": "Promo images accessibility label",
+      "default": "Promotional images"
+    },
+    {
+      "type": "range",
+      "id": "promo_column_width",
+      "label": "Promo column width (desktop)",
+      "min": 120,
+      "max": 280,
+      "step": 4,
+      "unit": "px",
+      "default": 180
+    },
+    {
+      "type": "range",
+      "id": "promo_image_gap",
+      "label": "Gap between promo images",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
       "content": "Brands"
     },
     {
@@ -660,6 +708,29 @@
       "step": 1,
       "unit": "px",
       "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "promo_image",
+      "name": "Promo image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Optional link"
+        }
+      ]
     }
   ],
   "presets": []
