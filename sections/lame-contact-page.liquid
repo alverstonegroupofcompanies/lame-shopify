@@ -9,7 +9,6 @@
     assign page_heading = 'lame_contact.heading' | t
   endif
 
-  assign recipient_email = section.settings.recipient_email | default: 'creative@alverstones.com' | strip
   assign form_id = 'LameContactForm-' | append: section.id
 -%}
 
@@ -32,9 +31,8 @@
     <div class="lame-contact-page__layout">
       <aside class="lame-contact-page__info">
         <div class="lame-contact-page__info-card">
-          <h2 class="lame-contact-page__info-title">{{ 'lame_contact.email_us' | t }}</h2>
-          <p class="lame-contact-page__info-text">{{ 'lame_contact.email_intro' | t }}</p>
-          <a class="lame-contact-page__email-link" href="mailto:{{ recipient_email }}">{{ recipient_email }}</a>
+          <h2 class="lame-contact-page__info-title">{{ 'lame_contact.get_in_touch' | t }}</h2>
+          <p class="lame-contact-page__info-text">{{ 'lame_contact.get_in_touch_intro' | t }}</p>
         </div>
 
         {% if section.settings.response_note != blank %}
@@ -59,7 +57,7 @@
       </aside>
 
       <div class="lame-contact-page__form-panel">
-        {%- form 'contact', id: form_id, class: 'lame-contact-page__form', data-recipient-email: recipient_email -%}
+        {%- form 'contact', id: form_id, class: 'lame-contact-page__form' -%}
           <input type="hidden" name="contact[id]" value="{{ form_id }}">
           <input type="hidden" name="contact[tags]" value="contact-page">
 
@@ -80,7 +78,7 @@
           {%- if form.posted_successfully? and form.id == form_id -%}
             <div class="lame-contact-page__message lame-contact-page__message--success" tabindex="-1" autofocus role="status">
               {{- 'icon-checkmark.svg' | inline_asset_content -}}
-              <p>{{ 'lame_contact.success_html' | t: email: recipient_email }}</p>
+              <p>{{ 'lame_contact.success' | t }}</p>
             </div>
           {%- endif -%}
 
@@ -144,10 +142,6 @@
             >{{- form.body -}}</textarea>
           </div>
 
-          <p class="lame-contact-page__routing-note">
-              {{ 'lame_contact.routing_note_html' | t: email: recipient_email }}
-            </p>
-
           <button type="submit" class="lame-contact-page__submit button">
             {%- if section.settings.submit_label != blank -%}
               {{ section.settings.submit_label }}
@@ -161,29 +155,6 @@
   </div>
 </div>
 
-<script>
-  (() => {
-    const form = document.getElementById({{ form_id | json }});
-    if (!form) return;
-
-    const recipient = form.dataset.recipientEmail || 'creative@alverstones.com';
-    const routePrefix = `Deliver to: ${recipient}\n\n`;
-    const routePattern = /^Deliver to: [^\n]+\n\n/;
-
-    const body = form.querySelector('[name="contact[body]"]');
-    if (body instanceof HTMLTextAreaElement && body.value) {
-      body.value = body.value.replace(routePattern, '');
-    }
-
-    form.addEventListener('submit', () => {
-      if (!(body instanceof HTMLTextAreaElement)) return;
-      if (body.value && !body.value.startsWith('Deliver to:')) {
-        body.value = routePrefix + body.value;
-      }
-    });
-  })();
-</script>
-
 {% schema %}
 {
   "name": "Contact page (premium)",
@@ -192,7 +163,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Submissions use Shopify’s contact form and are emailed to your store contact address. Set it to creative@alverstones.com in Shopify Admin → Settings → Store details → Store contact email."
+      "content": "Submissions use Shopify’s contact form. Set the store contact email in Shopify Admin → Settings → Store details (not shown on this page)."
     },
     {
       "type": "text",
@@ -205,12 +176,6 @@
       "id": "subheading",
       "label": "Subheading",
       "default": "We’d love to hear from you. Send us a message and our team will respond as soon as possible."
-    },
-    {
-      "type": "text",
-      "id": "recipient_email",
-      "label": "Recipient email (displayed & tagged in message)",
-      "default": "creative@alverstones.com"
     },
     {
       "type": "text",
