@@ -3,17 +3,24 @@
  */
 
 .lame-flash-deal {
-  --lame-flash-sale-accent: #c9a227;
-  --lame-flash-sale-accent-dark: #9a7514;
-  --lame-flash-sale-accent-soft: #faf6eb;
-  --lame-flash-star: 201 162 39;
+  --lame-flash-sale-accent: var(--lame-offer-accent, #ff5722);
+  --lame-flash-sale-accent-dark: var(--lame-offer-accent-dark, #e64a19);
+  --lame-flash-sale-accent-soft: var(--lame-offer-bg-soft, #fff5f0);
+  --lame-flash-star: 255 87 34;
   --lame-flash-ink: 30 41 59;
   --lame-flash-muted: 100 116 139;
   --lame-flash-card-width: clamp(220px, calc((100vw - 8rem) / 4.2), 290px);
   --lame-flash-edge: max(1rem, var(--page-margin));
   position: relative;
   overflow-x: clip;
-  background: linear-gradient(180deg, #b8932a 0%, #9a7514 38%, #fdfbf7 38%, #fdfbf7 100%);
+  background: linear-gradient(
+    180deg,
+    #ff6f00 0%,
+    var(--lame-offer-accent, #ff5722) 28%,
+    var(--lame-offer-accent-dark, #e64a19) 38%,
+    var(--lame-offer-bg-soft, #fff5f0) 38%,
+    #fffaf8 100%
+  );
 }
 
 .lame-flash-deal__wrap {
@@ -92,9 +99,9 @@
   gap: 0.85rem 1.15rem;
   padding: 0.55rem 1.15rem;
   background: #fff;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 4px 18px rgb(0 0 0 / 0.12);
+  border: 2px solid rgb(255 87 34 / 0.25);
+  border-radius: 12px;
+  box-shadow: 0 6px 22px rgb(255 87 34 / 0.18);
 }
 
 .lame-flash-deal__countdown-label {
@@ -124,10 +131,10 @@
 
 .lame-flash-deal__unit-value {
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--lame-flash-sale-accent);
+  color: var(--lame-offer-accent, #ff5722);
 }
 
 .lame-flash-deal__unit small {
@@ -239,15 +246,16 @@
   flex-direction: column;
   width: 100%;
   background: #fff;
-  border: 1px solid rgb(0 0 0 / 0.06);
+  border: 1px solid var(--lame-offer-border);
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 0.08);
+  box-shadow: 0 8px 24px rgb(255 87 34 / 0.1);
   overflow: hidden;
-  transition: box-shadow 0.22s ease, transform 0.22s ease;
+  transition: box-shadow 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
 }
 
 .lame-flash-card:hover {
-  box-shadow: 0 14px 32px rgb(15 23 42 / 0.12);
+  border-color: rgb(255 87 34 / 0.45);
+  box-shadow: 0 14px 32px rgb(255 87 34 / 0.18);
   transform: translateY(-3px);
 }
 
@@ -288,10 +296,11 @@
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #fff;
-  background: var(--lame-flash-sale-accent);
+  color: var(--lame-sale-badge-color);
+  background: var(--lame-sale-badge-bg);
   border-radius: 14px 0 10px 0;
   line-height: 1.2;
+  box-shadow: var(--lame-sale-badge-shadow);
 }
 
 .lame-flash-card__body {
@@ -350,11 +359,12 @@
   gap: 0.35rem;
   padding: 0.28rem 0.65rem;
   border-radius: 999px;
-  background: var(--lame-flash-sale-accent-soft);
-  color: var(--lame-flash-sale-accent);
+  background: rgb(255 87 34 / 0.12);
+  color: var(--lame-offer-accent-dark);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.3;
+  border: 1px solid rgb(255 87 34 / 0.2);
 }
 
 .lame-flash-card__save-icon {
@@ -398,25 +408,29 @@
   padding: 0.55rem 0.75rem;
   border: none;
   border-radius: 8px;
-  background: var(--lame-flash-sale-accent);
-  color: #fff;
+  background: var(--lame-cta-bg-gradient);
+  color: var(--lame-cta-color);
   font-family: inherit;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: var(--lame-cta-shadow);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .lame-flash-card__atc:hover:not(:disabled) {
-  background: var(--lame-flash-sale-accent-dark);
+  background: linear-gradient(135deg, var(--lame-cta-bg-hover) 0%, var(--lame-cta-bg) 100%);
+  box-shadow: var(--lame-cta-shadow-hover);
+  transform: translateY(-1px);
 }
 
 .lame-flash-card__atc:disabled {
-  background: rgb(201 162 39 / 0.38);
+  background: rgb(255 87 34 / 0.35);
   opacity: 1;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .lame-flash-card__atc-icon {

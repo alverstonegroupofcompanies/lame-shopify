@@ -684,5 +684,26 @@
     --cart-secondary-font-family: var(--font-{{ settings.cart_price_font }}--family);
     --cart-secondary-font-style: var(--font-{{ settings.cart_price_font }}--style);
     --cart-secondary-font-weight: var(--font-{{ settings.cart_price_font }}--weight);
+
+    /* LAMÉ vibrant commerce (overridable in Theme settings → LAMÉ commerce colors) */
+    {%- if settings.lame_commerce_cta_color != blank -%}
+      --lame-cta-bg: {{ settings.lame_commerce_cta_color }};
+      --lame-cta-bg-hover: {{ settings.lame_commerce_cta_color | color_darken: 8 }};
+      --lame-cta-bg-gradient: linear-gradient(135deg, {{ settings.lame_commerce_cta_color | color_lighten: 6 }} 0%, {{ settings.lame_commerce_cta_color }} 48%, {{ settings.lame_commerce_cta_color | color_darken: 6 }} 100%);
+      --lame-cta-shadow: 0 6px 18px {{ settings.lame_commerce_cta_color | color_modify: 'alpha', 0.35 }};
+      --lame-offer-accent: {{ settings.lame_commerce_cta_color }};
+      --lame-offer-accent-dark: {{ settings.lame_commerce_cta_color | color_darken: 8 }};
+    {%- endif -%}
+    {%- if settings.lame_commerce_wishlist_color != blank -%}
+      --lame-wishlist-accent: {{ settings.lame_commerce_wishlist_color }};
+      --lame-wishlist-active: {{ settings.lame_commerce_wishlist_color | color_darken: 10 }};
+      --lame-wishlist-accent-soft: {{ settings.lame_commerce_wishlist_color | color_modify: 'alpha', 0.12 }};
+      --lame-wishlist-border: {{ settings.lame_commerce_wishlist_color | color_modify: 'alpha', 0.45 }};
+      --lame-wishlist-fab-gradient: linear-gradient(135deg, {{ settings.lame_commerce_wishlist_color | color_lighten: 8 }} 0%, {{ settings.lame_commerce_wishlist_color }} 52%, {{ settings.lame_commerce_wishlist_color | color_darken: 12 }} 100%);
+    {%- endif -%}
+    {%- if settings.lame_commerce_sale_badge_color != blank -%}
+      --lame-sale-badge-bg: linear-gradient(135deg, {{ settings.lame_commerce_sale_badge_color }} 0%, {{ settings.lame_commerce_sale_badge_color | color_darken: 14 }} 100%);
+      --lame-sale-badge-shadow: 0 4px 12px {{ settings.lame_commerce_sale_badge_color | color_modify: 'alpha', 0.28 }};
+    {%- endif -%}
   }
 {% endstyle %}
