@@ -98,6 +98,18 @@
     assign show_deal_section = true
     assign deal_section_paused = true
   endif
+
+  assign countdown_active = false
+  if section.settings.show_countdown and section.settings.countdown_start != blank
+    assign countdown_start_iso = section.settings.countdown_start | strip | replace: ' ', 'T'
+    assign countdown_start_ts = countdown_start_iso | date: '%s' | plus: 0
+    assign countdown_duration_seconds = section.settings.countdown_duration_hours | times: 3600
+    assign countdown_end_ts = countdown_start_ts | plus: countdown_duration_seconds
+    assign now_ts = 'now' | date: '%s' | plus: 0
+    if countdown_start_ts > 0 and now_ts >= countdown_start_ts and now_ts < countdown_end_ts
+      assign countdown_active = true
+    endif
+  endif
 %}
 
 {% if show_deal_section %}
@@ -134,7 +146,7 @@
         <p class="lame-flash-deal__subtitle">{{ section.settings.subtitle | escape }}</p>
       {%- endif -%}
 
-      {% if section.settings.show_countdown %}
+      {% if countdown_active %}
         <div
           class="lame-flash-deal__countdown"
           data-countdown
@@ -250,13 +262,16 @@
       const minutesNode = root.querySelector('[data-minutes]');
       const secondsNode = root.querySelector('[data-seconds]');
 
+      const hideCountdown = () => {
+        root.hidden = true;
+        root.setAttribute('aria-hidden', 'true');
+      };
+
       const tick = () => {
-        const diff = end.getTime() - Date.now();
-        if (diff <= 0) {
-          if (daysNode) daysNode.textContent = '00';
-          if (hoursNode) hoursNode.textContent = '00';
-          if (minutesNode) minutesNode.textContent = '00';
-          if (secondsNode) secondsNode.textContent = '00';
+        const now = Date.now();
+        const diff = end.getTime() - now;
+        if (now < start.getTime() || diff <= 0) {
+          hideCountdown();
           return;
         }
         const totalSeconds = Math.floor(diff / 1000);
