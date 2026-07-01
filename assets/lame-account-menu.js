@@ -1,5 +1,5 @@
 import { Component } from '@theme/component';
-import { debounce, isClickedOutside, isMobileBreakpoint } from '@theme/utilities';
+import { debounce, isMobileBreakpoint } from '@theme/utilities';
 
 /**
  * Premium account menu — mobile slide-in drawer and desktop dropdown.
@@ -24,8 +24,18 @@ class AccountMenuComponent extends Component {
   /** @type {Comment | null} */
   #backdropAnchor = null;
 
+  /** @type {HTMLElement | null} */
+  #panelEl = null;
+
+  /** @type {HTMLElement | null} */
+  #backdropEl = null;
+
+  /** @type {boolean} */
+  #suppressDocumentClick = false;
+
   connectedCallback() {
     super.connectedCallback();
+    this.#cacheElements();
     document.addEventListener('click', this.#handleDocumentClick);
     document.addEventListener('keydown', this.#handleDocumentKeyDown);
     window.addEventListener('resize', this.#handleReposition);
@@ -43,9 +53,28 @@ class AccountMenuComponent extends Component {
     this.#clearPanelPosition();
   }
 
+  updatedCallback() {
+    super.updatedCallback();
+    this.#cacheElements();
+  }
+
+  #cacheElements() {
+    if (this.refs.panel) this.#panelEl = this.refs.panel;
+    if (this.refs.backdrop) this.#backdropEl = this.refs.backdrop;
+  }
+
+  #getPanel() {
+    return this.refs.panel ?? this.#panelEl;
+  }
+
+  #getBackdrop() {
+    return this.refs.backdrop ?? this.#backdropEl;
+  }
+
   open() {
     if (this.classList.contains('is-open')) return;
 
+    this.#cacheElements();
     this.classList.add('is-open');
     document.documentElement.classList.add('lame-account-menu-open');
     this.refs.trigger.setAttribute('aria-expanded', 'true');
@@ -76,6 +105,7 @@ class AccountMenuComponent extends Component {
   }
 
   toggle() {
+    this.#suppressDocumentClick = true;
     if (this.classList.contains('is-open')) {
       this.close();
     } else {
@@ -90,7 +120,8 @@ class AccountMenuComponent extends Component {
   }
 
   #positionPanel() {
-    const { trigger, panel } = this.refs;
+    const trigger = this.refs.trigger;
+    const panel = this.#getPanel();
     if (!trigger || !panel || isMobileBreakpoint()) return;
 
     const rect = trigger.getBoundingClientRect();
@@ -122,7 +153,7 @@ class AccountMenuComponent extends Component {
   }
 
   #clearPanelPosition() {
-    const { panel } = this.refs;
+    const panel = this.#getPanel();
     if (!panel) return;
 
     panel.style.removeProperty('position');
@@ -152,7 +183,8 @@ class AccountMenuComponent extends Component {
   #portalPanel() {
     if (!isMobileBreakpoint()) return;
 
-    const { panel, backdrop } = this.refs;
+    const panel = this.#getPanel();
+    const backdrop = this.#getBackdrop();
     if (!panel || panel.parentElement === document.body) return;
 
     const panelParent = panel.parentElement;
@@ -161,6 +193,7 @@ class AccountMenuComponent extends Component {
       panelParent.insertBefore(this.#panelAnchor, panel);
       panel.classList.add('lame-account__panel--portaled');
       document.body.appendChild(panel);
+      this.#panelEl = panel;
     }
 
     if (backdrop?.parentElement && backdrop.parentElement !== document.body) {
@@ -168,11 +201,13 @@ class AccountMenuComponent extends Component {
       backdrop.parentElement.insertBefore(this.#backdropAnchor, backdrop);
       backdrop.classList.add('lame-account__backdrop--portaled');
       document.body.appendChild(backdrop);
+      this.#backdropEl = backdrop;
     }
   }
 
   #unportalPanel() {
-    const { panel, backdrop } = this.refs;
+    const panel = this.#getPanel();
+    const backdrop = this.#getBackdrop();
     if (!panel) return;
 
     if (panel.classList.contains('lame-account__panel--portaled')) {
@@ -212,12 +247,29 @@ class AccountMenuComponent extends Component {
     window.scrollTo({ top: this.#scrollY, behavior: 'instant' });
   }
 
+  #isEventInside(event, element) {
+    if (!(event.target instanceof Element) || !element) return false;
+    return element === event.target || element.contains(event.target);
+  }
+
   #handleDocumentClick = (event) => {
     if (!this.classList.contains('is-open')) return;
-    if (event.target instanceof Element && this.contains(event.target)) return;
-    if (isClickedOutside(event, this.refs.panel) && isClickedOutside(event, this.refs.trigger)) {
-      this.close();
+
+    if (this.#suppressDocumentClick) {
+      this.#suppressDocumentClick = false;
+      return;
     }
+
+    const panel = this.#getPanel();
+    const backdrop = this.#getBackdrop();
+    const trigger = this.refs.trigger;
+
+    if (this.#isEventInside(event, trigger)) return;
+    if (this.#isEventInside(event, panel)) return;
+    if (this.#isEventInside(event, backdrop)) return;
+    if (event.target instanceof Element && this.contains(event.target)) return;
+
+    this.close();
   };
 
   #handleDocumentKeyDown = (event) => {

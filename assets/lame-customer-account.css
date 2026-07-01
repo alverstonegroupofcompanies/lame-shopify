@@ -1360,7 +1360,10 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
 }
 
 .lame-account__header {
-  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 1rem 1rem 0.9rem;
   background: linear-gradient(
     180deg,
@@ -1373,24 +1376,29 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding-right: 1.75rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .lame-account__close {
-  position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
   margin: 0;
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgb(var(--lame-acct-gold) / 0.12);
-  color: rgb(var(--lame-acct-forest));
+  appearance: none;
+  background: rgb(var(--lame-acct-ink) / 0.06);
+  color: rgb(var(--lame-acct-ink) / 0.55);
+  box-shadow: none;
+  transform: none;
+  filter: none;
   cursor: pointer;
   transition:
     background 0.2s var(--lame-acct-ease),
@@ -1399,8 +1407,11 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
 
 .lame-account__close:hover,
 .lame-account__close:focus-visible {
-  background: rgb(var(--lame-acct-gold) / 0.22);
-  color: rgb(var(--lame-acct-gold-strong));
+  background: rgb(var(--lame-acct-ink) / 0.1);
+  color: rgb(var(--lame-acct-ink) / 0.85);
+  box-shadow: none;
+  transform: none;
+  filter: none;
   outline: none;
 }
 
@@ -1410,7 +1421,7 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: 0.01em;
-  color: rgb(var(--lame-acct-gold-strong));
+  color: rgb(var(--lame-acct-ink));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1420,18 +1431,16 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
   white-space: normal;
 }
 
-.lame-account__header-user--guest {
-  padding-right: 1.75rem;
-}
-
 .lame-account__email {
   margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.35;
-  color: rgb(var(--lame-acct-ink) / 0.58);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: rgb(var(--lame-acct-ink) / 0.55);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
 }
 
 .lame-account__user-avatar {
@@ -1669,7 +1678,16 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
 
   html.lame-account-menu-open .lame-account__panel--portaled {
     --lame-acct-panel-x: 0;
-    transform: translate3d(0, 0, 0);
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  html.lame-account-menu-open .lame-account__backdrop--portaled {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 
   .lame-account__header {
@@ -1716,10 +1734,6 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
 
   .lame-account__close {
     display: none;
-  }
-
-  .lame-account__header-user {
-    padding-right: 0;
   }
 }
 

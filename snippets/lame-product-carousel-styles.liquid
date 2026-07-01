@@ -3,6 +3,13 @@
     --lame-carousel-accent: #7b2cbf;
     --lame-carousel-discount: #0a9f4f;
     --lame-carousel-gap: 12px;
+    --lame-carousel-arrow-bg: rgb(244 248 245);
+    --lame-carousel-arrow-border: rgb(42 58 48 / 0.18);
+    --lame-carousel-arrow-color: rgb(72 104 82);
+    --lame-carousel-arrow-shadow: 0 4px 14px rgb(26 42 36 / 0.1);
+    --lame-carousel-arrow-bg-hover: rgb(42 58 48);
+    --lame-carousel-arrow-color-hover: rgb(232 242 236);
+    --lame-carousel-arrow-border-hover: rgb(42 58 48);
   }
 
   .lame-product-carousel .lame-section-heading {
@@ -46,14 +53,28 @@
     height: 2.25rem;
     padding: 0;
     border-radius: 50%;
-    border: 1px solid var(--lame-carousel-arrow-border, rgb(0 0 0 / 0.1));
-    background: var(--lame-carousel-arrow-bg, #fff);
-    color: rgb(0 0 0 / 0.65);
-    box-shadow: var(--lame-carousel-arrow-shadow, 0 2px 8px rgb(0 0 0 / 0.08));
+    border: 1px solid var(--lame-carousel-arrow-border, rgb(42 58 48 / 0.18));
+    background: var(--lame-carousel-arrow-bg, rgb(244 248 245));
+    color: var(--lame-carousel-arrow-color, rgb(72 104 82));
+    box-shadow: var(--lame-carousel-arrow-shadow, 0 4px 14px rgb(26 42 36 / 0.1));
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition:
+      background 0.22s ease,
+      border-color 0.22s ease,
+      color 0.22s ease,
+      box-shadow 0.22s ease,
+      transform 0.22s ease;
+  }
+
+  .lame-product-carousel__arrow:hover:not(:disabled):not([hidden]) {
+    background: var(--lame-carousel-arrow-bg-hover, rgb(42 58 48));
+    border-color: var(--lame-carousel-arrow-border-hover, rgb(42 58 48));
+    color: var(--lame-carousel-arrow-color-hover, rgb(232 242 236));
+    box-shadow: 0 6px 18px rgb(26 42 36 / 0.16);
+    transform: translateY(-50%) scale(1.04);
   }
 
   .lame-product-carousel__arrow:disabled,
@@ -76,6 +97,9 @@
     width: 1rem;
     height: 1rem;
     display: block;
+    color: inherit;
+    stroke: currentColor;
+    fill: none;
   }
 
   .lame-carousel-card {
