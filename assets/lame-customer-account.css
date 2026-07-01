@@ -1343,6 +1343,22 @@
   pointer-events: auto;
 }
 
+/* Mobile panel/backdrop are portaled to body — no longer descendants of .lame-account */
+html.lame-account-menu-open .lame-account__panel--portaled {
+  --lame-acct-panel-y: 0;
+
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(var(--lame-acct-panel-x, 0), 0, 0) scale(1);
+}
+
+html.lame-account-menu-open .lame-account__backdrop--portaled {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 .lame-account__header {
   position: relative;
   padding: 1rem 1rem 0.9rem;
@@ -1647,6 +1663,11 @@
   }
 
   .lame-account.is-open .lame-account__panel {
+    --lame-acct-panel-x: 0;
+    transform: translate3d(0, 0, 0);
+  }
+
+  html.lame-account-menu-open .lame-account__panel--portaled {
     --lame-acct-panel-x: 0;
     transform: translate3d(0, 0, 0);
   }
