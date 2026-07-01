@@ -52,16 +52,16 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   --lame-op-btn-height: 44px;
   --lame-op-btn-padding-x: 12px;
   --lame-op-btn-size: 0.6875rem;
-  --lame-op-btn-bg: #2d4628;
-  --lame-op-btn-bg-hover: #243a20;
-  --lame-op-btn-color: #ffffff;
-  --lame-op-btn-border: #2d4628;
+  --lame-op-btn-bg: var(--lame-cta-bg, #ff5722);
+  --lame-op-btn-bg-hover: var(--lame-cta-bg-hover, #e64a19);
+  --lame-op-btn-color: var(--lame-cta-color, #ffffff);
+  --lame-op-btn-border: var(--lame-cta-bg, #ff5722);
   --lame-op-btn-sold-bg: #b8c4bc;
   --lame-op-btn-sold-color: #ffffff;
   --lame-op-btn-radius: 8px;
   --lame-op-wishlist-size: 44px;
-  --lame-op-wishlist-border: rgb(0 0 0 / 0.18);
-  --lame-op-wishlist-icon: #1a1a1a;
+  --lame-op-wishlist-border: var(--lame-wishlist-border, rgb(233 30 140 / 0.45));
+  --lame-op-wishlist-icon: var(--lame-wishlist-accent, #e91e8c);
 
   /* Colors */
   --lame-op-ink: #111111;
@@ -70,8 +70,8 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   --lame-op-green-soft: #243a20;
   --lame-op-green-light: #3f6b52;
   --lame-op-gold: #d4af37;
-  --lame-op-discount-bg: #e8f0eb;
-  --lame-op-discount-color: #2d4628;
+  --lame-op-discount-bg: rgb(255 87 34 / 0.12);
+  --lame-op-discount-color: var(--lame-offer-accent-dark, #e64a19);
 }
 
 /* ── Neutralize global uniform / premium card rules inside this scope only ── */
@@ -596,8 +596,9 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge.color-scheme-sale,
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge[class*='sale'] {
-  background: #2d4628;
-  color: #fff;
+  background: var(--lame-sale-badge-bg);
+  color: var(--lame-sale-badge-color);
+  box-shadow: var(--lame-sale-badge-shadow);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .product-badges__badge[class*='new'],
@@ -730,15 +731,15 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn:hover {
-  border-color: rgb(45 70 40 / 0.35);
-  color: var(--lame-op-green);
-  background: rgb(45 70 40 / 0.04);
+  border-color: var(--lame-wishlist-border);
+  color: var(--lame-wishlist-accent);
+  background: var(--lame-wishlist-accent-soft);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active {
-  border-color: var(--lame-op-green);
-  color: var(--lame-op-green);
-  background: rgb(45 70 40 / 0.1);
+  border-color: var(--lame-wishlist-active);
+  color: var(--lame-wishlist-active);
+  background: var(--lame-wishlist-accent-soft);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-wishlist-btn.is-active .lame-wishlist-toggle__icon {
@@ -773,9 +774,9 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   box-sizing: border-box;
   border: 1px solid var(--lame-op-btn-border) !important;
   border-radius: var(--lame-op-btn-radius);
-  background: var(--lame-op-btn-bg) !important;
+  background: var(--lame-cta-bg-gradient, var(--lame-op-btn-bg)) !important;
   color: var(--lame-op-btn-color) !important;
-  box-shadow: none !important;
+  box-shadow: var(--lame-cta-shadow) !important;
   font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: var(--lame-op-btn-size);
   font-weight: 600;
@@ -849,11 +850,11 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button:not(:disabled):hover,
 .collection-template-our-products.lame-our-products-card-scope
   .lame-op-card__inner .buy-buttons-block .add-to-cart-button:not(:disabled):hover {
-  background: var(--lame-op-btn-bg-hover) !important;
+  background: linear-gradient(135deg, var(--lame-cta-bg-hover) 0%, var(--lame-op-btn-bg-hover) 100%) !important;
   color: var(--lame-op-btn-color) !important;
   border-color: var(--lame-op-btn-bg-hover) !important;
-  transform: none;
-  box-shadow: none !important;
+  transform: translateY(-1px);
+  box-shadow: var(--lame-cta-shadow-hover) !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button:disabled,
