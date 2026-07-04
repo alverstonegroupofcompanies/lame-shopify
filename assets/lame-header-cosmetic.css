@@ -698,8 +698,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury cart-icon .cart-bubble {
-  background: rgb(var(--lame-nav-forest));
-  color: #fff;
+  background: rgb(var(--lame-nav-gold));
+  color: rgb(var(--lame-nav-forest));
 }
 
 /* Mobile horizontal category row (second nav strip) */
@@ -2367,8 +2367,8 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 }
 
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble {
-  background: rgb(var(--lame-nav-forest));
-  color: #fff;
+  background: rgb(var(--lame-nav-gold));
+  color: rgb(var(--lame-nav-forest));
   border: 1.5px solid rgb(255 255 255);
   animation: lame-cart-pulse 0.35s ease;
 }
@@ -2456,27 +2456,66 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     display: none;
   }
 
-  #header-component.header--cosmetic-luxury header-actions {
-    gap: clamp(0.75rem, 1.5vw, 1.25rem);
-  }
-
+  /* Account · Wishlist · Cart — icon above label with dividers */
   #header-component.header--cosmetic-luxury header-actions .header-actions__action,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger {
-    flex-direction: column;
+  #header-component.header--cosmetic-luxury header-actions .lame-account.header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions cart-drawer-component > .header-actions__action {
     width: auto;
-    min-width: 3.6rem;
     height: auto;
-    min-height: auto;
-    padding: 0.1rem 0.2rem 0;
+    min-width: unset;
+    min-height: unset;
     border: none;
     border-radius: 0;
     background: transparent;
-    gap: 0.35rem;
+    box-shadow: none;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions {
+    align-items: stretch;
+    gap: 0;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__action, .account-button, cart-drawer-component) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    width: auto;
+    min-width: 4.25rem;
+    height: auto;
+    min-height: auto;
+    padding: 0.15rem clamp(0.85rem, 1.4vw, 1.15rem) 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__action, .account-button, cart-drawer-component) + :is(.lame-account, .header-actions__action, .account-button, cart-drawer-component) {
+    border-inline-start: 1px solid rgb(var(--lame-nav-forest) / 0.14);
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
+  #header-component.header--cosmetic-luxury header-actions cart-drawer-component > button {
+    flex-direction: column;
+    width: 100%;
+    min-width: unset;
+    height: auto;
+    min-height: auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    gap: 0.3rem;
     box-shadow: none;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__action:hover,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover {
+  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover,
+  #header-component.header--cosmetic-luxury header-actions cart-drawer-component > button:hover {
     transform: none;
     box-shadow: none;
     background: transparent;
@@ -2486,13 +2525,15 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap,
   #header-component.header--cosmetic-luxury header-actions .lame-account__avatar,
   #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-trigger .svg-wrapper {
-    width: var(--header-luxury-icon-ring);
-    height: var(--header-luxury-icon-ring);
-    min-width: var(--header-luxury-icon-ring);
-    min-height: var(--header-luxury-icon-ring);
-    border-radius: 50%;
-    border: 1.5px solid rgb(var(--lame-nav-forest) / 0.72);
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-trigger,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
+    position: relative;
+    width: 1.65rem;
+    height: 1.65rem;
+    min-width: 1.65rem;
+    min-height: 1.65rem;
+    border: none;
+    border-radius: 0;
     background: transparent;
     color: rgb(var(--lame-nav-forest));
     display: inline-flex;
@@ -2500,46 +2541,44 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     justify-content: center;
     box-sizing: border-box;
     box-shadow: none;
-    transition:
-      border-color 0.22s ease,
-      background 0.22s ease,
-      transform 0.22s ease,
-      box-shadow 0.22s ease,
-      color 0.22s ease;
+    transition: color 0.2s ease;
   }
 
   #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__icon-wrap,
   #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__avatar,
   #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist:hover .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action:has(.header-actions__cart-trigger):hover .svg-wrapper {
-    border-color: rgb(var(--lame-nav-forest) / 0.9);
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action:has(.header-actions__cart-trigger):hover .header-actions__cart-icon {
     background: transparent;
     color: rgb(var(--lame-nav-forest));
     box-shadow: none;
-    transform: translateY(-1px);
+    transform: none;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__action svg,
   #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap svg,
   #header-component.header--cosmetic-luxury header-actions .account-button__icon,
   #header-component.header--cosmetic-luxury header-actions cart-icon svg {
-    width: var(--header-luxury-icon-glyph);
-    height: var(--header-luxury-icon-glyph);
+    width: 1.35rem;
+    height: 1.35rem;
     flex-shrink: 0;
   }
 
   #header-component.header--cosmetic-luxury header-actions .lame-account__avatar {
-    font-size: 0.6875rem;
+    width: 1.65rem;
+    height: 1.65rem;
+    min-width: 1.65rem;
+    min-height: 1.65rem;
+    font-size: 0.72rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.02em;
     color: rgb(var(--lame-nav-forest));
     background: transparent;
-    border: 1.5px solid rgb(var(--lame-nav-forest) / 0.72);
+    border: none;
+    border-radius: 0;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-trigger {
-    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2548,10 +2587,40 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     background: transparent;
   }
 
-  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
+    --cart-bubble-size: 16px;
+    --cart-bubble-top: -3px;
+    --cart-bubble-right: -5px;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper {
+    position: relative;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count {
+    --cart-bubble-size: 16px;
+    top: -3px;
+    right: -5px;
+    background: rgb(var(--lame-nav-forest));
+    color: #fff;
+    border: 1.5px solid rgb(255 255 255);
+  }
+
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble {
-    top: 0;
-    right: 0;
+    border: none;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background {
+    background: rgb(var(--lame-nav-gold)) !important;
+    border: 1.5px solid rgb(255 255 255) !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text {
+    color: rgb(var(--lame-nav-forest)) !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
+    mask: none;
   }
 
   #header-component.header--cosmetic-luxury header-actions .lame-account__label,
@@ -2559,9 +2628,9 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     font-family: var(--font-body--family, 'Inter', system-ui, sans-serif);
     font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: capitalize;
-    color: rgb(var(--lame-nav-forest) / 0.86);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: rgb(var(--lame-nav-forest) / 0.88);
     line-height: 1.15;
     -webkit-font-smoothing: antialiased;
   }
@@ -2869,29 +2938,6 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--right header-actions {
     flex-shrink: 0;
-    gap: clamp(0.35rem, 0.8vw, 0.55rem);
-  }
-
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header-actions__action,
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-account.header-actions__action,
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] cart-drawer-component > button {
-    width: 2.1rem;
-    height: 2.1rem;
-    min-width: 2.1rem;
-    min-height: 2.1rem;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    color: rgb(var(--brand-ink) / 0.82);
-  }
-
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header-actions__action:hover,
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-account.header-actions__action:hover,
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] cart-drawer-component > button:hover {
-    background: transparent;
-    color: rgb(var(--brand-ink));
-    transform: none;
   }
 
   #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
