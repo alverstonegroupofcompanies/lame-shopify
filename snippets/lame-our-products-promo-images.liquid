@@ -1,40 +1,55 @@
 {%- comment -%}
   Editable promo images for Our Products — column on desktop, horizontal row on mobile.
-  @param {object} section - main-collection section with promo_image blocks
+  @param {object} section - main-collection section with promo image settings
 {%- endcomment -%}
-{%- assign promo_blocks = section.blocks | where: 'type', 'promo_image' -%}
-{%- if promo_blocks.size > 0 -%}
+{%- liquid
+  assign lame_promo_count = 0
+  for lame_promo_index in (1..4)
+    assign lame_promo_image_key = 'promo_image_' | append: lame_promo_index
+    assign lame_promo_image = section.settings[lame_promo_image_key]
+    if lame_promo_image != blank
+      assign lame_promo_count = lame_promo_count | plus: 1
+    endif
+  endfor
+-%}
+{%- if lame_promo_count > 0 -%}
   <aside
     class="lame-op-promo-images"
     aria-label="{{ section.settings.promo_aria_label | default: 'Promotional images' | escape }}"
     style="--lame-op-promo-width: {{ section.settings.promo_column_width }}px; --lame-op-promo-gap: {{ section.settings.promo_image_gap }}px;"
   >
     <div class="lame-op-promo-images__track">
-      {%- for block in promo_blocks -%}
-        <div class="lame-op-promo-images__item" {{ block.shopify_attributes }}>
-          {%- if block.settings.link != blank -%}
-            <a href="{{ block.settings.link }}" class="lame-op-promo-images__link">
-          {%- endif -%}
+      {%- for lame_promo_index in (1..4) -%}
+        {%- liquid
+          assign lame_promo_image_key = 'promo_image_' | append: lame_promo_index
+          assign lame_promo_alt_key = 'promo_image_' | append: lame_promo_index | append: '_alt'
+          assign lame_promo_link_key = 'promo_image_' | append: lame_promo_index | append: '_link'
+          assign lame_promo_image = section.settings[lame_promo_image_key]
+          assign lame_promo_alt = section.settings[lame_promo_alt_key]
+          assign lame_promo_link = section.settings[lame_promo_link_key]
+        -%}
+        {%- if lame_promo_image != blank -%}
+          <div class="lame-op-promo-images__item">
+            {%- if lame_promo_link != blank -%}
+              <a href="{{ lame_promo_link }}" class="lame-op-promo-images__link">
+            {%- endif -%}
 
-          {%- if block.settings.image != blank -%}
             {{
-              block.settings.image
+              lame_promo_image
               | image_url: width: 600
               | image_tag:
                 class: 'lame-op-promo-images__img',
                 loading: 'lazy',
                 widths: '160, 200, 240, 300, 360, 480, 600',
                 sizes: '(min-width: 750px) var(--lame-op-promo-width, 180px), 42vw',
-                alt: block.settings.image_alt | default: block.settings.image.alt | escape
+                alt: lame_promo_alt | default: lame_promo_image.alt | escape
             }}
-          {%- else -%}
-            {{ 'image' | placeholder_svg_tag: 'lame-op-promo-images__placeholder' }}
-          {%- endif -%}
 
-          {%- if block.settings.link != blank -%}
-            </a>
-          {%- endif -%}
-        </div>
+            {%- if lame_promo_link != blank -%}
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
       {%- endfor -%}
     </div>
   </aside>

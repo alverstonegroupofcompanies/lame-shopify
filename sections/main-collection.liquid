@@ -58,10 +58,11 @@
     endif
   endif
 
-  assign lame_promo_image_blocks = section.blocks | where: 'type', 'promo_image'
   assign lame_has_promo_images = false
-  if lame_our_products_op_cards and lame_promo_image_blocks.size > 0
-    assign lame_has_promo_images = true
+  if lame_our_products_op_cards
+    if section.settings.promo_image_1 != blank or section.settings.promo_image_2 != blank or section.settings.promo_image_3 != blank or section.settings.promo_image_4 != blank
+      assign lame_has_promo_images = true
+    endif
   endif
 %}
 
@@ -627,7 +628,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Add Image blocks below. Desktop: vertical column on the right of the product grid. Mobile: horizontal scrollable row above products."
+      "content": "Add promo images below. Desktop: vertical column on the right of the product grid. Mobile: horizontal scrollable row above products."
     },
     {
       "type": "text",
@@ -654,6 +655,66 @@
       "step": 2,
       "unit": "px",
       "default": 16
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_1",
+      "label": "Promo image 1"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_1_alt",
+      "label": "Promo image 1 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_1_link",
+      "label": "Promo image 1 link"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_2",
+      "label": "Promo image 2"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_2_alt",
+      "label": "Promo image 2 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_2_link",
+      "label": "Promo image 2 link"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_3",
+      "label": "Promo image 3"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_3_alt",
+      "label": "Promo image 3 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_3_link",
+      "label": "Promo image 3 link"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_4",
+      "label": "Promo image 4"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_4_alt",
+      "label": "Promo image 4 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_4_link",
+      "label": "Promo image 4 link"
     },
     {
       "type": "header",
@@ -708,29 +769,6 @@
       "step": 1,
       "unit": "px",
       "default": 56
-    }
-  ],
-  "blocks": [
-    {
-      "type": "promo_image",
-      "name": "Promo image",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image"
-        },
-        {
-          "type": "text",
-          "id": "image_alt",
-          "label": "Image alt text"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Optional link"
-        }
-      ]
     }
   ],
   "presets": []
