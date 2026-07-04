@@ -116,12 +116,9 @@
               data-brand="{{ brand_label | escape }}"
               ref="cards[]"
             >
-              {% render 'lame-category-product-card',
-                product: product,
-                section: section,
-                collection_handle: collection.handle,
-                show_wishlist: section.settings.show_wishlist
-              %}
+              {% # theme-check-disable %}
+              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+              {% # theme-check-enable %}
             </li>
             {% assign item_index = item_index | plus: 1 %}
           {% endif %}
