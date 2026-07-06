@@ -613,7 +613,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   justify-content: center;
   width: 1.125rem;
   height: 1.125rem;
-  color: rgb(var(--brand-gold-strong));
+  color: rgb(var(--lame-nav-forest));
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container.menu-open > .header__icon--summary.header__icon--menu {
@@ -700,8 +700,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury cart-icon .cart-bubble {
-  background: rgb(var(--lame-nav-gold));
-  color: rgb(var(--lame-nav-forest));
+  background: rgb(var(--lame-nav-forest));
+  color: #fff;
 }
 
 /* Mobile horizontal category row (second nav strip) */
@@ -2377,12 +2377,14 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 }
 
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__background {
-  background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-gold))) !important;
+  background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-forest))) !important;
+  border: 1.5px solid rgb(255 255 255) !important;
 }
 
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__text,
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__text-count {
-  color: var(--lame-header-cart-badge-text, rgb(var(--lame-nav-forest))) !important;
+  color: var(--lame-header-cart-badge-text, #fff) !important;
+  font-weight: 700 !important;
 }
 
 #header-component.header--cosmetic-luxury header-actions .header-actions__icon-image {
@@ -2455,14 +2457,16 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   overflow: visible;
 }
 
-/* Account · Wishlist · Cart — unified forest outline icons (all breakpoints) */
-#header-component.header--cosmetic-luxury header-actions .header-actions__action,
-#header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
-#header-component.header--cosmetic-luxury header-actions .header-actions__cart {
-  color: rgb(var(--lame-nav-forest));
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+/* Account · Wishlist · Cart — unified forest outline icons (desktop icon row) */
+@media screen and (min-width: 990px) {
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart {
+    color: rgb(var(--lame-nav-forest));
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 }
 
 #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap,
@@ -2731,12 +2735,12 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background {
-    background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-gold))) !important;
+    background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-forest))) !important;
     border: 1.5px solid rgb(255 255 255) !important;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text {
-    color: var(--lame-header-cart-badge-text, rgb(var(--lame-nav-forest))) !important;
+    color: var(--lame-header-cart-badge-text, #fff) !important;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
@@ -3089,5 +3093,131 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 @media screen and (max-width: 989px) {
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--center {
     display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE — readable nav strip, unified icons, high-contrast badges
+   ═══════════════════════════════════════════════════════════════ */
+
+@media screen and (max-width: 767px) {
+  /* Nav strip: forest background so white/gold link text is readable */
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--lame-nav-forest)) 0%,
+      rgb(52 72 58) 48%,
+      rgb(var(--lame-nav-forest)) 100%
+    ) !important;
+    border-block-start: 1px solid rgb(var(--lame-nav-gold) / 0.35) !important;
+    border-block-end: 1px solid rgb(0 0 0 / 0.14) !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list--mobile a,
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__item {
+    color: rgb(255 255 255 / 0.95) !important;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__item:hover,
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list--mobile a:hover,
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list--mobile a:focus-visible {
+    color: #fff !important;
+    opacity: 1;
+  }
+
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row a[aria-current='page'] {
+    color: rgb(var(--lame-nav-gold)) !important;
+    font-weight: 700;
+  }
+
+  /* Same circular forest-outline style for every header icon */
+  #header-component.header--cosmetic-luxury .header__icon--menu,
+  #header-component.header--cosmetic-luxury .lame-header-search-icon,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .lame-account.header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart,
+  #header-component.header--cosmetic-luxury .search-action .header-actions__action {
+    box-sizing: border-box;
+    width: var(--header-mobile-icon-size, 2.125rem) !important;
+    height: var(--header-mobile-icon-size, 2.125rem) !important;
+    min-width: var(--header-mobile-icon-size, 2.125rem) !important;
+    min-height: var(--header-mobile-icon-size, 2.125rem) !important;
+    padding: 0 !important;
+    border: 1.5px solid rgb(var(--lame-nav-forest) / 0.78) !important;
+    border-radius: 50% !important;
+    background: rgb(var(--lame-nav-forest) / 0.04) !important;
+    color: rgb(var(--lame-nav-forest)) !important;
+    box-shadow: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-account__trigger,
+  #header-component.header--cosmetic-luxury .lame-account .account-button {
+    border: none !important;
+    background: transparent !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon--open,
+  #header-component.header--cosmetic-luxury .header__icon--menu svg,
+  #header-component.header--cosmetic-luxury .lame-header-search-icon,
+  #header-component.header--cosmetic-luxury .lame-header-search-icon svg,
+  #header-component.header--cosmetic-luxury header-actions svg,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap,
+  #header-component.header--cosmetic-luxury header-actions .account-button__icon,
+  #header-component.header--cosmetic-luxury header-actions .lame-account-icon,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper {
+    color: rgb(var(--lame-nav-forest)) !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions svg path {
+    stroke: currentColor;
+  }
+
+  #header-component.header--cosmetic-luxury .header__icon--menu:hover,
+  #header-component.header--cosmetic-luxury .lame-header-search-icon:hover,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action:hover,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart:hover {
+    background: rgb(var(--lame-nav-forest) / 0.08) !important;
+    border-color: rgb(var(--lame-nav-forest) / 0.92) !important;
+    transform: translateY(-1px);
+  }
+
+  /* Readable count badges on light header background */
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count {
+    top: -4px;
+    right: -6px;
+    min-width: 17px;
+    height: 17px;
+    line-height: 17px;
+    background: rgb(var(--lame-nav-forest)) !important;
+    color: #fff !important;
+    border: 1.5px solid #fff !important;
+    font-size: 0.5625rem;
+    font-weight: 700;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
+    --cart-bubble-size: 17px;
+    --cart-bubble-top: -4px;
+    --cart-bubble-right: -6px;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background {
+    background: rgb(var(--lame-nav-forest)) !important;
+    border: 1.5px solid #fff !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text-count {
+    color: #fff !important;
+    font-size: 0.5625rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
+    mask: none !important;
   }
 }
