@@ -47,12 +47,11 @@
     aria-controls="{{ menu_id }}"
     on:click="/toggle"
   >
+    <span class="lame-account__icon-wrap {% if display_style != 'icon' %}desktop:hidden{% endif %}" aria-hidden="true">
+      {% render 'lame-account-icon', size: 20, class: 'account-button__icon' %}
+    </span>
     {%- if customer -%}
-      <span class="lame-account__avatar" aria-hidden="true">{{ avatar_letter }}</span>
-    {%- else -%}
-      <span class="lame-account__icon-wrap {% if display_style != 'icon' %}desktop:hidden{% endif %}" aria-hidden="true">
-        {% render 'lame-account-icon', size: 20, class: 'account-button__icon' %}
-      </span>
+      <span class="visually-hidden">{{ customer.first_name | default: customer.email }}</span>
     {%- endif -%}
     <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
       {{ 'content.account_title' | t }}
