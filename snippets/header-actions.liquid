@@ -183,9 +183,25 @@
       </div>
     {% endcapture %}
 
-    <cart-drawer-component
-      class="cart-drawer{% if display_style == 'text' %} cart-drawer--text{% endif %}"
+    <button
+      type="button"
+      class="header-actions__action header-actions__cart button-unstyled{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      on:click="#header-cart-drawer/open"
+      aria-haspopup="dialog"
+      aria-label="{{ 'accessibility.cart' | t }}"
+      aria-describedby="cart-bubble-text"
+      data-testid="cart-drawer-trigger"
       {{ block.shopify_attributes }}
+    >
+      <span class="header-actions__cart-trigger">
+        {{ cart_icon }}
+      </span>
+      <span class="header-actions__action-label mobile:hidden">{{ 'content.cart_title' | t }}</span>
+    </button>
+
+    <cart-drawer-component
+      id="header-cart-drawer"
+      class="cart-drawer{% if display_style == 'text' %} cart-drawer--text{% endif %}"
       {% if settings.auto_open_cart_drawer %}
         auto-open
       {% endif %}
@@ -193,19 +209,6 @@
       <template id="empty-cart-template">
         {{ empty_cart_drawer_content }}
       </template>
-      <button
-        class="header-actions__action button-unstyled{% if display_style == 'text' %} header-actions__text-style{% endif %}"
-        on:click="/open"
-        aria-haspopup="dialog"
-        aria-label="{{ 'accessibility.cart' | t }}"
-        aria-describedby="cart-bubble-text"
-        data-testid="cart-drawer-trigger"
-      >
-        <span class="header-actions__cart-trigger">
-          {{ cart_icon }}
-        </span>
-        <span class="header-actions__action-label mobile:hidden">{{ 'content.cart_title' | t }}</span>
-      </button>
 
       <dialog
         ref="dialog"
