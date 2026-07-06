@@ -568,6 +568,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: visible;
   transition:
     background 0.22s ease,
     border-color 0.22s ease,
@@ -578,7 +579,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 #header-component.header--cosmetic-luxury .lame-account.header-actions__action,
 #header-component.header--cosmetic-luxury .lame-account .account-button,
 #header-component.header--cosmetic-luxury .header-actions__wishlist,
-#header-component.header--cosmetic-luxury .header-actions__action:has(.header-actions__cart-trigger) {
+#header-component.header--cosmetic-luxury .header-actions__cart {
   background: rgb(var(--lame-nav-forest) / 0.03);
   border-color: rgb(var(--lame-nav-forest) / 0.72);
 }
@@ -666,7 +667,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 #header-component.header--cosmetic-luxury .lame-account .lame-account__icon-wrap,
 #header-component.header--cosmetic-luxury .lame-account .lame-account__avatar,
 #header-component.header--cosmetic-luxury .header-actions__wishlist .svg-wrapper,
-#header-component.header--cosmetic-luxury .header-actions__action:has(.header-actions__cart-trigger) .svg-wrapper {
+#header-component.header--cosmetic-luxury .header-actions__cart .svg-wrapper,
+#header-component.header--cosmetic-luxury .header-actions__action:has(.header-actions__cart-icon) .svg-wrapper {
   color: rgb(var(--lame-nav-forest));
 }
 
@@ -2351,27 +2353,50 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 #header-component.header--cosmetic-luxury .header-actions__wishlist-count {
   --cart-bubble-size: 17px;
   position: absolute;
-  top: 1px;
-  right: 1px;
+  top: -3px;
+  right: -5px;
   min-width: var(--cart-bubble-size);
   height: var(--cart-bubble-size);
   padding: 0 4px;
   border-radius: 999px;
-  background: rgb(var(--lame-nav-forest));
-  color: #fff;
+  background: var(--lame-header-wishlist-badge-bg, rgb(var(--lame-nav-forest)));
+  color: var(--lame-header-wishlist-badge-text, #fff);
   font-family: var(--font-body--family, 'Inter', system-ui, sans-serif);
   font-size: 0.5625rem;
   font-weight: 700;
   line-height: var(--cart-bubble-size);
   text-align: center;
   border: 1.5px solid rgb(255 255 255);
+  z-index: 2;
+  pointer-events: none;
 }
 
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble {
-  background: rgb(var(--lame-nav-gold));
-  color: rgb(var(--lame-nav-forest));
-  border: 1.5px solid rgb(255 255 255);
-  animation: lame-cart-pulse 0.35s ease;
+  z-index: 2;
+  pointer-events: none;
+}
+
+#header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__background {
+  background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-gold))) !important;
+}
+
+#header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__text,
+#header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__text-count {
+  color: var(--lame-header-cart-badge-text, rgb(var(--lame-nav-forest))) !important;
+}
+
+#header-component.header--cosmetic-luxury header-actions .header-actions__icon-image {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+}
+
+#header-component.header--cosmetic-luxury header-actions[data-hide-count-badges='true'] .header-actions__count-badge,
+#header-component.header--cosmetic-luxury header-actions[data-hide-count-badges='true'] .header-actions__wishlist-count,
+#header-component.header--cosmetic-luxury header-actions[data-hide-count-badges='true'] .header-actions__cart-icon .cart-bubble {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 @keyframes lame-cart-pulse {
@@ -2422,6 +2447,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 #header-component.header--cosmetic-luxury .header__column--right {
   overflow: visible;
   flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 #header-component.header--cosmetic-luxury header-actions {
@@ -2458,11 +2484,28 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   stroke: currentColor;
 }
 
-#header-component.header--cosmetic-luxury header-actions cart-drawer-component {
-  display: contents;
+#header-component.header--cosmetic-luxury header-actions .header-actions__cart,
+#header-component.header--cosmetic-luxury header-actions .header-actions__wishlist {
+  display: inline-flex !important;
+  overflow: visible !important;
+  width: auto !important;
+  min-width: unset;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-#header-component.header--cosmetic-luxury header-actions cart-drawer-component .cart-drawer__dialog {
+#header-component.header--cosmetic-luxury .header__column--right > cart-drawer-component,
+#header-component.header--cosmetic-luxury header-actions + cart-drawer-component {
+  display: block;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  position: static;
+  flex: 0 0 0;
+}
+
+#header-component.header--cosmetic-luxury .header__column--right > cart-drawer-component .cart-drawer__dialog,
+#header-component.header--cosmetic-luxury header-actions + cart-drawer-component .cart-drawer__dialog {
   position: fixed;
 }
 
@@ -2552,7 +2595,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   #header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart {
     flex-direction: column;
-    width: 100%;
+    width: auto;
     min-width: unset;
     height: auto;
     min-height: auto;
@@ -2562,6 +2605,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     background: transparent;
     gap: 0.3rem;
     box-shadow: none;
+    overflow: visible;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__action:hover,
@@ -2576,7 +2620,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap,
   #header-component.header--cosmetic-luxury header-actions .lame-account__avatar,
   #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-trigger,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper,
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
     position: relative;
     width: 1.65rem;
@@ -2598,7 +2642,8 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__icon-wrap,
   #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__avatar,
   #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist:hover .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action:has(.header-actions__cart-trigger):hover .header-actions__cart-icon {
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action:has(.header-actions__cart-icon):hover .header-actions__cart-icon,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart:hover .header-actions__cart-icon {
     background: transparent;
     color: rgb(var(--lame-nav-forest));
     box-shadow: none;
@@ -2629,13 +2674,34 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     border-radius: 0;
   }
 
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-trigger {
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     border: none;
     background: transparent;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper > svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    flex-shrink: 0;
+    color: rgb(var(--lame-nav-forest));
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon > .svg-wrapper,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon > span.hidden {
+    display: none !important;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
@@ -2652,22 +2718,25 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     --cart-bubble-size: 16px;
     top: -3px;
     right: -5px;
-    background: rgb(var(--lame-nav-forest));
-    color: #fff;
+    background: var(--lame-header-wishlist-badge-bg, rgb(var(--lame-nav-forest)));
+    color: var(--lame-header-wishlist-badge-text, #fff);
     border: 1.5px solid rgb(255 255 255);
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble {
+    --cart-bubble-top: -3px;
+    --cart-bubble-right: -5px;
     border: none;
+    animation: lame-cart-pulse 0.35s ease;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background {
-    background: rgb(var(--lame-nav-gold)) !important;
+    background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-gold))) !important;
     border: 1.5px solid rgb(255 255 255) !important;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text {
-    color: rgb(var(--lame-nav-forest)) !important;
+    color: var(--lame-header-cart-badge-text, rgb(var(--lame-nav-forest))) !important;
   }
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {

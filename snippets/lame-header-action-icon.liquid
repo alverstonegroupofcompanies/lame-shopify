@@ -1,0 +1,55 @@
+{%- doc -%}
+  Default or custom header action icon.
+
+  @param {string} icon_type - account, wishlist, or cart
+  @param {image} [custom_image] - Optional image from theme editor
+  @param {string} [class] - Optional class on the icon element
+  @param {number} [size] - Icon size in pixels for default SVG icons
+{%- enddoc -%}
+
+{%- liquid
+  assign icon_size = size | default: 20
+  assign icon_class = class | default: 'header-actions__icon-image'
+-%}
+
+{%- if custom_image != blank -%}
+  {{
+    custom_image
+    | image_url: width: 160
+    | image_tag:
+      class: icon_class,
+      widths: '40,80,160',
+      sizes: '20px',
+      loading: 'eager',
+      width: icon_size,
+      height: icon_size,
+      alt: ''
+  }}
+{%- else -%}
+  {%- case icon_type -%}
+    {%- when 'wishlist' -%}
+      <svg
+        class="{{ icon_class }}"
+        width="{{ icon_size }}"
+        height="{{ icon_size }}"
+        viewBox="0 0 20 20"
+        fill="none"
+        focusable="false"
+        aria-hidden="true"
+      >
+        <path
+          d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.35"
+          stroke-linejoin="round"
+        />
+      </svg>
+    {%- when 'cart' -%}
+      <span class="svg-wrapper {{ icon_class }}" aria-hidden="true">
+        {{ 'icon-cart.svg' | inline_asset_content }}
+      </span>
+    {%- when 'account' -%}
+      {% render 'lame-account-icon', size: icon_size, class: icon_class %}
+  {%- endcase -%}
+{%- endif -%}

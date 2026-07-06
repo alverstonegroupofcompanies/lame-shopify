@@ -57,13 +57,74 @@
   </svg>
 {% endcapture %}
 
+{% liquid
+  assign show_header_account = false
+  if shop.customer_accounts_enabled and section and section.settings.header_show_account != false
+    assign show_header_account = true
+  elsif shop.customer_accounts_enabled and section == blank
+    assign show_header_account = true
+  endif
+
+  assign show_header_wishlist = false
+  if settings.lame_enable_wishlist and section and section.settings.header_show_wishlist != false
+    assign show_header_wishlist = true
+  elsif settings.lame_enable_wishlist and section == blank
+    assign show_header_wishlist = true
+  endif
+
+  assign show_header_cart = true
+  if section and section.settings.header_show_cart == false
+    assign show_header_cart = false
+  endif
+
+  assign show_action_labels = true
+  if section and section.settings.actions_show_labels == false
+    assign show_action_labels = false
+  endif
+
+  assign show_count_badges = true
+  if section and section.settings.actions_show_count_badges == false
+    assign show_count_badges = false
+  endif
+
+  assign account_label = 'content.account_title' | t
+  assign wishlist_label = 'lame_wishlist.title' | t
+  assign cart_label = 'content.cart_title' | t
+  if section
+    if section.settings.actions_account_label != blank
+      assign account_label = section.settings.actions_account_label
+    endif
+    if section.settings.actions_wishlist_label != blank
+      assign wishlist_label = section.settings.actions_wishlist_label
+    endif
+    if section.settings.actions_cart_label != blank
+      assign cart_label = section.settings.actions_cart_label
+    endif
+  endif
+
+  assign wishlist_icon_image = blank
+  assign cart_icon_image = blank
+  if section
+    assign wishlist_icon_image = section.settings.actions_wishlist_icon
+    assign cart_icon_image = section.settings.actions_cart_icon
+  endif
+
+  assign action_label_class = 'header-actions__action-label mobile:hidden'
+  unless show_action_labels
+    assign action_label_class = 'header-actions__action-label hidden'
+  endunless
+%}
+
 <header-actions
   {% if display_style == 'text' %}
     class="header-actions--text"
   {% endif %}
+  {% unless show_count_badges %}
+    data-hide-count-badges="true"
+  {% endunless %}
   {{- block.shopify_attributes -}}
 >
-  {% if shop.customer_accounts_enabled %}
+  {% if show_header_account %}
     {% liquid
       assign use_lame_profile_menu = true
       if section and section.settings.use_lame_profile_menu == false
@@ -122,30 +183,33 @@
     {% endif %}
   {% endif %}
 
-  {% if settings.lame_enable_wishlist %}
+  {% if show_header_wishlist %}
     <button
       type="button"
       class="header-actions__action header-actions__wishlist lame-header-wishlist-btn"
-      aria-label="{{ 'lame_wishlist.title' | t }}"
+      aria-label="{{ wishlist_label }}"
       data-lame-wishlist-open
+      {% if section %}
+        data-shopify-editor-section="{{ section.id }}"
+      {% endif %}
     >
       <span class="svg-wrapper" aria-hidden="true">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" focusable="false">
-          <path
-            d="M10 5.2393L8.5149 3.77392C6.79996 2.08174 4.01945 2.08174 2.30451 3.77392C0.589562 5.4661 0.589563 8.2097 2.30451 9.90188L10 17.4952L17.6955 9.90188C19.4104 8.2097 19.4104 5.4661 17.6955 3.77392C15.9805 2.08174 13.2 2.08174 11.4851 3.77392L10 5.2393Z"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.35"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span class="header-actions__wishlist-count cart-bubble" data-wishlist-header-count hidden>0</span>
+        {% render 'lame-header-action-icon',
+          icon_type: 'wishlist',
+          custom_image: wishlist_icon_image,
+          class: 'header-actions__icon-image'
+        %}
+        <span
+          class="header-actions__wishlist-count header-actions__count-badge"
+          data-wishlist-header-count
+          hidden
+        >0</span>
       </span>
-      <span class="header-actions__action-label mobile:hidden">{{ 'lame_wishlist.title' | t }}</span>
+      <span class="{{ action_label_class }}">{{ wishlist_label }}</span>
     </button>
   {% endif %}
 
-  {% if settings.cart_type == 'drawer' and template.name != 'cart' %}
+  {% if show_header_cart and settings.cart_type == 'drawer' and template.name != 'cart' %}
     <script
       src="{{ 'cart-drawer.js' | asset_url }}"
       type="module"
@@ -185,20 +249,66 @@
 
     <button
       type="button"
-      class="header-actions__action header-actions__cart button-unstyled{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      class="header-actions__action header-actions__cart lame-header-cart-btn{% if display_style == 'text' %} header-actions__text-style{% endif %}"
       on:click="#header-cart-drawer/open"
       aria-haspopup="dialog"
-      aria-label="{{ 'accessibility.cart' | t }}"
+      aria-label="{{ cart_label }}"
       aria-describedby="cart-bubble-text"
       data-testid="cart-drawer-trigger"
+      {% if section %}
+        data-shopify-editor-section="{{ section.id }}"
+      {% endif %}
       {{ block.shopify_attributes }}
     >
-      <span class="header-actions__cart-trigger">
-        {{ cart_icon }}
-      </span>
-      <span class="header-actions__action-label mobile:hidden">{{ 'content.cart_title' | t }}</span>
-    </button>
+      <span class="svg-wrapper" aria-hidden="true">
+        {% if cart_icon_image != blank %}
+          {% render 'lame-header-action-icon',
+            icon_type: 'cart',
+            custom_image: cart_icon_image,
+            class: 'header-actions__icon-image'
+          %}
+        {% elsif display_style == 'icon' %}
+          {{ 'icon-cart.svg' | inline_asset_content }}
+        {% endif %}
+        <cart-icon
+          class="header-actions__cart-icon{% if display_style == 'text' %} header-actions__cart-icon--text{% endif %}{% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}"
+          data-testid="cart-icon"
+        >
+          <span class="{% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+            {{ cart_label }}
+          </span>
 
+          {% if display_style != 'icon' and cart_icon_image == blank %}
+            <span class="svg-wrapper desktop:hidden" aria-hidden="true">
+              {{ 'icon-cart.svg' | inline_asset_content }}
+            </span>
+          {% endif %}
+
+          {% render 'cart-bubble', limit: 100 %}
+        </cart-icon>
+      </span>
+      <span class="{{ action_label_class }}">{{ cart_label }}</span>
+    </button>
+  {% elsif show_header_cart %}
+    <a
+      href="{{ routes.cart_url }}"
+      class="header-actions__action action__cart header-actions__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      aria-label="{{ cart_label }}"
+      aria-describedby="cart-bubble-text"
+    >
+      {{ cart_icon }}
+    </a>
+  {% endif %}
+
+  <span
+    ref="liveRegion"
+    class="visually-hidden"
+    role="status"
+    data-testid="cart-count-live-region"
+  ></span>
+</header-actions>
+
+{% if show_header_cart and settings.cart_type == 'drawer' and template.name != 'cart' %}
     <cart-drawer-component
       id="header-cart-drawer"
       class="cart-drawer{% if display_style == 'text' %} cart-drawer--text{% endif %}"
@@ -278,24 +388,7 @@
         </div>
       </dialog>
     </cart-drawer-component>
-  {% else %}
-    <a
-      href="{{ routes.cart_url }}"
-      class="header-actions__action action__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
-      aria-label="{{ 'accessibility.cart' | t }}"
-      aria-describedby="cart-bubble-text"
-    >
-      {{ cart_icon }}
-    </a>
-  {% endif %}
-
-  <span
-    ref="liveRegion"
-    class="visually-hidden"
-    role="status"
-    data-testid="cart-count-live-region"
-  ></span>
-</header-actions>
+{% endif %}
 
 <script
   type="module"
@@ -582,6 +675,11 @@
     display: flex;
     align-items: center;
 
+    .header-actions__action,
+    .header-actions__cart {
+      overflow: visible;
+    }
+
     @media screen and (max-width: 749px) {
       justify-content: flex-end;
       justify-self: flex-end;
@@ -631,12 +729,33 @@
     height: 18px;
     padding: 0 4px;
     border-radius: 999px;
-    background: #264734;
-    color: #fff;
+    background: var(--lame-header-wishlist-badge-bg, #264734);
+    color: var(--lame-header-wishlist-badge-text, #fff);
     font-size: 0.625rem;
     font-weight: 700;
     line-height: 18px;
     text-align: center;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  header-actions[data-hide-count-badges='true'] .header-actions__count-badge,
+  header-actions[data-hide-count-badges='true'] .header-actions__wishlist-count,
+  header-actions[data-hide-count-badges='true'] .header-actions__cart-icon .cart-bubble {
+    display: none !important;
+  }
+
+  .header-actions__icon-image {
+    display: block;
+    width: 1.35rem;
+    height: 1.35rem;
+    object-fit: contain;
+  }
+
+  .header-actions__cart .svg-wrapper > svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    flex-shrink: 0;
   }
 
   .header-actions__cart-icon .cart-bubble {

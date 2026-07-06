@@ -16,6 +16,21 @@
     assign wishlist_url = pages['wishlist'].url
   endif
 
+  assign account_label = 'content.account_title' | t
+  if section and section.settings.actions_account_label != blank
+    assign account_label = section.settings.actions_account_label
+  endif
+
+  assign show_action_labels = true
+  if section and section.settings.actions_show_labels == false
+    assign show_action_labels = false
+  endif
+
+  assign action_label_class = 'lame-account__label header-actions__action-label mobile:hidden'
+  unless show_action_labels
+    assign action_label_class = 'lame-account__label header-actions__action-label hidden'
+  endunless
+
   assign avatar_letter = ''
   if customer
     assign avatar_letter = customer.first_name | slice: 0, 1 | upcase
@@ -41,22 +56,30 @@
     type="button"
     ref="trigger"
     class="lame-account__trigger account-button"
-    aria-label="{{ 'content.account_title' | t }}"
+    aria-label="{{ account_label }}"
     aria-haspopup="menu"
     aria-expanded="false"
     aria-controls="{{ menu_id }}"
     on:click="/toggle"
   >
     <span class="lame-account__icon-wrap {% if display_style != 'icon' %}desktop:hidden{% endif %}" aria-hidden="true">
-      {% render 'lame-account-icon', size: 20, class: 'account-button__icon' %}
+      {% if section and section.settings.actions_account_icon != blank %}
+        {% render 'lame-header-action-icon',
+          icon_type: 'account',
+          custom_image: section.settings.actions_account_icon,
+          class: 'account-button__icon header-actions__icon-image'
+        %}
+      {% else %}
+        {% render 'lame-account-icon', size: 20, class: 'account-button__icon' %}
+      {% endif %}
     </span>
     {%- if customer -%}
       <span class="visually-hidden">{{ customer.first_name | default: customer.email }}</span>
     {%- endif -%}
     <span class="account-button__text header-actions__text-style {% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
-      {{ 'content.account_title' | t }}
+      {{ account_label }}
     </span>
-    <span class="lame-account__label header-actions__action-label mobile:hidden">{{ 'content.account_title' | t }}</span>
+    <span class="{{ action_label_class }}">{{ account_label }}</span>
   </button>
 
   <div

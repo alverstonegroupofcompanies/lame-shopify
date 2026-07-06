@@ -168,8 +168,9 @@
 
     document.querySelectorAll('[data-wishlist-header-count]').forEach((node) => {
       if (!(node instanceof HTMLElement)) return;
+      const hideBadges = node.closest('header-actions')?.hasAttribute('data-hide-count-badges');
       node.textContent = String(n);
-      node.hidden = n === 0;
+      node.hidden = hideBadges || n === 0;
     });
   }
 
