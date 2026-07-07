@@ -507,11 +507,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 @media screen and (min-width: 990px) {
-  #header-component.header--cosmetic-luxury .header__column--left .search-action {
-    flex: 1 1 auto;
-    min-width: min(12rem, 22vw);
-    max-width: min(20rem, 26vw);
-    margin-inline: 0;
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--left .search-action {
+    display: none !important;
   }
 }
 
@@ -2544,12 +2541,21 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     display: inline-flex !important;
   }
 
-  #header-component.header--cosmetic-luxury .search-action,
+  #header-component.header--cosmetic-luxury .search-action.search-action--hidden-on-menu,
   #header-component.header--cosmetic-luxury .search-action.search-action--hidden-on-drawer {
-    display: flex !important;
+    display: none !important;
   }
 
-  #header-component.header--cosmetic-luxury .lame-header-search-bar--trigger {
+  #header-component.header--cosmetic-luxury .lame-header-inline-search {
+    display: block;
+    width: 100%;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-bar--live {
+    display: inline-flex !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon {
     display: none !important;
   }
 }
@@ -3553,5 +3559,185 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
     mask: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER LAYOUT — single search, 3-column grid, readable UI
+   ═══════════════════════════════════════════════════════════════ */
+
+#header-component.header--cosmetic-luxury:not([data-show-wishlist='true']) .header-actions__wishlist {
+  display: none !important;
+}
+
+@media screen and (min-width: 750px) {
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__row--top .header__columns {
+    display: grid !important;
+    grid-template-columns: auto minmax(12rem, 1fr) auto;
+    grid-template-areas: 'left center right';
+    align-items: center;
+    gap: clamp(0.85rem, 2vw, 1.75rem);
+    padding-inline: clamp(0.85rem, 2vw, 1.75rem);
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--left {
+    grid-area: left;
+    flex: none;
+    min-width: 0;
+    max-width: none;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--center {
+    grid-area: center;
+    display: flex !important;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    max-width: min(34rem, 100%);
+    margin-inline: auto;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right {
+    grid-area: right;
+    flex: none;
+    justify-content: flex-end;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--left .search-action {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--center .search-action {
+    display: flex !important;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--left .header-logo {
+    max-width: min(10.5rem, 14vw);
+  }
+
+  #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
+    padding: 0.35rem 0.55rem;
+    font-size: clamp(0.7rem, 0.82vw, 0.78rem);
+    letter-spacing: 0.14em;
+    white-space: nowrap;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right header-actions {
+    margin-inline-start: 0;
+    padding-inline-start: 0.65rem;
+    border-inline-start: 1px solid rgb(var(--lame-nav-forest) / 0.12);
+  }
+}
+
+#header-component.header--cosmetic-luxury .lame-header-search-bar--live {
+  height: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 1rem 0 0.95rem;
+  border-width: 1px;
+  border-color: rgb(var(--lame-nav-forest) / 0.22);
+  background: rgb(255 255 255 / 0.62);
+  box-shadow: 0 1px 4px rgb(var(--lame-nav-forest) / 0.07);
+}
+
+#header-component.header--cosmetic-luxury .lame-header-search-bar--live:focus-within {
+  border-color: rgb(var(--lame-nav-forest) / 0.45);
+  background: #fff;
+  box-shadow: 0 4px 16px rgb(var(--lame-nav-forest) / 0.1);
+}
+
+#header-component.header--cosmetic-luxury .lame-header-search-bar__input {
+  font-size: 0.875rem;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-search-bar__input::placeholder {
+  font-size: 0.84rem;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-search-bar__reset {
+  width: 1.4rem;
+  height: 1.4rem;
+  min-width: 1.4rem;
+  min-height: 1.4rem;
+  padding: 0;
+  border-radius: 50%;
+  background: rgb(var(--lame-nav-forest) / 0.08);
+  color: rgb(var(--lame-nav-forest) / 0.75);
+}
+
+#header-component.header--cosmetic-luxury .lame-header-search-bar__reset .svg-wrapper {
+  width: 0.7rem;
+  height: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-inline-search__dropdown {
+  left: 0;
+  right: 0;
+  transform: none;
+  width: 100%;
+  min-width: 0;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-inline-search .predictive-search-form__content-wrapper {
+  border-radius: 0.75rem;
+  background: #fff;
+  border: 1px solid rgb(var(--lame-nav-forest) / 0.1);
+  box-shadow: 0 14px 40px rgb(var(--lame-nav-forest) / 0.14);
+}
+
+#header-component.header--cosmetic-luxury .lame-header-inline-search .predictive-search-form__content {
+  max-height: min(60vh, 28rem);
+}
+
+@media screen and (max-width: 989px) {
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__row--top .header__columns {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'left center right';
+    gap: 0.5rem;
+    padding-inline: 0.65rem;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--left :is(header-menu, .header-menu) {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--center {
+    display: flex !important;
+    justify-content: flex-end;
+    align-items: center;
+    max-width: none;
+    width: auto;
+    min-width: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--center .search-action {
+    display: flex !important;
+    width: auto;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-inline-search {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon {
+    display: inline-flex !important;
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border: 1px solid rgb(var(--lame-nav-forest) / 0.25);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.5);
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right header-actions {
+    border-inline-start: none;
+    padding-inline-start: 0;
   }
 }
