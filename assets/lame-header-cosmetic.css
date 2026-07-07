@@ -481,6 +481,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   display: flex;
   align-items: center;
   gap: clamp(0.45rem, 1vw, 0.65rem);
+  flex-shrink: 0;
 }
 
 #header-component.header--cosmetic-luxury .header-logo {
@@ -553,35 +554,71 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   }
 }
 
-#header-component.header--cosmetic-luxury .header-actions__action,
-#header-component.header--cosmetic-luxury .header__icon--menu {
-  width: 2.65rem;
-  height: 2.65rem;
-  min-width: 2.65rem;
-  min-height: 2.65rem;
-  padding: 0;
-  border-radius: 50%;
-  background: rgb(var(--lame-nav-forest) / 0.03);
-  border: 1.5px solid rgb(var(--lame-nav-forest) / 0.72);
-  box-shadow: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: visible;
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    transform 0.22s ease,
-    box-shadow 0.22s ease;
+#header-component.header--cosmetic-luxury {
+  --lame-header-action-width: 3.75rem;
+  --lame-header-action-icon-box: 1.65rem;
+  --lame-header-action-icon-inner: 1.35rem;
+  --lame-header-action-gap: 0.35rem;
+}
+
+@media screen and (max-width: 749px) {
+  #header-component.header--cosmetic-luxury .header-actions__action,
+  #header-component.header--cosmetic-luxury .header__icon--menu {
+    width: 2.65rem;
+    height: 2.65rem;
+    min-width: 2.65rem;
+    min-height: 2.65rem;
+    padding: 0;
+    border-radius: 50%;
+    background: rgb(var(--lame-nav-forest) / 0.03);
+    border: 1.5px solid rgb(var(--lame-nav-forest) / 0.72);
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: visible;
+    transition:
+      background 0.22s ease,
+      border-color 0.22s ease,
+      transform 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  #header-component.header--cosmetic-luxury .header-actions__action,
+  #header-component.header--cosmetic-luxury .header-actions__wishlist,
+  #header-component.header--cosmetic-luxury .header-actions__cart,
+  #header-component.header--cosmetic-luxury .lame-account.header-actions__action {
+    width: auto;
+    height: auto;
+    min-width: unset;
+    min-height: unset;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
 }
 
 #header-component.header--cosmetic-luxury .lame-account.header-actions__action,
 #header-component.header--cosmetic-luxury .lame-account .account-button,
 #header-component.header--cosmetic-luxury .header-actions__wishlist,
 #header-component.header--cosmetic-luxury .header-actions__cart {
-  background: rgb(var(--lame-nav-forest) / 0.03);
-  border-color: rgb(var(--lame-nav-forest) / 0.72);
+  background: transparent;
+  border-color: transparent;
+}
+
+@media screen and (max-width: 749px) {
+  #header-component.header--cosmetic-luxury .lame-account.header-actions__action,
+  #header-component.header--cosmetic-luxury .lame-account .account-button,
+  #header-component.header--cosmetic-luxury .header-actions__wishlist,
+  #header-component.header--cosmetic-luxury .header-actions__cart {
+    background: rgb(var(--lame-nav-forest) / 0.03);
+    border-color: rgb(var(--lame-nav-forest) / 0.72);
+  }
 }
 
 /* Drawer column + toggle */
@@ -2513,6 +2550,179 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   position: fixed;
 }
 
+@media screen and (min-width: 750px) {
+  /* Account · Wishlist · Cart — uniform icon slots, label below */
+  #header-component.header--cosmetic-luxury header-actions {
+    align-items: stretch;
+    gap: var(--lame-header-action-gap);
+    flex-wrap: nowrap;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__action, .account-button) {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    width: var(--lame-header-action-width);
+    min-width: var(--lame-header-action-width);
+    max-width: var(--lame-header-action-width);
+    height: auto;
+    min-height: auto;
+    padding: 0.1rem 0.2rem 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__action, .account-button) + :is(.lame-account, .header-actions__action, .account-button) {
+    border-inline-start: 1px solid rgb(var(--lame-nav-forest) / 0.14);
+    margin-inline-start: 0.1rem;
+    padding-inline-start: calc(var(--lame-header-action-gap) + 0.1rem);
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    min-height: auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    gap: 0.35rem;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action-label,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__label {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.15;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action .svg-wrapper,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper {
+    position: relative;
+    width: var(--lame-header-action-icon-box);
+    height: var(--lame-header-action-icon-box);
+    min-width: var(--lame-header-action-icon-box);
+    min-height: var(--lame-header-action-icon-box);
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: rgb(var(--lame-nav-forest));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action svg,
+  #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap svg,
+  #header-component.header--cosmetic-luxury header-actions .account-button__icon,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__icon-image,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper > svg {
+    width: var(--lame-header-action-icon-inner);
+    height: var(--lame-header-action-icon-inner);
+    flex-shrink: 0;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon > .svg-wrapper,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon > span.hidden {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
+    --cart-bubble-size: 16px;
+    --cart-bubble-top: -3px;
+    --cart-bubble-right: -5px;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper {
+    position: relative;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count {
+    --cart-bubble-size: 16px;
+    top: -3px;
+    right: -5px;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .lame-account__label,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__action-label {
+    font-family: var(--font-body--family, 'Inter', system-ui, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: rgb(var(--lame-nav-forest) / 0.88);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count {
+    background: var(--lame-header-wishlist-badge-bg, rgb(var(--lame-nav-forest)));
+    color: var(--lame-header-wishlist-badge-text, #fff);
+    border: 1.5px solid rgb(255 255 255);
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background {
+    background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-gold))) !important;
+    border: 1.5px solid rgb(255 255 255) !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text-count {
+    color: var(--lame-header-cart-badge-text, rgb(var(--lame-nav-forest))) !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--right .search-action {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--center .search-action {
+    display: flex;
+    width: 100%;
+    max-width: min(24rem, 46vw);
+    margin-inline: auto;
+    justify-content: center;
+  }
+
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .lame-header-search-bar {
+    min-width: min(14rem, 36vw);
+    max-width: min(24rem, 46vw);
+    width: 100%;
+  }
+}
+
 @media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury[data-search-position='center'] .header__row--top .header__columns {
     display: grid;
@@ -2551,218 +2761,26 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     display: none;
   }
 
-  /* Account · Wishlist · Cart — icon above label with dividers */
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action,
-  #header-component.header--cosmetic-luxury header-actions .lame-account.header-actions__action,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart {
-    width: auto;
-    height: auto;
-    min-width: unset;
-    min-height: unset;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions {
-    align-items: stretch;
-    gap: 0;
-    flex-wrap: nowrap;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__action, .account-button) {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3rem;
-    width: auto;
-    min-width: 4.25rem;
-    height: auto;
-    min-height: auto;
-    padding: 0.15rem clamp(0.85rem, 1.4vw, 1.15rem) 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    flex: 0 0 auto;
-    flex-shrink: 0;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__action, .account-button) + :is(.lame-account, .header-actions__action, .account-button) {
-    border-inline-start: 1px solid rgb(var(--lame-nav-forest) / 0.14);
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart {
-    flex-direction: column;
-    width: auto;
-    min-width: unset;
-    height: auto;
-    min-height: auto;
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    gap: 0.3rem;
-    box-shadow: none;
-    overflow: visible;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action:hover,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart:hover {
-    transform: none;
-    box-shadow: none;
-    background: transparent;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__avatar,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
-    position: relative;
-    width: 1.65rem;
-    height: 1.65rem;
-    min-width: 1.65rem;
-    min-height: 1.65rem;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    color: rgb(var(--lame-nav-forest));
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    box-shadow: none;
-    transition: color 0.2s ease;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__icon-wrap,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__avatar,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist:hover .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action:has(.header-actions__cart-icon):hover .header-actions__cart-icon,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart:hover .header-actions__cart-icon {
-    background: transparent;
-    color: rgb(var(--lame-nav-forest));
-    box-shadow: none;
-    transform: none;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action svg,
-  #header-component.header--cosmetic-luxury header-actions .lame-account__icon-wrap svg,
-  #header-component.header--cosmetic-luxury header-actions .account-button__icon,
-  #header-component.header--cosmetic-luxury header-actions cart-icon svg {
-    width: 1.35rem;
-    height: 1.35rem;
-    flex-shrink: 0;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .lame-account__avatar {
-    width: 1.65rem;
-    height: 1.65rem;
-    min-width: 1.65rem;
-    min-height: 1.65rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    color: rgb(var(--lame-nav-forest));
-    background: transparent;
-    border: none;
-    border-radius: 0;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: none;
-    background: transparent;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper > svg {
-    width: 1.35rem;
-    height: 1.35rem;
-    flex-shrink: 0;
-    color: rgb(var(--lame-nav-forest));
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon > .svg-wrapper,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart .header-actions__cart-icon > span.hidden {
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--right .search-action {
     display: none !important;
   }
 
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon {
-    --cart-bubble-size: 16px;
-    --cart-bubble-top: -3px;
-    --cart-bubble-right: -5px;
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist .svg-wrapper {
-    position: relative;
+  #header-component.header--cosmetic-luxury[data-search-position='center'] .lame-header-search-bar {
+    min-width: min(16rem, 38vw);
+    max-width: min(26rem, 50vw);
+    width: 100%;
   }
 
-  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count {
-    --cart-bubble-size: 16px;
-    top: -3px;
-    right: -5px;
-    background: var(--lame-header-wishlist-badge-bg, rgb(var(--lame-nav-forest)));
-    color: var(--lame-header-wishlist-badge-text, #fff);
-    border: 1.5px solid rgb(255 255 255);
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble {
-    --cart-bubble-top: -3px;
-    --cart-bubble-right: -5px;
-    border: none;
-    animation: lame-cart-pulse 0.35s ease;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background {
-    background: var(--lame-header-cart-badge-bg, rgb(var(--lame-nav-forest))) !important;
-    border: 1.5px solid rgb(255 255 255) !important;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__text {
-    color: var(--lame-header-cart-badge-text, #fff) !important;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
-    mask: none;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .lame-account__label,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__action-label {
-    font-family: var(--font-body--family, 'Inter', system-ui, sans-serif);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: none;
-    color: rgb(var(--lame-nav-forest) / 0.88);
-    line-height: 1.15;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  #header-component.header--cosmetic-luxury header-actions .lame-account__trigger:hover .lame-account__label,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist:hover .header-actions__action-label,
-  #header-component.header--cosmetic-luxury header-actions .header-actions__cart:hover .header-actions__action-label {
-    color: rgb(var(--lame-nav-forest));
+  #header-component.header--cosmetic-luxury[data-menu-row='top'][data-search-position='center'] .header__column--center .search-action {
+    width: 100%;
+    max-width: min(26rem, 50vw);
+    margin-inline: auto;
   }
 }
 
@@ -3046,18 +3064,29 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     justify-content: center;
   }
 
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--right {
+  #header-component.header--cosmetic-luxury .header__column--right {
     grid-area: right;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: clamp(0.65rem, 1.2vw, 1rem);
+    gap: var(--lame-header-action-gap);
+    flex-shrink: 0;
     padding-inline-end: clamp(0.35rem, 1.2vw, 0.85rem);
   }
 
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--right .search-action {
     margin-inline: 0;
     flex-shrink: 0;
+  }
+
+  #header-component.header--cosmetic-luxury[data-menu-row='top'][data-search-position='center'] .header__column--right .search-action {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-menu-row='top'][data-search-position='center'] .header__column--center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--right header-actions {
@@ -3091,7 +3120,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 }
 
 @media screen and (max-width: 989px) {
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--center {
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--center:not(:has(.search-action)) {
     display: none;
   }
 }
