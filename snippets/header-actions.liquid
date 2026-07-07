@@ -113,7 +113,51 @@
   unless show_action_labels
     assign action_label_class = 'header-actions__action-label hidden'
   endunless
+
+  assign show_header_cart_drawer = false
+  if show_header_cart and settings.cart_type == 'drawer' and template.name != 'cart'
+    assign show_header_cart_drawer = true
+  endif
 %}
+
+{% if show_header_cart_drawer %}
+  <script
+    src="{{ 'cart-drawer.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+
+  {% capture empty_cart_drawer_content %}
+    <div class="cart-drawer__header">
+      <button
+        ref="closeButton"
+        on:click="cart-drawer-component/close"
+        class="button close-button cart-drawer__close-button button-unstyled"
+        aria-label="{{ 'actions.close_dialog' | t }}"
+      >
+        <span class="svg-wrapper">
+          {{- 'icon-close.svg' | inline_asset_content -}}
+        </span>
+      </button>
+    </div>
+
+    <div
+      class="cart-drawer__content"
+      aria-label="{{ 'accessibility.cart' | t }}"
+    >
+      <h2
+        class="cart-drawer__heading h4 cart-drawer__heading--empty"
+        id="cart-drawer-heading-empty"
+      >
+        {{ 'content.your_cart_is_empty' | t }}
+      </h2>
+
+      <div class="cart-drawer__items">
+        {% render 'cart-products', force_empty: true %}
+      </div>
+    </div>
+  {% endcapture %}
+{% endif %}
 
 <header-actions
   {% if display_style == 'text' %}
@@ -152,7 +196,7 @@
       {% render 'lame-account-button', section: section, display_style: display_style %}
     {% else %}
     <div
-      class="account-button header-actions__action{% if display_style == 'text' %} account-button--text{% endif %} color-{{ settings.popover_color_scheme }}"
+      class="account-button header-actions__action header-actions__slot{% if display_style == 'text' %} account-button--text{% endif %} color-{{ settings.popover_color_scheme }}"
     >
       <shopify-account
         menu="{{ customer_account_menu }}"
@@ -186,7 +230,7 @@
   {% if show_header_wishlist %}
     <button
       type="button"
-      class="header-actions__action header-actions__wishlist lame-header-wishlist-btn"
+      class="header-actions__action header-actions__slot header-actions__wishlist lame-header-wishlist-btn"
       aria-label="{{ wishlist_label }}"
       data-lame-wishlist-open
       {% if section %}
@@ -209,47 +253,10 @@
     </button>
   {% endif %}
 
-  {% if show_header_cart and settings.cart_type == 'drawer' and template.name != 'cart' %}
-    <script
-      src="{{ 'cart-drawer.js' | asset_url }}"
-      type="module"
-      fetchpriority="low"
-    ></script>
-
-    {% capture empty_cart_drawer_content %}
-      <div class="cart-drawer__header">
-        <button
-          ref="closeButton"
-          on:click="cart-drawer-component/close"
-          class="button close-button cart-drawer__close-button button-unstyled"
-          aria-label="{{ 'actions.close_dialog' | t }}"
-        >
-          <span class="svg-wrapper">
-            {{- 'icon-close.svg' | inline_asset_content -}}
-          </span>
-        </button>
-      </div>
-
-      <div
-        class="cart-drawer__content"
-        aria-label="{{ 'accessibility.cart' | t }}"
-      >
-        <h2
-          class="cart-drawer__heading h4 cart-drawer__heading--empty"
-          id="cart-drawer-heading-empty"
-        >
-          {{ 'content.your_cart_is_empty' | t }}
-        </h2>
-
-        <div class="cart-drawer__items">
-          {% render 'cart-products', force_empty: true %}
-        </div>
-      </div>
-    {% endcapture %}
-
+  {% if show_header_cart_drawer %}
     <button
       type="button"
-      class="header-actions__action header-actions__cart lame-header-cart-btn{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      class="header-actions__action header-actions__slot header-actions__cart lame-header-cart-btn{% if display_style == 'text' %} header-actions__text-style{% endif %}"
       on:click="#header-cart-drawer/open"
       aria-haspopup="dialog"
       aria-label="{{ cart_label }}"
@@ -292,7 +299,7 @@
   {% elsif show_header_cart %}
     <a
       href="{{ routes.cart_url }}"
-      class="header-actions__action action__cart header-actions__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
+      class="header-actions__action header-actions__slot action__cart header-actions__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
       aria-label="{{ cart_label }}"
       aria-describedby="cart-bubble-text"
     >
@@ -308,7 +315,7 @@
   ></span>
 </header-actions>
 
-{% if show_header_cart and settings.cart_type == 'drawer' and template.name != 'cart' %}
+{% if show_header_cart_drawer %}
     <cart-drawer-component
       id="header-cart-drawer"
       class="cart-drawer{% if display_style == 'text' %} cart-drawer--text{% endif %}"
