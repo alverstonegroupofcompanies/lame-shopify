@@ -81,6 +81,12 @@
     else
       assign order = 'logo,menu,search,localization,drawer_search,actions'
     endif
+  elsif section.settings.search_position == 'left'
+    if shop.customer_accounts_enabled
+      assign order = 'drawer_search,logo,menu,search,localization,actions'
+    else
+      assign order = 'logo,menu,search,localization,drawer_search,actions'
+    endif
   elsif section.settings.localization_position == 'left'
     if section.settings.search_position == 'left'
       if shop.customer_accounts_enabled
@@ -1748,7 +1754,7 @@
       "type": "checkbox",
       "id": "header_show_wishlist",
       "label": "Show wishlist",
-      "default": true
+      "default": false
     },
     {
       "type": "checkbox",

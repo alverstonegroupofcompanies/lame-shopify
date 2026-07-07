@@ -1,0 +1,81 @@
+{%- doc -%}
+  Inline predictive search for the cosmetic header bar (desktop).
+  Uses the same predictive search section as the modal — no duplicate search UI.
+{%- enddoc -%}
+
+<script
+  src="{{ 'predictive-search.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+<predictive-search-component
+  class="predictive-search lame-header-inline-search color-{{ settings.popover_color_scheme }}"
+  style="--product-corner-radius: {{ settings.product_corner_radius | default: 8 | append: 'px' }}; --card-corner-radius: {{ settings.card_corner_radius | default: 8 | append: 'px' }};{% if settings.card_title_case == 'uppercase' %} --title-case: uppercase;{% endif %}"
+  data-section-id="predictive-search"
+  data-testid="search-component--header-inline"
+  role="search"
+  aria-label="{{ 'content.search_input_label' | t }}"
+>
+  <form
+    action="{{ routes.search_url }}"
+    method="get"
+    role="search"
+    class="predictive-search-form lame-header-inline-search__form"
+    ref="form"
+    on:keydown="/onSearchKeyDown"
+  >
+    <div class="lame-header-inline-search__bar predictive-search-form__header">
+      <div class="lame-header-search-bar lame-header-search-bar--live predictive-search-form__header-inner">
+        <span class="lame-header-search-bar__icon svg-wrapper" aria-hidden="true">
+          {{ 'icon-search.svg' | inline_asset_content }}
+        </span>
+        <label class="visually-hidden" for="header-inline-search-input">
+          {{- 'content.search_input_label' | t -}}
+        </label>
+        <input
+          class="search-input lame-header-search-bar__input"
+          id="header-inline-search-input"
+          type="search"
+          name="q"
+          role="combobox"
+          aria-expanded="false"
+          aria-owns="predictive-search-results-header-inline"
+          aria-controls="predictive-search-results-header-inline"
+          aria-haspopup="listbox"
+          aria-autocomplete="list"
+          autocomplete="off"
+          placeholder="{{ 'lame_search.placeholder' | t }}"
+          ref="searchInput"
+          on:input="/search"
+          on:keydown="/onSearchKeyDown"
+        >
+        <input name="options[prefix]" type="hidden" value="last">
+        <button
+          type="button"
+          class="button-unstyled predictive-search__reset-button lame-header-search-bar__reset"
+          ref="resetButton"
+          hidden
+          on:click="/resetSearch"
+          aria-label="{{ 'actions.clear' | t }}"
+        >
+          {{ 'actions.clear' | t }}
+        </button>
+      </div>
+    </div>
+
+    <div class="predictive-search-form__content-wrapper lame-header-inline-search__dropdown">
+      <div
+        class="predictive-search-form__content"
+        ref="predictiveSearchResults"
+        id="predictive-search-results-header-inline"
+      >
+        {% render 'predictive-search-empty-state',
+          load_empty_state: true,
+          shadow_opacity: 0.1,
+          products_test_id: 'products-list-default--header-inline'
+        %}
+      </div>
+    </div>
+  </form>
+</predictive-search-component>
