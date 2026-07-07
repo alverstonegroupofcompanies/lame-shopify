@@ -126,7 +126,12 @@
             {% endif %}
             ref="menuitem"
           >
-            <span class="menu-list__link-title">{{- menu_link_title -}}</span>
+            {% render 'lame-header-menu-link-content',
+              link: link,
+              section: section,
+              menu_block: block,
+              menu_link_title: menu_link_title
+            %}
           </a>
           {%- if link.links != blank -%}
             <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">
@@ -1085,6 +1090,34 @@
       "type": "url",
       "id": "drawer_custom_url",
       "label": "t:settings.custom_link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu_link",
+      "name": "Menu link",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Match a link from your navigation menu by its title or handle (e.g. Shop, home, contact)."
+        },
+        {
+          "type": "text",
+          "id": "link_match",
+          "label": "Link title or handle"
+        },
+        {
+          "type": "text",
+          "id": "custom_label",
+          "label": "Custom label",
+          "info": "Leave blank to use the navigation link title."
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        }
+      ]
     }
   ]
 }

@@ -70,9 +70,7 @@
     render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section
   endcapture
 
-  if shop.customer_accounts_enabled
-    assign search_class = 'search-action--hidden-on-drawer'
-  endif
+  assign search_class = ''
 
   # Handle localization and search positioning
   if section.settings.search_position == 'center'
@@ -1735,6 +1733,27 @@
       ],
       "default": "none",
       "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
+    },
+    {
+      "type": "header",
+      "content": "Navigation menu (desktop)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Menu links come from Online store → Navigation. Add Menu link blocks under the Menu block to set custom icons and labels per link."
+    },
+    {
+      "type": "checkbox",
+      "id": "menu_show_labels",
+      "label": "Show menu labels",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "menu_show_icons",
+      "label": "Show menu icons",
+      "default": false,
+      "info": "Upload icons per link in Menu → Add block → Menu link."
     },
     {
       "type": "header",

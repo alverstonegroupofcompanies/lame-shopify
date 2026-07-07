@@ -1,0 +1,74 @@
+{%- doc -%}
+  Renders a header menu link label and optional icon from theme editor overrides.
+
+  @param {link} link - Shopify navigation link object
+  @param {object} section - Header section
+  @param {object} menu_block - Header menu block (for child block overrides)
+  @param {string} [menu_link_title] - Pre-resolved link title
+{%- enddoc -%}
+
+{%- liquid
+  assign display_title = menu_link_title | default: link.title
+  assign display_title_down = display_title | downcase
+  if display_title_down == 'our products'
+    assign display_title = 'Shop'
+  endif
+
+  assign menu_icon = blank
+  assign custom_label = blank
+
+  if menu_block and menu_block.blocks.size > 0
+    for child_block in menu_block.blocks
+      if child_block.type == 'menu_link'
+        assign match_value = child_block.settings.link_match | downcase | strip
+        assign link_title_down = link.title | downcase | strip
+        assign link_handle_down = link.handle | downcase | strip
+        if match_value != blank
+          if match_value == link_title_down or match_value == link_handle_down
+            assign menu_icon = child_block.settings.icon
+            if child_block.settings.custom_label != blank
+              assign custom_label = child_block.settings.custom_label
+            endif
+          endif
+        endif
+      endif
+    endfor
+  endif
+
+  if custom_label != blank
+    assign display_title = custom_label
+  endif
+
+  assign show_menu_labels = true
+  if section and section.settings.menu_show_labels == false
+    assign show_menu_labels = false
+  endif
+
+  assign show_menu_icons = false
+  if section and section.settings.menu_show_icons
+    assign show_menu_icons = true
+  endif
+-%}
+
+{%- if show_menu_icons and menu_icon != blank -%}
+  <span class="menu-list__link-icon" aria-hidden="true">
+    {{
+      menu_icon
+      | image_url: width: 64
+      | image_tag:
+        class: 'menu-list__link-icon-image',
+        widths: '32,64',
+        sizes: '20px',
+        loading: 'eager',
+        width: 20,
+        height: 20,
+        alt: ''
+    }}
+  </span>
+{%- endif -%}
+
+{%- if show_menu_labels -%}
+  <span class="menu-list__link-title">{{ display_title }}</span>
+{%- elsif show_menu_icons == false or menu_icon == blank -%}
+  <span class="menu-list__link-title visually-hidden">{{ display_title }}</span>
+{%- endif -%}
