@@ -1,5 +1,9 @@
 {%- doc -%}
-  Renders the search action button.
+  Renders the header search bar.
+
+  A single, valid search control: a pill-styled trigger on desktop and an icon
+  button on mobile. Both open the shared #search-modal (the only predictive
+  search component on the page), so there is no duplicate search markup.
 
   @param {string} [style] - The style of the search action.
   @param {string} [class] - Additional classes for the search action.
@@ -10,7 +14,18 @@
   <search-button
     class="search-action{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
   >
-    {% render 'lame-header-inline-search' %}
+    <button
+      type="button"
+      on:click="#search-modal/showDialog"
+      class="lame-header-search-bar lame-header-search-bar--trigger button-unstyled"
+      aria-label="{{ 'content.search_input_label' | t }}"
+      aria-haspopup="dialog"
+    >
+      <span class="lame-header-search-bar__icon svg-wrapper" aria-hidden="true">
+        {{ 'icon-search.svg' | inline_asset_content }}
+      </span>
+      <span class="lame-header-search-bar__label">{{ 'lame_search.placeholder' | t | default: 'Search' }}</span>
+    </button>
 
     <button
       type="button"
