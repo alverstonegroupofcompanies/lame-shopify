@@ -163,6 +163,9 @@
   {% if display_style == 'text' %}
     class="header-actions--text"
   {% endif %}
+  {% if show_action_labels %}
+    data-actions-labels="true"
+  {% endif %}
   {% unless show_count_badges %}
     data-hide-count-badges="true"
   {% endunless %}
@@ -241,7 +244,8 @@
         {% render 'lame-header-action-icon',
           icon_type: 'wishlist',
           custom_image: wishlist_icon_image,
-          class: 'header-actions__icon-image'
+          class: 'header-actions__icon-image',
+          size: 22
         %}
         <span
           class="header-actions__wishlist-count header-actions__count-badge"
@@ -268,15 +272,12 @@
       {{ block.shopify_attributes }}
     >
       <span class="svg-wrapper" aria-hidden="true">
-        {% if cart_icon_image != blank %}
-          {% render 'lame-header-action-icon',
-            icon_type: 'cart',
-            custom_image: cart_icon_image,
-            class: 'header-actions__icon-image'
-          %}
-        {% elsif display_style == 'icon' %}
-          {{ 'icon-cart.svg' | inline_asset_content }}
-        {% endif %}
+        {% render 'lame-header-action-icon',
+          icon_type: 'cart',
+          custom_image: cart_icon_image,
+          class: 'header-actions__icon-image',
+          size: 22
+        %}
         <cart-icon
           class="header-actions__cart-icon{% if display_style == 'text' %} header-actions__cart-icon--text{% endif %}{% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}"
           data-testid="cart-icon"
