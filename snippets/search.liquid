@@ -1,9 +1,8 @@
 {%- doc -%}
-  Renders the header search bar.
+  Renders the header search control.
 
-  A single, valid search control: a pill-styled trigger on desktop and an icon
-  button on mobile. Both open the shared #search-modal (the only predictive
-  search component on the page), so there is no duplicate search markup.
+  Single magnifying-glass icon that opens the shared #search-modal.
+  No duplicate pill bar — one button, one modal.
 
   @param {string} [style] - The style of the search action.
   @param {string} [class] - Additional classes for the search action.
@@ -12,21 +11,8 @@
 
 {% unless style == 'none' %}
   <search-button
-    class="search-action{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
+    class="search-action search-action--icon{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
   >
-    <button
-      type="button"
-      on:click="#search-modal/showDialog"
-      class="lame-header-search-bar lame-header-search-bar--trigger button-unstyled"
-      aria-label="{{ 'content.search_input_label' | t }}"
-      aria-haspopup="dialog"
-    >
-      <span class="lame-header-search-bar__icon svg-wrapper" aria-hidden="true">
-        {{ 'icon-search.svg' | inline_asset_content }}
-      </span>
-      <span class="lame-header-search-bar__label">{{ 'lame_search.placeholder' | t | default: 'Search' }}</span>
-    </button>
-
     <button
       type="button"
       on:click="#search-modal/showDialog"
@@ -42,28 +28,25 @@
 {% endunless %}
 
 {% stylesheet %}
+  search-button.search-action {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
   .search-action {
     --search-border-radius: var(--style-border-radius-inputs);
     --search-border-width: var(--style-border-width-inputs);
 
-    display: flex;
+    display: inline-flex;
     align-items: center;
     position: relative;
-    width: 100%;
+    width: auto;
     min-width: 0;
   }
 
-  @media screen and (max-width: 749px) {
-    .search-action {
-      width: auto;
-      justify-content: center;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    .search-action--hidden-on-drawer {
-      display: none;
-    }
+  .search-action--hidden-on-drawer {
+    display: none;
   }
 
   @media screen and (min-width: 750px) {
