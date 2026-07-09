@@ -268,11 +268,11 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
 }
 
 #header-component.header--cosmetic-luxury {
-  --header-luxury-min-height: 4.75rem;
+  --header-luxury-min-height: 5.75rem;
   --header-luxury-icon-ring: 2.25rem;
   --header-luxury-icon-glyph: 1.2rem;
-  --header-luxury-logo-max-w: min(14rem, 18vw);
-  --header-luxury-logo-max-h: clamp(3.5rem, 5.5vw, 5rem);
+  --header-luxury-logo-max-w: min(17rem, 22vw);
+  --header-luxury-logo-max-h: clamp(4.25rem, 6.5vw, 6rem);
   --lame-mobile-menu-z: 100000;
 
   /* Reference navbar — white minimal + gold accent */
@@ -699,7 +699,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   height: 100%;
 }
 
-/* Header toggle: hamburger only; hide when drawer is open (close is in drawer header) */
+/* Header toggle: keep hamburger tappable for open/close */
 #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon--open {
   display: flex;
   align-items: center;
@@ -710,18 +710,9 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury .menu-drawer-container.menu-open > .header__icon--summary.header__icon--menu {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 #header-component.header--cosmetic-luxury .header__icon--menu .svg-wrapper {
@@ -971,12 +962,12 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 /* Header height tokens */
 body:has(#header-component.header--cosmetic-luxury) {
-  --header-height: 4.75rem;
+  --header-height: 5.75rem;
 }
 
 @media screen and (min-width: 750px) {
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 4.85rem;
+    --header-height: 5.9rem;
   }
 
   #header-group .announcement-bar--luxury {
@@ -986,9 +977,9 @@ body:has(#header-component.header--cosmetic-luxury) {
 
 @media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury {
-    --header-luxury-min-height: 4.75rem;
-    --header-luxury-logo-max-w: min(15rem, 18vw);
-    --header-luxury-logo-max-h: clamp(3.75rem, 5.5vw, 5rem);
+    --header-luxury-min-height: 6rem;
+    --header-luxury-logo-max-w: min(18rem, 22vw);
+    --header-luxury-logo-max-h: clamp(4.5rem, 6.8vw, 6.25rem);
   }
 
   #header-component.header--cosmetic-luxury .header__columns {
@@ -1017,9 +1008,9 @@ body:has(#header-component.header--cosmetic-luxury) {
     --header-mobile-icon-size: 2.125rem;
     --header-mobile-icon-inner: 1.0625rem;
     --header-mobile-icon-gap: 0.5rem;
-    --header-luxury-min-height: 4.25rem;
-    --header-luxury-logo-max-w: min(13.5rem, 54vw);
-    --header-luxury-logo-max-h: clamp(3.5rem, 14vw, 4.5rem);
+    --header-luxury-min-height: 4.85rem;
+    --header-luxury-logo-max-w: min(15.5rem, 62vw);
+    --header-luxury-logo-max-h: clamp(3.9rem, 16vw, 5.2rem);
   }
 
   #header-component.header--cosmetic-luxury .header__row--top {
@@ -1030,7 +1021,7 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 4.25rem;
+    --header-height: 4.85rem;
   }
 
   #header-component.header--cosmetic-luxury .header__row--top .header__columns {
@@ -3806,10 +3797,10 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    min-width: 2.25rem;
-    min-height: 2.25rem;
+    width: auto;
+    height: auto;
+    min-width: unset;
+    min-height: unset;
     padding: 0;
     border: none;
     border-radius: 0;
@@ -3869,4 +3860,92 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
 #header-component.header--cosmetic-luxury[data-search-position='center'] .header__column--center .search-action {
   display: inline-flex !important;
+}
+
+/* Mobile header + drawer polish */
+@media screen and (max-width: 749px) {
+  #header-component.header--cosmetic-luxury .header__row--top .header__columns {
+    position: relative;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'left center right';
+    align-items: center;
+    min-height: 4.25rem;
+    padding-inline: 0.8rem;
+    column-gap: 0.5rem;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--left {
+    grid-area: left;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  /* Keep drawer trigger visible, hide desktop nav only */
+  #header-component.header--cosmetic-luxury .header__column--left .header-menu {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--left .header__drawer {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  /* Center logo regardless of right icon count */
+  #header-component.header--cosmetic-luxury .header-logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    max-width: min(10.5rem, 52vw);
+    margin: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--center {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right {
+    grid-area: right;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.3rem;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right .search-action {
+    display: inline-flex !important;
+  }
+}
+
+/* Side menu open behavior */
+body > .menu-drawer.menu-drawer--luxury.menu-drawer--portaled {
+  width: min(86vw, 360px);
+  max-width: 360px;
+  border-inline-end: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: 14px 0 36px rgb(0 0 0 / 0.16);
+}
+
+body > .menu-drawer__backdrop.menu-drawer__backdrop--portaled.menu-drawer__backdrop--open {
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  background: rgb(16 16 16 / 0.35);
+}
+
+.menu-drawer.menu-drawer--luxury .menu-drawer__header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.menu-drawer.menu-drawer--luxury .menu-drawer__close-button--header {
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
