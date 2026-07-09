@@ -176,13 +176,27 @@
           {% if should_show_pane %}
             {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering %}
               {% liquid
+                assign filters_head_active_count = 0
+                for filter in filters
+                  case filter.type
+                    when 'price_range'
+                      if filter.min_value.value != null or filter.max_value.value != null
+                        assign filters_head_active_count = filters_head_active_count | plus: 1
+                      endif
+                    else
+                      unless lame_our_products_active and filter.param_name == 'filter.p.vendor'
+                        assign filters_head_active_count = filters_head_active_count | plus: filter.active_values.size
+                      endunless
+                  endcase
+                endfor
+
                 assign filters_head_active = false
-                if total_active_values > 0
+                if filters_head_active_count > 0
                   assign filters_head_active = true
                 endif
               %}
               {% render 'lame-collection-filters-panel-head',
-                active_count: total_active_values,
+                active_count: filters_head_active_count,
                 show_clear_all: lame_our_products_active,
                 results_url: results_url,
                 section_id: section.id,
