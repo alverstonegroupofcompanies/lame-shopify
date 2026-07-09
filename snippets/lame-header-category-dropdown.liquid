@@ -2,7 +2,15 @@
   Shop by category dropdown for the header nav row.
   @param {object} menu - Main navigation linklist
   @param {object} section - Header section
+  @param {string} [label] - Button label (defaults to translation)
 {%- enddoc -%}
+
+{%- liquid
+  assign category_label = label
+  if category_label == blank
+    assign category_label = 'lame_search.shop_by_category' | t
+  endif
+-%}
 
 {%- liquid
   assign shop_nav_link = blank
@@ -40,7 +48,7 @@
         <rect x="11.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
       </svg>
     </span>
-    <span class="lame-header-shop-category-btn__text">{{ 'lame_search.shop_by_category' | t }}</span>
+    <span class="lame-header-shop-category-btn__text">{{ category_label }}</span>
     <span class="lame-header-shop-category-btn__caret" aria-hidden="true">▾</span>
   </button>
 

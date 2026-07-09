@@ -1,0 +1,75 @@
+{%- doc -%}
+  Primary header nav: Home, Shop, and Category dropdown.
+  @param {object} menu - Main navigation linklist
+  @param {object} section - Header section
+{%- enddoc -%}
+
+{%- liquid
+  assign home_link = blank
+  assign shop_link = blank
+
+  for link in menu.links
+    assign link_down = link.title | downcase | strip
+    if link_down == 'home'
+      assign home_link = link
+    elsif link_down == 'shop' or link_down == 'our products'
+      assign shop_link = link
+    endif
+  endfor
+
+  if home_link == blank
+    assign home_url = routes.root_url
+    assign home_active = false
+    if request.page_type == 'index'
+      assign home_active = true
+    endif
+  else
+    assign home_url = home_link.url
+    assign home_active = home_link.active
+  endif
+
+  if shop_link != blank
+    assign shop_url = shop_link.url
+    assign shop_active = shop_link.active
+  else
+    assign shop_url = routes.collections_url
+    assign shop_active = false
+  endif
+-%}
+
+<nav
+  class="menu-list lame-header-primary-nav"
+  aria-label="{{ 'accessibility.header_navigation_label' | t }}"
+>
+  <div class="lame-header-primary-nav__inner">
+    <ul class="menu-list__list list-unstyled lame-header-primary-nav__list" role="list">
+      <li class="menu-list__list-item" role="presentation">
+        <a
+          href="{{ home_url }}"
+          class="menu-list__link{% if home_active %} menu-list__link--active{% endif %}"
+          {% if home_active %}
+            aria-current="page"
+          {% endif %}
+        >
+          <span class="menu-list__link-title">Home</span>
+        </a>
+      </li>
+      <li class="menu-list__list-item" role="presentation">
+        <a
+          href="{{ shop_url }}"
+          class="menu-list__link{% if shop_active %} menu-list__link--active{% endif %}"
+          {% if shop_active %}
+            aria-current="page"
+          {% endif %}
+        >
+          <span class="menu-list__link-title">Shop</span>
+        </a>
+      </li>
+    </ul>
+    {% render 'lame-header-category-dropdown',
+      menu: menu,
+      section: section,
+      label: 'Category'
+    %}
+  </div>
+</nav>

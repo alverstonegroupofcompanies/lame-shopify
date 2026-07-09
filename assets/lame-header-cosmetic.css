@@ -268,11 +268,11 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
 }
 
 #header-component.header--cosmetic-luxury {
-  --header-luxury-min-height: 4.75rem;
+  --header-luxury-min-height: 9.5rem;
   --header-luxury-icon-ring: 2.65rem;
   --header-luxury-icon-glyph: 1.35rem;
-  --header-luxury-logo-max-w: min(14rem, 18vw);
-  --header-luxury-logo-max-h: clamp(4.25rem, 6.5vw, 5.75rem);
+  --header-luxury-logo-max-w: min(22rem, 28vw);
+  --header-luxury-logo-max-h: clamp(5.5rem, 9vw, 8rem);
   --lame-mobile-menu-z: 100000;
 
   /* Branded navbar palette — sage green + warm cream + gold accent */
@@ -326,6 +326,48 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 #header-component.header--cosmetic-luxury .header__row--top .header__columns {
   overflow: visible;
+}
+
+#header-component.header--cosmetic-luxury .header__row--utility {
+  display: none !important;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-primary-nav__inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.35rem, 0.8vw, 0.65rem);
+  flex-wrap: nowrap;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-primary-nav__list {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.35rem, 0.8vw, 0.65rem);
+  margin: 0;
+  padding: 0;
+}
+
+#header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-header-primary-nav .lame-header-shop-category-btn {
+  min-height: auto;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0;
+  background: transparent;
+  color: rgb(var(--lame-nav-forest));
+  font-family: var(--lame-lux-font-display, 'Playfair Display', Georgia, serif);
+  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-header-primary-nav .lame-header-shop-category-btn:hover,
+#header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-header-primary-nav .lame-header-shop-category-btn:focus-visible {
+  background: transparent;
+  color: rgb(var(--lame-nav-gold));
+}
+
+#header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-header-primary-nav .lame-header-shop-category-btn__icon {
+  display: none;
 }
 
 #header-component.header--cosmetic-luxury .header__icon--summary,
@@ -444,7 +486,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 #header-component.header--cosmetic-luxury .header__columns {
   min-height: var(--header-luxury-min-height);
-  padding-block: 0.55rem;
+  padding-block: 0.85rem;
   gap: clamp(0.5rem, 1.8vw, 1.35rem);
   max-width: var(--page-width);
   margin-inline: auto;
@@ -950,8 +992,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 /* Sticky header: subtle shrink */
 #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-  min-height: 4.25rem;
-  padding-block: 0.4rem;
+  min-height: 7rem;
+  padding-block: 0.55rem;
   transition:
     min-height 0.35s ease,
     padding 0.35s ease;
@@ -959,12 +1001,12 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 /* Header height tokens */
 body:has(#header-component.header--cosmetic-luxury) {
-  --header-height: 4.25rem;
+  --header-height: 7.5rem;
 }
 
 @media screen and (min-width: 750px) {
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 4.85rem;
+    --header-height: 9.75rem;
   }
 
   #header-group .announcement-bar--luxury {
@@ -974,20 +1016,28 @@ body:has(#header-component.header--cosmetic-luxury) {
 
 @media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury {
-    --header-luxury-min-height: 5rem;
+    --header-luxury-min-height: 9.5rem;
+    --header-luxury-logo-max-w: min(24rem, 30vw);
+    --header-luxury-logo-max-h: clamp(6rem, 9.5vw, 8.5rem);
   }
 
   #header-component.header--cosmetic-luxury .header__columns {
-    min-height: 5rem;
-    padding-block: 0.6rem;
+    min-height: var(--header-luxury-min-height);
+    padding-block: 0.85rem;
   }
 
   #header-component.header--cosmetic-luxury .header-logo {
-    max-width: 14rem;
+    max-width: var(--header-luxury-logo-max-w);
   }
 
   #header-component.header--cosmetic-luxury .header-logo__image {
-    max-height: 5.75rem;
+    max-height: var(--header-luxury-logo-max-h);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  #header-component.header--cosmetic-luxury .lame-header-primary-nav {
+    display: none !important;
   }
 }
 
@@ -3589,6 +3639,35 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     grid-area: right;
     flex: none;
     justify-content: flex-end;
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--center {
+    justify-content: center;
+    max-width: none;
+    width: 100%;
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--center .header-logo {
+    max-width: var(--header-luxury-logo-max-w);
+    margin-inline: auto;
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--center .search-action,
+  #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--center header-menu {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='center'][data-search-position='right'] .header__column--right .search-action {
+    display: flex !important;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: min(18rem, 28vw);
+    margin-inline-end: 0.5rem;
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='center'][data-search-position='right'] .header__column--right {
+    flex-wrap: nowrap;
+    gap: clamp(0.5rem, 1vw, 0.85rem);
   }
 
   #header-component.header--cosmetic-luxury .header__column--left .search-action {

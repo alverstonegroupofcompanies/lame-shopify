@@ -89,6 +89,24 @@
       endif
     %}
 
+    {% if section.settings.menu_row == 'top' %}
+      <header-menu
+        ref="headerMenu"
+        class="header-menu"
+        {{ block.shopify_attributes }}
+        data-hydration-key="header-menu"
+      >
+        <div class="header-menu__inner">
+          {% render 'lame-header-primary-nav', menu: block_settings.menu, section: section %}
+        </div>
+
+        <script
+          src="{{ 'header-menu.js' | asset_url }}"
+          type="module"
+          fetchpriority="low"
+        ></script>
+      </header-menu>
+    {% else %}
     {% capture children %}
       {% for link in block_settings.menu.links %}
         {% liquid
@@ -220,6 +238,7 @@
         fetchpriority="low"
       ></script>
     </header-menu>
+    {% endif %}
 {% endcase %}
 
 {% style %}

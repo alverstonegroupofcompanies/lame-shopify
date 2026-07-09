@@ -3,6 +3,10 @@
 {% liquid
   assign order = 'logo,menu,search,localization,actions'
 
+  if section.settings.logo_position == 'center'
+    assign order = 'menu,logo,search,localization,actions'
+  endif
+
   # Handle localization and search positioning (no duplicate drawer_search — single search bar)
   if section.settings.search_position == 'center'
     assign order = 'logo,menu,search,localization,actions'
@@ -283,6 +287,7 @@
   id="header-component"
   class="{{ class }} header--cosmetic-luxury"
   data-search-position="{{ section.settings.search_position }}"
+  data-logo-position="{{ section.settings.logo_position }}"
   data-menu-row="{{ section.settings.menu_row }}"
   data-show-wishlist="{% if section.settings.header_show_wishlist %}true{% else %}false{% endif %}"
   data-lame-scroll="top"
