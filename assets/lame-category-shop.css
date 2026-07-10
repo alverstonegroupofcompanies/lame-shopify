@@ -40,13 +40,12 @@
 /* Toolbar */
 .lame-category-shop__toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem 1.5rem;
-  margin-bottom: 1.35rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgb(255 255 255 / 0.18);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .lame-category-shop__count {
@@ -60,16 +59,14 @@
 }
 
 .lame-category-shop__filters {
-  flex: 1 1 28rem;
-  min-width: min(100%, 28rem);
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
 }
 
 .lame-category-shop__filters-panel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 0.85rem 1.25rem;
+  display: block;
+  width: 100%;
   padding: 0.85rem 1rem;
   border: 1px solid rgb(255 255 255 / 0.14);
   border-radius: 12px;
@@ -78,7 +75,11 @@
 }
 
 .lame-category-shop__filter-form {
-  display: contents;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 0.85rem;
+  align-items: end;
+  width: 100%;
 }
 
 .lame-category-shop__filter-group {
@@ -100,72 +101,11 @@
   color: rgb(var(--lame-cat-forest));
 }
 
-.lame-category-shop__price-radios {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.lame-category-shop__price-radio {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.38rem 0.65rem;
-  border: 1px solid rgb(var(--lame-cat-forest) / 0.16);
-  border-radius: 999px;
-  background: #fff;
-  color: rgb(var(--lame-cat-forest));
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.2;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-.lame-category-shop__price-radio:hover {
-  border-color: rgb(var(--lame-cat-forest) / 0.35);
-  background: rgb(var(--lame-cat-forest) / 0.04);
-}
-
-.lame-category-shop__price-radio.is-active {
-  border-color: rgb(var(--lame-cat-forest));
-  background: rgb(var(--lame-cat-forest));
-  color: #fff;
-  box-shadow: 0 2px 8px rgb(var(--lame-cat-forest) / 0.22);
-}
-
-.lame-category-shop__price-radio-dot {
-  flex-shrink: 0;
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  background: transparent;
-  transition: background 0.18s ease;
-}
-
-.lame-category-shop__price-radio.is-active .lame-category-shop__price-radio-dot {
-  border-color: #fff;
-  background: #fff;
-  box-shadow: inset 0 0 0 2px rgb(var(--lame-cat-forest));
-}
-
-.lame-category-shop__brand-field {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-width: 0;
-}
-
+.lame-category-shop__price-select,
 .lame-category-shop__brand-select,
 .lame-category-shop__sort-select {
-  min-width: 9.5rem;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   padding: 0.45rem 2rem 0.45rem 0.75rem;
   font-size: 0.8125rem;
@@ -182,19 +122,17 @@
   background-size: 0.65rem;
 }
 
-.lame-category-shop__brand-select {
-  min-width: 10.5rem;
-}
-
+.lame-category-shop__price-select:focus-visible,
 .lame-category-shop__brand-select:focus-visible,
 .lame-category-shop__sort-select:focus-visible,
-.lame-category-shop__price-radio:focus-visible,
 .lame-category-shop__clear-btn:focus-visible {
   outline: 2px solid rgb(var(--lame-cat-forest));
   outline-offset: 2px;
 }
 
 .lame-category-shop__clear-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
   flex-shrink: 0;
   padding: 0.42rem 0.7rem;
   border: 1px solid rgb(var(--lame-cat-forest) / 0.2);
@@ -229,6 +167,14 @@
   .lame-category-shop__toolbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .lame-category-shop__filters {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
   }
 
   .lame-category-shop__filters,
@@ -238,30 +184,31 @@
   }
 
   .lame-category-shop__filters-panel {
-    flex-direction: column;
-    align-items: stretch;
+    padding: 0.6rem 0.65rem;
   }
 
-  .lame-category-shop__filter-group--price {
-    order: 1;
+  .lame-category-shop__filter-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem 0.4rem;
   }
 
-  .lame-category-shop__filter-group--brand {
-    order: 2;
+  .lame-category-shop__filter-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
   }
 
-  .lame-category-shop__filter-group--sort {
-    order: 3;
-  }
-
-  .lame-category-shop__brand-field {
-    flex-wrap: wrap;
-  }
-
+  .lame-category-shop__price-select,
   .lame-category-shop__brand-select,
   .lame-category-shop__sort-select {
-    width: 100%;
-    min-width: 0;
+    padding: 0.4rem 1.5rem 0.4rem 0.55rem;
+    font-size: 0.6875rem;
+    background-position: right 0.45rem center;
+  }
+
+  .lame-category-shop__clear-btn {
+    margin-top: 0.15rem;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.625rem;
   }
 }
 
@@ -669,6 +616,8 @@
 
   .lame-category-shop-page.product-grid-container.spacing-style,
   .lame-category-shop-page.product-grid-container {
+    --padding-block-start: 0.75rem;
+    --padding-block-end: 1.25rem;
     padding-block-start: 0.75rem !important;
     padding-block-end: 1.25rem !important;
   }
@@ -680,30 +629,42 @@
   .lame-category-shop-page .lame-collection-products-column {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    gap: 0.35rem;
   }
 
   .lame-category-shop-page .lame-category-shop__toolbar {
     margin-bottom: 0;
     padding-bottom: 0;
     border-bottom: none;
-    gap: 0.65rem;
+    gap: 0.4rem;
+  }
+
+  .lame-category-shop-page .lame-category-shop__filters {
+    flex: 0 0 auto;
   }
 
   .lame-category-shop-page .lame-category-shop__filters-panel {
-    padding: 0.65rem 0.75rem;
+    padding: 0.6rem 0.65rem;
+  }
+
+  .lame-category-shop-page results-list .lame-collection-products-column > .lame-category-shop__toolbar {
+    margin-bottom: 0;
   }
 
   .lame-category-shop-page #ResultsList.spacing-style,
   .lame-category-shop-page .main-collection-grid.spacing-style,
   .lame-category-shop-page .main-collection-grid {
+    --padding-block-start: 0px;
+    --padding-block-end: 0px;
     padding: 0 !important;
     margin: 0 !important;
     min-height: 0 !important;
+    margin-block-start: 0 !important;
   }
 
   .lame-category-shop-page .main-collection-grid > div {
     margin: 0;
+    padding: 0;
   }
 
   .lame-category-shop-page .product-grid.lame-category-shop__grid {
