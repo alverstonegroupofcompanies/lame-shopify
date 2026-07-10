@@ -447,7 +447,7 @@
     }
   }
 
-  #header-component[data-menu-style='drawer'] .header__column {
+  #header-component[data-menu-style='drawer']:not(.header--cosmetic-luxury) .header__column {
     display: contents;
   }
 
@@ -913,42 +913,44 @@
     }
 
     @media screen and (max-width: 749px) {
-      --header-template-columns: auto 1fr auto auto auto;
+      #header-component:not(.header--cosmetic-luxury) & {
+        --header-template-columns: auto 1fr auto auto auto;
 
-      grid-template-areas: 'drawerArea logoArea searchArea accountArea actionsArea';
-      grid-column: span 3;
-      column-gap: 0.5rem;
-      align-items: center;
-      padding-block: 0;
-      padding-inline: max(0.875rem, env(safe-area-inset-left, 0px)) max(0.875rem, env(safe-area-inset-right, 0px));
+        grid-template-areas: 'drawerArea logoArea searchArea accountArea actionsArea';
+        grid-column: span 3;
+        column-gap: 0.5rem;
+        align-items: center;
+        padding-block: 0;
+        padding-inline: max(0.875rem, env(safe-area-inset-left, 0px)) max(0.875rem, env(safe-area-inset-right, 0px));
 
-      .header-logo {
-        grid-area: logoArea;
-        justify-self: center;
-      }
+        .header-logo {
+          grid-area: logoArea;
+          justify-self: center;
+        }
 
-      .header__drawer {
-        grid-area: drawerArea;
-        justify-self: start;
-      }
+        .header__drawer {
+          grid-area: drawerArea;
+          justify-self: start;
+        }
 
-      .search-action {
-        grid-area: searchArea;
-      }
+        .search-action {
+          grid-area: searchArea;
+        }
 
-      shopify-account {
-        grid-area: accountArea;
-      }
+        shopify-account {
+          grid-area: accountArea;
+        }
 
-      header-actions {
-        grid-area: actionsArea;
+        header-actions {
+          grid-area: actionsArea;
+        }
       }
     }
   }
 
   /* not ideal but we need to duplicate these styles for when touch comes into play
     We could avoid the duplication using js to set the data-menu-style attribute on small screens instead of using @media queries */
-  #header-component[data-menu-style='drawer'] .header__columns {
+  #header-component[data-menu-style='drawer']:not(.header--cosmetic-luxury) .header__columns {
     --header-template-columns: auto 1fr auto auto auto;
 
     grid-template-areas: 'drawerArea logoArea searchArea accountArea actionsArea';

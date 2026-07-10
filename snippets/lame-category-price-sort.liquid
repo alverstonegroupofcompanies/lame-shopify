@@ -1,5 +1,6 @@
 {%- doc -%}
-  Price-only sort control for individual category collection pages.
+  Toolbar for individual category collection pages: result count, price range,
+  brand filter, sort, and clear.
 
   @param {object} collection - Collection
   @param {object} paginate - Paginate object
@@ -11,41 +12,211 @@
   if range_end > paginate.items
     assign range_end = paginate.items
   endif
+
   assign sort_by = collection.sort_by | default: collection.default_sort_by
   assign sort_form_action = collection.url
   if collection.current_type != blank or collection.current_vendor != blank
     assign sort_form_action = collection.url | append: '/'
   endif
+
+  assign active_price_range = 'all'
+  assign active_vendor = blank
+  assign active_vendor_label = blank
+
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      assign price_min = filter.min_value.value | default: 0 | plus: 0
+      assign price_max = filter.max_value.value | default: 0 | plus: 0
+
+      if price_max == 400 and price_min <= 0
+        assign active_price_range = '0-400'
+      elsif price_min == 400 and price_max == 800
+        assign active_price_range = '400-800'
+      elsif price_min == 800 and price_max == 1200
+        assign active_price_range = '800-1200'
+      endif
+    endif
+
+    if filter.param_name == 'filter.p.vendor'
+      for value in filter.active_values
+        assign active_vendor = value.value
+        assign active_vendor_label = value.label
+      endfor
+    endif
+  endfor
+
+  assign brand_count = 0
+  assign vendors_sorted = collection.all_vendors | sort
 -%}
 
 <div class="lame-category-shop__toolbar">
   <p class="lame-category-shop__count" role="status">
     {{ 'lame_category_shop.showing_range' | t: from: range_start, to: range_end, total: paginate.items }}
   </p>
-  <form class="lame-category-shop__sort-form" method="get" action="{{ sort_form_action }}">
-    {%- for filter in collection.filters -%}
-      {%- for value in filter.active_values -%}
-        <input type="hidden" name="{{ value.param_name }}" value="{{ value.value }}">
-      {%- endfor -%}
-    {%- endfor -%}
-    {%- if collection.current_type != blank -%}
-      <input type="hidden" name="q" value="{{ collection.current_type | escape }}">
-    {%- endif -%}
-    <label class="lame-category-shop__sort-label" for="lame-category-sort-{{ collection.id }}">
-      {{ 'lame_category_shop.sort_label' | t }}
-    </label>
-    <select
-      id="lame-category-sort-{{ collection.id }}"
-      class="lame-category-shop__sort-select"
-      name="sort_by"
-      onchange="this.form.submit()"
-    >
-      <option value="price-ascending" {% if sort_by == 'price-ascending' %}selected{% endif %}>
-        {{ 'lame_category_shop.sort_price_low' | t }}
-      </option>
-      <option value="price-descending" {% if sort_by == 'price-descending' %}selected{% endif %}>
-        {{ 'lame_category_shop.sort_price_high' | t }}
-      </option>
-    </select>
-  </form>
+
+  <lame-category-filters class="lame-category-shop__filters">
+    <div class="lame-category-shop__filters-panel">
+      <fieldset class="lame-category-shop__filter-group lame-category-shop__filter-group--price">
+        <legend class="lame-category-shop__filter-label">{{ 'lame_category_shop.filter_price' | t }}</legend>
+        <div class="lame-category-shop__price-radios" role="radiogroup" aria-label="{{ 'lame_category_shop.filter_price' | t }}">
+          {%- assign price_ranges = 'all,0-400,400-800,800-1200' | split: ',' -%}
+          {%- for range_key in price_ranges -%}
+            {%- liquid
+              assign range_label = blank
+              case range_key
+                when 'all'
+                  assign range_label = 'lame_category_shop.price_all'
+                when '0-400'
+                  assign range_label = 'lame_category_shop.price_range_low'
+                when '400-800'
+                  assign range_label = 'lame_category_shop.price_range_mid'
+                when '800-1200'
+                  assign range_label = 'lame_category_shop.price_range_high'
+              endcase
+
+              assign pill_url = collection.url
+              assign pill_query = blank
+
+              if sort_by != blank and sort_by != collection.default_sort_by
+                assign pill_query = 'sort_by=' | append: sort_by
+              endif
+
+              if active_vendor != blank
+                assign vendor_param = 'filter.p.vendor=' | append: active_vendor | url_encode
+                if pill_query != blank
+                  assign pill_query = pill_query | append: '&' | append: vendor_param
+                else
+                  assign pill_query = vendor_param
+                endif
+              endif
+
+              unless range_key == 'all'
+                assign range_parts = range_key | split: '-'
+                assign range_gte = range_parts[0]
+                assign range_lte = range_parts[1]
+                assign price_param = 'filter.v.price.gte=' | append: range_gte | append: '&filter.v.price.lte=' | append: range_lte
+                if pill_query != blank
+                  assign pill_query = pill_query | append: '&' | append: price_param
+                else
+                  assign pill_query = price_param
+                endif
+              endunless
+
+              if pill_query != blank
+                assign pill_url = pill_url | append: '?' | append: pill_query
+              endif
+            -%}
+            <a
+              href="{{ pill_url }}"
+              class="lame-category-shop__price-radio{% if active_price_range == range_key %} is-active{% endif %}"
+              {% if active_price_range == range_key %}
+                aria-current="true"
+              {% endif %}
+              data-price-range="{{ range_key }}"
+            >
+              <span class="lame-category-shop__price-radio-dot" aria-hidden="true"></span>
+              <span class="lame-category-shop__price-radio-text">{{ range_label | t }}</span>
+            </a>
+          {%- endfor -%}
+        </div>
+      </fieldset>
+
+      <form
+        class="lame-category-shop__filter-form"
+        method="get"
+        action="{{ sort_form_action }}"
+        data-lame-category-filter-form
+      >
+        {%- comment -%} Preserve price filter {%- endcomment -%}
+        {%- if active_price_range != 'all' -%}
+          {%- assign active_range_parts = active_price_range | split: '-' -%}
+          <input type="hidden" name="filter.v.price.gte" value="{{ active_range_parts[0] }}">
+          <input type="hidden" name="filter.v.price.lte" value="{{ active_range_parts[1] }}">
+        {%- endif -%}
+
+        {%- comment -%} Preserve other active filters except vendor and price {%- endcomment -%}
+        {%- for filter in collection.filters -%}
+          {%- unless filter.type == 'price_range' or filter.param_name == 'filter.p.vendor' -%}
+            {%- for value in filter.active_values -%}
+              <input type="hidden" name="{{ value.param_name }}" value="{{ value.value }}">
+            {%- endfor -%}
+          {%- endunless -%}
+        {%- endfor -%}
+
+        {%- if collection.current_type != blank -%}
+          <input type="hidden" name="q" value="{{ collection.current_type | escape }}">
+        {%- endif -%}
+
+        <div class="lame-category-shop__filter-group lame-category-shop__filter-group--brand">
+          <label class="lame-category-shop__filter-label" for="lame-category-brand-{{ collection.id }}">
+            {{ 'lame_category_shop.filter_brand' | t }}
+          </label>
+          <div class="lame-category-shop__brand-field">
+            <select
+              id="lame-category-brand-{{ collection.id }}"
+              class="lame-category-shop__brand-select"
+              name="filter.p.vendor"
+              data-auto-submit
+            >
+              <option value="">{{ 'lame_category_shop.brand_all' | t }}</option>
+              {%- for vendor_name in vendors_sorted -%}
+                {%- assign vendor_name_stripped = vendor_name | strip -%}
+                {%- if vendor_name_stripped != blank -%}
+                  {%- assign brand_count = brand_count | plus: 1 -%}
+                  {%- liquid
+                    assign display_label = vendor_name_stripped
+                    assign label_down = vendor_name_stripped | downcase
+                    if label_down contains 'lamstone'
+                      assign display_label = 'Lamstone Healthcare'
+                    endif
+                  -%}
+                  <option
+                    value="{{ vendor_name_stripped | escape }}"
+                    {% if active_vendor == vendor_name_stripped %}selected{% endif %}
+                  >
+                    {{ display_label | escape }}
+                  </option>
+                {%- endif -%}
+              {%- endfor -%}
+            </select>
+            <button
+              type="button"
+              class="lame-category-shop__clear-btn{% if active_vendor == blank and active_price_range == 'all' %} is-hidden{% endif %}"
+              data-clear-filters
+              {% if active_vendor == blank and active_price_range == 'all' %}
+                hidden
+              {% endif %}
+            >
+              {{ 'lame_category_shop.clear_filters' | t }}
+            </button>
+          </div>
+        </div>
+
+        <div class="lame-category-shop__filter-group lame-category-shop__filter-group--sort">
+          <label class="lame-category-shop__filter-label" for="lame-category-sort-{{ collection.id }}">
+            {{ 'lame_category_shop.sort_label' | t }}
+          </label>
+          <select
+            id="lame-category-sort-{{ collection.id }}"
+            class="lame-category-shop__sort-select"
+            name="sort_by"
+            data-auto-submit
+          >
+            <option value="price-ascending" {% if sort_by == 'price-ascending' %}selected{% endif %}>
+              {{ 'lame_category_shop.sort_price_low' | t }}
+            </option>
+            <option value="price-descending" {% if sort_by == 'price-descending' %}selected{% endif %}>
+              {{ 'lame_category_shop.sort_price_high' | t }}
+            </option>
+          </select>
+        </div>
+      </form>
+    </div>
+  </lame-category-filters>
 </div>
+
+<script
+  src="{{ 'lame-category-filters.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
