@@ -47,7 +47,7 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
 
 #header-group .announcement-bar--luxury {
   --announcement-bar-min-height: 2.75rem;
-  background: linear-gradient(102deg, rgb(36 52 42) 0%, rgb(47 66 50) 48%, rgb(40 58 44) 100%);
+  background: linear-gradient(180deg, #076653 0%, #0c342c 52%, #06231d 100%);
   border-block-end: 1px solid rgb(255 255 255 / 0.08);
   box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset;
   color: rgb(255 255 255 / 0.92);
@@ -273,11 +273,14 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
   --header-luxury-icon-glyph: 1.2rem;
   --header-luxury-logo-max-w: min(17rem, 22vw);
   --header-luxury-logo-max-h: clamp(4.25rem, 6.5vw, 6rem);
+  --lame-nav-font: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   --lame-mobile-menu-z: 100000;
 
-  /* Navbar — brand forest green (matches buttons), white text, gold active */
-  --lame-nav-forest: var(--brand-forest, 45 74 34);
-  --lame-nav-forest-dark: var(--brand-forest-dark, 35 58 28);
+  /* Navbar — Gradient 4: #076653 → #0C342C → #06231D */
+  --lame-nav-gradient: linear-gradient(180deg, #076653 0%, #0C342C 52%, #06231D 100%);
+  --lame-nav-forest: 7 102 83;
+  --lame-nav-forest-mid: 12 52 44;
+  --lame-nav-forest-dark: 6 35 29;
   --lame-nav-sage: 246 248 245;
   --lame-nav-sage-deep: 237 241 235;
   --lame-nav-cream: 246 248 245;
@@ -290,12 +293,12 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
   --lame-nav-accent-rose: 188 78 108;
   --lame-nav-accent-violet: 118 88 168;
   --lame-nav-accent-coral: 224 118 96;
-  --lame-nav-bg: rgb(var(--lame-nav-forest));
-  --lame-nav-bg-solid: rgb(var(--lame-nav-forest));
-  --lame-nav-bg-scroll: rgb(var(--lame-nav-forest));
+  --lame-nav-bg: var(--lame-nav-gradient);
+  --lame-nav-bg-solid: #06231d;
+  --lame-nav-bg-scroll: var(--lame-nav-gradient);
 
   --color-scheme-top-row: rgb(var(--lame-nav-forest)) !important;
-  --color-scheme-bottom-row: rgb(var(--lame-nav-forest)) !important;
+  --color-scheme-bottom-row: rgb(var(--lame-nav-forest-dark)) !important;
 
   position: relative;
   z-index: calc(var(--layer-sticky, 8) + 1);
@@ -569,10 +572,10 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
   position: relative;
-  font-family: var(--lame-lux-font-display, 'Playfair Display', Georgia, serif);
-  font-size: clamp(0.875rem, 1vw, 1rem);
+  font-family: var(--lame-nav-font);
+  font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
   text-transform: none;
   padding: 0.5rem 0.85rem;
   color: rgb(var(--lame-nav-text) / 0.92);
@@ -596,7 +599,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link.menu-list__link--active {
   color: rgb(var(--lame-nav-active));
-  background: rgb(255 255 255 / 0.1);
+  background: transparent;
   font-weight: 600;
 }
 
@@ -802,12 +805,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 /* Mobile horizontal category row (second nav strip) */
 #header-component.header--cosmetic-luxury .header__navigation-bar-row {
-  background: linear-gradient(
-    90deg,
-    rgb(var(--lame-nav-forest)) 0%,
-    rgb(52 72 58) 48%,
-    rgb(var(--lame-nav-forest)) 100%
-  );
+  background: var(--lame-nav-gradient);
   border-block-start: 1px solid rgb(var(--lame-nav-gold) / 0.22);
   border-block-end: 1px solid rgb(0 0 0 / 0.14);
   box-shadow:
@@ -989,9 +987,13 @@ body:has(#header-component.header--cosmetic-luxury) {
 
 @media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury {
-    --header-luxury-min-height: 6rem;
-    --header-luxury-logo-max-w: min(18rem, 22vw);
-    --header-luxury-logo-max-h: clamp(4.5rem, 6.8vw, 6.25rem);
+    --header-luxury-min-height: 7rem;
+    --header-luxury-logo-max-w: min(22rem, 28vw);
+    --header-luxury-logo-max-h: clamp(5.75rem, 8vw, 8rem);
+  }
+
+  body:has(#header-component.header--cosmetic-luxury) {
+    --header-height: 7rem;
   }
 
   #header-component.header--cosmetic-luxury .header__columns {
@@ -1003,8 +1005,17 @@ body:has(#header-component.header--cosmetic-luxury) {
     max-width: var(--header-luxury-logo-max-w);
   }
 
+  #header-component.header--cosmetic-luxury .header__column--left .header-logo {
+    max-width: var(--header-luxury-logo-max-w);
+  }
+
   #header-component.header--cosmetic-luxury .header-logo__image {
+    --header-logo-image-height: 128px;
     max-height: var(--header-luxury-logo-max-h);
+  }
+
+  #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
+    min-height: 5.75rem;
   }
 }
 
@@ -1047,23 +1058,33 @@ body:has(#header-component.header--cosmetic-luxury) {
     row-gap: 0;
   }
 
-  /* True optical center for logo (balances asymmetric left/right clusters) */
+  #header-component.header--cosmetic-luxury .header__column--left {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--header-mobile-icon-gap);
+    min-width: 0;
+  }
+
+  /* Logo beside hamburger — left aligned */
   #header-component.header--cosmetic-luxury .header-logo {
-    position: absolute;
-    left: 50%;
-    top: 50%;
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
     z-index: 1;
-    transform: translate(-50%, -50%);
-    justify-self: center;
-    max-width: var(--header-luxury-logo-max-w, min(13.5rem, 54vw));
+    justify-self: unset;
+    justify-content: flex-start;
+    flex: 0 1 auto;
+    max-width: min(9.5rem, calc(100vw - 12rem));
     margin: 0;
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   #header-component.header--cosmetic-luxury .header-logo a {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     pointer-events: auto;
   }
 
@@ -3151,7 +3172,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
 /* Bottom navigation row */
 #header-component.header--cosmetic-luxury .header__row--bottom {
-  background: var(--lame-nav-bg);
+  background: var(--lame-nav-gradient);
   border-block-start: 1px solid rgb(255 255 255 / 0.12);
   border-block-end: 1px solid rgb(255 255 255 / 0.08);
   box-shadow: none;
@@ -3466,10 +3487,10 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   }
 
   #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
-    font-family: var(--lame-lux-font-display, 'Playfair Display', Georgia, serif);
+    font-family: var(--lame-nav-font);
     font-size: clamp(0.75rem, 0.9vw, 0.8125rem);
     font-weight: 500;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.05em;
     padding: 0.45rem 0.7rem;
     color: rgb(var(--lame-nav-text) / 0.92);
   }
@@ -3481,6 +3502,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header-menu .menu-list__link.menu-list__link--active {
     color: rgb(var(--lame-nav-active));
+    background: transparent;
     font-weight: 600;
   }
 
@@ -3502,14 +3524,9 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
    ═══════════════════════════════════════════════════════════════ */
 
 @media screen and (max-width: 767px) {
-  /* Nav strip: forest background so white/gold link text is readable */
+  /* Nav strip: gradient background so white/gold link text is readable */
   #header-component.header--cosmetic-luxury .header__navigation-bar-row {
-    background: linear-gradient(
-      90deg,
-      rgb(var(--lame-nav-forest)) 0%,
-      rgb(52 72 58) 48%,
-      rgb(var(--lame-nav-forest)) 100%
-    ) !important;
+    background: var(--lame-nav-gradient) !important;
     border-block-start: 1px solid rgb(var(--lame-nav-gold) / 0.35) !important;
     border-block-end: 1px solid rgb(0 0 0 / 0.14) !important;
   }
@@ -3709,13 +3726,14 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   }
 
   #header-component.header--cosmetic-luxury .header__column--left .header-logo {
-    max-width: min(10.5rem, 14vw);
+    max-width: var(--header-luxury-logo-max-w);
   }
 
   #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
+    font-family: var(--lame-nav-font);
     padding: 0.5rem 0.85rem;
-    font-size: clamp(0.875rem, 1vw, 1rem);
-    letter-spacing: 0.02em;
+    font-size: clamp(0.875rem, 1vw, 0.9375rem);
+    letter-spacing: 0.05em;
     text-transform: none;
     white-space: nowrap;
   }
@@ -3916,6 +3934,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     display: flex !important;
     align-items: center;
     justify-content: flex-start;
+    gap: 0.5rem;
     min-width: 0;
     flex: 0 0 auto;
   }
@@ -3945,19 +3964,24 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     grid-area: unset !important;
   }
 
-  /* Center logo regardless of right icon count */
+  /* Logo beside hamburger — left aligned */
   #header-component.header--cosmetic-luxury .header-logo {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
     z-index: 2;
-    max-width: min(10.5rem, 52vw);
+    justify-content: flex-start;
+    flex: 0 1 auto;
+    max-width: min(9.5rem, calc(100vw - 12rem));
     margin: 0;
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   #header-component.header--cosmetic-luxury .header-logo a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     pointer-events: auto;
   }
 

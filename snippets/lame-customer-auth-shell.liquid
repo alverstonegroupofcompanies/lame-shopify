@@ -14,47 +14,76 @@
 <script src="{{ 'lame-customer-auth.js' | asset_url }}" defer></script>
 
 {%- liquid
-  assign profile_logo = settings.logo
-  if profile_logo == blank
-    assign profile_logo = settings.logo_inverse
+  assign auth_logo = section.settings.logo_image
+  if auth_logo == blank
+    assign auth_logo = settings.logo
   endif
+  if auth_logo == blank
+    assign auth_logo = settings.logo_inverse
+  endif
+
+  assign show_logo = section.settings.show_logo
+  if show_logo == nil
+    assign show_logo = true
+  endif
+
+  assign logo_max_width = section.settings.logo_max_width | default: 220
+  assign panel_background = section.settings.panel_background | default: '#1f3315'
+  assign side_media = section.settings.side_media
+  assign logo_gap = section.settings.logo_spacing | default: 12
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-customer-auth"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-customer-auth{% if side_media != blank %} lame-customer-auth--split{% endif %}"
   data-lame-customer-auth
+  style="--lame-auth-panel-bg: {{ panel_background }}; --lame-auth-logo-max: {{ logo_max_width }}px; --lame-auth-logo-gap: {{ logo_gap }}px;"
   {{ section.shopify_attributes }}
 >
-  <div class="lame-acct-page spacing-style lame-auth-page" style="{% render 'spacing-padding', settings: section.settings %}">
-    <header class="lame-profile__topbar lame-auth__topbar" aria-label="{{ 'lame_customer.auth_topbar' | t }}">
-      <div class="lame-profile__topbar-start">
-        {% if profile_logo != blank %}
-          <a href="{{ routes.root_url }}" class="lame-profile__topbar-logo-link">
-            {% render 'image',
-              image: profile_logo,
-              height: 36,
-              class: 'lame-profile__topbar-logo',
-              alt_text_fallback: shop.name,
-              text_fallback: shop.name
-            %}
+  <div class="lame-auth-layout spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    <div class="lame-auth-layout__form-panel">
+      <div class="lame-auth-layout__intro">
+        {% if show_logo and auth_logo != blank %}
+          <a href="{{ routes.root_url }}" class="lame-auth-layout__logo-link">
+            {{
+              auth_logo
+              | image_url: width: 600
+              | image_tag:
+                class: 'lame-auth-layout__logo',
+                loading: 'eager',
+                widths: '180,240,300,400,600',
+                sizes: '(min-width: 750px) 220px, 180px',
+                alt: shop.name
+            }}
           </a>
-        {% else %}
-          <a href="{{ routes.root_url }}" class="lame-profile__topbar-name">{{ shop.name }}</a>
+        {% elsif show_logo %}
+          <a href="{{ routes.root_url }}" class="lame-auth-layout__shop-name">{{ shop.name }}</a>
         {% endif %}
-      </div>
-    </header>
 
-    <div class="lame-auth__card lame-acct-card">
-      <div class="lame-auth__card-head">
-        <h1 class="lame-auth__title">{{ page_title }}</h1>
+        <h1 class="lame-auth-layout__title">{{ page_title }}</h1>
         {% if page_subtitle != blank %}
-          <p class="lame-auth__subtitle">{{ page_subtitle }}</p>
+          <p class="lame-auth-layout__subtitle">{{ page_subtitle }}</p>
         {% endif %}
       </div>
-      <div class="lame-auth__card-body">
+
+      <div class="lame-auth-layout__body lame-acct-card">
         {{ body }}
       </div>
     </div>
+
+    {% if side_media != blank %}
+      <div class="lame-auth-layout__media-panel" aria-hidden="true">
+        {{
+          side_media
+          | image_url: width: 1600
+          | image_tag:
+            class: 'lame-auth-layout__media-image',
+            loading: 'lazy',
+            widths: '600,900,1200,1600',
+            sizes: '50vw',
+            alt: ''
+        }}
+      </div>
+    {% endif %}
   </div>
 </section>

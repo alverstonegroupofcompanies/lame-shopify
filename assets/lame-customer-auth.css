@@ -16,48 +16,126 @@
 
 .lame-customer-auth {
   --lame-auth-max: 32rem;
-  background: linear-gradient(
-    180deg,
-    rgb(var(--brand-cream, 250 246 238) / 0.65) 0%,
-    rgb(var(--color-background-rgb, 255 255 255)) 12rem
-  );
+  --lame-auth-panel-bg: #1f3315;
+  --lame-auth-logo-max: 220px;
+  --lame-auth-logo-gap: 12px;
+  background: var(--lame-auth-panel-bg);
 }
 
-.lame-auth-page {
-  max-width: var(--lame-auth-max);
+.lame-customer-auth .section-background {
+  display: none;
+}
+
+.lame-auth-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: min(100dvh, 920px);
+}
+
+.lame-customer-auth--split .lame-auth-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.lame-auth-layout__form-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  width: 100%;
+  max-width: 28rem;
   margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 4vw, 2.5rem);
+  color: #fff;
 }
 
-.lame-auth__topbar {
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+.lame-customer-auth--split .lame-auth-layout__form-panel {
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: clamp(1.5rem, 6vw, 4rem);
 }
 
-.lame-auth__card {
-  padding: 0;
-  overflow: hidden;
+.lame-auth-layout__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--lame-auth-logo-gap);
+  text-align: left;
 }
 
-.lame-auth__card-head {
-  padding: 1.75rem 1.5rem 0;
-  text-align: center;
+.lame-auth-layout__logo-link {
+  display: inline-flex;
+  max-width: var(--lame-auth-logo-max);
+  line-height: 0;
+  text-decoration: none;
 }
 
-.lame-auth__card-body {
-  padding: 1.25rem 1.5rem 1.75rem;
+.lame-auth-layout__logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
 }
 
-.lame-auth__title {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.35rem, 3vw, 1.65rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+.lame-auth-layout__shop-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
 }
 
-.lame-auth__subtitle {
+.lame-auth-layout__title {
   margin: 0;
-  font-size: 0.92rem;
-  color: rgb(var(--lame-acct-ink, 26 42 36) / 0.72);
-  line-height: 1.5;
+  font-size: clamp(1.65rem, 3.5vw, 2.15rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.lame-auth-layout__subtitle {
+  margin: 0;
+  max-width: 26rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.lame-auth-layout__body {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.lame-auth-layout__media-panel {
+  position: relative;
+  min-height: 16rem;
+  overflow: hidden;
+  background: rgb(0 0 0 / 0.12);
+}
+
+.lame-auth-layout__media-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media screen and (max-width: 989px) {
+  .lame-customer-auth--split .lame-auth-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lame-auth-layout__media-panel {
+    order: -1;
+    min-height: clamp(12rem, 34vw, 18rem);
+  }
+
+  .lame-auth-layout__form-panel {
+    max-width: 28rem;
+    margin-inline: auto;
+  }
 }
 
 .lame-auth__fieldset {
@@ -205,10 +283,39 @@
   }
 }
 
+.lame-customer-auth .lame-profile__field label,
+.lame-customer-auth .lame-auth__legend,
+.lame-customer-auth .lame-auth__recover-intro,
+.lame-customer-auth .lame-auth__footer,
+.lame-customer-auth .lame-auth__hint {
+  color: rgb(255 255 255 / 0.82);
+}
+
+.lame-customer-auth .lame-auth__footer a,
+.lame-customer-auth .lame-auth__text-link {
+  color: rgb(var(--lame-nav-active, 232 201 122));
+}
+
+.lame-customer-auth .lame-auth__tabs {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.lame-customer-auth .lame-auth__tab {
+  color: rgb(255 255 255 / 0.72);
+}
+
+.lame-customer-auth .lame-auth__tab--active {
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+  box-shadow: none;
+}
+
 .lame-customer-auth .lame-profile__input,
 .lame-customer-auth .lame-profile__select {
   border-radius: var(--lame-acct-radius-sm, 10px);
-  border-color: rgb(26 26 26 / 0.1);
+  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.96);
+  color: rgb(var(--lame-acct-ink, 26 42 36));
 }
 
 .lame-customer-auth .lame-profile__btn-primary {
