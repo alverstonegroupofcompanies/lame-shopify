@@ -431,12 +431,12 @@
                 {% if venture_image != blank %}
                   {{
                     venture_image
-                    | image_url: width: 1440
+                    | image_url: width: 960
                     | image_tag:
                       class: 'footer-premium__venture-logo',
                       loading: 'lazy',
-                      widths: '320,480,640,800,960,1200,1440',
-                      sizes: '(max-width: 749px) 72vw, 400px',
+                      widths: '240,320,400,480,640,800,960',
+                      sizes: '(max-width: 749px) 30vw, 160px',
                       alt: venture_alt
                   }}
                 {% elsif venture_asset != blank %}
@@ -600,14 +600,28 @@
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-    margin: 0 0 0.7rem;
+    margin: 0 0 0.85rem;
     text-align: center;
-    font-family: var(--footer-font-body);
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgb(0 0 0 / 0.42);
+    font-family: var(--footer-font-display);
+    font-size: clamp(1.05rem, 1.5vw, 1.32rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: #062f01;
+    position: relative;
+    padding-bottom: 0.55rem;
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 2.25rem;
+    height: 2px;
+    transform: translateX(-50%);
+    background: rgb(6 47 1 / 0.35);
+    border-radius: 1px;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-row {
@@ -630,7 +644,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: clamp(7rem, 13vw, 9.5rem);
+    min-height: 3.5rem;
     padding: 0.35rem 0.5rem;
     text-decoration: none;
     background: transparent;
@@ -646,9 +660,9 @@
   #footer-{{ section.id }} .footer-premium__venture-logo {
     display: block;
     width: auto;
-    max-width: min(28rem, 64vw);
+    max-width: min(10rem, 14vw);
     height: auto;
-    max-height: clamp(6.5rem, 13vw, 9rem);
+    max-height: 3.25rem;
     object-fit: contain;
     object-position: center;
     background: transparent;
@@ -667,6 +681,55 @@
     color: rgb(0 0 0 / 0.45);
     text-align: center;
     background: rgb(255 255 255 / 0.65);
+  }
+
+  @media screen and (min-width: 750px) {
+    #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
+      padding: clamp(1.5rem, 2.5vw, 2.35rem) clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__ventures-bar-label {
+      margin-bottom: 1.1rem;
+      font-size: clamp(1.2rem, 1.35vw, 1.45rem);
+      letter-spacing: 0.03em;
+    }
+
+    #footer-{{ section.id }} .footer-premium__ventures-row {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: clamp(0.75rem, 1.6vw, 1.5rem);
+      max-width: min(1080px, 100%);
+      margin-inline: auto;
+    }
+
+    #footer-{{ section.id }} .footer-premium__venture-item {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 11.5rem;
+    }
+
+    #footer-{{ section.id }} .footer-premium__venture-link {
+      min-height: 4.75rem;
+      padding: 0.4rem 0.35rem;
+      width: 100%;
+    }
+
+    #footer-{{ section.id }} .footer-premium__venture-logo {
+      width: 100%;
+      max-width: 100%;
+      max-height: clamp(3.5rem, 4.2vw, 4.25rem);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    #footer-{{ section.id }} .footer-premium__ventures-row {
+      gap: clamp(1rem, 2vw, 2rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__venture-logo {
+      max-height: 4.5rem;
+    }
   }
 
   @media screen and (max-width: 749px) {
