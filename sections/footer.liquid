@@ -47,52 +47,8 @@
   {% endif %}
 
   <div class="footer-premium__inner spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
-    <div class="footer-premium__main">
-      <div class="footer-premium__brand">
-        {% if section.settings.logo != blank %}
-          <a href="{{ routes.root_url }}" class="footer-premium__logo-link">
-            {{
-              section.settings.logo
-              | image_url: width: 360
-              | image_tag:
-                class: 'footer-premium__logo',
-                loading: 'lazy',
-                widths: '120,180,240,360',
-                sizes: '200px',
-                alt: section.settings.brand_name | default: shop.name
-            }}
-          </a>
-        {% elsif section.settings.brand_name != blank %}
-          <a href="{{ routes.root_url }}" class="footer-premium__brand-name">{{ section.settings.brand_name }}</a>
-        {% endif %}
-
-        {% if section.settings.about_text != blank %}
-          <div class="footer-premium__about rte">{{ section.settings.about_text }}</div>
-        {% endif %}
-
-        {% if section.blocks.size > 0 %}
-          <ul class="footer-premium__social" role="list">
-            {% for block in section.blocks %}
-              {% if block.type == 'social_link' and block.settings.url != blank %}
-                <li {{ block.shopify_attributes }}>
-                  <a
-                    href="{{ block.settings.url }}"
-                    class="footer-premium__social-link"
-                    aria-label="{{ block.settings.label | escape }}"
-                    {% if block.settings.open_in_new_tab %}
-                      target="_blank" rel="noopener noreferrer"
-                    {% endif %}
-                  >
-                    {% render 'footer-social-icon', platform: block.settings.platform %}
-                    <span class="visually-hidden">{{ block.settings.label }}</span>
-                  </a>
-                </li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-
+    <div class="footer-premium__nav-panel">
+      <div class="footer-premium__main">
       <div class="footer-premium__column">
         <h3 class="footer-premium__heading footer-premium__heading--icon">
           <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'grid' %}</span>
@@ -241,9 +197,11 @@
           {%- endform -%}
         </div>
       {% endif %}
+      </div>
     </div>
 
-    <div class="footer-premium__mid">
+    <div class="footer-premium__info-panel">
+      <div class="footer-premium__mid">
       {% if section.settings.show_map %}
         <div class="footer-premium__map-wrap">
           <h3 class="footer-premium__heading footer-premium__heading--icon">
@@ -322,32 +280,6 @@
         </div>
       </div>
     </div>
-
-    {% if section.settings.trust_badges != blank %}
-      <p class="footer-premium__trust">
-        <span class="footer-premium__icon footer-premium__icon--trust" aria-hidden="true">
-          {% render 'footer-icon', name: 'sparkle' %}
-        </span>
-        {{ section.settings.trust_badges }}
-      </p>
-    {% endif %}
-
-    <div class="footer-premium__bottom">
-      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
-      {% if section.settings.show_policy_links %}
-        <ul class="footer-premium__policies" role="list">
-          {% for policy in shop.policies %}
-            {% if policy != blank %}
-              <li>
-                <a href="{{ policy.url }}" class="footer-premium__link-row footer-premium__link-row--policy">
-                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'arrow' %}</span>
-                  <span>{{ policy.title }}</span>
-                </a>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      {% endif %}
     </div>
   </div>
 
@@ -356,6 +288,7 @@
       assign venture_blocks = section.blocks | where: 'type', 'venture'
     %}
     {% if venture_blocks.size > 0 or request.design_mode %}
+      <div class="footer-premium__ventures-divider" aria-hidden="true"></div>
       <div class="footer-premium__ventures-bar" aria-label="{{ section.settings.ventures_heading | default: 'Our Ventures' | escape }}">
         <div class="footer-premium__ventures-bar-inner">
           {% if section.settings.ventures_heading != blank %}
@@ -391,12 +324,12 @@
                 {% if venture_image != blank %}
                   {{
                     venture_image
-                    | image_url: width: 960
+                    | image_url: width: 1920
                     | image_tag:
                       class: 'footer-premium__venture-logo',
                       loading: 'lazy',
-                      widths: '240,320,400,480,640,800,960',
-                      sizes: '(max-width: 749px) 30vw, 160px',
+                      widths: '320,480,640,800,960,1200,1440,1920',
+                      sizes: '(max-width: 749px) 30vw, 320px',
                       alt: venture_alt
                   }}
                 {% elsif venture_asset != blank %}
@@ -423,6 +356,35 @@
       </div>
     {% endif %}
   {% endif %}
+
+  <div class="footer-premium__legal">
+    {% if section.settings.trust_badges != blank %}
+      <p class="footer-premium__trust">
+        <span class="footer-premium__icon footer-premium__icon--trust" aria-hidden="true">
+          {% render 'footer-icon', name: 'sparkle' %}
+        </span>
+        {{ section.settings.trust_badges }}
+      </p>
+    {% endif %}
+
+    <div class="footer-premium__bottom">
+      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
+      {% if section.settings.show_policy_links %}
+        <ul class="footer-premium__policies" role="list">
+          {% for policy in shop.policies %}
+            {% if policy != blank %}
+              <li>
+                <a href="{{ policy.url }}" class="footer-premium__link-row footer-premium__link-row--policy">
+                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'arrow' %}</span>
+                  <span>{{ policy.title }}</span>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
 </footer>
 
 {% style %}
@@ -433,16 +395,17 @@
     --footer-forest-dark: 21 66 48;
     --footer-gold: rgb(221 196 130);
     --footer-gold-bright: rgb(212 175 55);
-    --footer-gold-soft: rgb(255 255 255 / 0.18);
-    --footer-icon-bg: rgb(255 255 255 / 0.1);
+    --footer-gold-soft: rgb(255 255 255 / 0.16);
+    --footer-icon-bg: rgb(255 255 255 / 0.08);
     --footer-text: rgb(255 255 255);
-    --footer-text-muted: rgb(255 255 255 / 0.9);
-    --footer-text-subtle: rgb(255 255 255 / 0.72);
+    --footer-text-muted: rgb(255 255 255 / 0.88);
+    --footer-text-subtle: rgb(255 255 255 / 0.68);
     --footer-icon-size: 0.875rem;
     --footer-icon-box: 1.375rem;
+    --footer-luxury-radius: 14px;
     font-family: var(--footer-font-body);
     color: var(--footer-text);
-    border-top: 1px solid rgb(255 255 255 / 0.12);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
     background: #154230;
   }
 
@@ -456,98 +419,64 @@
 
   #footer-{{ section.id }} .footer-premium__inner {
     display: grid;
-    gap: clamp(1.5rem, 3vw, 2.5rem);
+    gap: 0;
+    max-width: min(1240px, 100%);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  #footer-{{ section.id }} .footer-premium__nav-panel {
+    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  }
+
+  #footer-{{ section.id }} .footer-premium__info-panel {
+    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
   }
 
   #footer-{{ section.id }} .footer-premium__main {
     display: grid;
-    gap: clamp(1.25rem, 2.5vw, 2rem);
+    gap: clamp(1.5rem, 3vw, 2.25rem);
   }
 
-  #footer-{{ section.id }} .footer-premium__brand {
-    display: grid;
-    gap: 0.85rem;
-    align-content: start;
+  #footer-{{ section.id }} .footer-premium__column,
+  #footer-{{ section.id }} .footer-premium__newsletter {
+    min-width: 0;
   }
 
-  #footer-{{ section.id }} .footer-premium__logo-link {
-    display: inline-block;
-    line-height: 0;
-  }
-
-  #footer-{{ section.id }} .footer-premium__logo {
+  #footer-{{ section.id }} .footer-premium__ventures-divider {
     width: 100%;
-    max-width: 200px;
-    height: auto;
+    padding: 0.55rem 0;
+    background: #154230;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+    border-bottom: 1px solid rgb(0 0 0 / 0.18);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-divider::after {
+    content: '';
     display: block;
-  }
-
-  #footer-{{ section.id }} .footer-premium__brand-name {
-    font-family: var(--footer-font-display);
-    font-size: clamp(1.35rem, 2.4vw, 1.75rem);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    text-decoration: none;
-    color: inherit;
-  }
-
-  #footer-{{ section.id }} .footer-premium__about {
-    margin: 0;
-    max-width: 36ch;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--footer-text-muted);
-  }
-
-  #footer-{{ section.id }} .footer-premium__about p {
-    margin: 0;
-  }
-
-  #footer-{{ section.id }} .footer-premium__social {
-    list-style: none;
-    margin: 0.15rem 0 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  #footer-{{ section.id }} .footer-premium__social-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    border: 1px solid var(--footer-gold-soft);
-    background: var(--footer-icon-bg);
-    color: var(--footer-gold);
-    transition: background 200ms ease, border-color 200ms ease, color 200ms ease, transform 200ms ease;
-  }
-
-  #footer-{{ section.id }} .footer-premium__social-link:hover {
-    background: var(--footer-gold-bright);
-    border-color: var(--footer-gold-bright);
-    color: rgb(var(--footer-forest-dark));
-    transform: translateY(-1px);
-  }
-
-  #footer-{{ section.id }} .footer-premium__social-link svg {
-    width: 0.95rem;
-    height: 0.95rem;
-    fill: currentColor;
-    display: block;
+    width: min(92%, 1080px);
+    height: 1px;
+    margin-inline: auto;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(212 175 55 / 0.45) 18%,
+      rgb(212 175 55 / 0.45) 82%,
+      transparent
+    );
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar {
-    margin-top: clamp(0.5rem, 1.5vw, 0.85rem);
-    border-top: 1px solid rgb(0 0 0 / 0.1);
-    border-bottom: 1px solid rgb(0 0 0 / 0.1);
-    background-color: #f2f3f1;
+    margin-top: 0;
+    border-top: none;
+    border-bottom: 1px solid rgb(21 66 48 / 0.08);
+    background-color: #f8f6f1;
     background-image:
-      radial-gradient(rgb(0 0 0 / 0.045) 0.65px, transparent 0.65px),
-      linear-gradient(180deg, rgb(255 255 255 / 0.55) 0%, transparent 42%, transparent 58%, rgb(0 0 0 / 0.02) 100%);
-    background-size: 10px 10px, 100% 100%;
+      linear-gradient(180deg, rgb(255 255 255 / 0.72) 0%, transparent 38%),
+      radial-gradient(rgb(21 66 48 / 0.025) 0.5px, transparent 0.5px);
+    background-size: 100% 100%, 12px 12px;
     color: rgb(24 24 24);
   }
 
@@ -563,13 +492,13 @@
     margin: 0 0 0.85rem;
     text-align: center;
     font-family: var(--footer-font-display);
-    font-size: clamp(1.05rem, 1.5vw, 1.32rem);
+    font-size: clamp(1.1rem, 1.5vw, 1.4rem);
     font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: #154230;
     position: relative;
-    padding-bottom: 0.55rem;
+    padding-bottom: 0.65rem;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
@@ -577,11 +506,10 @@
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: 2.25rem;
-    height: 2px;
+    width: 2.75rem;
+    height: 1px;
     transform: translateX(-50%);
-    background: rgb(21 66 48 / 0.35);
-    border-radius: 1px;
+    background: linear-gradient(90deg, transparent, rgb(212 175 55 / 0.7), transparent);
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-row {
@@ -645,50 +573,57 @@
 
   @media screen and (min-width: 750px) {
     #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
-      padding: clamp(1.5rem, 2.5vw, 2.35rem) clamp(1.5rem, 3vw, 2.5rem);
+      padding: clamp(3rem, 5vw, 4.7rem) clamp(2rem, 4vw, 3.5rem);
+      max-width: min(1320px, 100%);
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-      margin-bottom: 1.1rem;
-      font-size: clamp(1.2rem, 1.35vw, 1.45rem);
-      letter-spacing: 0.03em;
+      margin-bottom: 2rem;
+      font-size: clamp(2rem, 2.4vw, 2.5rem);
+      letter-spacing: 0.06em;
+      padding-bottom: 1rem;
+    }
+
+    #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
+      width: 4rem;
+      height: 1px;
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-row {
       flex-wrap: nowrap;
       justify-content: space-between;
       align-items: center;
-      gap: clamp(0.75rem, 1.6vw, 1.5rem);
-      max-width: min(1080px, 100%);
+      gap: clamp(1.5rem, 3.2vw, 3rem);
+      max-width: 100%;
       margin-inline: auto;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-item {
       flex: 1 1 0;
       min-width: 0;
-      max-width: 11.5rem;
+      max-width: 23rem;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 4.75rem;
-      padding: 0.4rem 0.35rem;
+      min-height: 9.5rem;
+      padding: 0.8rem 0.7rem;
       width: 100%;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
       width: 100%;
       max-width: 100%;
-      max-height: clamp(3.5rem, 4.2vw, 4.25rem);
+      max-height: clamp(7rem, 8.4vw, 8.5rem);
     }
   }
 
   @media screen and (min-width: 990px) {
     #footer-{{ section.id }} .footer-premium__ventures-row {
-      gap: clamp(1rem, 2vw, 2rem);
+      gap: clamp(2rem, 4vw, 4rem);
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
-      max-height: 4.5rem;
+      max-height: 9rem;
     }
   }
 
@@ -734,21 +669,25 @@
   }
 
   #footer-{{ section.id }} .footer-premium__heading {
-    margin: 0 0 0.75rem;
+    margin: 0 0 1rem;
     font-family: var(--footer-font-display);
-    font-size: clamp(1.05rem, 1.8vw, 1.28rem);
+    font-size: clamp(1.1rem, 1.5vw, 1.35rem);
     font-weight: 500;
-    letter-spacing: 0.03em;
-    text-transform: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--footer-text);
     position: relative;
-    padding-bottom: 0.45rem;
+    padding-bottom: 0.65rem;
   }
 
   #footer-{{ section.id }} .footer-premium__heading--icon {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0;
+  }
+
+  #footer-{{ section.id }} .footer-premium__heading--icon .footer-premium__icon {
+    display: none;
   }
 
   #footer-{{ section.id }} .footer-premium__heading::after {
@@ -756,9 +695,9 @@
     position: absolute;
     left: 0;
     bottom: 0;
-    width: 2rem;
+    width: 2.5rem;
     height: 1px;
-    background: var(--footer-gold-bright);
+    background: linear-gradient(90deg, var(--footer-gold-bright), transparent);
   }
 
   #footer-{{ section.id }} .footer-premium__icon {
@@ -790,7 +729,7 @@
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.35rem;
+    gap: 0.5rem;
   }
 
   #footer-{{ section.id }} .footer-premium__link-row {
@@ -801,10 +740,14 @@
     max-width: 100%;
     text-decoration: none;
     font-size: 0.875rem;
-    line-height: 1.35;
-    letter-spacing: 0.01em;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
     color: var(--footer-text-muted);
-    transition: color 180ms ease;
+    transition: color 200ms ease, transform 200ms ease;
+  }
+
+  #footer-{{ section.id }} .footer-premium__link-row .footer-premium__icon {
+    display: none;
   }
 
   #footer-{{ section.id }} .footer-premium__link-row span:last-child {
@@ -813,41 +756,32 @@
 
   #footer-{{ section.id }} .footer-premium__link-row:is(:hover, :focus-visible) {
     color: var(--footer-gold);
-  }
-
-  #footer-{{ section.id }} .footer-premium__link-row .footer-premium__icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 4px;
-  }
-
-  #footer-{{ section.id }} .footer-premium__link-row .footer-premium__icon .footer-premium__icon-svg {
-    width: 0.75rem;
-    height: 0.75rem;
+    transform: translateX(2px);
   }
 
   #footer-{{ section.id }} .footer-premium__newsletter-text {
-    margin: 0 0 0.85rem;
+    margin: 0 0 1rem;
     font-size: 0.875rem;
-    line-height: 1.5;
+    line-height: 1.65;
     color: var(--footer-text-muted);
-    max-width: 32ch;
+    max-width: 34ch;
   }
 
   #footer-{{ section.id }} .footer-premium__newsletter-form {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.55rem;
   }
 
   #footer-{{ section.id }} .footer-premium__newsletter-row {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     border: 1px solid var(--footer-gold-soft);
     border-radius: 999px;
-    padding: 0.3rem 0.35rem 0.3rem 0.6rem;
-    background: rgb(255 255 255 / 0.08);
+    padding: 0.35rem 0.4rem 0.35rem 0.75rem;
+    background: rgb(255 255 255 / 0.06);
+    backdrop-filter: blur(6px);
   }
 
   #footer-{{ section.id }} .footer-premium__icon--input {
@@ -958,24 +892,24 @@
 
   #footer-{{ section.id }} .footer-premium__mid {
     display: grid;
-    gap: 1.25rem;
-    padding-top: 0.25rem;
-    border-top: 1px solid var(--footer-gold-soft);
+    gap: clamp(1.5rem, 3vw, 2.25rem);
+    align-items: start;
   }
 
   #footer-{{ section.id }} .footer-premium__map-wrap {
     display: grid;
-    gap: 0.65rem;
+    gap: 0.85rem;
   }
 
   #footer-{{ section.id }} .footer-premium__map {
     position: relative;
     width: 100%;
-    min-height: 220px;
-    border-radius: 12px;
+    min-height: 240px;
+    border-radius: var(--footer-luxury-radius);
     overflow: hidden;
-    border: 1px solid var(--footer-gold-soft);
-    background: rgb(0 0 0 / 0.2);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(0 0 0 / 0.22);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
   }
 
   #footer-{{ section.id }} .footer-premium__map iframe {
@@ -1048,16 +982,29 @@
     gap: 1rem;
   }
 
+  #footer-{{ section.id }} .footer-premium__contact-card {
+    padding: 1.1rem 1.15rem;
+    border-radius: var(--footer-luxury-radius);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background: rgb(255 255 255 / 0.04);
+    transition: border-color 200ms ease, background 200ms ease;
+  }
+
+  #footer-{{ section.id }} .footer-premium__contact-card:hover {
+    border-color: rgb(255 255 255 / 0.2);
+    background: rgb(255 255 255 / 0.06);
+  }
+
   #footer-{{ section.id }} .footer-premium__contact-title,
   #footer-{{ section.id }} .footer-premium__contact-card h4 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.65rem;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
     font-family: var(--footer-font-display);
-    font-size: 0.98rem;
+    font-size: 1.05rem;
     font-weight: 500;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     color: var(--footer-text);
   }
 
@@ -1107,21 +1054,28 @@
     color: var(--footer-gold);
   }
 
+  #footer-{{ section.id }} .footer-premium__legal {
+    padding: clamp(0.85rem, 2vw, 1.15rem) clamp(1rem, 3vw, 2.5rem) clamp(1.1rem, 2.5vw, 1.5rem);
+    background: #154230;
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+  }
+
   #footer-{{ section.id }} .footer-premium__trust {
-    margin: 0;
+    margin: 0 auto;
+    max-width: min(1240px, 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
     text-align: center;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--footer-text-subtle);
-    padding: 0.55rem 0;
-    border-top: 1px solid var(--footer-gold-soft);
-    border-bottom: 1px solid var(--footer-gold-soft);
+    padding: 0.75rem 0;
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
   }
 
   #footer-{{ section.id }} .footer-premium__icon--trust {
@@ -1136,22 +1090,6 @@
     color: var(--footer-gold);
   }
 
-  #footer-{{ section.id }} .footer-premium__bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.65rem;
-    text-align: center;
-  }
-
-  #footer-{{ section.id }} .footer-premium__copyright {
-    margin: 0;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    color: var(--footer-text-subtle);
-    max-width: 52ch;
-  }
-
   #footer-{{ section.id }} .footer-premium__policies {
     list-style: none;
     margin: 0;
@@ -1159,7 +1097,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.35rem 1rem;
+    gap: 0.5rem 1.25rem;
   }
 
   #footer-{{ section.id }} .footer-premium__policies a,
@@ -1167,40 +1105,89 @@
     font-size: 0.8125rem;
     text-decoration: none;
     color: var(--footer-text-subtle);
+    letter-spacing: 0.03em;
+  }
+
+  #footer-{{ section.id }} .footer-premium__policies .footer-premium__icon {
+    display: none;
   }
 
   #footer-{{ section.id }} .footer-premium__policies a:hover {
     color: var(--footer-gold);
   }
 
+  #footer-{{ section.id }} .footer-premium__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    max-width: min(1240px, 100%);
+    margin-inline: auto;
+    padding-top: 0.85rem;
+  }
+
+  #footer-{{ section.id }} .footer-premium__copyright {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    color: var(--footer-text-subtle);
+    max-width: 52ch;
+  }
+
   @media screen and (min-width: 750px) {
     #footer-{{ section.id }} .footer-premium__main {
-      grid-template-columns: 1.15fr repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: start;
+      gap: clamp(1.25rem, 2.5vw, 2.5rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__column:not(:last-child),
+    #footer-{{ section.id }} .footer-premium__newsletter {
+      padding-inline-end: clamp(1rem, 2vw, 1.75rem);
+      border-inline-end: 1px solid rgb(255 255 255 / 0.08);
     }
 
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: 1.1fr 1fr;
-      gap: 1.75rem;
-      align-items: start;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: clamp(1.5rem, 3vw, 2.5rem);
     }
 
     #footer-{{ section.id }} .footer-premium__map {
-      min-height: 260px;
+      min-height: 280px;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-grid {
       grid-template-columns: 1fr;
+      gap: 0.85rem;
     }
 
     #footer-{{ section.id }} .footer-premium__bottom {
       flex-direction: row;
       justify-content: space-between;
       text-align: start;
+      align-items: center;
     }
 
     #footer-{{ section.id }} .footer-premium__policies {
       justify-content: flex-end;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    #footer-{{ section.id }} .footer-premium__mid {
+      grid-template-columns: 1fr;
+      gap: clamp(1.75rem, 3vw, 2.5rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__map {
+      min-height: 300px;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.15rem;
     }
   }
 {% endstyle %}
@@ -1228,27 +1215,6 @@
       "id": "color_scheme",
       "label": "Color scheme",
       "default": "scheme-golden"
-    },
-    {
-      "type": "header",
-      "content": "Brand"
-    },
-    {
-      "type": "text",
-      "id": "brand_name",
-      "label": "Brand name (fallback)",
-      "default": "Lame Beauty Care"
-    },
-    {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Company logo"
-    },
-    {
-      "type": "richtext",
-      "id": "about_text",
-      "label": "About text",
-      "default": "<p>Premium cosmetic essentials crafted for radiant skin, confident beauty, and everyday self-care rituals.</p>"
     },
     {
       "type": "header",
@@ -1519,51 +1485,12 @@
           "default": true
         }
       ]
-    },
-    {
-      "type": "social_link",
-      "name": "Social link",
-      "settings": [
-        {
-          "type": "select",
-          "id": "platform",
-          "label": "Platform",
-          "options": [
-            { "value": "instagram", "label": "Instagram" },
-            { "value": "facebook", "label": "Facebook" },
-            { "value": "youtube", "label": "YouTube" },
-            { "value": "tiktok", "label": "TikTok" },
-            { "value": "pinterest", "label": "Pinterest" },
-            { "value": "whatsapp", "label": "WhatsApp" },
-            { "value": "linkedin", "label": "LinkedIn" }
-          ],
-          "default": "instagram"
-        },
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Accessibility label",
-          "default": "Instagram"
-        },
-        {
-          "type": "url",
-          "id": "url",
-          "label": "URL"
-        },
-        {
-          "type": "checkbox",
-          "id": "open_in_new_tab",
-          "label": "Open in new tab",
-          "default": true
-        }
-      ]
     }
   ],
   "presets": [
     {
       "name": "Lame Editable Footer",
       "settings": {
-        "brand_name": "Lame Beauty Care",
         "show_ventures": true,
         "ventures_heading": "Our Ventures",
         "show_newsletter": true,
@@ -1618,30 +1545,6 @@
             "asset": "alverstone-medcity-logo.png",
             "alt": "Alverstone Medcity"
           }
-        },
-        "social_instagram": {
-          "type": "social_link",
-          "settings": {
-            "platform": "instagram",
-            "label": "Instagram",
-            "url": "https://instagram.com"
-          }
-        },
-        "social_facebook": {
-          "type": "social_link",
-          "settings": {
-            "platform": "facebook",
-            "label": "Facebook",
-            "url": "https://facebook.com"
-          }
-        },
-        "social_youtube": {
-          "type": "social_link",
-          "settings": {
-            "platform": "youtube",
-            "label": "YouTube",
-            "url": "https://youtube.com"
-          }
         }
       },
       "block_order": [
@@ -1650,10 +1553,7 @@
         "venture_drug_house",
         "venture_lame",
         "venture_ihed",
-        "venture_medcity",
-        "social_instagram",
-        "social_facebook",
-        "social_youtube"
+        "venture_medcity"
       ]
     }
   ]
