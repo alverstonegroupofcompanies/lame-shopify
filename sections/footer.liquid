@@ -91,6 +91,76 @@
             {% endfor %}
           </ul>
         {% endif %}
+
+        {% if section.settings.show_ventures %}
+          {% liquid
+            assign venture_blocks = section.blocks | where: 'type', 'venture'
+          %}
+          {% if venture_blocks.size > 0 or request.design_mode %}
+            <div class="footer-premium__ventures">
+              {% if section.settings.ventures_heading != blank %}
+                <h3 class="footer-premium__ventures-heading">{{ section.settings.ventures_heading }}</h3>
+              {% endif %}
+              <ul class="footer-premium__ventures-grid" role="list">
+                {% for block in venture_blocks %}
+                  {% liquid
+                    assign venture_image = block.settings.image
+                    assign venture_alt = block.settings.alt | default: block.settings.title
+                    assign venture_asset = block.settings.asset | strip
+                    assign has_venture_logo = false
+                    if venture_image != blank or venture_asset != blank
+                      assign has_venture_logo = true
+                    endif
+                  %}
+                  {% if has_venture_logo == false and request.design_mode == false %}
+                    {% continue %}
+                  {% endif %}
+                  <li class="footer-premium__venture-item" {{ block.shopify_attributes }}>
+                    {% if block.settings.link != blank %}
+                      <a
+                        href="{{ block.settings.link }}"
+                        class="footer-premium__venture-link"
+                        {% if block.settings.open_in_new_tab %}
+                          target="_blank" rel="noopener noreferrer"
+                        {% endif %}
+                      >
+                    {% else %}
+                      <span class="footer-premium__venture-link">
+                    {% endif %}
+                    {% if venture_image != blank %}
+                      {{
+                        venture_image
+                        | image_url: width: 480
+                        | image_tag:
+                          class: 'footer-premium__venture-logo',
+                          loading: 'lazy',
+                          widths: '160,240,320,400,480',
+                          sizes: '(max-width: 749px) 42vw, 140px',
+                          alt: venture_alt
+                      }}
+                    {% elsif venture_asset != blank %}
+                      <img
+                        class="footer-premium__venture-logo"
+                        src="{{ venture_asset | asset_url }}"
+                        alt="{{ venture_alt | escape }}"
+                        width="200"
+                        height="64"
+                        loading="lazy"
+                      >
+                    {% elsif request.design_mode %}
+                      <span class="footer-premium__venture-placeholder">Add venture logo</span>
+                    {% endif %}
+                    {% if block.settings.link != blank %}
+                      </a>
+                    {% else %}
+                      </span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endif %}
       </div>
 
       <div class="footer-premium__column">
@@ -283,6 +353,46 @@
       {% endif %}
 
       <div class="footer-premium__contact-grid">
+        {% if section.settings.show_head_office %}
+          <div class="footer-premium__contact-card footer-premium__contact-card--head-office">
+            <h4 class="footer-premium__contact-title">
+              <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'location' %}</span>
+              {{ section.settings.head_office_heading }}
+            </h4>
+            {% if section.settings.head_office_address != blank %}
+              <div class="rte footer-premium__head-office-address">{{ section.settings.head_office_address }}</div>
+            {% endif %}
+            <ul class="footer-premium__contact-list footer-premium__head-office-list" role="list">
+              {% if section.settings.head_office_email != blank %}
+                <li>
+                  <span class="footer-premium__contact-label">Email</span>
+                  <a href="mailto:{{ section.settings.head_office_email | strip }}">{{ section.settings.head_office_email }}</a>
+                </li>
+              {% endif %}
+              {% if section.settings.head_office_website != blank %}
+                {% liquid
+                  assign head_office_site = section.settings.head_office_website | strip
+                  assign head_office_site_href = head_office_site
+                  unless head_office_site_href contains '://'
+                    assign head_office_site_href = 'https://' | append: head_office_site_href
+                  endunless
+                %}
+                <li>
+                  <span class="footer-premium__contact-label">Website</span>
+                  <a href="{{ head_office_site_href }}" target="_blank" rel="noopener noreferrer">
+                    {{ section.settings.head_office_website }}
+                  </a>
+                </li>
+              {% endif %}
+              {% if section.settings.head_office_phones != blank %}
+                <li class="footer-premium__contact-extra">
+                  <span class="footer-premium__contact-label">Contact No</span>
+                  <div class="rte footer-premium__head-office-phones">{{ section.settings.head_office_phones }}</div>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+        {% endif %}
         <div class="footer-premium__contact-card">
           <h4 class="footer-premium__contact-title">
             <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'clock' %}</span>
@@ -464,6 +574,72 @@
     height: 0.95rem;
     fill: currentColor;
     display: block;
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures {
+    margin-top: 0.35rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--footer-gold-soft);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-heading {
+    margin: 0 0 0.65rem;
+    font-family: var(--footer-font-display);
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--footer-text);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    max-width: 100%;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-item {
+    min-width: 0;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.45rem 0.55rem;
+    border-radius: 8px;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: #0a0a0a;
+    text-decoration: none;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-link:is(:hover, :focus-visible) {
+    border-color: rgb(255 255 255 / 0.22);
+    transform: translateY(-1px);
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-logo {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 2.5rem;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-placeholder {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--footer-text-subtle);
+    text-align: center;
   }
 
   #footer-{{ section.id }} .footer-premium__heading {
@@ -985,6 +1161,22 @@
     },
     {
       "type": "header",
+      "content": "Our ventures"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ventures",
+      "label": "Show venture logos",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "ventures_heading",
+      "label": "Ventures heading",
+      "default": "Our Ventures"
+    },
+    {
+      "type": "header",
       "content": "Navigation"
     },
     {
@@ -1150,6 +1342,46 @@
     },
     {
       "type": "header",
+      "content": "Head office"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_head_office",
+      "label": "Show head office details",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "head_office_heading",
+      "label": "Head office heading",
+      "default": "Head Office"
+    },
+    {
+      "type": "richtext",
+      "id": "head_office_address",
+      "label": "Head office address",
+      "default": "<p>Bio 360, Kerala Life Sciences Industries Park,<br>Thiruvananthapuram-695317</p>"
+    },
+    {
+      "type": "text",
+      "id": "head_office_email",
+      "label": "Head office email",
+      "default": "mail@lamstonehealthcare.com"
+    },
+    {
+      "type": "text",
+      "id": "head_office_website",
+      "label": "Head office website",
+      "default": "www.lamstonehealthcare.com"
+    },
+    {
+      "type": "richtext",
+      "id": "head_office_phones",
+      "label": "Head office phone numbers",
+      "default": "<p><a href=\"tel:+919746397686\">+91 974 639 7686</a>, <a href=\"tel:+918139807686\">+91 813 980 7686</a><br><a href=\"tel:+918129142686\">+9181291 42686</a>, <a href=\"tel:+971547401777\">+97154 740 1777</a></p>"
+    },
+    {
+      "type": "header",
       "content": "Footer bottom"
     },
     {
@@ -1198,6 +1430,46 @@
   ],
   "blocks": [
     {
+      "type": "venture",
+      "name": "Venture logo",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Venture name",
+          "default": "Venture"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo image",
+          "info": "Optional. Leave empty to use a theme asset filename below."
+        },
+        {
+          "type": "text",
+          "id": "asset",
+          "label": "Theme asset filename",
+          "info": "Example: alverstone-pharmacare-logo.png"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Alt text"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Website link"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open in new tab",
+          "default": true
+        }
+      ]
+    },
+    {
       "type": "social_link",
       "name": "Social link",
       "settings": [
@@ -1241,11 +1513,61 @@
       "name": "Lame Editable Footer",
       "settings": {
         "brand_name": "Lame Beauty Care",
+        "show_ventures": true,
+        "ventures_heading": "Our Ventures",
         "show_newsletter": true,
         "show_map": true,
         "trust_badges": "Cruelty-free · Dermatologist tested · Secure checkout"
       },
       "blocks": {
+        "venture_pharmacare": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone Pharmacare",
+            "asset": "alverstone-pharmacare-logo.png",
+            "alt": "Alverstone Pharmacare"
+          }
+        },
+        "venture_healthcare": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone Healthcare Pvt Ltd",
+            "asset": "alverstone-healthcare-logo.png",
+            "alt": "Alverstone Healthcare Pvt Ltd"
+          }
+        },
+        "venture_drug_house": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone Drug House (P) Ltd",
+            "asset": "alverstone-drug-house-logo.png",
+            "alt": "Alverstone Drug House (P) Ltd"
+          }
+        },
+        "venture_lame": {
+          "type": "venture",
+          "settings": {
+            "title": "Lamé Luxury Cosmetics & Fragrances",
+            "asset": "lame-luxury-logo.png",
+            "alt": "Lamé Luxury Cosmetics & Fragrances"
+          }
+        },
+        "venture_ihed": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone IHED LLC",
+            "asset": "alverstone-ihed-logo.png",
+            "alt": "Alverstone IHED LLC"
+          }
+        },
+        "venture_medcity": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone Medcity",
+            "asset": "alverstone-medcity-logo.png",
+            "alt": "Alverstone Medcity"
+          }
+        },
         "social_instagram": {
           "type": "social_link",
           "settings": {
@@ -1271,7 +1593,17 @@
           }
         }
       },
-      "block_order": ["social_instagram", "social_facebook", "social_youtube"]
+      "block_order": [
+        "venture_pharmacare",
+        "venture_healthcare",
+        "venture_drug_house",
+        "venture_lame",
+        "venture_ihed",
+        "venture_medcity",
+        "social_instagram",
+        "social_facebook",
+        "social_youtube"
+      ]
     }
   ]
 }

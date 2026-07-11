@@ -30,6 +30,90 @@
 
     <div class="lame-contact-page__layout">
       <aside class="lame-contact-page__info">
+        {% if section.settings.show_head_office %}
+          <div class="lame-contact-page__info-card lame-contact-page__info-card--head-office">
+            <div class="lame-contact-page__head-office-brand">
+              {% if section.settings.head_office_logo != blank %}
+                {{
+                  section.settings.head_office_logo
+                  | image_url: width: 480
+                  | image_tag:
+                    class: 'lame-contact-page__head-office-logo',
+                    loading: 'lazy',
+                    widths: '200,280,360,480',
+                    sizes: '(max-width: 600px) 200px, 240px',
+                    alt: section.settings.head_office_logo_alt | default: 'Alverstone Healthcare Pvt Ltd'
+                }}
+              {% else %}
+                <img
+                  class="lame-contact-page__head-office-logo"
+                  src="{{ 'alverstone-healthcare-logo.png' | asset_url }}"
+                  alt="{{ section.settings.head_office_logo_alt | default: 'Alverstone Healthcare Pvt Ltd' | escape }}"
+                  width="240"
+                  height="80"
+                  loading="lazy"
+                >
+              {% endif %}
+            </div>
+            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.head_office' | t }}</h2>
+            {% if section.settings.head_office_address != blank %}
+              <p class="lame-contact-page__info-text lame-contact-page__head-office-address">
+                {{ section.settings.head_office_address | escape | newline_to_br }}
+              </p>
+            {% endif %}
+            <ul class="lame-contact-page__head-office-links" role="list">
+              {% if section.settings.head_office_email != blank %}
+                <li>
+                  <span class="lame-contact-page__head-office-label">{{ 'lame_contact.email' | t }}</span>
+                  <a href="mailto:{{ section.settings.head_office_email | strip }}">
+                    {{ section.settings.head_office_email | escape }}
+                  </a>
+                </li>
+              {% endif %}
+              {% if section.settings.head_office_website != blank %}
+                {% liquid
+                  assign head_office_site = section.settings.head_office_website | strip
+                  assign head_office_site_href = head_office_site
+                  unless head_office_site_href contains '://'
+                    assign head_office_site_href = 'https://' | append: head_office_site_href
+                  endunless
+                %}
+                <li>
+                  <span class="lame-contact-page__head-office-label">{{ 'lame_contact.website' | t }}</span>
+                  <a href="{{ head_office_site_href }}" target="_blank" rel="noopener noreferrer">
+                    {{ section.settings.head_office_website | escape }}
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+            {% if section.settings.head_office_phones != blank %}
+              <div class="lame-contact-page__head-office-phones">
+                <span class="lame-contact-page__head-office-label">{{ 'lame_contact.contact_numbers' | t }}</span>
+                <ul class="lame-contact-page__phone-list" role="list">
+                  {% liquid
+                    assign head_office_phone_blob = section.settings.head_office_phones | replace: ',', '
+' | replace: '|', '
+'
+                    assign head_office_phone_lines = head_office_phone_blob | split: '
+'
+                  %}
+                  {% for phone_line in head_office_phone_lines %}
+                    {% assign phone_stripped = phone_line | strip %}
+                    {% if phone_stripped != blank %}
+                      {% assign phone_href = phone_stripped | remove: ' ' | remove: '-' | remove: '(' | remove: ')' %}
+                      <li>
+                        <a class="lame-contact-page__phone-link" href="tel:{{ phone_href }}">
+                          {{ phone_stripped | escape }}
+                        </a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
         <div class="lame-contact-page__info-card">
           <h2 class="lame-contact-page__info-title">{{ 'lame_contact.get_in_touch' | t }}</h2>
           <p class="lame-contact-page__info-text">{{ 'lame_contact.get_in_touch_intro' | t }}</p>
@@ -164,6 +248,57 @@
     {
       "type": "paragraph",
       "content": "Submissions use Shopify’s contact form. Set the store contact email in Shopify Admin → Settings → Store details (not shown on this page)."
+    },
+    {
+      "type": "header",
+      "content": "Head office"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_head_office",
+      "label": "Show head office block",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "head_office_logo",
+      "label": "Head office logo",
+      "info": "Leave empty to use the default Alverstone Healthcare logo."
+    },
+    {
+      "type": "text",
+      "id": "head_office_logo_alt",
+      "label": "Logo alt text",
+      "default": "Alverstone Healthcare Pvt Ltd"
+    },
+    {
+      "type": "textarea",
+      "id": "head_office_address",
+      "label": "Head office address",
+      "default": "Bio 360, Kerala Life Sciences Industries Park, Thiruvananthapuram-695317"
+    },
+    {
+      "type": "text",
+      "id": "head_office_email",
+      "label": "Head office email",
+      "default": "mail@lamstonehealthcare.com"
+    },
+    {
+      "type": "text",
+      "id": "head_office_website",
+      "label": "Head office website",
+      "default": "www.lamstonehealthcare.com"
+    },
+    {
+      "type": "textarea",
+      "id": "head_office_phones",
+      "label": "Head office phone numbers",
+      "info": "One number per line.",
+      "default": "+91 974 639 7686\n+91 813 980 7686\n+9181291 42686\n+97154 740 1777"
+    },
+    {
+      "type": "header",
+      "content": "Page content"
     },
     {
       "type": "text",
