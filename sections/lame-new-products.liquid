@@ -75,14 +75,14 @@
     padding: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
+    align-items: start;
     gap: 0.85rem;
   }
 
   .lame-new-products__item {
     display: flex;
     min-width: 0;
-    min-height: 100%;
+    height: auto;
   }
 
   .lame-new-products .lame-home-product-card--arrival {
@@ -90,7 +90,7 @@
     flex-direction: column;
     flex: 1;
     width: 100%;
-    height: 100%;
+    height: auto;
     border: 1px solid rgb(0 0 0 / 0.08);
     border-radius: 8px;
     background: #fff;
@@ -184,6 +184,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.35rem;
     border: 1px solid #2a3a30;
     border-radius: 999px;
     background: #2a3a30;
@@ -195,6 +196,12 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+
+  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
   }
 
   .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc:hover:not(:disabled) {
@@ -249,9 +256,8 @@
     }
 
     .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media-link {
-      position: absolute;
-      inset: 0;
       display: block;
+      flex: 0 0 auto;
     }
 
     .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media {
@@ -274,9 +280,12 @@
     }
 
     .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__body {
-      flex: 0 0 auto;
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
       gap: 0.3rem;
       padding: 0.6rem 0.55rem 0.7rem;
+      background: #fff;
     }
 
     .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title {
@@ -292,9 +301,21 @@
       padding-top: 0.1rem;
     }
 
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc {
+    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc:not(:disabled) {
+      width: 2.5rem;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      min-height: 2.5rem;
+      margin-inline: auto;
+      padding: 0;
+      border-radius: 50%;
+    }
+
+    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc:disabled {
+      width: 100%;
       min-height: 2.1rem;
       padding: 0.45rem 0.55rem;
+      border-radius: 999px;
     }
   }
 {% endstylesheet %}

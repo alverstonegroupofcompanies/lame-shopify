@@ -104,13 +104,18 @@
       <form method="post" action="{{ routes.cart_add_url }}" class="lame-flash-card__form" data-lame-home-atc>
         <input type="hidden" name="id" value="{{ selected_variant.id }}">
         <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="lame-flash-card__atc" {% unless product.available %}disabled{% endunless %}>
+        <button
+          type="submit"
+          class="lame-flash-card__atc"
+          aria-label="{% if product.available %}{{ add_to_cart_label | default: 'Add to cart' }}{% else %}{{ sold_out_label }}{% endif %}"
+          {% unless product.available %}disabled{% endunless %}
+        >
           <svg class="lame-flash-card__atc-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M6 6h14l-1.2 8H7.4L6 6Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
             <path d="M9 6V5a3 3 0 0 1 6 0v1" stroke="currentColor" stroke-width="1.5" fill="none"/>
           </svg>
           {%- if product.available -%}
-            {{ add_to_cart_label | default: 'Add to cart' }}
+            <span class="lame-flash-card__atc-label is-visually-hidden-mobile">{{ add_to_cart_label | default: 'Add to cart' }}</span>
           {%- else -%}
             {{ sold_out_label }}
           {%- endif -%}
