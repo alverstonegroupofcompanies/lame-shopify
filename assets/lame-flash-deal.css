@@ -568,13 +568,16 @@
 
 @media screen and (max-width: 749px) {
   .lame-flash-deal {
-    --lame-flash-card-width: max(140px, calc((100vw - 2 * var(--lame-flash-edge) - 0.75rem) / 2));
+    --lame-flash-mobile-gap: 0.65rem;
+    --lame-flash-mobile-gutter: 0.85rem;
+    --lame-flash-card-width: calc((100vw - 5rem) / 2);
+    overflow-x: visible;
   }
 
   .lame-flash-deal__carousel {
     grid-template-columns: 1fr;
     gap: 0;
-    padding-inline: var(--lame-flash-edge);
+    padding-inline: var(--lame-flash-mobile-gutter);
   }
 
   .lame-flash-deal__nav {
@@ -582,18 +585,29 @@
   }
 
   .lame-flash-deal__viewport {
-    scroll-padding-inline: var(--lame-flash-edge);
+    container-type: inline-size;
+    container-name: flash-viewport;
+    width: 100%;
+    padding-inline: 0.2rem;
+    scroll-padding-inline: 0.2rem;
+  }
+
+  @container flash-viewport (width < 750px) {
+    .lame-flash-deal__item {
+      flex: 0 0 calc((100cqi - var(--lame-flash-mobile-gap) - 0.5rem) / 2);
+      width: calc((100cqi - var(--lame-flash-mobile-gap) - 0.5rem) / 2);
+    }
   }
 
   .lame-flash-deal__track {
-    padding-inline: 0;
+    padding: 0.35rem 0.2rem 0.75rem;
     align-items: start;
-    gap: 0.75rem;
+    gap: var(--lame-flash-mobile-gap);
   }
 
   .lame-flash-card {
     height: auto;
-    overflow: visible;
+    overflow: hidden;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgb(255 87 34 / 0.1);
   }
