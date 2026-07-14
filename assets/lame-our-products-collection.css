@@ -22,7 +22,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   --lame-lux-shadow-card: 0 4px 20px rgb(20 31 24 / 0.06);
   --lame-lux-shadow-hover: 0 12px 32px rgb(20 31 24 / 0.1);
   --lame-lux-shadow-panel: 0 6px 28px rgb(20 31 24 / 0.05);
-  --lame-lux-layout-max: 1440px;
+  --lame-lux-layout-max: none;
   --lame-lux-font-display: 'Cormorant Garamond', Georgia, serif;
   --lame-lux-font-body: 'Jost', system-ui, sans-serif;
   --lame-ivory: #ffffff;
@@ -185,8 +185,8 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 /* —— Shell & layout —— */
 .collection-template-our-products > .lame-collection-shell {
   width: 100%;
-  max-width: min(100%, var(--lame-lux-layout-max, min(1680px, calc(100vw - 3rem))));
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
   padding-block: clamp(1rem, 2.5vw, 1.75rem) clamp(2rem, 4vw, 3rem);
   padding-inline: 0;
   box-sizing: border-box;
@@ -1021,24 +1021,28 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   color: var(--lame-lux-secondary, #3f6b52);
 }
 
-/* Override premium grid rules inside our-products card scope — fluid auto-fill */
+/* Override premium grid — force 3 columns on Our Products */
 .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
   :is(.lame-collection-brand-section__grid, .product-grid) {
   display: grid !important;
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: none !important;
   justify-content: stretch !important;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(min(100%, var(--lame-op-card-min, 180px)), 1fr)
-  ) !important;
-  gap: var(--lame-op-grid-gap) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: var(--lame-op-grid-gap, 0.75rem) !important;
   margin: 0;
   padding: 0;
   list-style: none;
-  --product-grid-columns-desktop: unset;
+  --product-grid-columns-desktop: unset !important;
   --product-grid-gap-mobile: unset;
   --product-grid-gap-desktop: unset;
+}
+
+@media screen and (min-width: 750px) {
+  .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
+    :is(.lame-collection-brand-section__grid, .product-grid) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
 }
 
 /* Pagination */
@@ -1546,14 +1550,17 @@ body.template-collection-our-products .lame-our-products-page > .lame-collection
   padding-block-start: 0 !important;
 }
 
-/* Wide desktop: expand shell and cards */
+/* Wide desktop: keep Our Products full-bleed (no max-width lock) */
 @media screen and (min-width: 1200px) {
   .collection-template-our-products.lame-our-products-page {
-    --lame-lux-layout-max: min(1680px, calc(100vw - 3rem));
+    --lame-lux-layout-max: none;
   }
 
-  .collection-template-our-products.lame-our-products-page > .lame-collection-shell {
-    max-width: min(100%, var(--lame-lux-layout-max));
+  .collection-template-our-products.lame-our-products-page > .lame-collection-shell,
+  .collection-template-our-products > .lame-collection-shell:has(.lame-op-page),
+  body.template-collection-our-products .lame-our-products-page > .lame-collection-shell {
+    max-width: none !important;
+    width: 100% !important;
     position: relative;
   }
 }

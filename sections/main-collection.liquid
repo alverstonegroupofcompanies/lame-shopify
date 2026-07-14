@@ -61,7 +61,12 @@
   assign lame_promo_image_blocks = section.blocks | where: 'type', 'promo_image'
   assign lame_has_promo_images = false
   if lame_our_products_op_cards and lame_promo_image_blocks.size > 0
-    assign lame_has_promo_images = true
+    for promo_block in lame_promo_image_blocks
+      if promo_block.settings.image != blank
+        assign lame_has_promo_images = true
+        break
+      endif
+    endfor
   endif
 %}
 
