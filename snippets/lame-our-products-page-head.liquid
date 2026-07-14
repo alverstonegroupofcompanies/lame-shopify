@@ -1,5 +1,5 @@
 {%- doc -%}
-  Our Products — centered catalog page title. Filters live in the left sidebar.
+  Our Products catalog page title — “Buy {collection} Online (count)”.
 
   @param {object} collection - Collection
   @param {string} [heading] - Override heading
@@ -14,10 +14,20 @@
   if page_heading == blank
     assign page_heading = 'Our Products'
   endif
+
+  assign product_count = 0
+  if collection != blank
+    assign product_count = collection.products_count
+  endif
 -%}
 
 <header class="lame-op-page__head lame-our-products-page-head lame-op-page__head--catalog">
-  <h1 class="lame-op-page__title lame-our-products-page-head__title">{{ page_heading | escape }}</h1>
+  <h1 class="lame-op-page__title lame-our-products-page-head__title">
+    <span class="lame-op-page__title-text">Buy {{ page_heading | escape }} Online</span>
+    {%- if product_count > 0 -%}
+      <span class="lame-op-page__title-count">({{ product_count }})</span>
+    {%- endif -%}
+  </h1>
   {%- if subtitle != blank -%}
     <p class="lame-op-page__subtitle">{{ subtitle | escape }}</p>
   {%- endif -%}

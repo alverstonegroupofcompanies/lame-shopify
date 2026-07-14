@@ -174,7 +174,7 @@
           on:submit="/handleFormSubmit"
         >
           {% if should_show_pane %}
-            {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering and lame_our_products_active == false %}
+            {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering %}
               {% liquid
                 assign filters_head_active_count = 0
                 for filter in filters
@@ -184,7 +184,9 @@
                         assign filters_head_active_count = filters_head_active_count | plus: 1
                       endif
                     else
-                      assign filters_head_active_count = filters_head_active_count | plus: filter.active_values.size
+                      unless lame_our_products_active and filter.param_name == 'filter.p.vendor'
+                        assign filters_head_active_count = filters_head_active_count | plus: filter.active_values.size
+                      endunless
                   endcase
                 endfor
 
@@ -193,13 +195,38 @@
                   assign filters_head_active = true
                 endif
               %}
-              {% render 'lame-collection-filters-panel-head',
-                active_count: filters_head_active_count,
-                show_clear_all: false,
-                results_url: results_url,
-                section_id: section.id,
-                is_active: filters_head_active
-              %}
+              {% if lame_our_products_active %}
+                {% if filters_head_active %}
+                  <div class="lame-op-filters-applied">
+                    <div class="lame-op-filters-applied__row">
+                      <span class="lame-op-filters-applied__title">Filters Applied</span>
+                      <facet-remove-component
+                        class="lame-op-filters-applied__clear-wrap"
+                        data-url="{{ results_url }}"
+                        active-class="is-active"
+                      >
+                        <button
+                          type="button"
+                          class="lame-op-filters-applied__clear"
+                          ref="clearButton"
+                          on:click="/removeFilter?form=FacetFiltersForm--{{ section.id }}-desktop"
+                          on:keydown="/removeFilter?form=FacetFiltersForm--{{ section.id }}-desktop"
+                        >
+                          Clear All
+                        </button>
+                      </facet-remove-component>
+                    </div>
+                  </div>
+                {% endif %}
+              {% else %}
+                {% render 'lame-collection-filters-panel-head',
+                  active_count: filters_head_active_count,
+                  show_clear_all: false,
+                  results_url: results_url,
+                  section_id: section.id,
+                  is_active: filters_head_active
+                %}
+              {% endif %}
             {% endif %}
 
             {% render 'filter-remove-buttons',

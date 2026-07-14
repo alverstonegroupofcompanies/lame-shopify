@@ -1,9 +1,9 @@
 {%- doc -%}
-  Our Products shop card — matches catalog mock (badge, wishlist, excerpt, price+rating, ATC).
+  Our Products catalog card — listing style (tags, price, rating, optional sale bar).
 
   @param {object} product
-  @param {object} section - Parent section (product form)
-  @param {boolean} [show_wishlist] - Wishlist heart on image
+  @param {object} section
+  @param {boolean} [show_wishlist]
 {%- enddoc -%}
 
 {%- liquid
@@ -21,15 +21,32 @@
     assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
   endif
 
-  assign card_label = product.type | strip
-  if card_label == blank
-    assign card_label = product.vendor | strip
+  assign tags_down = product.tags | join: ',' | downcase
+  assign is_featured = false
+  assign is_new = false
+  assign is_bestseller = false
+  if tags_down contains 'featured'
+    assign is_featured = true
   endif
-  if card_label == blank and product.metafields.custom.brand.value != blank
-    assign card_label = product.metafields.custom.brand.value | strip
+  if tags_down contains 'new'
+    assign is_new = true
+  endif
+  if tags_down contains 'bestseller' or tags_down contains 'best seller' or tags_down contains 'best-seller'
+    assign is_bestseller = true
   endif
 
-  assign card_excerpt = product.metafields.custom.short_description.value | default: product.description | strip_html | truncate: 96
+  assign promo_label = blank
+  if product.metafields.custom.promo_label.value != blank
+    assign promo_label = product.metafields.custom.promo_label.value
+  else
+    for tag in product.tags
+      assign tag_down = tag | downcase
+      if tag_down contains 'best of' or tag_down contains 'most reordered'
+        assign promo_label = tag
+        break
+      endif
+    endfor
+  endif
 
   assign rating = product.metafields.reviews.rating.value.rating
   assign rating_count = product.metafields.reviews.rating_count | default: 0
@@ -39,155 +56,120 @@
     assign has_rating = true
   endif
 
-  assign media_count = product.media.size
-  if media_count > 4
-    assign media_count = 4
+  assign variant_count = product.variants.size
+  assign form_id = 'CatalogCard-Form-' | append: section.id | append: '-' | append: product.id
+  assign show_sale_bar = false
+  if lame_discount_percent >= 15
+    assign show_sale_bar = true
   endif
-
-  assign form_id = 'ShopCard-Form-' | append: section.id | append: '-' | append: product.id
 -%}
 
-<article class="lame-shop-card" data-product-id="{{ product.id }}">
-  <div class="lame-shop-card__media">
-    {% if product.media.size > 0 %}
-      <div class="lame-shop-card__gallery" data-lame-shop-gallery>
-        {% for media in product.media limit: 4 %}
-          <a
-            href="{{ product.url }}"
-            class="lame-shop-card__media-link{% if forloop.first %} is-active{% endif %}"
-            data-lame-shop-slide
-            {% unless forloop.first %}hidden{% endunless %}
-            tabindex="{% if forloop.first %}-1{% else %}-1{% endif %}"
-            aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
-          >
-            {{
-              media.preview_image
-              | image_url: width: 800
-              | image_tag:
-                class: 'lame-shop-card__image',
-                loading: 'lazy',
-                widths: '280,360,480,600,800',
-                sizes: '(min-width: 990px) 28vw, (min-width: 750px) 40vw, 46vw',
-                alt: media.alt | default: product.title
-            }}
-          </a>
-        {% endfor %}
-      </div>
-
-      {% if media_count > 1 %}
-        <div class="lame-shop-card__dots" role="tablist" aria-label="Product images">
-          {% for i in (1..media_count) %}
-            <button
-              type="button"
-              class="lame-shop-card__dot{% if forloop.first %} is-active{% endif %}"
-              data-lame-shop-dot="{{ forloop.index0 }}"
-              aria-label="Image {{ forloop.index }}"
-              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-            ></button>
-          {% endfor %}
-        </div>
+<article class="lame-catlog-card">
+  <div class="lame-catlog-card__top">
+    <div class="lame-catlog-card__tags">
+      {% if is_featured %}
+        <span class="lame-catlog-card__tag lame-catlog-card__tag--featured">FEATURED</span>
       {% endif %}
-    {% else %}
-      <a href="{{ product.url }}" class="lame-shop-card__media-link is-active" tabindex="-1">
-        <div class="lame-shop-card__image lame-shop-card__image--placeholder" aria-hidden="true"></div>
-      </a>
-    {% endif %}
-
-    {% if lame_discount_percent > 0 %}
-      <span class="lame-shop-card__badge">{{ lame_discount_percent }}% OFF</span>
-    {% elsif product.available == false %}
-      <span class="lame-shop-card__badge lame-shop-card__badge--sold">{{ 'content.product_badge_sold_out' | t }}</span>
-    {% endif %}
+      <span class="lame-catlog-card__tags-end">
+        {% if is_bestseller %}
+          <span class="lame-catlog-card__tag lame-catlog-card__tag--bestseller">BESTSELLER</span>
+        {% elsif is_new %}
+          <span class="lame-catlog-card__tag lame-catlog-card__tag--new">NEW</span>
+        {% endif %}
+      </span>
+    </div>
 
     {% if show_wishlist and settings.lame_enable_wishlist %}
-      {% render 'lame-our-products-wishlist-btn', product: product %}
+      <div class="lame-catlog-card__wish">
+        {% render 'lame-our-products-wishlist-btn', product: product %}
+      </div>
     {% endif %}
   </div>
 
-  <div class="lame-shop-card__body">
-    {% if card_label != blank %}
-      <p class="lame-shop-card__eyebrow">{{ card_label | escape }}</p>
+  <a href="{{ product.url }}" class="lame-catlog-card__media">
+    {% if product.featured_media %}
+      {{
+        product.featured_media
+        | image_url: width: 720
+        | image_tag:
+          class: 'lame-catlog-card__image',
+          loading: 'lazy',
+          widths: '240,320,400,540,720',
+          sizes: '(min-width: 990px) 26vw, (min-width: 750px) 36vw, 46vw',
+          alt: product.featured_media.alt | default: product.title
+      }}
+    {% else %}
+      <div class="lame-catlog-card__image lame-catlog-card__image--placeholder" aria-hidden="true"></div>
+    {% endif %}
+  </a>
+
+  <div class="lame-catlog-card__body">
+    {% if promo_label != blank %}
+      <p class="lame-catlog-card__promo">{{ promo_label | escape | upcase }}</p>
     {% endif %}
 
-    <h3 class="lame-shop-card__title">
+    <h3 class="lame-catlog-card__title">
       <a href="{{ product.url }}">{{ product.title | escape }}</a>
     </h3>
 
-    {% if card_excerpt != blank %}
-      <p class="lame-shop-card__excerpt">{{ card_excerpt | escape }}</p>
-    {% endif %}
-
-    <hr class="lame-shop-card__rule" aria-hidden="true">
-
-    <div class="lame-shop-card__meta">
-      <div class="lame-shop-card__price">
-        {% if compare_at > price_amount %}
-          <span class="lame-shop-card__price-sale">{{ price_amount | money }}</span>
-          <span class="lame-shop-card__price-compare">{{ compare_at | money }}</span>
-        {% else %}
-          <span class="lame-shop-card__price-sale lame-shop-card__price-sale--regular">{{ price_amount | money }}</span>
+    <div class="lame-catlog-card__price-row">
+      {% if compare_at > price_amount %}
+        <span class="lame-catlog-card__mrp">{{ compare_at | money }}</span>
+        <span class="lame-catlog-card__price">{{ price_amount | money }}</span>
+        {% if lame_discount_percent > 0 %}
+          <span class="lame-catlog-card__off">{{ lame_discount_percent }}% Off</span>
         {% endif %}
-      </div>
-
-      {% if has_rating %}
-        <div class="lame-shop-card__rating" aria-label="{{ 'accessibility.rating' | t: rating: rating }}">
-          <span class="lame-shop-card__stars" aria-hidden="true">
-            {%- assign full_stars = rating | floor -%}
-            {%- for i in (1..5) -%}
-              {%- if i <= full_stars -%}
-                <span class="lame-shop-card__star lame-shop-card__star--full">★</span>
-              {%- else -%}
-                <span class="lame-shop-card__star">★</span>
-              {%- endif -%}
-            {%- endfor -%}
-          </span>
-          <span class="lame-shop-card__rating-count">({{ rating_count_num }})</span>
-        </div>
+      {% else %}
+        <span class="lame-catlog-card__price">{{ price_amount | money }}</span>
       {% endif %}
     </div>
 
-    <div class="lame-shop-card__actions">
+    {% if has_rating %}
+      <div class="lame-catlog-card__rating" aria-label="{{ 'accessibility.rating' | t: rating: rating }}">
+        <span class="lame-catlog-card__stars" aria-hidden="true">
+          {%- assign full_stars = rating | floor -%}
+          {%- for i in (1..5) -%}
+            {%- if i <= full_stars -%}
+              <span class="lame-catlog-card__star is-on">★</span>
+            {%- else -%}
+              <span class="lame-catlog-card__star">☆</span>
+            {%- endif -%}
+          {%- endfor -%}
+        </span>
+        <span class="lame-catlog-card__count">({{ rating_count_num }})</span>
+      </div>
+    {% endif %}
+
+    {% if variant_count > 1 %}
+      <p class="lame-catlog-card__sizes">{{ variant_count }} Sizes</p>
+    {% endif %}
+
+    <div class="lame-catlog-card__actions">
       {% if can_quick_add %}
         <product-form-component
-          class="lame-shop-card__form-wrap"
+          class="lame-catlog-card__form-wrap"
           data-section-id="{{ section.id }}"
           data-product-id="{{ product.id }}"
           data-product-url="{{ product.url }}"
         >
-          {%- form 'product', product, id: form_id, class: 'lame-shop-card__form' -%}
+          {%- form 'product', product, id: form_id, class: 'lame-catlog-card__form' -%}
             <input type="hidden" name="id" value="{{ variant.id }}" ref="variantId">
-            <button type="submit" name="add" class="lame-shop-card__atc">
-              <span class="lame-shop-card__atc-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" focusable="false">
-                  <path d="M6 7h12l-1 11H7L6 7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                  <path d="M9 7V5.8A2.8 2.8 0 0 1 11.8 3h.4A2.8 2.8 0 0 1 15 5.8V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                </svg>
-              </span>
-              <span class="lame-shop-card__atc-label">{{ 'actions.add_to_cart' | t }}</span>
+            <button type="submit" name="add" class="lame-catlog-card__atc">
+              {{ 'actions.add_to_cart' | t }}
             </button>
           {%- endform -%}
         </product-form-component>
       {% else %}
-        <a href="{{ product.url }}" class="lame-shop-card__atc">
-          <span class="lame-shop-card__atc-icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" focusable="false">
-              <path d="M6 7h12l-1 11H7L6 7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-              <path d="M9 7V5.8A2.8 2.8 0 0 1 11.8 3h.4A2.8 2.8 0 0 1 15 5.8V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            </svg>
-          </span>
-          <span class="lame-shop-card__atc-label">{{ 'lame_category_shop.view_product' | t }}</span>
-        </a>
+        <a href="{{ product.url }}" class="lame-catlog-card__atc">{{ 'lame_category_shop.view_product' | t }}</a>
       {% endif %}
-
-      <a href="{{ product.url }}" class="lame-shop-card__icon-btn" aria-label="{{ product.title | escape }}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-          <path d="M6 6h15l-1.5 9h-12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-          <path d="M6 6L5 3H2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          <circle cx="9" cy="20" r="1.15" fill="currentColor"/>
-          <circle cx="18" cy="20" r="1.15" fill="currentColor"/>
-          <path d="M19 3.5v5M16.5 6h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </a>
     </div>
   </div>
+
+  {% if show_sale_bar %}
+    <div class="lame-catlog-card__sale-bar">
+      <span class="lame-catlog-card__sale-label">Sale Price</span>
+      <span class="lame-catlog-card__sale-price">{{ price_amount | money }}</span>
+      <span class="lame-catlog-card__sale-off">{{ lame_discount_percent }}% Off</span>
+    </div>
+  {% endif %}
 </article>
