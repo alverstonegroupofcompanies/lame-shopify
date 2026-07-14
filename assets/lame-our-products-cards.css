@@ -11,15 +11,15 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   /* Prevent section color scheme from painting gallery dark green */
   --color-background-rgb: 255 255 255;
 
-  /* Grid — ~3 columns on desktop */
-  --lame-op-card-min: 200px;
-  --lame-op-grid-gap: 0.875rem;
+  /* Grid — full-width, 3–4 columns on desktop */
+  --lame-op-card-min: 160px;
+  --lame-op-grid-gap: 0.75rem;
 
   /* Card shell — catalog style */
   --lame-op-card-min-height: 100%;
-  --lame-op-card-radius: 6px;
+  --lame-op-card-radius: 8px;
   --lame-op-card-bg: #ffffff;
-  --lame-op-card-border: #e8e8e8;
+  --lame-op-card-border: #cfcfcf;
   --lame-op-card-shadow: none;
   --lame-op-card-shadow-hover: 0 4px 16px rgb(0 0 0 / 0.08);
 
@@ -132,29 +132,30 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   margin: 0;
   padding: 0;
   gap: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
   transform: none;
 }
 
-/* One card surface only — drop global product-grid-container chrome */
+/* One card surface — full border including rounded corners */
 .lame-our-products-card-scope .product-grid-container .product-card__content,
 .lame-our-products-card-scope .product-grid-container product-card .product-card__content.product-grid__card {
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
   background: transparent !important;
+  box-shadow: none !important;
 }
 
+.lame-our-products-card-scope .product-grid__item .lame-op-card__inner,
+.lame-our-products-card-scope .product-grid__item .lame-op-card__inner.product-grid__card,
 .collection-template-our-products.lame-our-products-card-scope
   .product-grid__item
   .lame-op-card__inner.product-grid__card {
   border: 1px solid var(--lame-op-card-border) !important;
   border-radius: var(--lame-op-card-radius) !important;
   background: var(--lame-op-card-bg) !important;
-  box-shadow: var(--lame-op-card-shadow) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+  background-clip: padding-box;
+  /* Keep corner stroke visible over child white fills */
+  outline: 1px solid var(--lame-op-card-border);
+  outline-offset: -1px;
 }
 .lame-our-products-card-scope .product-grid__item product-price {
   margin-top: 0;
@@ -182,21 +183,21 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 
 @media screen and (min-width: 750px) {
   .lame-our-products-card-scope {
-    --lame-op-card-min: 210px;
+    --lame-op-card-min: 170px;
   }
 }
 
 @media screen and (min-width: 990px) {
   .lame-our-products-card-scope {
-    --lame-op-card-min: 230px;
+    --lame-op-card-min: 180px;
   }
 }
 
 @media screen and (min-width: 1200px) {
   body.template-collection-our-products .lame-our-products-card-scope,
   .collection-template-our-products.lame-our-products-card-scope {
-    --lame-op-card-min: 250px;
-    --lame-op-grid-gap: 1rem;
+    --lame-op-card-min: 190px;
+    --lame-op-grid-gap: 0.875rem;
     --lame-op-body-padding-x: 14px;
     --lame-op-image-padding: 0;
     --lame-op-text-size: 0.875rem;
@@ -206,7 +207,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 
 @media screen and (min-width: 1400px) {
   .lame-our-products-card-scope {
-    --lame-op-card-min: 280px;
+    --lame-op-card-min: 200px;
   }
 }
 
@@ -254,15 +255,19 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   background: var(--lame-op-card-bg);
   border: 1px solid var(--lame-op-card-border);
   border-radius: var(--lame-op-card-radius);
-  box-shadow: var(--lame-op-card-shadow);
+  box-shadow: none;
   overflow: hidden;
+  background-clip: padding-box;
+  outline: 1px solid var(--lame-op-card-border);
+  outline-offset: -1px;
   text-align: left;
-  transition: box-shadow 0.28s ease;
+  transition: box-shadow 0.28s ease, border-color 0.28s ease, outline-color 0.28s ease;
 }
 
 .lame-our-products-card-scope .lame-op-card:is(:hover, :focus-within) .lame-op-card__inner {
   transform: none;
-  border-color: rgb(20 31 24 / 0.16);
+  border-color: #b0b0b0;
+  outline-color: #b0b0b0;
   box-shadow: var(--lame-op-card-shadow-hover);
 }
 
@@ -295,7 +300,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   aspect-ratio: 1 / 1;
   border: 0;
   border-bottom: none !important;
-  border-radius: var(--lame-op-card-radius) var(--lame-op-card-radius) 0 0;
+  border-radius: 0;
   background: #ffffff !important;
   background-image: none !important;
   overflow: hidden;
