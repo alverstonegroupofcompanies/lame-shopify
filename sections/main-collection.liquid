@@ -339,7 +339,13 @@
                           data-brand-slug="{{ brand_slug }}"
                           ref="cards[]"
                         >
-                          {% if lame_cosmetic_collection and lame_our_products_op_cards == false %}
+                          {% if lame_our_products_op_cards %}
+                            {% render 'lame-shop-product-card',
+                              product: product,
+                              section: section,
+                              show_wishlist: section.settings.show_wishlist
+                            %}
+                          {% elsif lame_cosmetic_collection %}
                             {% render 'lame-category-product-card',
                               product: product,
                               section: section,
@@ -382,7 +388,13 @@
                   data-brand-slug="{{ product_brand_slug }}"
                   ref="cards[]"
                 >
-                  {% if lame_cosmetic_collection and lame_our_products_op_cards == false %}
+                  {% if lame_our_products_op_cards %}
+                    {% render 'lame-shop-product-card',
+                      product: product,
+                      section: section,
+                      show_wishlist: section.settings.show_wishlist
+                    %}
+                  {% elsif lame_cosmetic_collection %}
                     {% render 'lame-category-product-card',
                       product: product,
                       section: section,

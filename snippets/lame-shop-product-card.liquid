@@ -1,0 +1,155 @@
+{%- doc -%}
+  Our Products shop card — media, badge, wishlist, brand, title, excerpt, price + rating, ATC.
+
+  @param {object} product
+  @param {object} section - Parent section (product form)
+  @param {boolean} [show_wishlist] - Wishlist heart on image
+{%- enddoc -%}
+
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign can_quick_add = false
+  if product.has_only_default_variant and variant.available
+    assign can_quick_add = true
+  endif
+  assign show_wishlist = show_wishlist | default: true
+
+  assign lame_discount_percent = 0
+  assign compare_at = variant.compare_at_price
+  assign price_amount = variant.price
+  if compare_at > price_amount
+    assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+  endif
+
+  assign card_label = product.type | strip
+  if card_label == blank
+    assign card_label = product.vendor | strip
+  endif
+  if card_label == blank and product.metafields.custom.brand.value != blank
+    assign card_label = product.metafields.custom.brand.value | strip
+  endif
+
+  assign card_excerpt = product.metafields.custom.short_description.value | default: product.description | strip_html | truncate: 90
+
+  assign rating = product.metafields.reviews.rating.value.rating
+  assign rating_count = product.metafields.reviews.rating_count | default: 0
+  assign rating_count_num = rating_count | plus: 0
+  assign has_rating = false
+  if rating != blank and rating_count_num > 0
+    assign has_rating = true
+  endif
+
+  assign form_id = 'ShopCard-Form-' | append: section.id | append: '-' | append: product.id
+-%}
+
+<article class="lame-shop-card">
+  <div class="lame-shop-card__media">
+    <a href="{{ product.url }}" class="lame-shop-card__media-link" tabindex="-1" aria-hidden="true">
+      {% if product.featured_media %}
+        {{
+          product.featured_media
+          | image_url: width: 800
+          | image_tag:
+            class: 'lame-shop-card__image',
+            loading: 'lazy',
+            widths: '280,360,480,600,800',
+            sizes: '(min-width: 990px) 28vw, (min-width: 750px) 40vw, 46vw',
+            alt: product.featured_media.alt | default: product.title
+        }}
+      {% else %}
+        <div class="lame-shop-card__image lame-shop-card__image--placeholder" aria-hidden="true"></div>
+      {% endif %}
+    </a>
+
+    {% if lame_discount_percent > 0 %}
+      <span class="lame-shop-card__badge">{{ lame_discount_percent }}% OFF</span>
+    {% elsif product.available == false %}
+      <span class="lame-shop-card__badge lame-shop-card__badge--sold">{{ 'content.product_badge_sold_out' | t }}</span>
+    {% endif %}
+
+    {% if show_wishlist and settings.lame_enable_wishlist %}
+      {% render 'lame-our-products-wishlist-btn', product: product %}
+    {% endif %}
+  </div>
+
+  <div class="lame-shop-card__body">
+    {% if card_label != blank %}
+      <p class="lame-shop-card__eyebrow">{{ card_label | escape }}</p>
+    {% endif %}
+
+    <h3 class="lame-shop-card__title">
+      <a href="{{ product.url }}">{{ product.title | escape }}</a>
+    </h3>
+
+    {% if card_excerpt != blank %}
+      <p class="lame-shop-card__excerpt">{{ card_excerpt | escape }}</p>
+    {% endif %}
+
+    <div class="lame-shop-card__meta">
+      <div class="lame-shop-card__price">
+        {% if compare_at > price_amount %}
+          <span class="lame-shop-card__price-sale">{{ price_amount | money }}</span>
+          <span class="lame-shop-card__price-compare">{{ compare_at | money }}</span>
+        {% else %}
+          <span class="lame-shop-card__price-sale lame-shop-card__price-sale--regular">{{ price_amount | money }}</span>
+        {% endif %}
+      </div>
+
+      {% if has_rating %}
+        <div class="lame-shop-card__rating" aria-label="{{ 'accessibility.rating' | t: rating: rating }}">
+          <span class="lame-shop-card__stars" aria-hidden="true">
+            {%- assign full_stars = rating | floor -%}
+            {%- for i in (1..5) -%}
+              {%- if i <= full_stars -%}
+                <span class="lame-shop-card__star lame-shop-card__star--full">★</span>
+              {%- else -%}
+                <span class="lame-shop-card__star">★</span>
+              {%- endif -%}
+            {%- endfor -%}
+          </span>
+          <span class="lame-shop-card__rating-count">({{ rating_count_num }})</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="lame-shop-card__actions">
+      {% if can_quick_add %}
+        <product-form-component
+          class="lame-shop-card__form-wrap"
+          data-section-id="{{ section.id }}"
+          data-product-id="{{ product.id }}"
+          data-product-url="{{ product.url }}"
+        >
+          {%- form 'product', product, id: form_id, class: 'lame-shop-card__form' -%}
+            <input type="hidden" name="id" value="{{ variant.id }}" ref="variantId">
+            <button type="submit" name="add" class="lame-shop-card__atc">
+              <span class="lame-shop-card__atc-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" focusable="false">
+                  <path d="M6 6h15l-1.5 9h-12z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                  <path d="M6 6L5 3H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="9" cy="20" r="1.2" fill="currentColor"/>
+                  <circle cx="18" cy="20" r="1.2" fill="currentColor"/>
+                </svg>
+              </span>
+              <span class="lame-shop-card__atc-label">{{ 'actions.add_to_cart' | t }}</span>
+            </button>
+          {%- endform -%}
+        </product-form-component>
+      {% else %}
+        <a href="{{ product.url }}" class="lame-shop-card__atc">
+          <span class="lame-shop-card__atc-label">{{ 'lame_category_shop.view_product' | t }}</span>
+        </a>
+      {% endif %}
+
+      <a href="{{ product.url }}" class="lame-shop-card__icon-btn" aria-label="{{ product.title | escape }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M6 6h15l-1.5 9h-12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="M6 6L5 3H2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <circle cx="9" cy="20" r="1.15" fill="currentColor"/>
+          <circle cx="18" cy="20" r="1.15" fill="currentColor"/>
+          <path d="M19 4v4M17 6h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</article>
