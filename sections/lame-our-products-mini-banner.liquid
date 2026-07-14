@@ -1,0 +1,348 @@
+{%- doc -%}
+  Mini full-width top banner for the Our Products collection page.
+  Add via Theme editor → Template → Add section → Our Products mini banner.
+{%- enddoc -%}
+
+{%- liquid
+  assign heading = section.settings.heading
+  assign text = section.settings.text
+  assign button_label = section.settings.button_label
+  assign button_link = section.settings.button_link
+  assign banner_image = section.settings.image
+  assign has_content = false
+  if heading != blank or text != blank or button_label != blank or banner_image != blank
+    assign has_content = true
+  endif
+-%}
+
+{%- if has_content or request.design_mode -%}
+  <section
+    class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }}"
+    style="
+      --lame-op-mini-bg: {{ section.settings.bg_color }};
+      --lame-op-mini-fg: {{ section.settings.text_color }};
+      --lame-op-mini-accent: {{ section.settings.accent_color }};
+      --lame-op-mini-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+    "
+    {{ section.shopify_attributes }}
+  >
+    <div class="lame-op-mini-banner__surface">
+      {% if banner_image != blank %}
+        {{
+          banner_image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'lame-op-mini-banner__image',
+            loading: 'eager',
+            fetchpriority: 'high',
+            widths: '750,1100,1500,2000,2400',
+            sizes: '100vw',
+            alt: section.settings.image_alt | default: heading | escape
+        }}
+        <div class="lame-op-mini-banner__overlay" aria-hidden="true"></div>
+      {% endif %}
+
+      <div class="lame-op-mini-banner__inner lame-op-mini-banner__inner--{{ section.settings.content_align }}">
+        {% if request.design_mode and has_content == false %}
+          <p class="lame-op-mini-banner__placeholder">
+            Our Products mini banner — add heading, text, or an image in the sidebar.
+          </p>
+        {% else %}
+          {% if section.settings.badge != blank %}
+            <span class="lame-op-mini-banner__badge">{{ section.settings.badge | escape }}</span>
+          {% endif %}
+
+          {% if heading != blank %}
+            <h2 class="lame-op-mini-banner__heading">{{ heading | escape }}</h2>
+          {% endif %}
+
+          {% if text != blank %}
+            <p class="lame-op-mini-banner__text">{{ text | escape }}</p>
+          {% endif %}
+
+          {% if button_label != blank %}
+            <a
+              class="lame-op-mini-banner__btn"
+              href="{{ button_link | default: '#' }}"
+              {% if button_link == blank %}aria-disabled="true"{% endif %}
+            >
+              {{ button_label | escape }}
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-op-mini-banner {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    background: var(--lame-op-mini-bg, #fc2779);
+    color: var(--lame-op-mini-fg, #ffffff);
+  }
+
+  .lame-op-mini-banner__surface {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--lame-op-mini-h, 72px);
+    overflow: hidden;
+  }
+
+  .lame-op-mini-banner--slim {
+    --lame-op-mini-h: 56px;
+  }
+
+  .lame-op-mini-banner--regular {
+    --lame-op-mini-h: 88px;
+  }
+
+  .lame-op-mini-banner--tall {
+    --lame-op-mini-h: 120px;
+  }
+
+  .lame-op-mini-banner__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .lame-op-mini-banner__overlay {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: var(--lame-op-mini-overlay, 0.35);
+    pointer-events: none;
+  }
+
+  .lame-op-mini-banner__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem 1rem;
+    width: 100%;
+    max-width: min(1280px, 100%);
+    margin-inline: auto;
+    padding: 0.75rem clamp(0.85rem, 2vw, 1.5rem);
+    box-sizing: border-box;
+  }
+
+  .lame-op-mini-banner__inner--left {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .lame-op-mini-banner__inner--center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .lame-op-mini-banner__inner--right {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .lame-op-mini-banner__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.5rem;
+    border-radius: 999px;
+    background: var(--lame-op-mini-accent, #ffffff);
+    color: var(--lame-op-mini-bg, #fc2779);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .lame-op-mini-banner__heading {
+    margin: 0;
+    font-family: var(--font-body--family, system-ui, sans-serif);
+    font-size: clamp(0.9375rem, 2vw, 1.125rem);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    color: inherit;
+  }
+
+  .lame-op-mini-banner__text {
+    margin: 0;
+    font-size: clamp(0.8125rem, 1.6vw, 0.9375rem);
+    font-weight: 500;
+    line-height: 1.35;
+    color: inherit;
+    opacity: 0.95;
+  }
+
+  .lame-op-mini-banner__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    background: var(--lame-op-mini-accent, #ffffff);
+    color: var(--lame-op-mini-bg, #fc2779);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+  }
+
+  .lame-op-mini-banner__btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+  }
+
+  .lame-op-mini-banner__placeholder {
+    margin: 0;
+    font-size: 0.875rem;
+    opacity: 0.85;
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-op-mini-banner__inner {
+      flex-direction: column;
+      gap: 0.4rem;
+      padding-block: 0.85rem;
+    }
+
+    .lame-op-mini-banner--slim {
+      --lame-op-mini-h: 72px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Our Products mini banner",
+  "tag": "section",
+  "class": "section-wrapper lame-op-mini-banner-section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge",
+      "default": "SALE"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Free shipping on orders above ₹999"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Supporting text",
+      "default": "Shop our bestsellers today"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image (optional)",
+      "info": "Full-bleed behind the text. Leave empty to use solid color."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Image overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 35
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "Banner height",
+      "options": [
+        { "value": "slim", "label": "Slim" },
+        { "value": "regular", "label": "Regular" },
+        { "value": "tall", "label": "Tall" }
+      ],
+      "default": "slim"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Content alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#fc2779"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Badge & button color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Products mini banner",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}
