@@ -174,7 +174,7 @@
           on:submit="/handleFormSubmit"
         >
           {% if should_show_pane %}
-            {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering %}
+            {% if block_settings.filter_style == 'vertical' and template.name == 'collection' and block_settings.enable_filtering and lame_our_products_active == false %}
               {% liquid
                 assign filters_head_active_count = 0
                 for filter in filters
@@ -184,9 +184,7 @@
                         assign filters_head_active_count = filters_head_active_count | plus: 1
                       endif
                     else
-                      unless lame_our_products_active and filter.param_name == 'filter.p.vendor'
-                        assign filters_head_active_count = filters_head_active_count | plus: filter.active_values.size
-                      endunless
+                      assign filters_head_active_count = filters_head_active_count | plus: filter.active_values.size
                   endcase
                 endfor
 
@@ -197,7 +195,7 @@
               %}
               {% render 'lame-collection-filters-panel-head',
                 active_count: filters_head_active_count,
-                show_clear_all: lame_our_products_active,
+                show_clear_all: false,
                 results_url: results_url,
                 section_id: section.id,
                 is_active: filters_head_active
@@ -253,8 +251,16 @@
                 {%- endfor -%}
               {% endcapture %}
 
-              <div class="facets__filters-wrapper">
-                {% if block_settings.filter_style == 'vertical' and block_settings.enable_sorting and template.name != 'collection' %}
+              <div class="facets__filters-wrapper{% if lame_our_products_active %} lame-op-filters-stack{% endif %}">
+                {% liquid
+                  assign show_sidebar_sorting = false
+                  if block_settings.filter_style == 'vertical' and block_settings.enable_sorting
+                    if template.name != 'collection' or lame_our_products_active
+                      assign show_sidebar_sorting = true
+                    endif
+                  endif
+                %}
+                {% if show_sidebar_sorting %}
                   {% render 'sorting',
                     results: results,
                     sort_by: sort_by,
@@ -281,7 +287,6 @@
                     data-testid: 'horizontal-filters-overflow-list'
                   %}
                 {% else %}
-                  {{ rendered_filters }}
                   {% if lame_our_products_active and template.name == 'collection' and block_settings.enable_filtering %}
                     {% render 'lame-brand-filter',
                       collection: results,
@@ -291,6 +296,7 @@
                       id_prefix: 'desktop'
                     %}
                   {% endif %}
+                  {{ rendered_filters }}
                 {% endif %}
               </div>
 
@@ -534,9 +540,19 @@
             {% endif %}
 
             {% if block_settings.enable_filtering %}
-              <div class="facets__filters-wrapper">
+              <div class="facets__filters-wrapper{% if lame_our_products_active %} lame-op-filters-stack{% endif %}">
                 {% assign total_active_values = 0 %}
                 {% assign is_active = false %}
+
+                {% if lame_our_products_active and template.name == 'collection' %}
+                  {% render 'lame-brand-filter',
+                    collection: results,
+                    filters: filters,
+                    section_id: section.id,
+                    filter_style: 'vertical',
+                    id_prefix: 'dialog'
+                  %}
+                {% endif %}
 
                 {%- for filter in filters -%}
                   {% case filter.type %}
@@ -563,15 +579,6 @@
                       {% endunless %}
                   {% endcase %}
                 {%- endfor -%}
-                {% if lame_our_products_active and template.name == 'collection' %}
-                  {% render 'lame-brand-filter',
-                    collection: results,
-                    filters: filters,
-                    section_id: section.id,
-                    filter_style: 'vertical',
-                    id_prefix: 'dialog'
-                  %}
-                {% endif %}
               </div>
             {% endif %}
           </scroll-hint>

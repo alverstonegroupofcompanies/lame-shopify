@@ -128,7 +128,7 @@
           endif
         %}
         {% if lame_show_op_discount and lame_discount_percent > 0 %}
-          <span class="lame-op-discount-badge">{{ lame_discount_percent }}% OFF</span>
+          <span class="lame-op-discount-badge">{{ lame_discount_percent }}% Off</span>
         {% endif %}
       {% else %}
         <span class="price-item__group">
@@ -139,6 +139,17 @@
           <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
           <span class="price-item--sale price">{{ price | default: '&nbsp;' }}</span>
         </span>
+        {% liquid
+          assign lame_show_op_discount_else = false
+          if template.name == 'collection' and collection != blank
+            if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
+              assign lame_show_op_discount_else = true
+            endif
+          endif
+        %}
+        {% if lame_show_op_discount_else and lame_discount_percent > 0 %}
+          <span class="lame-op-discount-badge">{{ lame_discount_percent }}% Off</span>
+        {% endif %}
       {% endif %}
     </div>
   {% endif %}

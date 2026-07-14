@@ -1,5 +1,5 @@
 /**
- * Cosmetic category collection pages — per-category hero & green theme
+ * Cosmetic category collection pages — listing-style top + banner
  */
 
 .template-collection {
@@ -9,98 +9,156 @@
 }
 
 .lame-cosmetic-category-hero {
-  background: linear-gradient(
-    135deg,
-    rgb(var(--lame-cos-forest) / 0.06) 0%,
-    var(--lame-cos-cream) 55%,
-    #fff 100%
-  );
+  background: #fff;
+  border-bottom: 1px solid rgb(var(--lame-cos-forest) / 0.06);
 }
 
 .lame-cosmetic-category-hero__inner {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
   max-width: var(--page-width);
   margin-inline: auto;
   padding-inline: max(1rem, var(--page-margin));
+  box-sizing: border-box;
 }
 
-.lame-cosmetic-category-hero__eyebrow {
-  margin: 0 0 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+.lame-cosmetic-category-hero__crumbs {
+  width: 100%;
+}
+
+.lame-cosmetic-category-hero__crumbs-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #8a9390;
+}
+
+.lame-cosmetic-category-hero__crumbs-list a {
+  color: #5c6b62;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.lame-cosmetic-category-hero__crumbs-list a:hover {
   color: rgb(var(--lame-cos-forest));
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.lame-cosmetic-category-hero__crumbs-sep {
+  color: #b0b8b4;
+  font-size: 0.7rem;
+}
+
+.lame-cosmetic-category-hero__crumbs-list [aria-current='page'] span {
+  color: #3d4742;
+  font-weight: 500;
+}
+
+.lame-cosmetic-category-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding-block: 0.15rem 0.35rem;
 }
 
 .lame-cosmetic-category-hero__heading {
-  margin: 0 0 0.65rem;
-  font-family: var(--lame-font-display);
-  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.3rem 0.5rem;
+  font-family: inherit;
+  font-size: clamp(1.25rem, 2.6vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: #1a1f1c;
+  line-height: 1.25;
+}
+
+.lame-cosmetic-category-hero__heading-count {
+  font-size: 0.78em;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgb(var(--lame-cos-forest));
-  line-height: 1.1;
+  color: #8a9390;
 }
 
 .lame-cosmetic-category-hero__subtitle {
   margin: 0;
-  max-width: 48ch;
-  font-size: clamp(0.9rem, 1.3vw, 1rem);
-  line-height: 1.55;
-  color: rgb(90 96 86);
+  max-width: 52ch;
+  font-size: clamp(0.84rem, 1.2vw, 0.95rem);
+  line-height: 1.5;
+  color: #6b756f;
 }
 
 .lame-cosmetic-category-hero__media {
-  border-radius: 14px;
+  width: 100%;
+  margin-top: 0.35rem;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 12px 36px rgb(var(--lame-cos-forest) / 0.1);
+  box-shadow: 0 6px 22px rgb(20 30 24 / 0.08);
+  background: #f4f4f4;
 }
 
 .lame-cosmetic-category-hero__image {
   width: 100%;
   height: auto;
   display: block;
-  aspect-ratio: 16 / 7;
+  aspect-ratio: 21 / 6;
   object-fit: cover;
+  object-position: center;
 }
 
-@media screen and (min-width: 990px) {
+@media screen and (max-width: 749px) {
   .lame-cosmetic-category-hero__inner {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 0.7rem;
+  }
+
+  .lame-cosmetic-category-hero__heading {
+    font-size: clamp(1.1rem, 4.6vw, 1.35rem);
+  }
+
+  .lame-cosmetic-category-hero__image {
+    aspect-ratio: 16 / 7;
   }
 }
 
-/* Per-category accent tints */
-.lame-cosmetic-category-hero--fragrance {
-  background: linear-gradient(135deg, rgb(45 74 34 / 0.05), #faf8f4 50%, #fff);
+/* Soft per-category page tint behind banner only */
+.lame-cosmetic-category-hero--fragrance .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #faf8f4, #f3efe8);
 }
 
-.lame-cosmetic-category-hero--make-up {
-  background: linear-gradient(135deg, rgb(210 180 170 / 0.12), #fdfbf7 50%, #fff);
+.lame-cosmetic-category-hero--make-up .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #fdf8f7, #f8efed);
 }
 
-.lame-cosmetic-category-hero--skin-care {
-  background: linear-gradient(135deg, rgb(180 210 170 / 0.15), #f8faf6 50%, #fff);
+.lame-cosmetic-category-hero--skin-care .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #f8faf6, #eef4ea);
 }
 
-.lame-cosmetic-category-hero--bath-body {
-  background: linear-gradient(135deg, rgb(170 200 190 / 0.14), #f7faf9 50%, #fff);
+.lame-cosmetic-category-hero--bath-body .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #f7faf9, #eaf3f1);
 }
 
-.lame-cosmetic-category-hero--hair-care {
-  background: linear-gradient(135deg, rgb(90 70 55 / 0.1), #f9f7f5 50%, #fff);
+.lame-cosmetic-category-hero--hair-care .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #f9f7f5, #f0ebe6);
 }
 
-.lame-cosmetic-category-hero--baby-mom {
-  background: linear-gradient(135deg, rgb(200 160 175 / 0.12), #fdf8fa 50%, #fff);
+.lame-cosmetic-category-hero--baby-mom .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #fdf8fa, #f6ecef);
 }
 
-.lame-cosmetic-category-hero--wellness {
-  background: linear-gradient(135deg, rgb(85 120 75 / 0.12), #f6faf5 50%, #fff);
+.lame-cosmetic-category-hero--wellness .lame-cosmetic-category-hero__media {
+  background: linear-gradient(135deg, #f6faf5, #eaf3e8);
 }
