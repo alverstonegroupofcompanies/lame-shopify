@@ -1,16 +1,12 @@
 {%- doc -%}
-  Full-width banner for the Our Products catalog.
-  Heading + Shop both link to the current collection page.
+  Full-width Our Products catalog banner — image only.
 {%- enddoc -%}
 
 {%- liquid
-  assign heading = heading | default: 'All Our Products'
-  assign button_label = button_label | default: 'Shop'
-  assign page_url = collection.url | default: routes.all_products_collection_url
-  assign image_alt = image_alt | default: heading
+  assign image_alt = image_alt | default: 'Our Products'
 -%}
 
-<section class="lame-op-mini-banner lame-op-mini-banner--regular lame-op-mini-banner--align-right" aria-label="{{ heading | escape }}">
+<section class="lame-op-mini-banner lame-op-mini-banner--tall lame-op-mini-banner--image-only" aria-label="{{ image_alt | escape }}">
   <div class="lame-op-mini-banner__surface">
     <img
       class="lame-op-mini-banner__image"
@@ -21,24 +17,5 @@
       loading="eager"
       fetchpriority="high"
     >
-    <div class="lame-op-mini-banner__overlay" aria-hidden="true"></div>
-
-    <div class="lame-op-mini-banner__inner lame-op-mini-banner__inner--right">
-      <div class="lame-op-mini-banner__copy">
-        {% if heading != blank %}
-          <h2 class="lame-op-mini-banner__heading">
-            <a class="lame-op-mini-banner__heading-link" href="{{ page_url }}">
-              {{ heading | escape }}
-            </a>
-          </h2>
-        {% endif %}
-
-        {% if button_label != blank %}
-          <a class="lame-op-mini-banner__btn" href="{{ page_url }}">
-            {{ button_label | escape }}
-          </a>
-        {% endif %}
-      </div>
-    </div>
   </div>
 </section>
