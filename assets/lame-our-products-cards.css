@@ -17,11 +17,11 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 
   /* Card shell — catalog style */
   --lame-op-card-min-height: 100%;
-  --lame-op-card-radius: 10px;
+  --lame-op-card-radius: 8px;
   --lame-op-card-bg: #ffffff;
-  --lame-op-card-border: #c4c4c4;
+  --lame-op-card-border: #bdbdbd;
   --lame-op-card-shadow: none;
-  --lame-op-card-shadow-hover: 0 8px 22px rgb(0 0 0 / 0.1);
+  --lame-op-card-shadow-hover: 0 6px 18px rgb(0 0 0 / 0.08);
   --lame-op-title-line-height: 1.4;
 
   /* Image Ã¢â‚¬â€ flush 1:1 square, no padding */
@@ -88,6 +88,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   padding: 0;
   border: 0;
   align-self: stretch;
+  overflow: visible;
 }
 
 /* Theme editor / static block wrapper (e.g. shopify-block-413a45783dae5b637a57442c5d685ccb) */
@@ -148,14 +149,12 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 .collection-template-our-products.lame-our-products-card-scope
   .product-grid__item
   .lame-op-card__inner.product-grid__card {
-  border: 1.5px solid var(--lame-op-card-border) !important;
+  border: 1px solid var(--lame-op-card-border) !important;
   border-radius: var(--lame-op-card-radius) !important;
   background: var(--lame-op-card-bg) !important;
-  /* Inset stroke keeps all 4 rounded corners visible over image fill */
-  box-shadow: inset 0 0 0 1px var(--lame-op-card-border) !important;
+  box-shadow: none !important;
   overflow: hidden;
-  background-clip: padding-box;
-  isolation: isolate;
+  background-clip: border-box;
 }
 .lame-our-products-card-scope .product-grid__item product-price {
   margin-top: 0;
@@ -256,22 +255,19 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   padding: 0;
   box-sizing: border-box;
   background: var(--lame-op-card-bg);
-  border: 1.5px solid var(--lame-op-card-border);
+  border: 1px solid var(--lame-op-card-border);
   border-radius: var(--lame-op-card-radius);
-  box-shadow: inset 0 0 0 1px var(--lame-op-card-border);
+  box-shadow: none;
   overflow: hidden;
-  background-clip: padding-box;
-  isolation: isolate;
+  background-clip: border-box;
   text-align: left;
-  transition: box-shadow 0.28s ease, border-color 0.28s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .lame-our-products-card-scope .lame-op-card:is(:hover, :focus-within) .lame-op-card__inner {
   transform: none;
   border-color: var(--lame-cta-bg, #ff5722);
-  box-shadow:
-    inset 0 0 0 1px var(--lame-cta-bg, #ff5722),
-    var(--lame-op-card-shadow-hover);
+  box-shadow: var(--lame-op-card-shadow-hover);
 }
 
 .lame-our-products-card-scope .lame-op-card__inner :is(button, input, select, label, product-form-component, add-to-cart-component),
@@ -292,18 +288,18 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery {
   position: relative;
   flex: 0 0 auto;
-  width: calc(100% - 3px);
+  width: 100%;
   height: auto;
   min-height: 0;
   max-height: none;
-  margin: 1.5px 1.5px 0;
+  margin: 0;
   padding: 0 !important;
   box-sizing: border-box;
   --gallery-aspect-ratio: 1;
   aspect-ratio: 1 / 1;
   border: 0;
   border-bottom: 1px solid #ececec !important;
-  border-radius: calc(var(--lame-op-card-radius) - 2px) calc(var(--lame-op-card-radius) - 2px) 0 0;
+  border-radius: 0;
   background: #ffffff !important;
   background-image: none !important;
   overflow: hidden;
