@@ -344,6 +344,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     padding: 0;
   }
 
+  /* Direct sibling of facets (legacy / non-op layout) */
   .collection-template-our-products .lame-collection-products-column {
     grid-column: 2 !important;
     grid-row: 1 !important;
@@ -354,6 +355,37 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   .collection-template-our-products .collection-wrapper:has(.facets--vertical) .facets-block-wrapper--vertical:not(.hidden) ~ .lame-collection-products-column {
     grid-column: 2 !important;
     grid-row: 1 !important;
+  }
+
+  /*
+    Our Products op-page: products live inside .lame-op-page__content.
+    Putting grid-column:2 on the nested products column created an empty
+    implicit track (huge middle gap + crushed cards on tablet/medium).
+  */
+  .collection-template-our-products .lame-op-page__layout .lame-op-page__content {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  .collection-template-our-products
+    .collection-wrapper:has(.facets--vertical)
+    .facets-block-wrapper--vertical:not(.hidden)
+    ~ .lame-op-page__content {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  .collection-template-our-products .lame-op-page__content .lame-collection-products-column {
+    /* Stay in the content/main track (promo uses column 2 when present) */
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100%;
+    min-width: 0;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
 

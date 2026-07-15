@@ -31,7 +31,7 @@ function initOurProductsCollectionCart() {
 }
 
 /** Image-dot gallery on shop product cards (works after filter AJAX too) */
-function initShopCardGalleries() {thi
+function initShopCardGalleries() {
   if (document.documentElement.dataset.lameShopGalleryInit === 'true') return;
   document.documentElement.dataset.lameShopGalleryInit = 'true';
 
