@@ -1,31 +1,31 @@
 {%- doc -%}
-  Optional Theme Editor section wrapper. Banner also renders automatically
-  from main-collection on Our Products catalog pages.
+  Full-width Our Products page banner.
+  Shown on all / our-products / products collection handles.
 {%- enddoc -%}
 
 {%- liquid
   assign show_banner = false
-  if template.suffix == 'our-products'
-    assign show_banner = true
-  elsif collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
-    assign show_banner = true
+  if template.name == 'collection' and collection != blank
+    if template.suffix == 'our-products'
+      assign show_banner = true
+    elsif collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products' or collection.handle == 'frontpage'
+      assign show_banner = true
+    endif
   endif
+
+  assign heading = section.settings.heading | default: 'All Our Products'
+  assign button_label = section.settings.button_label | default: 'Shop'
+  assign page_url = collection.url | default: routes.all_products_collection_url
+  assign link_url = page_url
+  if section.settings.button_link != blank
+    assign link_url = section.settings.button_link
+  endif
+  assign image_alt = section.settings.image_alt | default: heading
+  assign banner_image = section.settings.image
 -%}
 
-{%- comment -%} Skip when main-collection already paints the banner for OP pages. {%- endcomment -%}
-{%- unless show_banner -%}
-  {%- liquid
-    assign heading = section.settings.heading
-    assign text = section.settings.text
-    assign button_label = section.settings.button_label
-    assign banner_image = section.settings.image
-    assign page_url = collection.url | default: routes.all_products_collection_url
-    assign link_url = page_url
-    if section.settings.button_link != blank
-      assign link_url = section.settings.button_link
-    endif
-    assign image_alt = section.settings.image_alt | default: heading | default: collection.title
-  -%}
+{%- if show_banner -%}
+  {{ 'lame-op-page.css' | asset_url | stylesheet_tag }}
 
   <section
     class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }} lame-op-mini-banner--align-{{ section.settings.content_align }}"
@@ -52,10 +52,10 @@
       {% else %}
         <img
           class="lame-op-mini-banner__image"
-          src="{{ 'lame-our-products-banner.png' | asset_url }}"
+          src="{{ 'lame-our-products-banner-v2.png' | asset_url }}"
           alt="{{ image_alt | escape }}"
           width="1600"
-          height="400"
+          height="520"
           loading="eager"
           fetchpriority="high"
         >
@@ -68,8 +68,10 @@
               <a class="lame-op-mini-banner__heading-link" href="{{ link_url }}">{{ heading | escape }}</a>
             </h2>
           {% endif %}
-          {% if text != blank %}
-            <p class="lame-op-mini-banner__text">{{ text | escape }}</p>
+          {% if section.settings.text != blank %}
+            <p class="lame-op-mini-banner__text" style="margin:0;font-size:0.95rem;opacity:0.9;">
+              {{ section.settings.text | escape }}
+            </p>
           {% endif %}
           {% if button_label != blank %}
             <a class="lame-op-mini-banner__btn" href="{{ link_url }}">{{ button_label | escape }}</a>
@@ -78,7 +80,7 @@
       </div>
     </div>
   </section>
-{%- endunless -%}
+{%- endif -%}
 
 {% schema %}
 {
@@ -91,7 +93,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "On Our Products / All products pages the banner is shown automatically above the product grid. Use this section only on other collection templates."
+      "content": "Shows automatically on All / Our Products collection pages. Heading and Shop both link to this page."
     },
     {
       "type": "text",
@@ -102,8 +104,7 @@
     {
       "type": "text",
       "id": "text",
-      "label": "Supporting text",
-      "default": ""
+      "label": "Supporting text"
     },
     {
       "type": "text",
@@ -114,12 +115,14 @@
     {
       "type": "url",
       "id": "button_link",
-      "label": "Custom link (optional)"
+      "label": "Custom link (optional)",
+      "info": "Leave blank to stay on this collection page."
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Background image"
+      "label": "Background image",
+      "info": "Leave empty to use the built-in banner image."
     },
     {
       "type": "text",
@@ -136,7 +139,7 @@
         { "value": "regular", "label": "Regular" },
         { "value": "tall", "label": "Tall" }
       ],
-      "default": "regular"
+      "default": "tall"
     },
     {
       "type": "select",
@@ -153,7 +156,7 @@
       "type": "color",
       "id": "bg_color",
       "label": "Fallback background",
-      "default": "#f4b8c8"
+      "default": "#f7efe6"
     },
     {
       "type": "color",
