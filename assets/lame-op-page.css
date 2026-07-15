@@ -322,7 +322,7 @@ body.template-collection-our-products .lame-op-page__shell {
   display: none !important;
 }
 
-/* Our Products page top banner — full bleed above catalog */
+/* Our Products page top banner — full image always visible, scales to fit width */
 .lame-op-mini-banner {
   position: relative;
   z-index: 2;
@@ -330,173 +330,68 @@ body.template-collection-our-products .lame-op-page__shell {
   width: 100%;
   max-width: none;
   margin: 0;
-  background: #f4b8c8;
-  color: #3a1f28;
+  background: var(--lame-op-mini-bg, #f7efe6);
+  line-height: 0;
 }
 
 .lame-op-mini-banner__surface {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
+  display: block;
   width: 100%;
-  min-height: clamp(200px, 28vw, 340px);
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-}
-
-.lame-op-mini-banner--slim .lame-op-mini-banner__surface {
-  min-height: clamp(160px, 22vw, 240px);
-}
-
-.lame-op-mini-banner--regular .lame-op-mini-banner__surface {
-  min-height: clamp(200px, 28vw, 340px);
-}
-
-.lame-op-mini-banner--tall .lame-op-mini-banner__surface {
-  min-height: clamp(240px, 34vw, 400px);
+  background: var(--lame-op-mini-bg, #f7efe6);
 }
 
 .lame-op-mini-banner__image {
-  position: absolute;
-  inset: 0;
+  position: static;
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-}
-
-.lame-op-mini-banner__overlay {
-  position: absolute;
-  inset: 0;
-  background: transparent;
-  pointer-events: none;
-}
-
-.lame-op-mini-banner__inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  width: 100%;
-  max-width: min(1280px, 100%);
-  margin-inline: auto;
-  padding: 1.25rem clamp(1rem, 3vw, 2rem);
-  box-sizing: border-box;
-}
-
-.lame-op-mini-banner__inner--right {
-  justify-content: flex-end;
-  text-align: left;
-}
-
-.lame-op-mini-banner__inner--center {
-  justify-content: center;
-  text-align: center;
-}
-
-.lame-op-mini-banner__inner--left {
-  justify-content: flex-start;
-  text-align: left;
-}
-
-.lame-op-mini-banner__copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.65rem;
-  max-width: min(22rem, 100%);
-}
-
-.lame-op-mini-banner__inner--center .lame-op-mini-banner__copy {
-  align-items: center;
-  text-align: center;
-}
-
-.lame-op-mini-banner__heading {
+  max-width: 100%;
+  height: auto;
   margin: 0;
-  font-family: var(--font-heading--family, var(--font-body--family, system-ui, sans-serif));
-  font-size: clamp(1.5rem, 3.2vw, 2.25rem);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  line-height: 1.15;
-  color: inherit;
+  object-fit: contain;
+  object-position: center center;
+  vertical-align: top;
 }
 
-.lame-op-mini-banner__heading-link {
-  color: inherit;
-  text-decoration: none;
+/* Optional height caps still keep full image (letterbox with contain) */
+.lame-op-mini-banner--slim .lame-op-mini-banner__image {
+  max-height: min(220px, 28vw);
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
-.lame-op-mini-banner__heading-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
+.lame-op-mini-banner--regular .lame-op-mini-banner__image {
+  max-height: none;
 }
 
-.lame-op-mini-banner__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.5rem;
-  margin-top: 0.25rem;
-  padding: 0.55rem 1.35rem;
-  border-radius: 999px;
-  background: #fc2779;
-  color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  text-decoration: none;
-  box-shadow: 0 8px 20px rgba(252, 39, 121, 0.28);
-  transition: opacity 0.2s ease, transform 0.15s ease;
+.lame-op-mini-banner--tall .lame-op-mini-banner__image {
+  max-height: none;
 }
 
-.lame-op-mini-banner__btn:hover {
-  opacity: 0.94;
-  transform: translateY(-1px);
+.lame-op-mini-banner__overlay,
+.lame-op-mini-banner__inner,
+.lame-op-mini-banner__copy {
+  display: none;
 }
 
 @media screen and (max-width: 749px) {
-  .lame-op-mini-banner__surface,
-  .lame-op-mini-banner--slim .lame-op-mini-banner__surface,
-  .lame-op-mini-banner--regular .lame-op-mini-banner__surface,
-  .lame-op-mini-banner--tall .lame-op-mini-banner__surface {
-    min-height: clamp(180px, 48vw, 260px);
+  .lame-op-mini-banner__surface {
+    min-height: 0;
   }
 
-  .lame-op-mini-banner__image {
-    object-position: center center;
-  }
-
-  .lame-op-mini-banner__overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0) 40%,
-      rgba(58, 31, 40, 0.35) 100%
-    );
-  }
-
-  .lame-op-mini-banner__inner,
-  .lame-op-mini-banner__inner--left,
-  .lame-op-mini-banner__inner--center,
-  .lame-op-mini-banner__inner--right {
-    align-items: flex-end;
-    justify-content: center;
-    text-align: center;
-    min-height: clamp(200px, 52vw, 260px);
-    padding-bottom: 1.35rem;
-  }
-
-  .lame-op-mini-banner__copy {
-    align-items: center;
+  .lame-op-mini-banner__image,
+  .lame-op-mini-banner--slim .lame-op-mini-banner__image,
+  .lame-op-mini-banner--regular .lame-op-mini-banner__image,
+  .lame-op-mini-banner--tall .lame-op-mini-banner__image {
+    width: 100%;
     max-width: 100%;
-  }
-
-  .lame-op-mini-banner__heading {
-    font-size: clamp(1.35rem, 6vw, 1.75rem);
-    color: #ffffff;
-  }
-
-  .lame-op-mini-banner__heading-link:hover {
-    text-decoration-color: #ffffff;
+    max-height: none;
+    height: auto;
+    object-fit: contain;
   }
 }
