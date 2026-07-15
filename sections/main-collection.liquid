@@ -83,21 +83,20 @@
   Edit --lame-op-columns-desktop, --lame-op-image-height there.
 {% endcomment %}
 
-{% if lame_our_products_op_cards %}
-  {% render 'lame-our-products-page-banner' %}
-{% endif %}
-
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
   class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% elsif lame_our_products_op_cards %} lame-our-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% elsif lame_cosmetic_collection %} premium-products-shell uniform-products-page lame-collection-premium-active all-products-page collection-template-our-products lame-our-products--category-cards{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% endif %}"
-  style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
+  style="--padding-block-start: {% if lame_our_products_op_cards %}0{% else %}{{ section.settings.padding-block-start }}{% endif %}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{% if lame_cosmetic_collection or lame_category_shop_page %}false{% else %}{{ section.settings.enable_infinite_scroll }}{% endif %}"
   {% if lame_cosmetic_collection %}data-lame-our-products="true" data-lame-collection-layout="our-products"{% endif %}
   {% if lame_our_products_op_cards %}data-lame-op-cards="true"{% endif %}
   {% if lame_category_shop_page %}data-lame-category-shop="true"{% endif %}
 >
-  <div class="lame-collection-shell">
+  {% if lame_our_products_op_cards %}
+    {% render 'lame-our-products-page-banner' %}
+  {% endif %}
+  <div class="lame-collection-shell{% if lame_our_products_op_cards %} lame-collection-shell--op-banner{% endif %}">
     {% liquid
       if lame_category_shop_page or lame_cosmetic_collection
         assign products_per_page = 12
