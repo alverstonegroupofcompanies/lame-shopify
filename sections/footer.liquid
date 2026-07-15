@@ -240,22 +240,22 @@
         </div>
       {% endif %}
 
-      <div class="footer-premium__contact-grid">
-        <div class="footer-premium__contact-card">
+      <div class="footer-premium__contact-grid" aria-label="Store information">
+        <div class="footer-premium__contact-block">
           <h4 class="footer-premium__contact-title">
             <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'clock' %}</span>
             {{ section.settings.hours_heading }}
           </h4>
           <div class="rte">{{ section.settings.working_hours }}</div>
         </div>
-        <div class="footer-premium__contact-card">
+        <div class="footer-premium__contact-block">
           <h4 class="footer-premium__contact-title">
             <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'location' %}</span>
             {{ section.settings.address_heading }}
           </h4>
           <div class="rte">{{ section.settings.shop_address }}</div>
         </div>
-        <div class="footer-premium__contact-card">
+        <div class="footer-premium__contact-block">
           <h4 class="footer-premium__contact-title">
             <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'phone' %}</span>
             {{ section.settings.contact_heading }}
@@ -983,25 +983,35 @@
   }
 
   #footer-{{ section.id }} .footer-premium__contact-grid {
-    display: grid;
-    gap: 1rem;
-  }
-
-  #footer-{{ section.id }} .footer-premium__contact-card {
-    padding: 1.1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 1.15rem 1.25rem;
     border-radius: var(--footer-luxury-radius);
     border: 1px solid rgb(255 255 255 / 0.12);
     background: rgb(255 255 255 / 0.04);
-    transition: border-color 200ms ease, background 200ms ease;
+    min-height: 100%;
+    box-sizing: border-box;
   }
 
-  #footer-{{ section.id }} .footer-premium__contact-card:hover {
-    border-color: rgb(255 255 255 / 0.2);
-    background: rgb(255 255 255 / 0.06);
+  #footer-{{ section.id }} .footer-premium__contact-block {
+    padding: 0.95rem 0;
+  }
+
+  #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+  }
+
+  #footer-{{ section.id }} .footer-premium__contact-block:first-child {
+    padding-top: 0.15rem;
+  }
+
+  #footer-{{ section.id }} .footer-premium__contact-block:last-child {
+    padding-bottom: 0.15rem;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-title,
-  #footer-{{ section.id }} .footer-premium__contact-card h4 {
+  #footer-{{ section.id }} .footer-premium__contact-block h4 {
     margin: 0 0 0.65rem;
     display: flex;
     align-items: center;
@@ -1014,18 +1024,18 @@
   }
 
   #footer-{{ section.id }} .footer-premium__contact-title .footer-premium__icon,
-  #footer-{{ section.id }} .footer-premium__contact-card h4 .footer-premium__icon {
+  #footer-{{ section.id }} .footer-premium__contact-block h4 .footer-premium__icon {
     width: 1.35rem;
     height: 1.35rem;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-title .footer-premium__icon .footer-premium__icon-svg,
-  #footer-{{ section.id }} .footer-premium__contact-card h4 .footer-premium__icon .footer-premium__icon-svg {
+  #footer-{{ section.id }} .footer-premium__contact-block h4 .footer-premium__icon .footer-premium__icon-svg {
     width: 0.8125rem;
     height: 0.8125rem;
   }
 
-  #footer-{{ section.id }} .footer-premium__contact-card :is(p, a) {
+  #footer-{{ section.id }} .footer-premium__contact-block :is(p, a) {
     margin: 0;
     font-size: 0.875rem;
     line-height: 1.55;
@@ -1202,26 +1212,22 @@
     }
 
     #footer-{{ section.id }} .footer-premium__contact-grid {
-      grid-template-columns: 1fr;
-      gap: 0.65rem;
-    }
-
-    #footer-{{ section.id }} .footer-premium__contact-card:last-child {
-      grid-column: auto;
-    }
-
-    #footer-{{ section.id }} .footer-premium__contact-card {
-      padding: 0.8rem 0.85rem;
+      padding: 0.9rem 0.95rem;
       border-radius: 10px;
+      gap: 0;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-block {
+      padding: 0.75rem 0;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-title,
-    #footer-{{ section.id }} .footer-premium__contact-card h4 {
+    #footer-{{ section.id }} .footer-premium__contact-block h4 {
       margin-bottom: 0.45rem;
       font-size: 0.92rem;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-card :is(p, a) {
+    #footer-{{ section.id }} .footer-premium__contact-block :is(p, a) {
       font-size: 0.8125rem;
       line-height: 1.45;
     }
@@ -1265,13 +1271,16 @@
     }
 
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr));
-      gap: clamp(0.75rem, 1.4vw, 1.15rem);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: clamp(1rem, 2vw, 1.75rem);
       align-items: stretch;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-grid {
-      display: contents;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      justify-content: center;
     }
 
     #footer-{{ section.id }} .footer-premium__map-wrap {
@@ -1287,11 +1296,8 @@
       height: auto;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-card {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 0;
+    #footer-{{ section.id }} .footer-premium__contact-block {
+      display: block;
     }
 
     #footer-{{ section.id }} .footer-premium__bottom {
@@ -1308,8 +1314,8 @@
 
   @media screen and (min-width: 990px) {
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
-      gap: clamp(1rem, 1.8vw, 1.25rem);
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: clamp(1.25rem, 2.5vw, 2rem);
     }
 
     #footer-{{ section.id }} .footer-premium__map {
