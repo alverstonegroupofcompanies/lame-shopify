@@ -325,6 +325,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   /*
     Sticky sidebar (heading + filters): sticks under the site header while
     products scroll; releases when the product column ends.
+    No internal scroll — heading + filters stay fixed together without a scrollbar.
   */
   .collection-template-our-products .lame-op-page__sidebar {
     grid-column: 1 !important;
@@ -333,21 +334,11 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     align-self: start !important;
     position: sticky;
     top: calc(var(--header-height, 72px) + 12px);
-    max-height: calc(100vh - var(--header-height, 72px) - 24px);
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    max-height: none !important;
+    overflow: visible !important;
     z-index: 2;
     background: #f5f5f5;
     padding-block-end: 0.5rem;
-  }
-
-  .collection-template-our-products .lame-op-page__sidebar::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
   }
 
   .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
@@ -361,6 +352,24 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     overflow: visible !important;
     background: transparent;
     padding-block-end: 0;
+  }
+
+  /* Kill any nested scrollbars inside the sticky filter column */
+  .collection-template-our-products .lame-op-page__sidebar,
+  .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical,
+  .collection-template-our-products .lame-op-page__sidebar .facets--vertical,
+  .collection-template-our-products .lame-op-page__sidebar .facets__form,
+  .collection-template-our-products .lame-op-page__sidebar .facets__filters-wrapper,
+  .collection-template-our-products .lame-op-page__sidebar .lame-op-filters-stack {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .collection-template-our-products .lame-op-page__sidebar::-webkit-scrollbar,
+  .collection-template-our-products .lame-op-page__sidebar *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
   }
 
   /* Non–op-page Our Products: sticky filters alone (no sidebar heading) */
