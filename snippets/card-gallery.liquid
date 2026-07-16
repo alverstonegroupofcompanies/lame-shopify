@@ -42,7 +42,17 @@
     assign sizes_attribute = '(min-width: 750px) [viewport_width]vw, 100vw' | replace: '[viewport_width]', viewport_width
     assign image_sizes = sizes_attribute | strip
   endif
+%}
 
+{%- capture lame_op_active_check -%}
+  {%- render 'lame-our-products-active', section: section -%}
+{%- endcapture -%}
+{%- assign lame_our_products_gallery_single = false -%}
+{%- if lame_op_active_check contains 'true' -%}
+  {%- assign lame_our_products_gallery_single = true -%}
+{%- endif -%}
+
+{% liquid
   assign ratio = '1'
   case block_settings.image_ratio
     when 'landscape'
@@ -55,6 +65,11 @@
       assign ratio = product.featured_media.preview_image.aspect_ratio | default: '1'
   endcase
 
+  # Our Products cards: always force 1:1 square images
+  if lame_our_products_gallery_single
+    assign ratio = '1'
+  endif
+
   if block_settings.image_ratio == 'adapt' and block_settings.constrain_to_viewport
     if block_settings.constrain_to_viewport != ''
       assign constrain_to_viewport = true
@@ -62,14 +77,6 @@
     endif
   endif
 %}
-
-{%- capture lame_op_active_check -%}
-  {%- render 'lame-our-products-active', section: section -%}
-{%- endcapture -%}
-{%- assign lame_our_products_gallery_single = false -%}
-{%- if lame_op_active_check contains 'true' -%}
-  {%- assign lame_our_products_gallery_single = true -%}
-{%- endif -%}
 
 <div
   ref="cardGallery"

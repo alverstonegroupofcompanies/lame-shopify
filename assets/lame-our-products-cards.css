@@ -295,8 +295,8 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   margin: 0;
   padding: 0 !important;
   box-sizing: border-box;
-  --gallery-aspect-ratio: 1;
-  aspect-ratio: 1 / 1;
+  --gallery-aspect-ratio: 1 !important;
+  aspect-ratio: 1 / 1 !important;
   border: 0;
   border-bottom: 1px solid #ececec !important;
   border-radius: 0;
@@ -370,7 +370,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   height: 100%;
   min-height: 0;
   max-height: none;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 1 !important;
   margin: 0;
   padding: 0 !important;
   border-radius: 0;
@@ -378,6 +378,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   box-shadow: none;
   --product-media-fit: cover;
   --constrained-height: unset !important;
+  --media-preview-ratio: 1 !important;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .card-gallery img {
@@ -388,7 +389,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   max-height: none;
   margin: 0;
   padding: 0;
-  object-fit: cover;
+  object-fit: cover !important;
   object-position: center;
   background: #ffffff !important;
   transition: none;
@@ -1009,28 +1010,58 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   }
 }
 
-/* Beige image well Ã¢â‚¬â€ override Horizon base.css gallery leaks */
+/* Beige image well — override Horizon base.css gallery leaks */
 .lame-our-products-card-scope.product-grid-container .card-gallery,
 .collection-template-our-products.lame-our-products-card-scope .lame-op-card__inner .card-gallery,
 .collection-template-our-products.lame-our-products-card-scope .product-grid-container .card-gallery,
 .lame-our-products-card-scope .product-grid-container .card-gallery,
 .lame-our-products-card-scope.uniform-products-page .product-grid__item .card-gallery,
 .lame-our-products-card-scope.all-products-page .product-grid__item .card-gallery,
-.lame-our-products-card-scope .lame-op-card__inner .card-gallery {
+.lame-our-products-card-scope .lame-op-card__inner .card-gallery,
+.lame-our-products-card-scope .card-gallery--op-single {
   padding: 0 !important;
   border: none !important;
   border-bottom: none !important;
-  background: var(--lame-op-image-bg) !important;
+  background: var(--lame-op-image-bg, #ffffff) !important;
   background-image: none !important;
-  --gallery-aspect-ratio: 1;
-  aspect-ratio: 1 / 1;
+  --gallery-aspect-ratio: 1 !important;
+  aspect-ratio: 1 / 1 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: hidden !important;
 }
 
 .collection-template-our-products.lame-our-products-card-scope .lame-op-card__inner .card-gallery .product-media-container,
 .collection-template-our-products.lame-our-products-card-scope .product-grid-container .card-gallery .product-media-container,
 .lame-our-products-card-scope .product-grid-container .card-gallery .product-media-container,
-.lame-our-products-card-scope .lame-op-card__inner .card-gallery .product-media-container {
+.lame-our-products-card-scope .lame-op-card__inner .card-gallery .product-media-container,
+.lame-our-products-card-scope .card-gallery--op-single .product-media-container,
+.lame-our-products-card-scope .card-gallery--op-single .product-media-container.constrain-height,
+.lame-our-products-card-scope .card-gallery--op-single .product-media {
+  aspect-ratio: 1 / 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  --constrained-height: unset !important;
+  --media-preview-ratio: 1 !important;
+  --product-media-fit: cover !important;
   background: transparent !important;
+  overflow: hidden !important;
+}
+
+.lame-our-products-card-scope .card-gallery img,
+.lame-our-products-card-scope .card-gallery .product-media__image,
+.lame-our-products-card-scope .lame-op-card__inner .card-gallery img,
+.collection-template-our-products.lame-our-products-card-scope .card-gallery .product-media-container img,
+.lame-our-products-card-scope.product-grid-container .card-gallery .product-media-container img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center center !important;
 }
 
 /* Disable Horizon hover zoom inside Our Products cards */
