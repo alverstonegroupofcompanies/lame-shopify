@@ -406,7 +406,7 @@ body.template-collection-our-products .lame-op-page__shell {
   display: none !important;
 }
 
-/* Our Products page top banner — full image always visible, scales to fit width */
+/* Our Products page top banner — full-bleed cover, top anchored */
 .lame-op-mini-banner {
   position: relative;
   z-index: 2;
@@ -418,11 +418,18 @@ body.template-collection-our-products .lame-op-page__shell {
   line-height: 0;
 }
 
+.shopify-section.lame-op-mini-banner-section:has(.lame-op-mini-banner) {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
 .lame-op-mini-banner__surface {
   position: relative;
   display: block;
   width: 100%;
-  max-width: 100%;
+  max-width: none;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -430,31 +437,41 @@ body.template-collection-our-products .lame-op-page__shell {
 }
 
 .lame-op-mini-banner__image {
-  position: static;
   display: block;
   width: 100%;
-  max-width: 100%;
+  max-width: none;
   height: auto;
   margin: 0;
-  object-fit: contain;
-  object-position: center center;
+  object-fit: cover;
+  object-position: center top;
   vertical-align: top;
 }
 
-/* Optional height caps still keep full image (letterbox with contain) */
+/* Slim: fixed frame height (+25% vs prior), image covers full width */
+.lame-op-mini-banner--slim .lame-op-mini-banner__surface {
+  height: min(200px, 25vw);
+}
+
 .lame-op-mini-banner--slim .lame-op-mini-banner__image {
-  max-height: min(160px, 20vw);
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.lame-op-mini-banner--regular .lame-op-mini-banner__surface,
+.lame-op-mini-banner--tall .lame-op-mini-banner__surface {
+  height: auto;
+}
+
+.lame-op-mini-banner--regular .lame-op-mini-banner__image,
+.lame-op-mini-banner--tall .lame-op-mini-banner__image {
   width: 100%;
   height: auto;
-  object-fit: contain;
-}
-
-.lame-op-mini-banner--regular .lame-op-mini-banner__image {
   max-height: none;
-}
-
-.lame-op-mini-banner--tall .lame-op-mini-banner__image {
-  max-height: none;
+  object-fit: cover;
+  object-position: center top;
 }
 
 .lame-op-mini-banner__overlay,
@@ -464,21 +481,23 @@ body.template-collection-our-products .lame-op-page__shell {
 }
 
 @media screen and (max-width: 749px) {
-  .lame-op-mini-banner__surface {
-    min-height: 0;
-  }
-
-  .lame-op-mini-banner__image,
-  .lame-op-mini-banner--regular .lame-op-mini-banner__image,
-  .lame-op-mini-banner--tall .lame-op-mini-banner__image {
-    width: 100%;
-    max-width: 100%;
-    max-height: none;
-    height: auto;
-    object-fit: contain;
+  .lame-op-mini-banner--slim .lame-op-mini-banner__surface {
+    height: 130px;
   }
 
   .lame-op-mini-banner--slim .lame-op-mini-banner__image {
-    max-height: 104px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .lame-op-mini-banner--regular .lame-op-mini-banner__image,
+  .lame-op-mini-banner--tall .lame-op-mini-banner__image {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    object-fit: cover;
+    object-position: center top;
   }
 }
