@@ -1,13 +1,25 @@
 {%- liquid
   assign desktop_slide_count = 0
   assign mobile_slide_count = 0
+  assign desktop_banner_ratio = 2.4
+  assign mobile_banner_ratio = 0.5625
+  assign desktop_ratio_set = false
+  assign mobile_ratio_set = false
 
   for block in section.blocks
     if block.type == 'slide' and block.settings.image != blank
       assign desktop_slide_count = desktop_slide_count | plus: 1
+      unless desktop_ratio_set
+        assign desktop_banner_ratio = block.settings.image.aspect_ratio | default: 2.4
+        assign desktop_ratio_set = true
+      endunless
     endif
     if block.type == 'mobile_slide' and block.settings.image != blank
       assign mobile_slide_count = mobile_slide_count | plus: 1
+      unless mobile_ratio_set
+        assign mobile_banner_ratio = block.settings.image.aspect_ratio | default: 0.5625
+        assign mobile_ratio_set = true
+      endunless
     endif
   endfor
 
@@ -15,6 +27,7 @@
   assign show_mobile_desktop_fallback = false
   if mobile_slide_count == 0 and mobile_fallback and desktop_slide_count > 0
     assign show_mobile_desktop_fallback = true
+    assign mobile_banner_ratio = desktop_banner_ratio
   endif
 
   assign has_mobile_carousel = false
@@ -25,6 +38,7 @@
   assign hero_height = section.settings.banner_height
   assign hero_height_mobile = section.settings.banner_height_mobile | default: 'medium'
   assign slideshow_slide_size = hero_height
+  assign image_fit = section.settings.image_fit | default: 'contain'
 
   case hero_height
     when 'full_screen'
@@ -69,9 +83,9 @@
 {%- if show_section -%}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--full-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
+    class="section section--full-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }} lame-home-hero--fit-{{ image_fit }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
     data-testid="hero-slideshow"
-    style="--lame-hero-height: {{ lame_hero_h }}; --lame-hero-height-desktop: {{ lame_hero_h_desktop }}; --lame-hero-height-mobile: {{ lame_hero_h_mobile }};"
+    style="--lame-hero-height: {{ lame_hero_h }}; --lame-hero-height-desktop: {{ lame_hero_h_desktop }}; --lame-hero-height-mobile: {{ lame_hero_h_mobile }}; --lame-hero-desktop-ratio: {{ desktop_banner_ratio }}; --lame-hero-mobile-ratio: {{ mobile_banner_ratio }};"
     {{ section.shopify_attributes }}
   >
     <div
@@ -103,7 +117,8 @@
             slideshow_slide_size: slideshow_slide_size,
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
-            prioritize_first_slide: desktop_prioritize_loading
+            prioritize_first_slide: desktop_prioritize_loading,
+            media_fit: image_fit
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--desktop">
@@ -120,7 +135,8 @@
             slideshow_slide_size: slideshow_slide_size,
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
-            prioritize_first_slide: true
+            prioritize_first_slide: true,
+            media_fit: image_fit
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--mobile">
@@ -138,11 +154,15 @@
     --lame-hero-height-desktop: 100svh;
     --lame-hero-height-mobile: 220px;
     --lame-hero-height-offset: 0px;
-    --lame-hero-display-height: var(--lame-hero-height-mobile);
+    --lame-hero-display-height: auto;
     --lame-hero-desktop-min: 1200px;
+    --lame-hero-desktop-ratio: 2.4;
+    --lame-hero-mobile-ratio: 0.5625;
+    --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    background: #fff;
   }
 
   body:has(> #header-group > .header-section > #header-component)
@@ -171,22 +191,6 @@
     --lame-hero-height-offset: 0px;
   }
 
-  .lame-home-hero--full_screen {
-    --lame-hero-display-height: calc(var(--lame-hero-height-mobile) - var(--lame-hero-height-offset, 0px));
-  }
-
-  @media screen and (max-width: 1199px) {
-    .lame-home-hero--mobile-full_screen {
-      --lame-hero-display-height: calc(100svh - var(--lame-hero-height-offset, 0px));
-    }
-
-    @supports (height: 100dvh) {
-      .lame-home-hero--mobile-full_screen {
-        --lame-hero-display-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
-      }
-    }
-  }
-
   .lame-home-hero__slideshow {
     width: 100%;
     max-width: none;
@@ -205,40 +209,96 @@
 
   .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
     display: block;
+    --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
   }
 
   .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--mobile {
     display: none;
   }
 
-  .lame-home-hero__carousel slideshow-component {
-    --slide-min-height: var(--lame-hero-display-height) !important;
-    --slide-min-height-desktop: var(--lame-hero-display-height) !important;
-  }
-
+  /* Full-width native banner ratio — no crop; full image stays visible */
   .lame-home-hero__frame,
   .lame-home-hero__carousel slideshow-component,
   .lame-home-hero__carousel slideshow-container,
   .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-display-height);
-    max-height: var(--lame-hero-display-height);
-    min-height: var(--lame-hero-display-height);
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: var(--lame-hero-banner-ratio);
+  }
+
+  .lame-home-hero__carousel slideshow-component {
+    --slide-min-height: 0 !important;
+    --slide-min-height-desktop: 0 !important;
+    --product-media-fit: contain;
   }
 
   .lame-home-hero__frame {
-    width: 100%;
-    max-width: none;
     overflow: hidden;
+    line-height: 0;
+    background: #f5f5f5;
+  }
+
+  /* Optional height caps (Full screen / Small / Medium / Large) — still contain, never crop */
+  .lame-home-hero--full_screen .lame-home-hero__frame,
+  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
+  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
+  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides {
+    max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+  }
+
+  .lame-home-hero--small .lame-home-hero__frame,
+  .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
+  .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
+  .lame-home-hero--small .lame-home-hero__carousel slideshow-slides {
+    max-height: var(--lame-hero-height-mobile);
+  }
+
+  .lame-home-hero--medium .lame-home-hero__frame,
+  .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
+  .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
+  .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides {
+    max-height: var(--lame-hero-height-mobile);
+  }
+
+  .lame-home-hero--large .lame-home-hero__frame,
+  .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
+  .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
+  .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
+    max-height: var(--lame-hero-height-mobile);
   }
 
   /* Phones + tablets under ~12″: mobile banners only */
   @media screen and (max-width: 1199px) {
+    .lame-home-hero {
+      --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
+    }
+
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop {
       display: none !important;
     }
 
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile {
       display: block !important;
+      --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
+    }
+
+    .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
+    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
+    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
+    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
+      max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+    }
+
+    @supports (height: 100dvh) {
+      .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
+      .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
+      .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
+      .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
+        max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+      }
     }
 
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile,
@@ -255,39 +315,49 @@
       width: 100%;
       height: 100%;
     }
-
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .slide__image-container img,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link img {
-      object-fit: cover;
-      object-position: center top;
-      width: 100%;
-      height: 100%;
-      min-width: 100%;
-      min-height: 100%;
-    }
   }
 
   /* Desktop / large screens (1200px+) */
   @media screen and (min-width: 1200px) {
     .lame-home-hero {
-      --lame-hero-display-height: var(--lame-hero-height);
-    }
-
-    .lame-home-hero:not(.lame-home-hero--full_screen) {
-      --lame-hero-display-height: var(--lame-hero-height-desktop);
-    }
-
-    .lame-home-hero--full_screen {
-      --lame-hero-display-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
+      --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
     }
 
     .lame-home-hero__frame--desktop {
       display: block;
+      --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
     }
 
     .lame-home-hero__frame--mobile {
       display: none;
+    }
+
+    .lame-home-hero--small .lame-home-hero__frame,
+    .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
+    .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
+    .lame-home-hero--small .lame-home-hero__carousel slideshow-slides {
+      max-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--medium .lame-home-hero__frame,
+    .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
+    .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
+    .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides {
+      max-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--large .lame-home-hero__frame,
+    .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
+    .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
+    .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
+      max-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--full_screen .lame-home-hero__frame,
+    .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
+    .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
+    .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides {
+      max-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
     }
   }
 
@@ -295,6 +365,7 @@
     width: 100%;
     flex: 0 0 100%;
     height: 100%;
+    min-height: 0;
   }
 
   .lame-home-hero__carousel slideshow-slide > .slide__image-container {
@@ -303,15 +374,29 @@
     height: 100%;
     overflow: hidden;
     position: relative;
+    line-height: 0;
   }
 
+  /* Default: show entire banner (no crop) */
   .lame-home-hero__carousel .slide__image,
-  .lame-home-hero__carousel .slide__image-container img {
+  .lame-home-hero__carousel .slide__image-container img,
+  .lame-home-hero__slide-link .slide__image,
+  .lame-home-hero__slide-link img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center top;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center center;
     display: block;
+  }
+
+  .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image,
+  .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image-container img,
+  .lame-home-hero--fit-cover .lame-home-hero__slide-link .slide__image,
+  .lame-home-hero--fit-cover .lame-home-hero__slide-link img {
+    object-fit: cover;
+    object-position: center center;
   }
 
   .lame-home-hero__slide-link {
@@ -319,14 +404,6 @@
     width: 100%;
     height: 100%;
     line-height: 0;
-  }
-
-  .lame-home-hero__slide-link .slide__image,
-  .lame-home-hero__slide-link img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
   }
 
   .lame-home-hero__carousel slideshow-arrows,
@@ -470,12 +547,24 @@
       "id": "banner_height",
       "label": "Desktop banner height",
       "options": [
-        { "value": "full_screen", "label": "Full screen" },
+        { "value": "full_screen", "label": "Full screen (max)" },
         { "value": "large", "label": "Large" },
         { "value": "medium", "label": "Medium" },
         { "value": "small", "label": "Small" }
       ],
-      "default": "full_screen"
+      "default": "full_screen",
+      "info": "Banners keep their natural aspect ratio so the full image stays visible. Height only sets a maximum."
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Image fit",
+      "options": [
+        { "value": "contain", "label": "Show full image (no crop)" },
+        { "value": "cover", "label": "Fill frame (may crop)" }
+      ],
+      "default": "contain",
+      "info": "Use “Show full image” so nothing is hidden on any screen size."
     },
     {
       "type": "header",
@@ -492,7 +581,7 @@
         { "value": "small", "label": "Small" }
       ],
       "default": "medium",
-      "info": "Recommended: Medium or Large for mobile-friendly crops."
+      "info": "Height is a maximum only. Mobile slides keep their full image visible."
     },
     {
       "type": "checkbox",
@@ -580,7 +669,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Mobile image",
-          "info": "Shown on phones and tablets under 12″ (under 1200px). Portrait images (e.g. 1080×1920) work best for full-screen cover."
+          "info": "Shown on phones and tablets under 12″ (under 1200px). Use mobile-sized banners; the full image is shown without cropping."
         },
         {
           "type": "url",
