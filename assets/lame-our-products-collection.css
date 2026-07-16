@@ -127,11 +127,12 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 .collection-template-our-products .lame-our-products-page-head__title {
   margin: 0;
   font-family: inherit;
-  font-size: clamp(1.55rem, 3.2vw, 2.15rem);
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: 0.01em;
   color: var(--lame-ink);
+  text-align: left;
 }
 
 .collection-template-our-products .lame-our-products-page-head .lame-our-products-breadcrumbs {
@@ -322,15 +323,13 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   }
 
   /*
-    Sticky filters: stick under the site header while products scroll.
-    Containing block = this layout row only, so sticky releases when the
-    product column ends — no “last product visible” JS, no footer overlap.
+    Sticky sidebar (heading + filters): sticks under the site header while
+    products scroll; releases when the product column ends.
   */
-  .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
+  .collection-template-our-products .lame-op-page__sidebar {
     grid-column: 1 !important;
     grid-row: 1 !important;
     width: 100% !important;
-    --grid-column--desktop: auto !important;
     align-self: start !important;
     position: sticky;
     top: calc(var(--header-height, 72px) + 12px);
@@ -345,10 +344,23 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     padding-block-end: 0.5rem;
   }
 
-  .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden)::-webkit-scrollbar {
+  .collection-template-our-products .lame-op-page__sidebar::-webkit-scrollbar {
     width: 0;
     height: 0;
     display: none;
+  }
+
+  .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    --grid-column--desktop: auto !important;
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent;
+    padding-block-end: 0;
   }
 
   .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical {
@@ -2028,13 +2040,13 @@ body.template-collection-our-products #header-group .header-section {
   color: var(--lame-cta-bg-hover, #e64a19) !important;
 }
 
-.collection-template-our-products .lame-our-products-page-head__title {
+.collection-template-our-products .lame-op-page__sidebar .lame-our-products-page-head__title {
   font-family: var(--lame-lux-font-body, 'Jost', system-ui, sans-serif) !important;
-  font-size: clamp(1.5rem, 3vw, 1.875rem) !important;
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem) !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em;
   color: #121212 !important;
-  text-align: center;
+  text-align: left;
 }
 
 .collection-template-our-products .lame-our-products-toolbar {
