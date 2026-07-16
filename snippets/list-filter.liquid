@@ -8,6 +8,7 @@
   @param {boolean} [should_render_clear] - Whether to render the clear button
   @param {boolean} [show_swatch_label] - Whether to show the swatch label
   @param {boolean} [in_drawer] - Whether the filter is in a drawer
+  @param {boolean} [start_collapsed] - Force vertical filters closed until clicked
 {%- enddoc -%}
 
 {% liquid
@@ -32,6 +33,10 @@
   elsif filter_style == 'vertical'
     assign is_vertical = true
   endif
+  assign panel_open = is_vertical
+  if start_collapsed
+    assign panel_open = false
+  endif
   assign filter_param_name = filter.param_name | escape | replace: '.', '-'
 -%}
 {% capture accordion_children %}
@@ -41,7 +46,7 @@
     {% if filter_style == 'horizontal' %}
       data-auto-close-details="desktop"
     {% endif %}
-    {% if filter_style == 'vertical' %}
+    {% if panel_open %}
       open
     {% endif %}
   >
@@ -426,9 +431,9 @@
 {% render 'accordion-custom-component',
   children: accordion_children,
   class: 'facets__item',
-  open: is_vertical,
-  open_by_default_on_desktop: is_vertical,
-  open_by_default_on_mobile: is_vertical,
+  open: panel_open,
+  open_by_default_on_desktop: panel_open,
+  open_by_default_on_mobile: panel_open,
   disable_animation_on_desktop: is_horizontal,
   close_with_escape: is_horizontal,
   data_filter_param_name: filter_param_name

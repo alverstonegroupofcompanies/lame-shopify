@@ -250,11 +250,11 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
 }
 
 #header-component.header--cosmetic-luxury {
-  --header-luxury-min-height: 11.5rem;
+  --header-luxury-min-height: 9.5rem;
   --header-luxury-icon-ring: 2.25rem;
   --header-luxury-icon-glyph: 1.2rem;
-  --header-luxury-logo-max-w: min(34rem, 44vw);
-  --header-luxury-logo-max-h: clamp(8.5rem, 13vw, 12rem);
+  --header-luxury-logo-max-w: min(24rem, 40vw);
+  --header-luxury-logo-max-h: clamp(5.5rem, 9vw, 7.5rem);
   --lame-nav-font: 'Inter', var(--lame-font-body, 'Jost', system-ui, sans-serif);
   --lame-mobile-menu-z: 100000;
 
@@ -446,13 +446,13 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 #header-component.header--cosmetic-luxury .header__row--top > .header__columns {
   position: relative;
   z-index: 1;
-  padding-inline: 15px;
+  padding-inline: 10px;
 }
 
 #header-component.header--cosmetic-luxury .header__columns {
   min-height: var(--header-luxury-min-height);
-  padding-block: 0.55rem;
-  gap: clamp(0.5rem, 1.8vw, 1.35rem);
+  padding-block: 0.2rem;
+  gap: clamp(0.4rem, 1.4vw, 1rem);
   max-width: var(--page-width);
   margin-inline: auto;
   width: 100%;
@@ -560,7 +560,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 0.5rem 0.85rem;
+  padding: 0.35rem 0.65rem;
   color: rgb(var(--lame-nav-text) / 0.92);
   background: transparent;
   border: none;
@@ -942,8 +942,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 /* Sticky header: subtle shrink */
 #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-  min-height: 4.25rem;
-  padding-block: 0.4rem;
+  min-height: 8.5rem;
+  padding-block: 0.15rem;
   transition:
     min-height 0.35s ease,
     padding 0.35s ease;
@@ -951,12 +951,12 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 /* Header height tokens */
 body:has(#header-component.header--cosmetic-luxury) {
-  --header-height: 11.5rem;
+  --header-height: 9.5rem;
 }
 
 @media screen and (min-width: 750px) {
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 11.8rem;
+    --header-height: 10rem;
   }
 
   #header-group .announcement-bar--luxury {
@@ -964,24 +964,53 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 }
 
+/* Tablet: collapse announcement side zones so center promo is not crushed */
+@media screen and (max-width: 989px) {
+  #header-group .announcement-bar--luxury .announcement-bar__grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: 0.35rem;
+  }
+
+  #header-group .announcement-bar--luxury .announcement-bar__zone--start,
+  #header-group .announcement-bar--luxury .announcement-bar__zone--end {
+    display: none;
+  }
+
+  #header-group .announcement-bar--luxury .announcement-bar__zone--center {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #header-component.header--cosmetic-luxury .header__columns {
+    min-width: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .header-logo,
+  #header-component.header--cosmetic-luxury .header-logo__image {
+    max-width: 100%;
+  }
+}
+
 @media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury {
-    --header-luxury-min-height: 10rem;
-    --header-luxury-logo-max-w: min(28rem, 36vw);
-    --header-luxury-logo-max-h: 9.5rem;
+    --header-luxury-min-height: 9rem;
+    --header-luxury-logo-max-w: min(22rem, 32vw);
+    --header-luxury-logo-max-h: 7rem;
   }
 
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 10rem;
+    --header-height: 9rem;
   }
 
   #header-component.header--cosmetic-luxury .header__row--top .header__columns {
-    padding-inline: 15px;
+    padding-inline: 10px;
   }
 
   #header-component.header--cosmetic-luxury .header__columns {
     min-height: var(--header-luxury-min-height);
-    padding-block: 0.55rem;
+    padding-block: 0.2rem;
   }
 
   #header-component.header--cosmetic-luxury .header-logo {
@@ -993,12 +1022,14 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   #header-component.header--cosmetic-luxury .header-logo__image {
-    --header-logo-image-height: 152px;
-    max-height: 9.5rem;
+    --header-logo-image-height: 112px;
+    max-height: 7rem;
+    height: 7rem !important;
   }
 
   #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-    min-height: 9rem;
+    min-height: 8rem;
+    padding-block: 0.15rem;
   }
 }
 
@@ -1014,9 +1045,9 @@ body:has(#header-component.header--cosmetic-luxury) {
     --header-mobile-icon-size: 2.125rem;
     --header-mobile-icon-inner: 1.0625rem;
     --header-mobile-icon-gap: 0.5rem;
-    --header-luxury-min-height: 9.7rem;
-    --header-luxury-logo-max-w: min(31rem, 80vw);
-    --header-luxury-logo-max-h: clamp(7.8rem, 32vw, 10.4rem);
+    --header-luxury-min-height: 7.5rem;
+    --header-luxury-logo-max-w: min(19rem, 72vw);
+    --header-luxury-logo-max-h: clamp(4.5rem, 20vw, 5.7rem);
   }
 
   #header-component.header--cosmetic-luxury .header__row--top {
@@ -1027,7 +1058,7 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 9.7rem;
+    --header-height: 7.5rem;
   }
 
   #header-component.header--cosmetic-luxury .header__row--top .header__columns {
@@ -1035,8 +1066,8 @@ body:has(#header-component.header--cosmetic-luxury) {
     display: grid;
     align-items: center;
     min-height: var(--header-luxury-min-height);
-    padding-block: 0.35rem;
-    padding-inline: max(15px, env(safe-area-inset-left, 0px)) max(15px, env(safe-area-inset-right, 0px));
+    padding-block: 0.15rem;
+    padding-inline: max(10px, env(safe-area-inset-left, 0px)) max(10px, env(safe-area-inset-right, 0px));
     column-gap: var(--header-mobile-icon-gap);
     row-gap: 0;
   }
@@ -1239,8 +1270,8 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-    min-height: 3.375rem;
-    padding-block: 0.3rem;
+    min-height: 6.75rem;
+    padding-block: 0.15rem;
   }
 }
 
@@ -3715,7 +3746,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
   #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
     font-family: var(--lame-nav-font);
-    padding: 0.5rem 0.85rem;
+    padding: 0.35rem 0.65rem;
     font-size: clamp(0.75rem, 0.85vw, 0.8125rem);
     letter-spacing: 0.1em;
     text-transform: uppercase;

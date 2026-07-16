@@ -1,12 +1,21 @@
-/* Global mobile responsiveness pass for launch stability */
+/* Global mobile / tablet responsiveness pass for launch stability */
 
 @media screen and (max-width: 989px) {
   :root {
     --lame-mobile-page-padding: 14px;
   }
 
+  html,
   body {
     overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  iframe,
+  svg {
+    max-width: 100%;
   }
 
   .section:not(.section--full-width),
@@ -34,8 +43,59 @@
 
   .button,
   .button-primary,
-  .button-secondary {
+  .button-secondary,
+  .shopify-payment-button__button {
     min-height: 42px;
+    max-width: 100%;
+  }
+
+  /* Collections / product cards — cover tablet too (was phone-only ≤767) */
+  .template-collection .product-card,
+  .template-collection-our-products .product-card,
+  .template-index .product-card,
+  .lame-catlog-card,
+  .lame-our-products-card-scope .product-grid__item {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .template-collection .product-card__title,
+  .template-collection-our-products .product-card__title,
+  .template-index .product-card__title,
+  .lame-catlog-card__title,
+  .lame-catlog-card__title a {
+    font-size: 0.875rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .template-cart .cart-page,
+  .template-cart .cart-page--cosmetic {
+    padding-inline: var(--lame-mobile-page-padding);
+  }
+
+  .template-cart .cart-items__title,
+  .template-cart .cart-page--cosmetic .cart-items__title {
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Tablet band: prevent crushed grids / horizontal scroll */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .product-grid,
+  .lame-products-grid,
+  .lame-our-products-grid,
+  .lame-collection-brand-section__grid {
+    gap: 14px !important;
+  }
+
+  .button,
+  .button-primary,
+  .button-secondary {
+    white-space: normal;
   }
 }
 
@@ -65,18 +125,9 @@
     overflow-wrap: anywhere;
   }
 
-  /* Collections / product cards */
-  .template-collection .product-card,
-  .template-collection-our-products .product-card,
-  .template-index .product-card {
-    width: 100%;
-  }
-
   .template-collection .product-card__title,
   .template-collection-our-products .product-card__title,
   .template-index .product-card__title {
-    font-size: 0.875rem;
-    line-height: 1.35;
     min-height: calc(1.35em * 2);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -206,11 +257,6 @@
   }
 
   /* Cart */
-  .template-cart .cart-page,
-  .template-cart .cart-page--cosmetic {
-    padding-inline: var(--lame-mobile-page-padding);
-  }
-
   .template-cart .cart-items__table-row,
   .template-cart .cart-page--cosmetic .cart-items__table-row {
     overflow: hidden;
@@ -218,9 +264,7 @@
 
   .template-cart .cart-items__title,
   .template-cart .cart-page--cosmetic .cart-items__title {
-    line-height: 1.4;
     min-height: calc(1.4em * 2);
-    overflow-wrap: anywhere;
   }
 
   /* Account pages */

@@ -104,8 +104,40 @@
   fill: rgb(45 74 34 / 0.2);
 }
 
-/* Desktop: vertical column on the right */
-@media screen and (min-width: 750px) {
+/* Tablet: keep promo stacked above products so grid is not squeezed */
+@media screen and (min-width: 750px) and (max-width: 1099px) {
+  .lame-op-page__content--has-promo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'promo'
+      'main';
+    gap: var(--lame-op-layout-gap, 1rem);
+  }
+
+  .lame-op-promo-images {
+    position: static;
+    max-height: none;
+  }
+
+  .lame-op-promo-images__track {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    gap: 0.75rem;
+    padding-block: 0.25rem;
+  }
+
+  .lame-op-promo-images__item {
+    flex: 0 0 auto;
+    width: min(160px, 42vw);
+    scroll-snap-align: start;
+  }
+}
+
+/* Wide desktop: vertical promo column on the right */
+@media screen and (min-width: 1100px) {
   .lame-op-page__content--has-promo {
     grid-template-columns: minmax(0, 1fr) var(--lame-op-promo-width, 180px);
     grid-template-areas: 'main promo';

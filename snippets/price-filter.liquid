@@ -6,6 +6,7 @@
   @param {boolean} [should_render_clear] - Whether to render the clear button.
   @param {string} [id_prefix] - Unique prefix to avoid duplicate IDs when rendered multiple times.
   @param {boolean} [our_products_price_slider] - Our Products: 0–2000 range, step 100, integer labels.
+  @param {boolean} [start_collapsed] - Force vertical filters closed until clicked
 
   @example
   {% render 'price-filter', filter: filter, filter_style: 'vertical', id_prefix: 'dialog' %}
@@ -18,6 +19,10 @@
     assign is_horizontal = true
   elsif filter_style == 'vertical'
     assign is_vertical = true
+  endif
+  assign panel_open = is_vertical
+  if start_collapsed
+    assign panel_open = false
   endif
 
   assign price_slider_max = filter.range_max | money_without_currency
@@ -35,7 +40,7 @@
     {% if filter_style == 'horizontal' %}
       data-auto-close-details="desktop"
     {% endif %}
-    {% if filter_style == 'vertical' %}
+    {% if panel_open %}
       open
     {% endif %}
   >
@@ -260,9 +265,9 @@
 {% render 'accordion-custom-component',
   children: accordion_children,
   class: 'facets__item',
-  open: is_vertical,
-  open_by_default_on_desktop: is_vertical,
-  open_by_default_on_mobile: is_vertical,
+  open: panel_open,
+  open_by_default_on_desktop: panel_open,
+  open_by_default_on_mobile: panel_open,
   disable_animation_on_desktop: is_horizontal,
   close_with_escape: is_horizontal
 %}
