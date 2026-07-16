@@ -6,7 +6,7 @@
   --lame-op-shell-pad-x: clamp(0.75rem, 1.25vw, 1.5rem);
   --lame-op-sidebar-width: 280px;
   --lame-op-layout-gap: clamp(0.75rem, 1.25vw, 1.25rem);
-  --lame-op-grid-gap: 0.85rem;
+  --lame-op-grid-gap: 20px;
   width: 100%;
   max-width: none;
   background: #f5f5f5;
@@ -90,6 +90,7 @@
   min-width: 0;
   width: 100%;
   max-width: none;
+  align-items: center;
 }
 
 .lame-op-page__layout--has-promo .lame-op-page__content {
@@ -102,9 +103,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.5rem 1rem;
   width: 100%;
+  max-width: min(100%, calc(var(--lame-op-card-max, 280px) * 3 + var(--lame-op-grid-gap, 20px) * 2));
   padding-block: 0 0.65rem;
   border-bottom: 1px solid #ececec;
 }
@@ -122,7 +124,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.65rem;
-  margin-inline-start: auto;
+  margin-inline-start: 0;
 }
 
 /* Product grid — scales down: 1 → 2 → 3 columns */
@@ -140,7 +142,7 @@
   justify-content: center !important;
   justify-items: center !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: var(--lame-op-grid-gap, 0.75rem) !important;
+  gap: var(--lame-op-grid-gap, 20px) !important;
   align-items: stretch;
   --product-grid-columns-desktop: unset !important;
 }
@@ -282,7 +284,8 @@
 
   .lame-op-page__toolbar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
   }
 
   .lame-op-page .product-grid,
@@ -291,7 +294,7 @@
   .lame-our-products-card-scope .lame-collection-brand-section__grid,
   .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.65rem !important;
+    gap: var(--lame-op-grid-gap, 20px) !important;
   }
 }
 
@@ -318,6 +321,37 @@ body.template-collection-our-products .lame-op-page__main,
 body.template-collection-our-products .lame-collection-products-column {
   width: 100% !important;
   max-width: none !important;
+  align-items: center !important;
+}
+
+body.template-collection-our-products .lame-op-page__content .product-grid,
+body.template-collection-our-products .lame-op-page__content .lame-collection-brand-section__grid,
+body.template-collection-our-products .lame-op-page__main .product-grid,
+body.template-collection-our-products .lame-collection-products-column .product-grid,
+body.template-collection-our-products .lame-collection-products-column .lame-collection-brand-section__grid {
+  width: 100% !important;
+  max-width: min(100%, calc(var(--lame-op-card-max, 280px) * 3 + var(--lame-op-grid-gap, 20px) * 2)) !important;
+  margin-inline: auto !important;
+  justify-content: center !important;
+  justify-items: center !important;
+  gap: var(--lame-op-grid-gap, 20px) !important;
+}
+
+@media screen and (min-width: 750px) and (max-width: 1099px) {
+  body.template-collection-our-products .lame-op-page__content .product-grid,
+  body.template-collection-our-products .lame-op-page__main .product-grid,
+  body.template-collection-our-products .lame-collection-products-column .product-grid,
+  body.template-collection-our-products .lame-collection-products-column .lame-collection-brand-section__grid {
+    max-width: min(100%, calc(var(--lame-op-card-max, 280px) * 2 + var(--lame-op-grid-gap, 20px))) !important;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  body.template-collection-our-products .lame-op-page__content .product-grid,
+  body.template-collection-our-products .lame-op-page__main .product-grid,
+  body.template-collection-our-products .lame-collection-products-column .product-grid {
+    max-width: min(100%, var(--lame-op-card-max, 280px)) !important;
+  }
 }
 
 body.template-collection-our-products .lame-op-page__shell {
@@ -409,7 +443,7 @@ body.template-collection-our-products .lame-op-page__shell {
 
 /* Optional height caps still keep full image (letterbox with contain) */
 .lame-op-mini-banner--slim .lame-op-mini-banner__image {
-  max-height: min(220px, 28vw);
+  max-height: min(160px, 20vw);
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -435,7 +469,6 @@ body.template-collection-our-products .lame-op-page__shell {
   }
 
   .lame-op-mini-banner__image,
-  .lame-op-mini-banner--slim .lame-op-mini-banner__image,
   .lame-op-mini-banner--regular .lame-op-mini-banner__image,
   .lame-op-mini-banner--tall .lame-op-mini-banner__image {
     width: 100%;
@@ -443,5 +476,9 @@ body.template-collection-our-products .lame-op-page__shell {
     max-height: none;
     height: auto;
     object-fit: contain;
+  }
+
+  .lame-op-mini-banner--slim .lame-op-mini-banner__image {
+    max-height: 104px;
   }
 }

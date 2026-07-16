@@ -258,13 +258,11 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 }
 
 .collection-template-our-products .lame-collection-products-column:not(.lame-collection-products-column--brand-selected) .product-grid,
-.collection-template-our-products .lame-collection-products-column:not(.lame-collection-products-column--brand-selected) .lame-collection-brand-section__grid {
-  justify-content: start;
-}
-
+.collection-template-our-products .lame-collection-products-column:not(.lame-collection-products-column--brand-selected) .lame-collection-brand-section__grid,
 .collection-template-our-products .lame-collection-products-column--brand-selected .product-grid,
 .collection-template-our-products .lame-collection-products-column--brand-selected .lame-collection-brand-section__grid {
   justify-content: center;
+  justify-items: center;
 }
 
 .collection-template-our-products .collection-wrapper {
@@ -874,12 +872,15 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 .collection-template-our-products .lame-our-products-toolbar {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 0;
   width: 100%;
+  max-width: min(100%, calc(var(--lame-op-card-max, 280px) * 3 + var(--lame-op-grid-gap, 20px) * 2));
+  margin-inline: auto;
   margin-block: 0 1.25rem;
   padding-block-end: 0.85rem;
   border-bottom: 1px solid rgb(27 48 34 / 0.08);
+  text-align: center;
 }
 
 .collection-template-our-products .lame-our-products-breadcrumbs__list {
@@ -1146,7 +1147,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   max-width: none !important;
   justify-content: center !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: var(--lame-op-grid-gap, 0.75rem) !important;
+  gap: var(--lame-op-grid-gap, 20px) !important;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1349,7 +1350,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
     :is(.lame-collection-brand-section__grid, .product-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 10px !important;
+    gap: var(--lame-op-grid-gap, 20px) !important;
   }
 
   .collection-template-our-products > .lame-collection-shell {
@@ -2102,9 +2103,54 @@ body.template-collection-our-products #header-group .header-section {
   margin-block: 0 0.85rem;
   padding-block-end: 0.65rem;
   border-bottom: 1px solid #ececec;
+  align-items: center;
+  text-align: center;
 }
 
 .collection-template-our-products .lame-our-products-toolbar__actions:empty {
   display: none;
+}
+
+@media screen and (min-width: 750px) {
+  /* Make desktop filter panel cleaner and more structured */
+  .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical {
+    border: 1px solid rgb(27 48 34 / 0.12);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(20 31 24 / 0.06);
+    padding: 0.25rem 0.25rem 0.45rem;
+  }
+}
+
+/* Slightly tighter filter stack spacing */
+.collection-template-our-products .lame-op-filters-stack,
+.lame-op-page .lame-op-filters-stack {
+  padding: 0.35rem 0.35rem 0 !important;
+}
+
+.collection-template-our-products .lame-op-filters-stack > accordion-custom,
+.collection-template-our-products .lame-op-filters-stack > .sorting-filter,
+.collection-template-our-products .lame-op-filters-stack > lame-brand-filter,
+.lame-op-page .lame-op-filters-stack > accordion-custom,
+.lame-op-page .lame-op-filters-stack > .sorting-filter,
+.lame-op-page .lame-op-filters-stack > lame-brand-filter {
+  border-radius: 10px;
+}
+
+/* Remove blank space after product list before footer */
+body.template-collection-our-products .collection-template-our-products > .lame-collection-shell,
+body.template-collection-our-products .lame-our-products-page > .lame-collection-shell {
+  padding-bottom: 0 !important;
+}
+
+body.template-collection-our-products .collection-template-our-products .lame-collection-products-column,
+body.template-collection-our-products .collection-template-our-products .lame-op-page__content,
+body.template-collection-our-products .collection-template-our-products .lame-op-page__main,
+body.template-collection-our-products .collection-template-our-products .lame-our-products-pagination-wrap,
+body.template-collection-our-products .collection-template-our-products .lame-collection-pagination,
+body.template-collection-our-products #MainContent,
+body.template-collection-our-products .content-for-layout {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
