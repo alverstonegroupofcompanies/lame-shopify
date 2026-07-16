@@ -15,13 +15,6 @@
 <div class="lame-contact-page section spacing-style color-{{ section.settings.color_scheme }}" style="{% render 'spacing-style', settings: section.settings %}">
   <div class="lame-contact-page__shell page-width">
     <header class="lame-contact-page__head">
-      <nav class="lame-contact-page__breadcrumbs" aria-label="Breadcrumb">
-        <ol class="lame-contact-page__breadcrumbs-list">
-          <li><a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a></li>
-          <li class="lame-contact-page__breadcrumbs-sep" aria-hidden="true">&bull;</li>
-          <li aria-current="page"><span>{{ page_heading | escape }}</span></li>
-        </ol>
-      </nav>
       <h1 class="lame-contact-page__title">{{ page_heading | escape }}</h1>
       {% if section.settings.subheading != blank %}
         <p class="lame-contact-page__subtitle">{{ section.settings.subheading | escape }}</p>
@@ -30,29 +23,34 @@
 
     <div class="lame-contact-page__layout">
       <aside class="lame-contact-page__info">
-        <div class="lame-contact-page__info-card">
+        <div class="lame-contact-page__info-card lame-contact-page__info-card--primary">
           <h2 class="lame-contact-page__info-title">{{ 'lame_contact.get_in_touch' | t }}</h2>
           <p class="lame-contact-page__info-text">{{ 'lame_contact.get_in_touch_intro' | t }}</p>
+
+          {% if section.settings.phone != blank %}
+            <div class="lame-contact-page__info-detail">
+              <span class="lame-contact-page__info-label">{{ 'lame_contact.phone' | t }}</span>
+              <a class="lame-contact-page__phone-link" href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}">
+                {{ section.settings.phone | escape }}
+              </a>
+            </div>
+          {% endif %}
+
+          {% if section.settings.head_office_email != blank %}
+            <div class="lame-contact-page__info-detail">
+              <span class="lame-contact-page__info-label">{{ 'lame_contact.email' | t }}</span>
+              <a class="lame-contact-page__phone-link" href="mailto:{{ section.settings.head_office_email | strip }}">
+                {{ section.settings.head_office_email | escape }}
+              </a>
+            </div>
+          {% endif %}
         </div>
 
-        {% if section.settings.response_note != blank %}
-          <div class="lame-contact-page__info-card lame-contact-page__info-card--muted">
-            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.response_time' | t }}</h2>
-            <p class="lame-contact-page__info-text">{{ section.settings.response_note | escape }}</p>
+        {% if section.settings.show_head_office and section.settings.head_office_address != blank %}
+          <div class="lame-contact-page__info-card">
+            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.head_office' | t }}</h2>
+            <p class="lame-contact-page__info-text">{{ section.settings.head_office_address | escape | newline_to_br }}</p>
           </div>
-        {% endif %}
-
-        {% if section.settings.phone != blank %}
-          <div class="lame-contact-page__info-card lame-contact-page__info-card--muted">
-            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.phone' | t }}</h2>
-            <a class="lame-contact-page__phone-link" href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}">
-              {{ section.settings.phone | escape }}
-            </a>
-          </div>
-        {% endif %}
-
-        {% if page.content != blank %}
-          <div class="lame-contact-page__page-content rte">{{ page.content }}</div>
         {% endif %}
       </aside>
 
@@ -153,105 +151,6 @@
       </div>
     </div>
 
-    {% if section.settings.show_head_office %}
-      <section class="lame-contact-page__head-office" aria-labelledby="HeadOfficeHeading-{{ section.id }}">
-        <div class="lame-contact-page__head-office-card">
-          <header class="lame-contact-page__head-office-header">
-            <h2 id="HeadOfficeHeading-{{ section.id }}" class="lame-contact-page__head-office-title">
-              {{ 'lame_contact.head_office' | t }}
-            </h2>
-          </header>
-
-          <div class="lame-contact-page__head-office-layout">
-            <div class="lame-contact-page__head-office-brand">
-              {% if section.settings.head_office_logo != blank %}
-                {{
-                  section.settings.head_office_logo
-                  | image_url: width: 480
-                  | image_tag:
-                    class: 'lame-contact-page__head-office-logo',
-                    loading: 'lazy',
-                    widths: '200,280,360,480',
-                    sizes: '(max-width: 749px) 200px, 240px',
-                    alt: section.settings.head_office_logo_alt | default: 'Alverstone Healthcare Pvt Ltd'
-                }}
-              {% else %}
-                <img
-                  class="lame-contact-page__head-office-logo"
-                  src="{{ 'alverstone-healthcare-logo.png' | asset_url }}"
-                  alt="{{ section.settings.head_office_logo_alt | default: 'Alverstone Healthcare Pvt Ltd' | escape }}"
-                  width="240"
-                  height="80"
-                  loading="lazy"
-                >
-              {% endif %}
-            </div>
-
-            <div class="lame-contact-page__head-office-details">
-              {% if section.settings.head_office_address != blank %}
-                <div class="lame-contact-page__head-office-detail">
-                  <span class="lame-contact-page__head-office-label">{{ 'lame_contact.address' | t }}</span>
-                  <p class="lame-contact-page__head-office-value">
-                    {{ section.settings.head_office_address | escape | newline_to_br }}
-                  </p>
-                </div>
-              {% endif %}
-
-              {% if section.settings.head_office_email != blank %}
-                <div class="lame-contact-page__head-office-detail">
-                  <span class="lame-contact-page__head-office-label">{{ 'lame_contact.email' | t }}</span>
-                  <a class="lame-contact-page__head-office-value lame-contact-page__head-office-link" href="mailto:{{ section.settings.head_office_email | strip }}">
-                    {{ section.settings.head_office_email | escape }}
-                  </a>
-                </div>
-              {% endif %}
-
-              {% if section.settings.head_office_website != blank %}
-                {% liquid
-                  assign head_office_site = section.settings.head_office_website | strip
-                  assign head_office_site_href = head_office_site
-                  unless head_office_site_href contains '://'
-                    assign head_office_site_href = 'https://' | append: head_office_site_href
-                  endunless
-                %}
-                <div class="lame-contact-page__head-office-detail">
-                  <span class="lame-contact-page__head-office-label">{{ 'lame_contact.website' | t }}</span>
-                  <a class="lame-contact-page__head-office-value lame-contact-page__head-office-link" href="{{ head_office_site_href }}" target="_blank" rel="noopener noreferrer">
-                    {{ section.settings.head_office_website | escape }}
-                  </a>
-                </div>
-              {% endif %}
-
-              {% if section.settings.head_office_phones != blank %}
-                <div class="lame-contact-page__head-office-detail lame-contact-page__head-office-detail--phones">
-                  <span class="lame-contact-page__head-office-label">{{ 'lame_contact.contact_numbers' | t }}</span>
-                  <ul class="lame-contact-page__head-office-phone-grid" role="list">
-                    {% liquid
-                      assign head_office_phone_blob = section.settings.head_office_phones | replace: ',', '
-' | replace: '|', '
-'
-                      assign head_office_phone_lines = head_office_phone_blob | split: '
-'
-                    %}
-                    {% for phone_line in head_office_phone_lines %}
-                      {% assign phone_stripped = phone_line | strip %}
-                      {% if phone_stripped != blank %}
-                        {% assign phone_href = phone_stripped | remove: ' ' | remove: '-' | remove: '(' | remove: ')' %}
-                        <li>
-                          <a class="lame-contact-page__head-office-link" href="tel:{{ phone_href }}">
-                            {{ phone_stripped | escape }}
-                          </a>
-                        </li>
-                      {% endif %}
-                    {% endfor %}
-                  </ul>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </section>
-    {% endif %}
   </div>
 </div>
 
@@ -276,18 +175,6 @@
       "default": true
     },
     {
-      "type": "image_picker",
-      "id": "head_office_logo",
-      "label": "Head office logo",
-      "info": "Leave empty to use the default Alverstone Healthcare logo."
-    },
-    {
-      "type": "text",
-      "id": "head_office_logo_alt",
-      "label": "Logo alt text",
-      "default": "Alverstone Healthcare Pvt Ltd"
-    },
-    {
       "type": "textarea",
       "id": "head_office_address",
       "label": "Head office address",
@@ -298,19 +185,6 @@
       "id": "head_office_email",
       "label": "Head office email",
       "default": "mail@lamstonehealthcare.com"
-    },
-    {
-      "type": "text",
-      "id": "head_office_website",
-      "label": "Head office website",
-      "default": "www.lamstonehealthcare.com"
-    },
-    {
-      "type": "textarea",
-      "id": "head_office_phones",
-      "label": "Head office phone numbers",
-      "info": "One number per line.",
-      "default": "+91 974 639 7686\n+91 813 980 7686\n+9181291 42686\n+97154 740 1777"
     },
     {
       "type": "header",
@@ -332,12 +206,6 @@
       "type": "text",
       "id": "phone",
       "label": "Phone (optional)"
-    },
-    {
-      "type": "text",
-      "id": "response_note",
-      "label": "Response time note",
-      "default": "We typically reply within 1–2 business days."
     },
     {
       "type": "text",

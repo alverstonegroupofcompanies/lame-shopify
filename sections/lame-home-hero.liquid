@@ -118,7 +118,7 @@
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
             prioritize_first_slide: desktop_prioritize_loading,
-            media_fit: image_fit
+            media_fit: 'cover'
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--desktop">
@@ -136,7 +136,7 @@
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
             prioritize_first_slide: true,
-            media_fit: image_fit
+            media_fit: 'cover'
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--mobile">
@@ -159,10 +159,33 @@
     --lame-hero-desktop-ratio: 2.4;
     --lame-hero-mobile-ratio: 0.5625;
     --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
+    --lame-hero-frame-max-height: 100svh;
     width: 100%;
-    max-width: 100%;
+    max-width: none;
     overflow-x: hidden;
     background: #fff;
+  }
+
+  .lame-home-hero.section.section--full-width {
+    display: block;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .lame-home-hero.section.section--full-width > * {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .shopify-section.hero-wrapper:has(.lame-home-hero) {
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: 0;
   }
 
   body:has(> #header-group > .header-section > #header-component)
@@ -216,58 +239,86 @@
     display: none;
   }
 
-  /* Full-width native banner ratio — no crop; full image stays visible */
+  /* Full-width frame — always viewport width; fixed height + cover (no side letterboxing) */
   .lame-home-hero__frame,
   .lame-home-hero__carousel slideshow-component,
   .lame-home-hero__carousel slideshow-container,
   .lame-home-hero__carousel slideshow-slides {
     width: 100%;
-    max-width: 100%;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    aspect-ratio: var(--lame-hero-banner-ratio);
+    min-width: 100%;
+    max-width: none;
+    height: var(--lame-hero-frame-max-height);
+    min-height: var(--lame-hero-frame-min-height, 0px);
+    max-height: var(--lame-hero-frame-max-height);
+    aspect-ratio: unset;
+  }
+
+  .lame-home-hero__carousel slideshow-slide {
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    min-height: 100%;
   }
 
   .lame-home-hero__carousel slideshow-component {
     --slide-min-height: 0 !important;
     --slide-min-height-desktop: 0 !important;
-    --product-media-fit: contain;
+    --product-media-fit: cover;
   }
 
   .lame-home-hero__frame {
     overflow: hidden;
     line-height: 0;
-    background: #f5f5f5;
+    background: #1a1a1a;
   }
 
-  /* Optional height caps (Full screen / Small / Medium / Large) — still contain, never crop */
+  /* Optional height caps — frame stays full width; image uses cover inside */
+  .lame-home-hero--full_screen {
+    --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+  }
+
+  .lame-home-hero--small {
+    --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
+  }
+
+  .lame-home-hero--medium {
+    --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
+  }
+
+  .lame-home-hero--large {
+    --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
+  }
+
   .lame-home-hero--full_screen .lame-home-hero__frame,
   .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
   .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides {
-    max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+    height: var(--lame-hero-frame-max-height);
+    max-height: var(--lame-hero-frame-max-height);
   }
 
   .lame-home-hero--small .lame-home-hero__frame,
   .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
   .lame-home-hero--small .lame-home-hero__carousel slideshow-slides {
-    max-height: var(--lame-hero-height-mobile);
+    height: var(--lame-hero-frame-max-height);
+    max-height: var(--lame-hero-frame-max-height);
   }
 
   .lame-home-hero--medium .lame-home-hero__frame,
   .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
   .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides {
-    max-height: var(--lame-hero-height-mobile);
+    height: var(--lame-hero-frame-max-height);
+    max-height: var(--lame-hero-frame-max-height);
   }
 
   .lame-home-hero--large .lame-home-hero__frame,
   .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
   .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
-    max-height: var(--lame-hero-height-mobile);
+    height: var(--lame-hero-frame-max-height);
+    max-height: var(--lame-hero-frame-max-height);
   }
 
   /* Phones + tablets under ~12″: mobile banners only */
@@ -285,19 +336,21 @@
       --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
     }
 
+    .lame-home-hero--mobile-full_screen {
+      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+    }
+
     .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
     .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
     .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
     .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
-      max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+      height: var(--lame-hero-frame-max-height);
+      max-height: var(--lame-hero-frame-max-height);
     }
 
     @supports (height: 100dvh) {
-      .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
-      .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
-      .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
-      .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
-        max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+      .lame-home-hero--mobile-full_screen {
+        --lame-hero-frame-max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
       }
     }
 
@@ -332,32 +385,40 @@
       display: none;
     }
 
+    .lame-home-hero--small {
+      --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--medium {
+      --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--large {
+      --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
+    }
+
+    .lame-home-hero--full_screen {
+      --lame-hero-frame-max-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
+    }
+
     .lame-home-hero--small .lame-home-hero__frame,
     .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
     .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--small .lame-home-hero__carousel slideshow-slides {
-      max-height: var(--lame-hero-height-desktop);
-    }
-
+    .lame-home-hero--small .lame-home-hero__carousel slideshow-slides,
     .lame-home-hero--medium .lame-home-hero__frame,
     .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
     .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides {
-      max-height: var(--lame-hero-height-desktop);
-    }
-
+    .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides,
     .lame-home-hero--large .lame-home-hero__frame,
     .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
     .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
-      max-height: var(--lame-hero-height-desktop);
-    }
-
+    .lame-home-hero--large .lame-home-hero__carousel slideshow-slides,
     .lame-home-hero--full_screen .lame-home-hero__frame,
     .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
     .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
     .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides {
-      max-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
+      height: var(--lame-hero-frame-max-height);
+      max-height: var(--lame-hero-frame-max-height);
     }
   }
 
@@ -366,36 +427,40 @@
     flex: 0 0 100%;
     height: 100%;
     min-height: 0;
+    position: relative;
   }
 
   .lame-home-hero__carousel slideshow-slide > .slide__image-container {
     display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    position: relative;
     line-height: 0;
   }
 
-  /* Default: show entire banner (no crop) */
+  /* Always cover — no side letterboxing */
   .lame-home-hero__carousel .slide__image,
   .lame-home-hero__carousel .slide__image-container img,
   .lame-home-hero__slide-link .slide__image,
   .lame-home-hero__slide-link img {
     width: 100%;
     height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    min-width: 100%;
+    min-height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover !important;
     object-position: center center;
     display: block;
   }
 
-  .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image,
-  .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image-container img,
-  .lame-home-hero--fit-cover .lame-home-hero__slide-link .slide__image,
-  .lame-home-hero--fit-cover .lame-home-hero__slide-link img {
-    object-fit: cover;
+  .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image,
+  .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image-container img,
+  .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
+  .lame-home-hero--fit-contain .lame-home-hero__slide-link img {
+    object-fit: contain !important;
     object-position: center center;
   }
 
@@ -563,8 +628,8 @@
         { "value": "contain", "label": "Show full image (no crop)" },
         { "value": "cover", "label": "Fill frame (may crop)" }
       ],
-      "default": "contain",
-      "info": "Use “Show full image” so nothing is hidden on any screen size."
+      "default": "cover",
+      "info": "“Fill frame” keeps the banner edge-to-edge on every screen. Use “Show full image” only if you prefer letterboxing."
     },
     {
       "type": "header",
