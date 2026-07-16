@@ -294,7 +294,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 
   .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     display: grid !important;
-    grid-template-columns: minmax(180px, 200px) minmax(0, 1fr) !important;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
     grid-template-rows: auto !important;
     column-gap: 1.15rem !important;
     row-gap: 0 !important;
@@ -303,12 +303,12 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     align-items: start !important;
   }
 
-  /* Our Products (lame-op-page): narrow fixed sidebar so products use full remaining width */
+  /* Our Products (lame-op-page): wider filter column */
   .collection-template-our-products.lame-our-products-page
     .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
   body.template-collection-our-products
     .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar) {
-    grid-template-columns: 180px minmax(0, 1fr) !important;
+    grid-template-columns: 240px minmax(0, 1fr) !important;
     column-gap: 1rem !important;
     width: 100% !important;
     max-width: none !important;
@@ -323,9 +323,8 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   }
 
   /*
-    Sticky sidebar (heading + filters): sticks under the site header while
-    products scroll; releases when the product column ends.
-    No internal scroll — heading + filters stay fixed together without a scrollbar.
+    Sticky filters column: sticks under the site header while products scroll.
+    No max-height / overflow scroll — no scrollbar on filters.
   */
   .collection-template-our-products .lame-op-page__sidebar {
     grid-column: 1 !important;
@@ -354,13 +353,17 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     padding-block-end: 0;
   }
 
-  /* Kill any nested scrollbars inside the sticky filter column */
+  /* Remove scrollbars / height caps on Our Products filter scroll containers */
   .collection-template-our-products .lame-op-page__sidebar,
   .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical,
   .collection-template-our-products .lame-op-page__sidebar .facets--vertical,
   .collection-template-our-products .lame-op-page__sidebar .facets__form,
   .collection-template-our-products .lame-op-page__sidebar .facets__filters-wrapper,
+  .collection-template-our-products .lame-op-page__sidebar .facets__inputs-wrapper,
+  .collection-template-our-products .lame-op-page__sidebar .facets__panel-content,
   .collection-template-our-products .lame-op-page__sidebar .lame-op-filters-stack {
+    max-height: none !important;
+    overflow: visible !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
@@ -1574,29 +1577,37 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 @media screen and (min-width: 750px) and (max-width: 1099px) {
   .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     display: grid !important;
-    grid-template-columns: minmax(180px, 200px) minmax(0, 1fr) !important;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
     column-gap: 1rem !important;
   }
 
   .collection-template-our-products.lame-our-products-page
     .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)),
   body.template-collection-our-products
-    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
-    grid-template-columns: 180px minmax(0, 1fr) !important;
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)),
+  .collection-template-our-products.lame-our-products-page
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
+  body.template-collection-our-products
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar) {
+    grid-template-columns: 240px minmax(0, 1fr) !important;
   }
 }
 
 @media screen and (min-width: 1100px) {
   .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
-    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) !important;
+    grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) !important;
     column-gap: 1.5rem !important;
   }
 
   .collection-template-our-products.lame-our-products-page
     .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)),
   body.template-collection-our-products
-    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
-    grid-template-columns: 240px minmax(0, 1fr) !important;
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)),
+  .collection-template-our-products.lame-our-products-page
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
+  body.template-collection-our-products
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar) {
+    grid-template-columns: 280px minmax(0, 1fr) !important;
   }
 }
 
