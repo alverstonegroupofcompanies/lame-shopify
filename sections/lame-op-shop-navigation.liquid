@@ -79,6 +79,36 @@
                   endif
                 endif
               endif
+
+              assign icon_handle = block.settings.icon_key | strip | downcase
+              if icon_handle == blank and cat != blank
+                assign icon_handle = cat.handle
+              endif
+              if icon_handle == blank
+                assign label_key = label | downcase | strip
+                case label_key
+                  when 'all products', 'all'
+                    assign icon_handle = 'all'
+                  when 'skincare', 'skin care'
+                    assign icon_handle = 'skin-care'
+                  when 'makeup', 'make up', 'make-up'
+                    assign icon_handle = 'make-up'
+                  when 'haircare', 'hair care', 'hair'
+                    assign icon_handle = 'hair-care'
+                  when 'bath & body', 'bath and body', 'bath-body'
+                    assign icon_handle = 'bath-body'
+                  when 'fragrance', 'perfume'
+                    assign icon_handle = 'fragrance'
+                  when 'baby care', 'baby & mom', 'baby-mom', 'baby'
+                    assign icon_handle = 'baby-mom'
+                  when 'wellness'
+                    assign icon_handle = 'wellness'
+                  when 'herbal'
+                    assign icon_handle = 'herbal'
+                  else
+                    assign icon_handle = 'all'
+                endcase
+              endif
             %}
             <li class="lame-op-shop-nav__chip-item" {{ block.shopify_attributes }}>
               <a
@@ -86,18 +116,22 @@
                 class="lame-op-shop-nav__chip{% if is_active %} is-active{% endif %}"
                 {% if is_active %}aria-current="page"{% endif %}
               >
-                {% if block.settings.icon != blank %}
-                  {{
-                    block.settings.icon
-                    | image_url: width: 96
-                    | image_tag:
-                      class: 'lame-op-shop-nav__chip-icon',
-                      loading: 'lazy',
-                      widths: '48,64,96',
-                      sizes: '28px',
-                      alt: ''
-                  }}
-                {% endif %}
+                <span class="lame-op-shop-nav__chip-icon-wrap" aria-hidden="true">
+                  {% if block.settings.icon != blank %}
+                    {{
+                      block.settings.icon
+                      | image_url: width: 96
+                      | image_tag:
+                        class: 'lame-op-shop-nav__chip-icon-img',
+                        loading: 'lazy',
+                        widths: '48,64,96',
+                        sizes: '22px',
+                        alt: ''
+                    }}
+                  {% else %}
+                    {% render 'lame-op-category-icon', handle: icon_handle %}
+                  {% endif %}
+                </span>
                 <span class="lame-op-shop-nav__chip-label">{{ label | escape }}</span>
               </a>
             </li>
@@ -192,12 +226,13 @@
     --lame-op-nav-accent-soft: #fff0f6;
     --lame-op-nav-ink: #1a1a1a;
     --lame-op-nav-muted: #6b7280;
-    --lame-op-nav-border: #ececec;
+    --lame-op-nav-border: #e8e8e8;
+    --lame-op-nav-page: #f7f7f7;
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: 0.85rem clamp(0.75rem, 2vw, 1.5rem) 0.65rem;
-    background: #f5f5f5;
+    padding: 1rem clamp(0.75rem, 2vw, 1.5rem) 0.85rem;
+    background: var(--lame-op-nav-page);
     box-sizing: border-box;
   }
 
@@ -215,16 +250,17 @@
     width: 100%;
     max-width: min(1280px, 100%);
     margin-inline: auto;
-    margin-block-end: 0.75rem;
+    margin-block-end: 0.85rem;
   }
 
   .lame-op-shop-nav__chips {
     list-style: none;
     margin: 0;
-    padding: 0 0 0.25rem;
+    padding: 0.15rem 0 0.35rem;
     display: flex;
     flex-wrap: nowrap;
-    gap: 0.55rem;
+    justify-content: flex-start;
+    gap: 0.6rem;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -241,9 +277,9 @@
   .lame-op-shop-nav__chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    min-height: 2.5rem;
-    padding: 0.4rem 0.95rem;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem 0.4rem 0.45rem;
     border: 1px solid var(--lame-op-nav-border);
     border-radius: 999px;
     background: #fff;
@@ -254,29 +290,69 @@
     font-weight: 600;
     letter-spacing: 0.01em;
     white-space: nowrap;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
     transition:
       background 0.2s ease,
       border-color 0.2s ease,
       color 0.2s ease,
-      box-shadow 0.2s ease;
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
   }
 
   .lame-op-shop-nav__chip:hover {
-    border-color: rgb(252 39 121 / 0.35);
-    box-shadow: 0 4px 14px rgb(0 0 0 / 0.05);
+    border-color: rgb(252 39 121 / 0.28);
+    box-shadow: 0 6px 18px rgb(252 39 121 / 0.1);
+    transform: translateY(-1px);
   }
 
   .lame-op-shop-nav__chip.is-active {
     background: var(--lame-op-nav-accent-soft);
-    border-color: rgb(252 39 121 / 0.35);
+    border-color: rgb(252 39 121 / 0.42);
+    color: var(--lame-op-nav-accent);
+    box-shadow: 0 4px 14px rgb(252 39 121 / 0.12);
+  }
+
+  .lame-op-shop-nav__chip-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .lame-op-shop-nav__chip.is-active .lame-op-shop-nav__chip-icon-wrap {
+    background: #fff;
+    color: var(--lame-op-nav-accent);
+    box-shadow: inset 0 0 0 1px rgb(252 39 121 / 0.18);
+  }
+
+  .lame-op-shop-nav__chip:hover .lame-op-shop-nav__chip-icon-wrap {
     color: var(--lame-op-nav-accent);
   }
 
-  .lame-op-shop-nav__chip-icon {
-    width: 1.15rem;
-    height: 1.15rem;
-    object-fit: contain;
+  .lame-op-category-icon,
+  .lame-op-shop-nav__chip-icon-img {
     display: block;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .lame-op-category-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-op-shop-nav__chip-icon-img {
+    object-fit: contain;
+  }
+
+  .lame-op-shop-nav__chip-label {
+    padding-inline-end: 0.15rem;
   }
 
   .lame-op-shop-nav__brands {
@@ -289,37 +365,40 @@
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.75rem 1rem;
-    min-height: 4.25rem;
-    padding: 0.55rem 0.75rem 0.55rem 1rem;
+    gap: 0.85rem 1.1rem;
+    min-height: 4.5rem;
+    padding: 0.65rem 0.75rem 0.65rem 1.1rem;
     border: 1px solid var(--lame-op-nav-border);
-    border-radius: 8px;
+    border-radius: 12px;
     background: #fff;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.03);
   }
 
   .lame-op-shop-nav__brands-title {
     margin: 0;
     font-size: 0.6875rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--lame-op-nav-muted);
+    color: #4b5563;
     white-space: nowrap;
   }
 
   .lame-op-shop-nav__brands-viewport {
     min-width: 0;
     overflow: hidden;
+    mask-image: linear-gradient(90deg, #000 92%, transparent);
   }
 
   .lame-op-shop-nav__brands-track {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-block: 0.15rem;
+    padding-block: 0.2rem;
+    padding-inline-end: 1.25rem;
   }
 
   .lame-op-shop-nav__brands-track::-webkit-scrollbar {
@@ -334,9 +413,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 6.5rem;
-    height: 2.5rem;
+    width: 6.75rem;
+    height: 2.65rem;
+    padding: 0.2rem 0.35rem;
+    border-radius: 8px;
     text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .lame-op-shop-nav__brand-link:hover {
+    background: #fafafa;
   }
 
   .lame-op-shop-nav__brand-image {
@@ -346,22 +432,27 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    filter: grayscale(0.05);
-    opacity: 0.92;
-    transition: opacity 0.2s ease;
+    filter: grayscale(0.08);
+    opacity: 0.9;
+    transition:
+      opacity 0.2s ease,
+      filter 0.2s ease,
+      transform 0.2s ease;
   }
 
   .lame-op-shop-nav__brand-link:hover .lame-op-shop-nav__brand-image {
     opacity: 1;
+    filter: none;
+    transform: scale(1.03);
   }
 
   .lame-op-shop-nav__brand-placeholder {
     display: grid;
     place-items: center;
-    width: 6.5rem;
-    height: 2.5rem;
+    width: 6.75rem;
+    height: 2.65rem;
     border: 1px dashed #d4d4d4;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.65rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -372,22 +463,38 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
     margin: 0;
     padding: 0;
     border: 1px solid var(--lame-op-nav-border);
     border-radius: 999px;
     background: #fff;
-    color: var(--lame-op-nav-ink);
-    font-size: 1.25rem;
+    color: #374151;
+    font-size: 1.35rem;
     line-height: 1;
     cursor: pointer;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.04);
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease,
+      background 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .lame-op-shop-nav__brands-next:hover {
     border-color: var(--lame-op-nav-accent);
     color: var(--lame-op-nav-accent);
+    background: var(--lame-op-nav-accent-soft);
+    box-shadow: 0 4px 12px rgb(252 39 121 / 0.12);
+  }
+
+  @media screen and (min-width: 1100px) {
+    .lame-op-shop-nav__chips {
+      justify-content: center;
+      flex-wrap: wrap;
+      overflow: visible;
+    }
   }
 
   @media screen and (max-width: 749px) {
@@ -395,10 +502,29 @@
       padding-inline: 0.75rem;
     }
 
+    .lame-op-shop-nav__chip {
+      min-height: 2.55rem;
+      padding: 0.35rem 0.85rem 0.35rem 0.4rem;
+      font-size: 0.75rem;
+      gap: 0.45rem;
+    }
+
+    .lame-op-shop-nav__chip-icon-wrap {
+      width: 1.85rem;
+      height: 1.85rem;
+    }
+
+    .lame-op-category-icon,
+    .lame-op-shop-nav__chip-icon-img {
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+
     .lame-op-shop-nav__brands-bar {
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.55rem;
-      padding: 0.55rem 0.65rem;
+      padding: 0.6rem 0.65rem;
+      border-radius: 10px;
     }
 
     .lame-op-shop-nav__brands-title {
@@ -407,7 +533,8 @@
 
     .lame-op-shop-nav__brand-link,
     .lame-op-shop-nav__brand-placeholder {
-      width: 5.5rem;
+      width: 5.75rem;
+      height: 2.4rem;
     }
   }
 {% endstylesheet %}
@@ -464,7 +591,14 @@
         {
           "type": "image_picker",
           "id": "icon",
-          "label": "Icon (optional)"
+          "label": "Custom icon image",
+          "info": "Optional. Leave empty to use the built-in category icon."
+        },
+        {
+          "type": "text",
+          "id": "icon_key",
+          "label": "Built-in icon key",
+          "info": "Optional override: all, skin-care, make-up, hair-care, bath-body, fragrance, baby-mom, wellness, herbal."
         },
         {
           "type": "collection",
