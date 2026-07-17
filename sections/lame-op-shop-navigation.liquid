@@ -1,0 +1,534 @@
+{%- doc -%}
+  Our Products: category chips + Top Brands logo strip.
+  Categories link to collections; brand logos link to vendor filters (or custom URLs).
+{%- enddoc -%}
+
+{%- liquid
+  assign show_nav = false
+  if template.name == 'collection' and collection != blank
+    if template.suffix == 'our-products'
+      assign show_nav = true
+    elsif collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products' or collection.handle == 'frontpage'
+      assign show_nav = true
+    endif
+  endif
+
+  assign products_base = routes.all_products_collection_url
+  if collection != blank
+    if collection.handle == 'our-products' or collection.handle == 'all' or collection.handle == 'products'
+      assign products_base = collection.url
+    endif
+  endif
+  if products_base == routes.all_products_collection_url
+    if collections['our-products'] != blank
+      assign products_base = collections['our-products'].url
+    elsif collections['all'] != blank
+      assign products_base = collections['all'].url
+    endif
+  endif
+
+  assign category_count = 0
+  assign brand_count = 0
+  for block in section.blocks
+    if block.type == 'category'
+      assign category_count = category_count | plus: 1
+    elsif block.type == 'brand' and block.settings.image != blank
+      assign brand_count = brand_count | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if show_nav -%}
+  {{ 'lame-op-page.css' | asset_url | stylesheet_tag }}
+
+  <section
+    class="lame-op-shop-nav"
+    style="--lame-op-nav-accent: {{ section.settings.accent_color }}; --lame-op-nav-accent-soft: {{ section.settings.accent_soft }};"
+    {{ section.shopify_attributes }}
+  >
+    {% if category_count > 0 or request.design_mode %}
+      <nav class="lame-op-shop-nav__categories" aria-label="{{ section.settings.categories_label | escape }}">
+        <ul class="lame-op-shop-nav__chips" role="list">
+          {% for block in section.blocks %}
+            {% if block.type != 'category' %}{% continue %}{% endif %}
+            {% liquid
+              assign cat = block.settings.collection
+              assign label = block.settings.label
+              if label == blank and cat != blank
+                assign label = cat.title
+              endif
+              if label == blank
+                assign label = 'Category'
+              endif
+
+              assign href = block.settings.link
+              if href == blank and cat != blank
+                assign href = cat.url
+              endif
+              if href == blank
+                assign href = products_base
+              endif
+
+              assign is_active = false
+              if cat != blank and collection.handle == cat.handle
+                assign is_active = true
+              elsif cat == blank and block.settings.link == blank
+                if label == 'All Products' or label == 'All'
+                  if collection.handle == 'our-products' or collection.handle == 'all' or collection.handle == 'products'
+                    assign is_active = true
+                  endif
+                endif
+              endif
+            %}
+            <li class="lame-op-shop-nav__chip-item" {{ block.shopify_attributes }}>
+              <a
+                href="{{ href }}"
+                class="lame-op-shop-nav__chip{% if is_active %} is-active{% endif %}"
+                {% if is_active %}aria-current="page"{% endif %}
+              >
+                {% if block.settings.icon != blank %}
+                  {{
+                    block.settings.icon
+                    | image_url: width: 96
+                    | image_tag:
+                      class: 'lame-op-shop-nav__chip-icon',
+                      loading: 'lazy',
+                      widths: '48,64,96',
+                      sizes: '28px',
+                      alt: ''
+                  }}
+                {% endif %}
+                <span class="lame-op-shop-nav__chip-label">{{ label | escape }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    {% endif %}
+
+    {% if brand_count > 0 or request.design_mode %}
+      <div class="lame-op-shop-nav__brands" data-lame-op-brands>
+        <div class="lame-op-shop-nav__brands-bar">
+          <p class="lame-op-shop-nav__brands-title">{{ section.settings.brands_heading | escape }}</p>
+          <div class="lame-op-shop-nav__brands-viewport">
+            <div class="lame-op-shop-nav__brands-track" data-lame-op-brands-track>
+              {% for block in section.blocks %}
+                {% if block.type != 'brand' %}{% continue %}{% endif %}
+                {% if block.settings.image == blank and request.design_mode == false %}{% continue %}{% endif %}
+                {% liquid
+                  assign brand_alt = block.settings.alt | default: block.settings.vendor | default: 'Brand'
+                  assign brand_href = block.settings.link
+                  if brand_href == blank and block.settings.vendor != blank
+                    assign vendor_encoded = block.settings.vendor | url_encode
+                    assign brand_href = products_base | append: '?filter.p.vendor=' | append: vendor_encoded
+                  endif
+                %}
+                <div class="lame-op-shop-nav__brand" {{ block.shopify_attributes }}>
+                  {% if block.settings.image != blank %}
+                    {% if brand_href != blank %}
+                      <a href="{{ brand_href }}" class="lame-op-shop-nav__brand-link" aria-label="{{ brand_alt | escape }}">
+                        {{
+                          block.settings.image
+                          | image_url: width: 320
+                          | image_tag:
+                            class: 'lame-op-shop-nav__brand-image',
+                            loading: 'lazy',
+                            widths: '120,160,220,320',
+                            sizes: '110px',
+                            alt: brand_alt
+                        }}
+                      </a>
+                    {% else %}
+                      <span class="lame-op-shop-nav__brand-link">
+                        {{
+                          block.settings.image
+                          | image_url: width: 320
+                          | image_tag:
+                            class: 'lame-op-shop-nav__brand-image',
+                            loading: 'lazy',
+                            widths: '120,160,220,320',
+                            sizes: '110px',
+                            alt: brand_alt
+                        }}
+                      </span>
+                    {% endif %}
+                  {% elsif request.design_mode %}
+                    <span class="lame-op-shop-nav__brand-placeholder">Upload logo</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <button
+            type="button"
+            class="lame-op-shop-nav__brands-next"
+            data-lame-op-brands-next
+            aria-label="Scroll brands"
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  <script>
+    (() => {
+      const root = document.currentScript?.previousElementSibling;
+      if (!root || !root.classList.contains('lame-op-shop-nav')) return;
+      const track = root.querySelector('[data-lame-op-brands-track]');
+      const next = root.querySelector('[data-lame-op-brands-next]');
+      if (!track || !next) return;
+      next.addEventListener('click', () => {
+        track.scrollBy({ left: Math.max(180, track.clientWidth * 0.55), behavior: 'smooth' });
+      });
+    })();
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-op-shop-nav {
+    --lame-op-nav-accent: #fc2779;
+    --lame-op-nav-accent-soft: #fff0f6;
+    --lame-op-nav-ink: #1a1a1a;
+    --lame-op-nav-muted: #6b7280;
+    --lame-op-nav-border: #ececec;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0.85rem clamp(0.75rem, 2vw, 1.5rem) 0.65rem;
+    background: #f5f5f5;
+    box-sizing: border-box;
+  }
+
+  .shopify-section.lame-op-shop-nav-section {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .shopify-section.lame-op-shop-nav-section:not(:has(.lame-op-shop-nav)) {
+    display: none !important;
+    min-height: 0 !important;
+  }
+
+  .lame-op-shop-nav__categories {
+    width: 100%;
+    max-width: min(1280px, 100%);
+    margin-inline: auto;
+    margin-block-end: 0.75rem;
+  }
+
+  .lame-op-shop-nav__chips {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0.25rem;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.55rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .lame-op-shop-nav__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-op-shop-nav__chip-item {
+    flex: 0 0 auto;
+  }
+
+  .lame-op-shop-nav__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.95rem;
+    border: 1px solid var(--lame-op-nav-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--lame-op-nav-ink);
+    text-decoration: none;
+    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .lame-op-shop-nav__chip:hover {
+    border-color: rgb(252 39 121 / 0.35);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.05);
+  }
+
+  .lame-op-shop-nav__chip.is-active {
+    background: var(--lame-op-nav-accent-soft);
+    border-color: rgb(252 39 121 / 0.35);
+    color: var(--lame-op-nav-accent);
+  }
+
+  .lame-op-shop-nav__chip-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    object-fit: contain;
+    display: block;
+  }
+
+  .lame-op-shop-nav__brands {
+    width: 100%;
+    max-width: min(1280px, 100%);
+    margin-inline: auto;
+  }
+
+  .lame-op-shop-nav__brands-bar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    min-height: 4.25rem;
+    padding: 0.55rem 0.75rem 0.55rem 1rem;
+    border: 1px solid var(--lame-op-nav-border);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .lame-op-shop-nav__brands-title {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lame-op-nav-muted);
+    white-space: nowrap;
+  }
+
+  .lame-op-shop-nav__brands-viewport {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .lame-op-shop-nav__brands-track {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-block: 0.15rem;
+  }
+
+  .lame-op-shop-nav__brands-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-op-shop-nav__brand {
+    flex: 0 0 auto;
+  }
+
+  .lame-op-shop-nav__brand-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 6.5rem;
+    height: 2.5rem;
+    text-decoration: none;
+  }
+
+  .lame-op-shop-nav__brand-image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: grayscale(0.05);
+    opacity: 0.92;
+    transition: opacity 0.2s ease;
+  }
+
+  .lame-op-shop-nav__brand-link:hover .lame-op-shop-nav__brand-image {
+    opacity: 1;
+  }
+
+  .lame-op-shop-nav__brand-placeholder {
+    display: grid;
+    place-items: center;
+    width: 6.5rem;
+    height: 2.5rem;
+    border: 1px dashed #d4d4d4;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+
+  .lame-op-shop-nav__brands-next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--lame-op-nav-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--lame-op-nav-ink);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .lame-op-shop-nav__brands-next:hover {
+    border-color: var(--lame-op-nav-accent);
+    color: var(--lame-op-nav-accent);
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-op-shop-nav {
+      padding-inline: 0.75rem;
+    }
+
+    .lame-op-shop-nav__brands-bar {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.55rem;
+      padding: 0.55rem 0.65rem;
+    }
+
+    .lame-op-shop-nav__brands-title {
+      grid-column: 1 / -1;
+    }
+
+    .lame-op-shop-nav__brand-link,
+    .lame-op-shop-nav__brand-placeholder {
+      width: 5.5rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "OP shop navigation",
+  "tag": "section",
+  "class": "section-wrapper lame-op-shop-nav-section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Category chips and Top Brands strip for Our Products / All Products. Upload brand logos in the Brand blocks."
+    },
+    {
+      "type": "text",
+      "id": "categories_label",
+      "label": "Categories accessibility label",
+      "default": "Product categories"
+    },
+    {
+      "type": "text",
+      "id": "brands_heading",
+      "label": "Brands heading",
+      "default": "Top Brands"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#fc2779"
+    },
+    {
+      "type": "color",
+      "id": "accent_soft",
+      "label": "Active chip background",
+      "default": "#fff0f6"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Category"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon (optional)"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link",
+          "info": "Overrides collection URL when set."
+        }
+      ]
+    },
+    {
+      "type": "brand",
+      "name": "Brand logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Alt text"
+        },
+        {
+          "type": "text",
+          "id": "vendor",
+          "label": "Vendor name",
+          "info": "Used for filter.p.vendor when no custom link is set. Must match the product vendor exactly."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link",
+          "info": "Optional. Overrides the automatic vendor filter link."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "OP shop navigation",
+      "category": "Navigation",
+      "blocks": [
+        { "type": "category", "settings": { "label": "All Products", "collection": "our-products" } },
+        { "type": "category", "settings": { "label": "Skincare", "collection": "skin-care" } },
+        { "type": "category", "settings": { "label": "Makeup", "collection": "make-up" } },
+        { "type": "category", "settings": { "label": "Haircare", "collection": "hair-care" } },
+        { "type": "category", "settings": { "label": "Bath & Body", "collection": "bath-body" } },
+        { "type": "category", "settings": { "label": "Fragrance", "collection": "fragrance" } },
+        { "type": "category", "settings": { "label": "Baby Care", "collection": "baby-mom" } },
+        { "type": "category", "settings": { "label": "Wellness", "collection": "wellness" } },
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" }
+      ]
+    }
+  ]
+}
+{% endschema %}
