@@ -339,12 +339,16 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     width: 100% !important;
     align-self: start !important;
     position: sticky;
-    top: calc(var(--header-height, 72px) + 12px);
+    top: calc(var(--header-height, 72px) + 16px);
     max-height: none !important;
+    height: auto !important;
     overflow: visible !important;
+    overflow-y: visible !important;
     z-index: 2;
     background: transparent;
     padding-block-end: 0.5rem;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
   }
 
   .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical:not(#filters-drawer):not(.hidden) {
@@ -355,7 +359,9 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     position: static !important;
     top: auto !important;
     max-height: none !important;
+    height: auto !important;
     overflow: visible !important;
+    overflow-y: visible !important;
     background: transparent;
     padding-block-end: 0;
   }
@@ -365,12 +371,16 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical,
   .collection-template-our-products .lame-op-page__sidebar .facets--vertical,
   .collection-template-our-products .lame-op-page__sidebar .facets__form,
+  .collection-template-our-products .lame-op-page__sidebar .facets__form-wrapper,
   .collection-template-our-products .lame-op-page__sidebar .facets__filters-wrapper,
   .collection-template-our-products .lame-op-page__sidebar .facets__inputs-wrapper,
   .collection-template-our-products .lame-op-page__sidebar .facets__panel-content,
-  .collection-template-our-products .lame-op-page__sidebar .lame-op-filters-stack {
+  .collection-template-our-products .lame-op-page__sidebar .lame-op-filters-stack,
+  .collection-template-our-products .lame-op-page__sidebar .lame-lux-filters-panel {
     max-height: none !important;
+    height: auto !important;
     overflow: visible !important;
+    overflow-y: visible !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
   }
@@ -531,34 +541,46 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   color: var(--lame-muted);
 }
 
-/* Active filter pills — readable green on light background */
-.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove {
+/* Active filter pills — fully visible, not clipped */
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove,
+.collection-template-our-products .lame-op-page__sidebar .facets-remove {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
-  padding: 0 0 0.75rem;
-  margin: 0 0 0.5rem;
-  border-bottom: 1px solid rgb(38 71 52 / 0.08);
+  padding: 0.35rem 0.15rem 0.85rem !important;
+  margin: 0 0 0.65rem !important;
+  border-bottom: 1px solid rgb(196 160 106 / 0.28);
+  overflow: visible !important;
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove__pill,
-.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove .pills__pill {
-  background: #e8f0eb !important;
-  color: #264734 !important;
-  border: 1px solid rgb(38 71 52 / 0.18) !important;
+.collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove .pills__pill,
+.collection-template-our-products .lame-op-page__sidebar .facets-remove__pill,
+.collection-template-our-products .lame-op-page__sidebar .facets-remove .pills__pill {
+  background: #fffaf5 !important;
+  color: #8a6230 !important;
+  border: 1px solid rgb(196 160 106 / 0.55) !important;
   font-size: 0.8125rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
+  padding: 0.45rem 0.75rem !important;
+  border-radius: 999px !important;
+  box-sizing: border-box;
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove__pill .svg-wrapper,
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove .pills__pill .svg-wrapper {
-  color: #264734 !important;
-  opacity: 0.7;
+  color: #8a6230 !important;
+  opacity: 0.75;
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove__pill:hover,
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove .pills__pill:hover {
-  background: rgb(38 71 52 / 0.12) !important;
-  color: #1a3d2c !important;
+  background: #f7efe4 !important;
+  color: #6e4c22 !important;
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets__pill-input:checked + .facets__pill-label {
@@ -2082,20 +2104,23 @@ body.template-collection-our-products #header-group .header-section {
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove {
-  gap: 0.45rem;
-  padding: 0.15rem 0 0.85rem;
-  margin: 0 0 0.25rem;
-  border-bottom: 1px solid #ececec;
+  gap: 0.5rem;
+  padding: 0.4rem 0.15rem 0.85rem !important;
+  margin: 0 0 0.55rem !important;
+  border-bottom: 1px solid rgb(196 160 106 / 0.25);
+  overflow: visible !important;
 }
 
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove__pill,
 .collection-template-our-products .facets-block-wrapper--vertical:not(#filters-drawer) .facets-remove .pills__pill {
-  background: #fff5f0 !important;
-  color: #c2410c !important;
-  border: 1px solid rgb(255 87 34 / 0.35) !important;
+  background: #fffaf5 !important;
+  color: #8a6230 !important;
+  border: 1px solid rgb(196 160 106 / 0.55) !important;
   font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
+  padding: 0.45rem 0.75rem !important;
+  overflow: visible !important;
 }
 
 .collection-template-our-products .lame-collection-filters-head__clear:not(:disabled),
@@ -2130,13 +2155,40 @@ body.template-collection-our-products #header-group .header-section {
 }
 
 @media screen and (min-width: 750px) {
-  /* Make desktop filter panel cleaner and more structured */
+  /* Make desktop filter panel cleaner — no clip, no scroll */
   .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical {
-    border: 1px solid rgb(27 48 34 / 0.12);
+    border: 1px solid rgb(196 160 106 / 0.28);
     border-radius: 14px;
-    background: #fff;
-    box-shadow: 0 8px 24px rgb(20 31 24 / 0.06);
-    padding: 0.25rem 0.25rem 0.45rem;
+    background: #fffefb;
+    box-shadow: 0 8px 24px rgb(80 55 20 / 0.06);
+    padding: 0.85rem 0.65rem 0.65rem;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  .collection-template-our-products .lame-op-page__sidebar,
+  .collection-template-our-products .lame-op-page__sidebar .facets-block-wrapper--vertical,
+  .collection-template-our-products .lame-op-page__sidebar .facets--vertical,
+  .collection-template-our-products .lame-op-page__sidebar .facets__form,
+  .collection-template-our-products .lame-op-page__sidebar .facets__form-wrapper,
+  .collection-template-our-products .lame-op-page__sidebar .facets__filters-wrapper,
+  .collection-template-our-products .lame-op-page__sidebar .facets__inputs-wrapper,
+  .collection-template-our-products .lame-op-page__sidebar .facets__panel-content,
+  .collection-template-our-products .lame-op-page__sidebar .lame-op-filters-stack,
+  .collection-template-our-products .lame-op-page__sidebar .lame-lux-filters-panel {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .collection-template-our-products .lame-op-page__sidebar::-webkit-scrollbar,
+  .collection-template-our-products .lame-op-page__sidebar *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
   }
 }
 
