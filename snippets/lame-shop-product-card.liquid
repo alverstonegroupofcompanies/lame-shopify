@@ -64,19 +64,18 @@
   endif
 -%}
 
-<article class="lame-catlog-card">
+<article class="lame-catlog-card{% unless product.available %} is-sold-out{% endunless %}">
   <div class="lame-catlog-card__top">
     <div class="lame-catlog-card__tags">
-      {% if is_featured %}
+      {% unless product.available %}
+        <span class="lame-catlog-card__tag lame-catlog-card__tag--soldout">SOLD OUT</span>
+      {% elsif is_bestseller %}
+        <span class="lame-catlog-card__tag lame-catlog-card__tag--bestseller">BESTSELLER</span>
+      {% elsif is_new %}
+        <span class="lame-catlog-card__tag lame-catlog-card__tag--new">NEW</span>
+      {% elsif is_featured %}
         <span class="lame-catlog-card__tag lame-catlog-card__tag--featured">FEATURED</span>
       {% endif %}
-      <span class="lame-catlog-card__tags-end">
-        {% if is_bestseller %}
-          <span class="lame-catlog-card__tag lame-catlog-card__tag--bestseller">BESTSELLER</span>
-        {% elsif is_new %}
-          <span class="lame-catlog-card__tag lame-catlog-card__tag--new">NEW</span>
-        {% endif %}
-      </span>
     </div>
 
     {% if show_wishlist and settings.lame_enable_wishlist %}
@@ -95,7 +94,7 @@
           class: 'lame-catlog-card__image',
           loading: 'lazy',
           widths: '240,320,400,540,720',
-          sizes: '(min-width: 990px) 26vw, (min-width: 750px) 36vw, 46vw',
+          sizes: '(min-width: 990px) 22vw, (min-width: 750px) 36vw, 46vw',
           alt: product.featured_media.alt | default: product.title
       }}
     {% else %}
@@ -104,10 +103,6 @@
   </a>
 
   <div class="lame-catlog-card__body">
-    {% if promo_label != blank %}
-      <p class="lame-catlog-card__promo">{{ promo_label | escape | upcase }}</p>
-    {% endif %}
-
     <h3 class="lame-catlog-card__title">
       <a href="{{ product.url }}">{{ product.title | escape }}</a>
     </h3>
@@ -124,26 +119,6 @@
       {% endif %}
     </div>
 
-    {% if has_rating %}
-      <div class="lame-catlog-card__rating" aria-label="{{ 'accessibility.rating' | t: rating: rating }}">
-        <span class="lame-catlog-card__stars" aria-hidden="true">
-          {%- assign full_stars = rating | floor -%}
-          {%- for i in (1..5) -%}
-            {%- if i <= full_stars -%}
-              <span class="lame-catlog-card__star is-on">★</span>
-            {%- else -%}
-              <span class="lame-catlog-card__star">☆</span>
-            {%- endif -%}
-          {%- endfor -%}
-        </span>
-        <span class="lame-catlog-card__count">({{ rating_count_num }})</span>
-      </div>
-    {% endif %}
-
-    {% if variant_count > 1 %}
-      <p class="lame-catlog-card__sizes">{{ variant_count }} Sizes</p>
-    {% endif %}
-
     <div class="lame-catlog-card__actions">
       {% if can_quick_add %}
         <product-form-component
@@ -155,21 +130,23 @@
           {%- form 'product', product, id: form_id, class: 'lame-catlog-card__form' -%}
             <input type="hidden" name="id" value="{{ variant.id }}" ref="variantId">
             <button type="submit" name="add" class="lame-catlog-card__atc">
-              {{ 'actions.add_to_cart' | t }}
+              <span class="lame-catlog-card__atc-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6 5 3H2"/></svg>
+              </span>
+              <span>{{ 'actions.add_to_cart' | t }}</span>
             </button>
           {%- endform -%}
         </product-form-component>
+      {% elsif product.available == false %}
+        <span class="lame-catlog-card__atc is-disabled">{{ 'products.product.sold_out' | t | default: 'Sold out' }}</span>
       {% else %}
-        <a href="{{ product.url }}" class="lame-catlog-card__atc">{{ 'lame_category_shop.view_product' | t }}</a>
+        <a href="{{ product.url }}" class="lame-catlog-card__atc">
+          <span class="lame-catlog-card__atc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6 5 3H2"/></svg>
+          </span>
+          <span>{{ 'lame_category_shop.view_product' | t }}</span>
+        </a>
       {% endif %}
     </div>
   </div>
-
-  {% if show_sale_bar %}
-    <div class="lame-catlog-card__sale-bar">
-      <span class="lame-catlog-card__sale-label">Sale Price</span>
-      <span class="lame-catlog-card__sale-price">{{ price_amount | money }}</span>
-      <span class="lame-catlog-card__sale-off">{{ lame_discount_percent }}% Off</span>
-    </div>
-  {% endif %}
 </article>

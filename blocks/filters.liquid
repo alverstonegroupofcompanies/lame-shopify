@@ -243,22 +243,25 @@
                 {%- for filter in filters -%}
                   {% case filter.type %}
                     {% when 'price_range' %}
-                      {% unless lame_our_products_active %}
-                        {%- liquid
-                          if filter.min_value.value != null or filter.max_value.value != null
-                            assign total_active_values = total_active_values | plus: 1
-                            assign is_active = true
-                          endif
+                      {%- liquid
+                        if filter.min_value.value != null or filter.max_value.value != null
+                          assign total_active_values = total_active_values | plus: 1
+                          assign is_active = true
+                        endif
 
-                          if block_settings.filter_style != 'vertical'
-                            assign should_render_clear = true
-                          else
-                            assign should_render_clear = false
-                          endif
+                        if block_settings.filter_style != 'vertical'
+                          assign should_render_clear = true
+                        else
+                          assign should_render_clear = false
+                        endif
 
-                          render 'price-filter', filter: filter, filter_style: block_settings.filter_style, should_render_clear: should_render_clear, id_prefix: 'horizontal', our_products_price_slider: false, start_collapsed: lame_our_products_active
-                        -%}
-                      {% endunless %}
+                        assign op_price_slider = false
+                        if lame_our_products_active
+                          assign op_price_slider = true
+                        endif
+
+                        render 'price-filter', filter: filter, filter_style: block_settings.filter_style, should_render_clear: should_render_clear, id_prefix: 'horizontal', our_products_price_slider: op_price_slider, start_collapsed: false
+                      -%}
                     {% else %}
                       {% unless lame_our_products_active and filter.param_name == 'filter.p.vendor' %}
                         {% liquid
@@ -287,6 +290,12 @@
                     if template.name != 'collection' or lame_our_products_active
                       assign show_sidebar_sorting = true
                     endif
+                  endif
+                  comment
+                    Our Products: Sort By is in the product toolbar, not the filter sidebar
+                  endcomment
+                  if lame_our_products_active
+                    assign show_sidebar_sorting = false
                   endif
                 %}
                 {% if show_sidebar_sorting %}
@@ -336,12 +345,12 @@
                     assign filters_active = true
                   endif
                 %}
+                {% render 'lame-collection-facet-actions',
+                  results_url: results_url,
+                  is_active: filters_active,
+                  section_id: section.id
+                %}
                 {% unless lame_our_products_active %}
-                  {% render 'lame-collection-facet-actions',
-                    results_url: results_url,
-                    is_active: filters_active,
-                    section_id: section.id
-                  %}
                   {% render 'lame-collection-filters-shipping-promo' %}
                 {% endunless %}
               {% endif %}
@@ -586,16 +595,19 @@
                 {%- for filter in filters -%}
                   {% case filter.type %}
                     {% when 'price_range' %}
-                      {% unless lame_our_products_active %}
-                        {%- liquid
-                          if filter.min_value.value != null or filter.max_value.value != null
-                            assign total_active_values = total_active_values | plus: 1
-                            assign is_active = true
-                          endif
+                      {%- liquid
+                        if filter.min_value.value != null or filter.max_value.value != null
+                          assign total_active_values = total_active_values | plus: 1
+                          assign is_active = true
+                        endif
 
-                          render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, id_prefix: 'dialog', our_products_price_slider: false, start_collapsed: lame_our_products_active
-                        -%}
-                      {% endunless %}
+                        assign op_price_slider = false
+                        if lame_our_products_active
+                          assign op_price_slider = true
+                        endif
+
+                        render 'price-filter', filter: filter, filter_style: 'vertical', should_render_clear: false, id_prefix: 'dialog', our_products_price_slider: op_price_slider, start_collapsed: false
+                      -%}
                     {% else %}
                       {% unless lame_our_products_active and filter.param_name == 'filter.p.vendor' %}
                         {% liquid
