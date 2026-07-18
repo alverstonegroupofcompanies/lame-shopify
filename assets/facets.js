@@ -781,19 +781,31 @@ class FacetRemoveComponent extends Component {
 
     if (!(facetsForm instanceof FacetsFormComponent)) return;
 
-    facetsForm.updateFiltersByURL(url);
-
     // Only clear all brand chips when the user clicked a "Clear all" control.
-    // Individual facet-pill remove actions must only remove that single facet.
     const clearAllSelector =
-      '.facets__clear-all-link, .lame-collection-filters-head__clear, .lame-collection-facet-actions__clear';
+      '.facets__clear-all-link, .lame-collection-filters-head__clear, .lame-collection-facet-actions__clear, .lame-op-filters-applied__clear';
     const clickedClearAll =
       this.querySelector(clearAllSelector) ||
       (event?.target instanceof Element && event.target.closest(clearAllSelector));
 
     if (clickedClearAll) {
+      facetsForm.updateFiltersByURL(url);
       document.dispatchEvent(new CustomEvent('lame:clear-brand-filter'));
+      return;
     }
+
+    // Individual pill remove — strip custom `brand=` so checkboxes follow remaining vendors.
+    let nextUrl = url;
+    try {
+      const parsed = new URL(url, window.location.origin);
+      parsed.searchParams.delete(BRAND_FILTER_PARAM);
+      nextUrl = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      // Keep original url if parsing fails.
+    }
+
+    facetsForm.updateFiltersByURL(nextUrl);
+    document.dispatchEvent(new CustomEvent('lame:sync-brand-filter-from-url'));
   }
 
   /**

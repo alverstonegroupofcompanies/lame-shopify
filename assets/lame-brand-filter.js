@@ -717,27 +717,33 @@ export function clearBrandFilter() {
 function restoreBrandSelection() {
   const url = new URL(window.location.href);
 
-  if (url.searchParams.get(BRAND_PARAM)) {
-    syncFromUrl(url);
-    return;
-  }
-
+  // Vendor query params are the source of truth (facet pills + checkboxes).
   if (syncFromVendorUrl(url)) {
     return;
   }
 
-  const persisted = loadPersistedSlugs();
-  if (!persisted?.length) {
-    syncFromUrl(url);
-    return;
-  }
-
+  // No vendor filters in the URL — clear checkboxes and orphan brand= params.
+  // Do NOT revive selection from sessionStorage (that undoes facet-remove "X").
   for (const input of getAllBrandInputs()) {
-    const slug = normalizeSlug(input.getAttribute('data-brand-slug'));
-    input.checked = persisted.includes(slug);
+    input.checked = false;
   }
 
-  syncToUrl();
+  if (url.searchParams.has(BRAND_PARAM)) {
+    url.searchParams.delete(BRAND_PARAM);
+    history.replaceState(history.state, '', url.toString());
+  }
+
+  persistSlugs([]);
+}
+
+/**
+ * Sync brand checkboxes from the current location URL.
+ * Used after facet-remove pills clear filter.p.vendor.
+ */
+export function syncBrandFilterFromLocation() {
+  restoreBrandSelection();
+  applyBrandFilter();
+  updateActiveCount();
 }
 
 function initBrandFilter() {
@@ -783,6 +789,7 @@ if (!customElements.get('lame-brand-filter')) {
 
 document.addEventListener(CLEAR_EVENT, clearBrandFilter);
 document.addEventListener(MORPH_EVENT, handleMorphComplete);
+document.addEventListener('lame:sync-brand-filter-from-url', syncBrandFilterFromLocation);
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initBrandFilter, { once: true });
