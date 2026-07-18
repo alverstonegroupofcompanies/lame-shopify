@@ -434,6 +434,15 @@ body.template-collection-our-products .lame-op-page {
   background: #fdf9f4;
 }
 
+/* Kill horizontal overflow from full-bleed banners / badges */
+html:has(body.template-collection-our-products),
+body.template-collection-our-products,
+body.template-collection-our-products #MainContent,
+body.template-collection-our-products .content-for-layout {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 body.template-collection-our-products .lame-op-page__content .product-grid,
 body.template-collection-our-products .lame-op-page__content .lame-collection-brand-section__grid,
 body.template-collection-our-products .lame-op-page__main .product-grid,
@@ -512,12 +521,12 @@ body.template-collection-our-products .lame-op-page__shell {
 }
 
 .shopify-section.lame-op-mini-banner-section:has(.lame-op-mini-banner) {
-  width: 100vw;
-  max-width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
   padding-inline: 0;
   margin-bottom: 0;
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* Our Products page top banner — full-bleed, aspect-matched so image fills with no gaps */
@@ -532,6 +541,45 @@ body.template-collection-our-products .lame-op-page__shell {
   margin: 0;
   background: var(--lame-op-mini-bg);
   line-height: 0;
+}
+
+.lame-op-mini-banner__viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.lame-op-mini-banner__track {
+  position: relative;
+  width: 100%;
+}
+
+.lame-op-mini-banner__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.55s ease,
+    visibility 0.55s ease;
+}
+
+.lame-op-mini-banner__slide.is-active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.lame-op-mini-banner__link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
 }
 
 .lame-op-mini-banner__surface {
@@ -556,6 +604,77 @@ body.template-collection-our-products .lame-op-page__shell {
   margin: 0;
   object-fit: cover;
   object-position: center center;
+}
+
+.lame-op-mini-banner__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.88);
+  color: #1b3022;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgb(20 30 20 / 0.14);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.lame-op-mini-banner__arrow:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.lame-op-mini-banner__arrow--prev {
+  left: 0.75rem;
+}
+
+.lame-op-mini-banner__arrow--next {
+  right: 0.75rem;
+}
+
+.lame-op-mini-banner__dots {
+  position: absolute;
+  left: 50%;
+  bottom: 0.75rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transform: translateX(-50%);
+}
+
+.lame-op-mini-banner__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.08);
+  cursor: pointer;
+  transition:
+    width 0.2s ease,
+    background 0.2s ease;
+}
+
+.lame-op-mini-banner__dot.is-active {
+  width: 1.15rem;
+  background: #fff;
 }
 
 /* Slim: slightly shorter frame (gentle bottom crop) */
@@ -592,5 +711,23 @@ body.template-collection-our-products .lame-op-page__shell {
   .lame-op-mini-banner--regular .lame-op-mini-banner__surface,
   .lame-op-mini-banner--tall .lame-op-mini-banner__surface {
     min-height: 150px;
+  }
+
+  .lame-op-mini-banner__arrow {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: 1.25rem;
+  }
+
+  .lame-op-mini-banner__arrow--prev {
+    left: 0.45rem;
+  }
+
+  .lame-op-mini-banner__arrow--next {
+    right: 0.45rem;
+  }
+
+  .lame-op-mini-banner__dots {
+    bottom: 0.55rem;
   }
 }

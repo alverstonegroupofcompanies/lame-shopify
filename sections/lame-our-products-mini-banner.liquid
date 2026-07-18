@@ -1,5 +1,5 @@
 {%- doc -%}
-  Full-width Our Products page banner — image only.
+  Our Products mini banner carousel — full-width image slides.
   Shown on all / our-products / products collection handles.
 {%- enddoc -%}
 
@@ -13,49 +13,174 @@
     endif
   endif
 
-  assign image_alt = section.settings.image_alt | default: 'Our Products'
-  assign banner_image = section.settings.image
+  assign slide_blocks = section.blocks | where: 'type', 'slide'
+  assign slide_count = 0
+  for block in slide_blocks
+    if block.settings.image != blank
+      assign slide_count = slide_count | plus: 1
+    endif
+  endfor
+
+  assign use_legacy = false
+  if slide_count == 0
+    assign use_legacy = true
+    assign slide_count = 1
+  endif
+
   assign banner_ratio = 3.0029
-  if banner_image != blank and banner_image.aspect_ratio != blank
-    assign banner_ratio = banner_image.aspect_ratio
+  assign ratio_set = false
+  if use_legacy
+    if section.settings.image != blank and section.settings.image.aspect_ratio != blank
+      assign banner_ratio = section.settings.image.aspect_ratio
+      assign ratio_set = true
+    endif
+  else
+    for block in slide_blocks
+      if ratio_set == false and block.settings.image != blank and block.settings.image.aspect_ratio != blank
+        assign banner_ratio = block.settings.image.aspect_ratio
+        assign ratio_set = true
+      endif
+    endfor
+  endif
+
+  assign autoplay_ms = section.settings.autoplay_speed | default: 5 | times: 1000
+  if section.settings.autoplay == false
+    assign autoplay_ms = 0
   endif
 -%}
 
 {%- if show_banner -%}
   {{ 'lame-op-page.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'lame-op-mini-banner.js' | asset_url }}" defer></script>
 
-  <section
-    class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }} lame-op-mini-banner--image-only"
+  <lame-op-mini-banner
+    class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }} lame-op-mini-banner--image-only{% if slide_count > 1 %} lame-op-mini-banner--carousel{% endif %}"
     style="--lame-op-mini-bg-setting: {{ section.settings.bg_color }}; --lame-op-mini-ratio: {{ banner_ratio }};"
-    aria-label="{{ image_alt | escape }}"
+    data-autoplay="{{ autoplay_ms }}"
+    aria-roledescription="carousel"
+    aria-label="{{ section.settings.image_alt | default: 'Our Products' | escape }}"
     {{ section.shopify_attributes }}
   >
-    <div class="lame-op-mini-banner__surface">
-      {% if banner_image != blank %}
-        {{
-          banner_image
-          | image_url: width: 2400
-          | image_tag:
-            class: 'lame-op-mini-banner__image',
-            loading: 'eager',
-            fetchpriority: 'high',
-            widths: '750,1100,1500,2000,2400',
-            sizes: '100vw',
-            alt: image_alt
-        }}
-      {% else %}
-        <img
-          class="lame-op-mini-banner__image"
-          src="{{ 'lame-our-products-banner-v2.png' | asset_url }}"
-          alt="{{ image_alt | escape }}"
-          width="1600"
-          height="520"
-          loading="eager"
-          fetchpriority="high"
-        >
-      {% endif %}
+    <div class="lame-op-mini-banner__viewport">
+      <div class="lame-op-mini-banner__track" data-lame-op-banner-track>
+        {%- if use_legacy -%}
+          {%- liquid
+            assign image_alt = section.settings.image_alt | default: 'Our Products'
+            assign banner_image = section.settings.image
+          -%}
+          <div class="lame-op-mini-banner__slide is-active" data-lame-op-banner-slide aria-hidden="false">
+            <div class="lame-op-mini-banner__surface">
+              {% if banner_image != blank %}
+                {{
+                  banner_image
+                  | image_url: width: 2400
+                  | image_tag:
+                    class: 'lame-op-mini-banner__image',
+                    loading: 'eager',
+                    fetchpriority: 'high',
+                    widths: '750,1100,1500,2000,2400',
+                    sizes: '100vw',
+                    alt: image_alt
+                }}
+              {% else %}
+                <img
+                  class="lame-op-mini-banner__image"
+                  src="{{ 'lame-our-products-banner-v2.png' | asset_url }}"
+                  alt="{{ image_alt | escape }}"
+                  width="1600"
+                  height="520"
+                  loading="eager"
+                  fetchpriority="high"
+                >
+              {% endif %}
+            </div>
+          </div>
+        {%- else -%}
+          {%- assign slide_index = 0 -%}
+          {%- for block in slide_blocks -%}
+            {%- if block.settings.image == blank -%}{% continue %}{%- endif -%}
+            {%- liquid
+              assign image_alt = block.settings.image_alt | default: section.settings.image_alt | default: 'Our Products'
+              assign slide_link = block.settings.link
+            -%}
+            <div
+              class="lame-op-mini-banner__slide{% if slide_index == 0 %} is-active{% endif %}"
+              data-lame-op-banner-slide
+              aria-hidden="{% if slide_index == 0 %}false{% else %}true{% endif %}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if slide_link != blank -%}
+                <a class="lame-op-mini-banner__link" href="{{ slide_link }}" aria-label="{{ image_alt | escape }}">
+              {%- endif -%}
+              <div class="lame-op-mini-banner__surface">
+                {%- if slide_index == 0 -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 2400
+                    | image_tag:
+                      class: 'lame-op-mini-banner__image',
+                      loading: 'eager',
+                      fetchpriority: 'high',
+                      widths: '750,1100,1500,2000,2400',
+                      sizes: '100vw',
+                      alt: image_alt
+                  }}
+                {%- else -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 2400
+                    | image_tag:
+                      class: 'lame-op-mini-banner__image',
+                      loading: 'lazy',
+                      widths: '750,1100,1500,2000,2400',
+                      sizes: '100vw',
+                      alt: image_alt
+                  }}
+                {%- endif -%}
+              </div>
+              {%- if slide_link != blank -%}
+                </a>
+              {%- endif -%}
+            </div>
+            {%- assign slide_index = slide_index | plus: 1 -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </div>
     </div>
-  </section>
+
+    {%- if slide_count > 1 -%}
+      <button
+        type="button"
+        class="lame-op-mini-banner__arrow lame-op-mini-banner__arrow--prev"
+        data-lame-op-banner-prev
+        aria-label="Previous banner"
+      >
+        <span aria-hidden="true">‹</span>
+      </button>
+      <button
+        type="button"
+        class="lame-op-mini-banner__arrow lame-op-mini-banner__arrow--next"
+        data-lame-op-banner-next
+        aria-label="Next banner"
+      >
+        <span aria-hidden="true">›</span>
+      </button>
+
+      <div class="lame-op-mini-banner__dots" data-lame-op-banner-dots role="tablist" aria-label="Banner slides">
+        {%- for i in (1..slide_count) -%}
+          <button
+            type="button"
+            class="lame-op-mini-banner__dot{% if forloop.first %} is-active{% endif %}"
+            data-lame-op-banner-dot
+            data-index="{{ forloop.index0 }}"
+            role="tab"
+            aria-label="Go to slide {{ forloop.index }}"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </lame-op-mini-banner>
 {%- endif -%}
 
 {% schema %}
@@ -69,18 +194,18 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Image-only banner for All / Our Products collection pages."
+      "content": "Add banner images as slides below. Drag to reorder. If no slides have images, the fallback image is used."
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Banner image",
-      "info": "Leave empty to use the built-in banner image."
+      "label": "Fallback banner image",
+      "info": "Used only when no slide images are added."
     },
     {
       "type": "text",
       "id": "image_alt",
-      "label": "Image alt text",
+      "label": "Default image alt text",
       "default": "Our Products"
     },
     {
@@ -93,19 +218,63 @@
         { "value": "tall", "label": "Taller frame" }
       ],
       "default": "regular",
-      "info": "Fit full image matches the banner proportions so the artwork fills the width with no empty gaps. Slim crops a little from the bottom; Tall shows a bit more height."
+      "info": "Fit full image matches the banner proportions so the artwork fills the width with no empty gaps."
     },
     {
       "type": "color",
       "id": "bg_color",
       "label": "Fallback background",
       "default": "#fff0f6"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Auto-rotate every",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Banner slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text",
+          "default": "Our Products"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Optional link"
+        }
+      ]
     }
   ],
   "presets": [
     {
       "name": "Our Products mini banner",
-      "category": "Promotional"
+      "category": "Promotional",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
     }
   ]
 }
