@@ -43,168 +43,183 @@
 
   <section
     class="lame-op-shop-nav"
-    style="--lame-op-nav-accent: {{ section.settings.accent_color }}; --lame-op-nav-accent-soft: {{ section.settings.accent_soft }}; --lame-op-nav-accent-border: color-mix(in srgb, {{ section.settings.accent_color }} 55%, transparent);"
+    style="--lame-op-nav-accent: {{ section.settings.accent_color }}; --lame-op-nav-accent-soft: {{ section.settings.accent_soft }}; --lame-op-nav-line: {{ section.settings.line_color }};"
     {{ section.shopify_attributes }}
   >
     <div class="lame-op-shop-nav__inner">
-    {% if category_count > 0 or request.design_mode %}
-      <nav class="lame-op-shop-nav__categories" aria-label="{{ section.settings.categories_label | escape }}">
-        <ul class="lame-op-shop-nav__chips" role="list">
-          {% for block in section.blocks %}
-            {% if block.type != 'category' %}{% continue %}{% endif %}
-            {% liquid
-              assign cat = block.settings.collection
-              assign label = block.settings.label
-              if label == blank and cat != blank
-                assign label = cat.title
-              endif
-              if label == blank
-                assign label = 'Category'
-              endif
+      {% if category_count > 0 or request.design_mode %}
+        <nav class="lame-op-shop-nav__categories" aria-label="{{ section.settings.categories_label | escape }}">
+          <ul class="lame-op-shop-nav__chips" role="list">
+            {% for block in section.blocks %}
+              {% if block.type != 'category' %}{% continue %}{% endif %}
+              {% liquid
+                assign cat = block.settings.collection
+                assign label = block.settings.label
+                if label == blank and cat != blank
+                  assign label = cat.title
+                endif
+                if label == blank
+                  assign label = 'Category'
+                endif
 
-              assign href = block.settings.link
-              if href == blank and cat != blank
-                assign href = cat.url
-              endif
-              if href == blank
-                assign href = products_base
-              endif
+                assign href = block.settings.link
+                if href == blank and cat != blank
+                  assign href = cat.url
+                endif
+                if href == blank
+                  assign href = products_base
+                endif
 
-              assign is_active = false
-              if cat != blank and collection.handle == cat.handle
-                assign is_active = true
-              elsif cat == blank and block.settings.link == blank
-                if label == 'All Products' or label == 'All'
-                  if collection.handle == 'our-products' or collection.handle == 'all' or collection.handle == 'products'
-                    assign is_active = true
+                assign is_active = false
+                if cat != blank and collection.handle == cat.handle
+                  assign is_active = true
+                elsif cat == blank and block.settings.link == blank
+                  if label == 'All Products' or label == 'All'
+                    if collection.handle == 'our-products' or collection.handle == 'all' or collection.handle == 'products'
+                      assign is_active = true
+                    endif
                   endif
                 endif
-              endif
 
-              assign icon_handle = block.settings.icon_key | strip | downcase
-              if icon_handle == blank and cat != blank
-                assign icon_handle = cat.handle
-              endif
-              if icon_handle == blank
-                assign label_key = label | downcase | strip
-                case label_key
-                  when 'all products', 'all'
-                    assign icon_handle = 'all'
-                  when 'skincare', 'skin care'
-                    assign icon_handle = 'skin-care'
-                  when 'makeup', 'make up', 'make-up'
-                    assign icon_handle = 'make-up'
-                  when 'haircare', 'hair care', 'hair'
-                    assign icon_handle = 'hair-care'
-                  when 'bath & body', 'bath and body', 'bath-body'
-                    assign icon_handle = 'bath-body'
-                  when 'fragrance', 'perfume'
-                    assign icon_handle = 'fragrance'
-                  when 'baby care', 'baby & mom', 'baby-mom', 'baby'
-                    assign icon_handle = 'baby-mom'
-                  when 'wellness'
-                    assign icon_handle = 'wellness'
-                  when 'herbal'
-                    assign icon_handle = 'herbal'
-                  else
-                    assign icon_handle = 'all'
-                endcase
-              endif
-            %}
-            <li class="lame-op-shop-nav__chip-item" {{ block.shopify_attributes }}>
-              <a
-                href="{{ href }}"
-                class="lame-op-shop-nav__chip{% if is_active %} is-active{% endif %}"
-                {% if is_active %}aria-current="page"{% endif %}
-              >
-                <span class="lame-op-shop-nav__chip-icon-wrap" aria-hidden="true">
-                  {% if block.settings.icon != blank %}
-                    {{
-                      block.settings.icon
-                      | image_url: width: 96
-                      | image_tag:
-                        class: 'lame-op-shop-nav__chip-icon-img',
-                        loading: 'lazy',
-                        widths: '48,64,96',
-                        sizes: '22px',
-                        alt: ''
-                    }}
-                  {% else %}
-                    {% render 'lame-op-category-icon', handle: icon_handle %}
-                  {% endif %}
-                </span>
-                <span class="lame-op-shop-nav__chip-label">{{ label | escape }}</span>
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
-      </nav>
-    {% endif %}
-
-    {% if brand_count > 0 or request.design_mode %}
-      <div class="lame-op-shop-nav__brands" data-lame-op-brands>
-        <div class="lame-op-shop-nav__brands-bar">
-          <p class="lame-op-shop-nav__brands-title">{{ section.settings.brands_heading | escape }}</p>
-          <div class="lame-op-shop-nav__brands-viewport">
-            <div class="lame-op-shop-nav__brands-track" data-lame-op-brands-track>
-              {% for block in section.blocks %}
-                {% if block.type != 'brand' %}{% continue %}{% endif %}
-                {% if block.settings.image == blank and request.design_mode == false %}{% continue %}{% endif %}
-                {% liquid
-                  assign brand_alt = block.settings.alt | default: block.settings.vendor | default: 'Brand'
-                  assign brand_href = block.settings.link
-                  if brand_href == blank and block.settings.vendor != blank
-                    assign vendor_encoded = block.settings.vendor | url_encode
-                    assign brand_href = products_base | append: '?filter.p.vendor=' | append: vendor_encoded
-                  endif
-                %}
-                <div class="lame-op-shop-nav__brand" {{ block.shopify_attributes }}>
-                  {% if block.settings.image != blank %}
-                    {% if brand_href != blank %}
-                      <a href="{{ brand_href }}" class="lame-op-shop-nav__brand-link" aria-label="{{ brand_alt | escape }}">
-                        {{
-                          block.settings.image
-                          | image_url: width: 320
-                          | image_tag:
-                            class: 'lame-op-shop-nav__brand-image',
-                            loading: 'lazy',
-                            widths: '120,160,220,320',
-                            sizes: '110px',
-                            alt: brand_alt
-                        }}
-                      </a>
+                assign icon_handle = block.settings.icon_key | strip | downcase
+                if icon_handle == blank and cat != blank
+                  assign icon_handle = cat.handle
+                endif
+                if icon_handle == blank
+                  assign label_key = label | downcase | strip
+                  case label_key
+                    when 'all products', 'all'
+                      assign icon_handle = 'all'
+                    when 'skincare', 'skin care'
+                      assign icon_handle = 'skin-care'
+                    when 'makeup', 'make up', 'make-up'
+                      assign icon_handle = 'make-up'
+                    when 'haircare', 'hair care', 'hair'
+                      assign icon_handle = 'hair-care'
+                    when 'bath & body', 'bath and body', 'bath-body'
+                      assign icon_handle = 'bath-body'
+                    when 'fragrance', 'perfume'
+                      assign icon_handle = 'fragrance'
+                    when 'baby care', 'baby & mom', 'baby-mom', 'baby'
+                      assign icon_handle = 'baby-mom'
+                    when 'wellness'
+                      assign icon_handle = 'wellness'
+                    when 'herbal'
+                      assign icon_handle = 'herbal'
+                    else
+                      assign icon_handle = 'all'
+                  endcase
+                endif
+              %}
+              <li class="lame-op-shop-nav__chip-item" {{ block.shopify_attributes }}>
+                <a
+                  href="{{ href }}"
+                  class="lame-op-shop-nav__chip{% if is_active %} is-active{% endif %}"
+                  {% if is_active %}aria-current="page"{% endif %}
+                >
+                  <span class="lame-op-shop-nav__chip-icon-wrap" aria-hidden="true">
+                    {% if block.settings.icon != blank %}
+                      {{
+                        block.settings.icon
+                        | image_url: width: 96
+                        | image_tag:
+                          class: 'lame-op-shop-nav__chip-icon-img',
+                          loading: 'lazy',
+                          widths: '48,64,96',
+                          sizes: '28px',
+                          alt: ''
+                      }}
                     {% else %}
-                      <span class="lame-op-shop-nav__brand-link">
-                        {{
-                          block.settings.image
-                          | image_url: width: 320
-                          | image_tag:
-                            class: 'lame-op-shop-nav__brand-image',
-                            loading: 'lazy',
-                            widths: '120,160,220,320',
-                            sizes: '110px',
-                            alt: brand_alt
-                        }}
-                      </span>
+                      {% render 'lame-op-category-icon', handle: icon_handle %}
                     {% endif %}
-                  {% elsif request.design_mode %}
-                    <span class="lame-op-shop-nav__brand-placeholder">Upload logo</span>
-                  {% endif %}
-                </div>
-              {% endfor %}
-            </div>
+                  </span>
+                  <span class="lame-op-shop-nav__chip-label">{{ label | escape }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
+
+      {% if brand_count > 0 or request.design_mode %}
+        <div class="lame-op-shop-nav__brands" data-lame-op-brands>
+          <div class="lame-op-shop-nav__brands-heading" aria-hidden="false">
+            <span class="lame-op-shop-nav__brands-rule" aria-hidden="true"></span>
+            <h2 class="lame-op-shop-nav__brands-title">{{ section.settings.brands_heading | escape }}</h2>
+            <span class="lame-op-shop-nav__brands-rule" aria-hidden="true"></span>
           </div>
-          <button
-            type="button"
-            class="lame-op-shop-nav__brands-next"
-            data-lame-op-brands-next
-            aria-label="Scroll brands"
-          >
-            <span aria-hidden="true">›</span>
-          </button>
+
+          <div class="lame-op-shop-nav__brands-bar">
+            <button
+              type="button"
+              class="lame-op-shop-nav__brands-arrow lame-op-shop-nav__brands-arrow--prev"
+              data-lame-op-brands-prev
+              aria-label="Previous brands"
+            >
+              <span aria-hidden="true">‹</span>
+            </button>
+
+            <div class="lame-op-shop-nav__brands-viewport">
+              <div class="lame-op-shop-nav__brands-track" data-lame-op-brands-track>
+                {% for block in section.blocks %}
+                  {% if block.type != 'brand' %}{% continue %}{% endif %}
+                  {% if block.settings.image == blank and request.design_mode == false %}{% continue %}{% endif %}
+                  {% liquid
+                    assign brand_alt = block.settings.alt | default: block.settings.vendor | default: 'Brand'
+                    assign brand_href = block.settings.link
+                    if brand_href == blank and block.settings.vendor != blank
+                      assign vendor_encoded = block.settings.vendor | url_encode
+                      assign brand_href = products_base | append: '?filter.p.vendor=' | append: vendor_encoded
+                    endif
+                  %}
+                  <div class="lame-op-shop-nav__brand" {{ block.shopify_attributes }}>
+                    {% if block.settings.image != blank %}
+                      {% if brand_href != blank %}
+                        <a href="{{ brand_href }}" class="lame-op-shop-nav__brand-link" aria-label="{{ brand_alt | escape }}">
+                          {{
+                            block.settings.image
+                            | image_url: width: 320
+                            | image_tag:
+                              class: 'lame-op-shop-nav__brand-image',
+                              loading: 'lazy',
+                              widths: '120,160,220,320',
+                              sizes: '110px',
+                              alt: brand_alt
+                          }}
+                        </a>
+                      {% else %}
+                        <span class="lame-op-shop-nav__brand-link">
+                          {{
+                            block.settings.image
+                            | image_url: width: 320
+                            | image_tag:
+                              class: 'lame-op-shop-nav__brand-image',
+                              loading: 'lazy',
+                              widths: '120,160,220,320',
+                              sizes: '110px',
+                              alt: brand_alt
+                          }}
+                        </span>
+                      {% endif %}
+                    {% elsif request.design_mode %}
+                      <span class="lame-op-shop-nav__brand-placeholder">Upload logo</span>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="lame-op-shop-nav__brands-arrow lame-op-shop-nav__brands-arrow--next"
+              data-lame-op-brands-next
+              aria-label="Next brands"
+            >
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
         </div>
-      </div>
-    {% endif %}
+      {% endif %}
     </div>
   </section>
 
@@ -214,9 +229,14 @@
       if (!root || !root.classList.contains('lame-op-shop-nav')) return;
       const track = root.querySelector('[data-lame-op-brands-track]');
       const next = root.querySelector('[data-lame-op-brands-next]');
-      if (!track || !next) return;
-      next.addEventListener('click', () => {
-        track.scrollBy({ left: Math.max(180, track.clientWidth * 0.55), behavior: 'smooth' });
+      const prev = root.querySelector('[data-lame-op-brands-prev]');
+      if (!track) return;
+      const scrollByAmount = () => Math.max(180, track.clientWidth * 0.55);
+      next?.addEventListener('click', () => {
+        track.scrollBy({ left: scrollByAmount(), behavior: 'smooth' });
+      });
+      prev?.addEventListener('click', () => {
+        track.scrollBy({ left: -scrollByAmount(), behavior: 'smooth' });
       });
     })();
   </script>
@@ -229,22 +249,9 @@
     margin: 0 !important;
     padding: 0 !important;
     background: #fff;
-  }
-
-  .lame-op-shop-nav {
-    --lame-op-nav-accent: #fc2779;
-    --lame-op-nav-accent-soft: #fff0f6;
-    --lame-op-nav-accent-border: rgb(252 39 121 / 0.55);
-    --lame-op-nav-ink: #1a1a1a;
-    --lame-op-nav-muted: #6b7280;
-    --lame-op-nav-divider: #ececec;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    background: #fff;
-    box-sizing: border-box;
-    border-bottom: 1px solid var(--lame-op-nav-divider);
+    overflow: visible;
+    position: relative;
+    z-index: 4;
   }
 
   .shopify-section.lame-op-shop-nav-section:not(:has(.lame-op-shop-nav)) {
@@ -252,21 +259,42 @@
     min-height: 0 !important;
   }
 
-  .lame-op-shop-nav__inner {
+  .lame-op-shop-nav {
+    --lame-op-nav-accent: #c4a06a;
+    --lame-op-nav-accent-soft: #f4ece4;
+    --lame-op-nav-line: #c4a06a;
+    --lame-op-nav-ink: #2a2a2a;
+    --lame-op-nav-muted: #6b6b6b;
+    --lame-op-nav-icon: #4a4038;
     width: 100%;
-    max-width: min(1280px, 100%);
-    margin-inline: auto;
-    padding: 0.85rem clamp(0.75rem, 2vw, 1.5rem) 0.75rem;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #fff;
     box-sizing: border-box;
   }
 
-  .lame-op-shop-nav__categories {
+  .lame-op-shop-nav__inner {
     width: 100%;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
+    max-width: min(1180px, 100%);
+    margin-inline: auto;
+    padding: 0 clamp(0.85rem, 2.5vw, 1.75rem) 1.75rem;
+    box-sizing: border-box;
+  }
+
+  /* Floating category card — overlaps banner bottom */
+  .lame-op-shop-nav__categories {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    margin: -1.75rem 0 0;
+    padding: 1.15rem 1.25rem 1.05rem;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow:
+      0 10px 28px rgb(40 30 20 / 0.08),
+      0 2px 6px rgb(40 30 20 / 0.04);
+    box-sizing: border-box;
   }
 
   .lame-op-shop-nav__chips {
@@ -275,8 +303,9 @@
     padding: 0;
     display: flex;
     flex-wrap: nowrap;
-    justify-content: flex-start;
-    gap: 0.55rem;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(0.65rem, 1.8vw, 1.65rem);
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -291,79 +320,64 @@
   }
 
   .lame-op-shop-nav__chip {
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
     gap: 0.55rem;
-    min-height: 2.75rem;
-    padding: 0.4rem 1rem 0.4rem 0.45rem;
-    border: 1.5px solid var(--lame-op-nav-accent-border);
-    border-radius: 999px;
-    background: #fff;
+    min-width: 4.5rem;
+    max-width: 5.75rem;
+    padding: 0.15rem 0.2rem;
+    border: 0;
+    background: transparent;
     color: var(--lame-op-nav-ink);
     text-decoration: none;
+    text-align: center;
     font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-    box-shadow: none;
-    transition:
-      background 0.2s ease,
-      border-color 0.2s ease,
-      color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
-  }
-
-  .lame-op-shop-nav__chip:hover {
-    border-color: var(--lame-op-nav-accent);
-    background: var(--lame-op-nav-accent-soft);
-    color: var(--lame-op-nav-accent);
-    box-shadow: 0 4px 14px rgb(252 39 121 / 0.1);
-    transform: translateY(-1px);
-  }
-
-  .lame-op-shop-nav__chip.is-active {
-    background: var(--lame-op-nav-accent-soft);
-    border-color: var(--lame-op-nav-accent);
-    color: var(--lame-op-nav-accent);
-    box-shadow: 0 2px 10px rgb(252 39 121 / 0.14);
+    transition: color 0.2s ease;
   }
 
   .lame-op-shop-nav__chip-icon-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 3.35rem;
+    height: 3.35rem;
     flex-shrink: 0;
     border-radius: 999px;
     background: var(--lame-op-nav-accent-soft);
-    color: var(--lame-op-nav-accent);
-  }
-
-  .lame-op-shop-nav__chip.is-active .lame-op-shop-nav__chip-icon-wrap {
-    background: #fff;
-    color: var(--lame-op-nav-accent);
-    box-shadow: inset 0 0 0 1px rgb(252 39 121 / 0.22);
+    color: var(--lame-op-nav-icon);
+    box-shadow: inset 0 0 0 1.5px transparent;
+    transition:
+      box-shadow 0.2s ease,
+      background 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
   }
 
   .lame-op-shop-nav__chip:hover .lame-op-shop-nav__chip-icon-wrap {
-    color: var(--lame-op-nav-accent);
-    background: #fff;
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--lame-op-nav-accent) 55%, transparent);
+  }
+
+  .lame-op-shop-nav__chip.is-active .lame-op-shop-nav__chip-icon-wrap {
+    box-shadow: inset 0 0 0 1.5px var(--lame-op-nav-accent);
+    background: #fffaf5;
+    color: var(--lame-op-nav-icon);
   }
 
   .lame-op-category-icon,
   .lame-op-shop-nav__chip-icon-img {
     display: block;
-    width: 1.05rem;
-    height: 1.05rem;
+    width: 1.35rem;
+    height: 1.35rem;
   }
 
   .lame-op-category-icon svg {
     display: block;
     width: 100%;
     height: 100%;
+    stroke: currentColor;
   }
 
   .lame-op-shop-nav__chip-icon-img {
@@ -371,55 +385,100 @@
   }
 
   .lame-op-shop-nav__chip-label {
-    padding-inline-end: 0.15rem;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    color: var(--lame-op-nav-ink);
+    white-space: nowrap;
   }
 
+  .lame-op-shop-nav__chip.is-active .lame-op-shop-nav__chip-label {
+    font-weight: 700;
+  }
+
+  /* Top Brands */
   .lame-op-shop-nav__brands {
     width: 100%;
-    margin: 0;
-    padding: 0.75rem 0 0;
-    border-top: 1px solid var(--lame-op-nav-divider);
+    margin: 1.85rem 0 0;
+    padding: 0;
     background: transparent;
+  }
+
+  .lame-op-shop-nav__brands-heading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    margin: 0 0 1.15rem;
+    width: 100%;
+  }
+
+  .lame-op-shop-nav__brands-title {
+    margin: 0;
+    flex: 0 0 auto;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, 'Times New Roman', serif);
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #3a322c;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .lame-op-shop-nav__brands-rule {
+    position: relative;
+    flex: 1 1 auto;
+    max-width: 7.5rem;
+    height: 1px;
+    background: var(--lame-op-nav-line);
+    opacity: 0.85;
+  }
+
+  .lame-op-shop-nav__brands-rule::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--lame-op-nav-line);
+    transform: translateY(-50%);
+  }
+
+  .lame-op-shop-nav__brands-heading .lame-op-shop-nav__brands-rule:first-child::after {
+    right: 0;
+  }
+
+  .lame-op-shop-nav__brands-heading .lame-op-shop-nav__brands-rule:last-child::after {
+    left: 0;
   }
 
   .lame-op-shop-nav__brands-bar {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.85rem 1.1rem;
-    min-height: 3.75rem;
+    gap: 0.75rem 1rem;
+    min-height: 3.5rem;
     padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  .lame-op-shop-nav__brands-title {
-    margin: 0;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #4b5563;
-    white-space: nowrap;
   }
 
   .lame-op-shop-nav__brands-viewport {
     min-width: 0;
     overflow: hidden;
-    mask-image: linear-gradient(90deg, #000 92%, transparent);
   }
 
   .lame-op-shop-nav__brands-track {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: center;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-block: 0.2rem;
-    padding-inline-end: 1.25rem;
+    padding-block: 0.35rem;
   }
 
   .lame-op-shop-nav__brands-track::-webkit-scrollbar {
@@ -434,16 +493,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 6.75rem;
-    height: 2.65rem;
-    padding: 0.2rem 0.35rem;
-    border-radius: 8px;
+    width: 7rem;
+    height: 2.75rem;
+    padding: 0.15rem 0.25rem;
+    border-radius: 6px;
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   .lame-op-shop-nav__brand-link:hover {
-    background: #fafafa;
+    transform: translateY(-1px);
   }
 
   .lame-op-shop-nav__brand-image {
@@ -453,26 +512,20 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    filter: grayscale(0.08);
-    opacity: 0.9;
-    transition:
-      opacity 0.2s ease,
-      filter 0.2s ease,
-      transform 0.2s ease;
+    opacity: 0.92;
+    transition: opacity 0.2s ease;
   }
 
   .lame-op-shop-nav__brand-link:hover .lame-op-shop-nav__brand-image {
     opacity: 1;
-    filter: none;
-    transform: scale(1.03);
   }
 
   .lame-op-shop-nav__brand-placeholder {
     display: grid;
     place-items: center;
-    width: 6.75rem;
-    height: 2.65rem;
-    border: 1px dashed #d4d4d4;
+    width: 7rem;
+    height: 2.75rem;
+    border: 1px dashed #d6d0c8;
     border-radius: 8px;
     font-size: 0.65rem;
     letter-spacing: 0.04em;
@@ -480,78 +533,118 @@
     color: #9ca3af;
   }
 
-  .lame-op-shop-nav__brands-next {
+  .lame-op-shop-nav__brands-arrow {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.15rem;
+    height: 2.15rem;
     margin: 0;
     padding: 0;
-    border: 1.5px solid var(--lame-op-nav-accent-border);
+    border: 1px solid #d9d2c8;
     border-radius: 999px;
     background: #fff;
-    color: var(--lame-op-nav-accent);
+    color: #5a524a;
     font-size: 1.35rem;
     line-height: 1;
     cursor: pointer;
-    box-shadow: none;
+    box-shadow: 0 1px 3px rgb(40 30 20 / 0.06);
     transition:
       border-color 0.2s ease,
       color 0.2s ease,
-      background 0.2s ease;
+      background 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
-  .lame-op-shop-nav__brands-next:hover {
+  .lame-op-shop-nav__brands-arrow:hover {
     border-color: var(--lame-op-nav-accent);
-    color: #fff;
-    background: var(--lame-op-nav-accent);
+    color: var(--lame-op-nav-accent);
+    box-shadow: 0 3px 10px rgb(40 30 20 / 0.1);
   }
 
-  @media screen and (min-width: 1100px) {
+  @media screen and (min-width: 990px) {
     .lame-op-shop-nav__chips {
-      justify-content: center;
-      flex-wrap: wrap;
       overflow: visible;
+      flex-wrap: nowrap;
+    }
+
+    .lame-op-shop-nav__categories {
+      padding: 1.25rem 1.75rem 1.15rem;
     }
   }
 
   @media screen and (max-width: 749px) {
     .lame-op-shop-nav__inner {
       padding-inline: 0.75rem;
+      padding-bottom: 1.35rem;
+    }
+
+    .lame-op-shop-nav__categories {
+      margin-top: -1.15rem;
+      padding: 0.95rem 0.75rem 0.9rem;
+      border-radius: 16px;
+    }
+
+    .lame-op-shop-nav__chips {
+      justify-content: flex-start;
+      gap: 0.85rem;
+      padding-inline: 0.15rem;
     }
 
     .lame-op-shop-nav__chip {
-      min-height: 2.55rem;
-      padding: 0.35rem 0.85rem 0.35rem 0.4rem;
-      font-size: 0.75rem;
-      gap: 0.45rem;
+      min-width: 4.1rem;
+      max-width: 4.75rem;
+      gap: 0.4rem;
     }
 
     .lame-op-shop-nav__chip-icon-wrap {
-      width: 1.85rem;
-      height: 1.85rem;
+      width: 2.85rem;
+      height: 2.85rem;
     }
 
     .lame-op-category-icon,
     .lame-op-shop-nav__chip-icon-img {
-      width: 0.95rem;
-      height: 0.95rem;
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    .lame-op-shop-nav__chip-label {
+      font-size: 0.6875rem;
+      white-space: normal;
+    }
+
+    .lame-op-shop-nav__brands {
+      margin-top: 1.35rem;
+    }
+
+    .lame-op-shop-nav__brands-heading {
+      gap: 0.55rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .lame-op-shop-nav__brands-rule {
+      max-width: 3.5rem;
     }
 
     .lame-op-shop-nav__brands-bar {
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0.55rem;
+      gap: 0.45rem;
     }
 
-    .lame-op-shop-nav__brands-title {
-      grid-column: 1 / -1;
+    .lame-op-shop-nav__brands-track {
+      justify-content: flex-start;
+      gap: 1.15rem;
     }
 
     .lame-op-shop-nav__brand-link,
     .lame-op-shop-nav__brand-placeholder {
       width: 5.75rem;
       height: 2.4rem;
+    }
+
+    .lame-op-shop-nav__brands-arrow {
+      width: 1.95rem;
+      height: 1.95rem;
+      font-size: 1.2rem;
     }
   }
 {% endstylesheet %}
@@ -567,7 +660,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Category chips and Top Brands strip for Our Products / All Products. Upload brand logos in the Brand blocks."
+      "content": "Category icon row and Top Brands strip for Our Products. Upload brand logos in the Brand blocks."
     },
     {
       "type": "text",
@@ -584,14 +677,20 @@
     {
       "type": "color",
       "id": "accent_color",
-      "label": "Accent color",
-      "default": "#fc2779"
+      "label": "Active ring / accent",
+      "default": "#c4a06a"
     },
     {
       "type": "color",
       "id": "accent_soft",
-      "label": "Active chip background",
-      "default": "#fff0f6"
+      "label": "Icon circle background",
+      "default": "#f4ece4"
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Brands divider line",
+      "default": "#c4a06a"
     }
   ],
   "blocks": [
