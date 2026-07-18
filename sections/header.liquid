@@ -171,6 +171,13 @@
   elsif bottom_transparent
     assign transparent_color_scheme_value = 'bottom'
   endif
+
+  # Keep comparisons with ">" out of the header-component opening tag —
+  # Shopify's HTML checker treats ">" inside a tag as the tag closer.
+  assign submenu_overlap_bottom_row = false
+  if section.settings.menu_row == 'top' and bottom_row_blocks.size > 0
+    assign submenu_overlap_bottom_row = true
+  endif
 %}
 
 {% capture localization_markup %}
@@ -296,7 +303,7 @@
   {% endif %}
   data-skip-node-update
   data-scroll-direction="none"
-  {% if section.settings.menu_row == 'top' and bottom_row_blocks.size > 0 %}
+  {% if submenu_overlap_bottom_row %}
     data-submenu-overlap-bottom-row
   {% endif %}
   {% if transparent_color_scheme_value %}
