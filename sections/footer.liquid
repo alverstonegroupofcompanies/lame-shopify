@@ -265,11 +265,15 @@
       assign venture_blocks = section.blocks | where: 'type', 'venture'
     %}
     {% if venture_blocks.size > 0 or request.design_mode %}
-      <div class="footer-premium__ventures-divider" aria-hidden="true"></div>
       <div class="footer-premium__ventures-bar" aria-label="{{ section.settings.ventures_heading | default: 'Our Ventures' | escape }}">
         <div class="footer-premium__ventures-bar-inner">
           {% if section.settings.ventures_heading != blank %}
             <p class="footer-premium__ventures-bar-label">{{ section.settings.ventures_heading }}</p>
+            <div class="footer-premium__ventures-ornament" aria-hidden="true">
+              <span class="footer-premium__ventures-ornament-line"></span>
+              <span class="footer-premium__ventures-ornament-mark"></span>
+              <span class="footer-premium__ventures-ornament-line"></span>
+            </div>
           {% endif %}
           <ul class="footer-premium__ventures-row" role="list">
             {% for block in venture_blocks %}
@@ -430,69 +434,72 @@
     min-width: 0;
   }
 
-  #footer-{{ section.id }} .footer-premium__ventures-divider {
-    width: 100%;
-    padding: 0.4rem 0;
-    background: #154230;
-    border-top: 1px solid rgb(255 255 255 / 0.12);
-    border-bottom: none;
-    box-shadow: none;
-  }
-
-  #footer-{{ section.id }} .footer-premium__ventures-divider::after {
-    content: '';
-    display: block;
-    width: min(92%, 720px);
-    height: 1px;
-    margin-inline: auto;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgb(212 175 55 / 0.4) 20%,
-      rgb(212 175 55 / 0.4) 80%,
-      transparent
-    );
-  }
-
   #footer-{{ section.id }} .footer-premium__ventures-bar {
     margin-top: 0;
-    border-top: none;
-    border-bottom: 1px solid rgb(21 66 48 / 0.08);
-    background-color: #f7f7f5;
+    border-top: 1px solid #c5a059;
+    border-bottom: 1px solid #c5a059;
+    background-color: #f9f8f3;
     background-image: none;
     color: rgb(24 24 24);
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
     width: 100%;
-    max-width: min(1200px, 100%);
+    max-width: min(1280px, 100%);
     margin-inline: auto;
-    padding: clamp(1.1rem, 2.5vw, 1.65rem) clamp(1rem, 3vw, 2rem);
+    padding: clamp(1.75rem, 3.5vw, 2.75rem) clamp(1rem, 3vw, 2.5rem) clamp(1.85rem, 3.8vw, 2.85rem);
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-    margin: 0 0 0.75rem;
+    margin: 0;
     text-align: center;
     font-family: var(--footer-font-display);
-    font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #154230;
-    position: relative;
-    padding-bottom: 0.55rem;
+    color: #012a1c;
   }
 
-  #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
+  #footer-{{ section.id }} .footer-premium__ventures-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    max-width: 11rem;
+    margin: 0.7rem auto 1.35rem;
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-line {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c5a059 30%, #c5a059);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-line:last-child {
+    background: linear-gradient(90deg, #c5a059, #c5a059 70%, transparent);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-mark {
+    position: relative;
+    flex: 0 0 auto;
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 1px solid #c5a059;
+    transform: rotate(45deg);
+    background: #f9f8f3;
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-mark::before {
     content: '';
     position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 2.25rem;
-    height: 1px;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, transparent, rgb(212 175 55 / 0.7), transparent);
+    inset: 2px;
+    border: 1px solid rgb(197 160 89 / 0.55);
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-row {
@@ -504,6 +511,7 @@
     align-items: center;
     justify-content: center;
     gap: clamp(0.75rem, 2vw, 1.5rem);
+    width: 100%;
     max-width: 100%;
     overflow-x: hidden;
   }
@@ -558,18 +566,17 @@
 
   @media screen and (min-width: 750px) {
     #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
-      padding: clamp(1.25rem, 2.5vw, 1.85rem) clamp(1.5rem, 3vw, 2.5rem);
+      padding: clamp(2rem, 3.5vw, 3rem) clamp(1.5rem, 3vw, 2.75rem) clamp(2.15rem, 3.8vw, 3.15rem);
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-      margin-bottom: 1rem;
-      font-size: clamp(1rem, 1.4vw, 1.2rem);
-      letter-spacing: 0.1em;
-      padding-bottom: 0.65rem;
+      font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+      letter-spacing: 0.26em;
     }
 
-    #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
-      width: 2.75rem;
+    #footer-{{ section.id }} .footer-premium__ventures-ornament {
+      max-width: 12.5rem;
+      margin-bottom: 1.65rem;
     }
   }
 
@@ -999,13 +1006,19 @@
     width: 100%;
     max-width: none;
     margin-inline: 0;
-    padding: clamp(0.85rem, 2vw, 1.15rem) var(--footer-edge-desktop) clamp(1rem, 2.2vw, 1.35rem);
-    background: rgb(0 0 0 / 0.12);
-    border-top: 1px solid rgb(255 255 255 / 0.1);
+    padding: clamp(1.1rem, 2.4vw, 1.55rem) var(--footer-edge-desktop);
+    background-color: #012a1c;
+    background-image:
+      radial-gradient(ellipse 80% 55% at 8% 100%, rgb(197 160 89 / 0.08), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 92% 0%, rgb(197 160 89 / 0.06), transparent 50%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='80' viewBox='0 0 160 80' fill='none'%3E%3Cpath d='M0 40c20-18 40-18 60 0s40 18 60 0 40-18 60 0' stroke='%23c5a059' stroke-opacity='0.12' stroke-width='0.7'/%3E%3Cpath d='M0 55c20-14 40-14 60 0s40 14 60 0 40-14 60 0' stroke='%23c5a059' stroke-opacity='0.08' stroke-width='0.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat, no-repeat, repeat;
+    background-size: auto, auto, 160px 80px;
+    border-top: none;
   }
 
   #footer-{{ section.id }} .footer-premium__legal > :is(.footer-premium__trust, .footer-premium__bottom, .footer-premium__rights) {
-    max-width: min(1200px, 100%);
+    max-width: min(1280px, 100%);
     margin-inline: auto;
   }
 
@@ -1044,55 +1057,56 @@
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.35rem 1.1rem;
+    justify-content: flex-start;
+    gap: 0.35rem 1.35rem;
   }
 
   #footer-{{ section.id }} .footer-premium__policies a,
   #footer-{{ section.id }} .footer-premium__policies .footer-premium__link-row {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     text-decoration: none;
-    color: var(--footer-text-subtle);
-    letter-spacing: 0.03em;
+    color: #fff;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid #c5a059;
+    padding-bottom: 0.1rem;
+    transform: none;
   }
 
   #footer-{{ section.id }} .footer-premium__policies .footer-premium__icon {
     display: none;
   }
 
-  #footer-{{ section.id }} .footer-premium__policies a:hover {
-    color: var(--footer-gold);
+  #footer-{{ section.id }} .footer-premium__policies a:hover,
+  #footer-{{ section.id }} .footer-premium__policies .footer-premium__link-row:is(:hover, :focus-visible) {
+    color: #c5a059;
+    transform: none;
   }
 
   #footer-{{ section.id }} .footer-premium__bottom {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 0.55rem;
-    text-align: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: start;
     max-width: 100%;
     margin-inline: 0;
-    padding-top: 0.15rem;
+    padding-top: 0;
+    width: 100%;
   }
 
   #footer-{{ section.id }} .footer-premium__copyright {
     margin: 0;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     line-height: 1.5;
     letter-spacing: 0.02em;
-    color: var(--footer-text-muted);
+    color: #fff;
     max-width: none;
+    text-align: end;
   }
 
   #footer-{{ section.id }} .footer-premium__rights {
-    margin: 0.75rem auto 0;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgb(255 255 255 / 0.08);
-    text-align: center;
-    font-size: 0.72rem;
-    line-height: 1.5;
-    letter-spacing: 0.04em;
-    color: var(--footer-text-subtle);
+    display: none;
   }
 
   @media screen and (max-width: 749px) {
@@ -1181,10 +1195,9 @@
       font-size: 0.75rem;
     }
 
-    #footer-{{ section.id }} .footer-premium__rights {
-      margin-top: 0.65rem;
-      padding-top: 0.65rem;
-      font-size: 0.68rem;
+    #footer-{{ section.id }} .footer-premium__bottom {
+      flex-wrap: wrap;
+      gap: 0.65rem 1rem;
     }
 
     #footer-{{ section.id }} .footer-premium__policies {
