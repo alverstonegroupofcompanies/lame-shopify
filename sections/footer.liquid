@@ -345,14 +345,12 @@
     {% endif %}
 
     <div class="footer-premium__bottom">
-      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
       {% if section.settings.show_policy_links %}
         <ul class="footer-premium__policies" role="list">
           {% for policy in shop.policies %}
             {% if policy != blank %}
               <li>
                 <a href="{{ policy.url }}" class="footer-premium__link-row footer-premium__link-row--policy">
-                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'arrow' %}</span>
                   <span>{{ policy.title }}</span>
                 </a>
               </li>
@@ -360,7 +358,14 @@
           {% endfor %}
         </ul>
       {% endif %}
+      {% if section.settings.copyright_text != blank %}
+        <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
+      {% endif %}
     </div>
+
+    <p class="footer-premium__rights">
+      {{ section.settings.rights_text | default: 'All rights reserved. Lamstone Healthcare (P) Ltd since 2026.' }}
+    </p>
   </div>
 </footer>
 
@@ -400,24 +405,24 @@
     display: grid;
     gap: 0;
     width: 100%;
-    max-width: 100%;
-    margin-inline: 0;
+    max-width: min(1200px, 100%);
+    margin-inline: auto;
     padding-inline: var(--footer-edge-desktop);
     box-sizing: border-box;
   }
 
   #footer-{{ section.id }} .footer-premium__nav-panel {
-    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+    padding-block: clamp(1.5rem, 3vw, 2.25rem);
     border-bottom: 1px solid rgb(255 255 255 / 0.1);
   }
 
   #footer-{{ section.id }} .footer-premium__info-panel {
-    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+    padding-block: clamp(1.5rem, 3vw, 2.25rem);
   }
 
   #footer-{{ section.id }} .footer-premium__main {
     display: grid;
-    gap: clamp(1.5rem, 3vw, 2.25rem);
+    gap: clamp(1.35rem, 2.5vw, 2rem);
   }
 
   #footer-{{ section.id }} .footer-premium__column,
@@ -427,24 +432,24 @@
 
   #footer-{{ section.id }} .footer-premium__ventures-divider {
     width: 100%;
-    padding: 0.55rem 0;
+    padding: 0.4rem 0;
     background: #154230;
-    border-top: 1px solid rgb(255 255 255 / 0.14);
-    border-bottom: 1px solid rgb(0 0 0 / 0.18);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    border-bottom: none;
+    box-shadow: none;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-divider::after {
     content: '';
     display: block;
-    width: min(92%, 1080px);
+    width: min(92%, 720px);
     height: 1px;
     margin-inline: auto;
     background: linear-gradient(
       90deg,
       transparent,
-      rgb(212 175 55 / 0.45) 18%,
-      rgb(212 175 55 / 0.45) 82%,
+      rgb(212 175 55 / 0.4) 20%,
+      rgb(212 175 55 / 0.4) 80%,
       transparent
     );
   }
@@ -453,33 +458,30 @@
     margin-top: 0;
     border-top: none;
     border-bottom: 1px solid rgb(21 66 48 / 0.08);
-    background-color: #f8f6f1;
-    background-image:
-      linear-gradient(180deg, rgb(255 255 255 / 0.72) 0%, transparent 38%),
-      radial-gradient(rgb(21 66 48 / 0.025) 0.5px, transparent 0.5px);
-    background-size: 100% 100%, 12px 12px;
+    background-color: #f7f7f5;
+    background-image: none;
     color: rgb(24 24 24);
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
     width: 100%;
-    max-width: var(--page-width, 1200px);
+    max-width: min(1200px, 100%);
     margin-inline: auto;
-    padding: clamp(1.35rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
+    padding: clamp(1.1rem, 2.5vw, 1.65rem) clamp(1rem, 3vw, 2rem);
     box-sizing: border-box;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-    margin: 0 0 0.85rem;
+    margin: 0 0 0.75rem;
     text-align: center;
     font-family: var(--footer-font-display);
-    font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+    font-size: clamp(0.95rem, 1.3vw, 1.15rem);
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #154230;
     position: relative;
-    padding-bottom: 0.65rem;
+    padding-bottom: 0.55rem;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
@@ -487,7 +489,7 @@
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: 2.75rem;
+    width: 2.25rem;
     height: 1px;
     transform: translateX(-50%);
     background: linear-gradient(90deg, transparent, rgb(212 175 55 / 0.7), transparent);
@@ -501,7 +503,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.85rem, 2.8vw, 2.25rem);
+    gap: clamp(0.75rem, 2vw, 1.5rem);
     max-width: 100%;
     overflow-x: hidden;
   }
@@ -515,8 +517,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.5rem;
-    padding: 0.35rem 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.25rem 0.4rem;
     text-decoration: none;
     background: transparent;
     border: none;
@@ -531,9 +533,9 @@
   #footer-{{ section.id }} .footer-premium__venture-logo {
     display: block;
     width: auto;
-    max-width: min(10rem, 14vw);
+    max-width: min(7.5rem, 22vw);
     height: auto;
-    max-height: 3.25rem;
+    max-height: 2.5rem;
     object-fit: contain;
     object-position: center;
     background: transparent;
@@ -556,57 +558,54 @@
 
   @media screen and (min-width: 750px) {
     #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
-      padding: clamp(3rem, 5vw, 4.7rem) clamp(2rem, 4vw, 3.5rem);
-      max-width: min(1320px, 100%);
+      padding: clamp(1.25rem, 2.5vw, 1.85rem) clamp(1.5rem, 3vw, 2.5rem);
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-      margin-bottom: 2rem;
-      font-size: clamp(2rem, 2.4vw, 2.5rem);
-      letter-spacing: 0.06em;
-      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+      letter-spacing: 0.1em;
+      padding-bottom: 0.65rem;
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
-      width: 4rem;
-      height: 1px;
+      width: 2.75rem;
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-row {
-      flex-wrap: nowrap;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
-      gap: clamp(1.5rem, 3.2vw, 3rem);
-      max-width: 100%;
-      margin-inline: auto;
+      gap: clamp(1rem, 2.5vw, 2rem);
     }
 
     #footer-{{ section.id }} .footer-premium__venture-item {
-      flex: 1 1 0;
+      flex: 0 1 auto;
       min-width: 0;
-      max-width: 23rem;
+      max-width: none;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 14.25rem;
-      padding: 0.8rem 0.7rem;
-      width: 100%;
+      min-height: 3.25rem;
+      padding: 0.35rem 0.5rem;
+      width: auto;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
-      width: 100%;
-      max-width: 100%;
-      max-height: clamp(10.5rem, 12.6vw, 12.75rem);
+      width: auto;
+      max-width: 8.5rem;
+      max-height: 3rem;
     }
   }
 
   @media screen and (min-width: 990px) {
     #footer-{{ section.id }} .footer-premium__ventures-row {
-      gap: clamp(2rem, 4vw, 4rem);
+      gap: clamp(1.25rem, 2.5vw, 2.25rem);
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
-      max-height: 13.5rem;
+      max-height: 3.25rem;
+      max-width: 9rem;
     }
   }
 
@@ -620,7 +619,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       justify-items: center;
       align-items: center;
-      gap: 0.85rem 1rem;
+      gap: 0.75rem 0.85rem;
       width: 100%;
       max-width: 100%;
       margin-inline: auto;
@@ -640,15 +639,15 @@
     }
 
     #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 3.75rem;
-      padding: 0.45rem 0.55rem;
+      min-height: 3rem;
+      padding: 0.35rem 0.45rem;
       width: 100%;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
       width: 100%;
       max-width: 100%;
-      max-height: clamp(2.75rem, 11vw, 3.5rem);
+      max-height: clamp(2.25rem, 9vw, 2.85rem);
     }
   }
 
@@ -916,19 +915,19 @@
   }
 
   #footer-{{ section.id }} .footer-premium__contact-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 0;
-    padding: 1.15rem 1.25rem;
-    border-radius: var(--footer-luxury-radius);
-    border: 1px solid rgb(255 255 255 / 0.12);
-    background: rgb(255 255 255 / 0.04);
-    min-height: 100%;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    min-height: 0;
     box-sizing: border-box;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block {
-    padding: 0.95rem 0;
+    padding: 0.85rem 0;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
@@ -936,11 +935,11 @@
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block:first-child {
-    padding-top: 0.15rem;
+    padding-top: 0;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block:last-child {
-    padding-bottom: 0.15rem;
+    padding-bottom: 0;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-title,
@@ -1003,13 +1002,21 @@
   }
 
   #footer-{{ section.id }} .footer-premium__legal {
-    padding: clamp(0.85rem, 2vw, 1.15rem) var(--footer-edge-desktop) clamp(1.1rem, 2.5vw, 1.5rem);
-    background: #154230;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding: clamp(0.85rem, 2vw, 1.15rem) var(--footer-edge-desktop) clamp(1rem, 2.2vw, 1.35rem);
+    background: rgb(0 0 0 / 0.12);
     border-top: 1px solid rgb(255 255 255 / 0.1);
   }
 
+  #footer-{{ section.id }} .footer-premium__legal > :is(.footer-premium__trust, .footer-premium__bottom, .footer-premium__rights) {
+    max-width: min(1200px, 100%);
+    margin-inline: auto;
+  }
+
   #footer-{{ section.id }} .footer-premium__trust {
-    margin: 0 auto;
+    margin: 0 auto 0.75rem;
     max-width: 100%;
     display: flex;
     align-items: center;
@@ -1021,9 +1028,8 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--footer-text-subtle);
-    padding: 0.75rem 0;
-    border-top: 1px solid rgb(255 255 255 / 0.1);
-    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    padding: 0 0 0.75rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
   }
 
   #footer-{{ section.id }} .footer-premium__icon--trust {
@@ -1045,12 +1051,12 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.5rem 1.25rem;
+    gap: 0.35rem 1.1rem;
   }
 
   #footer-{{ section.id }} .footer-premium__policies a,
   #footer-{{ section.id }} .footer-premium__policies .footer-premium__link-row {
-    font-size: 0.8125rem;
+    font-size: 0.78rem;
     text-decoration: none;
     color: var(--footer-text-subtle);
     letter-spacing: 0.03em;
@@ -1068,20 +1074,31 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.55rem;
     text-align: center;
     max-width: 100%;
     margin-inline: 0;
-    padding-top: 0.85rem;
+    padding-top: 0.15rem;
   }
 
   #footer-{{ section.id }} .footer-premium__copyright {
     margin: 0;
     font-size: 0.78rem;
-    line-height: 1.55;
+    line-height: 1.5;
     letter-spacing: 0.02em;
+    color: var(--footer-text-muted);
+    max-width: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__rights {
+    margin: 0.75rem auto 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 0.08);
+    text-align: center;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
     color: var(--footer-text-subtle);
-    max-width: 52ch;
   }
 
   @media screen and (max-width: 749px) {
@@ -1135,13 +1152,13 @@
     }
 
     #footer-{{ section.id }} .footer-premium__contact-grid {
-      padding: 0.9rem 0.95rem;
-      border-radius: 10px;
+      padding: 0;
+      border-radius: 0;
       gap: 0;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-block {
-      padding: 0.75rem 0;
+      padding: 0.7rem 0;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-title,
@@ -1162,16 +1179,22 @@
     #footer-{{ section.id }} .footer-premium__trust {
       font-size: 0.68rem;
       letter-spacing: 0.1em;
-      padding: 0.6rem 0;
+      padding: 0 0 0.6rem;
+      margin-bottom: 0.6rem;
     }
 
     #footer-{{ section.id }} .footer-premium__copyright {
       font-size: 0.75rem;
-      max-width: none;
+    }
+
+    #footer-{{ section.id }} .footer-premium__rights {
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+      font-size: 0.68rem;
     }
 
     #footer-{{ section.id }} .footer-premium__policies {
-      gap: 0.4rem 0.85rem;
+      gap: 0.35rem 0.85rem;
     }
 
     #footer-{{ section.id }} .footer-premium__policies a,
@@ -1181,11 +1204,6 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 989px) {
-    #footer-{{ section.id }} .footer-premium__venture-logo {
-      max-width: min(8.5rem, 18vw);
-      max-height: 2.85rem;
-    }
-
     #footer-{{ section.id }} .footer-premium__mid {
       min-width: 0;
     }
@@ -1194,6 +1212,17 @@
     #footer-{{ section.id }} .footer-premium__contact-grid {
       min-width: 0;
       max-width: 100%;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
+      border-inline-start: none;
+      padding-inline-start: 0;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      padding-top: 0.85rem;
     }
   }
 
@@ -1211,20 +1240,28 @@
     }
 
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: clamp(1rem, 2vw, 1.75rem);
-      align-items: stretch;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(1.25rem, 2.5vw, 2.25rem);
+      align-items: start;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-grid {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem 1.25rem;
+      height: auto;
+      justify-content: start;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-block {
       display: block;
+      padding: 0;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
+      border-top: none;
+      border-inline-start: 1px solid rgb(255 255 255 / 0.1);
+      padding-inline-start: 1.25rem;
     }
 
     #footer-{{ section.id }} .footer-premium__bottom {
@@ -1235,15 +1272,15 @@
     }
 
     #footer-{{ section.id }} .footer-premium__policies {
-      justify-content: flex-end;
+      justify-content: flex-start;
     }
   }
 
   @media screen and (min-width: 990px) {
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-      gap: clamp(1.25rem, 2.5vw, 2rem);
-      align-items: center;
+      grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      align-items: start;
     }
   }
 {% endstyle %}
@@ -1457,6 +1494,12 @@
       "label": "Copyright text",
       "default": "© 2026 Lamstone Healthcare (P) Ltd",
       "info": "Press Enter for a second line (e.g. brand disclaimer)."
+    },
+    {
+      "type": "text",
+      "id": "rights_text",
+      "label": "All rights reserved line",
+      "default": "All rights reserved. Lamstone Healthcare (P) Ltd since 2026."
     },
     {
       "type": "checkbox",
