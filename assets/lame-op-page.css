@@ -406,9 +406,10 @@ body.template-collection-our-products .lame-op-page__shell {
   display: none !important;
 }
 
-/* Our Products page top banner — full-bleed cover, top anchored */
+/* Our Products page top banner — full-bleed, aspect-matched so image fills with no gaps */
 .lame-op-mini-banner {
   --lame-op-mini-bg: var(--lame-op-mini-bg-setting, #fff0f6);
+  --lame-op-mini-ratio: 3.0029; /* matches lame-our-products-banner-v2.png */
   position: relative;
   z-index: 2;
   display: block;
@@ -435,44 +436,38 @@ body.template-collection-our-products .lame-op-page__shell {
   padding: 0;
   overflow: hidden;
   background: var(--lame-op-mini-bg);
+  aspect-ratio: var(--lame-op-mini-ratio);
 }
 
 .lame-op-mini-banner__image {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
+  height: 100%;
   max-width: none;
-  height: auto;
   margin: 0;
   object-fit: cover;
-  object-position: center top;
-  vertical-align: top;
+  object-position: center center;
 }
 
-/* Slim: fixed frame height (+50% vs prior), image covers full width */
+/* Slim: slightly shorter frame (gentle bottom crop) */
 .lame-op-mini-banner--slim .lame-op-mini-banner__surface {
-  height: min(240px, 30vw);
+  aspect-ratio: calc(var(--lame-op-mini-ratio) * 1.15);
 }
 
 .lame-op-mini-banner--slim .lame-op-mini-banner__image {
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  object-fit: cover;
   object-position: center top;
 }
 
-.lame-op-mini-banner--regular .lame-op-mini-banner__surface,
+/* Regular: natural banner proportions — full image, no letterboxing */
+.lame-op-mini-banner--regular .lame-op-mini-banner__surface {
+  aspect-ratio: var(--lame-op-mini-ratio);
+}
+
+/* Tall: a bit more height than the source image */
 .lame-op-mini-banner--tall .lame-op-mini-banner__surface {
-  height: auto;
-}
-
-.lame-op-mini-banner--regular .lame-op-mini-banner__image,
-.lame-op-mini-banner--tall .lame-op-mini-banner__image {
-  width: 100%;
-  height: auto;
-  max-height: none;
-  object-fit: cover;
-  object-position: center top;
+  aspect-ratio: calc(var(--lame-op-mini-ratio) * 0.88);
 }
 
 .lame-op-mini-banner__overlay,
@@ -483,22 +478,12 @@ body.template-collection-our-products .lame-op-page__shell {
 
 @media screen and (max-width: 749px) {
   .lame-op-mini-banner--slim .lame-op-mini-banner__surface {
-    height: 156px;
+    aspect-ratio: calc(var(--lame-op-mini-ratio) * 0.9);
+    min-height: 140px;
   }
 
-  .lame-op-mini-banner--slim .lame-op-mini-banner__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-  }
-
-  .lame-op-mini-banner--regular .lame-op-mini-banner__image,
-  .lame-op-mini-banner--tall .lame-op-mini-banner__image {
-    width: 100%;
-    max-width: none;
-    height: auto;
-    object-fit: cover;
-    object-position: center top;
+  .lame-op-mini-banner--regular .lame-op-mini-banner__surface,
+  .lame-op-mini-banner--tall .lame-op-mini-banner__surface {
+    min-height: 150px;
   }
 }

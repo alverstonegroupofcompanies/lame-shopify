@@ -15,6 +15,10 @@
 
   assign image_alt = section.settings.image_alt | default: 'Our Products'
   assign banner_image = section.settings.image
+  assign banner_ratio = 3.0029
+  if banner_image != blank and banner_image.aspect_ratio != blank
+    assign banner_ratio = banner_image.aspect_ratio
+  endif
 -%}
 
 {%- if show_banner -%}
@@ -22,7 +26,7 @@
 
   <section
     class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }} lame-op-mini-banner--image-only"
-    style="--lame-op-mini-bg-setting: {{ section.settings.bg_color }};"
+    style="--lame-op-mini-bg-setting: {{ section.settings.bg_color }}; --lame-op-mini-ratio: {{ banner_ratio }};"
     aria-label="{{ image_alt | escape }}"
     {{ section.shopify_attributes }}
   >
@@ -84,12 +88,12 @@
       "id": "height",
       "label": "Banner height",
       "options": [
-        { "value": "slim", "label": "Slim (shorter)" },
+        { "value": "slim", "label": "Slim (slight crop)" },
         { "value": "regular", "label": "Fit full image" },
-        { "value": "tall", "label": "Fit full image (default)" }
+        { "value": "tall", "label": "Taller frame" }
       ],
-      "default": "slim",
-      "info": "Slim fills the full width and crops from the bottom if needed (top stays visible). Regular/Tall show more of the image."
+      "default": "regular",
+      "info": "Fit full image matches the banner proportions so the artwork fills the width with no empty gaps. Slim crops a little from the bottom; Tall shows a bit more height."
     },
     {
       "type": "color",
