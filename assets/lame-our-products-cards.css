@@ -168,7 +168,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   padding-top: 0;
 }
 
-/* —— Product grid — 3 compact cols on tablet, 2 on mid laptop, 3 on wide —— */
+/* —— Product grid — 2 cols default/tablet, 2 mid laptop, 3 on wide —— */
 .lame-our-products-card-scope .product-grid,
 .lame-our-products-card-scope .lame-collection-brand-section__grid,
 .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
@@ -186,15 +186,33 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   --product-grid-columns-desktop: repeat(2, minmax(0, 1fr)) !important;
 }
 
-/* iPad Mini / tablet: smaller cards, 3-up, centered */
+/* iPad Mini / tablet (+ sidebar): 2-up so cards and ATC row stay readable */
 @media screen and (min-width: 750px) and (max-width: 1099px) {
+  .lame-our-products-card-scope {
+    --lame-op-grid-gap: 16px;
+    --lame-op-body-padding-x: 12px;
+    --lame-op-btn-padding-x: 10px;
+    --lame-op-btn-size: 0.625rem;
+  }
+
   .lame-our-products-card-scope .product-grid,
   .lame-our-products-card-scope .lame-collection-brand-section__grid,
   .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    --product-grid-columns-desktop: repeat(3, minmax(0, 1fr)) !important;
-    justify-content: center !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    --product-grid-columns-desktop: repeat(2, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+    gap: var(--lame-op-grid-gap) !important;
+  }
+
+  .lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions {
+    gap: 8px;
+  }
+
+  .lame-our-products-card-scope .lame-op-card__inner .buy-buttons-block .add-to-cart-button .add-to-cart-text__content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
