@@ -11,31 +11,31 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   /* Prevent section color scheme from painting gallery dark green */
   --color-background-rgb: 255 255 255;
 
-  /* Grid — slightly smaller cards, centered in columns */
+  /* Grid — fill columns evenly in the centered shell */
   --lame-op-card-min: 0;
-  --lame-op-card-max: 280px;
-  --lame-op-grid-gap: 20px;
+  --lame-op-card-max: none;
+  --lame-op-grid-gap: clamp(16px, 1.5vw, 22px);
 
   /* Card shell — catalog style */
   --lame-op-card-min-height: 100%;
-  --lame-op-card-radius: 8px;
+  --lame-op-card-radius: 10px;
   --lame-op-card-bg: #ffffff;
   --lame-op-card-border: transparent;
-  --lame-op-card-shadow: none;
-  --lame-op-card-shadow-hover: 0 6px 18px rgb(0 0 0 / 0.08);
+  --lame-op-card-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  --lame-op-card-shadow-hover: 0 8px 22px rgb(0 0 0 / 0.08);
   --lame-op-title-line-height: 1.35;
 
-  /* Image — flush 1:1 square, no padding */
+  /* Image — square frame, product fitted neatly inside */
   --lame-op-image-padding: 0;
   --lame-op-image-bg: #ffffff;
   --lame-op-image-inset: 0;
   --lame-op-image-panel-radius: 0;
 
-  /* Body text — breathing room under image for a neat title */
-  --lame-op-gap-after-image: 16px;
+  /* Body text — even spacing under image */
+  --lame-op-gap-after-image: 12px;
   --lame-op-gap-title-price: 6px;
   --lame-op-gap-before-button: 12px;
-  --lame-op-body-padding-x: 12px;
+  --lame-op-body-padding-x: 14px;
   --lame-op-body-padding-y: 0;
   --lame-op-card-padding-bottom: 14px;
   --lame-op-text-font: var(--lame-font-body, 'Jost', system-ui, sans-serif);
@@ -82,14 +82,14 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: var(--lame-op-card-max, 280px);
+  max-width: none;
   height: 100%;
   min-height: 0;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
   border: 0;
   align-self: stretch;
-  justify-self: center;
+  justify-self: stretch;
   overflow: visible;
 }
 
@@ -163,7 +163,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   padding-top: 0;
 }
 
-/* —— Product grid — desktop = 3 columns, cards capped + centered —— */
+/* —— Product grid — 2 cols on tablet/laptop, 3 on wide desktop —— */
 .lame-our-products-card-scope .product-grid,
 .lame-our-products-card-scope .lame-collection-brand-section__grid,
 .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
@@ -173,27 +173,29 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   margin: 0;
   padding: 0;
   list-style: none;
-  justify-content: center !important;
-  justify-items: center !important;
+  justify-content: stretch !important;
+  justify-items: stretch !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: var(--lame-op-grid-gap);
   align-items: stretch;
-  --product-grid-columns-desktop: unset !important;
+  --product-grid-columns-desktop: repeat(2, minmax(0, 1fr)) !important;
 }
 
-@media screen and (min-width: 750px) and (max-width: 1099px) {
+@media screen and (min-width: 750px) and (max-width: 1279px) {
   .lame-our-products-card-scope .product-grid,
   .lame-our-products-card-scope .lame-collection-brand-section__grid,
   .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    --product-grid-columns-desktop: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 1280px) {
   .lame-our-products-card-scope .product-grid,
   .lame-our-products-card-scope .lame-collection-brand-section__grid,
   .lame-our-products-card-scope .lame-collection-grouped-products .product-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    --product-grid-columns-desktop: repeat(3, minmax(0, 1fr)) !important;
   }
 }
 
@@ -208,11 +210,11 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
 @media screen and (min-width: 1200px) {
   body.template-collection-our-products .lame-our-products-card-scope,
   .collection-template-our-products.lame-our-products-card-scope {
-    --lame-op-card-max: 300px;
-    --lame-op-grid-gap: 20px;
+    --lame-op-card-max: none;
+    --lame-op-grid-gap: 22px;
     --lame-op-body-padding-x: 14px;
     --lame-op-image-padding: 0;
-    --lame-op-gap-after-image: 18px;
+    --lame-op-gap-after-image: 12px;
     --lame-op-text-size: 0.875rem;
     --lame-op-btn-height: 40px;
   }
@@ -258,16 +260,18 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   min-height: 0;
   margin: 0;
   padding: 0;
-  padding-block-end: var(--lame-op-card-padding-bottom);
+  padding-block-end: 0;
   box-sizing: border-box;
   background: var(--lame-op-card-bg);
-  border: none;
+  border: 1px solid #ececec;
   border-radius: var(--lame-op-card-radius);
-  box-shadow: none;
+  box-shadow: var(--lame-op-card-shadow);
   overflow: hidden;
   background-clip: border-box;
   text-align: center;
-  transition: box-shadow 0.22s ease;
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .lame-our-products-card-scope .lame-op-card:is(:hover, :focus-within) .lame-op-card__inner {
@@ -382,7 +386,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   border-radius: 0;
   background: #ffffff !important;
   box-shadow: none;
-  --product-media-fit: cover;
+  --product-media-fit: contain;
   --constrained-height: unset !important;
   --media-preview-ratio: 1 !important;
 }
@@ -395,8 +399,8 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   max-height: none;
   margin: 0;
   padding: 0;
-  object-fit: cover !important;
-  object-position: center;
+  object-fit: contain !important;
+  object-position: center center;
   background: #ffffff !important;
   transition: none;
 }
@@ -705,6 +709,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   min-width: 0;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 .lame-our-products-card-scope .lame-op-card__inner .lame-op-card__actions > span:has(add-to-cart-component) {
@@ -1068,7 +1073,7 @@ body.template-collection-our-products .lame-our-products-page.lame-our-products-
   height: 100% !important;
   max-width: none !important;
   max-height: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
 }
 
