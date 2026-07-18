@@ -8,6 +8,13 @@
   if new_collection == blank
     assign view_all_url = routes.all_products_collection_url
   endif
+  if view_all_url contains '?'
+    assign view_all_url = view_all_url | append: '&sort_by=created-descending'
+  else
+    assign view_all_url = view_all_url | append: '?sort_by=created-descending'
+  endif
+
+  assign products_to_show = section.settings.products_to_show
 %}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -24,32 +31,39 @@
     </header>
 
     <ul class="lame-new-products__grid" role="list">
-      {% for product in new_collection.products limit: section.settings.products_to_show %}
-        <li class="lame-new-products__item" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 5 }}">
-          {% render 'lame-home-product-card', product: product, card_style: 'arrival', show_add_to_cart: true, add_to_cart_label: section.settings.add_to_cart_label %}
-        </li>
-      {% else %}
-        {% for i in (1..section.settings.products_to_show) %}
-          <li class="lame-new-products__item" data-lame-reveal>
-            <article class="lame-home-product-card lame-home-product-card--arrival">
-              <a href="#" class="lame-home-product-card__media-link">
-                <div class="lame-home-product-card__media">
-                  {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
-                </div>
-              </a>
-              <div class="lame-home-product-card__body">
-                <h3 class="lame-home-product-card__title">
-                  <a href="#">{{ section.settings.placeholder_title }}</a>
-                </h3>
-                <p class="lame-home-product-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</p>
-                <form class="lame-home-product-card__atc-form">
-                  <button type="button" class="lame-home-product-card__atc" disabled>{{ section.settings.add_to_cart_label }}</button>
-                </form>
-              </div>
-            </article>
+      {% comment %}
+        Load a large product pool, then sort by created_at (newest first)
+        so New Arrivals always shows recently added products—not collection manual order.
+      {% endcomment %}
+      {% paginate new_collection.products by 250 %}
+        {% assign newest_products = new_collection.products | sort: 'created_at' | reverse %}
+        {% for product in newest_products limit: products_to_show %}
+          <li class="lame-new-products__item" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 5 }}">
+            {% render 'lame-home-product-card', product: product, card_style: 'arrival', show_add_to_cart: true, add_to_cart_label: section.settings.add_to_cart_label %}
           </li>
+        {% else %}
+          {% for i in (1..products_to_show) %}
+            <li class="lame-new-products__item" data-lame-reveal>
+              <article class="lame-home-product-card lame-home-product-card--arrival">
+                <a href="#" class="lame-home-product-card__media-link">
+                  <div class="lame-home-product-card__media">
+                    {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
+                  </div>
+                </a>
+                <div class="lame-home-product-card__body">
+                  <h3 class="lame-home-product-card__title">
+                    <a href="#">{{ section.settings.placeholder_title }}</a>
+                  </h3>
+                  <p class="lame-home-product-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</p>
+                  <form class="lame-home-product-card__atc-form">
+                    <button type="button" class="lame-home-product-card__atc" disabled>{{ section.settings.add_to_cart_label }}</button>
+                  </form>
+                </div>
+              </article>
+            </li>
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
+      {% endpaginate %}
     </ul>
   </div>
 </section>
@@ -404,7 +418,12 @@
     { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals" },
     { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View all" },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
-    { "type": "collection", "id": "collection", "label": "Collection" },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Products are always sorted newest-first by date added, regardless of this collection’s sort order."
+    },
     {
       "type": "range",
       "id": "products_to_show",
