@@ -1,6 +1,6 @@
 /**
  * Lamstone Healthcare — Individual product page
- * Reference: FemiSafe sterilizer PDP (green + cream, left thumbnails, accordions)
+ * Reference: FemiSafe sterilizer PDP (green + cream, thumbnails below image, accordions)
  */
 
 .lame-product-healthcare-wrap {
@@ -146,77 +146,108 @@
   width: 100%;
 }
 
-/* Carousel: thumbnails left | main image right */
+/* Carousel: main image on top | thumbnails below (mobile + desktop) */
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-component:has(slideshow-controls[thumbnails]) {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] {
+  order: 2;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  justify-content: center;
+  --thumbnail-width: 56px;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
+  order: 1;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-arrows {
+  order: 1;
+}
+
+/* Never show pagination dots on healthcare PDP — thumbnails only */
+.lame-product-healthcare-wrap .slideshow-controls__dots,
+.lame-product-healthcare-wrap .media-gallery__mobile-controls:not([thumbnails]) {
+  display: none !important;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] .slideshow-controls__thumbnails-container {
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  width: 100%;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] .slideshow-controls__thumbnails {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button {
+  width: var(--thumbnail-width, var(--hc-thumb)) !important;
+  min-width: var(--thumbnail-width, var(--hc-thumb));
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: var(--hc-radius);
+  border: var(--hc-border);
+  background: #fff;
+  overflow: hidden;
+  box-shadow: none;
+  outline: none;
+  flex: 0 0 auto;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button:focus-visible {
+  outline: 2px solid var(--hc-green);
+  outline-offset: 2px;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button[aria-current='true'] {
+  border: var(--hc-border-active);
+  box-shadow: none;
+  outline: none;
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel .slideshow-controls__thumbnail-badge {
+  box-shadow: none;
+  border: var(--hc-border);
+}
+
+.lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 @media screen and (min-width: 750px) {
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-component:has(slideshow-controls[thumbnails]) {
-    display: grid !important;
-    grid-template:
-      'controls container' 1fr
-      'controls arrows' min-content
-      / auto minmax(0, 1fr) !important;
-    gap: 0 1rem;
-    align-items: stretch;
+    gap: 1rem;
   }
 
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] {
-    order: -1;
-    width: var(--hc-thumb);
-    min-width: var(--hc-thumb);
-    height: auto;
-    align-self: stretch;
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] {
+    --thumbnail-width: var(--hc-thumb);
   }
 
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] .slideshow-controls__thumbnails-container {
-    max-height: min(520px, 58vh);
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-  }
-
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] .slideshow-controls__thumbnails {
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0;
-  }
-
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button {
-    width: var(--hc-thumb) !important;
-    min-width: var(--hc-thumb);
-    aspect-ratio: 1;
-    padding: 0;
-    border-radius: var(--hc-radius);
-    border: var(--hc-border);
-    background: #fff;
-    overflow: hidden;
-    box-shadow: none;
-    outline: none;
-  }
-
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button:focus-visible {
-    outline: 2px solid var(--hc-green);
-    outline-offset: 2px;
-  }
-
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button[aria-current='true'] {
-    border: var(--hc-border-active);
-    box-shadow: none;
-    outline: none;
-  }
-
-  .lame-product-healthcare-wrap .media-gallery--carousel .slideshow-controls__thumbnail-badge {
-    box-shadow: none;
-    border: var(--hc-border);
-  }
-
-  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button img {
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] .slideshow-controls__thumbnails {
+    justify-content: center;
+    flex-wrap: wrap;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   /* Main image — light grey box, 1:1 square */
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
-    grid-area: container;
     background: var(--hc-grey);
     border: var(--hc-border);
     border-radius: var(--hc-radius-lg);
