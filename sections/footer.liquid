@@ -208,29 +208,6 @@
             <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'map-pin' %}</span>
             {{ section.settings.map_heading }}
           </h3>
-          <div class="footer-premium__map">
-            {% if section.settings.map_embed_url != blank %}
-              <iframe
-                title="{{ section.settings.map_heading | escape }}"
-                src="{{ section.settings.map_embed_url }}"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                allowfullscreen
-              ></iframe>
-            {% else %}
-              <a
-                class="footer-premium__map-fallback"
-                href="{{ directions_url }}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span class="footer-premium__icon footer-premium__icon--map" aria-hidden="true">
-                  {% render 'footer-icon', name: 'map-pin' %}
-                </span>
-                <span>{{ section.settings.map_fallback_text }}</span>
-              </a>
-            {% endif %}
-          </div>
           <a class="footer-premium__directions" href="{{ directions_url }}" target="_blank" rel="noopener noreferrer">
             {{ section.settings.map_directions_label }}
             <span class="footer-premium__icon footer-premium__icon--inline" aria-hidden="true">
@@ -288,11 +265,15 @@
       assign venture_blocks = section.blocks | where: 'type', 'venture'
     %}
     {% if venture_blocks.size > 0 or request.design_mode %}
-      <div class="footer-premium__ventures-divider" aria-hidden="true"></div>
       <div class="footer-premium__ventures-bar" aria-label="{{ section.settings.ventures_heading | default: 'Our Ventures' | escape }}">
         <div class="footer-premium__ventures-bar-inner">
           {% if section.settings.ventures_heading != blank %}
             <p class="footer-premium__ventures-bar-label">{{ section.settings.ventures_heading }}</p>
+            <div class="footer-premium__ventures-ornament" aria-hidden="true">
+              <span class="footer-premium__ventures-ornament-line"></span>
+              <span class="footer-premium__ventures-ornament-mark"></span>
+              <span class="footer-premium__ventures-ornament-line"></span>
+            </div>
           {% endif %}
           <ul class="footer-premium__ventures-row" role="list">
             {% for block in venture_blocks %}
@@ -368,14 +349,12 @@
     {% endif %}
 
     <div class="footer-premium__bottom">
-      <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
       {% if section.settings.show_policy_links %}
         <ul class="footer-premium__policies" role="list">
           {% for policy in shop.policies %}
             {% if policy != blank %}
               <li>
                 <a href="{{ policy.url }}" class="footer-premium__link-row footer-premium__link-row--policy">
-                  <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'arrow' %}</span>
                   <span>{{ policy.title }}</span>
                 </a>
               </li>
@@ -383,7 +362,14 @@
           {% endfor %}
         </ul>
       {% endif %}
+      {% if section.settings.copyright_text != blank %}
+        <p class="footer-premium__copyright">{{ section.settings.copyright_text | newline_to_br }}</p>
+      {% endif %}
     </div>
+
+    <p class="footer-premium__rights">
+      {{ section.settings.rights_text | default: 'All rights reserved. Lamstone Healthcare (P) Ltd since 2026.' }}
+    </p>
   </div>
 </footer>
 
@@ -423,24 +409,24 @@
     display: grid;
     gap: 0;
     width: 100%;
-    max-width: 100%;
-    margin-inline: 0;
+    max-width: min(1200px, 100%);
+    margin-inline: auto;
     padding-inline: var(--footer-edge-desktop);
     box-sizing: border-box;
   }
 
   #footer-{{ section.id }} .footer-premium__nav-panel {
-    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+    padding-block: clamp(1.5rem, 3vw, 2.25rem);
     border-bottom: 1px solid rgb(255 255 255 / 0.1);
   }
 
   #footer-{{ section.id }} .footer-premium__info-panel {
-    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+    padding-block: clamp(1.5rem, 3vw, 2.25rem);
   }
 
   #footer-{{ section.id }} .footer-premium__main {
     display: grid;
-    gap: clamp(1.5rem, 3vw, 2.25rem);
+    gap: clamp(1.35rem, 2.5vw, 2rem);
   }
 
   #footer-{{ section.id }} .footer-premium__column,
@@ -448,72 +434,72 @@
     min-width: 0;
   }
 
-  #footer-{{ section.id }} .footer-premium__ventures-divider {
-    width: 100%;
-    padding: 0.55rem 0;
-    background: #154230;
-    border-top: 1px solid rgb(255 255 255 / 0.14);
-    border-bottom: 1px solid rgb(0 0 0 / 0.18);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
-  }
-
-  #footer-{{ section.id }} .footer-premium__ventures-divider::after {
-    content: '';
-    display: block;
-    width: min(92%, 1080px);
-    height: 1px;
-    margin-inline: auto;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgb(212 175 55 / 0.45) 18%,
-      rgb(212 175 55 / 0.45) 82%,
-      transparent
-    );
-  }
-
   #footer-{{ section.id }} .footer-premium__ventures-bar {
     margin-top: 0;
-    border-top: none;
-    border-bottom: 1px solid rgb(21 66 48 / 0.08);
-    background-color: #f8f6f1;
-    background-image:
-      linear-gradient(180deg, rgb(255 255 255 / 0.72) 0%, transparent 38%),
-      radial-gradient(rgb(21 66 48 / 0.025) 0.5px, transparent 0.5px);
-    background-size: 100% 100%, 12px 12px;
+    border-top: 1px solid #c5a059;
+    border-bottom: 1px solid #c5a059;
+    background-color: #f9f8f3;
+    background-image: none;
     color: rgb(24 24 24);
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
     width: 100%;
-    max-width: var(--page-width, 1200px);
+    max-width: min(1280px, 100%);
     margin-inline: auto;
-    padding: clamp(1.35rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
+    padding: clamp(1.75rem, 3.5vw, 2.75rem) clamp(1rem, 3vw, 2.5rem) clamp(1.85rem, 3.8vw, 2.85rem);
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-    margin: 0 0 0.85rem;
+    margin: 0;
     text-align: center;
     font-family: var(--footer-font-display);
-    font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #154230;
-    position: relative;
-    padding-bottom: 0.65rem;
+    color: #012a1c;
   }
 
-  #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
+  #footer-{{ section.id }} .footer-premium__ventures-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    max-width: 11rem;
+    margin: 0.7rem auto 1.35rem;
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-line {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c5a059 30%, #c5a059);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-line:last-child {
+    background: linear-gradient(90deg, #c5a059, #c5a059 70%, transparent);
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-mark {
+    position: relative;
+    flex: 0 0 auto;
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 1px solid #c5a059;
+    transform: rotate(45deg);
+    background: #f9f8f3;
+  }
+
+  #footer-{{ section.id }} .footer-premium__ventures-ornament-mark::before {
     content: '';
     position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 2.75rem;
-    height: 1px;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, transparent, rgb(212 175 55 / 0.7), transparent);
+    inset: 2px;
+    border: 1px solid rgb(197 160 89 / 0.55);
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-row {
@@ -524,7 +510,8 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.85rem, 2.8vw, 2.25rem);
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    width: 100%;
     max-width: 100%;
     overflow-x: hidden;
   }
@@ -538,8 +525,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.5rem;
-    padding: 0.35rem 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.25rem 0.4rem;
     text-decoration: none;
     background: transparent;
     border: none;
@@ -554,9 +541,9 @@
   #footer-{{ section.id }} .footer-premium__venture-logo {
     display: block;
     width: auto;
-    max-width: min(10rem, 14vw);
+    max-width: min(7.5rem, 22vw);
     height: auto;
-    max-height: 3.25rem;
+    max-height: 2.5rem;
     object-fit: contain;
     object-position: center;
     background: transparent;
@@ -579,63 +566,53 @@
 
   @media screen and (min-width: 750px) {
     #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
-      padding: clamp(3rem, 5vw, 4.7rem) clamp(2rem, 4vw, 3.5rem);
-      max-width: min(1320px, 100%);
+      padding: clamp(2rem, 3.5vw, 3rem) clamp(1.5rem, 3vw, 2.75rem) clamp(2.15rem, 3.8vw, 3.15rem);
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-bar-label {
-      margin-bottom: 2rem;
-      font-size: clamp(2rem, 2.4vw, 2.5rem);
-      letter-spacing: 0.06em;
-      padding-bottom: 1rem;
+      font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+      letter-spacing: 0.26em;
     }
 
-    #footer-{{ section.id }} .footer-premium__ventures-bar-label::after {
-      width: 4rem;
-      height: 1px;
+    #footer-{{ section.id }} .footer-premium__ventures-ornament {
+      max-width: 12.5rem;
+      margin-bottom: 1.65rem;
     }
+  }
 
+  /* Desktop: larger logos in a single centered row */
+  @media screen and (min-width: 990px) {
     #footer-{{ section.id }} .footer-premium__ventures-row {
-      flex-wrap: nowrap;
-      justify-content: space-between;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
-      gap: clamp(1.5rem, 3.2vw, 3rem);
-      max-width: 100%;
-      margin-inline: auto;
+      gap: clamp(1.5rem, 3vw, 2.75rem);
     }
 
     #footer-{{ section.id }} .footer-premium__venture-item {
-      flex: 1 1 0;
-      min-width: 0;
-      max-width: 23rem;
+      flex: 0 1 auto;
+      width: auto;
+      max-width: none;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 14.25rem;
-      padding: 0.8rem 0.7rem;
-      width: 100%;
+      min-height: 4.5rem;
+      padding: 0.5rem 0.65rem;
+      width: auto;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
-      width: 100%;
-      max-width: 100%;
-      max-height: clamp(10.5rem, 12.6vw, 12.75rem);
+      width: auto;
+      max-width: 12.5rem;
+      max-height: 4.75rem;
     }
   }
 
-  @media screen and (min-width: 990px) {
-    #footer-{{ section.id }} .footer-premium__ventures-row {
-      gap: clamp(2rem, 4vw, 4rem);
-    }
-
-    #footer-{{ section.id }} .footer-premium__venture-logo {
-      max-height: 13.5rem;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
+  /* Mobile + tablet: 2 logos per row */
+  @media screen and (max-width: 989px) {
     #footer-{{ section.id }} .footer-premium__ventures-bar-inner {
-      padding-inline: clamp(0.85rem, 4vw, 1.25rem);
+      padding-inline: clamp(0.85rem, 4vw, 1.5rem);
     }
 
     #footer-{{ section.id }} .footer-premium__ventures-row {
@@ -663,15 +640,15 @@
     }
 
     #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 3.75rem;
-      padding: 0.45rem 0.55rem;
+      min-height: 3.25rem;
+      padding: 0.4rem 0.5rem;
       width: 100%;
     }
 
     #footer-{{ section.id }} .footer-premium__venture-logo {
       width: 100%;
       max-width: 100%;
-      max-height: clamp(2.75rem, 11vw, 3.5rem);
+      max-height: clamp(2.5rem, 10vw, 3.5rem);
     }
   }
 
@@ -905,54 +882,8 @@
 
   #footer-{{ section.id }} .footer-premium__map-wrap {
     display: grid;
-    gap: 0.85rem;
-  }
-
-  #footer-{{ section.id }} .footer-premium__map {
-    position: relative;
-    width: 100%;
-    min-height: 240px;
-    border-radius: var(--footer-luxury-radius);
-    overflow: hidden;
-    border: 1px solid rgb(255 255 255 / 0.14);
-    background: rgb(0 0 0 / 0.22);
-    box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
-  }
-
-  #footer-{{ section.id }} .footer-premium__map iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
-
-  #footer-{{ section.id }} .footer-premium__map-fallback {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 220px;
-    padding: 1.5rem;
-    text-align: center;
-    text-decoration: none;
-    color: var(--footer-text-muted);
-    font-size: 0.875rem;
-    line-height: 1.45;
-  }
-
-  #footer-{{ section.id }} .footer-premium__icon--map {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    background: var(--footer-icon-bg);
-    color: var(--footer-gold);
-  }
-
-  #footer-{{ section.id }} .footer-premium__icon--map .footer-premium__icon-svg {
-    width: 1rem;
-    height: 1rem;
+    gap: 0.65rem;
+    align-content: start;
   }
 
   #footer-{{ section.id }} .footer-premium__directions {
@@ -985,19 +916,19 @@
   }
 
   #footer-{{ section.id }} .footer-premium__contact-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 0;
-    padding: 1.15rem 1.25rem;
-    border-radius: var(--footer-luxury-radius);
-    border: 1px solid rgb(255 255 255 / 0.12);
-    background: rgb(255 255 255 / 0.04);
-    min-height: 100%;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    background: transparent;
+    min-height: 0;
     box-sizing: border-box;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block {
-    padding: 0.95rem 0;
+    padding: 0.85rem 0;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
@@ -1005,11 +936,11 @@
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block:first-child {
-    padding-top: 0.15rem;
+    padding-top: 0;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-block:last-child {
-    padding-bottom: 0.15rem;
+    padding-bottom: 0;
   }
 
   #footer-{{ section.id }} .footer-premium__contact-title,
@@ -1072,13 +1003,27 @@
   }
 
   #footer-{{ section.id }} .footer-premium__legal {
-    padding: clamp(0.85rem, 2vw, 1.15rem) var(--footer-edge-desktop) clamp(1.1rem, 2.5vw, 1.5rem);
-    background: #154230;
-    border-top: 1px solid rgb(255 255 255 / 0.1);
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding: clamp(1.1rem, 2.4vw, 1.55rem) var(--footer-edge-desktop);
+    background-color: #012a1c;
+    background-image:
+      radial-gradient(ellipse 80% 55% at 8% 100%, rgb(197 160 89 / 0.08), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 92% 0%, rgb(197 160 89 / 0.06), transparent 50%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='80' viewBox='0 0 160 80' fill='none'%3E%3Cpath d='M0 40c20-18 40-18 60 0s40 18 60 0 40-18 60 0' stroke='%23c5a059' stroke-opacity='0.12' stroke-width='0.7'/%3E%3Cpath d='M0 55c20-14 40-14 60 0s40 14 60 0 40-14 60 0' stroke='%23c5a059' stroke-opacity='0.08' stroke-width='0.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat, no-repeat, repeat;
+    background-size: auto, auto, 160px 80px;
+    border-top: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__legal > :is(.footer-premium__trust, .footer-premium__bottom, .footer-premium__rights) {
+    max-width: min(1280px, 100%);
+    margin-inline: auto;
   }
 
   #footer-{{ section.id }} .footer-premium__trust {
-    margin: 0 auto;
+    margin: 0 auto 0.75rem;
     max-width: 100%;
     display: flex;
     align-items: center;
@@ -1090,9 +1035,8 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--footer-text-subtle);
-    padding: 0.75rem 0;
-    border-top: 1px solid rgb(255 255 255 / 0.1);
-    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    padding: 0 0 0.75rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
   }
 
   #footer-{{ section.id }} .footer-premium__icon--trust {
@@ -1113,44 +1057,56 @@
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem 1.25rem;
+    justify-content: flex-start;
+    gap: 0.35rem 1.35rem;
   }
 
   #footer-{{ section.id }} .footer-premium__policies a,
   #footer-{{ section.id }} .footer-premium__policies .footer-premium__link-row {
-    font-size: 0.8125rem;
+    font-size: 0.8rem;
     text-decoration: none;
-    color: var(--footer-text-subtle);
-    letter-spacing: 0.03em;
+    color: #fff;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid #c5a059;
+    padding-bottom: 0.1rem;
+    transform: none;
   }
 
   #footer-{{ section.id }} .footer-premium__policies .footer-premium__icon {
     display: none;
   }
 
-  #footer-{{ section.id }} .footer-premium__policies a:hover {
-    color: var(--footer-gold);
+  #footer-{{ section.id }} .footer-premium__policies a:hover,
+  #footer-{{ section.id }} .footer-premium__policies .footer-premium__link-row:is(:hover, :focus-visible) {
+    color: #c5a059;
+    transform: none;
   }
 
   #footer-{{ section.id }} .footer-premium__bottom {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 0.75rem;
-    text-align: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: start;
     max-width: 100%;
     margin-inline: 0;
-    padding-top: 0.85rem;
+    padding-top: 0;
+    width: 100%;
   }
 
   #footer-{{ section.id }} .footer-premium__copyright {
     margin: 0;
-    font-size: 0.78rem;
-    line-height: 1.55;
+    font-size: 0.8rem;
+    line-height: 1.5;
     letter-spacing: 0.02em;
-    color: var(--footer-text-subtle);
-    max-width: 52ch;
+    color: #fff;
+    max-width: none;
+    text-align: end;
+  }
+
+  #footer-{{ section.id }} .footer-premium__rights {
+    display: none;
   }
 
   @media screen and (max-width: 749px) {
@@ -1203,24 +1159,14 @@
       gap: 1rem;
     }
 
-    #footer-{{ section.id }} .footer-premium__map-wrap {
-      margin-inline: calc(-1 * var(--footer-edge));
-      width: calc(100% + 2 * var(--footer-edge));
-    }
-
-    #footer-{{ section.id }} .footer-premium__map {
-      min-height: clamp(150px, 38vw, 200px);
-      border-radius: 10px;
-    }
-
     #footer-{{ section.id }} .footer-premium__contact-grid {
-      padding: 0.9rem 0.95rem;
-      border-radius: 10px;
+      padding: 0;
+      border-radius: 0;
       gap: 0;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-block {
-      padding: 0.75rem 0;
+      padding: 0.7rem 0;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-title,
@@ -1241,16 +1187,21 @@
     #footer-{{ section.id }} .footer-premium__trust {
       font-size: 0.68rem;
       letter-spacing: 0.1em;
-      padding: 0.6rem 0;
+      padding: 0 0 0.6rem;
+      margin-bottom: 0.6rem;
     }
 
     #footer-{{ section.id }} .footer-premium__copyright {
       font-size: 0.75rem;
-      max-width: none;
+    }
+
+    #footer-{{ section.id }} .footer-premium__bottom {
+      flex-wrap: wrap;
+      gap: 0.65rem 1rem;
     }
 
     #footer-{{ section.id }} .footer-premium__policies {
-      gap: 0.4rem 0.85rem;
+      gap: 0.35rem 0.85rem;
     }
 
     #footer-{{ section.id }} .footer-premium__policies a,
@@ -1260,11 +1211,6 @@
   }
 
   @media screen and (min-width: 750px) and (max-width: 989px) {
-    #footer-{{ section.id }} .footer-premium__venture-logo {
-      max-width: min(8.5rem, 18vw);
-      max-height: 2.85rem;
-    }
-
     #footer-{{ section.id }} .footer-premium__mid {
       min-width: 0;
     }
@@ -1273,6 +1219,17 @@
     #footer-{{ section.id }} .footer-premium__contact-grid {
       min-width: 0;
       max-width: 100%;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
+      border-inline-start: none;
+      padding-inline-start: 0;
+      border-top: 1px solid rgb(255 255 255 / 0.1);
+      padding-top: 0.85rem;
     }
   }
 
@@ -1290,33 +1247,28 @@
     }
 
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: clamp(1rem, 2vw, 1.75rem);
-      align-items: stretch;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(1.25rem, 2.5vw, 2.25rem);
+      align-items: start;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-grid {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      justify-content: center;
-    }
-
-    #footer-{{ section.id }} .footer-premium__map-wrap {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-      height: 100%;
-    }
-
-    #footer-{{ section.id }} .footer-premium__map {
-      flex: 1 1 auto;
-      min-height: 200px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem 1.25rem;
       height: auto;
+      justify-content: start;
     }
 
     #footer-{{ section.id }} .footer-premium__contact-block {
       display: block;
+      padding: 0;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
+      border-top: none;
+      border-inline-start: 1px solid rgb(255 255 255 / 0.1);
+      padding-inline-start: 1.25rem;
     }
 
     #footer-{{ section.id }} .footer-premium__bottom {
@@ -1327,18 +1279,15 @@
     }
 
     #footer-{{ section.id }} .footer-premium__policies {
-      justify-content: flex-end;
+      justify-content: flex-start;
     }
   }
 
   @media screen and (min-width: 990px) {
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-      gap: clamp(1.25rem, 2.5vw, 2rem);
-    }
-
-    #footer-{{ section.id }} .footer-premium__map {
-      min-height: 220px;
+      grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      align-items: start;
     }
   }
 {% endstyle %}
@@ -1453,32 +1402,26 @@
     },
     {
       "type": "header",
-      "content": "Map"
+      "content": "Directions"
     },
     {
       "type": "checkbox",
       "id": "show_map",
-      "label": "Show map",
+      "label": "Show directions",
       "default": true
     },
     {
       "type": "text",
       "id": "map_heading",
-      "label": "Map heading",
+      "label": "Directions heading",
       "default": "Visit our store"
     },
     {
       "type": "text",
       "id": "map_query",
-      "label": "Map search query",
+      "label": "Location search query",
       "default": "Lamstone Healthcare Mangalapuram Kerala 695317",
-      "info": "Used for directions link when embed URL is empty."
-    },
-    {
-      "type": "url",
-      "id": "map_embed_url",
-      "label": "Google Maps embed URL",
-      "info": "Paste the iframe src URL from Google Maps â†’ Share â†’ Embed a map."
+      "info": "Used for the Get directions link when a custom URL is not set."
     },
     {
       "type": "url",
@@ -1490,12 +1433,6 @@
       "id": "map_directions_label",
       "label": "Directions link label",
       "default": "Get directions"
-    },
-    {
-      "type": "text",
-      "id": "map_fallback_text",
-      "label": "Map fallback text",
-      "default": "Tap to open location in Google Maps"
     },
     {
       "type": "header",
@@ -1562,8 +1499,14 @@
       "type": "text",
       "id": "copyright_text",
       "label": "Copyright text",
-      "default": "Â© 2026 Lamstone HealthCare Pvt Ltd. All rights reserved.\nLAMEÂ® is a skincare brand by Lamstone HealthCare Pvt Ltd.",
+      "default": "© 2026 Lamstone Healthcare (P) Ltd",
       "info": "Press Enter for a second line (e.g. brand disclaimer)."
+    },
+    {
+      "type": "text",
+      "id": "rights_text",
+      "label": "All rights reserved line",
+      "default": "All rights reserved. Lamstone Healthcare (P) Ltd since 2026."
     },
     {
       "type": "checkbox",

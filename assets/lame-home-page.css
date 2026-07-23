@@ -46,6 +46,11 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   padding-inline: 0;
 }
 
+/* Flush homepage sections — no white gutters between bands */
+.template-index .content-for-layout {
+  row-gap: 0;
+}
+
 /* No section dividers or borders between homepage sections */
 .template-index .content-for-layout > .shopify-section {
   border-top: none !important;
@@ -183,26 +188,10 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   box-shadow: none;
 }
 
-/* New arrivals */
+/* New arrivals — flush band (colorful top strip from lame-commerce-vibrant.css) */
 .template-index .shopify-section:has(.lame-new-products) {
-  background:
-    radial-gradient(circle at 6% 50%, rgb(245 210 220 / 0.22), transparent 40%),
-    radial-gradient(circle at 94% 40%, rgb(221 181 109 / 0.1), transparent 38%),
-    linear-gradient(135deg, var(--lame-home-blush) 0%, var(--lame-home-cream) 48%, var(--lame-home-white) 100%);
-}
-
-.template-index .shopify-section:has(.lame-new-products)::before {
-  content: '';
-  position: absolute;
-  right: 2%;
-  top: 18%;
-  width: clamp(90px, 14vw, 160px);
-  height: clamp(90px, 14vw, 160px);
-  background: var(--lame-home-flourish) center / contain no-repeat;
-  transform: rotate(18deg);
-  opacity: 0.45;
-  pointer-events: none;
-  z-index: 0;
+  position: relative;
+  background: #f7f7f5;
 }
 
 .template-index .shopify-section:has(.lame-new-products) .lame-new-products__wrap {
@@ -235,7 +224,7 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .template-index .shopify-section::before {
+  .template-index .shopify-section:not(:has(.lame-new-products))::before {
     opacity: 0.35;
   }
 }

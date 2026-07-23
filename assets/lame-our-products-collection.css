@@ -312,7 +312,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     align-items: start !important;
   }
 
-  /* Our Products (lame-op-page): wider filter column */
+  /* Our Products (lame-op-page): filter + products — tablet overrides below */
   .collection-template-our-products.lame-our-products-page
     .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
   body.template-collection-our-products
@@ -477,6 +477,25 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     min-width: 0;
     padding: 0 !important;
     margin: 0 !important;
+  }
+}
+
+/* iPad Mini / tablet: balanced sidebar + room for 2-up product cards */
+@media screen and (min-width: 750px) and (max-width: 1099px) {
+  .collection-template-our-products.lame-our-products-page
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
+  body.template-collection-our-products
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
+  .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
+    grid-template-columns: minmax(180px, 210px) minmax(0, 1fr) !important;
+    column-gap: 1.25rem !important;
+    align-items: start !important;
+  }
+
+  .collection-template-our-products .lame-collection-products-column,
+  .collection-template-our-products #ResultsList {
+    min-width: 0;
+    width: 100%;
   }
 }
 
@@ -1271,13 +1290,14 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   color: var(--lame-lux-secondary, #3f6b52);
 }
 
-/* Override premium grid — force 3 columns on Our Products */
+/* Override premium grid — 2 columns by default on Our Products */
 .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
   :is(.lame-collection-brand-section__grid, .product-grid) {
   display: grid !important;
   width: 100% !important;
   max-width: none !important;
-  justify-content: center !important;
+  justify-content: stretch !important;
+  justify-items: stretch !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: var(--lame-op-grid-gap, 20px) !important;
   margin: 0;
@@ -1288,7 +1308,18 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   --product-grid-gap-desktop: unset;
 }
 
-@media screen and (min-width: 750px) and (max-width: 1279px) {
+/* iPad Mini / tablet: keep 2-up beside filters (3-up was crushing cards) */
+@media screen and (min-width: 750px) and (max-width: 1099px) {
+  .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
+    :is(.lame-collection-brand-section__grid, .product-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    justify-items: stretch !important;
+    gap: 16px !important;
+  }
+}
+
+@media screen and (min-width: 1100px) and (max-width: 1279px) {
   .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
     :is(.lame-collection-brand-section__grid, .product-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1742,7 +1773,29 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   }
 }
 
-@media screen and (min-width: 750px) and (max-width: 1279px) {
+@media screen and (min-width: 750px) and (max-width: 1099px) {
+  .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 210px) minmax(0, 1fr) !important;
+    column-gap: 1.25rem !important;
+  }
+
+  .collection-template-our-products.lame-our-products-page
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)),
+  body.template-collection-our-products
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)),
+  .collection-template-our-products.lame-our-products-page
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar),
+  body.template-collection-our-products
+    .lame-op-page__layout.collection-wrapper.lame-collection-layout--sidebar-left:has(.lame-op-page__sidebar) {
+    grid-template-columns: minmax(180px, 210px) minmax(0, 1fr) !important;
+    grid-template-areas: none !important;
+    column-gap: 1.25rem !important;
+    align-items: start !important;
+  }
+}
+
+@media screen and (min-width: 1100px) and (max-width: 1279px) {
   .collection-template-our-products .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     display: grid !important;
     grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) !important;

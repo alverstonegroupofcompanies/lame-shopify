@@ -11,6 +11,7 @@
   assign compare_at = selected_variant.compare_at_price
   assign price = selected_variant.price
   assign on_sale = false
+  assign discount_percent = 0
   if compare_at > price
     assign on_sale = true
     assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
@@ -27,58 +28,71 @@
   if card_style == 'arrival'
     assign is_arrival_card = true
   endif
+
+  if settings.currency_code_enabled
+    assign display_price = price | money_with_currency
+    assign display_compare = compare_at | money_with_currency
+  else
+    assign display_price = price | money
+    assign display_compare = compare_at | money
+  endif
+
+  assign review_count = product.metafields.reviews.rating_count.value | default: product.metafields.custom.review_count.value
 -%}
 
 <article class="lame-home-product-card lame-home-product-card--{{ card_style }}">
-  <a href="{{ product.url }}" class="lame-home-product-card__media-link">
+  {% if is_arrival_card %}
     <div class="lame-home-product-card__media">
-      {% if product.featured_media %}
-        {% liquid
-          if card_style == 'flash'
-            assign card_image_widths = '160,240,320,400,480'
-            assign card_image_sizes = '(min-width: 750px) 260px, 30vw'
-          elsif card_style == 'arrival'
-            assign card_image_widths = '240,360,480,600,900'
-            assign card_image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw'
-          else
-            assign card_image_widths = '240,360,480,600,900'
-            assign card_image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw'
-          endif
-        %}
-        {{
-          product.featured_media
-          | image_url: width: 400
-          | image_tag:
-            class: 'lame-home-product-card__image',
-            loading: 'lazy',
-            widths: card_image_widths,
-            sizes: card_image_sizes,
-            alt: product.featured_media.alt | default: product.title | escape
-        }}
-      {% else %}
-        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
-      {% endif %}
+      {%- if on_sale -%}
+        <span class="lame-home-product-card__badge">{{ discount_percent }}% OFF</span>
+      {%- else -%}
+        <span class="lame-home-product-card__badge lame-home-product-card__badge--new">NEW</span>
+      {%- endif -%}
 
-      {% if show_badge and is_arrival_card == false %}
-        <span class="lame-home-product-card__badge">
-          {%- if badge_text != blank -%}
-            {{ badge_text }}
-          {%- else -%}
-            -{{ discount_percent }}%
-          {%- endif -%}
-        </span>
-      {% endif %}
+      <a href="{{ product.url }}" class="lame-home-product-card__media-link" tabindex="-1" aria-hidden="true">
+        {% if product.featured_media %}
+          {{
+            product.featured_media
+            | image_url: width: 720
+            | image_tag:
+              class: 'lame-home-product-card__image',
+              loading: 'lazy',
+              widths: '240,360,480,600,720',
+              sizes: '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw',
+              alt: product.featured_media.alt | default: product.title | escape
+          }}
+        {% else %}
+          {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
+        {% endif %}
+      </a>
     </div>
-  </a>
 
-  <div class="lame-home-product-card__body">
-    {% if is_arrival_card %}
+    <div class="lame-home-product-card__body">
       <h3 class="lame-home-product-card__title">
-        <a href="{{ product.url }}">{{ product.title }}</a>
+        <a href="{{ product.url }}">{{ product.title | escape }}</a>
       </h3>
-      <p class="lame-home-product-card__price">
-        {% render 'price', product_resource: product, show_sale_price_first: true %}
-      </p>
+
+      <div class="lame-home-product-card__price-row">
+        {%- if on_sale -%}
+          <span class="lame-home-product-card__compare">{{ display_compare }}</span>
+          <span class="lame-home-product-card__price">{{ display_price }}</span>
+          {%- if discount_percent > 0 -%}
+            <span class="lame-home-product-card__off">{{ discount_percent }}% Off</span>
+          {%- endif -%}
+        {%- else -%}
+          <span class="lame-home-product-card__price">{{ display_price }}</span>
+        {%- endif -%}
+      </div>
+
+      <div class="lame-home-product-card__rating" aria-hidden="true">
+        <span class="lame-home-product-card__stars">
+          {%- for i in (1..5) -%}&#9733;{%- endfor -%}
+        </span>
+        {%- if review_count != blank -%}
+          <span class="lame-home-product-card__reviews">({{ review_count }})</span>
+        {%- endif -%}
+      </div>
+
       {% if show_add_to_cart and selected_variant %}
         <form
           method="post"
@@ -110,7 +124,47 @@
           <span class="lame-home-product-card__atc-status" aria-live="polite"></span>
         </form>
       {% endif %}
-    {% else %}
+    </div>
+  {% else %}
+  <a href="{{ product.url }}" class="lame-home-product-card__media-link">
+    <div class="lame-home-product-card__media">
+      {% if product.featured_media %}
+        {% liquid
+          if card_style == 'flash'
+            assign card_image_widths = '160,240,320,400,480'
+            assign card_image_sizes = '(min-width: 750px) 260px, 30vw'
+          else
+            assign card_image_widths = '240,360,480,600,900'
+            assign card_image_sizes = '(min-width: 990px) 220px, (min-width: 750px) 33vw, 46vw'
+          endif
+        %}
+        {{
+          product.featured_media
+          | image_url: width: 400
+          | image_tag:
+            class: 'lame-home-product-card__image',
+            loading: 'lazy',
+            widths: card_image_widths,
+            sizes: card_image_sizes,
+            alt: product.featured_media.alt | default: product.title | escape
+        }}
+      {% else %}
+        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
+      {% endif %}
+
+      {% if show_badge %}
+        <span class="lame-home-product-card__badge">
+          {%- if badge_text != blank -%}
+            {{ badge_text }}
+          {%- else -%}
+            -{{ discount_percent }}%
+          {%- endif -%}
+        </span>
+      {% endif %}
+    </div>
+  </a>
+
+  <div class="lame-home-product-card__body">
     {% if card_style == 'flash' %}
       <p class="lame-home-product-card__type">
         {%- if product.type != blank -%}
@@ -172,6 +226,6 @@
     {% elsif product.available == false %}
       <p class="lame-home-product-card__sold-out">{{ sold_out_label }}</p>
     {% endif %}
-    {% endif %}
   </div>
+  {% endif %}
 </article>
