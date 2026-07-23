@@ -78,9 +78,17 @@
   if block_settings.enable_filtering == false and block_settings.enable_sorting
     assign should_use_select_on_mobile = false
   endif
+
+  comment
+    Our Products: never show grid/view density toggles (mobile or desktop)
+  endcomment
+  assign lame_enable_grid_density = block_settings.enable_grid_density
+  if lame_our_products_active
+    assign lame_enable_grid_density = false
+  endif
 -%}
 
-{% if block_settings.enable_filtering or block_settings.enable_sorting or block_settings.enable_grid_density %}
+{% if block_settings.enable_filtering or block_settings.enable_sorting or lame_enable_grid_density %}
   {% if block_settings.filter_style == 'vertical' %}
     {% # These elements are always rendered in the horizontal bar that's why we apply the .facets--horizontal class %}
     <div
@@ -126,7 +134,7 @@
         {% endif %}
       {% endif %}
 
-      {% if block_settings.enable_grid_density %}
+      {% if lame_enable_grid_density %}
         {% render 'grid-density-controls', viewport: 'desktop' %}
       {% endif %}
     </div>
@@ -399,7 +407,7 @@
                 %}
               {% endif %}
 
-              {% if block_settings.enable_grid_density %}
+              {% if lame_enable_grid_density %}
                 {% render 'grid-density-controls', viewport: 'desktop' %}
               {% endif %}
             {% endif %}
@@ -456,7 +464,7 @@
       if block_settings.enable_filtering == false and block_settings.enable_sorting
         assign child_count = child_count | plus: 1
       endif
-      if block_settings.enable_grid_density
+      if lame_enable_grid_density
         assign child_count = child_count | plus: 1
       endif
     %}
@@ -485,7 +493,7 @@
           </form>
         </facets-form-component>
       {% endif %}
-      {% if block_settings.enable_grid_density %}
+      {% if lame_enable_grid_density %}
         {% render 'grid-density-controls', viewport: 'mobile' %}
       {% endif %}
     </div>
