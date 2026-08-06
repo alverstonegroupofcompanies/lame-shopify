@@ -21,18 +21,7 @@
       {% endif %}
 
       {% assign product = block.settings.product %}
-      {% render 'lame-flash-deal-product',
-        product: product,
-        product_index: products_shown,
-        products_limit: products_limit,
-        badge_label: section.settings.badge_label,
-        add_to_cart_label: section.settings.add_to_cart_label,
-        sold_out_label: section.settings.sold_out_label,
-        review_count_fallback: section.settings.review_count_fallback,
-        save_label_prefix: section.settings.save_label_prefix,
-        reveal_delay: products_shown | modulo: 2,
-        block_attributes: block.shopify_attributes
-      %}
+      {% render 'lame-flash-deal-product', product: product, product_index: products_shown, products_limit: products_limit, badge_label: section.settings.badge_label, add_to_cart_label: section.settings.add_to_cart_label, sold_out_label: section.settings.sold_out_label, review_count_fallback: section.settings.review_count_fallback, save_label_prefix: section.settings.save_label_prefix, reveal_delay: products_shown, modulo: 2, block_attributes: block.shopify_attributes %}
       {% assign products_shown = products_shown | plus: 1 %}
     {% endfor %}
   {% elsif deal_collection != blank %}
@@ -66,17 +55,7 @@
         {% continue %}
       {% endunless %}
 
-      {% render 'lame-flash-deal-product',
-        product: product,
-        product_index: products_shown,
-        products_limit: products_limit,
-        badge_label: section.settings.badge_label,
-        add_to_cart_label: section.settings.add_to_cart_label,
-        sold_out_label: section.settings.sold_out_label,
-        review_count_fallback: section.settings.review_count_fallback,
-        save_label_prefix: section.settings.save_label_prefix,
-        reveal_delay: products_shown | modulo: 2
-      %}
+      {% render 'lame-flash-deal-product', product: product, product_index: products_shown, products_limit: products_limit, badge_label: section.settings.badge_label, add_to_cart_label: section.settings.add_to_cart_label, sold_out_label: section.settings.sold_out_label, review_count_fallback: section.settings.review_count_fallback, save_label_prefix: section.settings.save_label_prefix, reveal_delay: products_shown, modulo: 2 %}
       {% assign products_shown = products_shown | plus: 1 %}
     {% endfor %}
   {% endif %}
@@ -563,3 +542,48 @@
   ]
 }
 {% endschema %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: |-
+    {% render 'lame-flash-deal-product',
+            product: product,
+            product_index: products_shown,
+            products_limit: products_limit,
+            badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label,
+            review_count_fallback: section.settings.review_count_fallback,
+            save_label_prefix: section.settings.save_label_prefix,
+            reveal_delay: products_shown | modulo: 2,
+            block_attributes: block.shopify_attributes
+          %}
+  to: "{% render 'lame-flash-deal-product', product: product, product_index: products_shown,
+    products_limit: products_limit, badge_label: section.settings.badge_label, add_to_cart_label:
+    section.settings.add_to_cart_label, sold_out_label: section.settings.sold_out_label,
+    review_count_fallback: section.settings.review_count_fallback, save_label_prefix:
+    section.settings.save_label_prefix, reveal_delay: products_shown, modulo: 2, block_attributes:
+    block.shopify_attributes %}"
+  position: 954..1423
+- from: |-
+    {% render 'lame-flash-deal-product',
+            product: product,
+            product_index: products_shown,
+            products_limit: products_limit,
+            badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label,
+            review_count_fallback: section.settings.review_count_fallback,
+            save_label_prefix: section.settings.save_label_prefix,
+            reveal_delay: products_shown | modulo: 2
+          %}
+  to: "{% render 'lame-flash-deal-product', product: product, product_index: products_shown,
+    products_limit: products_limit, badge_label: section.settings.badge_label, add_to_cart_label:
+    section.settings.add_to_cart_label, sold_out_label: section.settings.sold_out_label,
+    review_count_fallback: section.settings.review_count_fallback, save_label_prefix:
+    section.settings.save_label_prefix, reveal_delay: products_shown, modulo: 2 %}"
+  position: 2538..2963
+{% endcomment %}

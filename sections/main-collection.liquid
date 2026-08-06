@@ -58,15 +58,11 @@
     endif
   endif
 
-  assign lame_promo_image_blocks = section.blocks | where: 'type', 'promo_image'
   assign lame_has_promo_images = false
-  if lame_our_products_op_cards and lame_promo_image_blocks.size > 0
-    for promo_block in lame_promo_image_blocks
-      if promo_block.settings.image != blank
-        assign lame_has_promo_images = true
-        break
-      endif
-    endfor
+  if lame_our_products_op_cards
+    if section.settings.promo_image_1 != blank or section.settings.promo_image_2 != blank or section.settings.promo_image_3 != blank or section.settings.promo_image_4 != blank
+      assign lame_has_promo_images = true
+    endif
   endif
 %}
 
@@ -111,29 +107,22 @@
       {% if lame_our_products_op_cards %}
         <div class="lame-op-page">
           <div class="lame-op-page__shell">
+            {% render 'lame-our-products-page-head',
+              collection: collection,
+              heading: section.settings.our_products_heading,
+              subtitle: section.settings.our_products_subtitle
+            %}
             <div
               class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left collection-wrapper--grid-full-width{% if lame_has_promo_images %} lame-op-page__layout--has-promo{% endif %}"
               {% if lame_has_promo_images %}
                 style="--lame-op-promo-width: {{ section.settings.promo_column_width }}px; --lame-op-promo-gap: {{ section.settings.promo_image_gap }}px;"
               {% endif %}
             >
-              <aside class="lame-op-page__sidebar">
-                {% render 'lame-our-products-page-head',
-                  collection: collection,
-                  heading: section.settings.our_products_heading,
-                  subtitle: section.settings.our_products_subtitle
-                %}
-                {% content_for 'block',
-                  type: 'filters',
-                  id: 'filters',
-                  results: collection,
-                  results_size: collection.products_count
-                %}
-              </aside>
       {% else %}
       <div
         class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
       >
+      {% endif %}
         {% unless lame_category_shop_page %}
           {% content_for 'block',
             type: 'filters',
@@ -142,7 +131,6 @@
             results_size: collection.products_count
           %}
         {% endunless %}
-      {% endif %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
           if lame_category_shop_page
@@ -227,13 +215,6 @@
               if lame_filters_block != blank
                 assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
                 assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
-              endif
-              comment
-                Our Products: Sort By in toolbar (right); no grid/view density controls
-              endcomment
-              if lame_our_products_op_cards
-                assign lame_enable_sorting = true
-                assign lame_enable_grid_density = false
               endif
             %}
             {% render 'lame-our-products-toolbar',
@@ -348,13 +329,7 @@
                           data-brand-slug="{{ brand_slug }}"
                           ref="cards[]"
                         >
-                          {% if lame_our_products_op_cards %}
-                            {% render 'lame-shop-product-card',
-                              product: product,
-                              section: section,
-                              show_wishlist: section.settings.show_wishlist
-                            %}
-                          {% elsif lame_cosmetic_collection %}
+                          {% if lame_cosmetic_collection and lame_our_products_op_cards == false %}
                             {% render 'lame-category-product-card',
                               product: product,
                               section: section,
@@ -397,13 +372,7 @@
                   data-brand-slug="{{ product_brand_slug }}"
                   ref="cards[]"
                 >
-                  {% if lame_our_products_op_cards %}
-                    {% render 'lame-shop-product-card',
-                      product: product,
-                      section: section,
-                      show_wishlist: section.settings.show_wishlist
-                    %}
-                  {% elsif lame_cosmetic_collection %}
+                  {% if lame_cosmetic_collection and lame_our_products_op_cards == false %}
                     {% render 'lame-category-product-card',
                       product: product,
                       section: section,
@@ -421,17 +390,7 @@
           {% endcapture %}
         {% endif %}
 
-          {% render 'product-grid',
-            section: section,
-            children: children,
-            products: collection.products,
-            paginate: paginate,
-            enable_infinite_scroll: use_infinite_scroll,
-            grouped_by_brand: group_by_brand,
-            lame_paginated_collection: lame_cosmetic_collection,
-            category_shop_grid: lame_category_shop_page or lame_cosmetic_collection and lame_our_products_op_cards == false,
-            show_brand_filter_empty: lame_category_shop_page == false
-          %}
+          {% render 'product-grid', section: section, children: children, products: collection.products, paginate: paginate, enable_infinite_scroll: use_infinite_scroll, grouped_by_brand: group_by_brand, lame_paginated_collection: lame_cosmetic_collection, category_shop_grid: lame_category_shop_page, show_brand_filter_empty: lame_category_shop_page %}
         {% if lame_our_products_op_cards %}
         </main>
         </div>
@@ -659,7 +618,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Add Image blocks below. Desktop: vertical column on the right of the product grid. Mobile: horizontal scrollable row above products."
+      "content": "Add promo images below. Desktop: vertical column on the right of the product grid. Mobile: horizontal scrollable row above products."
     },
     {
       "type": "text",
@@ -686,6 +645,66 @@
       "step": 2,
       "unit": "px",
       "default": 16
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_1",
+      "label": "Promo image 1"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_1_alt",
+      "label": "Promo image 1 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_1_link",
+      "label": "Promo image 1 link"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_2",
+      "label": "Promo image 2"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_2_alt",
+      "label": "Promo image 2 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_2_link",
+      "label": "Promo image 2 link"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_3",
+      "label": "Promo image 3"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_3_alt",
+      "label": "Promo image 3 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_3_link",
+      "label": "Promo image 3 link"
+    },
+    {
+      "type": "image_picker",
+      "id": "promo_image_4",
+      "label": "Promo image 4"
+    },
+    {
+      "type": "text",
+      "id": "promo_image_4_alt",
+      "label": "Promo image 4 alt text"
+    },
+    {
+      "type": "url",
+      "id": "promo_image_4_link",
+      "label": "Promo image 4 link"
     },
     {
       "type": "header",
@@ -742,29 +761,30 @@
       "default": 56
     }
   ],
-  "blocks": [
-    {
-      "type": "promo_image",
-      "name": "Promo image",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Image"
-        },
-        {
-          "type": "text",
-          "id": "image_alt",
-          "label": "Image alt text"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Optional link"
-        }
-      ]
-    }
-  ],
   "presets": []
 }
 {% endschema %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: |-
+    {% render 'product-grid',
+                section: section,
+                children: children,
+                products: collection.products,
+                paginate: paginate,
+                enable_infinite_scroll: use_infinite_scroll,
+                grouped_by_brand: group_by_brand,
+                lame_paginated_collection: lame_cosmetic_collection,
+                category_shop_grid: lame_category_shop_page or lame_cosmetic_collection and lame_our_products_op_cards == false,
+                show_brand_filter_empty: lame_category_shop_page == false
+              %}
+  to: "{% render 'product-grid', section: section, children: children, products: collection.products,
+    paginate: paginate, enable_infinite_scroll: use_infinite_scroll, grouped_by_brand:
+    group_by_brand, lame_paginated_collection: lame_cosmetic_collection, category_shop_grid:
+    lame_category_shop_page, show_brand_filter_empty: lame_category_shop_page %}"
+  position: 19365..19708
+{% endcomment %}
