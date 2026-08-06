@@ -81,30 +81,29 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   min-height: 100%;
   max-width: none;
   object-fit: cover !important;
-  object-position: center center;
+  object-position: center top;
 }
 
 .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
   object-fit: contain !important;
-  object-position: center center;
+  object-position: center top;
 }
 
 .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img) {
   transform-origin: center center;
 }
 
-/* Hero → Shop by Category: tight handoff */
+/* Hero → Shop by Category: tight handoff (desktop only — overlap feels like a stuck/hovering banner on mobile) */
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) {
   margin-bottom: 0;
   padding-bottom: 0;
-  /* Keep hero arrows above the overlapping category band */
   position: relative;
-  z-index: 2;
+  z-index: auto;
 }
 
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section {
-  margin-top: clamp(-1.35rem, -2.8vw, -0.85rem);
-  z-index: 1;
+  margin-top: 0;
+  z-index: auto;
 }
 
 .template-index
@@ -123,7 +122,62 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   padding-top: clamp(0.85rem, 2vw, 1.35rem) !important;
   margin-top: 0;
   position: relative;
-  z-index: 1;
+  z-index: auto;
+}
+
+@media screen and (min-width: 1200px) {
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) {
+    /* Keep hero arrows above the overlapping category band */
+    z-index: 2;
+  }
+
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section {
+    margin-top: clamp(-1.35rem, -2.8vw, -0.85rem);
+    z-index: 1;
+  }
+
+  .template-index
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero)
+    + .shopify-section
+    [class*='ai-category-carousel-'] {
+    z-index: 1;
+  }
+}
+
+/* Mobile: banner scrolls with the page — no sticky/hover/stack effects */
+@media screen and (max-width: 1199px) {
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero),
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) .lame-home-hero,
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) .lame-home-hero__frame,
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) .slideshow-section,
+  .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container, slideshow-slides, slideshow-slide) {
+    position: relative !important;
+    z-index: auto !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+    view-timeline-name: none !important;
+    animation-timeline: auto !important;
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero) slideshow-arrows .slideshow-control,
+  .template-index .shopify-section:has(.lame-home-hero) slideshow-arrows .slideshow-control:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero) slideshow-slide {
+    content-visibility: visible !important;
+  }
 }
 
 /* Neutralize default section-background on homepage bands */
