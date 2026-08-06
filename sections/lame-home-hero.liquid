@@ -118,7 +118,7 @@
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
             prioritize_first_slide: desktop_prioritize_loading,
-            media_fit: 'cover'
+            media_fit: image_fit
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--desktop">
@@ -136,7 +136,7 @@
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
             prioritize_first_slide: true,
-            media_fit: 'cover'
+            media_fit: image_fit
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--mobile">
@@ -150,16 +150,18 @@
 
 {% stylesheet %}
   .lame-home-hero {
-    --lame-hero-height: 100svh;
-    --lame-hero-height-desktop: 100svh;
+    --lame-hero-height: 100dvh;
+    --lame-hero-height-desktop: 100dvh;
     --lame-hero-height-mobile: 220px;
-    --lame-hero-height-offset: 0px;
+    /* Header + announcement take space above; banner fills the rest of the first screen */
+    --lame-hero-height-offset: var(--header-group-height, 0px);
     --lame-hero-display-height: auto;
     --lame-hero-desktop-min: 1200px;
     --lame-hero-desktop-ratio: 2.4;
     --lame-hero-mobile-ratio: 0.5625;
     --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
-    --lame-hero-frame-max-height: 100svh;
+    --lame-hero-frame-max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     width: 100%;
     max-width: none;
     overflow-x: hidden;
@@ -188,16 +190,13 @@
     padding-inline: 0;
   }
 
-  body:has(> #header-group > .header-section > #header-component)
+  /* Transparent header overlays the banner — use full viewport for the frame */
+  body:has(.header[transparent])
     .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child
-    .lame-home-hero--full_screen {
-    --lame-hero-height-offset: var(--header-group-height, 0px);
-  }
-
-  /* Transparent header: keep banner top visible — pad slideshow below nav instead of pulling section under header */
-  body:has(.header[transparent]) .content-for-layout > .shopify-section:has(.lame-home-hero):first-child,
-  body:has(header-component[transparent]) .content-for-layout > .shopify-section:has(.lame-home-hero):first-child {
+    > .shopify-section:has(.lame-home-hero):first-child,
+  body:has(header-component[transparent])
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero):first-child {
     margin-top: 0;
     width: 100%;
     max-width: none;
@@ -207,10 +206,18 @@
     .content-for-layout
     > .shopify-section:has(.lame-home-hero):first-child
     .lame-home-hero--full_screen,
+  body:has(.header[transparent])
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero):first-child
+    .lame-home-hero--mobile-full_screen,
   body:has(header-component[transparent])
     .content-for-layout
     > .shopify-section:has(.lame-home-hero):first-child
-    .lame-home-hero--full_screen {
+    .lame-home-hero--full_screen,
+  body:has(header-component[transparent])
+    .content-for-layout
+    > .shopify-section:has(.lame-home-hero):first-child
+    .lame-home-hero--mobile-full_screen {
     --lame-hero-height-offset: 0px;
   }
 
@@ -239,7 +246,7 @@
     display: none;
   }
 
-  /* Full-width frame — always viewport width; fixed height + cover (no side letterboxing) */
+  /* Full-width frame — viewport fill + cover (extend image to fill) */
   .lame-home-hero__frame,
   .lame-home-hero__carousel slideshow-component,
   .lame-home-hero__carousel slideshow-container,
@@ -247,17 +254,18 @@
     width: 100%;
     min-width: 100%;
     max-width: none;
-    height: var(--lame-hero-frame-max-height);
-    min-height: var(--lame-hero-frame-min-height, 0px);
-    max-height: var(--lame-hero-frame-max-height);
+    height: var(--lame-hero-frame-max-height) !important;
+    min-height: var(--lame-hero-frame-min-height, var(--lame-hero-frame-max-height)) !important;
+    max-height: var(--lame-hero-frame-max-height) !important;
     aspect-ratio: unset;
   }
 
   .lame-home-hero__carousel slideshow-slide {
     width: 100%;
     min-width: 100%;
-    height: 100%;
-    min-height: 100%;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: none !important;
   }
 
   .lame-home-hero__carousel slideshow-component {
@@ -272,53 +280,54 @@
     background: #1a1a1a;
   }
 
-  /* Optional height caps — frame stays full width; image uses cover inside */
-  .lame-home-hero--full_screen {
-    --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+  /* Full screen: remaining viewport under the header */
+  .lame-home-hero--full_screen,
+  .lame-home-hero--mobile-full_screen {
+    --lame-hero-frame-max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
+  }
+
+  @supports not (height: 100dvh) {
+    .lame-home-hero--full_screen,
+    .lame-home-hero--mobile-full_screen {
+      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+    }
   }
 
   .lame-home-hero--small {
     --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
+    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
   }
 
   .lame-home-hero--medium {
     --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
+    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
   }
 
   .lame-home-hero--large {
     --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
+    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
   }
 
   .lame-home-hero--full_screen .lame-home-hero__frame,
   .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-frame-max-height);
-    max-height: var(--lame-hero-frame-max-height);
-  }
-
+  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides,
   .lame-home-hero--small .lame-home-hero__frame,
   .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--small .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-frame-max-height);
-    max-height: var(--lame-hero-frame-max-height);
-  }
-
+  .lame-home-hero--small .lame-home-hero__carousel slideshow-slides,
   .lame-home-hero--medium .lame-home-hero__frame,
   .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-frame-max-height);
-    max-height: var(--lame-hero-frame-max-height);
-  }
-
+  .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides,
   .lame-home-hero--large .lame-home-hero__frame,
   .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
   .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
   .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-frame-max-height);
-    max-height: var(--lame-hero-frame-max-height);
+    height: var(--lame-hero-frame-max-height) !important;
+    min-height: var(--lame-hero-frame-max-height) !important;
+    max-height: var(--lame-hero-frame-max-height) !important;
   }
 
   /* Phones + tablets under ~12″: mobile banners only */
@@ -337,20 +346,22 @@
     }
 
     .lame-home-hero--mobile-full_screen {
-      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+      --lame-hero-frame-max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
     .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
     .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
     .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
     .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
-      height: var(--lame-hero-frame-max-height);
-      max-height: var(--lame-hero-frame-max-height);
+      height: var(--lame-hero-frame-max-height) !important;
+      min-height: var(--lame-hero-frame-max-height) !important;
+      max-height: var(--lame-hero-frame-max-height) !important;
     }
 
-    @supports (height: 100dvh) {
+    @supports not (height: 100dvh) {
       .lame-home-hero--mobile-full_screen {
-        --lame-hero-frame-max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+        --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
       }
     }
 
@@ -387,18 +398,22 @@
 
     .lame-home-hero--small {
       --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
+      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
     .lame-home-hero--medium {
       --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
+      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
     .lame-home-hero--large {
       --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
+      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
     .lame-home-hero--full_screen {
-      --lame-hero-frame-max-height: calc(var(--lame-hero-height-desktop) - var(--lame-hero-height-offset, 0px));
+      --lame-hero-frame-max-height: calc(100dvh - var(--lame-hero-height-offset, 0px));
+      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
     .lame-home-hero--small .lame-home-hero__frame,
@@ -417,16 +432,17 @@
     .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
     .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
     .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides {
-      height: var(--lame-hero-frame-max-height);
-      max-height: var(--lame-hero-frame-max-height);
+      height: var(--lame-hero-frame-max-height) !important;
+      min-height: var(--lame-hero-frame-max-height) !important;
+      max-height: var(--lame-hero-frame-max-height) !important;
     }
   }
 
   .lame-home-hero__carousel slideshow-slide {
     width: 100%;
     flex: 0 0 100%;
-    height: 100%;
-    min-height: 0;
+    height: 100% !important;
+    min-height: 100% !important;
     position: relative;
   }
 
@@ -440,7 +456,15 @@
     line-height: 0;
   }
 
-  /* Always cover — no side letterboxing */
+  .lame-home-hero__carousel .lame-home-hero__slide-link,
+  .lame-home-hero__slide-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 0;
+  }
+
+  /* Extend / fill — crop edges as needed, no letterbox bars */
   .lame-home-hero__carousel .slide__image,
   .lame-home-hero__carousel .slide__image-container img,
   .lame-home-hero__slide-link .slide__image,
@@ -452,7 +476,7 @@
     max-width: none;
     max-height: none;
     object-fit: cover !important;
-    object-position: center top;
+    object-position: center center;
     display: block;
   }
 
@@ -461,14 +485,7 @@
   .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
   .lame-home-hero--fit-contain .lame-home-hero__slide-link img {
     object-fit: contain !important;
-    object-position: center top;
-  }
-
-  .lame-home-hero__slide-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    line-height: 0;
+    object-position: center center;
   }
 
   .lame-home-hero__carousel slideshow-arrows,
@@ -622,7 +639,7 @@
         { "value": "small", "label": "Small" }
       ],
       "default": "full_screen",
-      "info": "Banners keep their natural aspect ratio so the full image stays visible. Height only sets a maximum."
+      "info": "Full screen fills the first viewport under the header. Image extends to cover the frame."
     },
     {
       "type": "select",
@@ -633,7 +650,7 @@
         { "value": "cover", "label": "Fill frame (may crop)" }
       ],
       "default": "cover",
-      "info": "“Fill frame” keeps the banner edge-to-edge on every screen. Use “Show full image” only if you prefer letterboxing."
+      "info": "“Fill frame” stretches the image to cover the full screen. Use “Show full image” only if you prefer letterboxing."
     },
     {
       "type": "header",
@@ -650,7 +667,7 @@
         { "value": "small", "label": "Small" }
       ],
       "default": "medium",
-      "info": "Height is a maximum only. Mobile slides keep their full image visible."
+      "info": "Full screen fills the mobile viewport under the header."
     },
     {
       "type": "checkbox",
