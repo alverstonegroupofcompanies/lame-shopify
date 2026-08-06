@@ -1,7 +1,7 @@
 {% doc %}
-  Shop by category — responsive grid of collection cards.
+  Shop by category — collection cards.
   Desktop/tablet: all cards in one scalable row.
-  Mobile: 2 cards per row.
+  Mobile: one horizontal scrollable row with auto-loop.
 {% enddoc %}
 {% liquid
   assign ai_gen_id = block.id | replace: '_', '' | downcase
@@ -15,6 +15,7 @@
   if category_count == 0
     assign category_count = 7
   endif
+  assign auto_slide_speed = block.settings.auto_slide_speed | default: 3
 %}
 
 {% style %}
@@ -46,16 +47,58 @@
     }
   }
 
+  /* Desktop / tablet: one grid row */
   .ai-category-carousel__track-{{ ai_gen_id }} {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--ai-category-cols), minmax(0, 1fr));
     gap: var(--ai-category-gap);
     width: 100%;
   }
 
-  @media screen and (min-width: 750px) {
+  /* Mobile: single horizontal scrollable row */
+  @media screen and (max-width: 749px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      padding-inline: 0;
+    }
+
+    .ai-category-carousel__container-{{ ai_gen_id }} {
+      padding-inline: 0;
+    }
+
+    .ai-category-carousel__header-{{ ai_gen_id }} {
+      padding-inline: 1rem;
+    }
+
     .ai-category-carousel__track-{{ ai_gen_id }} {
-      grid-template-columns: repeat(var(--ai-category-cols), minmax(0, 1fr));
+      display: flex;
+      flex-wrap: nowrap;
+      grid-template-columns: none;
+      gap: var(--ai-category-gap);
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      padding-inline: 1rem;
+      padding-bottom: 0.25rem;
+      scrollbar-width: none;
+    }
+
+    .ai-category-carousel__track-{{ ai_gen_id }}::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-category-carousel__card-{{ ai_gen_id }} {
+      flex: 0 0 min(72vw, 260px);
+      width: min(72vw, 260px);
+      max-width: min(72vw, 260px);
+      scroll-snap-align: start;
+    }
+
+    .ai-category-carousel__card-{{ ai_gen_id }}:hover {
+      transform: none;
     }
   }
 
@@ -68,8 +111,10 @@
     transition: transform 0.3s ease;
   }
 
-  .ai-category-carousel__card-{{ ai_gen_id }}:hover {
-    transform: translateY(-3px);
+  @media (hover: hover) and (pointer: fine) {
+    .ai-category-carousel__card-{{ ai_gen_id }}:hover {
+      transform: translateY(-3px);
+    }
   }
 
   .ai-category-carousel__card-link-{{ ai_gen_id }} {
@@ -173,7 +218,12 @@
   }
 {% endstyle %}
 
-<div class="ai-category-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div
+  class="ai-category-carousel-{{ ai_gen_id }}"
+  data-ai-category-carousel
+  data-auto-slide-speed="{{ auto_slide_speed }}"
+  {{ block.shopify_attributes }}
+>
   <div class="ai-category-carousel__container-{{ ai_gen_id }}">
     {% if block.settings.heading != blank %}
       <div class="ai-category-carousel__header-{{ ai_gen_id }}">
@@ -185,14 +235,14 @@
       </div>
     {% endif %}
 
-    <div class="ai-category-carousel__track-{{ ai_gen_id }}">
+    <div class="ai-category-carousel__track-{{ ai_gen_id }}" data-ai-category-track>
       {% for i in (1..7) %}
         {% liquid
           assign collection_key = 'collection_' | append: i
           assign collection = block.settings[collection_key]
         %}
         {% if collection != blank %}
-          <div class="ai-category-carousel__card-{{ ai_gen_id }}">
+          <div class="ai-category-carousel__card-{{ ai_gen_id }}" data-ai-category-card>
             <a href="{{ collection.url }}" class="ai-category-carousel__card-link-{{ ai_gen_id }}">
               <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
                 {% if collection.image %}
@@ -234,6 +284,115 @@
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    var root = document.currentScript && document.currentScript.previousElementSibling;
+    if (!root || !root.hasAttribute('data-ai-category-carousel')) {
+      root = document.querySelector('.ai-category-carousel-{{ ai_gen_id }}[data-ai-category-carousel]');
+    }
+    if (!root) return;
+
+    var track = root.querySelector('[data-ai-category-track]');
+    if (!track) return;
+
+    var mobileQuery = window.matchMedia('(max-width: 749px)');
+    var speedSec = Number(root.getAttribute('data-auto-slide-speed')) || 3;
+    var timer = null;
+    var cloned = false;
+    var paused = false;
+
+    function isMobile() {
+      return mobileQuery.matches;
+    }
+
+    function ensureLoopClones() {
+      if (cloned || !isMobile()) return;
+      var cards = track.querySelectorAll('[data-ai-category-card]:not([data-clone])');
+      if (cards.length < 2) return;
+      cards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('data-clone', 'true');
+        clone.setAttribute('aria-hidden', 'true');
+        var link = clone.querySelector('a');
+        if (link) link.setAttribute('tabindex', '-1');
+        track.appendChild(clone);
+      });
+      cloned = true;
+    }
+
+    function clearClones() {
+      if (!cloned) return;
+      track.querySelectorAll('[data-clone="true"]').forEach(function (node) {
+        node.remove();
+      });
+      cloned = false;
+      track.scrollLeft = 0;
+    }
+
+    function stopLoop() {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function stepLoop() {
+      if (!isMobile() || paused) return;
+      ensureLoopClones();
+      var firstCard = track.querySelector('[data-ai-category-card]');
+      if (!firstCard) return;
+      var gap = parseFloat(getComputedStyle(track).gap) || 16;
+      var step = firstCard.getBoundingClientRect().width + gap;
+      var half = track.scrollWidth / 2;
+
+      track.scrollBy({ left: step, behavior: 'smooth' });
+
+      window.setTimeout(function () {
+        if (!isMobile()) return;
+        if (track.scrollLeft >= half - 4) {
+          track.scrollLeft = track.scrollLeft - half;
+        }
+      }, 420);
+    }
+
+    function startLoop() {
+      stopLoop();
+      if (!isMobile()) {
+        clearClones();
+        return;
+      }
+      ensureLoopClones();
+      timer = window.setInterval(stepLoop, Math.max(2, speedSec) * 1000);
+    }
+
+    track.addEventListener(
+      'touchstart',
+      function () {
+        paused = true;
+        stopLoop();
+      },
+      { passive: true }
+    );
+
+    track.addEventListener(
+      'touchend',
+      function () {
+        paused = false;
+        startLoop();
+      },
+      { passive: true }
+    );
+
+    if (typeof mobileQuery.addEventListener === 'function') {
+      mobileQuery.addEventListener('change', startLoop);
+    } else if (typeof mobileQuery.addListener === 'function') {
+      mobileQuery.addListener(startLoop);
+    }
+
+    startLoop();
+  })();
+</script>
 
 {% schema %}
 {
@@ -365,12 +524,12 @@
     },
     {
       "type": "header",
-      "content": "Legacy carousel (unused)"
+      "content": "Mobile carousel"
     },
     {
       "type": "range",
       "id": "auto_slide_speed",
-      "label": "Slide speed",
+      "label": "Auto-slide every",
       "min": 2,
       "max": 10,
       "step": 1,
