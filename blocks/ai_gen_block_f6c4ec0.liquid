@@ -1,16 +1,30 @@
 {% doc %}
-  @prompt
-    add a neat shop by category section, 7 cards image only, auto slide one row, image should have rectangle shape also not too small big size miimum 450px card width
+  Shop by category — responsive grid of collection cards.
+  Desktop/tablet: all cards in one scalable row.
+  Mobile: 2 cards per row.
 {% enddoc %}
-{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+{% liquid
+  assign ai_gen_id = block.id | replace: '_', '' | downcase
+  assign category_count = 0
+  for i in (1..7)
+    assign collection_key = 'collection_' | append: i
+    if block.settings[collection_key] != blank
+      assign category_count = category_count | plus: 1
+    endif
+  endfor
+  if category_count == 0
+    assign category_count = 7
+  endif
+%}
 
 {% style %}
   .ai-category-carousel-{{ ai_gen_id }} {
     --ai-category-gap: {{ block.settings.card_gap }}px;
-    --ai-category-visible: 1;
-    width: 100%;
+    --ai-category-cols: {{ category_count }};
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
     display: block;
-    overflow: hidden;
+    margin-inline: auto;
     padding: clamp(1.25rem, 2.5vw, 2rem) 0;
     background-color: {{ block.settings.background_color }};
   }
@@ -32,107 +46,30 @@
     }
   }
 
-  .ai-category-carousel__nav-{{ ai_gen_id }} {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 4;
-    width: 1.65rem;
-    height: 1.65rem;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1 / 1;
-    border: 1px solid rgb(42 58 48 / 0.35);
-    border-radius: 50%;
-    background: rgb(255 255 255 / 0.92);
-    color: rgb(42 58 48);
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgb(0 0 0 / 0.08);
-    transition: opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  }
-
-  .ai-category-carousel__nav-{{ ai_gen_id }}:hover:not(:disabled) {
-    background: #fff;
-    box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
-  }
-
-  .ai-category-carousel__nav-{{ ai_gen_id }}:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper,
-  .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper svg {
-    width: 0.75rem;
-    height: 0.75rem;
-    display: block;
-  }
-
-  .ai-category-carousel__nav--prev-{{ ai_gen_id }} {
-    left: 0.5rem;
-  }
-
-  .ai-category-carousel__nav--next-{{ ai_gen_id }} {
-    right: 0.5rem;
-  }
-
-  @media screen and (max-width: 749px) {
-    .ai-category-carousel__nav-{{ ai_gen_id }} {
-      width: 2.25rem;
-      height: 2.25rem;
-    }
-
-    .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper,
-    .ai-category-carousel__nav-{{ ai_gen_id }} .svg-wrapper svg {
-      width: 0.85rem;
-      height: 0.85rem;
-    }
-
-    .ai-category-carousel__nav--prev-{{ ai_gen_id }} {
-      left: 0.5rem;
-    }
-
-    .ai-category-carousel__nav--next-{{ ai_gen_id }} {
-      right: 0.5rem;
-    }
-
-    .ai-category-carousel__card-{{ ai_gen_id }} {
-      scroll-snap-align: center;
-    }
-  }
-
-  .ai-category-carousel__track-wrapper-{{ ai_gen_id }} {
-    position: relative;
-    width: 100%;
-    container-type: inline-size;
-    container-name: ai-category-track-{{ ai_gen_id }};
-  }
-
   .ai-category-carousel__track-{{ ai_gen_id }} {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--ai-category-gap);
-    width: max-content;
-    min-width: 100%;
+    width: 100%;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-category-carousel__track-{{ ai_gen_id }} {
+      grid-template-columns: repeat(var(--ai-category-cols), minmax(0, 1fr));
+    }
   }
 
   .ai-category-carousel__card-{{ ai_gen_id }} {
-    flex: 0 0 calc((100cqw - (var(--ai-category-gap) * (var(--ai-category-visible) - 1))) / var(--ai-category-visible));
-    width: calc((100cqw - (var(--ai-category-gap) * (var(--ai-category-visible) - 1))) / var(--ai-category-visible));
     min-width: 0;
-    max-width: none;
     position: relative;
     overflow: hidden;
     border-radius: {{ block.settings.card_border_radius }}px;
     border: 1px solid rgb(42 58 48 / 0.22);
-    cursor: pointer;
     transition: transform 0.3s ease;
-    scroll-snap-align: start;
   }
 
   .ai-category-carousel__card-{{ ai_gen_id }}:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
   }
 
   .ai-category-carousel__card-link-{{ ai_gen_id }} {
@@ -175,7 +112,7 @@
   .ai-category-carousel__overlay-{{ ai_gen_id }} {
     position: absolute;
     inset: auto 0 0 0;
-    padding: 12px;
+    padding: clamp(6px, 1vw, 12px);
     display: flex;
     justify-content: flex-start;
     pointer-events: none;
@@ -185,27 +122,30 @@
     pointer-events: auto;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.6rem;
+    gap: 0.28rem;
+    padding: clamp(0.22rem, 0.55vw, 0.35rem) clamp(0.4rem, 0.9vw, 0.6rem);
     border-radius: 999px;
     background: var(--lame-cta-bg-gradient, linear-gradient(135deg, #ff7043 0%, #ff5722 48%, #f4511e 100%));
     border: 1px solid var(--lame-cta-bg, #ff5722);
     color: #fff;
-    font-size: 0.7rem;
+    font-size: clamp(0.5rem, 0.85vw, 0.7rem);
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     line-height: 1;
     box-shadow: var(--lame-cta-shadow, 0 6px 18px rgb(255 87 34 / 0.35));
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+    max-width: calc(100% - 4px);
+    white-space: nowrap;
   }
 
   .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper,
   .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper svg {
-    width: 0.75rem;
-    height: 0.75rem;
+    width: clamp(0.45rem, 0.8vw, 0.75rem);
+    height: clamp(0.45rem, 0.8vw, 0.75rem);
     display: block;
+    flex-shrink: 0;
   }
 
   .ai-category-carousel__card-link-{{ ai_gen_id }}:hover .ai-category-carousel__cta-{{ ai_gen_id }} {
@@ -213,54 +153,16 @@
     border-color: var(--lame-cta-bg-hover, #e64a19);
   }
 
-  /* Native scroll + snapping for touch + trackpad */
-  .ai-category-carousel__track-wrapper-{{ ai_gen_id }} {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    touch-action: pan-x;
-    overscroll-behavior-x: contain;
-    cursor: grab;
-  }
-
-  .ai-category-carousel__track-wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
-    display: none;
-  }
-
-  .ai-category-carousel__track-wrapper-{{ ai_gen_id }}:active {
-    cursor: grabbing;
-  }
-
-  /* Visible cards: mobile 1, tablet 3, desktop 4 */
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    .ai-category-carousel-{{ ai_gen_id }} {
-      --ai-category-visible: 3;
-    }
-  }
-
-  @media screen and (min-width: 990px) {
-    .ai-category-carousel-{{ ai_gen_id }} {
-      --ai-category-visible: 4;
-    }
-  }
-
   @media screen and (max-width: 749px) {
     .ai-category-carousel__overlay-{{ ai_gen_id }} {
-      padding: 12px 14px;
-      justify-content: flex-start;
-      align-items: flex-end;
+      padding: 10px 12px;
     }
 
     .ai-category-carousel__cta-{{ ai_gen_id }} {
-      padding: 0.4rem 0.7rem;
-      gap: 0.3rem;
-      font-size: clamp(0.62rem, 2.8vw, 0.72rem);
-      letter-spacing: 0.06em;
+      padding: 0.35rem 0.55rem;
+      font-size: clamp(0.58rem, 2.6vw, 0.7rem);
+      letter-spacing: 0.05em;
       box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
-      max-width: calc(100% - 8px);
     }
 
     .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper,
@@ -269,29 +171,9 @@
       height: 0.65rem;
     }
   }
-
-  @media screen and (max-width: 389px) {
-    .ai-category-carousel__overlay-{{ ai_gen_id }} {
-      padding: 6px 8px;
-    }
-
-    .ai-category-carousel__cta-{{ ai_gen_id }} {
-      padding: 0.18rem 0.38rem;
-      font-size: 0.48rem;
-      gap: 0.18rem;
-    }
-
-    .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper,
-    .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper svg {
-      width: 0.45rem;
-      height: 0.45rem;
-    }
-  }
-
-  /* Keep arrows visible for navigation (mobile + desktop) */
 {% endstyle %}
 
-<category-carousel-{{ ai_gen_id }} class="ai-category-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div class="ai-category-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   <div class="ai-category-carousel__container-{{ ai_gen_id }}">
     {% if block.settings.heading != blank %}
       <div class="ai-category-carousel__header-{{ ai_gen_id }}">
@@ -303,78 +185,39 @@
       </div>
     {% endif %}
 
-    <div class="ai-category-carousel__track-wrapper-{{ ai_gen_id }}">
-      {% unless block.settings.show_navigation_arrows == false %}
-        <button
-          type="button"
-          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--prev-{{ ai_gen_id }} flip-x"
-          aria-label="Previous categories"
-          data-ai-carousel-prev
-        >
-          <span class="svg-wrapper icon-arrow">
-            {{- 'icon-arrow.svg' | inline_asset_content -}}
-          </span>
-        </button>
-        <button
-          type="button"
-          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--next-{{ ai_gen_id }}"
-          aria-label="Next categories"
-          data-ai-carousel-next
-        >
-          <span class="svg-wrapper icon-arrow">
-            {{- 'icon-arrow.svg' | inline_asset_content -}}
-          </span>
-        </button>
-      {% endunless %}
-      <div class="ai-category-carousel__track-{{ ai_gen_id }}">
-        {% for i in (1..7) %}
-          {% liquid
-            assign collection_key = 'collection_' | append: i
-            assign collection = block.settings[collection_key]
-          %}
-
+    <div class="ai-category-carousel__track-{{ ai_gen_id }}">
+      {% for i in (1..7) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+        {% if collection != blank %}
           <div class="ai-category-carousel__card-{{ ai_gen_id }}">
-            {% if collection != blank %}
-              <a href="{{ collection.url }}" class="ai-category-carousel__card-link-{{ ai_gen_id }}">
-                <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
-                  {% if collection.image %}
-                    <img
-                      src="{{ collection.image | image_url: width: 800 }}"
-                      alt="{{ collection.title | escape }}"
-                      class="ai-category-carousel__image-{{ ai_gen_id }}"
-                      loading="lazy"
-                      width="800"
-                      height="600"
-                    >
-                  {% elsif collection.products.first and collection.products.first.featured_image %}
-                    <img
-                      src="{{ collection.products.first.featured_image | image_url: width: 800 }}"
-                      alt="{{ collection.title | escape }}"
-                      class="ai-category-carousel__image-{{ ai_gen_id }}"
-                      loading="lazy"
-                      width="800"
-                      height="600"
-                    >
-                  {% else %}
-                    <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
-                      {{ 'collection-apparel-1' | placeholder_svg_tag }}
-                    </div>
-                  {% endif %}
-                  <div class="ai-category-carousel__overlay-{{ ai_gen_id }}" aria-hidden="true">
-                    <span class="ai-category-carousel__cta-{{ ai_gen_id }}">
-                      Shop now
-                      <span class="svg-wrapper icon-arrow">
-                        {{- 'icon-arrow.svg' | inline_asset_content -}}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              </a>
-            {% else %}
+            <a href="{{ collection.url }}" class="ai-category-carousel__card-link-{{ ai_gen_id }}">
               <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
-                <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
-                  {{ 'collection-apparel-1' | placeholder_svg_tag }}
-                </div>
+                {% if collection.image %}
+                  <img
+                    src="{{ collection.image | image_url: width: 800 }}"
+                    alt="{{ collection.title | escape }}"
+                    class="ai-category-carousel__image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                  >
+                {% elsif collection.products.first and collection.products.first.featured_image %}
+                  <img
+                    src="{{ collection.products.first.featured_image | image_url: width: 800 }}"
+                    alt="{{ collection.title | escape }}"
+                    class="ai-category-carousel__image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="800"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
                 <div class="ai-category-carousel__overlay-{{ ai_gen_id }}" aria-hidden="true">
                   <span class="ai-category-carousel__cta-{{ ai_gen_id }}">
                     Shop now
@@ -384,191 +227,13 @@
                   </span>
                 </div>
               </div>
-            {% endif %}
+            </a>
           </div>
-        {% endfor %}
-      </div>
+        {% endif %}
+      {% endfor %}
     </div>
   </div>
-</category-carousel-{{ ai_gen_id }}>
-
-<script>
-  (function() {
-    class CategoryCarousel{{ ai_gen_id }} extends HTMLElement {
-      constructor() {
-        super();
-        this.track = this.querySelector('.ai-category-carousel__track-{{ ai_gen_id }}');
-        this.wrapper = this.querySelector('.ai-category-carousel__track-wrapper-{{ ai_gen_id }}');
-        this.originalCards = Array.from(this.querySelectorAll('.ai-category-carousel__card-{{ ai_gen_id }}'));
-        this.cloneCount = 0;
-        this.autoSlideInterval = null;
-        this.autoSlideDelay = {{ block.settings.auto_slide_speed | times: 1000 }};
-      }
-
-      connectedCallback() {
-        if (!this.track || !this.wrapper || this.originalCards.length === 0) return;
-        this.setupInfiniteLoop();
-        this.setupHoverPause();
-        this.setupNavButtons();
-        this.setupLoopGuards();
-        this.startAutoSlide();
-      }
-
-      setupNavButtons() {
-        const prev = this.querySelector('[data-ai-carousel-prev]');
-        const next = this.querySelector('[data-ai-carousel-next]');
-        if (prev) {
-          prev.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.scrollByCards(-1);
-            this.restartAutoSlide();
-          });
-        }
-        if (next) {
-          next.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.scrollByCards(1);
-            this.restartAutoSlide();
-          });
-        }
-      }
-
-      restartAutoSlide() {
-        this.stopAutoSlide();
-        this.startAutoSlide();
-      }
-
-      stepPx() {
-        const first = this.track.querySelector('.ai-category-carousel__card-{{ ai_gen_id }}');
-        if (!first) return 0;
-        const cardWidth = first.offsetWidth;
-        const gap = {{ block.settings.card_gap }};
-        return cardWidth + gap;
-      }
-
-      scrollByCards(n) {
-        const step = this.stepPx();
-        if (!step) return;
-        this.wrapper.scrollBy({ left: step * n, behavior: 'smooth' });
-      }
-
-      visibleCount() {
-        const w = window.innerWidth || 0;
-        if (w >= 990) return 4;
-        if (w >= 750) return 3;
-        return 1;
-      }
-
-      setupInfiniteLoop() {
-        // Build: [tail clones][original][head clones]
-        const originals = this.originalCards;
-        const cloneCount = Math.min(Math.max(this.visibleCount() + 1, 3), originals.length);
-        this.cloneCount = cloneCount;
-
-        // Clear track and rebuild with deep clones to preserve markup.
-        this.track.innerHTML = '';
-
-        const tail = originals.slice(-cloneCount).map((el) => el.cloneNode(true));
-        const head = originals.slice(0, cloneCount).map((el) => el.cloneNode(true));
-
-        tail.forEach((el) => this.track.appendChild(el));
-        originals.forEach((el) => this.track.appendChild(el));
-        head.forEach((el) => this.track.appendChild(el));
-
-        // Jump into the "original" region.
-        requestAnimationFrame(() => {
-          const step = this.stepPx();
-          this.wrapper.scrollLeft = step * cloneCount;
-        });
-      }
-
-      startAutoSlide() {
-        // Don’t auto-slide if speed is 0/blank.
-        if (!this.autoSlideDelay || this.autoSlideDelay < 500) return;
-        this.autoSlideInterval = setInterval(() => this.scrollByCards(1), this.autoSlideDelay);
-      }
-
-      stopAutoSlide() {
-        if (this.autoSlideInterval) {
-          clearInterval(this.autoSlideInterval);
-          this.autoSlideInterval = null;
-        }
-      }
-
-      setupHoverPause() {
-        this.addEventListener('mouseenter', () => {
-          this.stopAutoSlide();
-        });
-
-        this.addEventListener('mouseleave', () => {
-          this.startAutoSlide();
-        });
-      }
-
-      setupLoopGuards() {
-        let ticking = false;
-        const onScroll = () => {
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(() => {
-            ticking = false;
-            this.guardLoop();
-          });
-        };
-        this.wrapper.addEventListener('scroll', onScroll, { passive: true });
-
-        // Rebuild on resize so cloneCount matches breakpoint.
-        let resizeTimer = null;
-        window.addEventListener(
-          'resize',
-          () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-              this.originalCards = Array.from(this.originalCards); // keep reference stable
-              this.setupInfiniteLoop();
-            }, 150);
-          },
-          { passive: true }
-        );
-      }
-
-      guardLoop() {
-        const step = this.stepPx();
-        if (!step || !this.cloneCount) return;
-
-        const originalsCount = this.originalCards.length;
-        const start = step * this.cloneCount;
-        const end = step * (this.cloneCount + originalsCount);
-        const x = this.wrapper.scrollLeft;
-
-        // If we scroll into the cloned head/tail zones, jump by one originals length.
-        if (x <= start - step * 0.5) {
-          const delta = step * originalsCount;
-          this.jumpScroll(x + delta);
-        } else if (x >= end + step * 0.5) {
-          const delta = step * originalsCount;
-          this.jumpScroll(x - delta);
-        }
-      }
-
-      jumpScroll(newLeft) {
-        const prev = this.wrapper.style.scrollBehavior;
-        this.wrapper.style.scrollBehavior = 'auto';
-        this.wrapper.scrollLeft = newLeft;
-        // restore
-        this.wrapper.style.scrollBehavior = prev || '';
-      }
-
-      disconnectedCallback() {
-        this.stopAutoSlide();
-      }
-    }
-
-    customElements.define('category-carousel-{{ ai_gen_id }}', CategoryCarousel{{ ai_gen_id }});
-  })();
-</script>
+</div>
 
 {% schema %}
 {
@@ -661,7 +326,7 @@
     {
       "type": "range",
       "id": "card_width",
-      "label": "Card width",
+      "label": "Card width (unused — cards scale to row)",
       "min": 450,
       "max": 800,
       "step": 50,
@@ -671,7 +336,7 @@
     {
       "type": "range",
       "id": "card_height",
-      "label": "Card height",
+      "label": "Card height (unused — aspect ratio used)",
       "min": 300,
       "max": 600,
       "step": 50,
@@ -700,7 +365,7 @@
     },
     {
       "type": "header",
-      "content": "Auto slide"
+      "content": "Legacy carousel (unused)"
     },
     {
       "type": "range",
@@ -716,7 +381,7 @@
       "type": "checkbox",
       "id": "show_navigation_arrows",
       "label": "Show previous / next arrows",
-      "default": true
+      "default": false
     },
     {
       "type": "header",
