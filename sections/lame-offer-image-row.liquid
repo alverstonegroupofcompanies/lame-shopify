@@ -1,0 +1,316 @@
+{%- liquid
+  assign open_new_tab = section.settings.open_in_new_tab
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-offer-image-row"
+  aria-label="{{ section.settings.accessibility_label | escape }}"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-offer-image-row__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {%- if section.settings.heading != blank -%}
+      <header class="lame-offer-image-row__header">
+        <h2 class="lame-offer-image-row__heading">{{ section.settings.heading | escape }}</h2>
+      </header>
+    {%- endif -%}
+
+    <ul class="lame-offer-image-row__grid" role="list">
+      {%- for i in (1..4) -%}
+        {%- liquid
+          assign img = section.settings.image_1
+          assign alt = section.settings.alt_1
+          assign link = section.settings.link_1
+          assign fallback_asset = section.settings.asset_1
+
+          if i == 2
+            assign img = section.settings.image_2
+            assign alt = section.settings.alt_2
+            assign link = section.settings.link_2
+            assign fallback_asset = section.settings.asset_2
+          elsif i == 3
+            assign img = section.settings.image_3
+            assign alt = section.settings.alt_3
+            assign link = section.settings.link_3
+            assign fallback_asset = section.settings.asset_3
+          elsif i == 4
+            assign img = section.settings.image_4
+            assign alt = section.settings.alt_4
+            assign link = section.settings.link_4
+            assign fallback_asset = section.settings.asset_4
+          endif
+
+          if alt == blank
+            assign alt = shop.name | escape
+          endif
+        -%}
+
+        <li class="lame-offer-image-row__item">
+          {%- if link != blank -%}
+            <a
+              class="lame-offer-image-row__link"
+              href="{{ link }}"
+              {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
+            >
+          {%- else -%}
+            <div class="lame-offer-image-row__link">
+          {%- endif -%}
+
+          {%- if img != blank -%}
+            {{
+              img
+              | image_url: width: 1200
+              | image_tag:
+                class: 'lame-offer-image-row__image',
+                loading: 'lazy',
+                widths: '200, 320, 480, 640, 800, 1000, 1200',
+                sizes: '(min-width: 990px) 22vw, 24vw',
+                alt: alt
+            }}
+          {%- elsif fallback_asset != blank -%}
+            <img
+              class="lame-offer-image-row__image"
+              src="{{ fallback_asset | asset_url }}"
+              alt="{{ alt | escape }}"
+              width="600"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            >
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'lame-offer-image-row__image placeholder-svg' }}
+          {%- endif -%}
+
+          {%- if link != blank -%}
+            </a>
+          {%- else -%}
+            </div>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-offer-image-row {
+    --lame-offer-row-gap: clamp(0.4rem, 1.2vw, 1rem);
+  }
+
+  .lame-offer-image-row__wrap {
+    width: 100%;
+    max-width: min(100%, var(--page-width, 1200px));
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  .section--full-width .lame-offer-image-row__wrap {
+    max-width: 100%;
+    padding-inline: clamp(0.5rem, 2.5vw, 1.5rem);
+  }
+
+  .lame-offer-image-row__header {
+    text-align: center;
+    margin-bottom: clamp(0.6rem, 1.5vw, 1rem);
+  }
+
+  .lame-offer-image-row__heading {
+    margin: 0;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .lame-offer-image-row__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--lame-offer-row-gap);
+    width: 100%;
+  }
+
+  .lame-offer-image-row__item {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: clamp(6px, 0.8vw, 12px);
+    background: #f7f1ea;
+    line-height: 0;
+  }
+
+  .lame-offer-image-row__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .lame-offer-image-row__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .lame-offer-image-row__image.placeholder-svg {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #eee;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Offer image row",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Special offers"
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Accessibility label",
+      "default": "Special offers"
+    },
+    {
+      "type": "header",
+      "content": "Offer 1"
+    },
+    { "type": "image_picker", "id": "image_1", "label": "Image 1 (optional override)" },
+    {
+      "type": "text",
+      "id": "asset_1",
+      "label": "Theme asset filename 1",
+      "default": "lame-offer-skincare-50.png",
+      "info": "Used when no image is uploaded in the picker"
+    },
+    {
+      "type": "text",
+      "id": "alt_1",
+      "label": "Alt text 1",
+      "default": "Promotional banner offering up to 50% off for skincare products"
+    },
+    { "type": "url", "id": "link_1", "label": "Link 1 (optional)" },
+    {
+      "type": "header",
+      "content": "Offer 2"
+    },
+    { "type": "image_picker", "id": "image_2", "label": "Image 2 (optional override)" },
+    {
+      "type": "text",
+      "id": "asset_2",
+      "label": "Theme asset filename 2",
+      "default": "lame-offer-onam-special.png"
+    },
+    {
+      "type": "text",
+      "id": "alt_2",
+      "label": "Alt text 2",
+      "default": "Onam Special Offer Super Sale"
+    },
+    { "type": "url", "id": "link_2", "label": "Link 2 (optional)" },
+    {
+      "type": "header",
+      "content": "Offer 3"
+    },
+    { "type": "image_picker", "id": "image_3", "label": "Image 3 (optional override)" },
+    {
+      "type": "text",
+      "id": "asset_3",
+      "label": "Theme asset filename 3",
+      "default": "lame-offer-mega-onam.png"
+    },
+    {
+      "type": "text",
+      "id": "alt_3",
+      "label": "Alt text 3",
+      "default": "Mega Onam Offer — up to 50% off"
+    },
+    { "type": "url", "id": "link_3", "label": "Link 3 (optional)" },
+    {
+      "type": "header",
+      "content": "Offer 4"
+    },
+    { "type": "image_picker", "id": "image_4", "label": "Image 4 (optional override)" },
+    {
+      "type": "text",
+      "id": "asset_4",
+      "label": "Theme asset filename 4",
+      "default": "lame-offer-onam-big-sale.png"
+    },
+    {
+      "type": "text",
+      "id": "alt_4",
+      "label": "Alt text 4",
+      "default": "Onam Big Sale promotional banner"
+    },
+    { "type": "url", "id": "link_4", "label": "Link 4 (optional)" },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "Open links in new tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Offer image row",
+      "category": "Banners"
+    }
+  ]
+}
+{% endschema %}
