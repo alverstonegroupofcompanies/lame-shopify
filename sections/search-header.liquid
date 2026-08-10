@@ -1,7 +1,9 @@
 
 
+{{ 'lame-search-page.css' | asset_url | stylesheet_tag }}
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-<div class="section section--page-width color-{{ section.settings.color_scheme }}">
+<div class="section section--page-width color-{{ section.settings.color_scheme }} lame-search-header">
   <div
     class="spacing-style search-page__header"
     style="
@@ -15,11 +17,23 @@
       {% assign heading_text = 'content.search_results' | t %}
     {% endif %}
 
-    {% capture heading_text %}
-      <h3>{{ heading_text }}</h3>
-    {% endcapture %}
-
     {% content_for 'block', id: 'heading', type: '_heading', text: heading_text %}
+
+    {% if search.performed %}
+      <p class="lame-search-header__meta">
+        {% if search.results_count > 0 %}
+          {{ search.results_count }}
+          {% if search.terms != blank %}
+            results for “{{ search.terms | escape }}”
+          {% else %}
+            results
+          {% endif %}
+        {% else %}
+          No products found{% if search.terms != blank %} for “{{ search.terms | escape }}”{% endif %}
+        {% endif %}
+      </p>
+    {% endif %}
+
     {% content_for 'block', id: 'search', type: '_search-input' %}
   </div>
 </div>

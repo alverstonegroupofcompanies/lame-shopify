@@ -1,22 +1,21 @@
-
-
 <script
   src="{{ 'results-list.js' | asset_url }}"
   type="module"
   fetchpriority="low"
 ></script>
 
+{{ 'lame-shop-product-card.css' | asset_url | stylesheet_tag }}
+{{ 'lame-search-page.css' | asset_url | stylesheet_tag }}
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 
 <results-list
-  class="section product-grid-container spacing-style color-{{ section.settings.color_scheme }} uniform-products-page"
+  class="section product-grid-container spacing-style color-{{ section.settings.color_scheme }} uniform-products-page lame-our-products-card-scope lame-search-results"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
 >
-  <div
-    class="collection-wrapper grid gap-style"
-  >
+  <div class="collection-wrapper grid gap-style lame-search-results__wrapper">
     {% assign products_per_page = 24 %}
 
     {% if section.settings.enable_infinite_scroll == false %}
@@ -43,7 +42,7 @@
             data-product-id="{{ product.id }}"
             ref="cards[]"
           >
-            {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+            {% render 'lame-shop-product-card', product: product, section: section %}
           </li>
         {% endfor %}
       {% endcapture %}
@@ -106,7 +105,7 @@
           "label": "t:options.extra_large"
         }
       ],
-      "default": "medium",
+      "default": "small",
       "visible_if": "{{ section.settings.layout_type == 'grid' }}"
     },
     {

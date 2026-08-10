@@ -1,0 +1,157 @@
+/**
+ * Search results page — premium layout + catalog cards
+ */
+
+.template-search {
+  --lame-search-ink: #121212;
+  --lame-search-muted: #6b7280;
+  --lame-search-border: #e8ebe9;
+  --lame-search-page: #f7f7f5;
+  --lame-search-forest: #1a4d2e;
+  --lame-search-accent: #e11d48;
+}
+
+body.template-search .shopify-section:has(.search-page__header),
+body.template-search .shopify-section:has(.lame-search-results) {
+  background: var(--lame-search-page);
+}
+
+/* Header */
+.template-search .search-page__header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  max-width: min(100%, var(--page-width, 1200px));
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 1.5rem);
+  box-sizing: border-box;
+}
+
+.template-search .search-page__header .text-block,
+.template-search .search-page__header h1,
+.template-search .search-page__header h2,
+.template-search .search-page__header h3 {
+  margin: 0;
+  font-family: var(--lame-font-display, var(--font-heading--family));
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--lame-search-ink);
+  line-height: 1.2;
+}
+
+.template-search .lame-search-header__meta {
+  margin: -0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--lame-search-muted);
+  line-height: 1.4;
+}
+
+.template-search .search-page__header .search-input,
+.template-search .search-page__header predictive-search,
+.template-search .search-page__header .field {
+  width: 100%;
+  max-width: 36rem;
+}
+
+.template-search .search-page__header input[type='search'],
+.template-search .search-page__header .search__input,
+.template-search .search-page__header .field__input {
+  border-radius: 999px;
+  border: 1px solid var(--lame-search-border);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(18 18 18 / 0.04);
+  min-height: 2.85rem;
+}
+
+.template-search .search-page__header input[type='search']:focus,
+.template-search .search-page__header .search__input:focus,
+.template-search .search-page__header .field__input:focus {
+  border-color: var(--lame-search-forest);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(26 77 46 / 0.12);
+}
+
+/* Results shell */
+.lame-search-results {
+  background: var(--lame-search-page);
+}
+
+.lame-search-results__wrapper {
+  width: 100%;
+  max-width: min(100%, var(--page-width, 1200px));
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 2.5vw, 1.5rem);
+  box-sizing: border-box;
+}
+
+/* Catalog card grid overrides for search */
+.lame-search-results.lame-our-products-card-scope .product-grid {
+  --product-grid-gap-mobile: 14px 10px;
+  --product-grid-gap-desktop: 20px 16px;
+}
+
+@media screen and (min-width: 750px) {
+  .lame-search-results.lame-our-products-card-scope .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .lame-search-results.lame-our-products-card-scope .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  }
+}
+
+.lame-search-results .product-grid__item {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+}
+
+.lame-search-results .lame-catlog-card {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--lame-search-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgb(18 18 18 / 0.04);
+}
+
+.lame-search-results .lame-catlog-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgb(18 18 18 / 0.08);
+  border-color: rgb(26 77 46 / 0.22);
+}
+
+/* Facets / filter bar */
+.template-search .facets-block-wrapper,
+.template-search .facets,
+.template-search .facets-controls-wrapper {
+  background: transparent;
+}
+
+.template-search .facets__summary,
+.template-search .facets-controls-wrapper button,
+.template-search .sorting .select__select,
+.template-search .facets__label,
+.template-search .facets-mobile-toggle {
+  border-radius: 999px;
+  border-color: var(--lame-search-border);
+  background: #fff;
+}
+
+.template-search .product-count__text,
+.template-search .facets__product-count,
+.template-search .collection-wrapper .product-grid-controls {
+  color: var(--lame-search-muted);
+  font-size: 0.875rem;
+}
+
+/* Empty / fallback title */
+.lame-search-results .collection-title,
+.lame-search-results .collection-wrapper > h2 {
+  font-family: var(--lame-font-display, var(--font-heading--family));
+  font-weight: 600;
+  color: var(--lame-search-ink);
+}
