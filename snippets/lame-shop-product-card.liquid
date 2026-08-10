@@ -1,5 +1,5 @@
 {%- doc -%}
-  Our Products catalog card — listing style (tags, price, rating, optional sale bar).
+  Our Products catalog card — listing style (tags, price, optional sale bar).
 
   @param {object} product
   @param {object} section
@@ -46,14 +46,6 @@
         break
       endif
     endfor
-  endif
-
-  assign rating = product.metafields.reviews.rating.value.rating
-  assign rating_count = product.metafields.reviews.rating_count | default: 0
-  assign rating_count_num = rating_count | plus: 0
-  assign has_rating = false
-  if rating != blank and rating_count_num > 0
-    assign has_rating = true
   endif
 
   assign variant_count = product.variants.size

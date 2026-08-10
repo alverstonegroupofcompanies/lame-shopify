@@ -99,9 +99,11 @@
 -%}
 
 {% if found > 0 %}
+  {{ 'lame-shop-product-card.css' | asset_url | stylesheet_tag }}
+
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-pdp-similar"
+    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-pdp-similar lame-our-products-card-scope"
     data-pdp-similar-carousel
     {{ section.shopify_attributes }}
   >
@@ -134,10 +136,7 @@
                 {% continue %}
               {% endif %}
               <li class="lame-pdp-similar__slide">
-                {% render 'lame-cart-rec-card',
-                  product: similar_product,
-                  add_to_cart_label: section.settings.add_to_cart_label
-                %}
+                {% render 'lame-shop-product-card', product: similar_product, section: section %}
               </li>
             {% endfor %}
           </ul>
@@ -170,7 +169,7 @@
         const slide = track.querySelector('.lame-pdp-similar__slide');
         if (!slide) return;
         const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '16') || 16;
-        viewport.scrollBy({ left: dir * (slide.offsetWidth + gap), behavior: 'smooth' });
+        viewport.scrollBy({ left: dir * (slide.getBoundingClientRect().width + gap), behavior: 'smooth' });
       };
 
       prev?.addEventListener('click', () => scrollBySlide(-1));
@@ -178,6 +177,129 @@
     })();
   </script>
 {% endif %}
+
+{% stylesheet %}
+  .lame-pdp-similar {
+    --lame-pdp-similar-gap: 1rem;
+    --lame-pdp-similar-card: 220px;
+    background: #f7f7f5;
+  }
+
+  .lame-pdp-similar__wrap {
+    width: 100%;
+    max-width: min(1120px, 100%);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 1.5rem);
+    box-sizing: border-box;
+  }
+
+  .lame-pdp-similar__header {
+    margin-bottom: 1.15rem;
+  }
+
+  .lame-pdp-similar__heading {
+    margin: 0;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+    font-weight: 600;
+    color: #121212;
+  }
+
+  .lame-pdp-similar__subheading {
+    margin: 0.35rem 0 0;
+    font-size: 0.95rem;
+    color: #6b7280;
+  }
+
+  .lame-pdp-similar__carousel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .lame-pdp-similar__nav {
+    align-self: center;
+    flex-shrink: 0;
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 1px solid rgb(0 0 0 / 0.12);
+    border-radius: 50%;
+    background: #fff;
+    color: #6b7280;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .lame-pdp-similar__nav:hover {
+    border-color: rgb(26 77 46 / 0.35);
+    color: #1a4d2e;
+  }
+
+  .lame-pdp-similar__viewport {
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .lame-pdp-similar__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-pdp-similar__track {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--lame-pdp-similar-gap);
+    margin: 0;
+    padding: 0.25rem 0.15rem 0.5rem;
+    list-style: none;
+    width: max-content;
+  }
+
+  .lame-pdp-similar__slide {
+    flex: 0 0 var(--lame-pdp-similar-card);
+    width: var(--lame-pdp-similar-card);
+    min-width: var(--lame-pdp-similar-card);
+    max-width: var(--lame-pdp-similar-card);
+    scroll-snap-align: start;
+    box-sizing: border-box;
+  }
+
+  .lame-pdp-similar__slide .lame-catlog-card {
+    height: 100%;
+    background: #fff;
+    border: 1px solid #e8ebe9;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgb(18 18 18 / 0.04);
+  }
+
+  .lame-pdp-similar__slide .lame-catlog-card:hover {
+    transform: translateY(-2px);
+    border-color: rgb(26 77 46 / 0.22);
+    box-shadow: 0 12px 28px rgb(18 18 18 / 0.08);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-pdp-similar {
+      --lame-pdp-similar-card: 240px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-pdp-similar {
+      --lame-pdp-similar-card: min(200px, 68vw);
+    }
+
+    .lame-pdp-similar__nav {
+      display: none;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
@@ -213,7 +335,8 @@
       "type": "text",
       "id": "add_to_cart_label",
       "label": "Add to cart button label",
-      "default": "Add to cart"
+      "default": "Add to cart",
+      "info": "Unused with catalog cards (card has its own Add to cart)"
     },
     {
       "type": "select",

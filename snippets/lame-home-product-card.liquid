@@ -2,7 +2,6 @@
   assign card_style = card_style | default: 'grid'
   assign show_sale_badge = show_sale_badge | default: true
   assign show_type = show_type | default: true
-  assign show_rating = show_rating | default: true
   assign show_add_to_cart = show_add_to_cart | default: false
   assign add_to_cart_label = add_to_cart_label | default: 'Add to cart'
   assign sold_out_label = sold_out_label | default: 'Sold out'
@@ -36,8 +35,6 @@
     assign display_price = price | money
     assign display_compare = compare_at | money
   endif
-
-  assign review_count = product.metafields.reviews.rating_count.value | default: product.metafields.custom.review_count.value
 -%}
 
 <article class="lame-home-product-card lame-home-product-card--{{ card_style }}">
@@ -81,15 +78,6 @@
           {%- endif -%}
         {%- else -%}
           <span class="lame-home-product-card__price">{{ display_price }}</span>
-        {%- endif -%}
-      </div>
-
-      <div class="lame-home-product-card__rating" aria-hidden="true">
-        <span class="lame-home-product-card__stars">
-          {%- for i in (1..5) -%}&#9733;{%- endfor -%}
-        </span>
-        {%- if review_count != blank -%}
-          <span class="lame-home-product-card__reviews">({{ review_count }})</span>
         {%- endif -%}
       </div>
 
@@ -180,14 +168,6 @@
     <h3 class="lame-home-product-card__title">
       <a href="{{ product.url }}">{{ product.title }}</a>
     </h3>
-
-    {% if show_rating %}
-      <div class="lame-home-product-card__rating" aria-hidden="true">
-        {% for i in (1..5) %}
-          <span class="lame-home-product-card__star">&#9733;</span>
-        {% endfor %}
-      </div>
-    {% endif %}
 
     <p class="lame-home-product-card__price">
       {% render 'price', product_resource: product, show_sale_price_first: true %}

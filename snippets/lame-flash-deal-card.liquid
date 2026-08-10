@@ -26,11 +26,6 @@
     assign card_badge = badge_label
   endif
 
-  assign review_count = product.metafields.reviews.rating_count.value | default: product.metafields.custom.review_count.value
-  if review_count == blank and review_count_fallback != blank
-    assign review_count = review_count_fallback
-  endif
-
   if settings.currency_code_enabled
     assign display_price = price | money_with_currency
     assign display_compare = compare_at | money_with_currency
@@ -90,15 +85,6 @@
         {{ save_label_prefix }} {{ display_savings }}
       </span>
     {%- endif -%}
-
-    <div class="lame-flash-card__rating" aria-hidden="true">
-      <span class="lame-flash-card__stars">
-        {%- for i in (1..5) -%}&#9733;{%- endfor -%}
-      </span>
-      {%- if review_count != blank -%}
-        <span class="lame-flash-card__reviews">({{ review_count }})</span>
-      {%- endif -%}
-    </div>
 
     {%- if selected_variant -%}
       <form method="post" action="{{ routes.cart_add_url }}" class="lame-flash-card__form" data-lame-home-atc>
