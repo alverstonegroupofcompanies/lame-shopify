@@ -82,16 +82,17 @@
 }
 
 .lame-offer-slider:not(:has(.lame-offer-slider__nav)) {
-  grid-template-columns: minmax(0, 1fr);
+  /* single slide — no nav */
 }
 
 .lame-offer-slider__viewport {
   position: relative;
   overflow: hidden;
   width: 100%;
-  border-radius: var(--lame-dt-radius);
+  border-radius: 0;
   background: transparent;
   box-shadow: none;
+  aspect-ratio: 21 / 9;
 }
 
 .lame-offer-slider__track {
@@ -99,8 +100,9 @@
   margin: 0;
   padding: 0;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
+  height: 100%;
   transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
 }
@@ -109,14 +111,16 @@
   flex: 0 0 100%;
   width: 100%;
   min-width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
 }
 
 .lame-offer-slider__link {
   display: block;
   width: 100%;
+  height: 100%;
   line-height: 0;
   text-decoration: none;
   color: inherit;
@@ -125,19 +129,59 @@
 .lame-offer-slider__image {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   max-width: 100%;
-  max-height: min(52vh, 420px);
   margin-inline: auto;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
+}
+
+.lame-offer-slider__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgb(42 36 32 / 0.12);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.92);
+  color: var(--lame-dt-ink);
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgb(42 36 32 / 0.1);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.lame-offer-slider__nav--prev {
+  left: clamp(0.55rem, 2vw, 1.25rem);
+}
+
+.lame-offer-slider__nav--next {
+  right: clamp(0.55rem, 2vw, 1.25rem);
+}
+
+.lame-offer-slider__nav:hover {
+  background: var(--lame-dt-orange);
+  border-color: var(--lame-dt-orange);
+  color: #fff;
+  transform: translateY(-50%) scale(1.04);
 }
 
 .lame-offer-slider__placeholder {
   display: grid;
   place-content: center;
   gap: 0.35rem;
-  min-height: clamp(12rem, 28vw, 20rem);
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
   padding: 1.5rem;
   text-align: center;
   background: linear-gradient(165deg, #ff8a3d 0%, var(--lame-dt-orange) 48%, var(--lame-dt-orange-deep) 100%);
@@ -156,38 +200,12 @@
   opacity: 0.9;
 }
 
-.lame-offer-slider__nav {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid rgb(42 36 32 / 0.12);
-  border-radius: 50%;
-  background: #fff;
-  color: var(--lame-dt-ink);
-  font-size: 1.35rem;
-  font-weight: 500;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgb(42 36 32 / 0.1);
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.lame-offer-slider__nav:hover {
-  background: var(--lame-dt-orange);
-  border-color: var(--lame-dt-orange);
-  color: #fff;
-  transform: scale(1.04);
-}
-
 .lame-offer-slider__dots {
   display: flex;
   justify-content: center;
   gap: 0.45rem;
   margin-top: 0.9rem;
+  padding-inline: var(--lame-dt-edge);
 }
 
 .lame-offer-slider__dot {
@@ -213,35 +231,13 @@
     --lame-dt-edge: 0.75rem;
   }
 
-  .lame-offer-slider {
-    grid-template-columns: 1fr;
-    gap: 0;
+  .lame-offer-slider__viewport {
+    aspect-ratio: 16 / 9;
   }
 
   .lame-offer-slider__nav {
-    position: absolute;
-    top: 50%;
-    z-index: 2;
-    transform: translateY(-50%);
     width: 2.15rem;
     height: 2.15rem;
-    background: rgb(255 255 255 / 0.92);
-  }
-
-  .lame-offer-slider__nav:hover {
-    transform: translateY(-50%) scale(1.04);
-  }
-
-  .lame-offer-slider__nav--prev {
-    left: 0.55rem;
-  }
-
-  .lame-offer-slider__nav--next {
-    right: 0.55rem;
-  }
-
-  .lame-offer-slider__image {
-    max-height: min(42vh, 300px);
   }
 }
 
