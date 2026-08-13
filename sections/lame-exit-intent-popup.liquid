@@ -1,0 +1,455 @@
+{%- liquid
+  assign show_popup = false
+  assign form_posted = false
+  assign page_type = request.page_type | default: template.name
+
+  if section.settings.enabled
+    if page_type == 'index' and section.settings.show_on_home
+      assign show_popup = true
+    elsif page_type == 'collection' and section.settings.show_on_collection
+      assign show_popup = true
+    elsif page_type == 'product' and section.settings.show_on_product
+      assign show_popup = true
+    elsif page_type == 'cart' and section.settings.show_on_cart
+      assign show_popup = true
+    endif
+  endif
+
+  if page_type == 'customers/login' or page_type == 'customers/register' or page_type == 'customers/activate_account' or page_type == 'customers/reset_password'
+    assign show_popup = false
+  endif
+  if page_type == 'password' or page_type == 'gift_card'
+    assign show_popup = false
+  endif
+  if request.path contains '/challenge' or request.path contains '/checkouts' or request.path contains '/thank_you'
+    assign show_popup = false
+  endif
+
+  if customer
+    if section.settings.hide_for_subscribers and customer.accepts_marketing
+      assign show_popup = false
+    endif
+    if section.settings.hide_after_purchase and customer.orders_count > 0
+      assign show_popup = false
+    endif
+  endif
+
+  assign delay_ms = section.settings.delay_seconds | times: 1000
+  assign inactivity_ms = section.settings.inactivity_seconds | times: 1000
+  assign coupon_tags = 'newsletter,exit-intent'
+  if section.settings.coupon_code != blank
+    assign coupon_tags = coupon_tags | append: ',' | append: section.settings.coupon_code
+  endif
+-%}
+
+{%- if show_popup -%}
+  {{ 'lame-exit-intent-popup.css' | asset_url | stylesheet_tag }}
+
+  <div
+    id="LameExitIntentPopup-{{ section.id }}"
+    class="lame-exit-popup"
+    data-lame-exit-popup
+    data-delay-ms="{{ delay_ms }}"
+    data-inactivity-ms="{{ inactivity_ms }}"
+    data-require-product-view="{{ section.settings.require_product_view }}"
+    data-frequency="{{ section.settings.frequency }}"
+    data-storage-key="lame_exit_intent_{{ section.id }}"
+    data-coupon-code="{{ section.settings.coupon_code | escape }}"
+    data-contact-url="{{ routes.root_url }}contact"
+    data-template="{{ template.name }}"
+    data-start-success="false"
+    hidden
+    aria-hidden="true"
+    {{ section.shopify_attributes }}
+  >
+    <button type="button" class="lame-exit-popup__backdrop" data-lame-exit-close aria-label="{{ section.settings.close_label | escape }}"></button>
+
+    <div
+      class="lame-exit-popup__dialog"
+      data-lame-exit-dialog
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="LameExitIntentHeading-{{ section.id }}"
+      tabindex="-1"
+    >
+      <button
+        type="button"
+        class="lame-exit-popup__close"
+        data-lame-exit-close
+        aria-label="{{ section.settings.close_label | escape }}"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      <div class="lame-exit-popup__media{% if section.settings.background_image != blank %} lame-exit-popup__media--has-image{% endif %}">
+        {%- if section.settings.background_image != blank -%}
+          {{
+            section.settings.background_image
+            | image_url: width: 900
+            | image_tag:
+              class: 'lame-exit-popup__image',
+              loading: 'lazy',
+              widths: '400,600,800,900',
+              sizes: '(max-width: 749px) 100vw, 28rem',
+              alt: section.settings.headline | escape
+          }}
+          <div class="lame-exit-popup__media-overlay" aria-hidden="true"></div>
+        {%- endif -%}
+        <div class="lame-exit-popup__offer-badge">
+          {%- if section.settings.offer_label != blank -%}
+            <p class="lame-exit-popup__offer-label">{{ section.settings.offer_label }}</p>
+          {%- endif -%}
+          {%- if section.settings.offer_text != blank -%}
+            <p class="lame-exit-popup__offer">{{ section.settings.offer_text }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="lame-exit-popup__body">
+        <div class="lame-exit-popup__capture" data-lame-exit-capture>
+          {%- if section.settings.headline != blank -%}
+            <h2 id="LameExitIntentHeading-{{ section.id }}" class="lame-exit-popup__heading">
+              {{ section.settings.headline }}
+            </h2>
+          {%- endif -%}
+          {%- if section.settings.subheading != blank -%}
+            <p class="lame-exit-popup__subheading">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+          {%- if section.settings.terms_text != blank -%}
+            <p class="lame-exit-popup__terms">{{ section.settings.terms_text }}</p>
+          {%- endif -%}
+
+          {% form 'customer', class: 'lame-exit-popup__form' %}
+            {%- if form.posted_successfully? -%}
+              {%- assign form_posted = true -%}
+            {%- endif -%}
+            <input type="hidden" name="contact[tags]" value="{{ coupon_tags | escape }}">
+            <div class="lame-exit-popup__field">
+              <label class="visually-hidden" for="LameExitEmail-{{ section.id }}">
+                {{ section.settings.email_placeholder | escape }}
+              </label>
+              <input
+                id="LameExitEmail-{{ section.id }}"
+                class="lame-exit-popup__input"
+                type="email"
+                name="contact[email]"
+                value="{% if customer %}{{ customer.email }}{% endif %}"
+                placeholder="{{ section.settings.email_placeholder | escape }}"
+                autocomplete="email"
+                autocapitalize="off"
+                autocorrect="off"
+                required
+                inputmode="email"
+              >
+            </div>
+            <p class="lame-exit-popup__error" data-lame-exit-error hidden></p>
+            {% if form.errors %}
+              <p class="lame-exit-popup__error">{{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}</p>
+            {% endif %}
+            <button
+              type="submit"
+              class="lame-exit-popup__cta"
+              name="commit"
+              data-lame-exit-submit
+              data-loading-label="{{ section.settings.loading_label | escape }}"
+            >
+              {{ section.settings.cta_label }}
+            </button>
+            <button type="button" class="lame-exit-popup__secondary" data-lame-exit-close>
+              {{ section.settings.secondary_label }}
+            </button>
+          {% endform %}
+        </div>
+
+        <div class="lame-exit-popup__success" data-lame-exit-success {% unless form_posted %}hidden{% endunless %}>
+          <h2
+            id="LameExitIntentSuccessHeading-{{ section.id }}"
+            class="lame-exit-popup__heading"
+            data-lame-exit-success-heading
+            tabindex="-1"
+          >
+            {{ section.settings.success_heading }}
+          </h2>
+          {%- if section.settings.success_message != blank -%}
+            <p class="lame-exit-popup__success-text">{{ section.settings.success_message }}</p>
+          {%- endif -%}
+          {%- if section.settings.coupon_code != blank -%}
+            <div class="lame-exit-popup__code-row">
+              <code class="lame-exit-popup__code" data-lame-exit-code>{{ section.settings.coupon_code }}</code>
+              <button
+                type="button"
+                class="lame-exit-popup__copy"
+                data-lame-exit-copy
+                data-copied-label="{{ section.settings.copied_label | escape }}"
+                data-copy-fallback="{{ section.settings.copy_fallback_label | escape }}"
+              >
+                {{ section.settings.copy_label }}
+              </button>
+            </div>
+            <p class="lame-exit-popup__copy-note" data-lame-exit-copy-note aria-live="polite"></p>
+          {%- endif -%}
+          {%- if section.settings.terms_text != blank -%}
+            <p class="lame-exit-popup__terms">{{ section.settings.terms_text }}</p>
+          {%- endif -%}
+          <button type="button" class="lame-exit-popup__cta" data-lame-exit-close>
+            {{ section.settings.secondary_label }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- if form_posted -%}
+    <style>
+      #LameExitIntentPopup-{{ section.id }} [data-lame-exit-capture] {
+        display: none !important;
+      }
+    </style>
+    <script>
+      (() => {
+        const root = document.getElementById('LameExitIntentPopup-{{ section.id }}');
+        if (root) root.dataset.startSuccess = 'true';
+      })();
+    </script>
+  {%- endif -%}
+
+  <script src="{{ 'lame-exit-intent-popup.js' | asset_url }}" defer></script>
+
+  <style>
+    #shopify-section-{{ section.id }} {
+      margin: 0;
+      padding: 0;
+      height: 0;
+      overflow: visible;
+    }
+
+    html.lame-exit-popup-open,
+    body.lame-exit-popup-open {
+      overflow: hidden;
+    }
+  </style>
+{%- endif -%}
+{% schema %}
+{
+  "name": "Exit-intent coupon",
+  "tag": "section",
+  "class": "lame-exit-intent-section",
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Status"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable popup",
+      "default": true
+    },
+    {
+      "type": "paragraph",
+      "content": "Create the matching discount code in Shopify Admin → Discounts. The theme displays the code after email capture; it cannot create discount codes."
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Wait! Don't Leave Yet!"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Enjoy an exclusive discount on your first order."
+    },
+    {
+      "type": "text",
+      "id": "offer_label",
+      "label": "Offer label",
+      "default": "Exclusive offer"
+    },
+    {
+      "type": "text",
+      "id": "offer_text",
+      "label": "Offer text",
+      "default": "10% OFF"
+    },
+    {
+      "type": "text",
+      "id": "coupon_code",
+      "label": "Coupon code",
+      "default": "WELCOME10",
+      "info": "Must match a real Shopify discount code."
+    },
+    {
+      "type": "textarea",
+      "id": "terms_text",
+      "label": "Terms / discount details",
+      "default": "Valid on your first order. Minimum purchase and expiry are set on the Shopify discount.",
+      "info": "Use this to describe min. purchase, expiry, and exclusions (configured on the Admin discount)."
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "header",
+      "content": "Email form"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Email placeholder",
+      "default": "Enter your email"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Primary button",
+      "default": "Claim My Discount"
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "Secondary button",
+      "default": "Continue Shopping"
+    },
+    {
+      "type": "text",
+      "id": "loading_label",
+      "label": "Loading label",
+      "default": "Saving…"
+    },
+    {
+      "type": "text",
+      "id": "close_label",
+      "label": "Close button label",
+      "default": "Close"
+    },
+    {
+      "type": "header",
+      "content": "Success state"
+    },
+    {
+      "type": "text",
+      "id": "success_heading",
+      "label": "Success heading",
+      "default": "Your discount is ready!"
+    },
+    {
+      "type": "textarea",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "Use this code at checkout. We’ve also saved your email for beauty tips and offers."
+    },
+    {
+      "type": "text",
+      "id": "copy_label",
+      "label": "Copy button",
+      "default": "Copy"
+    },
+    {
+      "type": "text",
+      "id": "copied_label",
+      "label": "Copied message",
+      "default": "Copied!"
+    },
+    {
+      "type": "text",
+      "id": "copy_fallback_label",
+      "label": "Copy fallback message",
+      "default": "Select and copy the code"
+    },
+    {
+      "type": "header",
+      "content": "Display rules"
+    },
+    {
+      "type": "range",
+      "id": "delay_seconds",
+      "label": "Minimum delay before trigger",
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 10,
+      "info": "Popup can only appear after this delay."
+    },
+    {
+      "type": "range",
+      "id": "inactivity_seconds",
+      "label": "Mobile inactivity trigger",
+      "min": 15,
+      "max": 60,
+      "step": 1,
+      "unit": "s",
+      "default": 25
+    },
+    {
+      "type": "checkbox",
+      "id": "require_product_view",
+      "label": "Require at least one product page view",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "frequency",
+      "label": "Show frequency",
+      "default": "once_every_7_days",
+      "options": [
+        { "value": "once_per_session", "label": "Once per browser session" },
+        { "value": "once_per_day", "label": "Once per day" },
+        { "value": "once_every_7_days", "label": "Once every 7 days" },
+        { "value": "once_forever", "label": "Once (until browser data cleared)" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_for_subscribers",
+      "label": "Hide for customers who accept marketing",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_after_purchase",
+      "label": "Hide for logged-in customers with past orders",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Target pages"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_home",
+      "label": "Home",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_collection",
+      "label": "Collections",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_product",
+      "label": "Product",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_cart",
+      "label": "Cart",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
