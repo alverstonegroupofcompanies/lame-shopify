@@ -57,13 +57,17 @@
         {% if section.settings.meta_two != blank %}
           <li class="lame-pickup-banner__chip">{{ section.settings.meta_two | escape }}</li>
         {% endif %}
+        {% if section.settings.button_label != blank %}
+          <li>
+            <a class="lame-pickup-banner__chip lame-pickup-banner__chip--action" href="{{ section.settings.button_link | default: routes.root_url }}">
+              <svg class="lame-pickup-banner__chip-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/>
+              </svg>
+              <span>{{ section.settings.button_label | escape }}</span>
+            </a>
+          </li>
+        {% endif %}
       </ul>
-
-      {% if section.settings.button_label != blank %}
-        <a class="lame-pickup-banner__button" href="{{ section.settings.button_link | default: routes.root_url }}">
-          {{ section.settings.button_label | escape }}
-        </a>
-      {% endif %}
     </div>
   </div>
 </section>
@@ -142,6 +146,7 @@
   .lame-pickup-banner__chip {
     display: inline-flex;
     align-items: center;
+    gap: 0.35rem;
     padding: 0.38rem 0.7rem;
     border-radius: 999px;
     font-size: 0.74rem;
@@ -151,28 +156,20 @@
     color: var(--lame-pickup-chip-color, #24543f);
   }
 
-  .lame-pickup-banner__button {
-    width: fit-content;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.65rem;
-    padding: 0.56rem 1.15rem;
-    border-radius: 999px;
-    border: 1px solid rgb(var(--brand-gold, 201 169 98) / 0.5);
-    background: rgb(var(--color-background-rgb));
-    color: rgb(var(--color-foreground-rgb));
+  .lame-pickup-banner__chip--action {
     text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid color-mix(in srgb, var(--lame-pickup-chip-color, #6e3b12) 22%, transparent);
+    transition: transform 0.2s ease, filter 0.2s ease;
   }
 
-  .lame-pickup-banner__button:hover {
+  .lame-pickup-banner__chip--action:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgb(var(--brand-gold, 201 169 98) / 0.2);
+    filter: brightness(0.97);
+  }
+
+  .lame-pickup-banner__chip-icon {
+    flex-shrink: 0;
+    display: block;
   }
 
   @media screen and (min-width: 990px) {

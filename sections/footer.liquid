@@ -5,6 +5,7 @@
   if categories_menu == blank or categories_menu.links.size == 0
     assign use_collection_links = true
   endif
+  assign show_categories = section.settings.show_categories
 
   assign phone_href = section.settings.phone | strip
   if phone_href != blank
@@ -49,6 +50,7 @@
   <div class="footer-premium__inner spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
     <div class="footer-premium__nav-panel">
       <div class="footer-premium__main">
+      {% if show_categories %}
       <div class="footer-premium__column">
         <h3 class="footer-premium__heading footer-premium__heading--icon">
           <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'grid' %}</span>
@@ -86,6 +88,7 @@
           {% endif %}
         </ul>
       </div>
+      {% endif %}
 
       <div class="footer-premium__column">
         <h3 class="footer-premium__heading footer-premium__heading--icon">
@@ -1335,6 +1338,12 @@
     {
       "type": "header",
       "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_categories",
+      "label": "Show Shop by category",
+      "default": false
     },
     {
       "type": "text",
