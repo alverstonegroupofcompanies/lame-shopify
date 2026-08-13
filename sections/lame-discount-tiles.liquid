@@ -43,109 +43,123 @@
       </header>
     {%- endif -%}
 
-    <div class="lame-offer-slider">
-      {%- if slide_count > 1 -%}
-        <button
-          type="button"
-          class="lame-offer-slider__nav lame-offer-slider__nav--prev"
-          data-offer-prev
-          aria-label="{{ section.settings.prev_label | default: 'Previous offer' | escape }}"
-        >
-          <span aria-hidden="true">&#8249;</span>
-        </button>
-      {%- endif -%}
-
-      <div class="lame-offer-slider__viewport" data-offer-viewport>
-        <ul class="lame-offer-slider__track" role="list" data-offer-track>
-          {%- assign visible_index = 0 -%}
-          {%- for block in section.blocks -%}
-            {%- liquid
-              assign slide_link = block.settings.link
-              if block.settings.collection != blank
-                assign slide_link = block.settings.collection.url
-              endif
-              assign image_alt = block.settings.image_alt | default: section.settings.heading | default: 'Offer'
-            -%}
-
-            {%- if block.settings.image == blank and request.design_mode == false -%}
-              {%- continue -%}
-            {%- endif -%}
-
-            <li
-              class="lame-offer-slider__slide{% if visible_index == 0 %} is-active{% endif %}"
-              data-offer-slide
-              {{ block.shopify_attributes }}
-            >
-              {%- if slide_link != blank -%}
-                <a
-                  class="lame-offer-slider__link"
-                  href="{{ slide_link }}"
-                  {% if block.settings.open_in_new_tab %}
-                    target="_blank"
-                    rel="noopener"
-                  {% endif %}
-                >
-              {%- else -%}
-                <div class="lame-offer-slider__link">
-              {%- endif -%}
-
-                {%- if block.settings.image != blank -%}
-                  {%- liquid
-                    if visible_index == 0
-                      assign image_loading = 'eager'
-                    else
-                      assign image_loading = 'lazy'
-                    endif
-                  -%}
-                  {{
-                    block.settings.image
-                    | image_url: width: 2400
-                    | image_tag:
-                      class: 'lame-offer-slider__image',
-                      loading: image_loading,
-                      widths: '750, 1100, 1500, 1800, 2400',
-                      sizes: '100vw',
-                      alt: image_alt
-                  }}
-                {%- else -%}
-                  <div class="lame-offer-slider__placeholder">
-                    <span>Add offer image</span>
-                    <small>Theme editor → Offer slide → Image</small>
-                  </div>
-                {%- endif -%}
-
-              {%- if slide_link != blank -%}
-                </a>
-              {%- else -%}
-                </div>
-              {%- endif -%}
-            </li>
-            {%- assign visible_index = visible_index | plus: 1 -%}
-          {%- endfor -%}
-
-          {%- if visible_index == 0 and request.design_mode -%}
-            <li class="lame-offer-slider__slide is-active" data-offer-slide>
-              <div class="lame-offer-slider__link">
-                <div class="lame-offer-slider__placeholder">
-                  <span>Add offer slides</span>
-                  <small>Add blocks with image + link</small>
-                </div>
-              </div>
-            </li>
-          {%- endif -%}
-        </ul>
+    <div class="lame-offer-stage">
+      <div class="lame-offer-stage__side lame-offer-stage__side--left" aria-hidden="true">
+        <span class="lame-offer-stage__motif lame-offer-stage__motif--leaf"></span>
+        <span class="lame-offer-stage__motif lame-offer-stage__motif--dots"></span>
+        <span class="lame-offer-stage__motif lame-offer-stage__motif--arc"></span>
       </div>
 
-      {%- if slide_count > 1 -%}
-        <button
-          type="button"
-          class="lame-offer-slider__nav lame-offer-slider__nav--next"
-          data-offer-next
-          aria-label="{{ section.settings.next_label | default: 'Next offer' | escape }}"
-        >
-          <span aria-hidden="true">&#8250;</span>
-        </button>
-      {%- endif -%}
+      <div class="lame-offer-slider">
+        {%- if slide_count > 1 -%}
+          <button
+            type="button"
+            class="lame-offer-slider__nav lame-offer-slider__nav--prev"
+            data-offer-prev
+            aria-label="{{ section.settings.prev_label | default: 'Previous offer' | escape }}"
+          >
+            <span aria-hidden="true">&#8249;</span>
+          </button>
+        {%- endif -%}
+
+        <div class="lame-offer-slider__viewport" data-offer-viewport>
+          <ul class="lame-offer-slider__track" role="list" data-offer-track>
+            {%- assign visible_index = 0 -%}
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign slide_link = block.settings.link
+                if block.settings.collection != blank
+                  assign slide_link = block.settings.collection.url
+                endif
+                assign image_alt = block.settings.image_alt | default: section.settings.heading | default: 'Offer'
+              -%}
+
+              {%- if block.settings.image == blank and request.design_mode == false -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              <li
+                class="lame-offer-slider__slide{% if visible_index == 0 %} is-active{% endif %}"
+                data-offer-slide
+                {{ block.shopify_attributes }}
+              >
+                {%- if slide_link != blank -%}
+                  <a
+                    class="lame-offer-slider__link"
+                    href="{{ slide_link }}"
+                    {% if block.settings.open_in_new_tab %}
+                      target="_blank"
+                      rel="noopener"
+                    {% endif %}
+                  >
+                {%- else -%}
+                  <div class="lame-offer-slider__link">
+                {%- endif -%}
+
+                  {%- if block.settings.image != blank -%}
+                    {%- liquid
+                      if visible_index == 0
+                        assign image_loading = 'eager'
+                      else
+                        assign image_loading = 'lazy'
+                      endif
+                    -%}
+                    {{
+                      block.settings.image
+                      | image_url: width: 1800
+                      | image_tag:
+                        class: 'lame-offer-slider__image',
+                        loading: image_loading,
+                        widths: '640, 900, 1200, 1500, 1800',
+                        sizes: '(min-width: 990px) min(920px, 70vw), 92vw',
+                        alt: image_alt
+                    }}
+                  {%- else -%}
+                    <div class="lame-offer-slider__placeholder">
+                      <span>Add offer image</span>
+                      <small>Theme editor → Offer slide → Image</small>
+                    </div>
+                  {%- endif -%}
+
+                {%- if slide_link != blank -%}
+                  </a>
+                {%- else -%}
+                  </div>
+                {%- endif -%}
+              </li>
+              {%- assign visible_index = visible_index | plus: 1 -%}
+            {%- endfor -%}
+
+            {%- if visible_index == 0 and request.design_mode -%}
+              <li class="lame-offer-slider__slide is-active" data-offer-slide>
+                <div class="lame-offer-slider__link">
+                  <div class="lame-offer-slider__placeholder">
+                    <span>Add offer slides</span>
+                    <small>Add blocks with image + link</small>
+                  </div>
+                </div>
+              </li>
+            {%- endif -%}
+          </ul>
+        </div>
+
+        {%- if slide_count > 1 -%}
+          <button
+            type="button"
+            class="lame-offer-slider__nav lame-offer-slider__nav--next"
+            data-offer-next
+            aria-label="{{ section.settings.next_label | default: 'Next offer' | escape }}"
+          >
+            <span aria-hidden="true">&#8250;</span>
+          </button>
+        {%- endif -%}
+      </div>
+
+      <div class="lame-offer-stage__side lame-offer-stage__side--right" aria-hidden="true">
+        <span class="lame-offer-stage__motif lame-offer-stage__motif--arc"></span>
+        <span class="lame-offer-stage__motif lame-offer-stage__motif--dots"></span>
+        <span class="lame-offer-stage__motif lame-offer-stage__motif--leaf"></span>
+      </div>
     </div>
 
     {%- if slide_count > 1 and section.settings.show_dots -%}

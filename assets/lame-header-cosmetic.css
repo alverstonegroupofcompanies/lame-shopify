@@ -257,11 +257,11 @@ body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .s
 }
 
 #header-component.header--cosmetic-luxury {
-  --header-luxury-min-height: 4.25rem;
+  --header-luxury-min-height: 3.5rem;
   --header-luxury-icon-ring: 1.85rem;
   --header-luxury-icon-glyph: 1.05rem;
-  --header-luxury-logo-max-w: min(11rem, 28vw);
-  --header-luxury-logo-max-h: clamp(2.35rem, 4.2vw, 2.85rem);
+  --header-luxury-logo-max-w: min(10rem, 26vw);
+  --header-luxury-logo-max-h: clamp(2rem, 3.5vw, 2.35rem);
   --lame-nav-font: 'Inter', var(--lame-font-body, 'Jost', system-ui, sans-serif);
   --lame-mobile-menu-z: 100000;
 
@@ -460,7 +460,7 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 #header-component.header--cosmetic-luxury .header__columns {
   min-height: var(--header-luxury-min-height);
-  padding-block: 0.35rem;
+  padding-block: 0.2rem;
   gap: clamp(0.4rem, 1.4vw, 1rem);
   max-width: var(--page-width);
   margin-inline: auto;
@@ -949,23 +949,21 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   border-color: rgb(var(--brand-gold) / 0.5);
 }
 
-/* Sticky header: subtle shrink */
+/* Sticky header: keep same height — no shrink/grow on scroll */
 #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-  min-height: 3.75rem;
-  padding-block: 0.25rem;
-  transition:
-    min-height 0.35s ease,
-    padding 0.35s ease;
+  min-height: var(--header-luxury-min-height);
+  padding-block: 0.2rem;
+  transition: none;
 }
 
 /* Header height tokens */
 body:has(#header-component.header--cosmetic-luxury) {
-  --header-height: 4.25rem;
+  --header-height: 3.5rem;
 }
 
 @media screen and (min-width: 750px) {
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 4.5rem;
+    --header-height: 3.75rem;
   }
 
   #header-group .announcement-bar--luxury {
@@ -1004,13 +1002,13 @@ body:has(#header-component.header--cosmetic-luxury) {
 
 @media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury {
-    --header-luxury-min-height: 4.5rem;
-    --header-luxury-logo-max-w: min(12rem, 22vw);
-    --header-luxury-logo-max-h: 2.85rem;
+    --header-luxury-min-height: 3.75rem;
+    --header-luxury-logo-max-w: min(11rem, 20vw);
+    --header-luxury-logo-max-h: 2.35rem;
   }
 
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 4.5rem;
+    --header-height: 3.75rem;
   }
 
   #header-component.header--cosmetic-luxury .header__row--top .header__columns {
@@ -1019,7 +1017,7 @@ body:has(#header-component.header--cosmetic-luxury) {
 
   #header-component.header--cosmetic-luxury .header__columns {
     min-height: var(--header-luxury-min-height);
-    padding-block: 0.1rem;
+    padding-block: 0.15rem;
   }
 
   #header-component.header--cosmetic-luxury .header-logo {
@@ -1031,13 +1029,14 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   #header-component.header--cosmetic-luxury .header-logo__image {
-    --header-logo-image-height: 46px;
-    max-height: 6rem;
-    height: 6rem !important;
+    --header-logo-image-height: 38px;
+    max-height: var(--header-luxury-logo-max-h);
+    height: var(--header-luxury-logo-max-h) !important;
   }
 
+  /* Sticky: identical size to resting state */
   #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-    min-height: 8rem;
+    min-height: var(--header-luxury-min-height);
     padding-block: 0.15rem;
   }
 }
@@ -1054,9 +1053,9 @@ body:has(#header-component.header--cosmetic-luxury) {
     --header-mobile-icon-size: 2rem;
     --header-mobile-icon-inner: 1rem;
     --header-mobile-icon-gap: 0.4rem;
-    --header-luxury-min-height: 3.75rem;
-    --header-luxury-logo-max-w: min(10rem, 48vw);
-    --header-luxury-logo-max-h: clamp(2.1rem, 10vw, 2.55rem);
+    --header-luxury-min-height: 3.25rem;
+    --header-luxury-logo-max-w: min(9.5rem, 46vw);
+    --header-luxury-logo-max-h: clamp(1.85rem, 8vw, 2.25rem);
   }
 
   #header-component.header--cosmetic-luxury .header__row--top {
@@ -1067,7 +1066,7 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   body:has(#header-component.header--cosmetic-luxury) {
-    --header-height: 3.75rem;
+    --header-height: 3.25rem;
   }
 
   #header-component.header--cosmetic-luxury .header__row--top .header__columns {
@@ -1075,7 +1074,7 @@ body:has(#header-component.header--cosmetic-luxury) {
     display: grid;
     align-items: center;
     min-height: var(--header-luxury-min-height);
-    padding-block: 0.15rem;
+    padding-block: 0.1rem;
     padding-inline: max(10px, env(safe-area-inset-left, 0px)) max(10px, env(safe-area-inset-right, 0px));
     column-gap: var(--header-mobile-icon-gap);
     row-gap: 0;
@@ -1112,7 +1111,8 @@ body:has(#header-component.header--cosmetic-luxury) {
   }
 
   #header-component.header--cosmetic-luxury .header-logo__image {
-    max-height: var(--header-luxury-logo-max-h, clamp(3.5rem, 14vw, 4.5rem));
+    max-height: var(--header-luxury-logo-max-h);
+    height: var(--header-luxury-logo-max-h) !important;
   }
 
   #header-component.header--cosmetic-luxury .header__drawer,
@@ -1292,8 +1292,9 @@ body:has(#header-component.header--cosmetic-luxury) {
     height: var(--header-mobile-icon-size);
   }
 
+  /* Sticky: keep compact — same height as resting mobile navbar */
   #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top .header__columns {
-    min-height: 5.85rem;
+    min-height: var(--header-luxury-min-height);
     padding-block: 0.1rem;
   }
 }
