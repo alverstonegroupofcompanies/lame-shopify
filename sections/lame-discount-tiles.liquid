@@ -62,15 +62,6 @@
             endif
           endif
 
-          assign badge_line = block.settings.badge_text
-          if badge_line == blank
-            if tile_type == 'bogo'
-              assign badge_line = 'BUY 1 GET 1'
-            else
-              assign badge_line = eyebrow | append: ' ' | append: percent | append: '% OFF'
-            endif
-          endif
-
           assign image_alt = block.settings.image_alt | default: category
         -%}
 
@@ -98,8 +89,6 @@
               {%- elsif tile_type == 'bogo' -%}
                 <div class="lame-discount-tile__bogo-visual" aria-hidden="true">
                   <span class="lame-discount-tile__bogo-kicker">SPECIAL OFFER</span>
-                  <span class="lame-discount-tile__bogo-main">BUY 1</span>
-                  <span class="lame-discount-tile__bogo-main lame-discount-tile__bogo-main--accent">GET 1 FREE</span>
                 </div>
               {%- elsif request.design_mode -%}
                 <div class="lame-discount-tile__placeholder lame-discount-tile__placeholder--editor">
@@ -111,10 +100,6 @@
                   <span>{{ percent }}%</span>
                 </div>
               {%- endif -%}
-
-              <span class="lame-discount-tile__badge">
-                <span class="lame-discount-tile__badge-text">{{ badge_line | escape }}</span>
-              </span>
 
               <svg class="lame-discount-tile__wave" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true">
                 <path d="M0,18 C70,48 130,0 200,22 C270,44 330,6 400,24 L400,48 L0,48 Z"></path>
@@ -289,12 +274,6 @@
           "step": 5,
           "unit": "%",
           "default": 50
-        },
-        {
-          "type": "text",
-          "id": "badge_text",
-          "label": "Badge text (optional)",
-          "info": "Defaults from eyebrow + percent, or BOGO"
         },
         {
           "type": "text",
