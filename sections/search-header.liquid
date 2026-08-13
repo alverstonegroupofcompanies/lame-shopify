@@ -1,40 +1,44 @@
-
-
 {{ 'lame-search-page.css' | asset_url | stylesheet_tag }}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div class="section section--page-width color-{{ section.settings.color_scheme }} lame-search-header">
   <div
-    class="spacing-style search-page__header"
+    class="spacing-style search-page__header lame-search-hero"
     style="
-      --horizontal-alignment: {{ section.settings.alignment }};
+      --horizontal-alignment: center;
       {% render 'spacing-style', settings: section.settings %}
     "
   >
-    {% assign heading_text = 'content.search' | t %}
+    <div class="lame-search-hero__copy">
+      {% assign heading_text = 'content.search' | t %}
 
-    {% if search.performed %}
-      {% assign heading_text = 'content.search_results' | t %}
-    {% endif %}
+      {% if search.performed %}
+        {% assign heading_text = 'content.search_results' | t %}
+      {% endif %}
 
-    {% content_for 'block', id: 'heading', type: '_heading', text: heading_text %}
+      {% content_for 'block', id: 'heading', type: '_heading', text: heading_text %}
 
-    {% if search.performed %}
-      <p class="lame-search-header__meta">
-        {% if search.results_count > 0 %}
-          {{ search.results_count }}
-          {% if search.terms != blank %}
-            results for “{{ search.terms | escape }}”
+      {% if search.performed %}
+        <p class="lame-search-header__meta">
+          {% if search.results_count > 0 %}
+            <span class="lame-search-header__count">{{ search.results_count }}</span>
+            {% if search.terms != blank %}
+              results for <span class="lame-search-header__term">“{{ search.terms | escape }}”</span>
+            {% else %}
+              results
+            {% endif %}
           {% else %}
-            results
+            No products found{% if search.terms != blank %} for <span class="lame-search-header__term">“{{ search.terms | escape }}”</span>{% endif %}
           {% endif %}
-        {% else %}
-          No products found{% if search.terms != blank %} for “{{ search.terms | escape }}”{% endif %}
-        {% endif %}
-      </p>
-    {% endif %}
+        </p>
+      {% else %}
+        <p class="lame-search-header__meta">Find products, brands, and beauty essentials</p>
+      {% endif %}
+    </div>
 
-    {% content_for 'block', id: 'search', type: '_search-input' %}
+    <div class="lame-search-hero__bar">
+      {% content_for 'block', id: 'search', type: '_search-input' %}
+    </div>
   </div>
 </div>
 
@@ -60,7 +64,7 @@
           "label": "t:options.right"
         }
       ],
-      "default": "flex-start"
+      "default": "center"
     },
     {
       "type": "color_scheme",
