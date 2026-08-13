@@ -318,38 +318,87 @@
   transform: scale(1.15);
 }
 
-@media screen and (max-width: 989px) {
+/* Tablet + mobile: shrink width, show full offer image (no crop) */
+@media screen and (max-width: 1199px) {
   .lame-discount-tiles {
-    --lame-dt-slider-max: min(820px, 78vw);
-  }
-
-  .lame-offer-stage {
-    grid-template-columns: minmax(2.25rem, 0.7fr) minmax(0, var(--lame-dt-slider-max)) minmax(2.25rem, 0.7fr);
-  }
-}
-
-@media screen and (max-width: 749px) {
-  .lame-discount-tiles {
-    --lame-dt-edge: 0.75rem;
-    --lame-dt-slider-max: 100%;
+    --lame-dt-edge: clamp(0.75rem, 3vw, 1.25rem);
+    --lame-dt-slider-max: min(100%, 34rem);
+    --lame-dt-radius: 12px;
   }
 
   .lame-offer-stage {
     grid-template-columns: 1fr;
     gap: 0;
+    justify-items: center;
+    max-width: none;
   }
 
   .lame-offer-stage__side {
     display: none;
   }
 
+  .lame-offer-slider {
+    width: 100%;
+    max-width: var(--lame-dt-slider-max);
+    margin-inline: auto;
+  }
+
   .lame-offer-slider__viewport {
+    aspect-ratio: unset;
+    width: 100%;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
+    background: transparent;
+  }
+
+  .lame-offer-slider__track,
+  .lame-offer-slider__slide,
+  .lame-offer-slider__link {
+    height: auto;
+    min-height: 0;
+    align-items: center;
+  }
+
+  .lame-offer-slider__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto !important;
+    max-height: none;
+    object-fit: contain !important;
+    object-position: center;
+  }
+
+  .lame-offer-slider__placeholder {
+    min-height: 10rem;
     aspect-ratio: 16 / 9;
   }
 
   .lame-offer-slider__nav {
-    width: 2.15rem;
-    height: 2.15rem;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .lame-offer-slider__nav--prev {
+    left: 0.35rem;
+  }
+
+  .lame-offer-slider__nav--next {
+    right: 0.35rem;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .lame-discount-tiles {
+    --lame-dt-edge: 0.75rem;
+    /* Narrower frame so the full discount creative fits on small screens */
+    --lame-dt-slider-max: min(100%, 20.5rem);
+  }
+
+  .lame-offer-slider__nav {
+    width: 2.05rem;
+    height: 2.05rem;
   }
 }
 
