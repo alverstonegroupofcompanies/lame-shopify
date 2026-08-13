@@ -97,6 +97,7 @@
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal"
   data-flash-deal-carousel
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -279,6 +280,8 @@
         const overflows = track.scrollWidth > scrollEl.clientWidth + 4;
         scrollEl.classList.toggle('is-scrollable', overflows);
         scrollEl.classList.toggle('is-centered', !overflows);
+        prev?.toggleAttribute('hidden', !overflows);
+        next?.toggleAttribute('hidden', !overflows);
         if (!overflows) {
           scrollEl.scrollLeft = 0;
         }

@@ -1,154 +1,242 @@
 {%- comment -%}
-  Homepage Best Offers — wave cards with image, badge, icon, CTA.
+  Homepage Best Offers — single-image slideshow (editable slides + links).
 {%- endcomment -%}
 
 {{ 'lame-discount-tiles.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign slide_count = 0
+  for block in section.blocks
+    if block.settings.image != blank or request.design_mode
+      assign slide_count = slide_count | plus: 1
+    endif
+  endfor
+-%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-discount-tiles"
   aria-label="{{ section.settings.eyebrow | default: section.settings.heading | default: 'Best Offers' | escape }}"
+  data-offer-slider
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-autoplay-speed="{{ section.settings.autoplay_speed | default: 5 }}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-discount-tiles__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    <header class="lame-discount-tiles__header" data-lame-reveal>
-      {%- if section.settings.eyebrow != blank -%}
-        <p class="lame-discount-tiles__eyebrow">
-          <span class="lame-discount-tiles__eyebrow-rule" aria-hidden="true"></span>
-          <span class="lame-discount-tiles__eyebrow-text">{{ section.settings.eyebrow | escape }}</span>
-          <span class="lame-discount-tiles__eyebrow-rule" aria-hidden="true"></span>
-        </p>
+    {%- if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.subtitle != blank -%}
+      <header class="lame-discount-tiles__header" data-lame-reveal>
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="lame-discount-tiles__eyebrow">
+            <span class="lame-discount-tiles__eyebrow-rule" aria-hidden="true"></span>
+            <span class="lame-discount-tiles__eyebrow-text">{{ section.settings.eyebrow | escape }}</span>
+            <span class="lame-discount-tiles__eyebrow-rule" aria-hidden="true"></span>
+          </p>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h2 class="lame-discount-tiles__title">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.subtitle != blank -%}
+          <p class="lame-discount-tiles__subtitle">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div class="lame-offer-slider">
+      {%- if slide_count > 1 -%}
+        <button
+          type="button"
+          class="lame-offer-slider__nav lame-offer-slider__nav--prev"
+          data-offer-prev
+          aria-label="{{ section.settings.prev_label | default: 'Previous offer' | escape }}"
+        >
+          <span aria-hidden="true">&#8249;</span>
+        </button>
       {%- endif -%}
 
-      {%- if section.settings.heading != blank -%}
-        <h2 class="lame-discount-tiles__title">{{ section.settings.heading | escape }}</h2>
-      {%- endif -%}
+      <div class="lame-offer-slider__viewport" data-offer-viewport>
+        <ul class="lame-offer-slider__track" role="list" data-offer-track>
+          {%- assign visible_index = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign slide_link = block.settings.link
+              if block.settings.collection != blank
+                assign slide_link = block.settings.collection.url
+              endif
+              assign image_alt = block.settings.image_alt | default: section.settings.heading | default: 'Offer'
+            -%}
 
-      {%- if section.settings.subtitle != blank -%}
-        <p class="lame-discount-tiles__subtitle">{{ section.settings.subtitle | escape }}</p>
-      {%- endif -%}
-    </header>
+            {%- if block.settings.image == blank and request.design_mode == false -%}
+              {%- continue -%}
+            {%- endif -%}
 
-    <ul class="lame-discount-tiles__grid" role="list">
-      {%- for block in section.blocks -%}
-        {%- liquid
-          assign tile_link = block.settings.link
-          if block.settings.collection != blank
-            assign tile_link = block.settings.collection.url
-          endif
-
-          assign percent = block.settings.percent | default: 50
-          assign category = block.settings.category | default: 'Skincare'
-          assign eyebrow = block.settings.eyebrow | default: 'UP TO'
-          assign tile_type = block.settings.tile_type | default: 'percent'
-          assign icon_name = block.settings.icon | default: 'leaf'
-          assign cta_label = block.settings.cta_label | default: 'SHOP NOW'
-          assign offer_line = block.settings.offer_line
-
-          if offer_line == blank
-            if tile_type == 'bogo'
-              assign offer_line = 'BUY 1 GET 1 FREE'
-            else
-              assign offer_line = eyebrow | append: ' ' | append: percent | append: '% OFF'
-            endif
-          endif
-
-          assign category_line = block.settings.category_line
-          if category_line == blank
-            if tile_type == 'bogo'
-              assign category_line = 'on ' | append: category | append: ' Products'
-            else
-              assign category_line = 'on ' | append: category
-            endif
-          endif
-
-          assign image_alt = block.settings.image_alt | default: category
-        -%}
-
-        <li class="lame-discount-tiles__item" {{ block.shopify_attributes }}>
-          {%- if tile_link != blank -%}
-            <a class="lame-discount-tile lame-discount-tile--{{ tile_type }}" href="{{ tile_link }}">
-          {%- else -%}
-            <div class="lame-discount-tile lame-discount-tile--{{ tile_type }}">
-          {%- endif -%}
-
-            <div class="lame-discount-tile__visual">
-              <span class="lame-discount-tile__pattern" aria-hidden="true"></span>
-
-              {%- if block.settings.image != blank -%}
-                {{
-                  block.settings.image
-                  | image_url: width: 900
-                  | image_tag:
-                    class: 'lame-discount-tile__image',
-                    loading: 'lazy',
-                    widths: '320, 480, 640, 900',
-                    sizes: '(min-width: 990px) 18vw, (min-width: 750px) 30vw, 70vw',
-                    alt: image_alt
-                }}
-              {%- elsif tile_type == 'bogo' -%}
-                <div class="lame-discount-tile__bogo-visual" aria-hidden="true">
-                  <span class="lame-discount-tile__bogo-kicker">SPECIAL OFFER</span>
-                </div>
-              {%- elsif request.design_mode -%}
-                <div class="lame-discount-tile__placeholder lame-discount-tile__placeholder--editor">
-                  <span>Add image</span>
-                  <small>Theme editor → this tile → Product image</small>
-                </div>
+            <li
+              class="lame-offer-slider__slide{% if visible_index == 0 %} is-active{% endif %}"
+              data-offer-slide
+              {{ block.shopify_attributes }}
+            >
+              {%- if slide_link != blank -%}
+                <a
+                  class="lame-offer-slider__link"
+                  href="{{ slide_link }}"
+                  {% if block.settings.open_in_new_tab %}
+                    target="_blank"
+                    rel="noopener"
+                  {% endif %}
+                >
               {%- else -%}
-                <div class="lame-discount-tile__placeholder" aria-hidden="true">
-                  <span>{{ percent }}%</span>
-                </div>
+                <div class="lame-offer-slider__link">
               {%- endif -%}
 
-              <svg class="lame-discount-tile__wave" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M0,18 C70,48 130,0 200,22 C270,44 330,6 400,24 L400,48 L0,48 Z"></path>
-              </svg>
-            </div>
+                {%- if block.settings.image != blank -%}
+                  {%- liquid
+                    if visible_index == 0
+                      assign image_loading = 'eager'
+                    else
+                      assign image_loading = 'lazy'
+                    endif
+                  -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 2400
+                    | image_tag:
+                      class: 'lame-offer-slider__image',
+                      loading: image_loading,
+                      widths: '750, 1100, 1500, 1800, 2400',
+                      sizes: '(min-width: 990px) 90vw, 100vw',
+                      alt: image_alt
+                  }}
+                {%- else -%}
+                  <div class="lame-offer-slider__placeholder">
+                    <span>Add offer image</span>
+                    <small>Theme editor → Offer slide → Image</small>
+                  </div>
+                {%- endif -%}
 
-            <div class="lame-discount-tile__body">
-              <span class="lame-discount-tile__icon" aria-hidden="true">
-                {%- case icon_name -%}
-                  {%- when 'mustache' -%}
-                    <svg viewBox="0 0 48 24" fill="none"><path d="M4 14c4-8 10-10 14-6 2 2 3 3 6 3s4-1 6-3c4-4 10-2 14 6-5-2-8 1-12 3-3 1.5-5 1.5-8 0-4-2-7-5-12-3z" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  {%- when 'baby' -%}
-                    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="18" r="10" stroke="currentColor" stroke-width="2.2"/><path d="M14 17.5h2M24 17.5h2M16 23c1.4 1.6 6.6 1.6 8 0" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 10c2-4 6-5 8-5s6 1 8 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M13 30h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-                  {%- when 'venus' -%}
-                    <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="14" r="8" stroke="currentColor" stroke-width="2.2"/><path d="M20 22v12M14 28h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-                  {%- when 'gift' -%}
-                    <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="16" width="24" height="16" rx="2" stroke="currentColor" stroke-width="2.2"/><path d="M8 22h24M20 16v16M20 16c-4-6-10-4-10 0 0 2.5 4 4 10 4M20 16c4-6 10-4 10 0 0 2.5-4 4-10 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  {%- else -%}
-                    <svg viewBox="0 0 40 40" fill="none"><path d="M20 34c8-6 12-12 12-18a8 8 0 0 0-16 0c0-6-4-8-8-8-2 8 2 16 12 26z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 18c2 2 4 3 6 3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-                {%- endcase -%}
-              </span>
+              {%- if slide_link != blank -%}
+                </a>
+              {%- else -%}
+                </div>
+              {%- endif -%}
+            </li>
+            {%- assign visible_index = visible_index | plus: 1 -%}
+          {%- endfor -%}
 
-              <p class="lame-discount-tile__offer">
-                <span class="lame-discount-tile__offer-strong">{{ offer_line | escape }}</span>
-                <span class="lame-discount-tile__offer-cat">{{ category_line | escape }}</span>
-              </p>
-
-              <span class="lame-discount-tile__cta">
-                {{ cta_label | escape }}
-                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                  <path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-            </div>
-
-          {%- if tile_link != blank -%}
-            </a>
-          {%- else -%}
-            </div>
+          {%- if visible_index == 0 and request.design_mode -%}
+            <li class="lame-offer-slider__slide is-active" data-offer-slide>
+              <div class="lame-offer-slider__link">
+                <div class="lame-offer-slider__placeholder">
+                  <span>Add offer slides</span>
+                  <small>Add blocks with image + link</small>
+                </div>
+              </div>
+            </li>
           {%- endif -%}
-        </li>
-      {%- endfor -%}
-    </ul>
+        </ul>
+      </div>
+
+      {%- if slide_count > 1 -%}
+        <button
+          type="button"
+          class="lame-offer-slider__nav lame-offer-slider__nav--next"
+          data-offer-next
+          aria-label="{{ section.settings.next_label | default: 'Next offer' | escape }}"
+        >
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+      {%- endif -%}
+    </div>
+
+    {%- if slide_count > 1 and section.settings.show_dots -%}
+      <div class="lame-offer-slider__dots" data-offer-dots role="tablist" aria-label="Offer slides">
+        {%- assign dot_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.settings.image == blank and request.design_mode == false -%}
+            {%- continue -%}
+          {%- endif -%}
+          <button
+            type="button"
+            class="lame-offer-slider__dot{% if dot_index == 0 %} is-active{% endif %}"
+            data-offer-dot="{{ dot_index }}"
+            aria-label="Go to slide {{ dot_index | plus: 1 }}"
+          ></button>
+          {%- assign dot_index = dot_index | plus: 1 -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
+<script>
+  (() => {
+    const root = document.querySelector('#shopify-section-{{ section.id }} [data-offer-slider]');
+    if (!root) return;
+
+    const track = root.querySelector('[data-offer-track]');
+    const slides = Array.from(root.querySelectorAll('[data-offer-slide]'));
+    const prev = root.querySelector('[data-offer-prev]');
+    const next = root.querySelector('[data-offer-next]');
+    const dots = Array.from(root.querySelectorAll('[data-offer-dot]'));
+    if (!track || slides.length === 0) return;
+
+    let index = 0;
+    let timer = null;
+    const autoplay = root.dataset.autoplay === 'true' && slides.length > 1;
+    const speed = Math.max(2, Number(root.dataset.autoplaySpeed) || 5) * 1000;
+
+    const setActive = (nextIndex) => {
+      index = (nextIndex + slides.length) % slides.length;
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === index);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === index);
+      });
+      track.style.transform = `translateX(-${index * 100}%)`;
+    };
+
+    const stop = () => {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    };
+
+    const start = () => {
+      if (!autoplay) return;
+      stop();
+      timer = window.setInterval(() => setActive(index + 1), speed);
+    };
+
+    prev?.addEventListener('click', () => {
+      setActive(index - 1);
+      start();
+    });
+    next?.addEventListener('click', () => {
+      setActive(index + 1);
+      start();
+    });
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        setActive(Number(dot.dataset.offerDot) || 0);
+        start();
+      });
+    });
+
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', start);
+
+    setActive(0);
+    start();
+  })();
+</script>
+
 {% schema %}
 {
-  "name": "Discount tiles",
+  "name": "Best Offers slider",
   "tag": "section",
   "class": "section-wrapper",
   "enabled_on": {
@@ -174,6 +262,40 @@
       "default": "Limited time offers on skincare, baby care, hygiene & more"
     },
     {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "prev_label",
+      "label": "Previous button label",
+      "default": "Previous offer"
+    },
+    {
+      "type": "text",
+      "id": "next_label",
+      "label": "Next button label",
+      "default": "Next offer"
+    },
+    {
       "type": "select",
       "id": "section_width",
       "label": "Section width",
@@ -181,7 +303,7 @@
         { "value": "page-width", "label": "Page width" },
         { "value": "full-width", "label": "Full width" }
       ],
-      "default": "page-width"
+      "default": "full-width"
     },
     {
       "type": "color_scheme",
@@ -210,98 +332,21 @@
       "default": 24
     }
   ],
-  "max_blocks": 8,
+  "max_blocks": 12,
   "blocks": [
     {
-      "type": "tile",
-      "name": "Offer tile",
+      "type": "slide",
+      "name": "Offer slide",
       "settings": [
-        {
-          "type": "header",
-          "content": "Image"
-        },
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Product image",
-          "info": "Upload or select an image for the orange top of this card. Optional for BOGO tiles."
+          "label": "Image"
         },
         {
           "type": "text",
           "id": "image_alt",
-          "label": "Image alt text",
-          "info": "Defaults to the category label if left blank"
-        },
-        {
-          "type": "header",
-          "content": "Offer"
-        },
-        {
-          "type": "select",
-          "id": "tile_type",
-          "label": "Tile type",
-          "options": [
-            { "value": "percent", "label": "Percent off" },
-            { "value": "bogo", "label": "Buy 1 Get 1 Free" }
-          ],
-          "default": "percent"
-        },
-        {
-          "type": "select",
-          "id": "icon",
-          "label": "Icon",
-          "options": [
-            { "value": "leaf", "label": "Leaf (skincare)" },
-            { "value": "mustache", "label": "Mustache (men)" },
-            { "value": "baby", "label": "Baby" },
-            { "value": "venus", "label": "Venus (hygiene)" },
-            { "value": "gift", "label": "Gift (special)" }
-          ],
-          "default": "leaf"
-        },
-        {
-          "type": "text",
-          "id": "eyebrow",
-          "label": "Eyebrow",
-          "default": "UP TO"
-        },
-        {
-          "type": "range",
-          "id": "percent",
-          "label": "Percent",
-          "min": 5,
-          "max": 90,
-          "step": 5,
-          "unit": "%",
-          "default": 50
-        },
-        {
-          "type": "text",
-          "id": "offer_line",
-          "label": "Offer line (optional)",
-          "info": "e.g. UP TO 50% OFF"
-        },
-        {
-          "type": "text",
-          "id": "category",
-          "label": "Category label",
-          "default": "Skincare"
-        },
-        {
-          "type": "text",
-          "id": "category_line",
-          "label": "Category line (optional)",
-          "info": "e.g. on Skincare"
-        },
-        {
-          "type": "text",
-          "id": "cta_label",
-          "label": "Button label",
-          "default": "SHOP NOW"
-        },
-        {
-          "type": "header",
-          "content": "Link"
+          "label": "Image alt text"
         },
         {
           "type": "collection",
@@ -313,64 +358,23 @@
           "id": "link",
           "label": "Custom link (optional)",
           "info": "Used only if no collection is selected"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open link in new tab",
+          "default": false
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Discount tiles",
+      "name": "Best Offers slider",
       "category": "Banners",
       "blocks": [
-        {
-          "type": "tile",
-          "settings": {
-            "tile_type": "percent",
-            "icon": "leaf",
-            "eyebrow": "UP TO",
-            "percent": 50,
-            "category": "Skincare"
-          }
-        },
-        {
-          "type": "tile",
-          "settings": {
-            "tile_type": "percent",
-            "icon": "mustache",
-            "eyebrow": "UP TO",
-            "percent": 25,
-            "category": "Men's Care"
-          }
-        },
-        {
-          "type": "tile",
-          "settings": {
-            "tile_type": "percent",
-            "icon": "baby",
-            "eyebrow": "UP TO",
-            "percent": 15,
-            "category": "Baby Care"
-          }
-        },
-        {
-          "type": "tile",
-          "settings": {
-            "tile_type": "percent",
-            "icon": "venus",
-            "eyebrow": "UP TO",
-            "percent": 20,
-            "category": "Female Hygiene"
-          }
-        },
-        {
-          "type": "tile",
-          "settings": {
-            "tile_type": "bogo",
-            "icon": "gift",
-            "category": "Selected",
-            "category_line": "on Selected Products"
-          }
-        }
+        { "type": "slide" },
+        { "type": "slide" }
       ]
     }
   ]

@@ -10,9 +10,14 @@
   --lame-flash-ink: 30 41 59;
   --lame-flash-muted: 100 116 139;
   --lame-flash-card-width: clamp(220px, calc((100vw - 8rem) / 4.2), 290px);
-  --lame-flash-edge: max(1rem, var(--page-margin));
+  --lame-flash-edge: clamp(1rem, 2.5vw, 2rem);
+  --lame-flash-visible-count: 4;
   position: relative;
   overflow-x: clip;
+  background: transparent;
+}
+
+.shopify-section:has(.lame-flash-deal) {
   background: linear-gradient(
     180deg,
     #ff6f00 0%,
@@ -206,6 +211,14 @@
   transform: scale(1.04);
 }
 
+.lame-flash-deal__carousel:has(.lame-flash-deal__nav[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lame-flash-deal__nav[hidden] {
+  display: none;
+}
+
 .lame-flash-deal__nav:disabled {
   opacity: 0.35;
   cursor: default;
@@ -225,7 +238,7 @@
 }
 
 .lame-flash-deal__viewport.is-centered {
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .lame-flash-deal__viewport::-webkit-scrollbar {
@@ -245,8 +258,16 @@
 }
 
 .lame-flash-deal__viewport.is-centered .lame-flash-deal__track {
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(var(--lame-flash-visible-count, 4), minmax(0, 1fr));
+  justify-content: stretch;
   width: 100%;
+}
+
+.lame-flash-deal__viewport.is-centered .lame-flash-deal__item {
+  flex: none;
+  width: 100%;
+  max-width: none;
 }
 
 .lame-flash-deal__item {
@@ -532,12 +553,27 @@
 
 .lame-flash-deal.section--page-width .lame-flash-deal__wrap {
   max-width: var(--page-width);
+  margin-inline: auto;
   padding-inline: var(--lame-flash-edge);
 }
 
 .lame-flash-deal.section--page-width .lame-flash-deal__header,
 .lame-flash-deal.section--page-width .lame-flash-deal__carousel {
   padding-inline: 0;
+}
+
+@media screen and (min-width: 990px) {
+  .lame-flash-deal.section--full-width {
+    --lame-flash-edge: clamp(1.25rem, 3.5vw, 3rem);
+  }
+
+  .lame-flash-deal.section--full-width .lame-flash-deal__carousel {
+    padding-inline: var(--lame-flash-edge);
+  }
+
+  .lame-flash-deal.section--full-width .lame-flash-deal__header {
+    padding-inline: var(--lame-flash-edge);
+  }
 }
 
 @media screen and (min-width: 750px) {
