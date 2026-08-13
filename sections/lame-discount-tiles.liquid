@@ -70,6 +70,8 @@
               assign badge_line = eyebrow | append: ' ' | append: percent | append: '% OFF'
             endif
           endif
+
+          assign image_alt = block.settings.image_alt | default: category
         -%}
 
         <li class="lame-discount-tiles__item" {{ block.shopify_attributes }}>
@@ -91,13 +93,18 @@
                     loading: 'lazy',
                     widths: '320, 480, 640, 900',
                     sizes: '(min-width: 990px) 18vw, (min-width: 750px) 30vw, 70vw',
-                    alt: category
+                    alt: image_alt
                 }}
               {%- elsif tile_type == 'bogo' -%}
                 <div class="lame-discount-tile__bogo-visual" aria-hidden="true">
                   <span class="lame-discount-tile__bogo-kicker">SPECIAL OFFER</span>
                   <span class="lame-discount-tile__bogo-main">BUY 1</span>
                   <span class="lame-discount-tile__bogo-main lame-discount-tile__bogo-main--accent">GET 1 FREE</span>
+                </div>
+              {%- elsif request.design_mode -%}
+                <div class="lame-discount-tile__placeholder lame-discount-tile__placeholder--editor">
+                  <span>Add image</span>
+                  <small>Theme editor → this tile → Product image</small>
                 </div>
               {%- else -%}
                 <div class="lame-discount-tile__placeholder" aria-hidden="true">
@@ -218,11 +225,32 @@
       "default": 24
     }
   ],
+  "max_blocks": 8,
   "blocks": [
     {
       "type": "tile",
-      "name": "Discount tile",
+      "name": "Offer tile",
       "settings": [
+        {
+          "type": "header",
+          "content": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Product image",
+          "info": "Upload or select an image for the orange top of this card. Optional for BOGO tiles."
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image alt text",
+          "info": "Defaults to the category label if left blank"
+        },
+        {
+          "type": "header",
+          "content": "Offer"
+        },
         {
           "type": "select",
           "id": "tile_type",
@@ -232,11 +260,6 @@
             { "value": "bogo", "label": "Buy 1 Get 1 Free" }
           ],
           "default": "percent"
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Product image"
         },
         {
           "type": "select",
@@ -296,6 +319,10 @@
           "id": "cta_label",
           "label": "Button label",
           "default": "SHOP NOW"
+        },
+        {
+          "type": "header",
+          "content": "Link"
         },
         {
           "type": "collection",
