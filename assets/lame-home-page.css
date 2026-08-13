@@ -46,7 +46,7 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   padding-inline: 0;
 }
 
-/* Flush homepage sections — no white gutters between bands */
+/* Flush homepage sections by default — no white gutters between bands */
 .template-index .content-for-layout {
   row-gap: 0;
 }
@@ -55,6 +55,17 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 .template-index .content-for-layout > .shopify-section {
   border-top: none !important;
   border-bottom: none !important;
+}
+
+/* PC: minimum breathing room between sections below the hero */
+@media screen and (min-width: 990px) {
+  .template-index {
+    --lame-home-section-min-gap: clamp(2.25rem, 3.2vw, 3.5rem);
+  }
+
+  .template-index .content-for-layout > .shopify-section:not(:has(.lame-home-hero)) + .shopify-section {
+    margin-top: var(--lame-home-section-min-gap);
+  }
 }
 
 .template-index .content-for-layout > .shopify-section::after {

@@ -8,30 +8,30 @@
   --lame-dt-orange-dark: #c23400;
   --lame-dt-yellow: #ffd000;
   --lame-dt-cream: #fff8ef;
-  --lame-dt-gap: clamp(0.45rem, 1.1vw, 0.85rem);
+  --lame-dt-gap: clamp(0.28rem, 0.7vw, 0.45rem);
 }
 
 .lame-discount-tiles__wrap {
   width: 100%;
-  max-width: min(100%, var(--page-width, 1200px));
+  max-width: min(100%, 920px);
   margin-inline: auto;
   box-sizing: border-box;
 }
 
 .section--full-width .lame-discount-tiles__wrap {
-  max-width: 100%;
+  max-width: min(100%, 920px);
   padding-inline: clamp(0.6rem, 2.5vw, 1.5rem);
 }
 
 .lame-discount-tiles__header {
   text-align: center;
-  margin-bottom: clamp(0.75rem, 1.8vw, 1.15rem);
+  margin-bottom: clamp(0.6rem, 1.5vw, 0.95rem);
 }
 
 .lame-discount-tiles__heading {
   margin: 0;
   font-family: var(--lame-font-display, var(--font-heading--family));
-  font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #121212;
@@ -49,7 +49,14 @@
 
 .lame-discount-tiles__item {
   min-width: 0;
+  animation: lame-dt-rise 0.55s ease both;
 }
+
+.lame-discount-tiles__item:nth-child(1) { animation-delay: 0.02s; }
+.lame-discount-tiles__item:nth-child(2) { animation-delay: 0.08s; }
+.lame-discount-tiles__item:nth-child(3) { animation-delay: 0.14s; }
+.lame-discount-tiles__item:nth-child(4) { animation-delay: 0.2s; }
+.lame-discount-tiles__item:nth-child(5) { animation-delay: 0.26s; }
 
 .lame-discount-tile {
   position: relative;
@@ -57,11 +64,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.15rem;
+  gap: 0.1rem;
   width: 100%;
-  aspect-ratio: 3 / 4;
-  padding: clamp(0.65rem, 1.4vw, 1rem) clamp(0.4rem, 1vw, 0.7rem);
-  border-radius: clamp(10px, 1.2vw, 14px);
+  aspect-ratio: 3 / 3.65;
+  padding: clamp(0.5rem, 1.1vw, 0.75rem) clamp(0.3rem, 0.8vw, 0.55rem);
+  border-radius: clamp(8px, 1vw, 12px);
   text-decoration: none;
   color: #fff;
   overflow: hidden;
@@ -69,7 +76,7 @@
   background:
     radial-gradient(circle at 50% 38%, #ff9a2e 0%, var(--lame-dt-orange) 48%, var(--lame-dt-orange-deep) 78%, var(--lame-dt-orange-dark) 100%);
   box-shadow:
-    0 10px 24px rgb(194 52 0 / 0.22),
+    0 8px 18px rgb(194 52 0 / 0.2),
     inset 0 1px 0 rgb(255 255 255 / 0.18);
   transition:
     transform 0.22s ease,
@@ -77,9 +84,9 @@
 }
 
 .lame-discount-tile:hover {
-  transform: translateY(-3px) scale(1.015);
+  transform: translateY(-3px) scale(1.02);
   box-shadow:
-    0 16px 32px rgb(194 52 0 / 0.28),
+    0 14px 28px rgb(194 52 0 / 0.28),
     inset 0 1px 0 rgb(255 255 255 / 0.2);
 }
 
@@ -99,6 +106,7 @@
     radial-gradient(circle at 88% 90%, #000 0 30%, transparent 58%);
   mask-composite: add;
   -webkit-mask-composite: source-over;
+  animation: lame-dt-halftone 8s linear infinite;
 }
 
 .lame-discount-tile__sparkles {
@@ -112,25 +120,27 @@
 .lame-discount-tile__sparkles::after {
   content: '';
   position: absolute;
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
   background: #fff;
   clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   filter: drop-shadow(0 0 4px rgb(255 255 255 / 0.85));
+  animation: lame-dt-twinkle 2.2s ease-in-out infinite;
 }
 
 .lame-discount-tile__sparkles::before {
-  top: 28%;
-  left: 14%;
+  top: 26%;
+  left: 12%;
   transform: scale(0.85);
 }
 
 .lame-discount-tile__sparkles::after {
-  top: 34%;
-  right: 16%;
-  width: 0.4rem;
-  height: 0.4rem;
+  top: 32%;
+  right: 14%;
+  width: 0.38rem;
+  height: 0.38rem;
   background: var(--lame-dt-yellow);
+  animation-delay: 1.1s;
 }
 
 .lame-discount-tile > *:not(.lame-discount-tile__halftone):not(.lame-discount-tile__sparkles) {
@@ -139,18 +149,17 @@
 }
 
 .lame-discount-tile__eyebrow,
-.lame-discount-tile__for,
-.lame-discount-tile__products {
+.lame-discount-tile__for {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.28rem;
   width: 100%;
 }
 
 .lame-discount-tile__rule {
   display: block;
-  width: clamp(0.7rem, 8%, 1.35rem);
+  width: clamp(0.55rem, 7%, 1.1rem);
   height: 1px;
   background: currentColor;
   opacity: 0.85;
@@ -163,9 +172,9 @@
 
 .lame-discount-tile__eyebrow {
   font-family: 'Montserrat', var(--lame-font-body, system-ui, sans-serif);
-  font-size: clamp(0.55rem, 1.05vw, 0.72rem);
+  font-size: clamp(0.5rem, 0.95vw, 0.65rem);
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   font-style: italic;
   color: #fff;
   text-transform: uppercase;
@@ -175,14 +184,15 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 0.05em;
-  margin: 0.1rem 0 0.05rem;
+  gap: 0.04em;
+  margin: 0.05rem 0;
   line-height: 0.85;
+  animation: lame-dt-pulse 2.8s ease-in-out infinite;
 }
 
 .lame-discount-tile__number {
   font-family: 'Black Ops One', 'Montserrat', Impact, sans-serif;
-  font-size: clamp(2.1rem, 5.2vw, 3.4rem);
+  font-size: clamp(1.7rem, 4.2vw, 2.65rem);
   font-weight: 400;
   color: #fffaf2;
   letter-spacing: -0.03em;
@@ -192,8 +202,7 @@
     3px 3px 0 #ff9a1a,
     4px 4px 0 #ff9a1a,
     5px 5px 0 var(--lame-dt-orange-dark),
-    6px 6px 0 var(--lame-dt-orange-dark),
-    0 0 18px rgb(255 255 255 / 0.25);
+    0 0 16px rgb(255 255 255 / 0.28);
 }
 
 .lame-discount-tile__suffix {
@@ -206,7 +215,7 @@
 
 .lame-discount-tile__percent {
   font-family: 'Black Ops One', 'Montserrat', Impact, sans-serif;
-  font-size: clamp(0.95rem, 2.2vw, 1.45rem);
+  font-size: clamp(0.8rem, 1.8vw, 1.15rem);
   color: #fffaf2;
   text-shadow:
     1px 1px 0 var(--lame-dt-orange-deep),
@@ -216,7 +225,7 @@
 
 .lame-discount-tile__off {
   font-family: 'Montserrat', system-ui, sans-serif;
-  font-size: clamp(0.7rem, 1.5vw, 0.95rem);
+  font-size: clamp(0.58rem, 1.2vw, 0.78rem);
   font-weight: 800;
   color: #fff;
   margin-top: 0.05em;
@@ -225,17 +234,17 @@
 
 .lame-discount-tile__for {
   font-family: 'Pacifico', cursive;
-  font-size: clamp(0.7rem, 1.4vw, 0.95rem);
+  font-size: clamp(0.6rem, 1.2vw, 0.8rem);
   color: var(--lame-dt-yellow);
   line-height: 1.1;
-  margin: 0.05rem 0;
+  margin: 0.02rem 0;
 }
 
 .lame-discount-tile__category {
   font-family: 'Montserrat', system-ui, sans-serif;
-  font-size: clamp(0.62rem, 1.25vw, 0.88rem);
+  font-size: clamp(0.55rem, 1.05vw, 0.74rem);
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-align: center;
   text-transform: uppercase;
   color: var(--lame-dt-yellow);
@@ -244,7 +253,7 @@
     0 1px 0 var(--lame-dt-orange-dark),
     1px 2px 0 rgb(0 0 0 / 0.18);
   max-width: 100%;
-  padding-inline: 0.15rem;
+  padding-inline: 0.1rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -252,26 +261,20 @@
   overflow: hidden;
 }
 
-.lame-discount-tile__products {
-  font-family: 'Pacifico', cursive;
-  font-size: clamp(0.68rem, 1.35vw, 0.9rem);
-  color: #fff;
-  margin-top: 0.1rem;
-}
-
 /* BOGO variant */
 .lame-discount-tile--bogo .lame-discount-tile__bogo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.05rem;
-  margin: 0.2rem 0 0.15rem;
+  gap: 0.02rem;
+  margin: 0.12rem 0 0.1rem;
   text-align: center;
+  animation: lame-dt-pulse 2.8s ease-in-out infinite;
 }
 
 .lame-discount-tile--bogo .lame-discount-tile__bogo-line {
   font-family: 'Montserrat', system-ui, sans-serif;
-  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  font-size: clamp(0.8rem, 1.7vw, 1.05rem);
   font-weight: 900;
   letter-spacing: 0.08em;
   color: #fff;
@@ -283,7 +286,7 @@
 
 .lame-discount-tile--bogo .lame-discount-tile__bogo-get {
   font-family: 'Black Ops One', Impact, sans-serif;
-  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  font-size: clamp(1.1rem, 2.5vw, 1.55rem);
   color: #fffaf2;
   letter-spacing: 0.02em;
   text-shadow:
@@ -295,18 +298,79 @@
 
 .lame-discount-tile--bogo .lame-discount-tile__bogo-free {
   font-family: 'Montserrat', system-ui, sans-serif;
-  font-size: clamp(1.1rem, 2.5vw, 1.55rem);
+  font-size: clamp(0.95rem, 2.1vw, 1.3rem);
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--lame-dt-yellow);
   text-shadow:
     0 1px 0 var(--lame-dt-orange-dark),
     1px 2px 0 rgb(0 0 0 / 0.2);
+  animation: lame-dt-flash 2.4s ease-in-out infinite;
+}
+
+@keyframes lame-dt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lame-dt-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.75) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(18deg);
+  }
+}
+
+@keyframes lame-dt-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.035);
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes lame-dt-flash {
+  0%,
+  100% {
+    opacity: 0.88;
+    letter-spacing: 0.1em;
+  }
+  50% {
+    opacity: 1;
+    letter-spacing: 0.14em;
+  }
+}
+
+@keyframes lame-dt-halftone {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 14px 14px;
+  }
 }
 
 @media screen and (max-width: 989px) {
   .lame-discount-tiles__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lame-discount-tiles__wrap {
+    max-width: min(100%, 720px);
   }
 }
 
@@ -316,17 +380,29 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 0.55rem;
-    padding-bottom: 0.35rem;
+    gap: 0.35rem;
+    padding-bottom: 0.3rem;
     scrollbar-width: thin;
   }
 
   .lame-discount-tiles__item {
-    flex: 0 0 min(42vw, 11.5rem);
+    flex: 0 0 min(38vw, 9.75rem);
     scroll-snap-align: start;
   }
 
   .lame-discount-tile {
-    aspect-ratio: 3 / 4.05;
+    aspect-ratio: 3 / 3.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lame-discount-tiles__item,
+  .lame-discount-tile__halftone,
+  .lame-discount-tile__sparkles::before,
+  .lame-discount-tile__sparkles::after,
+  .lame-discount-tile__offer,
+  .lame-discount-tile--bogo .lame-discount-tile__bogo,
+  .lame-discount-tile--bogo .lame-discount-tile__bogo-free {
+    animation: none !important;
   }
 }
