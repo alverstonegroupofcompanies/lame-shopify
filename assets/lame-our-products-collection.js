@@ -72,5 +72,49 @@ function initShopCardGalleries() {
 
 initOurProductsCollectionCart();
 initShopCardGalleries();
+initOurProductsFlashAtc();
 
 document.addEventListener('shopify:section:load', initOurProductsCollectionCart);
+
+function initOurProductsFlashAtc() {
+  if (document.documentElement.dataset.lameOpFlashAtc === 'true') return;
+  document.documentElement.dataset.lameOpFlashAtc = 'true';
+
+  document.addEventListener('submit', async (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if (!form.hasAttribute('data-lame-home-atc')) return;
+    if (!form.closest('.collection-template-our-products')) return;
+
+    event.preventDefault();
+    const button = form.querySelector('button[type="submit"]');
+    if (button instanceof HTMLButtonElement && button.disabled) return;
+
+    const formData = new FormData(form);
+    try {
+      if (button instanceof HTMLButtonElement) button.disabled = true;
+      const response = await fetch(`${window.Shopify?.routes?.root || '/'}cart/add.js`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formData,
+      });
+      const data = await response.json();
+      if (!response.ok || data?.status) throw new Error(data?.message || 'Add to cart failed');
+
+      const cartResponse = await fetch(`${window.Shopify?.routes?.root || '/'}cart.js`, {
+        headers: { Accept: 'application/json' },
+      });
+      const cartData = await cartResponse.json();
+      document.dispatchEvent(
+        new CustomEvent('cart:update', {
+          bubbles: true,
+          detail: { resource: cartData, data: { source: 'our-products-flash-atc' } },
+        })
+      );
+    } catch (error) {
+      console.error('Add to cart failed', error);
+    } finally {
+      if (button instanceof HTMLButtonElement) button.disabled = false;
+    }
+  });
+}

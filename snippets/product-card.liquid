@@ -141,19 +141,17 @@
     {% endif %}
   >
     {% if lame_op_card %}
-      <a
-        id="{{ product_card_id | md5 }}"
-        {% unless onboarding %}
-          href="{{ variant_to_link.url }}"
-        {% endunless %}
-        class="product-card__link lame-op-card__link-surface"
-        ref="productCardLink"
-      >
-        <span class="visually-hidden">
-          {{ product.title }}
-        </span>
-      </a>
-    {% endif %}
+      {% if onboarding %}
+        {{ children }}
+      {% else %}
+        {% render 'lame-flash-deal-card',
+          product: product,
+          add_to_cart_label: 'Add to cart',
+          sold_out_label: 'Sold out',
+          save_label_prefix: 'You Save'
+        %}
+      {% endif %}
+    {% else %}
     {{ children }}
     {% liquid
       assign lame_render_card_price = false
@@ -170,6 +168,7 @@
       >
         {% render 'price', product_resource: product, show_sale_price_first: true %}
       </product-price>
+    {% endif %}
     {% endif %}
   </div>
 </product-card>
