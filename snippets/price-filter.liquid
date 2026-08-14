@@ -5,7 +5,7 @@
   @param {string} filter_style - The filter style, can be 'horizontal' or 'vertical'.
   @param {boolean} [should_render_clear] - Whether to render the clear button.
   @param {string} [id_prefix] - Unique prefix to avoid duplicate IDs when rendered multiple times.
-  @param {boolean} [our_products_price_slider] - Our Products: 0–2000 range, step 100, integer labels.
+  @param {boolean} [our_products_price_slider] - Our Products: 0–2000 range, step 50, integer labels.
   @param {boolean} [start_collapsed] - Force vertical filters closed until clicked
 
   @example
@@ -30,7 +30,7 @@
   assign price_label_format = 'money'
   if our_products_price_slider
     assign price_slider_max = 2000
-    assign price_slider_step = 100
+    assign price_slider_step = 50
     assign price_label_format = 'integer'
   endif
 -%}
@@ -127,8 +127,12 @@
         <div class="price-facet__range" ref="rangeSlider">
           <div class="price-facet__range-track-wrap">
             <div class="price-facet__range-thumb-labels" aria-hidden="true">
-              <span class="price-facet__range-thumb-label price-facet__range-thumb-label--min" ref="minRangeLabel"></span>
-              <span class="price-facet__range-thumb-label price-facet__range-thumb-label--max" ref="maxRangeLabel"></span>
+              <span class="price-facet__range-thumb-label price-facet__range-thumb-label--min" ref="minRangeLabel">
+                {%- if our_products_price_slider -%}{{ slider_min_value | plus: 0 }}{%- endif -%}
+              </span>
+              <span class="price-facet__range-thumb-label price-facet__range-thumb-label--max" ref="maxRangeLabel">
+                {%- if our_products_price_slider -%}{{ slider_max_value | plus: 0 }}{%- endif -%}
+              </span>
             </div>
             <div class="price-facet__range-track" aria-hidden="true">
               <div class="price-facet__range-fill" ref="rangeFill"></div>

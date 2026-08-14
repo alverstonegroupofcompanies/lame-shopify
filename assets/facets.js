@@ -459,6 +459,8 @@ class PriceFacetComponent extends Component {
 
     minRange.addEventListener('input', this.#handleRangeInput);
     maxRange.addEventListener('input', this.#handleRangeInput);
+    this.#syncRangesFromInputs();
+    this.#updateRangeVisuals();
   }
 
   #commitRangeFilter = debounce(() => {
@@ -586,16 +588,14 @@ class PriceFacetComponent extends Component {
 
     if (minRangeLabel instanceof HTMLElement) {
       this.#positionThumbLabel(minRangeLabel, left);
-      if (this.#usesIntegerLabels()) {
-        minRangeLabel.textContent = String(Math.round(minValue));
-      } else {
-        minRangeLabel.textContent = minValue > 0 ? this.#formatThumbLabel(minValue) : '';
-      }
+      minRangeLabel.hidden = false;
+      minRangeLabel.textContent = this.#formatThumbLabel(minValue) || '0';
     }
 
     if (maxRangeLabel instanceof HTMLElement) {
       this.#positionThumbLabel(maxRangeLabel, 100 - right);
-      maxRangeLabel.textContent = this.#formatThumbLabel(maxValue);
+      maxRangeLabel.hidden = false;
+      maxRangeLabel.textContent = this.#formatThumbLabel(maxValue) || String(Math.round(sliderMax));
     }
   }
 
