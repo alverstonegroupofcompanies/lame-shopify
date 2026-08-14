@@ -1,6 +1,5 @@
 {%- doc -%}
-  Our Products catalog page title — “Buy {collection} Online (count)”.
-  Shown above filters in the sticky sidebar.
+  Our Products catalog page title.
 
   @param {object} collection - Collection
   @param {string} [heading] - Override heading
@@ -9,26 +8,14 @@
 
 {%- liquid
   assign page_heading = heading
-  if page_heading == blank and collection != blank
-    assign page_heading = collection.title
-  endif
   if page_heading == blank
     assign page_heading = 'Our Products'
-  endif
-
-  assign product_count = 0
-  if collection != blank
-    assign product_count = collection.products_count
   endif
 -%}
 
 <header class="lame-op-page__head lame-our-products-page-head lame-op-page__head--catalog lame-op-page__head--sidebar">
-  <p class="lame-op-page__eyebrow">Our Products</p>
   <h1 class="lame-op-page__title lame-our-products-page-head__title">
-    <span class="lame-op-page__title-text">Buy {{ page_heading | escape }} Online</span>
-    {%- if product_count > 0 -%}
-      <span class="lame-op-page__title-count">({{ product_count }})</span>
-    {%- endif -%}
+    <span class="lame-op-page__title-text">{{ page_heading | escape }}</span>
   </h1>
   {%- if subtitle != blank -%}
     <p class="lame-op-page__subtitle">{{ subtitle | escape }}</p>
