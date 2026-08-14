@@ -18,6 +18,7 @@
   margin-inline: auto;
   box-sizing: border-box;
   padding-inline: var(--lame-dt-edge);
+  overflow: visible;
 }
 
 .lame-discount-tiles__header {
@@ -83,6 +84,7 @@
   width: 100%;
   max-width: 1400px;
   margin-inline: auto;
+  overflow: visible;
 }
 
 .lame-offer-stage__side {
@@ -197,31 +199,6 @@
   border-radius: inherit;
 }
 
-.lame-offer-slider__nav--prev {
-  left: 0;
-  transform: translate(-120%, -50%);
-}
-
-.lame-offer-slider__nav--next {
-  right: 0;
-  transform: translate(120%, -50%);
-}
-
-.lame-offer-slider__nav:hover {
-  background: var(--lame-dt-orange);
-  border-color: var(--lame-dt-orange);
-  color: #fff;
-  transform: translateY(-50%) scale(1.04);
-}
-
-.lame-offer-slider__nav--prev:hover {
-  transform: translate(-120%, -50%) scale(1.04);
-}
-
-.lame-offer-slider__nav--next:hover {
-  transform: translate(120%, -50%) scale(1.04);
-}
-
 .lame-offer-slider__track {
   list-style: none;
   margin: 0;
@@ -267,7 +244,6 @@
   position: absolute;
   top: 50%;
   z-index: 3;
-  transform: translateY(-50%);
   width: 2.5rem;
   height: 2.5rem;
   border: 1px solid rgb(42 36 32 / 0.12);
@@ -287,18 +263,27 @@
 }
 
 .lame-offer-slider__nav--prev {
-  left: 0.65rem;
+  left: 0;
+  transform: translate(-120%, -50%);
 }
 
 .lame-offer-slider__nav--next {
-  right: 0.65rem;
+  right: 0;
+  transform: translate(120%, -50%);
 }
 
 .lame-offer-slider__nav:hover {
   background: var(--lame-dt-orange);
   border-color: var(--lame-dt-orange);
   color: #fff;
-  transform: translateY(-50%) scale(1.04);
+}
+
+.lame-offer-slider__nav--prev:hover {
+  transform: translate(-120%, -50%) scale(1.04);
+}
+
+.lame-offer-slider__nav--next:hover {
+  transform: translate(120%, -50%) scale(1.04);
 }
 
 .lame-offer-slider__placeholder {
@@ -355,16 +340,21 @@
 /* Tablet + mobile: shrink width, show full offer image (no crop) */
 @media screen and (max-width: 1199px) {
   .lame-discount-tiles {
-    --lame-dt-edge: clamp(0.75rem, 3vw, 1.25rem);
-    --lame-dt-slider-max: min(100%, 34rem);
+    --lame-dt-edge: 2.35rem;
+    --lame-dt-slider-max: 100%;
     --lame-dt-radius: 12px;
+  }
+
+  .shopify-section:has(.lame-discount-tiles) {
+    overflow: visible;
   }
 
   .lame-offer-stage {
     grid-template-columns: 1fr;
     gap: 0;
-    justify-items: center;
+    justify-items: stretch;
     max-width: none;
+    overflow: visible;
   }
 
   .lame-offer-stage__side {
@@ -373,8 +363,15 @@
 
   .lame-offer-slider {
     width: 100%;
-    max-width: var(--lame-dt-slider-max);
-    margin-inline: auto;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .lame-offer-slider__viewport,
+  .lame-offer-slider__slide,
+  .lame-offer-slider__link,
+  .lame-offer-slider__image {
+    border-radius: var(--lame-dt-radius);
   }
 
   .lame-offer-slider__viewport {
@@ -382,7 +379,7 @@
     width: 100%;
     height: auto;
     overflow-x: hidden;
-    overflow-y: visible;
+    overflow-y: hidden;
     background: transparent;
   }
 
@@ -415,19 +412,25 @@
   }
 
   .lame-offer-slider__nav--prev {
-    left: 0.35rem;
+    left: 0;
+    transform: translate(-110%, -50%);
   }
 
   .lame-offer-slider__nav--next {
-    right: 0.35rem;
+    right: 0;
+    transform: translate(110%, -50%);
   }
 }
 
 @media screen and (max-width: 749px) {
   .lame-discount-tiles {
-    --lame-dt-edge: 0.75rem;
-    /* Narrower frame so the full discount creative fits on small screens */
-    --lame-dt-slider-max: min(100%, 20.5rem);
+    --lame-dt-edge: 2.15rem;
+    --lame-dt-slider-max: 100%;
+    --lame-dt-radius: 12px;
+  }
+
+  .lame-discount-tiles__wrap {
+    padding-inline: var(--lame-dt-edge);
   }
 
   .lame-offer-slider__nav {
