@@ -107,11 +107,6 @@
       {% if lame_our_products_op_cards %}
         <div class="lame-op-page">
           <div class="lame-op-page__shell">
-            {% render 'lame-our-products-page-head',
-              collection: collection,
-              heading: section.settings.our_products_heading,
-              subtitle: section.settings.our_products_subtitle
-            %}
             <div
               class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left collection-wrapper--grid-full-width{% if lame_has_promo_images %} lame-op-page__layout--has-promo{% endif %}"
               {% if lame_has_promo_images %}
@@ -124,12 +119,18 @@
       >
       {% endif %}
         {% unless lame_category_shop_page %}
+          {% if lame_our_products_op_cards %}
+            <aside class="lame-op-page__sidebar">
+          {% endif %}
           {% content_for 'block',
             type: 'filters',
             id: 'filters',
             results: collection,
             results_size: collection.products_count
           %}
+          {% if lame_our_products_op_cards %}
+            </aside>
+          {% endif %}
         {% endunless %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
@@ -145,6 +146,27 @@
         %}
         {% if lame_our_products_op_cards %}
         <div class="lame-op-page__content{% if lame_has_promo_images %} lame-op-page__content--has-promo{% endif %}">
+          {% render 'lame-our-products-page-head',
+            collection: collection,
+            heading: section.settings.our_products_heading,
+            subtitle: section.settings.our_products_subtitle
+          %}
+          {% liquid
+            assign lame_filters_block = section.blocks['filters']
+            assign lame_enable_sorting = false
+            assign lame_enable_grid_density = false
+            if lame_filters_block != blank
+              assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
+              assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
+            endif
+          %}
+          {% render 'lame-our-products-toolbar',
+            collection: collection,
+            paginate: paginate,
+            section: section,
+            enable_sorting: lame_enable_sorting,
+            enable_grid_density: lame_enable_grid_density
+          %}
           {% if lame_has_promo_images %}
             {% render 'lame-our-products-promo-images', section: section %}
           {% endif %}

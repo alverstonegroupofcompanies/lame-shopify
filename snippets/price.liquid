@@ -20,8 +20,10 @@
   endif
 
   assign lame_discount_percent = 0
+  assign lame_savings_amount = 0
   if show_compare_price and compare_at_price > 0
     assign lame_discount_percent = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+    assign lame_savings_amount = compare_at_price | minus: price
   endif
 
   if product_resource == blank
@@ -69,11 +71,13 @@
     assign compare_at_price = compare_at_price | money_with_currency
     assign price_min = price_min | money_with_currency
     assign price_max = price_max | money_with_currency
+    assign lame_savings_display = lame_savings_amount | money_with_currency
   else
     assign price = price | money
     assign compare_at_price = compare_at_price | money
     assign price_min = price_min | money
     assign price_max = price_max | money
+    assign lame_savings_display = lame_savings_amount | money
   endif
 -%}
 
@@ -127,8 +131,14 @@
             endif
           endif
         %}
-        {% if lame_show_op_discount and lame_discount_percent > 0 %}
-          <span class="lame-op-discount-badge">{{ lame_discount_percent }}% Off</span>
+        {% if lame_show_op_discount and lame_savings_amount > 0 %}
+          <span class="lame-op-discount-badge lame-op-save-badge">
+            <svg class="lame-op-save-badge__icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 12v8H4V12" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M12 3 20 7v5H4V7l8-4Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+            </svg>
+            You Save {{ lame_savings_display }}
+          </span>
         {% endif %}
       {% else %}
         <span class="price-item__group">
@@ -147,8 +157,14 @@
             endif
           endif
         %}
-        {% if lame_show_op_discount_else and lame_discount_percent > 0 %}
-          <span class="lame-op-discount-badge">{{ lame_discount_percent }}% Off</span>
+        {% if lame_show_op_discount_else and lame_savings_amount > 0 %}
+          <span class="lame-op-discount-badge lame-op-save-badge">
+            <svg class="lame-op-save-badge__icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 12v8H4V12" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M12 3 20 7v5H4V7l8-4Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+            </svg>
+            You Save {{ lame_savings_display }}
+          </span>
         {% endif %}
       {% endif %}
     </div>
