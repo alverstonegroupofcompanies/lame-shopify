@@ -41,10 +41,15 @@
     {%- endif -%}
     {%- liquid
       assign lame_load_category_shop_css = false
-      if template.name == 'collection' and collection != blank
-        assign lame_category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
-        if lame_category_shop_handles contains collection.handle
+      if template.name == 'collection'
+        if template.suffix == 'our-products'
           assign lame_load_category_shop_css = true
+        elsif collection != blank
+          assign lame_category_shop_handles = 'bath-body,fragrance,make-up,skin-care,baby-mom,wellness,hair-care' | split: ','
+          assign lame_op_collection_handles = 'all,our-products,products,frontpage' | split: ','
+          if lame_category_shop_handles contains collection.handle or lame_op_collection_handles contains collection.handle
+            assign lame_load_category_shop_css = true
+          endif
         endif
       endif
     -%}
