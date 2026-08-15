@@ -1,5 +1,6 @@
 {%- doc -%}
-  Resolves the post-authentication redirect URL from query params or theme defaults.
+  Resolves the post-authentication redirect URL from query params, an override,
+  or the current page so login returns shoppers to where they started.
 
   @param {string} [return_url] - Optional override
 {%- enddoc -%}
@@ -12,7 +13,18 @@
   if resolved_return == blank and request.params.return_to != blank
     assign resolved_return = request.params.return_to
   endif
+
   if resolved_return == blank
-    assign resolved_return = routes.account_url
+    assign current_path = request.path | default: '/'
+    assign is_auth_page = false
+    if current_path contains '/account/login' or current_path contains '/account/register' or current_path contains '/account/activate' or current_path contains '/account/reset' or current_path contains 'customer_authentication'
+      assign is_auth_page = true
+    endif
+
+    if is_auth_page
+      assign resolved_return = routes.root_url | default: '/'
+    else
+      assign resolved_return = current_path
+    endif
   endif
 -%}{{- resolved_return -}}

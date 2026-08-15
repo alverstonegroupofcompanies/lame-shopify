@@ -14,7 +14,8 @@
   <h1 class="lame-cart-empty__title">{{ 'lame_cart.empty_title' | t }}</h1>
   <p class="lame-cart-empty__text">{{ 'lame_cart.empty_message' | t }}</p>
   {%- if shop.customer_accounts_enabled and customer == null -%}
-    <p class="lame-cart-empty__login">{{ 'actions.log_in_html' | t: link: routes.account_login_url }}</p>
+    {%- capture cart_login_url -%}{%- render 'lame-customer-auth-url', type: 'login', return_url: routes.cart_url -%}{%- endcapture -%}
+    <p class="lame-cart-empty__login">{{ 'actions.log_in_html' | t: link: cart_login_url }}</p>
   {%- endif -%}
   <a
     class="lame-cart-empty__cta button"
