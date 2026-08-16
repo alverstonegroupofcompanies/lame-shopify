@@ -23,9 +23,9 @@
 >
 
 {%- liquid
-  assign lame_home_seo_title = 'My Lamstone | Luxury Skincare & Cosmetics in Kerala'
-  assign lame_home_seo_description = 'Discover My Lamstone — luxury skincare and premium cosmetics from Kerala, South India. Trusted beauty rituals, radiant skin care, and refined self-care for every day.'
-  assign lame_brand_name = 'My Lamstone'
+  assign lame_brand_name = shop.name | default: 'My Lamstone'
+  assign lame_home_seo_title = settings.social_og_title | default: page_title | default: shop.name
+  assign lame_home_seo_description = settings.social_og_description | default: page_description | default: shop.description | default: shop.name
 
   assign og_title = page_title | default: shop.name
   assign og_url = canonical_url | default: request.origin
@@ -51,7 +51,13 @@
     assign og_url = request.origin
   endif
 
-  assign og_image = page_image
+  assign og_image = nil
+  if request.page_type == 'index' and settings.social_sharing_image != blank
+    assign og_image = settings.social_sharing_image
+  endif
+  if og_image == blank
+    assign og_image = page_image
+  endif
   if og_image == blank and request.page_type == 'product' and product.featured_media
     assign og_image = product.featured_media.preview_image
   endif
