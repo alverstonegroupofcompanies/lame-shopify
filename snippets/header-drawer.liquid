@@ -655,8 +655,9 @@
             {% unless drawer_luxury_layout %}
               <h2 class="menu-drawer__section-heading">{{ drawer_account_title | escape }}</h2>
               <div class="menu-drawer__footer-account">
+                {%- capture drawer_login_url -%}{%- render 'lame-customer-auth-url', type: 'login' -%}{%- endcapture -%}
                 <a
-                  href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}"
+                  href="{% if customer %}{{ routes.account_url }}{% else %}{{ drawer_login_url }}{% endif %}"
                   class="menu-drawer__account menu-drawer__account--luxury link focus-inset"
                 >
                   <span class="svg-wrapper menu-drawer__account-icon" aria-hidden="true">

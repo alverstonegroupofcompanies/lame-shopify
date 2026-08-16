@@ -20,16 +20,10 @@
     assign auth_base = routes.account_register_url
   endif
 
-  assign auth_return = return_url
-  if auth_return == blank and request.params.return_url != blank
-    assign auth_return = request.params.return_url
-  endif
-  if auth_return == blank and request.params.return_to != blank
-    assign auth_return = request.params.return_to
-  endif
-  if auth_return == blank
-    assign auth_return = routes.account_url
-  endif
+  capture auth_return
+    render 'lame-customer-auth-return-url', return_url: return_url
+  endcapture
+  assign auth_return = auth_return | strip
 
   assign return_param = 'return_url'
   if uses_new_customer_accounts
