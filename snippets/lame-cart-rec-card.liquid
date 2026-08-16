@@ -56,7 +56,8 @@
     {% if selected_variant %}
       <form method="post" action="{{ routes.cart_add_url }}" class="lame-cart-rec-card__form" data-lame-home-atc>
         <input type="hidden" name="id" value="{{ selected_variant.id }}">
-        <input type="hidden" name="quantity" value="1">
+        {%- capture lame_bogo_qty -%}{% render 'lame-bogo-add-qty', product: product %}{%- endcapture -%}
+        <input type="hidden" name="quantity" value="{{ lame_bogo_qty | strip }}">
         <button type="submit" class="lame-cart-rec-card__atc" {% unless product.available %}disabled{% endunless %}>
           {{ add_to_cart_label | default: 'Add to cart' }}
         </button>

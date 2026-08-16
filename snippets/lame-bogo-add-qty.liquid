@@ -1,0 +1,18 @@
+{%- doc -%}
+  Returns 2 for Buy 1 Get 1 products so Add to Cart adds a pair, otherwise 1.
+
+  @param {object} product
+{%- enddoc -%}
+{%- liquid
+  assign qty = 1
+  if product != blank
+    for tag in product.tags
+      assign tag_down = tag | downcase
+      if tag_down == 'buy 1 get 1 free' or tag_down == 'buy1get1free' or tag_down == 'bogo' or tag_down contains 'buy 1 get 1'
+        assign qty = 2
+        break
+      endif
+    endfor
+  endif
+-%}
+{{- qty -}}

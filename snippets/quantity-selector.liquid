@@ -28,6 +28,17 @@
   else
     assign min_quantity = variant.quantity_rule.min | default: 1
   endif
+
+  assign lame_bogo_qty = 1
+  if line_index == null and product != blank
+    capture lame_bogo_qty_capture
+      render 'lame-bogo-add-qty', product: product
+    endcapture
+    assign lame_bogo_qty = lame_bogo_qty_capture | strip | plus: 0
+    if lame_bogo_qty > min_quantity
+      assign min_quantity = lame_bogo_qty
+    endif
+  endif
 %}
 
 <div
@@ -62,7 +73,7 @@
     <input
       type="number"
       name="{% if line_index %}updates[]{% else %}quantity{% endif %}"
-      value="{{ in_cart_quantity | default: variant.quantity_rule.min | default: 1 }}"
+      value="{{ in_cart_quantity | default: min_quantity | default: variant.quantity_rule.min | default: 1 }}"
       data-cart-quantity="{{ cart | item_count_for_variant: variant.id }}"
       min="{{ min_quantity }}"
       data-min="{{ variant.quantity_rule.min | default: 1 }}"
