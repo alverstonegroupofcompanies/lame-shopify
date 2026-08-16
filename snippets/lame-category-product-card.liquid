@@ -29,6 +29,15 @@
   if card_label == blank
     assign card_label = product.type
   endif
+
+  assign is_bogo = false
+  for tag in product.tags
+    assign tag_down = tag | downcase
+    if tag_down == 'buy 1 get 1 free' or tag_down == 'buy1get1free' or tag_down == 'bogo' or tag_down contains 'buy 1 get 1'
+      assign is_bogo = true
+      break
+    endif
+  endfor
 -%}
 
 <article class="lame-cat-card lame-cat-card--{{ collection_handle }}">
@@ -50,9 +59,14 @@
       {% endif %}
     </a>
 
-    {% if lame_discount_percent > 0 %}
-      <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
-    {% endif %}
+    <div class="lame-cat-card__badges">
+      {% if is_bogo %}
+        <span class="lame-cat-card__badge lame-cat-card__badge--promo">Buy 1 Get 1 Free</span>
+      {% endif %}
+      {% if lame_discount_percent > 0 %}
+        <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
+      {% endif %}
+    </div>
 
   </div>
 
