@@ -651,6 +651,7 @@ export function applyBrandFilter() {
 
   diagnoseBrandFilter(root, selected, visibleCount, hasFilter);
   updateActiveCount();
+  document.dispatchEvent(new CustomEvent('lame:apply-client-filters'));
 }
 
 async function reloadSectionWithBrandFilter() {

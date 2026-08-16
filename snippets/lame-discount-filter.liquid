@@ -1,0 +1,81 @@
+{%- doc -%}
+  Discount % filter for Our Products collections (under Brand).
+  Client-side filter using data-discount-percent on product cards.
+  @param {object} collection
+  @param {string} section_id
+  @param {string} [filter_style]
+  @param {string} [id_prefix]
+{%- enddoc -%}
+
+{% liquid
+  assign filter_style = filter_style | default: 'vertical'
+  assign id_prefix = id_prefix | default: filter_style
+  assign discount_steps = '10,20,30,40,50,60,70' | split: ','
+%}
+
+<lame-discount-filter
+  data-section-id="{{ section_id }}"
+  data-id-prefix="{{ id_prefix }}"
+  data-msg-no-results="{{ 'lame_collection.discount_filter_no_results' | t | escape }}"
+>
+  <details
+    id="Facet-Details-{{ section_id }}-discount-{{ id_prefix }}"
+    class="facets__panel"
+  >
+    <summary class="facets__summary">
+      <span class="facets__label">{{ 'lame_collection.filter_discount' | t }}</span>
+      <div class="facets__status-wrapper">
+        <span
+          class="facets__status facets__bubble hide-when-empty"
+          data-discount-filter-status
+        ></span>
+        <span class="svg-wrapper icon-caret icon-animated">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </div>
+    </summary>
+
+    <floating-panel-component
+      data-disable-float-position="true"
+      class="facets__inputs facets__panel-content details-content"
+      id="facet-inputs-discount-{{ id_prefix }}"
+    >
+      <div class="facets__inputs-wrapper">
+        <ul
+          id="filters-list-{{ section_id }}-discount-{{ id_prefix }}"
+          class="facets__inputs-list list-unstyled"
+          name="{{ 'lame_collection.filter_discount' | t }}"
+        >
+          {% for step in discount_steps %}
+            {% assign input_id = 'Filter-discount-' | append: step | append: '-' | append: id_prefix %}
+            <li class="facets__inputs-list-item" data-skip-node-update="true">
+              <div class="checkbox">
+                <input
+                  type="checkbox"
+                  id="{{ input_id }}"
+                  class="checkbox__input"
+                  data-discount-min="{{ step }}"
+                  data-label="{{ 'lame_collection.discount_off_and_above' | t: percent: step }}"
+                >
+                <label class="checkbox__label" for="{{ input_id }}">
+                  {{ 'icon-checkmark.svg' | inline_asset_content }}
+                  <span class="checkbox__label-text">
+                    {{ 'lame_collection.discount_off_and_above' | t: percent: step }}
+                  </span>
+                </label>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </floating-panel-component>
+  </details>
+</lame-discount-filter>
+
+{% if id_prefix == 'desktop' %}
+  <script
+    src="{{ 'lame-discount-filter.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}

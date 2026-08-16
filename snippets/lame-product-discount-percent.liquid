@@ -1,0 +1,14 @@
+{%- doc -%}
+  Outputs a whole-number compare-at discount percent (0 if not on sale).
+  @param {object} product
+{%- enddoc -%}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign compare_at = variant.compare_at_price
+  assign price_amount = variant.price
+  assign lame_discount_percent = 0
+  if compare_at > price_amount and compare_at > 0
+    assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+  endif
+-%}
+{{- lame_discount_percent -}}
