@@ -345,6 +345,10 @@
                         {% render 'lame-vendor-slug', vendor: raw_vendor %}
                       {% endcapture %}
                       {% assign product_slug = product_slug_capture | strip %}
+                      {% capture discount_percent_capture %}
+                        {% render 'lame-product-discount-percent', product: product %}
+                      {% endcapture %}
+                      {% assign product_discount_percent = discount_percent_capture | strip %}
                       {% if product_slug == brand_slug %}
                         <li
                           id="{{ section.id }}-{{ product.id }}"
@@ -354,7 +358,7 @@
                           data-brand="{{ raw_vendor | escape }}"
                           data-vendor="{{ product.vendor | strip | escape }}"
                           data-brand-slug="{{ brand_slug }}"
-                          data-discount-percent="{% render 'lame-product-discount-percent', product: product %}"
+                          data-discount-percent="{{ product_discount_percent }}"
                           ref="cards[]"
                         >
                           {% if lame_category_shop_page or lame_our_products_op_cards or lame_cosmetic_collection %}
@@ -390,6 +394,10 @@
                 {% render 'lame-vendor-slug', vendor: raw_vendor %}
               {% endcapture %}
               {% assign product_brand_slug = product_slug_capture | strip %}
+              {% capture discount_percent_capture %}
+                {% render 'lame-product-discount-percent', product: product %}
+              {% endcapture %}
+              {% assign product_discount_percent = discount_percent_capture | strip %}
                 <li
                   id="{{ section.id }}-{{ product.id }}"
                   class="{{ lame_product_grid_item_class }} product-grid__item--{{ flat_grid_index }}"
@@ -398,7 +406,7 @@
                   data-brand="{{ raw_vendor | escape }}"
                   data-vendor="{{ product.vendor | strip | escape }}"
                   data-brand-slug="{{ product_brand_slug }}"
-                  data-discount-percent="{% render 'lame-product-discount-percent', product: product %}"
+                  data-discount-percent="{{ product_discount_percent }}"
                   ref="cards[]"
                 >
                   {% if lame_category_shop_page or lame_our_products_op_cards or lame_cosmetic_collection %}

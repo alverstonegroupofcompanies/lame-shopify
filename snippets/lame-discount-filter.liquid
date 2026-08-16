@@ -47,7 +47,20 @@
           name="{{ 'lame_collection.filter_discount' | t }}"
         >
           {% for step in discount_steps %}
-            {% assign input_id = 'Filter-discount-' | append: step | append: '-' | append: id_prefix %}
+            {% liquid
+              assign is_above = false
+              if step == '50'
+                assign is_above = true
+              endif
+              if is_above
+                assign discount_label = 'lame_collection.discount_above' | t: percent: step
+                assign discount_mode = 'above'
+              else
+                assign discount_label = 'lame_collection.discount_upto' | t: percent: step
+                assign discount_mode = 'upto'
+              endif
+              assign input_id = 'Filter-discount-' | append: step | append: '-' | append: id_prefix
+            %}
             <li class="facets__inputs-list-item" data-skip-node-update="true">
               <div class="checkbox">
                 <input
@@ -55,12 +68,13 @@
                   id="{{ input_id }}"
                   class="checkbox__input"
                   data-discount-min="{{ step }}"
-                  data-label="{{ 'lame_collection.discount_off_and_above' | t: percent: step }}"
+                  data-discount-mode="{{ discount_mode }}"
+                  data-label="{{ discount_label | escape }}"
                 >
                 <label class="checkbox__label" for="{{ input_id }}">
                   {{ 'icon-checkmark.svg' | inline_asset_content }}
                   <span class="checkbox__label-text">
-                    {{ 'lame_collection.discount_off_and_above' | t: percent: step }}
+                    {{ discount_label }}
                   </span>
                 </label>
               </div>

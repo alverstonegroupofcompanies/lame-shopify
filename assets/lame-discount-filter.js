@@ -35,29 +35,42 @@ function getAllDiscountInputs() {
 }
 
 /**
- * @returns {number[]}
+ * @returns {{ value: number, mode: string }[]}
  */
-function getSelectedMins() {
-  /** @type {Set<number>} */
-  const mins = new Set();
+function getSelectedRules() {
+  /** @type {Map<string, { value: number, mode: string }>} */
+  const rules = new Map();
 
   for (const input of getAllDiscountInputs()) {
     if (!input.checked) continue;
-    const min = Number(input.getAttribute('data-discount-min'));
-    if (Number.isFinite(min) && min > 0) mins.add(min);
+    const value = Number(input.getAttribute('data-discount-min'));
+    const mode = input.getAttribute('data-discount-mode') === 'above' ? 'above' : 'upto';
+    if (!Number.isFinite(value) || value <= 0) continue;
+    rules.set(`${mode}:${value}`, { value, mode });
   }
 
-  return [...mins].sort((a, b) => a - b);
+  return [...rules.values()].sort((a, b) => a.value - b.value);
+}
+
+/**
+ * @returns {number[]}
+ */
+function getSelectedMins() {
+  return getSelectedRules().map((rule) => rule.value);
 }
 
 /**
  * @param {number} percent
- * @param {number[]} mins
+ * @param {{ value: number, mode: string }[]} rules
  * @returns {boolean}
  */
-function matchesDiscount(percent, mins) {
-  if (!mins.length) return true;
-  return mins.some((min) => percent >= min);
+function matchesDiscount(percent, rules) {
+  if (!rules.length) return true;
+
+  return rules.some((rule) => {
+    if (rule.mode === 'above') return percent >= rule.value;
+    return percent > 0 && percent <= rule.value;
+  });
 }
 
 function persistMins(mins) {
@@ -206,8 +219,8 @@ function updateEmptyState(root, visibleCount, hasFilter) {
 
 export function applyDiscountFilter() {
   const root = getCollectionRoot();
-  const mins = getSelectedMins();
-  const hasFilter = mins.length > 0;
+  const rules = getSelectedRules();
+  const hasFilter = rules.length > 0;
 
   if (!root) {
     updateActiveCount();
@@ -223,7 +236,7 @@ export function applyDiscountFilter() {
 
   for (const item of items) {
     const percent = Number(item.getAttribute('data-discount-percent') || 0);
-    const show = matchesDiscount(percent, mins);
+    const show = matchesDiscount(percent, rules);
     item.classList.toggle(HIDDEN_CLASS, !show);
 
     const hidden =

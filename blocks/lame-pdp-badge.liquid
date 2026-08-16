@@ -1,4 +1,32 @@
-{% if block.settings.text != blank %}
+{%- liquid
+  assign show_badge = false
+  assign badge_product = closest.product
+  if badge_product == blank
+    assign badge_product = product
+  endif
+
+  if badge_product != blank
+    for tag in badge_product.tags
+      assign tag_down = tag | downcase
+      if tag_down == 'bestseller' or tag_down == 'best seller' or tag_down == 'best-seller' or tag_down == 'best-sellers'
+        assign show_badge = true
+        break
+      endif
+    endfor
+
+    unless show_badge
+      for coll in badge_product.collections
+        assign coll_handle = coll.handle | downcase
+        if coll_handle == 'best-sellers' or coll_handle == 'bestsellers' or coll_handle == 'best-seller'
+          assign show_badge = true
+          break
+        endif
+      endfor
+    endunless
+  endif
+-%}
+
+{% if show_badge and block.settings.text != blank %}
   <span
     class="lame-pdp-badge{% if block.settings.style == 'accent' %} lame-pdp-badge--accent{% endif %}"
     {{ block.shopify_attributes }}
@@ -12,6 +40,10 @@
   "name": "Product badge",
   "tag": null,
   "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows only on products tagged bestseller / best seller, or in a Best Sellers collection. Not shown on every product."
+    },
     {
       "type": "text",
       "id": "text",
