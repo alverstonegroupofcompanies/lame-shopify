@@ -1,24 +1,13 @@
 
 
 {% liquid
-  assign order = 'logo,menu,search,localization,actions'
+  assign order = 'logo,menu,localization,search,drawer_search,actions'
 
-  # Handle localization and search positioning (no duplicate drawer_search — single search bar)
-  if section.settings.search_position == 'center'
-    assign order = 'logo,menu,search,localization,actions'
-  elsif section.settings.search_position == 'left'
-    assign order = 'logo,menu,search,localization,actions'
-  elsif section.settings.localization_position == 'left'
-    if section.settings.search_position == 'left'
-      assign order = 'logo,menu,search,localization,actions'
-    else
-      assign order = 'logo,localization,menu,search,actions'
-    endif
-  else
-    if section.settings.search_position == 'left'
-      assign order = 'logo,menu,search,localization,actions'
-    endif
+  if shop.customer_accounts_enabled
+    assign order = 'drawer_search,logo,menu,localization,search,actions'
   endif
+
+  assign rows = 'top,bottom' | split: ','
   assign search_style = 'none'
 
   if section.settings.show_search
@@ -81,24 +70,58 @@
     render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section
   endcapture
 
-  assign search_class = ''
+  if shop.customer_accounts_enabled
+    assign search_class = 'search-action--hidden-on-drawer'
+  endif
 
+  # Handle localization and search positioning
+  if section.settings.search_position == 'center'
+    if shop.customer_accounts_enabled
+      assign order = 'drawer_search,logo,search,localization,actions'
+    else
+      assign order = 'logo,search,localization,drawer_search,actions'
+    endif
+  elsif section.settings.localization_position == 'left'
+    if section.settings.search_position == 'left'
+      if shop.customer_accounts_enabled
+        assign order = 'drawer_search,logo,menu,search,localization,actions'
+      else
+        assign order = 'logo,menu,search,localization,drawer_search,actions'
+      endif
+    else
+      if shop.customer_accounts_enabled
+        assign order = 'drawer_search,logo,localization,menu,search,actions'
+      else
+        assign order = 'logo,localization,menu,search,drawer_search,actions'
+      endif
+    endif
+  else
+    if section.settings.search_position == 'left'
+      if shop.customer_accounts_enabled
+        assign order = 'drawer_search,logo,menu,search,localization,actions'
+      else
+        assign order = 'logo,menu,search,localization,drawer_search,actions'
+      endif
+    endif
+  endif
   capture search
     render 'search', style: search_style, class: search_class, display_style: section.settings.actions_display_style
   endcapture
 
-  assign skip_drawer_search = true
-  if section.settings.search_row == 'bottom' and search_style != 'none'
-    assign skip_drawer_search = false
+  # Skip drawer search under specific conditions:
+  # Always render if search_row is bottom
+  # Don't render when shop.customer_accounts_enabled is false and search_position is left and search_style is not none
+  assign skip_drawer_search = false
+  if shop.customer_accounts_enabled == false and section.settings.search_position == 'left' and search_style != 'none'
+    assign skip_drawer_search = true
   endif
 
-  if skip_drawer_search == false
+  if section.settings.search_row == 'bottom' or search_style != 'none' and skip_drawer_search == false
+    # Mobile search duplicate for when search is not in the right order for mobile layout
     capture drawer_search
       render 'search', class: 'search-action--hidden-on-menu', style: search_style, display_style: section.settings.actions_display_style
     endcapture
   endif
-
-  assign rows = 'top,bottom' | split: ','
 
   assign show_language = section.settings.show_language
   if localization.available_languages.size <= 1
@@ -290,9 +313,7 @@
   id="header-component"
   class="{{ class }} header--cosmetic-luxury"
   data-search-position="{{ section.settings.search_position }}"
-  data-logo-position="{{ section.settings.logo_position }}"
   data-menu-row="{{ section.settings.menu_row }}"
-  data-show-wishlist="{% if section.settings.header_show_wishlist %}true{% else %}false{% endif %}"
   data-lame-scroll="top"
   data-theme-color="rgb({{ section.settings.color_scheme_top.settings.background.rgb }})"
   {% if transparent %}
@@ -318,10 +339,6 @@
       --header-actions-font-weight: var(--font-{{ section.settings.actions_font | default: 'heading' }}--weight);
       --header-actions-text-case: {{ section.settings.actions_text_case | default: 'none' }};
     {% endif %}
-    --lame-header-wishlist-badge-bg: {{ section.settings.actions_wishlist_badge_bg | default: '#264734' }};
-    --lame-header-wishlist-badge-text: {{ section.settings.actions_wishlist_badge_text | default: '#ffffff' }};
-    --lame-header-cart-badge-bg: {{ section.settings.actions_cart_badge_bg | default: '#2A3A30' }};
-    --lame-header-cart-badge-text: {{ section.settings.actions_cart_badge_text | default: '#ffffff' }};
   "
 >
   <div class="header__underlay header__underlay-closed"></div>
@@ -454,7 +471,7 @@
     }
   }
 
-  #header-component[data-menu-style='drawer']:not(.header--cosmetic-luxury) .header__column {
+  #header-component[data-menu-style='drawer'] .header__column {
     display: contents;
   }
 
@@ -920,44 +937,42 @@
     }
 
     @media screen and (max-width: 749px) {
-      #header-component:not(.header--cosmetic-luxury) & {
-        --header-template-columns: auto 1fr auto auto auto;
+      --header-template-columns: auto 1fr auto auto auto;
 
-        grid-template-areas: 'drawerArea logoArea searchArea accountArea actionsArea';
-        grid-column: span 3;
-        column-gap: 0.5rem;
-        align-items: center;
-        padding-block: 0;
-        padding-inline: max(0.875rem, env(safe-area-inset-left, 0px)) max(0.875rem, env(safe-area-inset-right, 0px));
+      grid-template-areas: 'drawerArea logoArea searchArea accountArea actionsArea';
+      grid-column: span 3;
+      column-gap: 0.5rem;
+      align-items: center;
+      padding-block: 0;
+      padding-inline: max(0.875rem, env(safe-area-inset-left, 0px)) max(0.875rem, env(safe-area-inset-right, 0px));
 
-        .header-logo {
-          grid-area: logoArea;
-          justify-self: center;
-        }
+      .header-logo {
+        grid-area: logoArea;
+        justify-self: center;
+      }
 
-        .header__drawer {
-          grid-area: drawerArea;
-          justify-self: start;
-        }
+      .header__drawer {
+        grid-area: drawerArea;
+        justify-self: start;
+      }
 
-        .search-action {
-          grid-area: searchArea;
-        }
+      .search-action {
+        grid-area: searchArea;
+      }
 
-        shopify-account {
-          grid-area: accountArea;
-        }
+      shopify-account {
+        grid-area: accountArea;
+      }
 
-        header-actions {
-          grid-area: actionsArea;
-        }
+      header-actions {
+        grid-area: actionsArea;
       }
     }
   }
 
   /* not ideal but we need to duplicate these styles for when touch comes into play
     We could avoid the duplication using js to set the data-menu-style attribute on small screens instead of using @media queries */
-  #header-component[data-menu-style='drawer']:not(.header--cosmetic-luxury) .header__columns {
+  #header-component[data-menu-style='drawer'] .header__columns {
     --header-template-columns: auto 1fr auto auto auto;
 
     grid-template-areas: 'drawerArea logoArea searchArea accountArea actionsArea';
@@ -1368,15 +1383,13 @@
       "type": "page",
       "id": "profile_page",
       "label": "Legacy profile page (optional)",
-      "info": "Optional. Leave empty to use Shopify /account (recommended). Or pick a custom page with the my-profile template.",
-      "visible_if": "{{ section.settings.use_lame_profile_menu }}"
+      "info": "Optional. Leave empty to use Shopify /account (recommended). Or pick a custom page with the my-profile template."
     },
     {
       "type": "page",
       "id": "orders_page",
       "label": "Orders page (optional)",
-      "info": "Leave empty to auto-use the “my-orders” page when it exists. Create a page with handle my-orders and template page.my-orders.",
-      "visible_if": "{{ section.settings.use_lame_profile_menu }}"
+      "info": "Leave empty to auto-use the my-orders page when it exists. Create a page with handle my-orders and template page.my-orders."
     },
     {
       "type": "header",
@@ -1717,139 +1730,6 @@
       ],
       "default": "none",
       "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
-    },
-    {
-      "type": "header",
-      "content": "Navigation menu (desktop)"
-    },
-    {
-      "type": "paragraph",
-      "content": "Menu links come from Online store → Navigation. Add Menu link blocks under the Menu block to set custom icons and labels per link."
-    },
-    {
-      "type": "checkbox",
-      "id": "menu_show_labels",
-      "label": "Show menu labels",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "menu_show_icons",
-      "label": "Show menu icons",
-      "default": false,
-      "info": "Upload icons per link in Menu → Add block → Menu link."
-    },
-    {
-      "type": "header",
-      "content": "Header actions (Account · Wishlist · Cart)"
-    },
-    {
-      "type": "paragraph",
-      "content": "Customize icons, labels, and count badges. Cart and wishlist counts update automatically when items change."
-    },
-    {
-      "type": "checkbox",
-      "id": "header_show_account",
-      "label": "Show account",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "header_show_wishlist",
-      "label": "Show wishlist",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "header_show_cart",
-      "label": "Show cart",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "actions_show_labels",
-      "label": "Show labels below icons on desktop",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "actions_show_count_badges",
-      "label": "Show item counts on icons",
-      "default": true,
-      "info": "Displays cart and wishlist totals on the icon badge when greater than zero."
-    },
-    {
-      "type": "header",
-      "content": "Action labels"
-    },
-    {
-      "type": "text",
-      "id": "actions_account_label",
-      "label": "Account label",
-      "info": "Leave blank to use the default translation."
-    },
-    {
-      "type": "text",
-      "id": "actions_wishlist_label",
-      "label": "Wishlist label",
-      "info": "Leave blank to use the default translation."
-    },
-    {
-      "type": "text",
-      "id": "actions_cart_label",
-      "label": "Cart label",
-      "info": "Leave blank to use the default translation."
-    },
-    {
-      "type": "header",
-      "content": "Custom icons"
-    },
-    {
-      "type": "paragraph",
-      "content": "Optional. Upload square PNG or SVG icons (about 40×40px). Leave blank to use the default outline icons."
-    },
-    {
-      "type": "image_picker",
-      "id": "actions_account_icon",
-      "label": "Account icon"
-    },
-    {
-      "type": "image_picker",
-      "id": "actions_wishlist_icon",
-      "label": "Wishlist icon"
-    },
-    {
-      "type": "image_picker",
-      "id": "actions_cart_icon",
-      "label": "Cart icon"
-    },
-    {
-      "type": "header",
-      "content": "Count badge colors"
-    },
-    {
-      "type": "color",
-      "id": "actions_wishlist_badge_bg",
-      "label": "Wishlist badge background",
-      "default": "#264734"
-    },
-    {
-      "type": "color",
-      "id": "actions_wishlist_badge_text",
-      "label": "Wishlist badge text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "actions_cart_badge_bg",
-      "label": "Cart badge background",
-      "default": "#2A3A30"
-    },
-    {
-      "type": "color",
-      "id": "actions_cart_badge_text",
-      "label": "Cart badge text",
-      "default": "#ffffff"
     },
     {
       "type": "header",
