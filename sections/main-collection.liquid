@@ -256,7 +256,14 @@
         {% if lame_category_shop_page %}
           {% capture children %}
             {% for product in collection.products %}
-              <li class="lame-category-shop__item" data-product-id="{{ product.id }}">
+              {% capture discount_percent_capture %}
+                {% render 'lame-product-discount-percent', product: product %}
+              {% endcapture %}
+              <li
+                class="lame-category-shop__item"
+                data-product-id="{{ product.id }}"
+                data-discount-percent="{{ discount_percent_capture | strip }}"
+              >
                 {% render 'lame-category-product-card',
                   product: product,
                   section: section,

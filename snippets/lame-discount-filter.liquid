@@ -1,7 +1,7 @@
 {%- doc -%}
   Discount % filter for Our Products collections (under Brand).
-  Client-side filter using data-discount-percent on product cards.
-  Options are 10% bands: 0–10, 10–20, … 50–60. A checked band shows only that range.
+  Loads all collection pages, then shows only products in the selected 10% bands
+  (0–10, 10–20, … 50–60) with pagination for the matching set.
   @param {object} collection
   @param {string} section_id
   @param {string} [filter_style]
@@ -18,6 +18,9 @@
   data-section-id="{{ section_id }}"
   data-id-prefix="{{ id_prefix }}"
   data-msg-no-results="{{ 'lame_collection.discount_filter_no_results' | t | escape }}"
+  data-msg-loading="{{ 'lame_collection.brand_filter_error_loading' | t | escape }}"
+  data-page-of="{{ 'lame_our_products.page_of' | t: current: '__CURRENT__', pages: '__PAGES__' | escape }}"
+  data-showing-range="{{ 'lame_our_products.showing_range' | t: from: '__FROM__', to: '__TO__', total: '__TOTAL__' | escape }}"
 >
   <details
     id="Facet-Details-{{ section_id }}-discount-{{ id_prefix }}"
