@@ -1,6 +1,7 @@
 {%- doc -%}
   Discount % filter for Our Products collections (under Brand).
   Client-side filter using data-discount-percent on product cards.
+  Options are 10% bands: 0–10, 10–20, … 50–60. A checked band shows only that range.
   @param {object} collection
   @param {string} section_id
   @param {string} [filter_style]
@@ -10,7 +11,7 @@
 {% liquid
   assign filter_style = filter_style | default: 'vertical'
   assign id_prefix = id_prefix | default: filter_style
-  assign discount_steps = '10,20,30,40,50,60,70' | split: ','
+  assign discount_max_steps = '10,20,30,40,50,60' | split: ','
 %}
 
 <lame-discount-filter
@@ -46,20 +47,13 @@
           class="facets__inputs-list list-unstyled"
           name="{{ 'lame_collection.filter_discount' | t }}"
         >
-          {% for step in discount_steps %}
+          {% for step in discount_max_steps %}
             {% liquid
-              assign is_above = false
-              if step == '50'
-                assign is_above = true
-              endif
-              if is_above
-                assign discount_label = 'lame_collection.discount_above' | t: percent: step
-                assign discount_mode = 'above'
-              else
-                assign discount_label = 'lame_collection.discount_upto' | t: percent: step
-                assign discount_mode = 'upto'
-              endif
-              assign input_id = 'Filter-discount-' | append: step | append: '-' | append: id_prefix
+              assign discount_max = step | plus: 0
+              assign discount_min = discount_max | minus: 10
+              assign discount_label = 'lame_collection.discount_range' | t: from: discount_min, to: discount_max
+              assign range_key = discount_min | append: '-' | append: discount_max
+              assign input_id = 'Filter-discount-' | append: range_key | append: '-' | append: id_prefix
             %}
             <li class="facets__inputs-list-item" data-skip-node-update="true">
               <div class="checkbox">
@@ -67,8 +61,9 @@
                   type="checkbox"
                   id="{{ input_id }}"
                   class="checkbox__input"
-                  data-discount-min="{{ step }}"
-                  data-discount-mode="{{ discount_mode }}"
+                  data-discount-min="{{ discount_min }}"
+                  data-discount-max="{{ discount_max }}"
+                  data-discount-range="{{ range_key }}"
                   data-label="{{ discount_label | escape }}"
                 >
                 <label class="checkbox__label" for="{{ input_id }}">

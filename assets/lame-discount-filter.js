@@ -1,6 +1,7 @@
 /**
  * Discount % filter for Our Products / premium collection pages.
  * Client-side hide based on data-discount-percent (compare-at savings).
+ * Ranges are exclusive bands: 0–10, 10–20, … 50–60 (min < percent <= max).
  */
 
 const HIDDEN_CLASS = 'lame-discount-filter--hidden';
@@ -31,73 +32,94 @@ function storageKey() {
  * @returns {NodeListOf<HTMLInputElement>}
  */
 function getAllDiscountInputs() {
-  return document.querySelectorAll('lame-discount-filter input[type="checkbox"][data-discount-min]');
+  return document.querySelectorAll('lame-discount-filter input[type="checkbox"][data-discount-range]');
 }
 
 /**
- * @returns {{ value: number, mode: string }[]}
+ * @param {HTMLInputElement} input
+ * @returns {string}
+ */
+function getRangeKey(input) {
+  return input.getAttribute('data-discount-range') || '';
+}
+
+/**
+ * @param {string} key
+ * @returns {{ min: number, max: number, key: string } | null}
+ */
+function parseRangeKey(key) {
+  if (!key || !key.includes('-')) return null;
+  const [minRaw, maxRaw] = key.split('-');
+  const min = Number(minRaw);
+  const max = Number(maxRaw);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+  return { min, max, key };
+}
+
+/**
+ * @returns {{ min: number, max: number, key: string }[]}
  */
 function getSelectedRules() {
-  /** @type {Map<string, { value: number, mode: string }>} */
+  /** @type {Map<string, { min: number, max: number, key: string }>} */
   const rules = new Map();
 
   for (const input of getAllDiscountInputs()) {
     if (!input.checked) continue;
-    const value = Number(input.getAttribute('data-discount-min'));
-    const mode = input.getAttribute('data-discount-mode') === 'above' ? 'above' : 'upto';
-    if (!Number.isFinite(value) || value <= 0) continue;
-    rules.set(`${mode}:${value}`, { value, mode });
+    const parsed = parseRangeKey(getRangeKey(input));
+    if (!parsed) continue;
+    rules.set(parsed.key, parsed);
   }
 
-  return [...rules.values()].sort((a, b) => a.value - b.value);
+  return [...rules.values()].sort((a, b) => a.min - b.min);
 }
 
 /**
- * @returns {number[]}
+ * @returns {string[]}
  */
-function getSelectedMins() {
-  return getSelectedRules().map((rule) => rule.value);
+function getSelectedRangeKeys() {
+  return getSelectedRules().map((rule) => rule.key);
 }
 
 /**
  * @param {number} percent
- * @param {{ value: number, mode: string }[]} rules
+ * @param {{ min: number, max: number }[]} rules
  * @returns {boolean}
  */
 function matchesDiscount(percent, rules) {
   if (!rules.length) return true;
+  if (!(percent > 0)) return false;
 
-  return rules.some((rule) => {
-    if (rule.mode === 'above') return percent >= rule.value;
-    return percent > 0 && percent <= rule.value;
-  });
+  return rules.some((rule) => percent > rule.min && percent <= rule.max);
 }
 
-function persistMins(mins) {
+/**
+ * @param {string[]} keys
+ */
+function persistRanges(keys) {
   try {
-    sessionStorage.setItem(storageKey(), JSON.stringify(mins));
+    sessionStorage.setItem(storageKey(), JSON.stringify(keys));
   } catch {
     // Ignore storage errors
   }
 }
 
 /**
- * @returns {number[]}
+ * @returns {string[]}
  */
-function readPersistedMins() {
+function readPersistedRanges() {
   try {
     const raw = sessionStorage.getItem(storageKey());
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map(Number).filter((n) => Number.isFinite(n) && n > 0);
+    return parsed.map(String).filter((key) => Boolean(parseRangeKey(key)));
   } catch {
     return [];
   }
 }
 
 function updateActiveCount() {
-  const count = getSelectedMins().length;
+  const count = getSelectedRangeKeys().length;
 
   for (const status of document.querySelectorAll('[data-discount-filter-status]')) {
     status.textContent = count > 0 ? String(count) : '';
@@ -114,7 +136,7 @@ function updateClearAllButton() {
     document.querySelector('.lame-collection-facet-actions__clear');
   if (!(clearButton instanceof HTMLButtonElement)) return;
 
-  const discountActive = getSelectedMins().length > 0;
+  const discountActive = getSelectedRangeKeys().length > 0;
   const alreadyActive =
     clearButton.classList.contains('lame-collection-facet-actions__clear--active') ||
     clearButton.classList.contains('lame-collection-filters-head__clear--active');
@@ -133,12 +155,12 @@ function updateClearAllButton() {
  * @param {HTMLInputElement} changedInput
  */
 function syncCheckboxGroups(changedInput) {
-  const min = changedInput.getAttribute('data-discount-min');
-  if (!min) return;
+  const range = getRangeKey(changedInput);
+  if (!range) return;
 
   for (const input of getAllDiscountInputs()) {
     if (input === changedInput) continue;
-    if (input.getAttribute('data-discount-min') === min) {
+    if (getRangeKey(input) === range) {
       input.checked = changedInput.checked;
     }
   }
@@ -148,17 +170,17 @@ function syncCheckboxGroups(changedInput) {
  * @param {URL} [baseUrl]
  */
 function syncDiscountParamsToUrl(baseUrl = new URL(window.location.href)) {
-  const mins = getSelectedMins();
+  const keys = getSelectedRangeKeys();
   const url = new URL(baseUrl.toString());
 
   url.searchParams.delete(DISCOUNT_PARAM);
 
-  if (mins.length) {
-    url.searchParams.set(DISCOUNT_PARAM, mins.join(','));
+  if (keys.length) {
+    url.searchParams.set(DISCOUNT_PARAM, keys.join(','));
   }
 
   history.replaceState(history.state, '', url.toString());
-  persistMins(mins);
+  persistRanges(keys);
   updateClearAllButton();
 
   return url;
@@ -167,21 +189,20 @@ function syncDiscountParamsToUrl(baseUrl = new URL(window.location.href)) {
 function restoreDiscountSelection() {
   const url = new URL(window.location.href);
   const fromUrl = url.searchParams.get(DISCOUNT_PARAM);
-  const mins = fromUrl
+  const keys = fromUrl
     ? fromUrl
         .split(',')
-        .map(Number)
-        .filter((n) => Number.isFinite(n) && n > 0)
-    : readPersistedMins();
+        .map((part) => part.trim())
+        .filter((key) => Boolean(parseRangeKey(key)))
+    : readPersistedRanges();
 
-  const minSet = new Set(mins);
+  const keySet = new Set(keys);
 
   for (const input of getAllDiscountInputs()) {
-    const min = Number(input.getAttribute('data-discount-min'));
-    input.checked = minSet.has(min);
+    input.checked = keySet.has(getRangeKey(input));
   }
 
-  if (mins.length && !fromUrl) {
+  if (keys.length && !fromUrl) {
     syncDiscountParamsToUrl(url);
   }
 
@@ -273,7 +294,7 @@ export function clearDiscountFilter() {
   const url = new URL(window.location.href);
   url.searchParams.delete(DISCOUNT_PARAM);
   history.replaceState(history.state, '', url.toString());
-  persistMins([]);
+  persistRanges([]);
   applyDiscountFilter();
 }
 
@@ -287,7 +308,7 @@ class LameDiscountFilter extends HTMLElement {
     this.addEventListener('change', (event) => {
       const { target } = event;
       if (!(target instanceof HTMLInputElement)) return;
-      if (!target.matches('[data-discount-min]')) return;
+      if (!target.matches('[data-discount-range]')) return;
 
       syncCheckboxGroups(target);
       syncDiscountParamsToUrl();
