@@ -245,7 +245,12 @@ function syncFromUrl(url = new URL(window.location.href)) {
 
   for (const input of getAllBrandInputs()) {
     const slug = normalizeSlug(input.getAttribute('data-brand-slug'));
-    input.checked = slugs.has(slug);
+    const compact = slug.replace(/-/g, '');
+    input.checked = Boolean(
+      slug &&
+        (slugs.has(slug) ||
+          [...slugs].some((part) => part === slug || part.replace(/-/g, '') === compact))
+    );
   }
 
   updateActiveCount();
@@ -744,12 +749,30 @@ export function clearBrandFilter() {
   scheduleServerReload();
 }
 
-function restoreBrandSelection() {
+/**
+ * @param {{ allowBrandParam?: boolean }} [options]
+ */
+function restoreBrandSelection(options = {}) {
+  const allowBrandParam = options.allowBrandParam === true;
   const url = new URL(window.location.href);
+  const hasVendor = url.searchParams.getAll(VENDOR_PARAM).length > 0;
+  const hasBrand = Boolean(url.searchParams.get(BRAND_PARAM));
 
-  // Vendor query params are the source of truth (facet pills + checkboxes).
-  if (syncFromVendorUrl(url)) {
+  if (hasVendor) {
+    syncFromVendorUrl(url);
+    if (getSelectedSlugs().size === 0 && hasBrand) {
+      syncFromUrl(url);
+    }
     return;
+  }
+
+  // Offer-banner links use brand= only so Shopify does not empty the grid
+  // with a vendor name that does not match (e.g. "Dr. Rashel" vs "DR.RASHEL").
+  if (allowBrandParam && hasBrand) {
+    syncFromUrl(url);
+    if (getSelectedSlugs().size > 0) {
+      return;
+    }
   }
 
   // No vendor filters in the URL — clear checkboxes and orphan brand= params.
@@ -779,14 +802,17 @@ export function syncBrandFilterFromLocation() {
 function initBrandFilter() {
   augmentBrandFilterFromGrid();
   dedupeBrandFilterLabels();
-  restoreBrandSelection();
+  restoreBrandSelection({ allowBrandParam: true });
   applyBrandFilter();
 
   const hasSelection = getSelectedSlugs().size > 0;
-  const hasVendorFilter =
-    new URL(window.location.href).searchParams.getAll(VENDOR_PARAM).length > 0;
+  const url = new URL(window.location.href);
+  const hasVendorFilter = url.searchParams.getAll(VENDOR_PARAM).length > 0;
+  const hasDiscount = Boolean(url.searchParams.get('discount'));
 
-  if (hasSelection && !hasVendorFilter) {
+  // Discount filter loads the full catalog itself. A vendor reload here would
+  // empty the page when the URL vendor label does not match Shopify exactly.
+  if (hasSelection && !hasVendorFilter && !hasDiscount) {
     scheduleServerReload();
   }
 }

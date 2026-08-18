@@ -171,7 +171,24 @@ function getActiveBrandSlugs() {
 function matchesBrand(slug, brandSlugs) {
   if (!brandSlugs.size) return true;
   const normalized = toBrandSlug(slug);
-  return Boolean(normalized && brandSlugs.has(normalized));
+  if (normalized && brandSlugs.has(normalized)) return true;
+
+  const compact = normalized.replace(/-/g, '');
+  for (const active of brandSlugs) {
+    if (active.replace(/-/g, '') === compact) return true;
+  }
+
+  return false;
+}
+
+/**
+ * @param {HTMLElement} item
+ * @returns {string}
+ */
+function cardBrandSlug(item) {
+  return toBrandSlug(
+    item.getAttribute('data-brand-slug') || item.getAttribute('data-vendor') || item.getAttribute('data-brand')
+  );
 }
 
 /**
@@ -292,13 +309,28 @@ function restoreDiscountSelection() {
 }
 
 /**
- * @returns {string}
+ * Unfiltered collection URL used to load every product, then filter in JS.
+ * Vendor params must not stay here — a mismatched vendor empties the server page.
+ * @param {number} [page]
+ * @returns {URL}
  */
-function catalogKey() {
+function unfilteredCollectionUrl(page = 1) {
   const url = new URL(window.location.href);
   url.searchParams.delete('page');
   url.searchParams.delete(DISCOUNT_PARAM);
+  url.searchParams.delete(VENDOR_PARAM);
+  url.searchParams.delete(BRAND_PARAM);
+  url.searchParams.set('page', String(page));
   url.hash = '';
+  return url;
+}
+
+/**
+ * @returns {string}
+ */
+function catalogKey() {
+  const url = unfilteredCollectionUrl(1);
+  url.searchParams.delete('page');
   return `${url.pathname}${url.search}`;
 }
 
@@ -314,10 +346,13 @@ function getPageSize() {
 }
 
 /**
+ * @param {ParentNode} source
  * @returns {number}
  */
-function getServerLastPage() {
-  const grid = getCollectionRoot()?.querySelector('[ref="grid"], [data-testid="product-grid"], [data-testid="product-grid-grouped"]');
+function readLastPage(source) {
+  const grid = source.querySelector(
+    '[ref="grid"], [data-testid="product-grid"], [data-testid="product-grid-grouped"]'
+  );
   const lastPage = Number(grid instanceof HTMLElement ? grid.dataset.lastPage : 1);
   return Number.isFinite(lastPage) && lastPage > 0 ? lastPage : 1;
 }
@@ -344,9 +379,7 @@ function extractCards(source) {
     cards.set(id, {
       html: item.outerHTML,
       percent: Number(item.getAttribute('data-discount-percent') || 0),
-      brand: toBrandSlug(
-        item.getAttribute('data-brand-slug') || item.getAttribute('data-vendor') || item.getAttribute('data-brand')
-      ),
+      brand: cardBrandSlug(item),
       id,
     });
   }
@@ -361,7 +394,16 @@ function extractCards(source) {
  */
 function filterCatalogItems(items, rules) {
   const brandSlugs = getActiveBrandSlugs();
-  return items.filter((item) => matchesDiscount(item.percent, rules) && matchesBrand(item.brand, brandSlugs));
+  const withBrand = items.filter((item) => matchesBrand(item.brand, brandSlugs));
+  const withDiscount = withBrand.filter((item) => matchesDiscount(item.percent, rules));
+
+  // Keep brand results if none of those products fall in the ticked discount bands
+  // (compare-at price missing, or the offer is wider than 0–20%).
+  if (!withDiscount.length && brandSlugs.size && withBrand.length) {
+    return withBrand;
+  }
+
+  return withDiscount;
 }
 
 /**
@@ -372,32 +414,30 @@ async function ensureCatalog(requestId) {
   if (catalog?.key === key && catalog.items.length) return catalog;
 
   const sectionId = getSectionId();
-  const lastPage = getServerLastPage();
+  /** @type {Map<string, { html: string, percent: number, brand: string, id: string }>} */
+  const byId = new Map();
+
   if (!sectionId) {
     catalog = { key, items: extractCards(getCollectionRoot() || document) };
     return catalog;
   }
 
-  /** @type {Map<string, { html: string, percent: number, id: string }>} */
-  const byId = new Map();
-  const currentRoot = getCollectionRoot();
-  if (currentRoot) {
-    for (const card of extractCards(currentRoot)) byId.set(card.id, card);
-  }
+  const firstHtml = await sectionRenderer.getSectionHTML(sectionId, true, unfilteredCollectionUrl(1));
+  if (requestId !== catalogRequestId) return catalog;
 
+  const firstDoc = new DOMParser().parseFromString(firstHtml, 'text/html');
+  for (const card of extractCards(firstDoc)) byId.set(card.id, card);
+
+  const lastPage = readLastPage(firstDoc);
   const batchSize = 4;
 
-  for (let start = 1; start <= lastPage; start += batchSize) {
+  for (let start = 2; start <= lastPage; start += batchSize) {
     if (requestId !== catalogRequestId) return catalog;
     const end = Math.min(start + batchSize - 1, lastPage);
     const fetches = [];
 
     for (let page = start; page <= end; page += 1) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete(DISCOUNT_PARAM);
-      url.searchParams.set('page', String(page));
-      url.hash = '';
-      fetches.push(sectionRenderer.getSectionHTML(sectionId, true, url));
+      fetches.push(sectionRenderer.getSectionHTML(sectionId, true, unfilteredCollectionUrl(page)));
     }
 
     const pages = await Promise.all(fetches);
@@ -658,13 +698,28 @@ function applyLocalHideOnly() {
   const items = root.querySelectorAll(CARD_SELECTOR);
   const brandSlugs = getActiveBrandSlugs();
   let visibleCount = 0;
+  let discountVisible = 0;
 
   for (const item of items) {
     const percent = Number(item.getAttribute('data-discount-percent') || 0);
-    const brand = item.getAttribute('data-brand-slug') || item.getAttribute('data-vendor') || item.getAttribute('data-brand');
-    const show = matchesDiscount(percent, rules) && matchesBrand(brand, brandSlugs);
+    const brand = cardBrandSlug(item);
+    const brandOk = matchesBrand(brand, brandSlugs);
+    const discountOk = !hasFilter || matchesDiscount(percent, rules);
+    const show = brandOk && discountOk;
     item.classList.toggle(HIDDEN_CLASS, !show);
-    if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) visibleCount += 1;
+    if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) {
+      visibleCount += 1;
+      if (discountOk) discountVisible += 1;
+    }
+  }
+
+  if (hasFilter && discountVisible === 0 && brandSlugs.size) {
+    visibleCount = 0;
+    for (const item of items) {
+      const show = matchesBrand(cardBrandSlug(item), brandSlugs);
+      item.classList.toggle(HIDDEN_CLASS, !show);
+      if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) visibleCount += 1;
+    }
   }
 
   for (const section of root.querySelectorAll('.lame-collection-brand-section')) {

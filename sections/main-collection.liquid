@@ -256,12 +256,22 @@
         {% if lame_category_shop_page %}
           {% capture children %}
             {% for product in collection.products %}
+              {% capture product_brand_capture %}
+                {% render 'lame-product-brand-name', product: product %}
+              {% endcapture %}
+              {% assign raw_vendor = product_brand_capture | strip %}
+              {% capture product_slug_capture %}
+                {% render 'lame-vendor-slug', vendor: raw_vendor %}
+              {% endcapture %}
               {% capture discount_percent_capture %}
                 {% render 'lame-product-discount-percent', product: product %}
               {% endcapture %}
               <li
                 class="lame-category-shop__item"
                 data-product-id="{{ product.id }}"
+                data-brand="{{ raw_vendor | escape }}"
+                data-vendor="{{ product.vendor | strip | escape }}"
+                data-brand-slug="{{ product_slug_capture | strip }}"
                 data-discount-percent="{{ discount_percent_capture | strip }}"
               >
                 {% render 'lame-category-product-card',

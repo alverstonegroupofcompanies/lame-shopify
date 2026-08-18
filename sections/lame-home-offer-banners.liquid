@@ -28,6 +28,10 @@
           {%- liquid
             assign banner_image = block.settings.image
             assign banner_alt = block.settings.alt
+            assign fallback_asset = block.settings.fallback_asset | strip
+            if banner_image == blank and fallback_asset == blank and request.design_mode == false
+              continue
+            endif
             if banner_alt == blank and banner_image != blank
               assign banner_alt = banner_image.alt
             endif
@@ -35,34 +39,56 @@
               assign banner_alt = shop.name
             endif
             assign banner_link = block.settings.link
-            assign fallback_asset = block.settings.fallback_asset | strip
             assign brand_name = block.settings.brand | strip
-            assign discount_choice = block.settings.discount_range | default: 'none'
-            assign discount_param = ''
+            assign discount_keys = ''
 
-            case discount_choice
-              when 'up-to-20'
-                assign discount_param = '0-10,10-20'
-              when 'up-to-50'
-                assign discount_param = '0-10,10-20,20-30,30-40,40-50'
-              when 'from-40'
-                assign discount_param = '40-50,50-60'
-              when 'none'
-                assign discount_param = ''
-              else
-                assign discount_param = discount_choice
-            endcase
+            if block.settings.discount_0_10
+              assign discount_keys = discount_keys | append: '|0-10'
+            endif
+            if block.settings.discount_10_20
+              assign discount_keys = discount_keys | append: '|10-20'
+            endif
+            if block.settings.discount_20_30
+              assign discount_keys = discount_keys | append: '|20-30'
+            endif
+            if block.settings.discount_30_40
+              assign discount_keys = discount_keys | append: '|30-40'
+            endif
+            if block.settings.discount_40_50
+              assign discount_keys = discount_keys | append: '|40-50'
+            endif
+            if block.settings.discount_50_60
+              assign discount_keys = discount_keys | append: '|50-60'
+            endif
+
+            assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
+
+            if discount_param == blank
+              assign discount_choice = block.settings.discount_range | default: 'none'
+              case discount_choice
+                when 'up-to-20'
+                  assign discount_param = '0-10,10-20'
+                when 'up-to-50'
+                  assign discount_param = '0-10,10-20,20-30,30-40,40-50'
+                when 'from-40'
+                  assign discount_param = '40-50,50-60'
+                when 'none'
+                  assign discount_param = ''
+                else
+                  assign discount_param = discount_choice
+              endcase
+            endif
+
+            assign brand_slug = brand_name | handleize
+            assign brand_name_down = brand_name | downcase
+            if brand_name_down contains 'lamstone'
+              assign brand_slug = 'lamstone-healthcare'
+            endif
 
             if brand_name != blank or discount_param != blank
               assign query_string = ''
               if brand_name != blank
-                assign brand_encoded = brand_name | url_encode
-                assign brand_slug = brand_name | handleize
-                assign brand_name_down = brand_name | downcase
-                if brand_name_down contains 'lamstone'
-                  assign brand_slug = 'lamstone-healthcare'
-                endif
-                assign query_string = 'filter.p.vendor=' | append: brand_encoded | append: '&brand=' | append: brand_slug
+                assign query_string = 'brand=' | append: brand_slug
               endif
               if discount_param != blank
                 if query_string != blank
@@ -93,7 +119,7 @@
                   class: 'lame-home-offer-banners__image',
                   loading: 'lazy',
                   widths: '400, 600, 800, 1000, 1200, 1600',
-                  sizes: '(min-width: 750px) calc((min(100vw, var(--page-width)) - 1.5rem) / 2), 100vw',
+                  sizes: 'calc((min(100vw, var(--page-width, 1200px)) - 1.5rem) / 2)',
                   alt: banner_alt
               }}
             {%- elsif fallback_asset != blank -%}
@@ -123,6 +149,10 @@
 </section>
 
 {% stylesheet %}
+  .lame-home-offer-banners {
+    --lame-home-offer-gap: clamp(0.5rem, 1.4vw, 1rem);
+  }
+
   .lame-home-offer-banners__wrap {
     width: 100%;
     max-width: min(100%, var(--page-width, 1200px));
@@ -153,12 +183,14 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(0.65rem, 1.6vw, 1.15rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--lame-home-offer-gap);
+    width: 100%;
   }
 
   .lame-home-offer-banners__item {
     min-width: 0;
+    display: flex;
     overflow: hidden;
     border-radius: clamp(8px, 1vw, 14px);
     background: #eef6fb;
@@ -166,7 +198,7 @@
   }
 
   .lame-home-offer-banners__link {
-    display: block;
+    display: flex;
     width: 100%;
     height: 100%;
     text-decoration: none;
@@ -176,21 +208,16 @@
   .lame-home-offer-banners__image {
     display: block;
     width: 100%;
-    height: auto;
-    object-fit: contain;
+    height: 100%;
+    aspect-ratio: 1024 / 682;
+    object-fit: cover;
     object-position: center;
   }
 
   .lame-home-offer-banners__image.placeholder-svg {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1024 / 682;
     background: #e8f2f8;
-  }
-
-  @media screen and (min-width: 750px) {
-    .lame-home-offer-banners__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 {% endstylesheet %}
 
@@ -277,7 +304,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "Upload a banner here to replace the theme file."
+          "info": "Upload a banner here to replace the theme file. Banners display in a 2 × 2 grid."
         },
         {
           "type": "text",
@@ -295,29 +322,50 @@
           "content": "Product filters"
         },
         {
+          "type": "paragraph",
+          "content": "Clicking this banner opens the products page with these Brand and Discount boxes already ticked. Set this separately on each banner."
+        },
+        {
           "type": "text",
           "id": "brand",
           "label": "Brand",
-          "info": "Must match the product vendor in Shopify Admin exactly (for example Cetaphil). Combined with discount on the products page."
+          "info": "Must match the Brand checkbox on the products page exactly (for example Cetaphil)."
         },
         {
-          "type": "select",
-          "id": "discount_range",
-          "label": "Discount",
-          "options": [
-            { "value": "none", "label": "No discount filter" },
-            { "value": "0-10", "label": "0% – 10%" },
-            { "value": "10-20", "label": "10% – 20%" },
-            { "value": "up-to-20", "label": "0% – 20% (0–10 and 10–20)" },
-            { "value": "20-30", "label": "20% – 30%" },
-            { "value": "30-40", "label": "30% – 40%" },
-            { "value": "40-50", "label": "40% – 50%" },
-            { "value": "50-60", "label": "50% – 60%" },
-            { "value": "up-to-50", "label": "Up to 50%" },
-            { "value": "from-40", "label": "40% and above" }
-          ],
-          "default": "none",
-          "info": "Opens the products page with this Discount filter already selected."
+          "type": "checkbox",
+          "id": "discount_0_10",
+          "label": "Tick 0% – 10%",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "discount_10_20",
+          "label": "Tick 10% – 20%",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "discount_20_30",
+          "label": "Tick 20% – 30%",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "discount_30_40",
+          "label": "Tick 30% – 40%",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "discount_40_50",
+          "label": "Tick 40% – 50%",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "discount_50_60",
+          "label": "Tick 50% – 60%",
+          "default": false
         },
         {
           "type": "url",
@@ -328,7 +376,7 @@
       ]
     }
   ],
-  "max_blocks": 6,
+  "max_blocks": 4,
   "presets": [
     {
       "name": "Home offer banners",
@@ -338,9 +386,10 @@
           "type": "banner",
           "settings": {
             "fallback_asset": "lame-offer-cetaphil-50.png",
-            "alt": "Cetaphil up to 50% off",
+            "alt": "Cetaphil up to 20% off",
             "brand": "Cetaphil",
-            "discount_range": "up-to-20"
+            "discount_0_10": true,
+            "discount_10_20": true
           }
         },
         {
@@ -348,8 +397,12 @@
           "settings": {
             "fallback_asset": "lame-offer-dr-rashel-50.png",
             "alt": "Dr. Rashel up to 50% off",
-            "brand": "Dr. Rashel",
-            "discount_range": "up-to-20"
+            "brand": "DR.RASHEL",
+            "discount_0_10": true,
+            "discount_10_20": true,
+            "discount_20_30": true,
+            "discount_30_40": true,
+            "discount_40_50": true
           }
         }
       ]
