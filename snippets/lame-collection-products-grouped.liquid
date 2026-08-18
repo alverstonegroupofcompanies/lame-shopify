@@ -1,6 +1,5 @@
 {%- doc -%}
   Collection products grouped by brand (normalized vendor).
-  Product cards are inlined here (no sub-snippet) so content_for works on collection pages.
 
   @param {object} collection
   @param {object} section
@@ -116,9 +115,7 @@
               data-brand="{{ brand_label | escape }}"
               ref="cards[]"
             >
-              {% # theme-check-disable %}
-              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
-              {% # theme-check-enable %}
+              {% render 'lame-shop-product-card', product: product, section: section %}
             </li>
             {% assign item_index = item_index | plus: 1 %}
           {% endif %}
