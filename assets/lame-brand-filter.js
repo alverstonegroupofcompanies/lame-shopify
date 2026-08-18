@@ -252,6 +252,17 @@ function syncFromUrl(url = new URL(window.location.href)) {
 }
 
 /**
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
+function toBrandSlug(value) {
+  return normalizeName(value)
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
  * @param {URL} [url]
  * @returns {boolean}
  */
@@ -260,13 +271,22 @@ function syncFromVendorUrl(url = new URL(window.location.href)) {
   if (!vendors.length) return false;
 
   const vendorSet = new Set(vendors.map((vendor) => normalizeName(vendor)));
+  const vendorSlugs = new Set(vendors.map((vendor) => toBrandSlug(vendor)).filter(Boolean));
+  let matched = false;
 
   for (const input of getAllBrandInputs()) {
     const label = normalizeName(input.getAttribute('data-brand-label'));
-    input.checked = Boolean(label && vendorSet.has(label));
+    const slug = normalizeSlug(input.getAttribute('data-brand-slug'));
+    const checked = Boolean((label && vendorSet.has(label)) || (slug && vendorSlugs.has(slug)));
+    input.checked = checked;
+    if (checked) matched = true;
   }
 
-  syncBrandParamsToUrl(url);
+  // Keep incoming vendor params when checkboxes are not on this page yet.
+  if (matched) {
+    syncBrandParamsToUrl(url);
+  }
+
   updateActiveCount();
   return true;
 }
@@ -614,12 +634,21 @@ export function augmentBrandFilterFromGrid() {
 
 export function applyBrandFilter() {
   const root = getCollectionRoot();
-
   const selected = getSelectedSlugs();
-  const hasFilter = selected.size > 0;
+  const url = new URL(window.location.href);
+  const urlSlugs = new Set(
+    [
+      ...(url.searchParams.get(BRAND_PARAM) || '')
+        .split(',')
+        .map((part) => normalizeSlug(part) || toBrandSlug(part)),
+      ...url.searchParams.getAll(VENDOR_PARAM).map((vendor) => toBrandSlug(vendor)),
+    ].filter(Boolean)
+  );
+  const active = selected.size ? selected : urlSlugs;
+  const hasFilter = active.size > 0;
 
   if (!root) {
-    diagnoseBrandFilter(null, selected, 0, hasFilter);
+    diagnoseBrandFilter(null, active, 0, hasFilter);
     return;
   }
 
@@ -633,14 +662,14 @@ export function applyBrandFilter() {
 
   for (const item of items) {
     const slug = normalizeSlug(item.getAttribute('data-brand-slug'));
-    const show = !hasFilter || selected.has(slug);
+    const show = !hasFilter || active.has(slug);
     item.classList.toggle(HIDDEN_CLASS, !show);
     if (show) visibleCount += 1;
   }
 
   for (const section of sections) {
     const slug = normalizeSlug(section.getAttribute('data-brand-slug'));
-    const show = !hasFilter || selected.has(slug);
+    const show = !hasFilter || active.has(slug);
     section.classList.toggle(HIDDEN_CLASS, !show);
     if (show) visibleCount += 1;
   }
@@ -649,7 +678,7 @@ export function applyBrandFilter() {
     productsColumn.classList.toggle('lame-collection-products-column--brand-selected', hasFilter);
   }
 
-  diagnoseBrandFilter(root, selected, visibleCount, hasFilter);
+  diagnoseBrandFilter(root, active, visibleCount, hasFilter);
   updateActiveCount();
   document.dispatchEvent(new CustomEvent('lame:apply-client-filters'));
 }

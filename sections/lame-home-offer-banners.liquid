@@ -1,5 +1,12 @@
 {%- liquid
   assign open_new_tab = section.settings.open_in_new_tab
+  assign products_url = routes.all_products_collection_url
+  if collections['our-products'] != blank and collections['our-products'].url != blank
+    assign products_url = collections['our-products'].url
+  endif
+  if section.settings.products_collection != blank
+    assign products_url = section.settings.products_collection.url
+  endif
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -29,6 +36,42 @@
             endif
             assign banner_link = block.settings.link
             assign fallback_asset = block.settings.fallback_asset | strip
+            assign brand_name = block.settings.brand | strip
+            assign discount_choice = block.settings.discount_range | default: 'none'
+            assign discount_param = ''
+
+            case discount_choice
+              when 'up-to-20'
+                assign discount_param = '0-10,10-20'
+              when 'up-to-50'
+                assign discount_param = '0-10,10-20,20-30,30-40,40-50'
+              when 'from-40'
+                assign discount_param = '40-50,50-60'
+              when 'none'
+                assign discount_param = ''
+              else
+                assign discount_param = discount_choice
+            endcase
+
+            if brand_name != blank or discount_param != blank
+              assign query_string = ''
+              if brand_name != blank
+                assign brand_encoded = brand_name | url_encode
+                assign brand_slug = brand_name | handleize
+                assign brand_name_down = brand_name | downcase
+                if brand_name_down contains 'lamstone'
+                  assign brand_slug = 'lamstone-healthcare'
+                endif
+                assign query_string = 'filter.p.vendor=' | append: brand_encoded | append: '&brand=' | append: brand_slug
+              endif
+              if discount_param != blank
+                if query_string != blank
+                  assign query_string = query_string | append: '&'
+                endif
+                assign query_string = query_string | append: 'discount=' | append: discount_param
+              endif
+              assign banner_link = products_url | append: '?' | append: query_string
+            endif
           -%}
 
           <li class="lame-home-offer-banners__item" {{ block.shopify_attributes }}>
@@ -167,6 +210,12 @@
       "info": "Optional. Leave empty if the offer text is already in the images."
     },
     {
+      "type": "collection",
+      "id": "products_collection",
+      "label": "Products page",
+      "info": "Banners with a brand or discount open this page with those filters applied. Defaults to Our Products."
+    },
+    {
       "type": "text",
       "id": "accessibility_label",
       "label": "Accessibility label",
@@ -242,10 +291,39 @@
           "label": "Alt text"
         },
         {
+          "type": "header",
+          "content": "Product filters"
+        },
+        {
+          "type": "text",
+          "id": "brand",
+          "label": "Brand",
+          "info": "Must match the product vendor in Shopify Admin exactly (for example Cetaphil). Combined with discount on the products page."
+        },
+        {
+          "type": "select",
+          "id": "discount_range",
+          "label": "Discount",
+          "options": [
+            { "value": "none", "label": "No discount filter" },
+            { "value": "0-10", "label": "0% – 10%" },
+            { "value": "10-20", "label": "10% – 20%" },
+            { "value": "up-to-20", "label": "0% – 20% (0–10 and 10–20)" },
+            { "value": "20-30", "label": "20% – 30%" },
+            { "value": "30-40", "label": "30% – 40%" },
+            { "value": "40-50", "label": "40% – 50%" },
+            { "value": "50-60", "label": "50% – 60%" },
+            { "value": "up-to-50", "label": "Up to 50%" },
+            { "value": "from-40", "label": "40% and above" }
+          ],
+          "default": "none",
+          "info": "Opens the products page with this Discount filter already selected."
+        },
+        {
           "type": "url",
           "id": "link",
-          "label": "Link",
-          "info": "Optional. Link this banner to a collection or page."
+          "label": "Custom link",
+          "info": "Used only when Brand and Discount are both empty."
         }
       ]
     }
@@ -260,14 +338,18 @@
           "type": "banner",
           "settings": {
             "fallback_asset": "lame-offer-cetaphil-50.png",
-            "alt": "Cetaphil up to 50% off"
+            "alt": "Cetaphil up to 50% off",
+            "brand": "Cetaphil",
+            "discount_range": "up-to-20"
           }
         },
         {
           "type": "banner",
           "settings": {
             "fallback_asset": "lame-offer-dr-rashel-50.png",
-            "alt": "Dr. Rashel up to 50% off"
+            "alt": "Dr. Rashel up to 50% off",
+            "brand": "Dr. Rashel",
+            "discount_range": "up-to-20"
           }
         }
       ]

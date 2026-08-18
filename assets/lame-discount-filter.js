@@ -9,6 +9,8 @@ import { sectionRenderer } from '@theme/section-renderer';
 const HIDDEN_CLASS = 'lame-discount-filter--hidden';
 const BRAND_HIDDEN_CLASS = 'lame-brand-filter--hidden';
 const DISCOUNT_PARAM = 'discount';
+const BRAND_PARAM = 'brand';
+const VENDOR_PARAM = 'filter.p.vendor';
 const STORAGE_PREFIX = 'lame-discount-filter:';
 const CLEAR_EVENT = 'lame:clear-brand-filter';
 const MORPH_EVENT = 'lame:section-morph-complete';
@@ -113,6 +115,63 @@ function matchesDiscount(percent, rules) {
   if (!(percent > 0)) return false;
 
   return rules.some((rule) => percent > rule.min && percent <= rule.max);
+}
+
+/**
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
+function toBrandSlug(value) {
+  return (value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Brand slugs from the URL and checked brand filters, so offer-banner links
+ * still constrain results after the discount filter rebuilds the grid.
+ * @returns {Set<string>}
+ */
+function getActiveBrandSlugs() {
+  /** @type {Set<string>} */
+  const slugs = new Set();
+  const url = new URL(window.location.href);
+  const brandParam = url.searchParams.get(BRAND_PARAM);
+
+  if (brandParam) {
+    for (const part of brandParam.split(',')) {
+      const slug = toBrandSlug(part);
+      if (slug) slugs.add(slug);
+    }
+  }
+
+  for (const vendor of url.searchParams.getAll(VENDOR_PARAM)) {
+    const slug = toBrandSlug(vendor);
+    if (slug) slugs.add(slug);
+  }
+
+  for (const input of document.querySelectorAll(
+    'lame-brand-filter input[type="checkbox"][data-brand-slug]:checked'
+  )) {
+    const slug = toBrandSlug(input.getAttribute('data-brand-slug'));
+    if (slug) slugs.add(slug);
+  }
+
+  return slugs;
+}
+
+/**
+ * @param {string | null | undefined} slug
+ * @param {Set<string>} brandSlugs
+ * @returns {boolean}
+ */
+function matchesBrand(slug, brandSlugs) {
+  if (!brandSlugs.size) return true;
+  const normalized = toBrandSlug(slug);
+  return Boolean(normalized && brandSlugs.has(normalized));
 }
 
 /**
@@ -272,10 +331,10 @@ function getSectionId() {
 
 /**
  * @param {ParentNode} source
- * @returns {{ html: string, percent: number, id: string }[]}
+ * @returns {{ html: string, percent: number, brand: string, id: string }[]}
  */
 function extractCards(source) {
-  /** @type {Map<string, { html: string, percent: number, id: string }>} */
+  /** @type {Map<string, { html: string, percent: number, brand: string, id: string }>} */
   const cards = new Map();
 
   for (const item of source.querySelectorAll(CARD_SELECTOR)) {
@@ -285,11 +344,24 @@ function extractCards(source) {
     cards.set(id, {
       html: item.outerHTML,
       percent: Number(item.getAttribute('data-discount-percent') || 0),
+      brand: toBrandSlug(
+        item.getAttribute('data-brand-slug') || item.getAttribute('data-vendor') || item.getAttribute('data-brand')
+      ),
       id,
     });
   }
 
   return [...cards.values()];
+}
+
+/**
+ * @param {{ percent: number, brand: string }[]} items
+ * @param {{ min: number, max: number }[]} rules
+ * @returns {{ percent: number, brand: string }[]}
+ */
+function filterCatalogItems(items, rules) {
+  const brandSlugs = getActiveBrandSlugs();
+  return items.filter((item) => matchesDiscount(item.percent, rules) && matchesBrand(item.brand, brandSlugs));
 }
 
 /**
@@ -584,11 +656,13 @@ function applyLocalHideOnly() {
   }
 
   const items = root.querySelectorAll(CARD_SELECTOR);
+  const brandSlugs = getActiveBrandSlugs();
   let visibleCount = 0;
 
   for (const item of items) {
     const percent = Number(item.getAttribute('data-discount-percent') || 0);
-    const show = matchesDiscount(percent, rules);
+    const brand = item.getAttribute('data-brand-slug') || item.getAttribute('data-vendor') || item.getAttribute('data-brand');
+    const show = matchesDiscount(percent, rules) && matchesBrand(brand, brandSlugs);
     item.classList.toggle(HIDDEN_CLASS, !show);
     if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) visibleCount += 1;
   }
@@ -656,7 +730,7 @@ export async function applyDiscountFilter() {
     const loaded = await ensureCatalog(requestId);
     if (requestId !== catalogRequestId) return;
 
-    const matching = (loaded?.items || []).filter((item) => matchesDiscount(item.percent, rules));
+    const matching = filterCatalogItems(loaded?.items || [], rules);
     setLoadingState(false);
 
     if (!matching.length) {
@@ -682,7 +756,7 @@ export async function applyDiscountFilter() {
 function goToFilteredPage(page) {
   const rules = getSelectedRules();
   if (!rules.length || !catalog?.items) return;
-  const matching = catalog.items.filter((item) => matchesDiscount(item.percent, rules));
+  const matching = filterCatalogItems(catalog.items, rules);
   renderFilteredPage(matching, page);
   getCollectionRoot()?.querySelector('#ResultsList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
