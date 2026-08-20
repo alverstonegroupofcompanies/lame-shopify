@@ -88,9 +88,17 @@ export default class ResultsList extends PaginatedList {
     const url = new URL(window.location.href);
     const preservedBrand = url.searchParams.get('brand');
     const preservedDiscount = url.searchParams.get('discount');
+    const lastPageAttr = this.querySelector('[data-last-page]')?.getAttribute('data-last-page');
+    const lastPage = Number(lastPageAttr || 0);
 
     for (const [key, value] of Object.entries(data || {})) {
       url.searchParams.set(key, value);
+    }
+
+    // Never navigate past the last available page for the current filtered set.
+    const requestedPage = Number(url.searchParams.get('page') || 1);
+    if (lastPage > 0 && requestedPage > lastPage) {
+      url.searchParams.delete('page');
     }
 
     if (preservedBrand) url.searchParams.set('brand', preservedBrand);
@@ -106,6 +114,21 @@ export default class ResultsList extends PaginatedList {
 
     history.pushState('', '', url.toString());
     this.#scrollProductsColumnToTop();
+
+    // If morph still landed past results, force page 1.
+    const emptyGrid = this.querySelector('.main-collection-grid__empty');
+    const productItems = this.querySelectorAll(
+      '[data-testid="product-grid"] > li, [data-testid="product-grid-grouped"] li[data-brand-slug]'
+    );
+    const pageNow = Number(new URL(window.location.href).searchParams.get('page') || 1);
+    if (emptyGrid && pageNow > 1 && productItems.length === 0) {
+      const fixUrl = new URL(window.location.href);
+      fixUrl.searchParams.delete('page');
+      fixUrl.searchParams.delete('section_id');
+      await sectionRenderer.renderSection(this.sectionId, { cache: false, url: fixUrl });
+      history.replaceState('', '', fixUrl.toString());
+      this.#scrollProductsColumnToTop();
+    }
   }
 
   #scrollProductsColumnToTop() {

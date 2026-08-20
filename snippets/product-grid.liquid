@@ -104,7 +104,36 @@
       container-name: product-grid;
     "
   >
-    {% if products.size == 0 %}
+    {% liquid
+      assign lame_page_out_of_range = false
+      if paginate != blank and paginate.current_page > paginate.pages and paginate.pages > 0
+        assign lame_page_out_of_range = true
+      elsif paginate != blank and products.size == 0 and paginate.items > 0 and paginate.current_page > 1
+        assign lame_page_out_of_range = true
+      endif
+    %}
+
+    {% if lame_page_out_of_range %}
+      {% comment %}
+        Filters can leave ?page=2 while only 1 page of results remains.
+        Bounce back to page 1 and keep current filter params.
+      {% endcomment %}
+      <script>
+        (() => {
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('page');
+            url.searchParams.delete('section_id');
+            window.location.replace(url.toString());
+          } catch (error) {
+            window.location.replace({{ collection.url | json }});
+          }
+        })();
+      </script>
+      <div class="main-collection-grid__empty" role="status">
+        <h2 class="main-collection-grid__empty-title h2">{{ 'lame_our_products.loading_page' | t }}</h2>
+      </div>
+    {% elsif products.size == 0 %}
       <div class="main-collection-grid__empty">
         <h2 class="main-collection-grid__empty-title h2">
           {{ 'content.no_products_found' | t }}
@@ -113,6 +142,15 @@
           {{ 'content.use_fewer_filters_html' | t: link: collection.url, class: 'main-collection-grid__empty-link' }}
         </p>
       </div>
+      {% if lame_paginated_collection and paginate != blank and paginate.previous %}
+        <div class="lame-our-products-pagination-wrap" id="LameCollectionPagination">
+          {% render 'lame-our-products-pagination',
+            paginate: paginate,
+            on_click_handler: 'results-list/onCollectionPaginationClick',
+            page_size: paginate.page_size
+          %}
+        </div>
+      {% endif %}
     {% else %}
       {% if enable_infinite_scroll %}
         <span ref="viewMorePrevious"></span>
@@ -193,6 +231,14 @@
             if range_end > paginate.items
               assign range_end = paginate.items
             endif
+            if range_start > paginate.items and paginate.items > 0
+              assign range_start = 1
+              if paginate.items < paginate.page_size
+                assign range_end = paginate.items
+              else
+                assign range_end = paginate.page_size
+              endif
+            endif
           %}
           <div class="lame-our-products-pagination-wrap" id="LameCollectionPagination">
             <p class="lame-our-products-pagination-meta">
@@ -204,7 +250,8 @@
             </p>
             {% render 'lame-our-products-pagination',
               paginate: paginate,
-              on_click_handler: 'results-list/onCollectionPaginationClick'
+              on_click_handler: 'results-list/onCollectionPaginationClick',
+              page_size: paginate.page_size
             %}
           </div>
         {% else %}

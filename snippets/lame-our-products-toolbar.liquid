@@ -9,17 +9,46 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign range_start = paginate.current_offset | plus: 1
-  assign range_end = paginate.current_offset | plus: paginate.page_size
-  if range_end > paginate.items
-    assign range_end = paginate.items
-  endif
   assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign total_items = paginate.items
+  assign page_size = paginate.page_size
+  assign current_page = paginate.current_page
+  assign total_pages = paginate.pages | default: 1
+  if total_pages < 1
+    assign total_pages = 1
+  endif
+
+  # Clamp range when a stale ?page= lands past filtered results
+  if total_items == 0
+    assign range_start = 0
+    assign range_end = 0
+  elsif current_page > total_pages
+    assign range_start = 1
+    if total_items < page_size
+      assign range_end = total_items
+    else
+      assign range_end = page_size
+    endif
+  else
+    assign range_start = paginate.current_offset | plus: 1
+    assign range_end = paginate.current_offset | plus: page_size
+    if range_end > total_items
+      assign range_end = total_items
+    endif
+    if range_start > total_items
+      assign range_start = 1
+      if total_items < page_size
+        assign range_end = total_items
+      else
+        assign range_end = page_size
+      endif
+    endif
+  endif
 -%}
 
 <div class="lame-op-page__toolbar lame-our-products-toolbar">
   <p class="lame-op-page__count lame-our-products-toolbar__count" role="status">
-    {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: paginate.items }} products
+    {{ 'lame_our_products.showing_range' | t: from: range_start, to: range_end, total: total_items }} products
   </p>
   <div class="lame-op-page__toolbar-actions lame-our-products-toolbar__actions">
     {% if enable_sorting %}

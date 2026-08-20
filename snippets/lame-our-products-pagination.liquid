@@ -3,13 +3,28 @@
 
   @param {object} paginate - Shopify paginate object
   @param {string} [on_click_handler] - results-list handler for section morph (replaces grid)
+  @param {number} [page_size] - Products per page (for Next/Previous label)
 {%- enddoc -%}
 
-{%- if paginate.pages > 1 -%}
+{%- liquid
+  assign step = page_size | default: paginate.page_size | default: 12
+  assign prev_label = 'lame_our_products.previous_n' | t: count: step
+  assign next_label = 'lame_our_products.next_n' | t: count: step
+  if prev_label contains 'Translation missing'
+    assign prev_label = 'Previous ' | append: step
+  endif
+  if next_label contains 'Translation missing'
+    assign next_label = 'Next ' | append: step
+  endif
+-%}
+
+{%- if paginate.pages > 1 or paginate.previous or paginate.next -%}
 <nav
   class="lame-collection-pagination"
   aria-label="{{ 'content.pagination.nav_label' | t }}"
   data-current-page="{{ paginate.current_page }}"
+  data-last-page="{{ paginate.pages }}"
+  data-page-size="{{ step }}"
 >
   <div class="lame-collection-pagination__actions">
     {%- if paginate.previous -%}
@@ -25,7 +40,7 @@
         <span class="lame-collection-pagination__icon" aria-hidden="true">
           {{- 'icon-chevron-left.svg' | inline_asset_content -}}
         </span>
-        <span class="lame-collection-pagination__label">{{ 'lame_our_products.previous' | t }}</span>
+        <span class="lame-collection-pagination__label">{{ prev_label }}</span>
       </a>
     {%- else -%}
       <span
@@ -35,7 +50,7 @@
         <span class="lame-collection-pagination__icon" aria-hidden="true">
           {{- 'icon-chevron-left.svg' | inline_asset_content -}}
         </span>
-        <span class="lame-collection-pagination__label">{{ 'lame_our_products.previous' | t }}</span>
+        <span class="lame-collection-pagination__label">{{ prev_label }}</span>
       </span>
     {%- endif -%}
 
@@ -53,7 +68,7 @@
           on:click="{{ on_click_handler }}?{{ next_params }}"
         {% endif %}
       >
-        <span class="lame-collection-pagination__label">{{ 'lame_our_products.next' | t }}</span>
+        <span class="lame-collection-pagination__label">{{ next_label }}</span>
         <span class="lame-collection-pagination__icon" aria-hidden="true">
           {{- 'icon-chevron-right.svg' | inline_asset_content -}}
         </span>
@@ -63,7 +78,7 @@
         class="lame-collection-pagination__btn lame-collection-pagination__btn--next lame-collection-pagination__btn--disabled"
         aria-disabled="true"
       >
-        <span class="lame-collection-pagination__label">{{ 'lame_our_products.next' | t }}</span>
+        <span class="lame-collection-pagination__label">{{ next_label }}</span>
         <span class="lame-collection-pagination__icon" aria-hidden="true">
           {{- 'icon-chevron-right.svg' | inline_asset_content -}}
         </span>
