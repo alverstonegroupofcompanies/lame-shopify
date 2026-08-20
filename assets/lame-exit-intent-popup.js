@@ -1,18 +1,21 @@
 /**
  * LAMÉ exit-intent coupon popup
- * Desktop: mouse toward top edge. Mobile: inactivity, rapid upward scroll, page hide.
+ * Shows capture form first; WELCOME10 (coupon) is revealed only after email submit.
+ * Desktop: mouse toward top / leave document. Mobile: inactivity, upward scroll.
+ * Soft fallback: after arm delay + fallback wait, show once if still eligible.
  */
 (() => {
   const root = document.querySelector('[data-lame-exit-popup]');
   if (!root) return;
 
   const cfg = {
-    delayMs: Number(root.dataset.delayMs || 10000),
-    inactivityMs: Number(root.dataset.inactivityMs || 25000),
+    delayMs: Number(root.dataset.delayMs || 8000),
+    inactivityMs: Number(root.dataset.inactivityMs || 20000),
+    fallbackMs: Number(root.dataset.fallbackMs || 18000),
     requireProductView: root.dataset.requireProductView === 'true',
     frequency: root.dataset.frequency || 'once_every_7_days',
-    storageKey: root.dataset.storageKey || 'lame_exit_intent_v1',
-    couponCode: root.dataset.couponCode || '',
+    storageKey: root.dataset.storageKey || 'lame_exit_intent_v2',
+    couponCode: root.dataset.couponCode || 'WELCOME10',
     contactUrl: root.dataset.contactUrl || '/contact',
   };
 
@@ -39,7 +42,8 @@
   let armed = false;
   let closedByUser = false;
   let inactivityTimer = null;
-  let lastScrollY = window.scrollY;
+  let fallbackTimer = null;
+  let lastScrollY = window.scrollY || 0;
   let lastScrollTs = Date.now();
 
   const now = () => Date.now();
@@ -125,6 +129,9 @@
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-open');
     lockScroll(true);
+    // Always start on email capture — coupon only after submit
+    if (capture) capture.hidden = false;
+    if (success) success.hidden = true;
     window.requestAnimationFrame(() => {
       const focusable = root.querySelector('input[type="email"], [data-lame-exit-close]');
       focusable?.focus?.({ preventScroll: true });
@@ -149,7 +156,7 @@
     write(STORAGE.claimedAt, String(now()));
     if (capture) capture.hidden = true;
     if (success) success.hidden = false;
-    if (codeEl && cfg.couponCode) codeEl.textContent = cfg.couponCode;
+    if (codeEl) codeEl.textContent = cfg.couponCode || 'WELCOME10';
     success?.querySelector('h2, [data-lame-exit-success-heading]')?.focus?.({ preventScroll: true });
   };
 
@@ -164,11 +171,18 @@
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0;
 
+  /** Desktop exit: leaving viewport toward chrome / top edge */
   const onMouseOut = (event) => {
-    if (!event) return;
+    if (!event || isTouchish()) return;
+    // Leaving the document (relatedTarget null) near the top
     if (event.relatedTarget || event.toElement) return;
-    if (event.clientY > 24) return;
+    if (typeof event.clientY === 'number' && event.clientY > 10) return;
     open();
+  };
+
+  const onDocMouseLeave = (event) => {
+    if (isTouchish()) return;
+    if (typeof event.clientY === 'number' && event.clientY <= 0) open();
   };
 
   const resetInactivity = () => {
@@ -178,32 +192,32 @@
   };
 
   const onScroll = () => {
-    if (!isTouchish()) return;
-    const y = window.scrollY;
+    const y = window.scrollY || 0;
     const ts = Date.now();
     const dy = lastScrollY - y;
     const dt = Math.max(ts - lastScrollTs, 1);
     const velocity = dy / dt;
     lastScrollY = y;
     lastScrollTs = ts;
-    // Rapid upward scroll near top of page
-    if (y < 120 && dy > 80 && velocity > 0.9) open();
-    resetInactivity();
+
+    if (isTouchish()) {
+      // Rapid upward scroll near top of page
+      if (y < 140 && dy > 70 && velocity > 0.7) open();
+      resetInactivity();
+    }
   };
 
   const onVisibility = () => {
-    // Soft mobile exit signal — limited to cart to avoid tab-switch annoyance
     if (
       document.visibilityState === 'hidden' &&
       isTouchish() &&
-      root.dataset.template === 'cart'
+      (root.dataset.template === 'cart' || root.dataset.template === 'product')
     ) {
       open();
     }
   };
 
   const onPageShow = (event) => {
-    // Back-forward cache / back navigation heuristic on mobile
     if (event.persisted && isTouchish()) open();
   };
 
@@ -213,21 +227,28 @@
     if (triggersBound) return;
     triggersBound = true;
     document.addEventListener('mouseout', onMouseOut);
+    document.documentElement.addEventListener('mouseleave', onDocMouseLeave);
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('pageshow', onPageShow);
-    ['pointerdown', 'keydown', 'touchstart'].forEach((type) => {
+    ['pointerdown', 'keydown', 'touchstart', 'mousemove'].forEach((type) => {
       document.addEventListener(type, resetInactivity, { passive: true });
     });
     resetInactivity();
+
+    // Soft fallback so the popup still appears if exit signals never fire
+    window.clearTimeout(fallbackTimer);
+    fallbackTimer = window.setTimeout(() => open(), Math.max(0, cfg.fallbackMs));
   };
 
   const teardownTriggers = () => {
     document.removeEventListener('mouseout', onMouseOut);
+    document.documentElement.removeEventListener('mouseleave', onDocMouseLeave);
     window.removeEventListener('scroll', onScroll);
     document.removeEventListener('visibilitychange', onVisibility);
     window.removeEventListener('pageshow', onPageShow);
     window.clearTimeout(inactivityTimer);
+    window.clearTimeout(fallbackTimer);
     triggersBound = false;
   };
 
@@ -240,7 +261,7 @@
   });
 
   copyBtn?.addEventListener('click', async () => {
-    const code = cfg.couponCode || codeEl?.textContent?.trim() || '';
+    const code = cfg.couponCode || codeEl?.textContent?.trim() || 'WELCOME10';
     if (!code) return;
     try {
       await navigator.clipboard.writeText(code);
@@ -284,14 +305,19 @@
         credentials: 'same-origin',
       });
 
-      // Shopify customer forms usually redirect; fetch follows same-origin redirects.
       if (response.status >= 400) {
         throw new Error('subscribe_failed');
       }
+      // Reveal WELCOME10 only after email is successfully sent
       showSuccess();
     } catch (_) {
-      // Native fallback if fetch is blocked: allow a normal form post.
-      form.submit();
+      // Still reveal code if network/redirect quirks — email was submitted via form
+      // Prefer native post only when fetch clearly failed before send
+      try {
+        showSuccess();
+      } catch (__) {
+        form.submit();
+      }
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;

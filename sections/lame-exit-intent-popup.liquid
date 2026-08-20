@@ -36,9 +36,11 @@
 
   assign delay_ms = section.settings.delay_seconds | times: 1000
   assign inactivity_ms = section.settings.inactivity_seconds | times: 1000
-  assign coupon_tags = 'newsletter,exit-intent'
-  if section.settings.coupon_code != blank
-    assign coupon_tags = coupon_tags | append: ',' | append: section.settings.coupon_code
+  assign fallback_ms = section.settings.fallback_seconds | default: 18 | times: 1000
+  assign coupon_code = section.settings.coupon_code | default: 'WELCOME10'
+  assign coupon_tags = 'newsletter,exit-intent,first-time'
+  if coupon_code != blank
+    assign coupon_tags = coupon_tags | append: ',' | append: coupon_code
   endif
 -%}
 
@@ -51,10 +53,11 @@
     data-lame-exit-popup
     data-delay-ms="{{ delay_ms }}"
     data-inactivity-ms="{{ inactivity_ms }}"
+    data-fallback-ms="{{ fallback_ms }}"
     data-require-product-view="{{ section.settings.require_product_view }}"
     data-frequency="{{ section.settings.frequency }}"
-    data-storage-key="lame_exit_intent_{{ section.id }}"
-    data-coupon-code="{{ section.settings.coupon_code | escape }}"
+    data-storage-key="lame_exit_intent_v2_{{ section.id }}"
+    data-coupon-code="{{ section.settings.coupon_code | default: 'WELCOME10' | escape }}"
     data-contact-url="{{ routes.root_url }}contact"
     data-template="{{ template.name }}"
     data-start-success="false"
@@ -115,6 +118,10 @@
           {%- if section.settings.subheading != blank -%}
             <p class="lame-exit-popup__subheading">{{ section.settings.subheading }}</p>
           {%- endif -%}
+          <p class="lame-exit-popup__first-time">
+            First-time shoppers: enter your email to unlock your welcome discount.
+            <span class="lame-exit-popup__code-hint">Your code is revealed after you submit.</span>
+          </p>
           {%- if section.settings.terms_text != blank -%}
             <p class="lame-exit-popup__terms">{{ section.settings.terms_text }}</p>
           {%- endif -%}
@@ -173,9 +180,13 @@
           {%- if section.settings.success_message != blank -%}
             <p class="lame-exit-popup__success-text">{{ section.settings.success_message }}</p>
           {%- endif -%}
-          {%- if section.settings.coupon_code != blank -%}
+          <p class="lame-exit-popup__first-time lame-exit-popup__first-time--success">
+            First-time order code
+          </p>
+          {%- assign success_coupon = section.settings.coupon_code | default: 'WELCOME10' -%}
+          {%- if success_coupon != blank -%}
             <div class="lame-exit-popup__code-row">
-              <code class="lame-exit-popup__code" data-lame-exit-code>{{ section.settings.coupon_code }}</code>
+              <code class="lame-exit-popup__code" data-lame-exit-code>{{ success_coupon }}</code>
               <button
                 type="button"
                 class="lame-exit-popup__copy"
