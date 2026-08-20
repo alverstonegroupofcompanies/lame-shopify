@@ -800,6 +800,7 @@ export async function applyDiscountFilter() {
     renderFilteredPage(matching, 1);
     updateEmptyState(root, matching.length, true);
     updateActiveCount();
+    document.dispatchEvent(new CustomEvent('lame:tick-brand-from-url'));
     getCollectionRoot()?.querySelector('#ResultsList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) {
     console.error('[lame-discount-filter] failed to load matching products', error);

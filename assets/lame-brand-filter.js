@@ -238,19 +238,21 @@ function syncFromUrl(url = new URL(window.location.href)) {
     ? new Set(
         brandParam
           .split(',')
-          .map(normalizeSlug)
+          .map((part) => toBrandSlug(part) || normalizeSlug(part))
           .filter(Boolean)
       )
     : new Set();
 
   for (const input of getAllBrandInputs()) {
-    const slug = normalizeSlug(input.getAttribute('data-brand-slug'));
-    const compact = slug.replace(/-/g, '');
-    input.checked = Boolean(
-      slug &&
-        (slugs.has(slug) ||
-          [...slugs].some((part) => part === slug || part.replace(/-/g, '') === compact))
+    const slug = toBrandSlug(input.getAttribute('data-brand-slug'));
+    const labelSlug = toBrandSlug(
+      input.getAttribute('data-brand-label') || input.getAttribute('data-label')
     );
+    const compact = (slug || labelSlug).replace(/-/g, '');
+    input.checked = [...slugs].some((part) => {
+      const compactPart = part.replace(/-/g, '');
+      return part === slug || part === labelSlug || (compact && compactPart === compact);
+    });
   }
 
   updateActiveCount();
@@ -750,10 +752,10 @@ export function clearBrandFilter() {
 }
 
 /**
- * @param {{ allowBrandParam?: boolean }} [options]
+ * Tick brand checkboxes from the current URL.
+ * Offer-banner links use brand= only; never strip that param here.
  */
-function restoreBrandSelection(options = {}) {
-  const allowBrandParam = options.allowBrandParam === true;
+function restoreBrandSelection() {
   const url = new URL(window.location.href);
   const hasVendor = url.searchParams.getAll(VENDOR_PARAM).length > 0;
   const hasBrand = Boolean(url.searchParams.get(BRAND_PARAM));
@@ -766,24 +768,13 @@ function restoreBrandSelection(options = {}) {
     return;
   }
 
-  // Offer-banner links use brand= only so Shopify does not empty the grid
-  // with a vendor name that does not match (e.g. "Dr. Rashel" vs "DR.RASHEL").
-  if (allowBrandParam && hasBrand) {
+  if (hasBrand) {
     syncFromUrl(url);
-    if (getSelectedSlugs().size > 0) {
-      return;
-    }
+    return;
   }
 
-  // No vendor filters in the URL — clear checkboxes and orphan brand= params.
-  // Do NOT revive selection from sessionStorage (that undoes facet-remove "X").
   for (const input of getAllBrandInputs()) {
     input.checked = false;
-  }
-
-  if (url.searchParams.has(BRAND_PARAM)) {
-    url.searchParams.delete(BRAND_PARAM);
-    history.replaceState(history.state, '', url.toString());
   }
 
   persistSlugs([]);
@@ -802,7 +793,7 @@ export function syncBrandFilterFromLocation() {
 function initBrandFilter() {
   augmentBrandFilterFromGrid();
   dedupeBrandFilterLabels();
-  restoreBrandSelection({ allowBrandParam: true });
+  restoreBrandSelection();
   applyBrandFilter();
 
   const hasSelection = getSelectedSlugs().size > 0;
@@ -815,6 +806,13 @@ function initBrandFilter() {
   if (hasSelection && !hasVendorFilter && !hasDiscount) {
     scheduleServerReload();
   }
+
+  requestAnimationFrame(() => {
+    restoreBrandSelection();
+    if (url.searchParams.get(BRAND_PARAM)) {
+      applyBrandFilter();
+    }
+  });
 }
 
 function handleMorphComplete() {
@@ -846,6 +844,10 @@ if (!customElements.get('lame-brand-filter')) {
 document.addEventListener(CLEAR_EVENT, clearBrandFilter);
 document.addEventListener(MORPH_EVENT, handleMorphComplete);
 document.addEventListener('lame:sync-brand-filter-from-url', syncBrandFilterFromLocation);
+document.addEventListener('lame:tick-brand-from-url', () => {
+  restoreBrandSelection();
+  updateActiveCount();
+});
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initBrandFilter, { once: true });

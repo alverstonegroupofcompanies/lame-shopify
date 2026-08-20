@@ -40,6 +40,12 @@
             endif
             assign banner_link = block.settings.link
             assign brand_name = block.settings.brand | strip
+            if block.settings.brand_other != blank
+              assign brand_name = block.settings.brand_other | strip
+            endif
+            if brand_name == 'other'
+              assign brand_name = block.settings.brand_other | strip
+            endif
             assign discount_keys = ''
 
             if block.settings.discount_0_10
@@ -327,13 +333,43 @@
         },
         {
           "type": "paragraph",
-          "content": "These are applied when someone clicks this banner. They must match the Brand and Discount checkboxes on the products page."
+          "content": "Pick the vendor from the list (you can type to find it). Tick the discount boxes that should be selected on the products page."
+        },
+        {
+          "type": "select",
+          "id": "brand",
+          "label": "Vendor / brand to tick",
+          "info": "Must match the Brand checkbox on the products page. Type in this list to jump to a name.",
+          "options": [
+            { "value": "", "label": "Select a vendor" },
+            { "value": "Cetaphil", "label": "Cetaphil" },
+            { "value": "DR.RASHEL", "label": "DR.RASHEL" },
+            { "value": "Dove", "label": "Dove" },
+            { "value": "Faces Canada", "label": "Faces Canada" },
+            { "value": "Fair & Lovely", "label": "Fair & Lovely" },
+            { "value": "Femisafe", "label": "Femisafe" },
+            { "value": "Hamam", "label": "Hamam" },
+            { "value": "Himalaya", "label": "Himalaya" },
+            { "value": "Indulekha", "label": "Indulekha" },
+            { "value": "Jovees Herbal", "label": "Jovees Herbal" },
+            { "value": "Korean", "label": "Korean" },
+            { "value": "Lakme", "label": "Lakme" },
+            { "value": "Lifebuoy", "label": "Lifebuoy" },
+            { "value": "Lotus", "label": "Lotus" },
+            { "value": "Lux", "label": "Lux" },
+            { "value": "Mamaearth", "label": "Mamaearth" },
+            { "value": "Pears", "label": "Pears" },
+            { "value": "Ponds", "label": "Ponds" },
+            { "value": "SebaMed", "label": "SebaMed" },
+            { "value": "other", "label": "Other vendor (type below)" }
+          ],
+          "default": ""
         },
         {
           "type": "text",
-          "id": "brand",
-          "label": "Vendor / brand to tick",
-          "info": "Type the vendor exactly as it appears in the Brand filter, for example Cetaphil, Himalaya, Jovees Herbal, or DR.RASHEL."
+          "id": "brand_other",
+          "label": "Other vendor name",
+          "info": "Used when the vendor is not in the list, or to override the list. Type it exactly as it appears in the Brand filter."
         },
         {
           "type": "checkbox",
