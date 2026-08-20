@@ -457,6 +457,89 @@ async function ensureCatalog(requestId) {
  * @param {boolean} loading
  * @param {string} [message]
  */
+function renderFilterLoadingMarkup(emptyState, message) {
+  emptyState.replaceChildren();
+
+  const wrap = document.createElement('span');
+  wrap.className = 'lame-filter-loading';
+
+  const spinner = document.createElement('span');
+  spinner.className = 'lame-filter-loading__spinner';
+  spinner.setAttribute('aria-hidden', 'true');
+
+  const label = document.createElement('span');
+  label.className = 'lame-filter-loading__label';
+  label.textContent = message;
+
+  const skeletons = document.createElement('span');
+  skeletons.className = 'lame-filter-loading__skeletons';
+  skeletons.setAttribute('aria-hidden', 'true');
+
+  for (let index = 0; index < 8; index += 1) {
+    const card = document.createElement('span');
+    card.className = 'lame-filter-loading__card';
+    skeletons.append(card);
+  }
+
+  wrap.append(spinner, label, skeletons);
+  emptyState.append(wrap);
+}
+
+/** @type {string | null} */
+let toolbarCountOriginal = null;
+
+/**
+ * @returns {NodeListOf<HTMLElement>}
+ */
+function getToolbarCountElements() {
+  return document.querySelectorAll('.lame-our-products-toolbar__count, .lame-op-page__count');
+}
+
+function rememberToolbarCountOriginal() {
+  if (toolbarCountOriginal !== null) return;
+  const el = getToolbarCountElements()[0];
+  if (el) toolbarCountOriginal = el.textContent || '';
+}
+
+function setToolbarCountLoading() {
+  rememberToolbarCountOriginal();
+  const message = getFilterEl()?.getAttribute('data-msg-loading') || 'Loading matching products...';
+  for (const el of getToolbarCountElements()) {
+    el.textContent = message;
+  }
+}
+
+/**
+ * @param {number} from
+ * @param {number} to
+ * @param {number} total
+ */
+function updateToolbarCount(from, to, total) {
+  const filterEl = getFilterEl();
+  const rangeTemplate =
+    filterEl?.getAttribute('data-showing-range') || 'Showing __FROM__–__TO__ of __TOTAL__';
+  const rangeText = rangeTemplate
+    .replaceAll('__FROM__', String(from))
+    .replaceAll('__TO__', String(to))
+    .replaceAll('__TOTAL__', String(total));
+
+  for (const el of getToolbarCountElements()) {
+    el.textContent = `${rangeText} products`;
+  }
+}
+
+function restoreToolbarCountOriginal() {
+  if (toolbarCountOriginal === null) return;
+  for (const el of getToolbarCountElements()) {
+    el.textContent = toolbarCountOriginal;
+  }
+  toolbarCountOriginal = null;
+}
+
+/**
+ * @param {boolean} loading
+ * @param {string} [message]
+ */
 function setLoadingState(loading, message) {
   const root = getCollectionRoot();
   const emptyState = ensureEmptyState(root);
@@ -471,8 +554,12 @@ function setLoadingState(loading, message) {
     return;
   }
 
+  setToolbarCountLoading();
   emptyState.hidden = false;
-  emptyState.textContent = message || getFilterEl()?.getAttribute('data-msg-loading') || 'Loading matching products...';
+  renderFilterLoadingMarkup(
+    emptyState,
+    message || getFilterEl()?.getAttribute('data-msg-loading') || 'Loading matching products...'
+  );
   emptyState.setAttribute('data-brand-filter-error', 'loading');
   emptyState.setAttribute('role', 'status');
   emptyState.classList.add('lame-brand-filter-empty--loading');
@@ -491,7 +578,7 @@ function ensureEmptyState(root) {
   const column = root.querySelector('.lame-collection-products-column');
   if (!column) return null;
 
-  emptyState = document.createElement('p');
+  emptyState = document.createElement('div');
   emptyState.className = 'lame-brand-filter-empty';
   emptyState.hidden = true;
   column.append(emptyState);
@@ -592,6 +679,8 @@ function updateFilteredPagination(total, pageSize, totalPages) {
     if (totalPages > 1) parts.push(pageOf);
     meta.textContent = parts.join(' · ');
   }
+
+  updateToolbarCount(from, to, total);
 
   const nav = document.querySelector('.lame-collection-pagination');
   if (nav instanceof HTMLElement) {
@@ -746,6 +835,7 @@ async function restoreServerCollection() {
   catalog = null;
   clientPagingActive = false;
   filteredPage = 1;
+  restoreToolbarCountOriginal();
 
   if (!sectionId) {
     applyLocalHideOnly();
@@ -805,6 +895,7 @@ export async function applyDiscountFilter() {
   } catch (error) {
     console.error('[lame-discount-filter] failed to load matching products', error);
     setLoadingState(false);
+    restoreToolbarCountOriginal();
     applyLocalHideOnly();
   }
 }
@@ -830,6 +921,7 @@ export async function clearDiscountFilter() {
 function initDiscountFilter() {
   restoreDiscountSelection();
   if (getSelectedRules().length) {
+    setToolbarCountLoading();
     applyDiscountFilter();
     return;
   }

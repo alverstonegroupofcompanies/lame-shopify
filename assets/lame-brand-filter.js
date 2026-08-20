@@ -360,11 +360,37 @@ function updateClearAllButton() {
 }
 
 /**
- * @param {HTMLElement | null} root
- * @param {Set<string>} selected
- * @param {number} visibleCount
- * @param {boolean} hasFilter
+ * @param {HTMLElement} emptyState
+ * @param {string} message
  */
+function renderBrandFilterLoadingMarkup(emptyState, message) {
+  emptyState.replaceChildren();
+
+  const wrap = document.createElement('span');
+  wrap.className = 'lame-filter-loading';
+
+  const spinner = document.createElement('span');
+  spinner.className = 'lame-filter-loading__spinner';
+  spinner.setAttribute('aria-hidden', 'true');
+
+  const label = document.createElement('span');
+  label.className = 'lame-filter-loading__label';
+  label.textContent = message;
+
+  const skeletons = document.createElement('span');
+  skeletons.className = 'lame-filter-loading__skeletons';
+  skeletons.setAttribute('aria-hidden', 'true');
+
+  for (let index = 0; index < 8; index += 1) {
+    const card = document.createElement('span');
+    card.className = 'lame-filter-loading__card';
+    skeletons.append(card);
+  }
+
+  wrap.append(spinner, label, skeletons);
+  emptyState.append(wrap);
+}
+
 function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
   const emptyState = root?.querySelector('.lame-brand-filter-empty');
   if (!(emptyState instanceof HTMLElement)) return;
@@ -385,9 +411,9 @@ function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
 
   if (isReloading) {
     emptyState.hidden = false;
-    emptyState.textContent = messages.loading;
+    renderBrandFilterLoadingMarkup(emptyState, messages.loading);
     emptyState.setAttribute('data-brand-filter-error', 'loading');
-    emptyState.setAttribute('role', 'alert');
+    emptyState.setAttribute('role', 'status');
     emptyState.classList.add('lame-brand-filter-empty--loading');
     emptyState.classList.remove('lame-brand-filter-empty--error');
     return;
@@ -447,8 +473,10 @@ function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
   }
 
   if (missingFromDom.length > 0 && vendorParams.length === 0) {
-    emptyState.textContent = messages.loading;
+    emptyState.hidden = false;
+    renderBrandFilterLoadingMarkup(emptyState, messages.loading);
     emptyState.setAttribute('data-brand-filter-error', 'loading');
+    emptyState.setAttribute('role', 'status');
     emptyState.classList.add('lame-brand-filter-empty--loading');
     emptyState.classList.remove('lame-brand-filter-empty--error');
     console.warn('[lame-brand-filter] Selected brands not on current page; server reload expected', {

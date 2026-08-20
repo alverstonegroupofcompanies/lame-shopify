@@ -840,9 +840,10 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 }
 
 .collection-template-our-products .lame-brand-filter-empty--loading {
-  border-color: rgb(31 70 53 / 0.2);
-  background: rgb(31 70 53 / 0.06);
+  border: none;
+  background: transparent;
   color: var(--lame-ink);
+  padding: 1.75rem 0.5rem 2.5rem;
 }
 
 .collection-template-our-products .lame-brand-filter-empty--error {
@@ -850,6 +851,73 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   border-color: rgb(180 60 50 / 0.45);
   background: rgb(180 60 50 / 0.06);
   color: rgb(120 40 35);
+}
+
+.lame-filter-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.15rem;
+  width: 100%;
+}
+
+.lame-filter-loading__spinner {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 3px solid rgb(31 70 53 / 0.14);
+  border-top-color: var(--lame-green, #1f4635);
+  border-radius: 50%;
+  animation: lame-filter-spin 0.75s linear infinite;
+}
+
+.lame-filter-loading__label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--lame-ink, #1f4635);
+}
+
+.lame-filter-loading__skeletons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.lame-filter-loading__card {
+  display: block;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  background: linear-gradient(
+    110deg,
+    rgb(31 70 53 / 0.06) 20%,
+    rgb(31 70 53 / 0.13) 37%,
+    rgb(31 70 53 / 0.06) 55%
+  );
+  background-size: 220% 100%;
+  animation: lame-filter-shimmer 1.35s ease-in-out infinite;
+}
+
+@media screen and (min-width: 750px) {
+  .lame-filter-loading__skeletons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+@keyframes lame-filter-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lame-filter-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 
 .collection-template-our-products .lame-brand-filter-admin-hint {
