@@ -337,6 +337,41 @@
   @media screen and (max-width: 1199px) {
     .lame-home-hero {
       --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
+      --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
+    }
+
+    .shopify-section.hero-wrapper:has(.lame-home-hero) {
+      padding-top: var(--lame-hero-height-offset);
+      box-sizing: border-box;
+    }
+
+    body:has(.header[transparent])
+      .content-for-layout
+      > .shopify-section.hero-wrapper:has(.lame-home-hero):first-child,
+    body:has(header-component[transparent])
+      .content-for-layout
+      > .shopify-section.hero-wrapper:has(.lame-home-hero):first-child {
+      margin-top: 0;
+      padding-top: var(--lame-hero-height-offset);
+    }
+
+    body:has(.header[transparent])
+      .content-for-layout
+      > .shopify-section:has(.lame-home-hero):first-child
+      .lame-home-hero--full_screen,
+    body:has(.header[transparent])
+      .content-for-layout
+      > .shopify-section:has(.lame-home-hero):first-child
+      .lame-home-hero--mobile-full_screen,
+    body:has(header-component[transparent])
+      .content-for-layout
+      > .shopify-section:has(.lame-home-hero):first-child
+      .lame-home-hero--full_screen,
+    body:has(header-component[transparent])
+      .content-for-layout
+      > .shopify-section:has(.lame-home-hero):first-child
+      .lame-home-hero--mobile-full_screen {
+      --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
     }
 
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop {
@@ -437,6 +472,24 @@
       slideshow-component:is([transitioning], [dragging]) {
       transition: none !important;
       animation: none !important;
+    }
+
+    /* Anchor image at top — crop bottom only, keep headline visible below navbar */
+    .lame-home-hero__carousel .slide__image,
+    .lame-home-hero__carousel .slide__image-container img,
+    .lame-home-hero__slide-link .slide__image,
+    .lame-home-hero__slide-link img {
+      object-fit: cover !important;
+      object-position: center top !important;
+      min-height: 0 !important;
+    }
+
+    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image,
+    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image-container img,
+    .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
+    .lame-home-hero--fit-contain .lame-home-hero__slide-link img {
+      object-fit: contain !important;
+      object-position: center top !important;
     }
   }
 
