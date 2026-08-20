@@ -26,16 +26,11 @@
   endif
 
   if customer
-    if section.settings.hide_for_subscribers and customer.accepts_marketing
-      assign show_popup = false
-    endif
-    if section.settings.hide_after_purchase and customer.orders_count > 0
-      assign show_popup = false
-    endif
+    assign show_popup = false
   endif
 
   assign delay_ms = section.settings.delay_seconds | times: 1000
-  assign inactivity_ms = section.settings.inactivity_seconds | times: 1000
+  assign inactivity_ms = section.settings.inactivity_seconds | default: 10 | times: 1000
   assign fallback_ms = section.settings.fallback_seconds | default: 18 | times: 1000
   assign coupon_code = section.settings.coupon_code | default: 'WELCOME10'
   assign coupon_tags = 'newsletter,exit-intent,first-time'
@@ -384,33 +379,34 @@
       "type": "range",
       "id": "delay_seconds",
       "label": "Minimum delay before trigger",
-      "min": 5,
+      "min": 0,
       "max": 60,
       "step": 1,
       "unit": "s",
-      "default": 8,
-      "info": "Popup can only appear after this delay."
+      "default": 0,
+      "info": "Extra wait before listening for exit / idle triggers. Use 0 so the 10s idle timer starts immediately."
     },
     {
       "type": "range",
       "id": "inactivity_seconds",
-      "label": "Mobile inactivity trigger",
-      "min": 12,
+      "label": "Show after no movement",
+      "min": 5,
       "max": 60,
       "step": 1,
       "unit": "s",
-      "default": 20
+      "default": 10,
+      "info": "If the visitor does not move the mouse, scroll, or tap for this long, show the popup."
     },
     {
       "type": "range",
       "id": "fallback_seconds",
-      "label": "Fallback show after arming",
+      "label": "Fallback show after arming (unused if idle is on)",
       "min": 8,
       "max": 45,
       "step": 1,
       "unit": "s",
       "default": 18,
-      "info": "If exit signals never fire, show once after this many seconds (after the minimum delay)."
+      "info": "Kept for compatibility. Idle / no-movement trigger is preferred."
     },
     {
       "type": "checkbox",
@@ -434,14 +430,16 @@
     {
       "type": "checkbox",
       "id": "hide_for_subscribers",
-      "label": "Hide for customers who accept marketing",
-      "default": true
+      "label": "Hide for marketing subscribers (legacy)",
+      "default": true,
+      "info": "Popup is already hidden for all signed-in customers."
     },
     {
       "type": "checkbox",
       "id": "hide_after_purchase",
-      "label": "Hide for logged-in customers with past orders",
-      "default": true
+      "label": "Hide after purchase (local + thank-you)",
+      "default": true,
+      "info": "Signed-in customers are always excluded. Guests who complete checkout are also excluded via browser storage."
     },
     {
       "type": "header",

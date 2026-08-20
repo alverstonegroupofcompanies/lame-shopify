@@ -3,16 +3,15 @@
  * Shows capture form first; WELCOME10 (coupon) is revealed only after email submit.
  * Desktop: mouse moves into the upper half of the viewport.
  * Mobile: user scrolls upward (instead of down).
- * Soft fallback: after arm delay + fallback wait, show once if still eligible.
+ * All devices: no movement / activity for ~10s → show (guests who have not purchased).
  */
 (() => {
   const root = document.querySelector('[data-lame-exit-popup]');
   if (!root) return;
 
   const cfg = {
-    delayMs: Number(root.dataset.delayMs || 8000),
-    inactivityMs: Number(root.dataset.inactivityMs || 20000),
-    fallbackMs: Number(root.dataset.fallbackMs || 18000),
+    delayMs: Number(root.dataset.delayMs || 0),
+    inactivityMs: Number(root.dataset.inactivityMs || 10000),
     requireProductView: root.dataset.requireProductView === 'true',
     frequency: root.dataset.frequency || 'once_every_7_days',
     storageKey: root.dataset.storageKey || 'lame_exit_intent_v2',
@@ -42,7 +41,7 @@
   let opened = false;
   let armed = false;
   let closedByUser = false;
-  let fallbackTimer = null;
+  let inactivityTimer = null;
   let lastScrollY = window.scrollY || 0;
   let upwardScrollAccum = 0;
   let lastMouseY = null;
@@ -175,11 +174,19 @@
 
   const midY = () => Math.max(window.innerHeight || 0, 1) * 0.5;
 
+  /** No mouse / scroll / touch / keyboard activity for inactivityMs → show */
+  const resetInactivity = () => {
+    if (!armed || opened || closedByUser) return;
+    window.clearTimeout(inactivityTimer);
+    inactivityTimer = window.setTimeout(() => open(), Math.max(1000, cfg.inactivityMs));
+  };
+
   /**
    * Desktop: pointer moved into the upper half of the screen
    * (must have been in the lower half first, then moved up / into top half).
    */
   const onMouseMove = (event) => {
+    resetInactivity();
     if (!armed || isTouchish()) return;
     if (typeof event.clientY !== 'number') return;
 
@@ -201,8 +208,11 @@
 
   /**
    * Mobile: any clear upward scroll (finger/content moving toward top of page).
+   * Also counts as activity (resets idle timer) on all devices.
    */
   const onScroll = () => {
+    resetInactivity();
+
     if (!armed || !isTouchish()) {
       lastScrollY = window.scrollY || 0;
       return;
@@ -223,6 +233,8 @@
     if (upwardScrollAccum >= 80) open();
   };
 
+  const onActivity = () => resetInactivity();
+
   let triggersBound = false;
 
   const bindTriggers = () => {
@@ -235,16 +247,21 @@
 
     document.addEventListener('mousemove', onMouseMove, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
+    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((type) => {
+      document.addEventListener(type, onActivity, { passive: true });
+    });
 
-    // Soft fallback so the popup still appears if exit signals never fire
-    window.clearTimeout(fallbackTimer);
-    fallbackTimer = window.setTimeout(() => open(), Math.max(0, cfg.fallbackMs));
+    // Idle: no movement for inactivityMs (default 10s)
+    resetInactivity();
   };
 
   const teardownTriggers = () => {
     document.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('scroll', onScroll);
-    window.clearTimeout(fallbackTimer);
+    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((type) => {
+      document.removeEventListener(type, onActivity);
+    });
+    window.clearTimeout(inactivityTimer);
     triggersBound = false;
   };
 
