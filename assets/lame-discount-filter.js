@@ -297,6 +297,7 @@ function syncDiscountParamsToUrl(baseUrl = new URL(window.location.href)) {
   const url = new URL(baseUrl.toString());
 
   url.searchParams.delete(DISCOUNT_PARAM);
+  url.searchParams.delete('section_id');
 
   if (keys.length) {
     url.searchParams.set(DISCOUNT_PARAM, keys.join(','));
@@ -867,6 +868,7 @@ async function restoreServerCollection() {
   }
 
   await sectionRenderer.renderSection(sectionId, { cache: false, url });
+  url.searchParams.delete('section_id');
   history.replaceState(history.state, '', url.toString());
   document.dispatchEvent(new CustomEvent(MORPH_EVENT));
 }
@@ -939,6 +941,7 @@ function goToFilteredPage(page) {
   } else {
     url.searchParams.delete('page');
   }
+  url.searchParams.delete('section_id');
   history.replaceState(history.state, '', url.toString());
 
   getCollectionRoot()?.querySelector('#ResultsList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });

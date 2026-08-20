@@ -308,6 +308,7 @@ function syncBrandParamsToUrl(baseUrl = new URL(window.location.href)) {
   url.searchParams.delete(BRAND_PARAM);
   url.searchParams.delete(VENDOR_PARAM);
   url.searchParams.delete('page');
+  url.searchParams.delete('section_id');
 
   if (slugs.length) {
     url.searchParams.set(BRAND_PARAM, slugs.join(','));
@@ -777,6 +778,7 @@ export function clearBrandFilter() {
   url.searchParams.delete(BRAND_PARAM);
   url.searchParams.delete(VENDOR_PARAM);
   url.searchParams.delete('page');
+  url.searchParams.delete('section_id');
   history.replaceState(history.state, '', url.toString());
   persistSlugs([]);
   applyBrandFilter();

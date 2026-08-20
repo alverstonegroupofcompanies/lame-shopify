@@ -82,6 +82,8 @@ class FacetsFormComponent extends Component {
       url.searchParams.append(VENDOR_FILTER_PARAM, vendor);
     }
 
+    url.searchParams.delete('section_id');
+
     history.pushState({ urlParameters: urlParameters.toString() }, '', url.toString());
   }
 
@@ -131,7 +133,9 @@ class FacetsFormComponent extends Component {
    * @param {string} url - The URL to update filters with
    */
   updateFiltersByURL(url) {
-    history.pushState('', '', url);
+    const cleanUrl = new URL(url, window.location.origin);
+    cleanUrl.searchParams.delete('section_id');
+    history.pushState('', '', cleanUrl.toString());
     this.dispatchEvent(new FilterUpdateEvent(this.createURLParameters()));
     this.#updateSection();
   }

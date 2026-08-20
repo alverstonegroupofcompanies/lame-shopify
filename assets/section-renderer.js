@@ -120,10 +120,13 @@ const SECTION_ID_PREFIX = 'shopify-section-';
  * @returns {string} The section rendering URL
  */
 function buildSectionRenderingURL(sectionId, url = new URL(window.location.href)) {
-  url.searchParams.set('section_id', normalizeSectionId(sectionId));
-  url.searchParams.sort();
+  // Clone first — never mutate the caller's URL. Mutating caused history.pushState
+  // to store ?section_id=…; reloading that URL returns section-only HTML (no CSS).
+  const renderUrl = new URL(url.toString());
+  renderUrl.searchParams.set('section_id', normalizeSectionId(sectionId));
+  renderUrl.searchParams.sort();
 
-  return url.toString();
+  return renderUrl.toString();
 }
 
 /**

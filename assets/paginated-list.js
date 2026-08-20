@@ -191,7 +191,9 @@ export default class PaginatedList extends Component {
 
     this.#aspectRatioHelper.processNewElements();
 
-    history.pushState('', '', nextPage.url.toString());
+    const nextUrl = new URL(nextPage.url.toString());
+    nextUrl.searchParams.delete('section_id');
+    history.pushState('', '', nextUrl.toString());
 
     requestIdleCallback(() => {
       this.#fetchPage('next');
@@ -230,7 +232,9 @@ export default class PaginatedList extends Component {
 
     this.#aspectRatioHelper.processNewElements();
 
-    history.pushState('', '', previousPage.url.toString());
+    const previousUrl = new URL(previousPage.url.toString());
+    previousUrl.searchParams.delete('section_id');
+    history.pushState('', '', previousUrl.toString());
 
     // Calculate and adjust scroll position to maintain the same view
     if (firstElement) {

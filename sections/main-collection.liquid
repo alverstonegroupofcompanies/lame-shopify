@@ -84,6 +84,30 @@
   Edit --lame-op-columns-desktop, --lame-op-image-height there.
 {% endcomment %}
 
+{% comment %}
+  If this section is loaded via ?section_id= in the browser URL (bad history state),
+  Shopify returns section-only HTML without theme CSS. Redirect to a clean full page.
+{% endcomment %}
+<script>
+  (function () {
+    try {
+      var url = new URL(window.location.href);
+      if (!url.searchParams.has('section_id')) return;
+      url.searchParams.delete('section_id');
+      // Stale page after filters often lands empty — reset to page 1 when filters are active
+      var hasFilter =
+        url.searchParams.has('filter.p.vendor') ||
+        url.searchParams.has('brand') ||
+        url.searchParams.has('discount') ||
+        url.searchParams.toString().indexOf('filter.') !== -1;
+      if (hasFilter && Number(url.searchParams.get('page') || 1) > 1) {
+        url.searchParams.delete('page');
+      }
+      window.location.replace(url.pathname + url.search + url.hash);
+    } catch (e) {}
+  })();
+</script>
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
   class="section section--full-width product-grid-container color-{{ section.settings.color_scheme }}{% if lame_category_shop_page %} lame-category-shop-page lame-category-shop-page--{{ lame_category_handle }}{% elsif lame_our_products_op_cards %} lame-our-products-page collection-template-our-products lame-our-products-grid lame-our-products-card-scope{% elsif lame_cosmetic_collection %} premium-products-shell uniform-products-page lame-collection-premium-active all-products-page collection-template-our-products lame-our-products--category-cards{% else %} premium-products-shell uniform-products-page lame-collection-premium-active{% endif %}"

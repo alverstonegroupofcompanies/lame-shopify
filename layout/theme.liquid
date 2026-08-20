@@ -7,12 +7,36 @@
 >
   <head>
     {%- if settings.favicon != blank -%}
-      <link
-        rel="icon"
-        type="image/png"
-        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
-      >
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
+    >
     {%- endif -%}
+
+    {% comment %}
+      Section Rendering API URLs must never be used as the browser location.
+      If ?section_id= is present on a full reload, Shopify returns section-only
+      HTML (no layout/CSS). Strip it immediately before paint.
+    {% endcomment %}
+    <script>
+      (function () {
+        try {
+          var url = new URL(window.location.href);
+          if (!url.searchParams.has('section_id')) return;
+          url.searchParams.delete('section_id');
+          var hasFilter =
+            url.searchParams.has('filter.p.vendor') ||
+            url.searchParams.has('brand') ||
+            url.searchParams.has('discount') ||
+            url.searchParams.toString().indexOf('filter.') !== -1;
+          if (hasFilter && Number(url.searchParams.get('page') || 1) > 1) {
+            url.searchParams.delete('page');
+          }
+          window.location.replace(url.pathname + url.search + url.hash);
+        } catch (e) {}
+      })();
+    </script>
 
     {% # theme-check-disable RemoteAsset %}
     {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
