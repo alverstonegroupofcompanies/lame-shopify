@@ -16,7 +16,7 @@
     frequency: root.dataset.frequency || 'once_every_7_days',
     storageKey: root.dataset.storageKey || 'lame_exit_intent_v2',
     couponCode: root.dataset.couponCode || 'WELCOME10',
-    contactUrl: root.dataset.contactUrl || '/contact',
+    contactUrl: root.dataset.contactUrl || window.location.pathname || '/',
   };
 
   const STORAGE = {
@@ -298,26 +298,22 @@
     }
 
     try {
-      const response = await fetch(cfg.contactUrl, {
+      const action = form.getAttribute('action') || cfg.contactUrl || window.location.pathname;
+      const response = await fetch(action, {
         method: 'POST',
         body: formData,
         headers: { Accept: 'application/json' },
         credentials: 'same-origin',
       });
 
+      // Shopify may return 200 HTML or a redirect; treat non-4xx as email accepted
       if (response.status >= 400) {
         throw new Error('subscribe_failed');
       }
       // Reveal WELCOME10 only after email is successfully sent
       showSuccess();
     } catch (_) {
-      // Still reveal code if network/redirect quirks — email was submitted via form
-      // Prefer native post only when fetch clearly failed before send
-      try {
-        showSuccess();
-      } catch (__) {
-        form.submit();
-      }
+      setError('Could not save your email. Please try again.');
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
