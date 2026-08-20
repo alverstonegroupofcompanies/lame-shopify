@@ -23,6 +23,30 @@ let filteredPage = 1;
 let clientPagingActive = false;
 
 /**
+ * @returns {boolean}
+ */
+function isDiscountFilterActive() {
+  if (getSelectedRules().length > 0) return true;
+  if (new URL(window.location.href).searchParams.get(DISCOUNT_PARAM)) return true;
+  return readPersistedRanges().length > 0;
+}
+
+/**
+ * @param {Record<string, string>} [data]
+ * @returns {number | null}
+ */
+function getPaginationTargetPage(data) {
+  if (data?.page) {
+    const page = Number(data.page);
+    if (Number.isFinite(page) && page > 0) return page;
+  }
+
+  const nav = document.querySelector('.lame-collection-pagination');
+  const current = Number(nav?.getAttribute('data-current-page') || filteredPage || 1);
+  return null;
+}
+
+/**
  * @returns {HTMLElement | null}
  */
 function getCollectionRoot() {
@@ -848,6 +872,8 @@ async function restoreServerCollection() {
 }
 
 export async function applyDiscountFilter() {
+  restoreDiscountSelection();
+
   const rules = getSelectedRules();
   const hasFilter = rules.length > 0;
   const root = getCollectionRoot();
@@ -901,10 +927,20 @@ export async function applyDiscountFilter() {
 }
 
 function goToFilteredPage(page) {
+  restoreDiscountSelection();
   const rules = getSelectedRules();
   if (!rules.length || !catalog?.items) return;
   const matching = filterCatalogItems(catalog.items, rules);
   renderFilteredPage(matching, page);
+
+  const url = syncDiscountParamsToUrl();
+  if (page > 1) {
+    url.searchParams.set('page', String(page));
+  } else {
+    url.searchParams.delete('page');
+  }
+  history.replaceState(history.state, '', url.toString());
+
   getCollectionRoot()?.querySelector('#ResultsList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -950,7 +986,7 @@ if (!customElements.get('lame-discount-filter')) {
 document.addEventListener(
   'click',
   (event) => {
-    if (!clientPagingActive || !getSelectedRules().length) return;
+    if (!isDiscountFilterActive()) return;
     if (!(event.target instanceof Element)) return;
 
     const link = event.target.closest(
@@ -967,21 +1003,59 @@ document.addEventListener(
 
     event.preventDefault();
     event.stopImmediatePropagation();
-    goToFilteredPage(filteredPage + (isNext ? 1 : -1));
+
+    if (catalog?.items?.length && getSelectedRules().length) {
+      goToFilteredPage(filteredPage + (isNext ? 1 : -1));
+      return;
+    }
+
+    filteredPage = Math.max(1, filteredPage + (isNext ? 1 : -1));
+    applyDiscountFilter();
   },
   true
 );
+
+document.addEventListener('lame:collection-pagination', (event) => {
+  if (!isDiscountFilterActive()) return;
+  if (!event.detail || typeof event.detail !== 'object') return;
+
+  const { data } = event.detail;
+  const targetPage = getPaginationTargetPage(data);
+  event.detail.handled = true;
+
+  if (catalog?.items?.length && getSelectedRules().length && targetPage) {
+    goToFilteredPage(targetPage);
+    return;
+  }
+
+  if (targetPage) filteredPage = targetPage;
+  applyDiscountFilter();
+});
 
 document.addEventListener(CLEAR_EVENT, () => {
   clearDiscountFilter();
 });
 document.addEventListener(MORPH_EVENT, () => {
   restoreDiscountSelection();
-  if (getSelectedRules().length) {
-    catalog = null;
-    applyDiscountFilter();
-    return;
+  syncDiscountParamsToUrl();
+
+  if (isDiscountFilterActive()) {
+    if (!getSelectedRules().length) {
+      const keys = readPersistedRanges();
+      for (const input of getAllDiscountInputs()) {
+        input.checked = keys.includes(getRangeKey(input));
+      }
+      syncDiscountParamsToUrl();
+    }
+
+    if (getSelectedRules().length || readPersistedRanges().length) {
+      catalog = null;
+      clientPagingActive = false;
+      applyDiscountFilter();
+      return;
+    }
   }
+
   clientPagingActive = false;
   applyLocalHideOnly();
 });

@@ -726,6 +726,10 @@ async function reloadSectionWithBrandFilter() {
   }
 
   const url = syncBrandParamsToUrl();
+  const discountParam = new URL(window.location.href).searchParams.get('discount');
+  if (discountParam) {
+    url.searchParams.set('discount', discountParam);
+  }
   isReloading = true;
   applyBrandFilter();
 
@@ -827,7 +831,8 @@ function initBrandFilter() {
   const hasSelection = getSelectedSlugs().size > 0;
   const url = new URL(window.location.href);
   const hasVendorFilter = url.searchParams.getAll(VENDOR_PARAM).length > 0;
-  const hasDiscount = Boolean(url.searchParams.get('discount'));
+  const hasDiscount =
+    Boolean(url.searchParams.get('discount')) || readPersistedRangesFromDiscountFilter();
 
   // Discount filter loads the full catalog itself. A vendor reload here would
   // empty the page when the URL vendor label does not match Shopify exactly.
@@ -848,6 +853,30 @@ function handleMorphComplete() {
   dedupeBrandFilterLabels();
   restoreBrandSelection();
   applyBrandFilter();
+
+  const url = new URL(window.location.href);
+  const hasBrand = Boolean(url.searchParams.get(BRAND_PARAM));
+  const hasVendor = url.searchParams.getAll(VENDOR_PARAM).length > 0;
+  const hasDiscount =
+    Boolean(url.searchParams.get('discount')) || readPersistedRangesFromDiscountFilter();
+
+  if (hasBrand && !hasVendor && !hasDiscount) {
+    scheduleServerReload();
+  }
+}
+
+/**
+ * @returns {boolean}
+ */
+function readPersistedRangesFromDiscountFilter() {
+  try {
+    const raw = sessionStorage.getItem(`lame-discount-filter:${window.location.pathname}`);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0;
+  } catch {
+    return false;
+  }
 }
 
 class LameBrandFilter extends HTMLElement {

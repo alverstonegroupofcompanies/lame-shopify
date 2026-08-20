@@ -147,6 +147,7 @@
       {%- endif -%}
     </div>
   </section>
+  <script src="{{ 'lame-home-hero-mobile.js' | asset_url }}" type="module" defer></script>
 {%- endif -%}
 
 {% stylesheet %}
@@ -347,18 +348,16 @@
       --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
     }
 
-    .lame-home-hero--mobile-full_screen {
-      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+    .lame-home-hero--mobile-small,
+    .lame-home-hero--mobile-medium,
+    .lame-home-hero--mobile-large {
+      --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
       --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
-    .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
-      height: var(--lame-hero-frame-max-height) !important;
-      min-height: var(--lame-hero-frame-max-height) !important;
-      max-height: var(--lame-hero-frame-max-height) !important;
+    .lame-home-hero--mobile-full_screen {
+      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
+      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
     @supports not (height: 100svh) {
@@ -367,41 +366,77 @@
       }
     }
 
-    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-component,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-container,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-slides,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-slide {
-      width: 100%;
-      max-width: 100%;
+    /* Mobile: fixed viewport height — never grow past the mobile frame */
+    .lame-home-hero__frame--mobile,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop,
+    .lame-home-hero__carousel--mobile slideshow-component,
+    .lame-home-hero__carousel--mobile slideshow-container,
+    .lame-home-hero__carousel--mobile slideshow-slides,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-component,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-container,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slides {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: var(--lame-hero-frame-max-height) !important;
+      min-height: var(--lame-hero-frame-max-height) !important;
+      max-height: var(--lame-hero-frame-max-height) !important;
+      aspect-ratio: unset !important;
+      overflow: hidden;
     }
 
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile slideshow-slide > .slide__image-container,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--mobile .lame-home-hero__slide-link {
+    .lame-home-hero__carousel--mobile slideshow-slide,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slide {
+      width: 100%;
+      max-width: 100%;
+      height: 100% !important;
+      min-height: 100% !important;
+      max-height: 100% !important;
+    }
+
+    .lame-home-hero__carousel--mobile slideshow-slide > .slide__image-container,
+    .lame-home-hero__carousel--mobile .lame-home-hero__slide-link {
       width: 100%;
       height: 100%;
     }
 
-    /* Fit the full banner image — do not stretch to 100svh */
-    .lame-home-hero--mobile-full_screen,
-    .lame-home-hero--full_screen {
-      --lame-hero-frame-max-height: none;
-      --lame-hero-frame-min-height: 0;
+    /* Swipe: plain horizontal slide only — no smooth scroll, pop-in, or partial slides */
+    .lame-home-hero__carousel--mobile slideshow-slides,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slides {
+      scroll-behavior: auto !important;
+      scroll-snap-type: x mandatory;
+      scroll-snap-stop: always;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .lame-home-hero__frame,
-    .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero__carousel slideshow-slides,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__frame--mobile,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-component,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-container,
-    .lame-home-hero--mobile-full_screen .lame-home-hero__carousel--mobile slideshow-slides {
-      width: 100% !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      aspect-ratio: var(--lame-hero-mobile-ratio, var(--lame-hero-banner-ratio, 2.4));
+    .lame-home-hero__carousel--mobile slideshow-component:not([in-viewport]) slideshow-slides,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners)
+      .lame-home-hero__carousel--desktop
+      slideshow-component:not([in-viewport])
+      slideshow-slides {
+      overflow-x: scroll;
+    }
+
+    .lame-home-hero__carousel--mobile slideshow-slide,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slide {
+      scroll-snap-align: start;
+      content-visibility: visible !important;
+      contain-intrinsic-size: unset !important;
+      view-timeline-name: none !important;
+    }
+
+    .lame-home-hero__carousel--mobile slideshow-component,
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-component {
+      timeline-scope: none;
+    }
+
+    .lame-home-hero__carousel--mobile slideshow-component[transitioning],
+    .lame-home-hero__carousel--mobile slideshow-component[dragging],
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners)
+      .lame-home-hero__carousel--desktop
+      slideshow-component:is([transitioning], [dragging]) {
+      transition: none !important;
+      animation: none !important;
     }
   }
 

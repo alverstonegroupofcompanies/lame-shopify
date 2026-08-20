@@ -81,10 +81,21 @@ export default class ResultsList extends PaginatedList {
   async onCollectionPaginationClick(data, event) {
     event.preventDefault();
 
+    const detail = { data: data || {}, handled: false };
+    document.dispatchEvent(new CustomEvent('lame:collection-pagination', { detail }));
+    if (detail.handled) return;
+
     const url = new URL(window.location.href);
-    for (const [key, value] of Object.entries(data)) {
+    const preservedBrand = url.searchParams.get('brand');
+    const preservedDiscount = url.searchParams.get('discount');
+
+    for (const [key, value] of Object.entries(data || {})) {
       url.searchParams.set(key, value);
     }
+
+    if (preservedBrand) url.searchParams.set('brand', preservedBrand);
+    if (preservedDiscount) url.searchParams.set('discount', preservedDiscount);
+    url.searchParams.delete('section_id');
 
     this.pages.clear();
 
