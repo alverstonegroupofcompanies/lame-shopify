@@ -1,7 +1,8 @@
 /**
  * LAMÉ exit-intent coupon popup
  * Shows capture form first; WELCOME10 (coupon) is revealed only after email submit.
- * Desktop: mouse toward top / leave document. Mobile: inactivity, upward scroll.
+ * Desktop: mouse moves into the upper half of the viewport.
+ * Mobile: user scrolls upward (instead of down).
  * Soft fallback: after arm delay + fallback wait, show once if still eligible.
  */
 (() => {
@@ -41,10 +42,11 @@
   let opened = false;
   let armed = false;
   let closedByUser = false;
-  let inactivityTimer = null;
   let fallbackTimer = null;
   let lastScrollY = window.scrollY || 0;
-  let lastScrollTs = Date.now();
+  let upwardScrollAccum = 0;
+  let lastMouseY = null;
+  let wasInLowerHalf = false;
 
   const now = () => Date.now();
 
@@ -171,54 +173,54 @@
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0;
 
-  /** Desktop exit: leaving viewport toward chrome / top edge */
-  const onMouseOut = (event) => {
-    if (!event || isTouchish()) return;
-    // Leaving the document (relatedTarget null) near the top
-    if (event.relatedTarget || event.toElement) return;
-    if (typeof event.clientY === 'number' && event.clientY > 10) return;
-    open();
-  };
+  const midY = () => Math.max(window.innerHeight || 0, 1) * 0.5;
 
-  const onDocMouseLeave = (event) => {
-    if (isTouchish()) return;
-    if (typeof event.clientY === 'number' && event.clientY <= 0) open();
-  };
+  /**
+   * Desktop: pointer moved into the upper half of the screen
+   * (must have been in the lower half first, then moved up / into top half).
+   */
+  const onMouseMove = (event) => {
+    if (!armed || isTouchish()) return;
+    if (typeof event.clientY !== 'number') return;
 
-  const resetInactivity = () => {
-    if (!isTouchish()) return;
-    window.clearTimeout(inactivityTimer);
-    inactivityTimer = window.setTimeout(() => open(), cfg.inactivityMs);
-  };
+    const half = midY();
+    const y = event.clientY;
+    const movingUp = lastMouseY != null && y < lastMouseY - 2;
+    lastMouseY = y;
 
-  const onScroll = () => {
-    const y = window.scrollY || 0;
-    const ts = Date.now();
-    const dy = lastScrollY - y;
-    const dt = Math.max(ts - lastScrollTs, 1);
-    const velocity = dy / dt;
-    lastScrollY = y;
-    lastScrollTs = ts;
-
-    if (isTouchish()) {
-      // Rapid upward scroll near top of page
-      if (y < 140 && dy > 70 && velocity > 0.7) open();
-      resetInactivity();
+    if (y >= half) {
+      wasInLowerHalf = true;
+      return;
     }
-  };
 
-  const onVisibility = () => {
-    if (
-      document.visibilityState === 'hidden' &&
-      isTouchish() &&
-      (root.dataset.template === 'cart' || root.dataset.template === 'product')
-    ) {
+    // In upper half: trigger when crossing from below, or moving further up while above half
+    if (wasInLowerHalf || movingUp) {
       open();
     }
   };
 
-  const onPageShow = (event) => {
-    if (event.persisted && isTouchish()) open();
+  /**
+   * Mobile: any clear upward scroll (finger/content moving toward top of page).
+   */
+  const onScroll = () => {
+    if (!armed || !isTouchish()) {
+      lastScrollY = window.scrollY || 0;
+      return;
+    }
+
+    const y = window.scrollY || 0;
+    const dy = lastScrollY - y; // positive = scrolled up
+    lastScrollY = y;
+
+    if (dy > 0) {
+      upwardScrollAccum += dy;
+    } else if (dy < -8) {
+      // Reset streak when user scrolls down again
+      upwardScrollAccum = 0;
+    }
+
+    // ~80px of upward travel in one streak is enough to feel intentional
+    if (upwardScrollAccum >= 80) open();
   };
 
   let triggersBound = false;
@@ -226,15 +228,13 @@
   const bindTriggers = () => {
     if (triggersBound) return;
     triggersBound = true;
-    document.addEventListener('mouseout', onMouseOut);
-    document.documentElement.addEventListener('mouseleave', onDocMouseLeave);
+    lastScrollY = window.scrollY || 0;
+    upwardScrollAccum = 0;
+    lastMouseY = null;
+    wasInLowerHalf = false;
+
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('pageshow', onPageShow);
-    ['pointerdown', 'keydown', 'touchstart', 'mousemove'].forEach((type) => {
-      document.addEventListener(type, resetInactivity, { passive: true });
-    });
-    resetInactivity();
 
     // Soft fallback so the popup still appears if exit signals never fire
     window.clearTimeout(fallbackTimer);
@@ -242,12 +242,8 @@
   };
 
   const teardownTriggers = () => {
-    document.removeEventListener('mouseout', onMouseOut);
-    document.documentElement.removeEventListener('mouseleave', onDocMouseLeave);
+    document.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('scroll', onScroll);
-    document.removeEventListener('visibilitychange', onVisibility);
-    window.removeEventListener('pageshow', onPageShow);
-    window.clearTimeout(inactivityTimer);
     window.clearTimeout(fallbackTimer);
     triggersBound = false;
   };
