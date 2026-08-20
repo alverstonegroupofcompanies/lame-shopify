@@ -1,7 +1,7 @@
 {% doc %}
   Shop by category — collection cards.
   Desktop/tablet: all cards in one scalable row.
-  Mobile: one horizontal scrollable row with auto-loop.
+  Mobile: 2-column rounded card grid.
 {% enddoc %}
 {% liquid
   assign ai_gen_id = block.id | replace: '_', '' | downcase
@@ -55,50 +55,43 @@
     width: 100%;
   }
 
-  /* Mobile: single horizontal scrollable row */
+  /* Mobile: 2-column rounded grid (same as home offer banners) */
   @media screen and (max-width: 749px) {
     .ai-category-carousel-{{ ai_gen_id }} {
-      padding-inline: 0;
-    }
-
-    .ai-category-carousel__container-{{ ai_gen_id }} {
-      padding-inline: 0;
+      --ai-category-gap: min({{ block.settings.card_gap }}px, 0.5rem);
     }
 
     .ai-category-carousel__header-{{ ai_gen_id }} {
-      padding-inline: 1rem;
+      padding-inline: 0;
     }
 
     .ai-category-carousel__track-{{ ai_gen_id }} {
-      display: flex;
-      flex-wrap: nowrap;
-      grid-template-columns: none;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--ai-category-gap);
       width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-x: contain;
-      padding-inline: 1rem;
-      padding-bottom: 0.25rem;
-      scrollbar-width: none;
-    }
-
-    .ai-category-carousel__track-{{ ai_gen_id }}::-webkit-scrollbar {
-      display: none;
+      overflow: visible;
+      padding-inline: 0;
+      padding-bottom: 0;
     }
 
     .ai-category-carousel__card-{{ ai_gen_id }} {
-      flex: 0 0 min(72vw, 260px);
-      width: min(72vw, 260px);
-      max-width: min(72vw, 260px);
-      scroll-snap-align: start;
+      flex: none;
+      width: 100%;
+      max-width: none;
+      border-radius: clamp(10px, 3.2vw, 14px);
     }
 
     .ai-category-carousel__card-{{ ai_gen_id }}:hover {
       transform: none;
+    }
+
+    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+      aspect-ratio: 1024 / 682;
+    }
+
+    .ai-category-carousel__image-{{ ai_gen_id }} {
+      object-position: center;
     }
   }
 
@@ -289,100 +282,21 @@
     if (!track) return;
 
     var mobileQuery = window.matchMedia('(max-width: 749px)');
-    var speedSec = Number(root.getAttribute('data-auto-slide-speed')) || 3;
-    var timer = null;
-    var cloned = false;
-    var paused = false;
-
-    function isMobile() {
-      return mobileQuery.matches;
-    }
-
-    function ensureLoopClones() {
-      if (cloned || !isMobile()) return;
-      var cards = track.querySelectorAll('[data-ai-category-card]:not([data-clone])');
-      if (cards.length < 2) return;
-      cards.forEach(function (card) {
-        var clone = card.cloneNode(true);
-        clone.setAttribute('data-clone', 'true');
-        clone.setAttribute('aria-hidden', 'true');
-        var link = clone.querySelector('a');
-        if (link) link.setAttribute('tabindex', '-1');
-        track.appendChild(clone);
-      });
-      cloned = true;
-    }
 
     function clearClones() {
-      if (!cloned) return;
       track.querySelectorAll('[data-clone="true"]').forEach(function (node) {
         node.remove();
       });
-      cloned = false;
       track.scrollLeft = 0;
     }
 
-    function stopLoop() {
-      if (timer) {
-        window.clearInterval(timer);
-        timer = null;
-      }
-    }
-
-    function stepLoop() {
-      if (!isMobile() || paused) return;
-      ensureLoopClones();
-      var firstCard = track.querySelector('[data-ai-category-card]');
-      if (!firstCard) return;
-      var gap = parseFloat(getComputedStyle(track).gap) || 16;
-      var step = firstCard.getBoundingClientRect().width + gap;
-      var half = track.scrollWidth / 2;
-
-      track.scrollBy({ left: step, behavior: 'smooth' });
-
-      window.setTimeout(function () {
-        if (!isMobile()) return;
-        if (track.scrollLeft >= half - 4) {
-          track.scrollLeft = track.scrollLeft - half;
-        }
-      }, 420);
-    }
-
-    function startLoop() {
-      stopLoop();
-      if (!isMobile()) {
-        clearClones();
-        return;
-      }
-      ensureLoopClones();
-      timer = window.setInterval(stepLoop, Math.max(2, speedSec) * 1000);
-    }
-
-    track.addEventListener(
-      'touchstart',
-      function () {
-        paused = true;
-        stopLoop();
-      },
-      { passive: true }
-    );
-
-    track.addEventListener(
-      'touchend',
-      function () {
-        paused = false;
-        startLoop();
-      },
-      { passive: true }
-    );
-
     if (typeof mobileQuery.addEventListener === 'function') {
-      mobileQuery.addEventListener('change', startLoop);
+      mobileQuery.addEventListener('change', clearClones);
     } else if (typeof mobileQuery.addListener === 'function') {
-      mobileQuery.addListener(startLoop);
+      mobileQuery.addListener(clearClones);
     }
 
-    startLoop();
+    clearClones();
   })();
 </script>
 
