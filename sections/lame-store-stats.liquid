@@ -118,7 +118,8 @@
                       class="lame-store-stats__number"
                       data-lame-stat-number
                       data-target="{{ stat_numeric }}"
-                    >{{ stat_numeric }}</span>{%- if block.settings.suffix != blank -%}<span class="lame-store-stats__suffix">{{ block.settings.suffix | escape }}</span>{%- endif -%}
+                      aria-label="{{ stat_numeric }}"
+                    >0</span>{%- if block.settings.suffix != blank -%}<span class="lame-store-stats__suffix">{{ block.settings.suffix | escape }}</span>{%- endif -%}
                   </p>
                   {%- if block.settings.label != blank -%}
                     <p class="lame-store-stats__label">{{ block.settings.label | escape }}</p>
@@ -220,10 +221,14 @@
 
   <script>
     (() => {
-      const root = document.getElementById('shopify-section-{{ section.id }}');
-      if (!root) return;
-      const numbers = root.querySelectorAll('[data-lame-stat-number]');
+      const root =
+        document.getElementById('shopify-section-{{ section.id }}') ||
+        document.querySelector('#shopify-section-{{ section.id }}');
+      const scope = root || document;
+      const numbers = scope.querySelectorAll('[data-lame-stat-number]');
       if (!numbers.length) return;
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const format = (value) => {
         try {
@@ -233,39 +238,54 @@
         }
       };
 
-      const animate = (el) => {
+      const animate = (el, delay) => {
         const target = Number(el.dataset.target || 0);
-        if (!Number.isFinite(target) || target <= 0) {
-          el.textContent = format(target || 0);
+        if (!Number.isFinite(target) || target <= 0 || reduceMotion) {
+          el.textContent = format(Math.max(target, 0));
           return;
         }
-        const duration = 1100;
-        const start = performance.now();
-        const tick = (now) => {
-          const progress = Math.min((now - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          el.textContent = format(target * eased);
-          if (progress < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+
+        el.textContent = format(0);
+        const duration = 2400;
+        window.setTimeout(() => {
+          const start = performance.now();
+          const tick = (now) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 4);
+            el.textContent = format(target * eased);
+            if (progress < 1) {
+              requestAnimationFrame(tick);
+              return;
+            }
+            el.textContent = format(target);
+          };
+          requestAnimationFrame(tick);
+        }, delay);
+      };
+
+      const play = () => {
+        numbers.forEach((el, index) => animate(el, index * 180));
       };
 
       if (!('IntersectionObserver' in window)) {
-        numbers.forEach(animate);
+        play();
         return;
       }
 
+      const watchTarget =
+        scope.querySelector('.lame-store-stats__copy') ||
+        scope.querySelector('.lame-store-stats__grid') ||
+        numbers[0];
+
       const observer = new IntersectionObserver(
         (entries, obs) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            animate(entry.target);
-            obs.unobserve(entry.target);
-          });
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          play();
+          obs.disconnect();
         },
-        { threshold: 0.35 }
+        { threshold: 0.35, rootMargin: '0px 0px -12% 0px' }
       );
-      numbers.forEach((el) => observer.observe(el));
+      observer.observe(watchTarget);
     })();
   </script>
 {%- endif -%}
