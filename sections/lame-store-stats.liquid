@@ -26,12 +26,12 @@
 
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--full-width color-{{ section.settings.color_scheme }} lame-store-stats"
-    style="{% render 'spacing-padding', settings: section.settings %}"
+    class="section section--full-width color-{{ section.settings.color_scheme }} lame-store-stats spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}"
     data-lame-store-stats
     {{ section.shopify_attributes }}
   >
-    <div class="lame-store-stats__wrap spacing-style">
+    <div class="lame-store-stats__wrap">
       <div class="lame-store-stats__layout lame-store-stats__layout--{{ section.settings.image_position | default: 'image-left' }}">
         <div class="lame-store-stats__media">
           {%- liquid
@@ -299,6 +299,18 @@
     width: min(var(--page-width, 90rem), calc(100% - 2 * var(--page-margin, 1.25rem)));
     margin-inline: auto;
     padding-inline: 0;
+  }
+
+  .lame-store-stats.section.spacing-style {
+    padding-block-start: max(2.5rem, var(--padding-block-start, 40px));
+    padding-block-end: max(2.5rem, var(--padding-block-end, 40px));
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-store-stats.section.spacing-style {
+      padding-block-start: 2.5rem;
+      padding-block-end: 2.5rem;
+    }
   }
 
   .lame-store-stats__layout {
