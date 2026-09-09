@@ -1,0 +1,508 @@
+{%- if section.settings.enabled -%}
+  {%- liquid
+    assign live_products = shop.products_count | default: 0
+    assign live_brands = shop.vendors.size | default: 0
+    assign stat_count = 0
+    for block in section.blocks
+      assign stat_count = stat_count | plus: 1
+    endfor
+  -%}
+
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <section
+    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-store-stats"
+    style="{% render 'spacing-padding', settings: section.settings %}"
+    data-lame-store-stats
+    {{ section.shopify_attributes }}
+  >
+    <div class="lame-store-stats__wrap spacing-style">
+      {%- if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.subheading != blank -%}
+        <header class="lame-store-stats__header">
+          {%- if section.settings.eyebrow != blank -%}
+            <p class="lame-store-stats__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.heading != blank -%}
+            <h2 class="lame-store-stats__heading">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+          {%- if section.settings.subheading != blank -%}
+            <p class="lame-store-stats__subheading">{{ section.settings.subheading | escape }}</p>
+          {%- endif -%}
+        </header>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul
+          class="lame-store-stats__grid lame-store-stats__grid--{{ stat_count }}"
+          role="list"
+        >
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign stat_value = block.settings.number | strip
+              assign stat_numeric = 0
+
+              case block.settings.source
+                when 'products'
+                  assign stat_numeric = live_products
+                  if block.settings.use_custom_number and block.settings.number != blank
+                    assign stat_numeric = block.settings.number | times: 1
+                  endif
+                when 'brands'
+                  assign stat_numeric = live_brands
+                  if block.settings.use_custom_number and block.settings.number != blank
+                    assign stat_numeric = block.settings.number | times: 1
+                  endif
+                else
+                  assign stat_numeric = block.settings.number | times: 1
+              endcase
+
+              if stat_numeric == blank or stat_numeric == 0
+                if stat_value != blank
+                  assign stat_numeric = stat_value | times: 1
+                endif
+              endif
+            -%}
+            <li
+              class="lame-store-stats__item"
+              data-lame-stat
+              {{ block.shopify_attributes }}
+            >
+              <span class="lame-store-stats__icon" aria-hidden="true">
+                {%- case block.settings.icon -%}
+                  {%- when 'orders' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M7 7h13l-1.4 8.2A2 2 0 0 1 16.6 17H9.2a2 2 0 0 1-2-1.7L6 4H3"/>
+                      <circle cx="10" cy="20" r="1.2"/>
+                      <circle cx="16" cy="20" r="1.2"/>
+                    </svg>
+                  {%- when 'products' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 8.5 12 4l8 4.5V18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8.5Z"/>
+                      <path d="M12 12v7M12 12 20 8M12 12 4 8"/>
+                    </svg>
+                  {%- when 'brands' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="8" r="3"/>
+                      <path d="M5 19a7 7 0 0 1 14 0"/>
+                    </svg>
+                  {%- when 'customers' -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="9" cy="8" r="3"/>
+                      <path d="M3 19a6 6 0 0 1 12 0"/>
+                      <circle cx="17" cy="9" r="2.2"/>
+                      <path d="M21 19a4.8 4.8 0 0 0-4-4.6"/>
+                    </svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z"/>
+                    </svg>
+                {%- endcase -%}
+              </span>
+              <p class="lame-store-stats__value">
+                <span
+                  class="lame-store-stats__number"
+                  data-lame-stat-number
+                  data-target="{{ stat_numeric }}"
+                >{{ stat_numeric }}</span>{%- if block.settings.suffix != blank -%}<span class="lame-store-stats__suffix">{{ block.settings.suffix | escape }}</span>{%- endif -%}
+              </p>
+              {%- if block.settings.label != blank -%}
+                <p class="lame-store-stats__label">{{ block.settings.label | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.caption != blank -%}
+                <p class="lame-store-stats__caption">{{ block.settings.caption | escape }}</p>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const root = document.getElementById('shopify-section-{{ section.id }}');
+      if (!root) return;
+      const numbers = root.querySelectorAll('[data-lame-stat-number]');
+      if (!numbers.length) return;
+
+      const format = (value) => {
+        try {
+          return new Intl.NumberFormat('en-IN').format(Math.round(value));
+        } catch (_) {
+          return String(Math.round(value));
+        }
+      };
+
+      const animate = (el) => {
+        const target = Number(el.dataset.target || 0);
+        if (!Number.isFinite(target) || target <= 0) {
+          el.textContent = format(target || 0);
+          return;
+        }
+        const duration = 1100;
+        const start = performance.now();
+        const tick = (now) => {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = format(target * eased);
+          if (progress < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+
+      if (!('IntersectionObserver' in window)) {
+        numbers.forEach(animate);
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            animate(entry.target);
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.35 }
+      );
+      numbers.forEach((el) => observer.observe(el));
+    })();
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-store-stats {
+    --lame-stats-ink: rgb(var(--color-foreground-heading-rgb, 28 32 24));
+    --lame-stats-muted: rgb(var(--color-foreground-rgb, 90 96 86) / 0.72);
+    --lame-stats-accent: rgb(var(--lame-premium-forest, 21 66 48));
+  }
+
+  .lame-store-stats__wrap {
+    padding-inline: var(--page-margin);
+    max-width: var(--page-width, 120rem);
+    margin-inline: auto;
+  }
+
+  .lame-store-stats__header {
+    text-align: center;
+    max-width: 40rem;
+    margin: 0 auto clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .lame-store-stats__eyebrow {
+    margin: 0 0 0.45rem;
+    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--lame-stats-accent);
+  }
+
+  .lame-store-stats__heading {
+    margin: 0;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(1.75rem, 3.4vw, 2.6rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--lame-stats-ink);
+  }
+
+  .lame-store-stats__subheading {
+    margin: 0.65rem 0 0;
+    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--lame-stats-muted);
+  }
+
+  .lame-store-stats__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-store-stats__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      border: 1px solid rgb(var(--color-foreground-rgb, 28 32 24) / 0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgb(var(--color-background-rgb, 255 255 255) / 0.72);
+    }
+
+    .lame-store-stats__grid--3,
+    .lame-store-stats__grid--4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-store-stats__grid--1 {
+      grid-template-columns: 1fr;
+    }
+
+    .lame-store-stats__grid--2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lame-store-stats__grid--3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .lame-store-stats__grid--4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .lame-store-stats__item {
+    text-align: center;
+    padding: 1.35rem 1.1rem 1.25rem;
+    border-radius: 16px;
+    background: rgb(var(--color-background-rgb, 255 255 255) / 0.7);
+    border: 1px solid rgb(var(--color-foreground-rgb, 28 32 24) / 0.08);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-store-stats__item {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding: clamp(1.5rem, 3vw, 2.4rem) 1.25rem;
+      box-shadow: inset -1px 0 0 rgb(var(--color-foreground-rgb, 28 32 24) / 0.08);
+    }
+
+    .lame-store-stats__item:last-child {
+      box-shadow: none;
+    }
+  }
+
+  .lame-store-stats__icon {
+    display: inline-flex;
+    width: 2.15rem;
+    height: 2.15rem;
+    margin-bottom: 0.7rem;
+    color: var(--lame-stats-accent);
+  }
+
+  .lame-store-stats__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-store-stats__value {
+    margin: 0;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2.15rem, 4.2vw, 3.15rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--lame-stats-ink);
+  }
+
+  .lame-store-stats__suffix {
+    margin-left: 0.08em;
+  }
+
+  .lame-store-stats__label {
+    margin: 0.55rem 0 0;
+    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--lame-stats-ink);
+  }
+
+  .lame-store-stats__caption {
+    margin: 0.3rem 0 0;
+    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--lame-stats-muted);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Store statistics",
+  "tag": "section",
+  "class": "section-wrapper",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Show this section",
+      "default": true,
+      "info": "Turn off to hide the statistics bar without deleting it. You can also use the eye icon in the theme editor."
+    },
+    {
+      "type": "paragraph",
+      "content": "Product and brand counts can update live from your catalog. Shopify themes cannot read total orders, so enter that number yourself (from Admin → Orders)."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Trusted by shoppers"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "LAMÉ in numbers"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real catalog size, plus orders fulfilled from our store."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-golden"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "select",
+          "id": "source",
+          "label": "Number source",
+          "options": [
+            { "value": "custom", "label": "Entered number (use for orders)" },
+            { "value": "products", "label": "Live product count" },
+            { "value": "brands", "label": "Live brand / vendor count" }
+          ],
+          "default": "custom",
+          "info": "Live product count uses your published catalog. Orders must be typed in."
+        },
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Number",
+          "default": "10000",
+          "info": "Used for orders, or as an override when “Use entered number” is on."
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_number",
+          "label": "Use entered number instead of live count",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "suffix",
+          "label": "Suffix",
+          "default": "+",
+          "info": "Shown after the number, e.g. +"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Orders fulfilled"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "default": "Delivered from our store"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "orders", "label": "Orders" },
+            { "value": "products", "label": "Products" },
+            { "value": "brands", "label": "Brands" },
+            { "value": "customers", "label": "Customers" },
+            { "value": "shield", "label": "Trust" }
+          ],
+          "default": "orders"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Store statistics",
+      "category": "Storytelling",
+      "blocks": [
+        {
+          "type": "stat",
+          "settings": {
+            "source": "custom",
+            "number": "10000",
+            "use_custom_number": false,
+            "suffix": "+",
+            "label": "Orders fulfilled",
+            "caption": "Happy deliveries from our store",
+            "icon": "orders"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "source": "products",
+            "number": "",
+            "use_custom_number": false,
+            "suffix": "+",
+            "label": "Products",
+            "caption": "Live from our catalog",
+            "icon": "products"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

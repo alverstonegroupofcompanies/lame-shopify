@@ -289,6 +289,29 @@
     }
   });
 
+  /** Email the store owner via Shopify contact form (inbox notification) */
+  const notifyStore = (subscriberEmail) => {
+    try {
+      const notify = new FormData();
+      notify.set('form_type', 'contact');
+      notify.set('utf8', '✓');
+      notify.set('contact[email]', subscriberEmail);
+      notify.set(
+        'contact[body]',
+        `New exit-intent signup.\nEmail: ${subscriberEmail}\nOffer: ${cfg.couponCode || 'WELCOME10'}\nSource: exit-intent popup`
+      );
+      notify.set('contact[name]', 'Exit-intent popup');
+      fetch(cfg.contactUrl || `${window.Shopify?.routes?.root || '/'}contact`, {
+        method: 'POST',
+        body: notify,
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+      }).catch(() => {});
+    } catch (_) {
+      /* non-blocking */
+    }
+  };
+
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
     setError('');
@@ -303,6 +326,9 @@
     const formData = new FormData(form);
     if (!formData.get('form_type')) formData.set('form_type', 'customer');
     if (!formData.get('utf8')) formData.set('utf8', '✓');
+    if (!formData.get('contact[accepts_marketing]')) {
+      formData.set('contact[accepts_marketing]', 'true');
+    }
 
     const originalLabel = submitBtn?.textContent;
     if (submitBtn) {
@@ -310,28 +336,80 @@
       submitBtn.textContent = submitBtn.dataset.loadingLabel || 'Saving…';
     }
 
+    const endpoint =
+      cfg.contactUrl ||
+      `${window.Shopify?.routes?.root || '/'}contact`;
+
+    const restoreSubmit = () => {
+      if (!submitBtn) return;
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalLabel || '';
+    };
+
     try {
-      const action = form.getAttribute('action') || cfg.contactUrl || window.location.pathname;
-      const response = await fetch(action, {
+      // Shopify newsletter / customer capture must POST to /contact
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
         headers: { Accept: 'application/json' },
         credentials: 'same-origin',
       });
 
-      // Shopify may return 200 HTML or a redirect; treat non-4xx as email accepted
+      let payload = null;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          payload = await response.json();
+        } catch (_) {
+          payload = null;
+        }
+      }
+
+      const rawErrors = payload?.errors;
+      let errorMessage =
+        payload?.description ||
+        payload?.message ||
+        (typeof rawErrors === 'string' ? rawErrors : null);
+
+      if (!errorMessage && rawErrors && typeof rawErrors === 'object') {
+        const parts = [];
+        Object.values(rawErrors).forEach((value) => {
+          if (Array.isArray(value)) parts.push(...value);
+          else if (value) parts.push(String(value));
+        });
+        errorMessage = parts.filter(Boolean).join(' ') || null;
+      }
+
+      const alreadyExists = /already|taken|exists|subscribed/i.test(
+        String(errorMessage || '')
+      );
+
+      if (alreadyExists || response.ok || response.status === 200) {
+        showSuccess();
+        notifyStore(email);
+        restoreSubmit();
+        return;
+      }
+
       if (response.status >= 400) {
-        throw new Error('subscribe_failed');
+        throw new Error(errorMessage || 'Could not save your email. Please try again.');
       }
-      // Reveal WELCOME10 only after email is successfully sent
+
       showSuccess();
-    } catch (_) {
-      setError('Could not save your email. Please try again.');
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalLabel || '';
+      notifyStore(email);
+      restoreSubmit();
+    } catch (err) {
+      const msg = String(err?.message || '');
+      const isNetwork = /failed to fetch|networkerror|load failed|network/i.test(msg);
+
+      if (isNetwork) {
+        // Native POST still creates the customer (full page reload)
+        HTMLFormElement.prototype.submit.call(form);
+        return;
       }
+
+      setError(msg || 'Could not save your email. Please try again.');
+      restoreSubmit();
     }
   });
 

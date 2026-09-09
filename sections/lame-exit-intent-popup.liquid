@@ -53,7 +53,7 @@
     data-frequency="{{ section.settings.frequency }}"
     data-storage-key="lame_exit_intent_v2_{{ section.id }}"
     data-coupon-code="{{ section.settings.coupon_code | default: 'WELCOME10' | escape }}"
-    data-contact-url="{{ request.path }}"
+    data-contact-url="{{ routes.root_url }}contact"
     data-template="{{ template.name }}"
     data-start-success="false"
     hidden
@@ -125,6 +125,7 @@
               {%- assign form_posted = true -%}
             {%- endif -%}
             <input type="hidden" name="contact[tags]" value="{{ coupon_tags | escape }}">
+            <input type="hidden" name="contact[accepts_marketing]" value="true">
             <div class="lame-exit-popup__field">
               <label class="visually-hidden" for="LameExitEmail-{{ section.id }}">
                 {{ section.settings.email_placeholder | escape }}
@@ -255,7 +256,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Create the matching discount code in Shopify Admin → Discounts. The theme displays the code after email capture; it cannot create discount codes."
+      "content": "Signups are saved in Admin → Customers (tags: newsletter, exit-intent). After submit, a contact-form email is also sent to your store email. Confirm the recipient under Settings → Notifications → Contact form."
     },
     {
       "type": "header",
