@@ -1,3 +1,4 @@
+{{ 'lame-store-stats.css' | asset_url | stylesheet_tag }}
 {%- if section.settings.enabled -%}
   {%- liquid
     assign live_products = shop.products_count | default: 0
@@ -31,7 +32,7 @@
     {{ section.shopify_attributes }}
   >
     <div class="lame-store-stats__wrap spacing-style">
-      <div class="lame-store-stats__layout">
+      <div class="lame-store-stats__layout lame-store-stats__layout--{{ section.settings.image_position | default: 'image-left' }}">
         <div class="lame-store-stats__media">
           {%- liquid
             assign stats_image_alt = section.settings.image_alt | default: 'MyLamstone delivery'
@@ -303,10 +304,19 @@
     align-items: stretch;
   }
 
-  @media screen and (min-width: 900px) {
+  @media screen and (min-width: 750px) {
     .lame-store-stats__layout {
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 1rem;
+      min-height: 28rem;
+    }
+
+    .lame-store-stats__layout--image-right .lame-store-stats__media {
+      order: 2;
+    }
+
+    .lame-store-stats__layout--image-right .lame-store-stats__copy {
+      order: 1;
     }
   }
 
@@ -419,12 +429,18 @@
     object-position: center center;
   }
 
-  @media screen and (min-width: 900px) {
-    .lame-store-stats__media,
+  @media screen and (min-width: 750px) {
+    .lame-store-stats__media {
+      min-height: 100%;
+    }
+
     .lame-store-stats__image,
     .lame-store-stats__image-placeholder {
-      min-height: 100%;
+      position: absolute;
+      inset: 0;
+      width: 100%;
       height: 100%;
+      min-height: 0;
     }
   }
 
@@ -475,6 +491,36 @@
       "content": "Then Admin → Flow: (1) Trigger Order created → Update shop metafield custom.orders_placed to current value + 1. (2) Trigger Fulfillment created → Update shop metafield custom.orders_delivered to current value + 1."
     },
     {
+      "type": "header",
+      "content": "Left image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Shows on the left. If empty, the MyLamstone delivery photo is used. Click Select to upload your own."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "MyLamstone delivery"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position (desktop)",
+      "options": [
+        { "value": "image-left", "label": "Left" },
+        { "value": "image-right", "label": "Right" }
+      ],
+      "default": "image-left"
+    },
+    {
+      "type": "header",
+      "content": "Right content"
+    },
+    {
       "type": "text",
       "id": "eyebrow",
       "label": "Badge",
@@ -504,17 +550,6 @@
       "label": "Heading fallback",
       "default": "MyLamstone in numbers",
       "info": "Used only if the split heading fields are empty."
-    },
-    {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Right image",
-      "info": "Optional. If empty, the MyLamstone delivery photo is used."
-    },
-    {
-      "type": "text",
-      "id": "image_alt",
-      "label": "Image alt text"
     },
     {
       "type": "header",
