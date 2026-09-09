@@ -32,6 +32,33 @@
   >
     <div class="lame-store-stats__wrap spacing-style">
       <div class="lame-store-stats__layout">
+        <div class="lame-store-stats__media">
+          {%- liquid
+            assign stats_image_alt = section.settings.image_alt | default: 'MyLamstone delivery'
+          -%}
+          {%- if section.settings.image != blank -%}
+            {{
+              section.settings.image
+              | image_url: width: 1600
+              | image_tag:
+                class: 'lame-store-stats__image',
+                loading: 'lazy',
+                widths: '600, 900, 1200, 1600',
+                sizes: '(min-width: 990px) 50vw, 100vw',
+                alt: stats_image_alt
+            }}
+          {%- else -%}
+            <img
+              class="lame-store-stats__image"
+              src="{{ 'lame-store-stats-delivery.png' | asset_url }}"
+              alt="{{ stats_image_alt | escape }}"
+              width="1200"
+              height="900"
+              loading="lazy"
+            >
+          {%- endif -%}
+        </div>
+
         <div class="lame-store-stats__copy">
           {%- if section.settings.eyebrow != blank -%}
             <p class="lame-store-stats__badge">{{ section.settings.eyebrow | escape }}</p>
@@ -98,33 +125,6 @@
                 </li>
               {%- endfor -%}
             </ul>
-          {%- endif -%}
-        </div>
-
-        <div class="lame-store-stats__media">
-          {%- liquid
-            assign stats_image_alt = section.settings.image_alt | default: 'MyLamstone delivery'
-          -%}
-          {%- if section.settings.image != blank -%}
-            {{
-              section.settings.image
-              | image_url: width: 1600
-              | image_tag:
-                class: 'lame-store-stats__image',
-                loading: 'lazy',
-                widths: '600, 900, 1200, 1600',
-                sizes: '(min-width: 990px) 50vw, 100vw',
-                alt: stats_image_alt
-            }}
-          {%- else -%}
-            <img
-              class="lame-store-stats__image"
-              src="{{ 'lame-store-stats-delivery.png' | asset_url }}"
-              alt="{{ stats_image_alt | escape }}"
-              width="1200"
-              height="900"
-              loading="lazy"
-            >
           {%- endif -%}
         </div>
       </div>
@@ -305,7 +305,7 @@
 
   @media screen and (min-width: 900px) {
     .lame-store-stats__layout {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
       gap: 1rem;
     }
   }
