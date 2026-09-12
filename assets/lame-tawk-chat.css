@@ -1,0 +1,52 @@
+/**
+ * MyLamstone — Tawk.to host-page polish
+ * Bubble colors still come from the Tawk dashboard; this lifts + frames the widget.
+ */
+
+:root {
+  --lame-tawk-lift-desktop: 5.5rem;
+  --lame-tawk-lift-mobile: 5.75rem;
+  --lame-tawk-side: 1.15rem;
+  --lame-tawk-z: 2147483000;
+}
+
+/* Outer iframe / container when Tawk exposes them on the host page */
+iframe[title='chat widget'],
+iframe[title*='Tawk'],
+iframe[title*='tawk'],
+div.widget-visible > iframe,
+#tawkchat-container,
+#tawkchat-minified-wrapper,
+.tawk-min-container {
+  z-index: var(--lame-tawk-z) !important;
+}
+
+/* Soft lift fallback if API offsets are ignored by an older embed */
+@media screen and (min-width: 750px) {
+  body:not(.lame-tawk-api-positioned) iframe[title='chat widget'],
+  body:not(.lame-tawk-api-positioned) iframe[title*='Tawk'],
+  body:not(.lame-tawk-api-positioned) #tawkchat-minified-wrapper {
+    margin-bottom: var(--lame-tawk-lift-desktop) !important;
+    margin-right: var(--lame-tawk-side) !important;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  body:not(.lame-tawk-api-positioned) iframe[title='chat widget'],
+  body:not(.lame-tawk-api-positioned) iframe[title*='Tawk'],
+  body:not(.lame-tawk-api-positioned) #tawkchat-minified-wrapper {
+    margin-bottom: var(--lame-tawk-lift-mobile) !important;
+    margin-right: 0.85rem !important;
+  }
+
+  /* Keep chat above sticky add-to-cart on product pages */
+  body.template-product:not(.lame-tawk-api-positioned) iframe[title='chat widget'],
+  body.template-product:not(.lame-tawk-api-positioned) #tawkchat-minified-wrapper {
+    margin-bottom: calc(var(--lame-tawk-lift-mobile) + 3.25rem) !important;
+  }
+}
+
+/* Hide chat while native Shopify design mode chrome is busy (optional calm) */
+html.shopify-design-mode iframe[title='chat widget'] {
+  opacity: 0.92;
+}

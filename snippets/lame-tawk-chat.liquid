@@ -1,0 +1,98 @@
+{% comment %}
+  MyLamstone Tawk.to polish — must load before content_for_header / app embed.
+  Position: lifted above the bottom edge. Theme match: forest + cream + gold.
+  Bubble/header colors are set in Tawk Admin → Chat Widget → Appearance.
+{% endcomment %}
+
+{{ 'lame-tawk-chat.css' | asset_url | stylesheet_tag }}
+
+<script>
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
+
+  /* Lift widget above bottom; keep bottom-right for thumb reach */
+  window.Tawk_API.customStyle = {
+    zIndex: 2147483000,
+    visibility: {
+      desktop: {
+        position: 'br',
+        xOffset: 18,
+        yOffset: {% if template.name == 'product' %}100{% else %}88{% endif %}
+      },
+      mobile: {
+        position: 'br',
+        xOffset: 12,
+        yOffset: {% if template.name == 'product' %}128{% else %}96{% endif %}
+      },
+      bubble: {
+        rotate: '0deg',
+        xOffset: -12,
+        yOffset: 0
+      }
+    }
+  };
+
+  document.documentElement.classList.add('lame-tawk-ready');
+
+  window.Tawk_API.onLoad = function () {
+    document.body.classList.add('lame-tawk-api-positioned');
+
+    try {
+      if (typeof window.Tawk_API.setAttributes === 'function') {
+        window.Tawk_API.setAttributes(
+          {
+            store: {{ shop.name | json }},
+            page: {{ request.path | json }}
+          },
+          function () {}
+        );
+      }
+    } catch (e) {}
+
+    /* Soft theme polish inside the widget iframe when same-origin allows it */
+    try {
+      var tries = 0;
+      var timer = window.setInterval(function () {
+        tries += 1;
+        var iframe =
+          document.querySelector("iframe[title='chat widget']") ||
+          document.querySelector("iframe[title*='Tawk']") ||
+          document.querySelector("iframe[title*='tawk']");
+
+        if (!iframe) {
+          if (tries > 40) window.clearInterval(timer);
+          return;
+        }
+
+        var doc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+        if (!doc || !doc.head) {
+          if (tries > 40) window.clearInterval(timer);
+          return;
+        }
+
+        if (doc.getElementById('lame-tawk-theme')) {
+          window.clearInterval(timer);
+          return;
+        }
+
+        var style = doc.createElement('style');
+        style.id = 'lame-tawk-theme';
+        style.textContent =
+          ':root{--lame-forest:#154230;--lame-cream:#f8f4ee;--lame-gold:#c1971f;}' +
+          'body{font-family:Jost,system-ui,sans-serif!important;}' +
+          '.tawk-button,.tawk-button-circle,.tawk-min-container button{' +
+          'box-shadow:0 10px 28px rgb(21 66 48 / 0.22)!important;' +
+          'border-radius:999px!important;}' +
+          '.tawk-button{background:linear-gradient(145deg,#1f5a40,#154230)!important;}' +
+          '.tawk-text-truncate,.tawk-chat-panel,.tawk-card{' +
+          'border-radius:16px!important;}' +
+          '.tawk-chat-panel{border:1px solid rgb(193 151 31 / 0.28)!important;}' +
+          'button.tawk-button-primary, .tawk-button-primary{' +
+          'background:#154230!important;border-color:#154230!important;}' +
+          'a{color:#154230!important;}';
+        doc.head.appendChild(style);
+        window.clearInterval(timer);
+      }, 250);
+    } catch (e) {}
+  };
+</script>
