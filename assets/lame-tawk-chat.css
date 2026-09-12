@@ -1,5 +1,5 @@
 /**
- * MyLamstone — branded Tawk launcher + host-page polish
+ * MyLamstone — Tawk.to position polish only (no custom overlay icon)
  */
 
 :root {
@@ -7,10 +7,6 @@
   --lame-tawk-lift-mobile: 5.75rem;
   --lame-tawk-side: 1.15rem;
   --lame-tawk-z: 2147483000;
-  --lame-tawk-forest: #154230;
-  --lame-tawk-forest-mid: #1f5a40;
-  --lame-tawk-cream: #f8f4ee;
-  --lame-tawk-gold: #c1971f;
 }
 
 iframe[title='chat widget'],
@@ -23,126 +19,9 @@ div.widget-visible > iframe,
   z-index: var(--lame-tawk-z) !important;
 }
 
-/* Hide default bubble when our launcher is active */
-body.lame-tawk-custom-launcher #tawkchat-minified-wrapper,
-body.lame-tawk-custom-launcher iframe[title='chat widget']:not(.lame-tawk-panel-open),
-body.lame-tawk-custom-launcher .widget-visible > iframe[style*='minified'],
-body.lame-tawk-hide-bubble #tawkchat-minified-wrapper {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: scale(0.01) !important;
-}
-
-.lame-tawk-launcher {
-  position: fixed;
-  right: var(--lame-tawk-side);
-  bottom: var(--lame-tawk-lift-desktop);
-  z-index: calc(var(--lame-tawk-z) + 2);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin: 0;
-  padding: 0.55rem 0.85rem 0.55rem 0.55rem;
-  border: 1px solid rgb(193 151 31 / 0.45);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 18% 20%, rgb(193 151 31 / 0.28), transparent 42%),
-    linear-gradient(145deg, var(--lame-tawk-forest-mid), var(--lame-tawk-forest));
-  color: #fff;
-  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-  box-shadow:
-    0 14px 34px rgb(21 66 48 / 0.28),
-    inset 0 1px 0 rgb(255 255 255 / 0.14);
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.lame-tawk-launcher:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 38px rgb(21 66 48 / 0.34);
-}
-
-.lame-tawk-launcher:focus-visible {
-  outline: 2px solid var(--lame-tawk-gold);
-  outline-offset: 3px;
-}
-
-.lame-tawk-launcher[hidden],
-.lame-tawk-launcher.is-hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px) scale(0.96);
-}
-
-.lame-tawk-launcher__icon {
-  display: grid;
-  place-items: center;
-  width: 2.55rem;
-  height: 2.55rem;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
-  border: 1px solid rgb(193 151 31 / 0.35);
-  flex-shrink: 0;
-}
-
-.lame-tawk-launcher__icon svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: none;
-  stroke: #fff;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.lame-tawk-launcher__copy {
-  display: grid;
-  gap: 0.05rem;
-  text-align: left;
-  padding-right: 0.2rem;
-}
-
-.lame-tawk-launcher__eyebrow {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.78);
-}
-
-.lame-tawk-launcher__label {
-  font-size: 0.92rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-}
-
-@media screen and (max-width: 749px) {
-  .lame-tawk-launcher {
-    right: 0.85rem;
-    bottom: var(--lame-tawk-lift-mobile);
-    padding: 0.5rem 0.75rem 0.5rem 0.5rem;
-  }
-
-  .lame-tawk-launcher__copy {
-    display: none;
-  }
-
-  .lame-tawk-launcher {
-    padding: 0.45rem;
-    gap: 0;
-  }
-
-  body.template-product .lame-tawk-launcher {
-    bottom: calc(var(--lame-tawk-lift-mobile) + 3.25rem);
-  }
-}
-
 @media screen and (min-width: 750px) {
   body:not(.lame-tawk-api-positioned) iframe[title='chat widget'],
+  body:not(.lame-tawk-api-positioned) iframe[title*='Tawk'],
   body:not(.lame-tawk-api-positioned) #tawkchat-minified-wrapper {
     margin-bottom: var(--lame-tawk-lift-desktop) !important;
     margin-right: var(--lame-tawk-side) !important;
@@ -151,12 +30,14 @@ body.lame-tawk-hide-bubble #tawkchat-minified-wrapper {
 
 @media screen and (max-width: 749px) {
   body:not(.lame-tawk-api-positioned) iframe[title='chat widget'],
+  body:not(.lame-tawk-api-positioned) iframe[title*='Tawk'],
   body:not(.lame-tawk-api-positioned) #tawkchat-minified-wrapper {
     margin-bottom: var(--lame-tawk-lift-mobile) !important;
     margin-right: 0.85rem !important;
   }
-}
 
-html.shopify-design-mode .lame-tawk-launcher {
-  opacity: 0.94;
+  body.template-product:not(.lame-tawk-api-positioned) iframe[title='chat widget'],
+  body.template-product:not(.lame-tawk-api-positioned) #tawkchat-minified-wrapper {
+    margin-bottom: calc(var(--lame-tawk-lift-mobile) + 3.25rem) !important;
+  }
 }
