@@ -15,11 +15,18 @@
   endif
   assign show_wishlist = show_wishlist | default: true
 
-  assign lame_discount_percent = 0
-  assign compare_at = variant.compare_at_price
   assign price_amount = variant.price
-  if compare_at > price_amount
-    assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+  assign compare_at = variant.compare_at_price
+  capture lame_sale_raw
+    render 'lame-product-sale-data', product: product
+  endcapture
+  assign lame_sale_parts = lame_sale_raw | split: '|'
+  assign lame_discount_percent = lame_sale_parts[0] | strip | plus: 0
+  assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+  assign lame_on_sale = lame_sale_parts[2] | strip | plus: 0
+  assign lame_sale_badge_label = lame_sale_parts[3] | strip
+  if compare_at <= price_amount and lame_effective_compare > price_amount
+    assign compare_at = lame_effective_compare
   endif
 
   assign card_label = product.vendor | strip
@@ -63,8 +70,12 @@
       {% if is_bogo %}
         <span class="lame-cat-card__badge lame-cat-card__badge--promo">Buy 1 Get 1 Free</span>
       {% endif %}
-      {% if lame_discount_percent > 0 %}
-        <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
+      {% if lame_on_sale == 1 %}
+        {% if lame_sale_badge_label != blank %}
+          <span class="lame-cat-card__badge">{{ lame_sale_badge_label | escape }}</span>
+        {% elsif lame_discount_percent > 0 %}
+          <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
+        {% endif %}
       {% endif %}
     </div>
 

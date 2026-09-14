@@ -21,8 +21,23 @@
 
   assign lame_discount_percent = 0
   assign lame_savings_amount = 0
+  if product_resource != blank
+    capture lame_sale_raw
+      render 'lame-product-sale-data', product: product_resource
+    endcapture
+    assign lame_sale_parts = lame_sale_raw | split: '|'
+    assign lame_discount_percent = lame_sale_parts[0] | strip | plus: 0
+    assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+    assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
+    if lame_on_sale_flag == 1 and compare_at_price <= price and lame_effective_compare > price
+      assign compare_at_price = lame_effective_compare
+      assign show_compare_price = true
+    endif
+  endif
   if show_compare_price and compare_at_price > 0
-    assign lame_discount_percent = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+    if lame_discount_percent == 0
+      assign lame_discount_percent = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+    endif
     assign lame_savings_amount = compare_at_price | minus: price
   endif
 

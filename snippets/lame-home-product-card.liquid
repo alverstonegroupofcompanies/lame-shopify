@@ -9,11 +9,20 @@
   assign selected_variant = product.selected_or_first_available_variant
   assign compare_at = selected_variant.compare_at_price
   assign price = selected_variant.price
+  capture lame_sale_raw
+    render 'lame-product-sale-data', product: product
+  endcapture
+  assign lame_sale_parts = lame_sale_raw | split: '|'
+  assign discount_percent = lame_sale_parts[0] | strip | plus: 0
+  assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+  assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
+  assign lame_sale_badge_label = lame_sale_parts[3] | strip
   assign on_sale = false
-  assign discount_percent = 0
-  if compare_at > price
+  if lame_on_sale_flag == 1
     assign on_sale = true
-    assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
+  endif
+  if compare_at <= price and lame_effective_compare > price
+    assign compare_at = lame_effective_compare
   endif
 
   assign show_badge = false
@@ -41,7 +50,9 @@
   {% if is_arrival_card %}
     <div class="lame-home-product-card__media">
       {%- if on_sale -%}
-        <span class="lame-home-product-card__badge">{{ discount_percent }}% OFF</span>
+        <span class="lame-home-product-card__badge">
+          {%- if lame_sale_badge_label != blank -%}{{ lame_sale_badge_label | escape }}{%- else -%}{{ discount_percent }}% OFF{%- endif -%}
+        </span>
       {%- else -%}
         <span class="lame-home-product-card__badge lame-home-product-card__badge--new">NEW</span>
       {%- endif -%}

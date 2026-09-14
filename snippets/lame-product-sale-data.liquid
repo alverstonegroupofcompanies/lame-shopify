@@ -1,0 +1,79 @@
+{%- doc -%}
+  Resolves sale badge + display pricing for product cards.
+  Outputs pipe-delimited: percent|effective_compare_cents|on_sale|badge_label
+  on_sale is 1 or 0. badge_label may be empty (use percent for "X% OFF").
+
+  Compare-at price (variant) is used first. Otherwise:
+  - custom.sale_badge_percent (integer metafield, storefront access)
+  - custom.sale_badge_label (text metafield, e.g. "50% OFF" or "DEAL")
+  - Product tags: sale-50, discount-50, 50-off (number = percent)
+
+  Shopify automatic "amount off product" discounts do not change Liquid price;
+  set compare-at OR the metafield/tag above so badges match the promotion.
+{%- enddoc -%}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign price_amount = variant.price
+  assign compare_at = variant.compare_at_price
+  assign lame_discount_percent = 0
+  assign effective_compare = 0
+  assign lame_on_sale = 0
+  assign badge_label = ''
+
+  if compare_at > price_amount and compare_at > 0
+    assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+    assign effective_compare = compare_at
+    assign lame_on_sale = 1
+  endif
+
+  unless lame_on_sale == 1
+    if product.metafields.custom.sale_badge_label.value != blank
+      assign badge_label = product.metafields.custom.sale_badge_label.value | strip
+      assign lame_on_sale = 1
+    endif
+
+    assign meta_percent = product.metafields.custom.sale_badge_percent.value
+    if meta_percent == blank
+      assign meta_percent = product.metafields.custom.discount_badge_percent.value
+    endif
+    if meta_percent != blank
+      assign lame_discount_percent = meta_percent | times: 1
+      if lame_discount_percent > 0
+        assign lame_on_sale = 1
+      endif
+    endif
+  endunless
+
+  unless lame_on_sale == 1
+    for tag in product.tags
+      assign tag_down = tag | downcase | strip
+      assign tag_parts = tag_down | split: '-'
+      if tag_down contains 'sale-' or tag_down contains 'discount-'
+        assign maybe_pct = tag_parts.last | times: 1
+        if maybe_pct > 0 and maybe_pct <= 95
+          assign lame_discount_percent = maybe_pct
+          assign lame_on_sale = 1
+          break
+        endif
+      elsif tag_down contains '-off' or tag_down contains '% off'
+        assign maybe_pct = tag_parts.first | times: 1
+        if maybe_pct == 0
+          assign maybe_pct = tag_down | remove: 'off' | remove: '-' | remove: '%' | strip | times: 1
+        endif
+        if maybe_pct > 0 and maybe_pct <= 95
+          assign lame_discount_percent = maybe_pct
+          assign lame_on_sale = 1
+          break
+        endif
+      endif
+    endfor
+  endunless
+
+  if lame_on_sale == 1 and effective_compare == 0 and lame_discount_percent > 0 and price_amount > 0
+    assign divisor = 100 | minus: lame_discount_percent
+    if divisor > 0
+      assign effective_compare = price_amount | times: 100.0 | divided_by: divisor | round
+    endif
+  endif
+-%}
+{{- lame_discount_percent -}}|{{- effective_compare -}}|{{- lame_on_sale -}}|{{- badge_label | escape -}}

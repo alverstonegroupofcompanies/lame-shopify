@@ -2,10 +2,20 @@
   assign selected_variant = product.selected_or_first_available_variant
   assign compare_at = selected_variant.compare_at_price
   assign price_amount = selected_variant.price
+  capture lame_sale_raw
+    render 'lame-product-sale-data', product: product
+  endcapture
+  assign lame_sale_parts = lame_sale_raw | split: '|'
+  assign discount_percent = lame_sale_parts[0] | strip | plus: 0
+  assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+  assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
+  assign lame_sale_badge_label = lame_sale_parts[3] | strip
   assign on_sale = false
-  if compare_at > price_amount
+  if lame_on_sale_flag == 1
     assign on_sale = true
-    assign discount_percent = compare_at | minus: price_amount | times: 100 | divided_by: compare_at
+  endif
+  if compare_at <= price_amount and lame_effective_compare > price_amount
+    assign compare_at = lame_effective_compare
   endif
 
   assign add_label = add_to_cart_label | default: 'Add to Cart'
@@ -35,7 +45,9 @@
       {% if offer_badge_text != blank %}
         <span class="lame-carousel-card__offer">{{ offer_badge_text }}</span>
       {% elsif on_sale %}
-        <span class="lame-carousel-card__offer">{{ discount_percent }}% off</span>
+        <span class="lame-carousel-card__offer">
+          {%- if lame_sale_badge_label != blank -%}{{ lame_sale_badge_label | escape }}{%- else -%}{{ discount_percent }}% off{%- endif -%}
+        </span>
       {% endif %}
     {% endif %}
   </div>

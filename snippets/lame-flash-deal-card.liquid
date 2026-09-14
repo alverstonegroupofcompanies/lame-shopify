@@ -17,11 +17,37 @@
   assign card_badge = ''
   assign savings_amount = 0
 
+  capture lame_sale_raw
+    render 'lame-product-sale-data', product: product
+  endcapture
+  assign lame_sale_parts = lame_sale_raw | split: '|'
+  assign discount_percent = lame_sale_parts[0] | strip | plus: 0
+  assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+  assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
+  assign lame_sale_badge_label = lame_sale_parts[3] | strip
+
   if compare_at > price
     assign on_sale = true
-    assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
-    assign card_badge = discount_percent | append: '% OFF'
+    if discount_percent == 0
+      assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
+    endif
+    if lame_sale_badge_label != blank
+      assign card_badge = lame_sale_badge_label
+    else
+      assign card_badge = discount_percent | append: '% OFF'
+    endif
     assign savings_amount = compare_at | minus: price
+  elsif lame_on_sale_flag == 1
+    assign on_sale = true
+    if lame_sale_badge_label != blank
+      assign card_badge = lame_sale_badge_label
+    elsif discount_percent > 0
+      assign card_badge = discount_percent | append: '% OFF'
+    endif
+    if lame_effective_compare > price
+      assign compare_at = lame_effective_compare
+      assign savings_amount = compare_at | minus: price
+    endif
   elsif badge_label != blank
     assign card_badge = badge_label
   endif
