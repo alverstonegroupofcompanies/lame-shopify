@@ -22,9 +22,16 @@ body:has(#header-component.header--cosmetic-luxury .header__row--utility) #heade
   display: none !important;
 }
 
-/* Flush header stack â€” no gap or extra strip between nav, utility, and page content */
+/* Flush header stack — no gap or extra strip between nav, utility, and page content */
+#header-group {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
 #header-group > .shopify-section {
   margin-block: 0;
+  padding-block: 0;
 }
 
 #header-group > .shopify-section + .shopify-section {
@@ -33,6 +40,7 @@ body:has(#header-component.header--cosmetic-luxury .header__row--utility) #heade
 
 #header-component.header--cosmetic-luxury > .header__row--top {
   margin-block-end: 0;
+  border-bottom: none;
 }
 
 #header-component.header--cosmetic-luxury > .header__row--utility {
@@ -45,7 +53,91 @@ body:has(#header-component.header--cosmetic-luxury .header__row--utility) #heade
 }
 
 body:has(#header-component.header--cosmetic-luxury) main.content-for-layout > .shopify-section:first-child {
-  margin-block-start: 0;
+  margin-block-start: 0 !important;
+  padding-block-start: 0 !important;
+}
+
+/*
+ * Homepage: kill the 5–10px seam under the sticky navbar.
+ * Sticky header uses #header-group { display: contents } + top: -1px, which
+ * can leave a cream/white body strip between the green bar and the hero.
+ */
+body.template-index:has(#header-component.header--cosmetic-luxury) {
+  gap: 0 !important;
+}
+
+body.template-index:has(#header-component.header--cosmetic-luxury) .header-section,
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  .header-section:has(> #header-component[sticky='always']),
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  .header-section:has(> #header-component[sticky='scroll-up']) {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  top: 0 !important;
+  background: #154230 !important;
+}
+
+body.template-index:has(#header-component.header--cosmetic-luxury) #header-component.header--cosmetic-luxury {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: #154230 !important;
+  display: block;
+}
+
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  #header-component.header--cosmetic-luxury
+  > .header__row--top,
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  #header-component.header--cosmetic-luxury
+  > .header__row--top:not(.divider--page-width),
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  #header-component.header--cosmetic-luxury
+  .header__row--top.divider--page-width
+  .header__columns {
+  margin: 0 !important;
+  padding-block: 0 !important;
+  border: none !important;
+  border-bottom: 0 !important;
+  border-block-end: 0 !important;
+  box-shadow: none !important;
+  background: #154230 !important;
+}
+
+body.template-index:has(#header-component.header--cosmetic-luxury) > main#MainContent,
+body.template-index:has(#header-component.header--cosmetic-luxury) main.content-for-layout {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+}
+
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  main.content-for-layout
+  > .shopify-section:has(.lame-home-hero):first-child,
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  main.content-for-layout
+  > .shopify-section.hero-wrapper:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+  /* Pull up to close any remaining sub-pixel / sticky seam */
+  margin-top: -10px !important;
+  position: relative;
+  z-index: 0;
+}
+
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  main.content-for-layout
+  > .shopify-section:has(.lame-home-hero):first-child
+  .lame-home-hero,
+body.template-index:has(#header-component.header--cosmetic-luxury)
+  main.content-for-layout
+  > .shopify-section:has(.lame-home-hero):first-child
+  .section-background {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -437,9 +529,9 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 #header-component.header--cosmetic-luxury .header__row--top {
   position: relative;
   background: var(--lame-nav-bg);
-  border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  border-bottom: none;
   border-radius: 0;
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset;
+  box-shadow: none;
   margin: 0;
   width: 100%;
 }
@@ -494,7 +586,9 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
     gap: var(--lame-header-left-gap);
     min-width: 0;
   }
+}
 
+@media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--left :is(header-menu, .header-menu) {
     display: flex !important;
     align-items: center;
@@ -561,9 +655,8 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 
 #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top {
   background: var(--lame-nav-bg);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.06) inset,
-    0 8px 24px rgb(var(--lame-nav-forest-dark) / 0.28);
+  border-bottom: none;
+  box-shadow: none;
 }
 
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
@@ -1066,7 +1159,8 @@ body:has(#header-component.header--cosmetic-luxury) {
     border-radius: 0;
     margin-top: 0;
     width: 100%;
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset;
+    box-shadow: none;
+    border-bottom: none;
   }
 
   body:has(#header-component.header--cosmetic-luxury) {
@@ -3484,18 +3578,14 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
 #header-component.header--cosmetic-luxury[data-lame-scroll='top'] .header__row--top {
   background: var(--lame-nav-bg-scroll);
-  border-bottom-color: rgb(255 255 255 / 0.12);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.06) inset,
-    0 10px 26px rgb(var(--lame-nav-forest-dark) / 0.22);
+  border-bottom: none;
+  box-shadow: none;
 }
 
 #header-component.header--cosmetic-luxury[data-lame-scroll='away'] .header__row--top {
   background: var(--lame-nav-bg-scroll);
-  border-bottom-color: rgb(255 255 255 / 0.1);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.06) inset,
-    0 12px 28px rgb(var(--lame-nav-forest-dark) / 0.26);
+  border-bottom: none;
+  box-shadow: none;
 }
 
 #header-component.header--cosmetic-luxury[data-lame-scroll='away'] .header__row--top::before {
@@ -3749,7 +3839,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   display: none !important;
 }
 
-@media screen and (min-width: 750px) {
+@media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__row--top .header__columns {
     display: grid !important;
     grid-template-columns: auto minmax(12rem, 1fr) auto;
@@ -3910,25 +4000,121 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 }
 
 @media screen and (max-width: 989px) {
-  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__row--top .header__columns {
+  #header-component.header--cosmetic-luxury {
+    --header-luxury-min-height: 4.75rem;
+    --header-luxury-logo-max-w: min(16rem, 48vw);
+    --header-luxury-logo-max-h: clamp(2.75rem, 7vw, 3.75rem);
+    --header-tablet-icon-size: 2.35rem;
+  }
+
+  body:has(#header-component.header--cosmetic-luxury) {
+    --header-height: 4.75rem;
+  }
+
+  /* Single compact row: hamburger + logo | icons — no desktop nav wrap */
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__row--top .header__columns,
+  #header-component.header--cosmetic-luxury .header__row--top .header__columns {
+    position: relative;
     display: grid !important;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas: 'left center right';
-    gap: 0.5rem;
-    padding-inline: 15px;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: 'left right' !important;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: var(--header-luxury-min-height);
+    max-height: none;
+    padding-inline: max(12px, env(safe-area-inset-left, 0px)) max(12px, env(safe-area-inset-right, 0px));
+    overflow: visible;
   }
 
-  #header-component.header--cosmetic-luxury .header__column--left :is(header-menu, .header-menu) {
+  #header-component.header--cosmetic-luxury .header__column--left {
+    grid-area: left !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.55rem;
+    min-width: 0;
+    flex: 1 1 auto;
+    max-width: 100%;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Hide desktop text nav on tablet — stays in drawer only */
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--left :is(header-menu, .header-menu),
+  #header-component.header--cosmetic-luxury .header__column--left :is(header-menu, .header-menu),
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-header-primary-nav,
+  #header-component.header--cosmetic-luxury .lame-header-primary-nav,
+  #header-component.header--cosmetic-luxury[data-menu-style='menu'] :is(header-menu, .header-menu),
+  #header-component.header--cosmetic-luxury .header__column--center :is(header-menu, .header-menu) {
     display: none !important;
   }
 
-  #header-component.header--cosmetic-luxury .header__column--center {
+  #header-component.header--cosmetic-luxury .header__column--center,
+  #header-component.header--cosmetic-luxury[data-menu-row='top'] .header__column--center {
     display: none !important;
+  }
+
+  /* Hide secondary mobile nav strip on tablet only (phones keep it; links also in drawer) */
+  /* (nav strip hide applied in 768–989 block below) */
+
+  #header-component.header--cosmetic-luxury .header__drawer,
+  #header-component.header--cosmetic-luxury[data-menu-style='drawer'] .header__drawer,
+  #header-component.header--cosmetic-luxury[data-menu-style='menu'] .header__drawer {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    z-index: 5;
+  }
+
+  /* Keep logo in flow beside hamburger — never absolute */
+  #header-component.header--cosmetic-luxury .header-logo {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: min(var(--header-luxury-logo-max-w), calc(100vw - 11.5rem));
+    margin: 0;
+    pointer-events: auto;
+  }
+
+  #header-component.header--cosmetic-luxury .header-logo a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+    pointer-events: auto;
+  }
+
+  #header-component.header--cosmetic-luxury .header-logo__image {
+    width: auto !important;
+    max-width: 100%;
+    max-height: var(--header-luxury-logo-max-h);
+    height: var(--header-luxury-logo-max-h) !important;
+    object-fit: contain;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right {
+    grid-area: right !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    gap: 0.35rem !important;
+    min-width: 0;
+    flex-wrap: nowrap !important;
   }
 
   #header-component.header--cosmetic-luxury .header__column--right .search-action {
-    display: flex !important;
+    display: inline-flex !important;
     width: auto;
+    order: -1;
+    flex: 0 0 auto;
   }
 
   #header-component.header--cosmetic-luxury .header__column--left .search-action,
@@ -3944,55 +4130,86 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    width: auto;
-    height: auto;
-    min-width: unset;
-    min-height: unset;
+    width: var(--header-tablet-icon-size);
+    height: var(--header-tablet-icon-size);
+    min-width: var(--header-tablet-icon-size);
+    min-height: var(--header-tablet-icon-size);
     padding: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
+    border: 1.5px solid rgb(255 255 255 / 0.42);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.08);
     color: rgb(var(--lame-nav-text));
+  }
+
+  #header-component.header--cosmetic-luxury header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
   }
 
   #header-component.header--cosmetic-luxury .header__column--right header-actions {
     border-inline-start: none;
     padding-inline-start: 0;
   }
-}
 
-/* Medium tablets — optically center logo; phones stay left beside hamburger */
-@media screen and (min-width: 768px) and (max-width: 989px) {
-  #header-component.header--cosmetic-luxury .header__row--top .header__columns {
-    position: relative;
+  #header-component.header--cosmetic-luxury .header-actions__action,
+  #header-component.header--cosmetic-luxury .header__icon--menu,
+  #header-component.header--cosmetic-luxury .lame-account.header-actions__action,
+  #header-component.header--cosmetic-luxury .header-actions__cart,
+  #header-component.header--cosmetic-luxury .search-action .header-actions__action {
+    box-sizing: border-box;
+    width: var(--header-tablet-icon-size);
+    height: var(--header-tablet-icon-size);
+    min-width: var(--header-tablet-icon-size);
+    min-height: var(--header-tablet-icon-size);
+    padding: 0;
+    border: 1.5px solid rgb(255 255 255 / 0.42);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
-  #header-component.header--cosmetic-luxury .header__column--left {
-    display: flex !important;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.5rem;
-    min-width: 0;
+  #header-component.header--cosmetic-luxury .lame-account__trigger,
+  #header-component.header--cosmetic-luxury .lame-account .account-button {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #header-component.header--cosmetic-luxury .header__row--top {
+    min-height: var(--header-luxury-min-height);
+  }
+}
+
+/* iPad / tablet portrait: never show a second nav row under the icons */
+@media screen and (min-width: 768px) and (max-width: 989px) {
+  #header-component.header--cosmetic-luxury > .header__navigation-bar-row,
+  #header-component.header--cosmetic-luxury .header__navigation-bar-row {
+    display: none !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-menu-style='menu'] :is(.header-menu, header-menu, .dropdown-localization) {
+    display: none !important;
+  }
+}
+
+/* Phones: tighter logo budget beside hamburger + action cluster */
+@media screen and (max-width: 767px) {
+  #header-component.header--cosmetic-luxury {
+    --header-luxury-logo-max-w: min(14.5rem, 58vw);
+    --header-luxury-logo-max-h: clamp(3.4rem, 13vw, 4.15rem);
   }
 
   #header-component.header--cosmetic-luxury .header-logo {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-    justify-content: center;
-    flex: none;
-    max-width: min(18rem, 46vw);
-    margin: 0;
-    pointer-events: auto;
-  }
-
-  #header-component.header--cosmetic-luxury .header-logo a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
+    max-width: min(var(--header-luxury-logo-max-w), calc(100vw - 10rem));
   }
 }
 
@@ -4000,7 +4217,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
    REFERENCE NAVBAR â€” gold cart badge, tight icon cluster
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-@media screen and (min-width: 750px) {
+@media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury .header__column--left {
     flex: 0 0 auto;
   }
@@ -4034,8 +4251,8 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   }
 }
 
-/* Always show search icon in the header action cluster (desktop / tablet) */
-@media screen and (min-width: 750px) {
+/* Always show search icon in the header action cluster (desktop) */
+@media screen and (min-width: 990px) {
   #header-component.header--cosmetic-luxury .header__column--right .search-action {
     display: inline-flex !important;
     order: -1;

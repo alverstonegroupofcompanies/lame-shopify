@@ -24,8 +24,12 @@
   assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
   assign lame_on_sale = lame_sale_parts[2] | strip | plus: 0
   assign lame_sale_badge_label = lame_sale_parts[3] | strip
-  if compare_at <= price_amount and lame_effective_compare > price_amount
+  assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
+  if lame_on_sale == 1 and lame_effective_compare > 0
     assign compare_at = lame_effective_compare
+  endif
+  if lame_on_sale == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
+    assign price_amount = lame_sale_price
   endif
 
   assign tags_down = product.tags | join: ',' | downcase

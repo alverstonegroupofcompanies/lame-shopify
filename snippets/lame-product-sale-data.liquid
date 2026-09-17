@@ -1,15 +1,12 @@
 {%- doc -%}
   Resolves sale badge + display pricing for product cards.
-  Outputs pipe-delimited: percent|effective_compare_cents|on_sale|badge_label
-  on_sale is 1 or 0. badge_label may be empty (use percent for "X% OFF").
+  Outputs pipe-delimited:
+  percent|compare_cents|on_sale|badge_label|sale_price_cents
+  on_sale is 1 or 0. badge_label may be empty.
 
-  Compare-at price (variant) is used first. Otherwise:
-  - custom.sale_badge_percent (integer metafield, storefront access)
-  - custom.sale_badge_label (text metafield, e.g. "50% OFF" or "DEAL")
-  - Product tags: sale-50, discount-50, 50-off (number = percent)
-
-  Shopify automatic "amount off product" discounts do not change Liquid price;
-  set compare-at OR the metafield/tag above so badges match the promotion.
+  1) Real compare-at: compare = compare_at, sale_price = variant.price
+  2) Else metafield/tag percent: compare = variant.price (previous),
+     sale_price = price reduced by that % (for automatic discounts)
 {%- enddoc -%}
 {%- liquid
   assign variant = product.selected_or_first_available_variant
@@ -17,12 +14,15 @@
   assign compare_at = variant.compare_at_price
   assign lame_discount_percent = 0
   assign effective_compare = 0
+  assign sale_price = price_amount
   assign lame_on_sale = 0
   assign badge_label = ''
+  assign from_tag_or_meta = false
 
   if compare_at > price_amount and compare_at > 0
     assign lame_discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
     assign effective_compare = compare_at
+    assign sale_price = price_amount
     assign lame_on_sale = 1
   endif
 
@@ -30,6 +30,7 @@
     if product.metafields.custom.sale_badge_label.value != blank
       assign badge_label = product.metafields.custom.sale_badge_label.value | strip
       assign lame_on_sale = 1
+      assign from_tag_or_meta = true
     endif
 
     assign meta_percent = product.metafields.custom.sale_badge_percent.value
@@ -40,6 +41,7 @@
       assign lame_discount_percent = meta_percent | times: 1
       if lame_discount_percent > 0
         assign lame_on_sale = 1
+        assign from_tag_or_meta = true
       endif
     endif
   endunless
@@ -53,6 +55,7 @@
         if maybe_pct > 0 and maybe_pct <= 95
           assign lame_discount_percent = maybe_pct
           assign lame_on_sale = 1
+          assign from_tag_or_meta = true
           break
         endif
       elsif tag_down contains '-off' or tag_down contains '% off'
@@ -63,17 +66,25 @@
         if maybe_pct > 0 and maybe_pct <= 95
           assign lame_discount_percent = maybe_pct
           assign lame_on_sale = 1
+          assign from_tag_or_meta = true
           break
         endif
       endif
     endfor
   endunless
 
-  if lame_on_sale == 1 and effective_compare == 0 and lame_discount_percent > 0 and price_amount > 0
-    assign divisor = 100 | minus: lame_discount_percent
-    if divisor > 0
-      assign effective_compare = price_amount | times: 100.0 | divided_by: divisor | round
+  if from_tag_or_meta and lame_discount_percent > 0 and price_amount > 0
+    assign effective_compare = price_amount
+    assign keep_pct = 100 | minus: lame_discount_percent
+    if keep_pct > 0
+      assign sale_price = price_amount | times: keep_pct | divided_by: 100.0 | round
+    endif
+    if sale_price < 1
+      assign sale_price = 1
+    endif
+    if sale_price >= effective_compare
+      assign sale_price = effective_compare | minus: 1
     endif
   endif
 -%}
-{{- lame_discount_percent -}}|{{- effective_compare -}}|{{- lame_on_sale -}}|{{- badge_label | escape -}}
+{{- lame_discount_percent -}}|{{- effective_compare -}}|{{- lame_on_sale -}}|{{- badge_label | escape -}}|{{- sale_price -}}

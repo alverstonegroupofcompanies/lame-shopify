@@ -1,6 +1,7 @@
 {% doc %}
   Shop by category — collection cards.
-  Desktop/tablet: all cards in one scalable row.
+  Desktop (1200px+): all cards in one scalable row.
+  Tablet (750–1199): full-width scroll cards matching discount tiles.
   Mobile: 2-column rounded card grid.
 {% enddoc %}
 {% liquid
@@ -47,12 +48,72 @@
     }
   }
 
-  /* Desktop / tablet: one grid row */
+  /* Desktop: one grid row */
   .ai-category-carousel__track-{{ ai_gen_id }} {
     display: grid;
     grid-template-columns: repeat(var(--ai-category-cols), minmax(0, 1fr));
     gap: var(--ai-category-gap);
     width: 100%;
+  }
+
+  /* Tablet: match top discount tile card size (full-bleed, contain) */
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-gap: 0.75rem;
+      width: 100%;
+      padding-inline: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .ai-category-carousel__container-{{ ai_gen_id }} {
+      width: 100%;
+      max-width: none;
+    }
+
+    .ai-category-carousel__track-{{ ai_gen_id }} {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--ai-category-gap);
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .ai-category-carousel__track-{{ ai_gen_id }}::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ai-category-carousel__card-{{ ai_gen_id }} {
+      flex: 0 0 100%;
+      width: 100%;
+      max-width: 100%;
+      scroll-snap-align: start;
+      border-radius: 12px;
+    }
+
+    .ai-category-carousel__card-{{ ai_gen_id }}:hover {
+      transform: none;
+    }
+
+    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+      aspect-ratio: unset;
+      width: 100%;
+      height: auto;
+      background: transparent;
+    }
+
+    .ai-category-carousel__image-{{ ai_gen_id }} {
+      width: 100%;
+      height: auto !important;
+      max-height: none;
+      object-fit: contain;
+      object-position: center;
+    }
   }
 
   /* Mobile: match home offer banner card size */

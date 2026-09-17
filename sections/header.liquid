@@ -449,7 +449,17 @@
   }
 
   @media screen and (min-width: 750px) {
-    #header-component[data-menu-style='menu'] :is(.header-menu, .dropdown-localization) {
+    #header-component[data-menu-style='menu']:not(.header--cosmetic-luxury) :is(.header-menu, .dropdown-localization) {
+      display: flex;
+    }
+
+    #header-component.header--cosmetic-luxury[data-menu-style='menu'] :is(.header-menu, .dropdown-localization) {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    #header-component.header--cosmetic-luxury[data-menu-style='menu'] :is(.header-menu, .dropdown-localization) {
       display: flex;
     }
   }
@@ -566,10 +576,22 @@
   .header-section:has(> #header-component[sticky='always']),
   .header-section:has(> #header-component[sticky='scroll-up'][data-sticky-state='active']) {
     position: sticky;
-
-    /* Use -1 instead of 0 so intersection observer can track sticky state */
+    /* Use -1 so intersection observer can track sticky state (non-cosmetic headers) */
     top: -1px;
     z-index: var(--layer-sticky);
+  }
+
+  /* Cosmetic navbar: sit flush on the hero — no -1px seam */
+  .header-section:has(> #header-component.header--cosmetic-luxury[sticky='always']),
+  .header-section:has(> #header-component.header--cosmetic-luxury[sticky='scroll-up'][data-sticky-state='active']) {
+    top: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .header__row--top:not(.divider--page-width),
+  #header-component.header--cosmetic-luxury .header__row--top.divider--page-width .header__columns,
+  #header-component.header--cosmetic-luxury .header__row--bottom {
+    border-bottom: none !important;
+    border-block-end: none !important;
   }
 
   .header[data-sticky-state] {

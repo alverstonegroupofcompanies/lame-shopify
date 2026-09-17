@@ -17,12 +17,16 @@
   assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
   assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
   assign lame_sale_badge_label = lame_sale_parts[3] | strip
+  assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
   assign on_sale = false
   if lame_on_sale_flag == 1
     assign on_sale = true
   endif
-  if compare_at <= price and lame_effective_compare > price
+  if on_sale and lame_effective_compare > 0
     assign compare_at = lame_effective_compare
+  endif
+  if on_sale and lame_sale_price > 0 and lame_sale_price < compare_at
+    assign price = lame_sale_price
   endif
 
   assign show_badge = false

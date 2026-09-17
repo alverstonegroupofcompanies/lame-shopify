@@ -25,6 +25,7 @@
   assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
   assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
   assign lame_sale_badge_label = lame_sale_parts[3] | strip
+  assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
 
   if compare_at > price
     assign on_sale = true
@@ -44,10 +45,13 @@
     elsif discount_percent > 0
       assign card_badge = discount_percent | append: '% OFF'
     endif
-    if lame_effective_compare > price
+    if lame_effective_compare > 0
       assign compare_at = lame_effective_compare
-      assign savings_amount = compare_at | minus: price
     endif
+    if lame_sale_price > 0 and lame_sale_price < compare_at
+      assign price = lame_sale_price
+    endif
+    assign savings_amount = compare_at | minus: price
   elsif badge_label != blank
     assign card_badge = badge_label
   endif
