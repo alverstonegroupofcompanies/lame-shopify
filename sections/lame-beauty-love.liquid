@@ -15,7 +15,11 @@
   <div class="lame-beauty-love__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {%- if section.settings.heading != blank -%}
       <header class="lame-beauty-love__header">
-        <h2 class="lame-beauty-love__heading">{{ section.settings.heading | escape }}</h2>
+        {% render 'lame-section-heading',
+          title: section.settings.heading,
+          alignment: 'left',
+          size: 'large'
+        %}
       </header>
     {%- endif -%}
 
@@ -135,7 +139,6 @@
     --lame-bl-radius: 10px;
     --lame-bl-ink: #1a1a1a;
     --lame-bl-muted: #5c5c5c;
-    --lame-bl-rule: #d9d9d9;
   }
 
   .lame-beauty-love__wrap {
@@ -151,20 +154,12 @@
   }
 
   .lame-beauty-love__header {
-    margin-bottom: clamp(1rem, 2vw, 1.35rem);
-    padding-bottom: 0.7rem;
-    border-bottom: 1px solid var(--lame-bl-rule);
+    text-align: left;
+    margin-bottom: clamp(1rem, 2.2vw, 1.5rem);
   }
 
-  .lame-beauty-love__heading {
+  .lame-beauty-love__header .lame-section-heading {
     margin: 0;
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: clamp(1.15rem, 2.2vw, 1.45rem);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-    color: var(--lame-bl-ink);
-    text-transform: none;
   }
 
   .lame-beauty-love__grid {

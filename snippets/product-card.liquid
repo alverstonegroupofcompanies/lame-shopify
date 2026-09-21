@@ -144,11 +144,20 @@
       {% if onboarding %}
         {{ children }}
       {% else %}
+      {% liquid
+        assign lame_card_show_wishlist = false
+        if settings.lame_enable_wishlist
+          if section == blank or section.settings.show_wishlist != false
+            assign lame_card_show_wishlist = true
+          endif
+        endif
+      %}
         {% render 'lame-flash-deal-card',
           product: product,
           add_to_cart_label: 'Add to cart',
           sold_out_label: 'Sold out',
-          save_label_prefix: 'You Save'
+          save_label_prefix: 'You Save',
+          show_wishlist: lame_card_show_wishlist
         %}
       {% endif %}
     {% else %}

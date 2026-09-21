@@ -15,429 +15,227 @@
   endif
 
   assign products_to_show = section.settings.products_to_show
+  assign per_brand_limit = section.settings.per_brand_limit | default: 1
+  assign products_shown = 0
+  assign seen_ids = '||'
+  assign seen_brands = '||'
+  assign skip_ids = '||'
+
+  comment
+    Avoid repeating products already shown in Best Selling (first items of All / selected skip collection).
+  endcomment
+  assign skip_collection = collections[section.settings.skip_collection]
+  if skip_collection == blank
+    assign skip_collection = collections.all
+  endif
+  if skip_collection != blank
+    for skip_product in skip_collection.products limit: section.settings.skip_bestseller_count
+      assign skip_ids = skip_ids | append: skip_product.id | append: '||'
+    endfor
+  endif
 %}
 
+{% capture arrival_products_markup %}
+  {% paginate new_collection.products by 250 %}
+    {% assign newest_products = new_collection.products | sort: 'created_at' | reverse %}
+
+    {% comment %}
+      Pass 1: newest product(s) per brand so the row mixes brands
+      instead of many items from one vendor that were added together.
+    {% endcomment %}
+    {% for product in newest_products %}
+      {% if products_shown >= products_to_show %}
+        {% break %}
+      {% endif %}
+
+      {% assign id_token = '||' | append: product.id | append: '||' %}
+      {% if seen_ids contains id_token %}
+        {% continue %}
+      {% endif %}
+      {% if skip_ids contains id_token %}
+        {% continue %}
+      {% endif %}
+
+      {% capture brand_raw %}
+        {% render 'lame-product-brand-name', product: product %}
+      {% endcapture %}
+      {% assign brand_key = brand_raw | strip | downcase | handleize %}
+      {% if brand_key == blank %}
+        {% assign brand_key = 'unknown' %}
+      {% endif %}
+
+      {% assign brand_token = '||' | append: brand_key | append: '||' %}
+      {% assign brand_parts = seen_brands | split: brand_token %}
+      {% assign brand_count = brand_parts.size | minus: 1 %}
+      {% if brand_count >= per_brand_limit %}
+        {% continue %}
+      {% endif %}
+
+      {% assign seen_brands = seen_brands | append: brand_key | append: '||' %}
+      {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+
+      {% render 'lame-flash-deal-product',
+        product: product,
+        product_index: products_shown,
+        products_limit: products_to_show,
+        badge_label: section.settings.badge_label,
+        add_to_cart_label: section.settings.add_to_cart_label,
+        sold_out_label: section.settings.sold_out_label,
+        review_count_fallback: section.settings.review_count_fallback,
+        save_label_prefix: section.settings.save_label_prefix,
+        reveal_delay: products_shown,
+        modulo: 2
+      %}
+      {% assign products_shown = products_shown | plus: 1 %}
+    {% endfor %}
+
+    {% comment %}
+      Pass 2: if fewer brands than slots, fill with next unique newest products
+      (still no duplicate product ids, and still skip Best Selling items).
+    {% endcomment %}
+    {% if products_shown < products_to_show %}
+      {% for product in newest_products %}
+        {% if products_shown >= products_to_show %}
+          {% break %}
+        {% endif %}
+
+        {% assign id_token = '||' | append: product.id | append: '||' %}
+        {% if seen_ids contains id_token %}
+          {% continue %}
+        {% endif %}
+        {% if skip_ids contains id_token %}
+          {% continue %}
+        {% endif %}
+        {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+
+        {% render 'lame-flash-deal-product',
+          product: product,
+          product_index: products_shown,
+          products_limit: products_to_show,
+          badge_label: section.settings.badge_label,
+          add_to_cart_label: section.settings.add_to_cart_label,
+          sold_out_label: section.settings.sold_out_label,
+          review_count_fallback: section.settings.review_count_fallback,
+          save_label_prefix: section.settings.save_label_prefix,
+          reveal_delay: products_shown,
+          modulo: 2
+        %}
+        {% assign products_shown = products_shown | plus: 1 %}
+      {% endfor %}
+    {% endif %}
+  {% endpaginate %}
+{% endcapture %}
+
+{{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-new-products"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-new-products"
+  data-flash-deal-carousel
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_to_show }};"
   {{ section.shopify_attributes }}
 >
-  <div class="lame-new-products__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    <header class="lame-section-heading-row" data-lame-reveal>
-      {% render 'lame-section-heading', title: section.settings.heading, alignment: 'center' %}
-      {% if section.settings.view_all_label != blank %}
-        <a class="lame-new-products__view-all" href="{{ view_all_url }}">{{ section.settings.view_all_label }}</a>
-      {% endif %}
+  <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    <header class="lame-flash-deal__header lame-new-products__header" data-lame-reveal>
+      <div class="lame-new-products__header-row">
+        {% render 'lame-section-heading',
+          title: section.settings.heading,
+          alignment: 'left',
+          size: 'large'
+        %}
+        {% if section.settings.view_all_label != blank %}
+          <a class="lame-new-products__view-all" href="{{ view_all_url }}">{{ section.settings.view_all_label }}</a>
+        {% endif %}
+      </div>
     </header>
 
-    <ul class="lame-new-products__grid" role="list">
-      {% comment %}
-        Load a large product pool, then sort by created_at (newest first)
-        so New Arrivals always shows recently added products—not collection manual order.
-      {% endcomment %}
-      {% paginate new_collection.products by 250 %}
-        {% assign newest_products = new_collection.products | sort: 'created_at' | reverse %}
-        {% for product in newest_products limit: products_to_show %}
-          <li class="lame-new-products__item" data-lame-reveal data-lame-delay="{{ forloop.index0 | modulo: 5 }}">
-            {% render 'lame-home-product-card', product: product, card_style: 'arrival', show_add_to_cart: true, add_to_cart_label: section.settings.add_to_cart_label %}
-          </li>
-        {% else %}
-          {% for i in (1..products_to_show) %}
-            <li class="lame-new-products__item" data-lame-reveal>
-              <article class="lame-home-product-card lame-home-product-card--arrival">
-                <div class="lame-home-product-card__media">
-                  <span class="lame-home-product-card__badge lame-home-product-card__badge--new">NEW</span>
-                  <a href="#" class="lame-home-product-card__media-link" tabindex="-1" aria-hidden="true">
-                    {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-home-product-card__image placeholder-svg' }}
-                  </a>
-                </div>
-                <div class="lame-home-product-card__body">
-                  <h3 class="lame-home-product-card__title">
-                    <a href="#">{{ section.settings.placeholder_title }}</a>
-                  </h3>
-                  <div class="lame-home-product-card__price-row">
-                    <span class="lame-home-product-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</span>
+    <div class="lame-flash-deal__carousel">
+      <button
+        type="button"
+        class="lame-flash-deal__nav lame-flash-deal__nav--prev"
+        data-flash-prev
+        aria-label="{{ section.settings.prev_label }}"
+      >
+        <span aria-hidden="true">&#8249;</span>
+      </button>
+
+      <div class="lame-flash-deal__viewport" data-flash-viewport>
+        <ul class="lame-flash-deal__track" role="list" data-flash-track>
+          {% if products_shown > 0 %}
+            {{ arrival_products_markup }}
+          {% else %}
+            {% for i in (1..products_to_show) %}
+              <li class="lame-flash-deal__item" data-lame-reveal>
+                <article class="lame-flash-card">
+                  <div class="lame-flash-card__media">
+                    <span class="lame-flash-card__badge">{{ section.settings.badge_label | default: 'NEW' }}</span>
+                    <a href="#" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
+                      {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
+                    </a>
                   </div>
-                  <form class="lame-home-product-card__atc-form">
-                    <button type="button" class="lame-home-product-card__atc" disabled>{{ section.settings.add_to_cart_label }}</button>
-                  </form>
-                </div>
-              </article>
-            </li>
-          {% endfor %}
-        {% endfor %}
-      {% endpaginate %}
-    </ul>
+                  <div class="lame-flash-card__body">
+                    <h3 class="lame-flash-card__title">
+                      <a href="#">{{ section.settings.placeholder_title }}</a>
+                    </h3>
+                    <div class="lame-flash-card__price-row">
+                      <span class="lame-flash-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</span>
+                    </div>
+                    <div class="lame-flash-card__actions">
+                      <form class="lame-flash-card__form">
+                        <button type="button" class="lame-flash-card__atc" disabled>
+                          {{ section.settings.add_to_cart_label }}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </article>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        class="lame-flash-deal__nav lame-flash-deal__nav--next"
+        data-flash-next
+        aria-label="{{ section.settings.next_label }}"
+      >
+        <span aria-hidden="true">&#8250;</span>
+      </button>
+    </div>
   </div>
 </section>
 
 {% stylesheet %}
-  .lame-new-products {
-    --lame-arrival-forest: #1a4d2e;
-    --lame-arrival-forest-mid: #2d6a45;
-    --lame-arrival-forest-soft: #e8f0eb;
-    --lame-arrival-ink: #121212;
-    --lame-arrival-muted: #6b7280;
-    --lame-arrival-border: #e8ebe9;
-    --lame-arrival-pink: #e11d48;
-    --lame-arrival-radius: 12px;
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-  }
-
-  .lame-new-products__wrap {
+  .lame-new-products .lame-new-products__header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
     width: 100%;
-    max-width: 100%;
-    margin-inline: auto;
   }
 
-  .lame-new-products .lame-section-heading__title {
-    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--lame-arrival-forest);
+  .lame-new-products .lame-new-products__header-row .lame-section-heading {
+    margin: 0;
+    min-width: 0;
   }
 
-  .lame-new-products__view-all {
+  .lame-new-products .lame-new-products__view-all {
+    flex-shrink: 0;
+    margin-bottom: 0.55rem;
     font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--lame-arrival-forest);
+    color: rgb(var(--lame-cos-forest, 45 74 34));
     text-decoration: none;
     white-space: nowrap;
   }
 
-  .lame-new-products__view-all:hover {
+  .lame-new-products .lame-new-products__view-all:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
-  }
-
-  .lame-new-products__grid {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-    gap: 0.85rem;
-  }
-
-  .lame-new-products__item {
-    display: flex;
-    min-width: 0;
-    height: auto;
-  }
-
-  /* Flash-sale structure + Our Products catalog look */
-  .lame-new-products .lame-home-product-card--arrival {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    width: 100%;
-    height: auto;
-    border: 1px solid var(--lame-arrival-border);
-    border-radius: var(--lame-arrival-radius);
-    background: #fff;
-    overflow: hidden;
-    box-shadow: 0 1px 2px rgb(26 77 46 / 0.04);
-    transition:
-      box-shadow 0.22s ease,
-      border-color 0.22s ease,
-      transform 0.22s ease;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival:hover {
-    border-color: rgb(26 77 46 / 0.18);
-    box-shadow: 0 8px 24px rgb(26 77 46 / 0.08);
-    transform: translateY(-2px);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media {
-    position: relative;
-    flex: 0 0 auto;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    background: #fff;
-    overflow: hidden;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    text-decoration: none;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__badge {
-    position: absolute;
-    top: 0.55rem;
-    left: 0.55rem;
-    right: auto;
-    z-index: 2;
-    padding: 0.22rem 0.45rem;
-    border-radius: 4px;
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: 0.5625rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    line-height: 1.2;
-    color: #fff;
-    background: var(--lame-arrival-forest);
-    box-shadow: none;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__badge--new {
-    background: var(--lame-arrival-pink);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.75rem 0.85rem 0.95rem;
-    text-align: center;
-    background: #fff;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title {
-    margin: 0;
-    width: 100%;
-    min-height: 2.6em;
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    line-height: 1.4;
-    color: var(--lame-arrival-ink);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title a {
-    color: inherit;
-    text-decoration: none;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title a:hover {
-    color: var(--lame-arrival-forest);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__price-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0.3rem 0.4rem;
-    width: 100%;
-    margin: 0;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__compare {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #9ca3af;
-    text-decoration: line-through;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__price {
-    margin: 0;
-    font-size: 0.9375rem;
-    font-weight: 700;
-    line-height: 1.3;
-    color: var(--lame-arrival-ink);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__off {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--lame-arrival-forest-mid);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__rating {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin: 0;
-    line-height: 1;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__stars {
-    display: inline-flex;
-    gap: 0.04rem;
-    color: #c9a227;
-    font-size: 0.78rem;
-    line-height: 1;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__reviews {
-    font-size: 0.75rem;
-    color: var(--lame-arrival-muted);
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc-form {
-    margin-top: auto;
-    width: 100%;
-    padding-top: 0.35rem;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc {
-    width: 100%;
-    min-height: 40px;
-    margin: 0;
-    padding: 0.55rem 0.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    border: 1px solid rgb(26 77 46 / 0.18);
-    border-radius: 8px;
-    background: var(--lame-arrival-forest-soft);
-    color: var(--lame-arrival-forest);
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition:
-      background 0.2s ease,
-      color 0.2s ease,
-      border-color 0.2s ease;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc-icon {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc:hover:not(:disabled) {
-    border-color: var(--lame-arrival-forest);
-    background: var(--lame-arrival-forest);
-    color: #fff;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc:disabled {
-    background: #eef0ee;
-    border-color: #e2e5e2;
-    color: #9aa39c;
-    opacity: 1;
-    cursor: not-allowed;
-  }
-
-  .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc-status {
-    display: block;
-    min-height: 0;
-  }
-
-  @media screen and (min-width: 750px) {
-    .lame-new-products__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1rem;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title {
-      font-size: 0.875rem;
-    }
-  }
-
-  @media screen and (min-width: 990px) {
-    .lame-new-products__grid {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 1.1rem;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    .lame-new-products__grid {
-      align-items: stretch;
-      gap: 0.75rem;
-    }
-
-    .lame-new-products__item {
-      min-height: 0;
-      height: auto;
-      display: flex;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival {
-      height: auto;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    /* iOS-safe square media — padding hack so image fills edge-to-edge */
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media {
-      position: relative;
-      flex: none;
-      width: 100%;
-      height: 0;
-      padding-bottom: 100%;
-      aspect-ratio: auto;
-      overflow: hidden;
-      line-height: 0;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__media-link {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__image {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center center;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__badge {
-      top: 0.45rem;
-      left: 0.45rem;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__body {
-      position: relative;
-      z-index: 1;
-      flex: none;
-      gap: 0.35rem;
-      padding: 0.65rem 0.65rem 0.8rem;
-      border-top: 1px solid var(--lame-arrival-border);
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__title {
-      min-height: 0;
-      font-size: 0.8125rem;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__price {
-      font-size: 0.875rem;
-    }
-
-    .lame-new-products .lame-home-product-card--arrival .lame-home-product-card__atc {
-      min-height: 2.25rem;
-      padding: 0.5rem 0.6rem;
-      border-radius: 8px;
-    }
   }
 {% endstylesheet %}
 
@@ -445,22 +243,60 @@
   (() => {
     const section = document.getElementById('shopify-section-{{ section.id }}');
     if (!section) return;
-    const nodes = section.querySelectorAll('[data-lame-reveal]');
-    if (!nodes.length) return;
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries, obs) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
-          });
-        },
-        { threshold: 0.1 }
-      );
-      nodes.forEach((node) => observer.observe(node));
-    } else {
-      nodes.forEach((node) => node.classList.add('is-visible'));
+
+    section.querySelectorAll('[data-lame-reveal]').forEach((node) => {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.12 }
+        );
+        observer.observe(node);
+      } else {
+        node.classList.add('is-visible');
+      }
+    });
+
+    const viewport = section.querySelector('[data-flash-viewport]');
+    const track = section.querySelector('[data-flash-track]');
+    const prev = section.querySelector('[data-flash-prev]');
+    const next = section.querySelector('[data-flash-next]');
+    const scrollEl = viewport || track;
+
+    if (scrollEl && track) {
+      const updateCarouselLayout = () => {
+        const overflows = track.scrollWidth > scrollEl.clientWidth + 4;
+        scrollEl.classList.toggle('is-scrollable', overflows);
+        scrollEl.classList.toggle('is-centered', !overflows);
+        prev?.toggleAttribute('hidden', !overflows);
+        next?.toggleAttribute('hidden', !overflows);
+        if (!overflows) {
+          scrollEl.scrollLeft = 0;
+        }
+      };
+
+      const scrollBySlide = (dir) => {
+        const slide = track.querySelector('.lame-flash-deal__item');
+        if (!slide) return;
+        const gap = parseFloat(getComputedStyle(track).gap) || 16;
+        scrollEl.scrollBy({ left: dir * (slide.offsetWidth + gap), behavior: 'smooth' });
+      };
+
+      updateCarouselLayout();
+      window.addEventListener('resize', () => {
+        updateCarouselLayout();
+        if (!scrollEl.classList.contains('is-scrollable')) {
+          scrollEl.scrollLeft = 0;
+        }
+      });
+
+      prev?.addEventListener('click', () => scrollBySlide(-1));
+      next?.addEventListener('click', () => scrollBySlide(1));
     }
 
     section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
@@ -506,21 +342,53 @@
     { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals" },
     { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View all" },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
+    { "type": "text", "id": "save_label_prefix", "label": "Savings label", "default": "You Save" },
+    { "type": "text", "id": "badge_label", "label": "New badge", "default": "NEW" },
+    { "type": "text", "id": "review_count_fallback", "label": "Review count fallback", "default": "120" },
     {
       "type": "collection",
       "id": "collection",
       "label": "Collection",
-      "info": "Products are always sorted newest-first by date added, regardless of this collection’s sort order."
+      "info": "Newest products are picked first, limited per brand so the same vendor does not fill the row."
     },
     {
       "type": "range",
       "id": "products_to_show",
       "label": "Products to show",
       "min": 2,
-      "max": 10,
+      "max": 12,
       "step": 1,
-      "default": 5
+      "default": 8
     },
+    {
+      "type": "range",
+      "id": "per_brand_limit",
+      "label": "Max products per brand",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1,
+      "info": "Keeps New Arrivals mixed across brands. Extra slots fill with other newest products if needed."
+    },
+    {
+      "type": "collection",
+      "id": "skip_collection",
+      "label": "Skip products from (Best Selling)",
+      "info": "Products already shown in this collection (usually All / Best Selling) are not repeated here."
+    },
+    {
+      "type": "range",
+      "id": "skip_bestseller_count",
+      "label": "Skip first N from that collection",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "default": 8,
+      "info": "Match Best Selling “products to show” so those cards do not repeat below."
+    },
+    { "type": "text", "id": "prev_label", "label": "Previous label", "default": "Previous products" },
+    { "type": "text", "id": "next_label", "label": "Next label", "default": "Next products" },
     { "type": "text", "id": "placeholder_title", "label": "Placeholder title", "default": "Product title" },
     { "type": "text", "id": "placeholder_price", "label": "Placeholder price", "default": "₹899" },
     {
@@ -547,7 +415,7 @@
       "max": 80,
       "step": 4,
       "unit": "px",
-      "default": 32
+      "default": 28
     },
     {
       "type": "range",
@@ -557,7 +425,7 @@
       "max": 80,
       "step": 4,
       "unit": "px",
-      "default": 40
+      "default": 32
     }
   ],
   "presets": [{ "name": "New arrivals grid", "category": "Products" }]

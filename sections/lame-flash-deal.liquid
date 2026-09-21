@@ -112,13 +112,12 @@
         <p class="lame-flash-deal__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
 
-      <h2 class="lame-flash-deal__title">
-        <span class="lame-flash-deal__title-text">{{ section.settings.heading | escape }}</span>
-      </h2>
-
-      {%- if section.settings.subtitle != blank -%}
-        <p class="lame-flash-deal__subtitle">{{ section.settings.subtitle | escape }}</p>
-      {%- endif -%}
+      {% render 'lame-section-heading',
+        title: section.settings.heading,
+        subtitle: section.settings.subtitle,
+        alignment: 'left',
+        size: 'large'
+      %}
 
       {% if countdown_active %}
         <div
@@ -336,34 +335,33 @@
 
 {% schema %}
 {
-  "name": "Flash deal",
+  "name": "Best Selling",
   "tag": "section",
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index"] },
   "settings": [
-    { "type": "header", "content": "Offer visibility" },
+    { "type": "header", "content": "Visibility" },
     {
       "type": "checkbox",
       "id": "offer_active",
-      "label": "Offer active",
+      "label": "Section active",
       "default": true,
-      "info": "When off, this section is hidden on the live storefront. Toggle off when your campaign ends."
+      "info": "When off, this section is hidden on the live storefront."
     },
     {
       "type": "checkbox",
       "id": "hide_when_empty",
       "label": "Hide when no products",
       "default": true,
-      "info": "Hide the entire section if no qualifying products are found."
+      "info": "Hide the entire section if no products are found."
     },
     { "type": "header", "content": "Content" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Limited time offer" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Flash Sale" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Best Selling" },
     {
       "type": "textarea",
       "id": "subtitle",
-      "label": "Subtitle",
-      "default": "Unbeatable offers on your favourite essentials. Hurry, deals won't last long!"
+      "label": "Subtitle"
     },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
@@ -529,7 +527,7 @@
   ],
   "presets": [
     {
-      "name": "Flash deal",
+      "name": "Best Selling",
       "category": "Products",
       "settings": {
         "product_source": "collection",

@@ -1,5 +1,5 @@
 {%- doc -%}
-  Flash sale product card — sale layout with savings badge and add to cart.
+  Product card — shared by homepage Best Selling / New Arrivals and Our Products shop.
 
   @param {object} product
   @param {string} [badge_label] - Fallback discount badge text
@@ -7,6 +7,7 @@
   @param {string} [sold_out_label]
   @param {string} [review_count_fallback]
   @param {string} [save_label_prefix]
+  @param {boolean} [show_wishlist] - Our Products only; keeps homepage ATC unchanged
 {%- enddoc -%}
 
 {%- liquid
@@ -16,6 +17,7 @@
   assign on_sale = false
   assign card_badge = ''
   assign savings_amount = 0
+  assign show_wishlist = show_wishlist | default: false
 
   capture lame_sale_raw
     render 'lame-product-sale-data', product: product
@@ -68,9 +70,14 @@
 
   assign sold_out_label = sold_out_label | default: 'Sold out'
   assign save_label_prefix = save_label_prefix | default: 'You Save'
+
+  assign render_wishlist = false
+  if show_wishlist and settings.lame_enable_wishlist
+    assign render_wishlist = true
+  endif
 -%}
 
-<article class="lame-flash-card">
+<article class="lame-flash-card{% if render_wishlist %} lame-flash-card--with-wishlist{% endif %}">
   <div class="lame-flash-card__media">
     {%- if card_badge != blank -%}
       <span class="lame-flash-card__badge">{{ card_badge | escape }}</span>
@@ -100,44 +107,38 @@
     </h3>
 
     <div class="lame-flash-card__price-row">
+      <span class="lame-flash-card__price">{{ display_price }}</span>
       {%- if on_sale -%}
         <span class="lame-flash-card__compare">{{ display_compare }}</span>
+        {%- if discount_percent > 0 -%}
+          <span class="lame-flash-card__discount">{{ discount_percent }}% off</span>
+        {%- endif -%}
       {%- endif -%}
-      <span class="lame-flash-card__price">{{ display_price }}</span>
     </div>
 
-    {%- if on_sale and savings_amount > 0 -%}
-      <span class="lame-flash-card__save">
-        <svg class="lame-flash-card__save-icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M20 12v8H4V12" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          <path d="M12 3 20 7v5H4V7l8-4Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-        </svg>
-        {{ save_label_prefix }} {{ display_savings }}
-      </span>
-    {%- endif -%}
-
     {%- if selected_variant -%}
-      <form method="post" action="{{ routes.cart_add_url }}" class="lame-flash-card__form" data-lame-home-atc>
-        <input type="hidden" name="id" value="{{ selected_variant.id }}">
-        {%- capture lame_bogo_qty -%}{% render 'lame-bogo-add-qty', product: product %}{%- endcapture -%}
-        <input type="hidden" name="quantity" value="{{ lame_bogo_qty | strip }}">
-        <button
-          type="submit"
-          class="lame-flash-card__atc"
-          aria-label="{% if product.available %}{{ add_to_cart_label | default: 'Add to cart' }}{% else %}{{ sold_out_label }}{% endif %}"
-          {% unless product.available %}disabled{% endunless %}
-        >
-          <svg class="lame-flash-card__atc-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M6 6h14l-1.2 8H7.4L6 6Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M9 6V5a3 3 0 0 1 6 0v1" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          </svg>
-          {%- if product.available -%}
-            <span class="lame-flash-card__atc-label">{{ add_to_cart_label | default: 'Add to cart' }}</span>
-          {%- else -%}
-            {{ sold_out_label }}
-          {%- endif -%}
-        </button>
-      </form>
+      <div class="lame-flash-card__actions">
+        <form method="post" action="{{ routes.cart_add_url }}" class="lame-flash-card__form" data-lame-home-atc>
+          <input type="hidden" name="id" value="{{ selected_variant.id }}">
+          {%- capture lame_bogo_qty -%}{% render 'lame-bogo-add-qty', product: product %}{%- endcapture -%}
+          <input type="hidden" name="quantity" value="{{ lame_bogo_qty | strip }}">
+          <button
+            type="submit"
+            class="lame-flash-card__atc"
+            aria-label="{% if product.available %}{{ add_to_cart_label | default: 'Add to cart' }}{% else %}{{ sold_out_label }}{% endif %}"
+            {% unless product.available %}disabled{% endunless %}
+          >
+            {%- if product.available -%}
+              <span class="lame-flash-card__atc-label">{{ add_to_cart_label | default: 'Add to cart' }}</span>
+            {%- else -%}
+              {{ sold_out_label }}
+            {%- endif -%}
+          </button>
+        </form>
+        {%- if render_wishlist -%}
+          {% render 'lame-our-products-wishlist-btn', product: product %}
+        {%- endif -%}
+      </div>
     {%- endif -%}
   </div>
 </article>
