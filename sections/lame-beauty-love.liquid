@@ -25,6 +25,7 @@
           {%- for block in section.blocks -%}
             {%- liquid
               assign card_image = block.settings.image
+              assign fallback_asset = block.settings.fallback_asset | strip
               assign card_alt = block.settings.alt | strip
               if card_alt == blank and card_image != blank
                 assign card_alt = card_image.alt
@@ -63,6 +64,16 @@
                         sizes: '(min-width: 1200px) 22vw, (min-width: 750px) 70vw, 78vw',
                         alt: card_alt
                     }}
+                  {%- elsif fallback_asset != blank -%}
+                    <img
+                      class="lame-beauty-love__image"
+                      src="{{ fallback_asset | asset_url }}"
+                      alt="{{ card_alt | escape }}"
+                      width="720"
+                      height="960"
+                      loading="lazy"
+                      decoding="async"
+                    >
                   {%- else -%}
                     {{ 'image' | placeholder_svg_tag: 'lame-beauty-love__image placeholder-svg' }}
                   {%- endif -%}
@@ -443,6 +454,12 @@
         },
         {
           "type": "text",
+          "id": "fallback_asset",
+          "label": "Fallback asset filename",
+          "info": "Used when no image is selected (e.g. lame-beauty-love-01-sebamed.png)"
+        },
+        {
+          "type": "text",
           "id": "alt",
           "label": "Image alt text"
         },
@@ -454,8 +471,7 @@
         {
           "type": "text",
           "id": "badge_text",
-          "label": "Badge text (optional)",
-          "default": "Brighten & De-Tan"
+          "label": "Badge text (optional)"
         },
         {
           "type": "color",
@@ -466,14 +482,12 @@
         {
           "type": "text",
           "id": "title",
-          "label": "Title",
-          "default": "Upto 20% off"
+          "label": "Title (optional)"
         },
         {
           "type": "text",
           "id": "subtitle",
-          "label": "Subtitle",
-          "default": "On Entire Range!"
+          "label": "Subtitle (optional)"
         },
         {
           "type": "url",
@@ -491,36 +505,29 @@
         {
           "type": "card",
           "settings": {
-            "badge_text": "Brighten & De-Tan",
-            "badge_color": "#c47a5a",
-            "title": "Upto 20% off",
-            "subtitle": "On Entire Range!"
+            "fallback_asset": "lame-beauty-love-01-sebamed.png",
+            "alt": "Baby Sebamed Gentle Wash"
           }
         },
         {
           "type": "card",
           "settings": {
-            "badge_text": "Health & Vitality",
-            "badge_color": "#2f6f7a",
-            "title": "Upto 30% off",
-            "subtitle": "On Entire Range!"
+            "fallback_asset": "lame-beauty-love-02-jovees-strawberry.png",
+            "alt": "Jovees Herbal Strawberry Face Wash"
           }
         },
         {
           "type": "card",
           "settings": {
-            "badge_text": "Body Mists",
-            "badge_color": "#4a4a4a",
-            "title": "Upto 15% off",
-            "subtitle": "on Bestsellers!"
+            "fallback_asset": "lame-beauty-love-03-himalaya-serum-model.png",
+            "alt": "Himalaya Dark Spot Clearing Turmeric Face Serum"
           }
         },
         {
           "type": "card",
           "settings": {
-            "badge_text": "",
-            "title": "New Launch!",
-            "subtitle": "Discover more"
+            "fallback_asset": "lame-beauty-love-04-himalaya-ghee.png",
+            "alt": "Himalaya Ayurveda Secrets Ghee Kesar Body Lotion"
           }
         }
       ]
