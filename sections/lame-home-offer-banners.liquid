@@ -18,145 +18,252 @@
   <div class="lame-home-offer-banners__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {%- if section.settings.heading != blank -%}
       <header class="lame-home-offer-banners__header">
-        <h2 class="lame-home-offer-banners__heading">{{ section.settings.heading | escape }}</h2>
+        {% render 'lame-section-heading',
+          title: section.settings.heading,
+          alignment: 'left',
+          size: 'large'
+        %}
       </header>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <ul class="lame-home-offer-banners__grid" role="list">
-        {%- for block in section.blocks -%}
-          {%- liquid
-            assign banner_image = block.settings.image
-            assign banner_alt = block.settings.alt
-            assign fallback_asset = block.settings.fallback_asset | strip
-            if banner_image == blank and fallback_asset == blank and request.design_mode == false
-              continue
-            endif
-            if banner_alt == blank and banner_image != blank
-              assign banner_alt = banner_image.alt
-            endif
-            if banner_alt == blank
-              assign banner_alt = shop.name
-            endif
-            assign banner_link = block.settings.link
-            assign brand_name = block.settings.brand | strip
-            if block.settings.brand_other != blank
-              assign brand_name = block.settings.brand_other | strip
-            endif
-            if brand_name == 'other'
-              assign brand_name = block.settings.brand_other | strip
-            endif
-            assign discount_keys = ''
-
-            if block.settings.discount_0_10
-              assign discount_keys = discount_keys | append: '|0-10'
-            endif
-            if block.settings.discount_10_20
-              assign discount_keys = discount_keys | append: '|10-20'
-            endif
-            if block.settings.discount_20_30
-              assign discount_keys = discount_keys | append: '|20-30'
-            endif
-            if block.settings.discount_30_40
-              assign discount_keys = discount_keys | append: '|30-40'
-            endif
-            if block.settings.discount_40_50
-              assign discount_keys = discount_keys | append: '|40-50'
-            endif
-            if block.settings.discount_50_60
-              assign discount_keys = discount_keys | append: '|50-60'
-            endif
-
-            assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
-
-            if discount_param == blank
-              assign discount_choice = block.settings.discount_range | default: 'none'
-              case discount_choice
-                when 'up-to-20'
-                  assign discount_param = '0-10,10-20'
-                when 'up-to-50'
-                  assign discount_param = '0-10,10-20,20-30,30-40,40-50'
-                when 'from-40'
-                  assign discount_param = '40-50,50-60'
-                when 'none'
-                  assign discount_param = ''
-                else
-                  assign discount_param = discount_choice
-              endcase
-            endif
-
-            assign brand_slug = brand_name | handleize
-            assign brand_name_down = brand_name | downcase
-            if brand_name_down contains 'lamstone'
-              assign brand_slug = 'lamstone-healthcare'
-            endif
-
-            if brand_name != blank or discount_param != blank
-              assign query_string = ''
-              if brand_name != blank
-                assign query_string = 'brand=' | append: brand_slug
+      <div
+        class="lame-home-offer-banners__scroller"
+        data-offer-scroller
+        data-autoplay="{{ section.settings.autoplay_seconds | default: 4 }}"
+      >
+        <ul class="lame-home-offer-banners__track" role="list" data-offer-track>
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign banner_image = block.settings.image
+              assign banner_alt = block.settings.alt
+              assign fallback_asset = block.settings.fallback_asset | strip
+              if banner_image == blank and fallback_asset == blank and request.design_mode == false
+                continue
               endif
-              if discount_param != blank
-                if query_string != blank
-                  assign query_string = query_string | append: '&'
+              if banner_alt == blank and banner_image != blank
+                assign banner_alt = banner_image.alt
+              endif
+              if banner_alt == blank
+                assign banner_alt = shop.name
+              endif
+              assign banner_link = block.settings.link
+              assign brand_name = block.settings.brand | strip
+              if block.settings.brand_other != blank
+                assign brand_name = block.settings.brand_other | strip
+              endif
+              if brand_name == 'other'
+                assign brand_name = block.settings.brand_other | strip
+              endif
+              assign discount_keys = ''
+
+              if block.settings.discount_0_10
+                assign discount_keys = discount_keys | append: '|0-10'
+              endif
+              if block.settings.discount_10_20
+                assign discount_keys = discount_keys | append: '|10-20'
+              endif
+              if block.settings.discount_20_30
+                assign discount_keys = discount_keys | append: '|20-30'
+              endif
+              if block.settings.discount_30_40
+                assign discount_keys = discount_keys | append: '|30-40'
+              endif
+              if block.settings.discount_40_50
+                assign discount_keys = discount_keys | append: '|40-50'
+              endif
+              if block.settings.discount_50_60
+                assign discount_keys = discount_keys | append: '|50-60'
+              endif
+
+              assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
+
+              if discount_param == blank
+                assign discount_choice = block.settings.discount_range | default: 'none'
+                case discount_choice
+                  when 'up-to-20'
+                    assign discount_param = '0-10,10-20'
+                  when 'up-to-50'
+                    assign discount_param = '0-10,10-20,20-30,30-40,40-50'
+                  when 'from-40'
+                    assign discount_param = '40-50,50-60'
+                  when 'none'
+                    assign discount_param = ''
+                  else
+                    assign discount_param = discount_choice
+                endcase
+              endif
+
+              assign brand_slug = brand_name | handleize
+              assign brand_name_down = brand_name | downcase
+              if brand_name_down contains 'lamstone'
+                assign brand_slug = 'lamstone-healthcare'
+              endif
+
+              if brand_name != blank or discount_param != blank
+                assign query_string = ''
+                if brand_name != blank
+                  assign query_string = 'brand=' | append: brand_slug
                 endif
-                assign query_string = query_string | append: 'discount=' | append: discount_param
+                if discount_param != blank
+                  if query_string != blank
+                    assign query_string = query_string | append: '&'
+                  endif
+                  assign query_string = query_string | append: 'discount=' | append: discount_param
+                endif
+                assign banner_link = products_url | append: '?' | append: query_string
               endif
-              assign banner_link = products_url | append: '?' | append: query_string
-            endif
-          -%}
+            -%}
 
-          <li class="lame-home-offer-banners__item" {{ block.shopify_attributes }}>
-            {%- if banner_link != blank -%}
-              <a
-                class="lame-home-offer-banners__link"
-                href="{{ banner_link }}"
-                {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
-              >
-            {%- else -%}
-              <div class="lame-home-offer-banners__link">
-            {%- endif -%}
+            <li class="lame-home-offer-banners__item" data-offer-card {{ block.shopify_attributes }}>
+              {%- if banner_link != blank -%}
+                <a
+                  class="lame-home-offer-banners__link"
+                  href="{{ banner_link }}"
+                  {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
+                >
+              {%- else -%}
+                <div class="lame-home-offer-banners__link">
+              {%- endif -%}
 
-            {%- if banner_image != blank -%}
-              {{
-                banner_image
-                | image_url: width: 1600
-                | image_tag:
-                  class: 'lame-home-offer-banners__image',
-                  loading: 'lazy',
-                  widths: '400, 600, 800, 1000, 1200, 1600',
-                  sizes: 'calc((min(100vw, var(--page-width, 1200px)) - 1.5rem) / 2)',
-                  alt: banner_alt
-              }}
-            {%- elsif fallback_asset != blank -%}
-              <img
-                class="lame-home-offer-banners__image"
-                src="{{ fallback_asset | asset_url }}"
-                alt="{{ banner_alt | escape }}"
-                width="1600"
-                height="900"
-                loading="lazy"
-                decoding="async"
-              >
-            {%- else -%}
-              {{ 'image' | placeholder_svg_tag: 'lame-home-offer-banners__image placeholder-svg' }}
-            {%- endif -%}
+              {%- if banner_image != blank -%}
+                {{
+                  banner_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'lame-home-offer-banners__image',
+                    loading: 'lazy',
+                    widths: '320, 480, 640, 800, 1000, 1200',
+                    sizes: '(min-width: 990px) 36vw, (min-width: 750px) 48vw, 78vw',
+                    alt: banner_alt
+                }}
+              {%- elsif fallback_asset != blank -%}
+                <img
+                  class="lame-home-offer-banners__image"
+                  src="{{ fallback_asset | asset_url }}"
+                  alt="{{ banner_alt | escape }}"
+                  width="1200"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
+                >
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'lame-home-offer-banners__image placeholder-svg' }}
+              {%- endif -%}
 
-            {%- if banner_link != blank -%}
-              </a>
-            {%- else -%}
-              </div>
-            {%- endif -%}
-          </li>
-        {%- endfor -%}
-      </ul>
+              {%- if banner_link != blank -%}
+                </a>
+              {%- else -%}
+                </div>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
     {%- endif -%}
   </div>
 </section>
 
+<script>
+  (function () {
+    var section = document.currentScript && document.currentScript.previousElementSibling;
+    if (!section || !section.classList.contains('lame-home-offer-banners')) {
+      section = document.querySelector('.lame-home-offer-banners');
+    }
+    if (!section) return;
+
+    var scroller = section.querySelector('[data-offer-scroller]');
+    var track = section.querySelector('[data-offer-track]');
+    if (!scroller || !track) return;
+
+    var cards = Array.prototype.slice.call(track.querySelectorAll('[data-offer-card]'));
+    if (cards.length < 2) return;
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var autoplayMs = Math.max(2, parseInt(scroller.getAttribute('data-autoplay') || '4', 10)) * 1000;
+    var timer = null;
+    var looping = false;
+
+    function clearClones() {
+      track.querySelectorAll('[data-clone="true"]').forEach(function (node) {
+        node.remove();
+      });
+    }
+
+    function cloneForLoop() {
+      clearClones();
+      cards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('data-clone', 'true');
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      });
+    }
+
+    function cardStep() {
+      var first = track.querySelector('[data-offer-card]');
+      if (!first) return 0;
+      var style = window.getComputedStyle(track);
+      var gap = parseFloat(style.columnGap || style.gap || '0') || 0;
+      return first.getBoundingClientRect().width + gap;
+    }
+
+    function normalizeLoop() {
+      if (looping) return;
+      var step = cardStep();
+      if (!step) return;
+      var max = step * cards.length;
+      if (scroller.scrollLeft >= max - 2) {
+        looping = true;
+        scroller.scrollLeft = scroller.scrollLeft - max;
+        requestAnimationFrame(function () {
+          looping = false;
+        });
+      }
+    }
+
+    function advance() {
+      if (document.hidden || reduceMotion) return;
+      var step = cardStep();
+      if (!step) return;
+      scroller.scrollBy({ left: step, behavior: 'smooth' });
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      if (reduceMotion) return;
+      timer = window.setInterval(advance, autoplayMs);
+    }
+
+    function stopAutoplay() {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    cloneForLoop();
+    scroller.addEventListener('scroll', normalizeLoop, { passive: true });
+    scroller.addEventListener('pointerenter', stopAutoplay);
+    scroller.addEventListener('pointerleave', startAutoplay);
+    scroller.addEventListener('touchstart', stopAutoplay, { passive: true });
+    scroller.addEventListener('touchend', startAutoplay, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+    window.addEventListener('resize', function () {
+      normalizeLoop();
+    });
+    startAutoplay();
+  })();
+</script>
+
 {% stylesheet %}
   .lame-home-offer-banners {
-    --lame-home-offer-gap: clamp(0.5rem, 1.4vw, 1rem);
+    --lame-home-offer-gap: 0.85rem;
+    --lame-home-offer-card-w: min(78vw, 20rem);
+    --lame-home-offer-radius: 14px;
   }
 
   .lame-home-offer-banners__wrap {
@@ -164,66 +271,115 @@
     max-width: min(100%, var(--page-width, 1200px));
     margin-inline: auto;
     box-sizing: border-box;
+    padding-inline: clamp(0.75rem, 2.5vw, 1.25rem);
   }
 
   .section--full-width .lame-home-offer-banners__wrap {
     max-width: 100%;
-    padding-inline: clamp(0.75rem, 2.5vw, 1.5rem);
   }
 
   .lame-home-offer-banners__header {
-    text-align: center;
-    margin-bottom: clamp(0.75rem, 1.6vw, 1.25rem);
+    text-align: left;
+    margin-bottom: clamp(0.85rem, 1.6vw, 1.25rem);
   }
 
-  .lame-home-offer-banners__heading {
-    margin: 0;
-    font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1.2rem, 2.4vw, 1.6rem);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+  .lame-home-offer-banners__scroller {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-inline: calc(var(--lame-home-offer-gap) * -0.25);
+    padding-inline: calc(var(--lame-home-offer-gap) * 0.25);
+    padding-bottom: 0.15rem;
   }
 
-  .lame-home-offer-banners__grid {
+  .lame-home-offer-banners__scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-home-offer-banners__track {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
     gap: var(--lame-home-offer-gap);
-    width: 100%;
+    width: max-content;
   }
 
   .lame-home-offer-banners__item {
+    flex: 0 0 var(--lame-home-offer-card-w);
+    width: var(--lame-home-offer-card-w);
+    max-width: var(--lame-home-offer-card-w);
+    aspect-ratio: 3 / 2;
+    height: auto;
     min-width: 0;
     display: flex;
     overflow: hidden;
-    border-radius: clamp(8px, 1vw, 14px);
-    background: #eef6fb;
+    border-radius: var(--lame-home-offer-radius);
+    background: #f4f7fa;
     line-height: 0;
+    scroll-snap-align: start;
+    box-shadow: 0 6px 18px rgb(26 22 20 / 0.06);
   }
 
   .lame-home-offer-banners__link {
-    display: flex;
+    display: block;
     width: 100%;
     height: 100%;
     text-decoration: none;
     color: inherit;
   }
 
+  /* Full banner art — height follows 3:2 so details stay visible */
   .lame-home-offer-banners__image {
     display: block;
     width: 100%;
     height: 100%;
-    aspect-ratio: 1024 / 682;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
   }
 
   .lame-home-offer-banners__image.placeholder-svg {
     width: 100%;
-    aspect-ratio: 1024 / 682;
+    height: 100%;
     background: #e8f2f8;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lame-home-offer-banners__item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgb(26 22 20 / 0.1);
+    }
+
+    .lame-home-offer-banners__item {
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .lame-home-offer-banners {
+      --lame-home-offer-gap: 0.95rem;
+      --lame-home-offer-card-w: min(46vw, 22rem);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-home-offer-banners {
+      --lame-home-offer-gap: 1rem;
+      --lame-home-offer-card-w: min(25rem, calc((100vw - 4rem) / 2.55));
+      --lame-home-offer-radius: 16px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .lame-home-offer-banners {
+      --lame-home-offer-card-w: min(24rem, calc((100% - 2rem) / 2.45));
+    }
   }
 {% endstylesheet %}
 
@@ -244,7 +400,8 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "info": "Optional. Leave empty if the offer text is already in the images."
+      "default": "Exclusive Offers",
+      "info": "Shown above the offer banners, matching other homepage section titles."
     },
     {
       "type": "collection",
@@ -263,6 +420,17 @@
       "id": "open_in_new_tab",
       "label": "Open links in new tab",
       "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_seconds",
+      "label": "Auto-slide every",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 4,
+      "info": "Offer banners loop automatically. Swipe or drag still works anytime."
     },
     {
       "type": "header",
@@ -320,7 +488,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image",
-          "info": "Upload a banner here to replace the theme file. Banners display in a 2 × 2 grid."
+          "info": "Upload a banner here to replace the theme file. Banners scroll in a looping row."
         },
         {
           "type": "text",

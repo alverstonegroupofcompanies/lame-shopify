@@ -1,5 +1,5 @@
 {%- comment -%}
-  More Beauty To Love — horizontal promo image cards (brand + offer).
+  More Beauty To Love — responsive promo image grid (rows + columns).
 {%- endcomment -%}
 
 {%- liquid
@@ -15,111 +15,113 @@
   <div class="lame-beauty-love__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {%- if section.settings.heading != blank -%}
       <header class="lame-beauty-love__header">
-        <h2 class="lame-beauty-love__heading">{{ section.settings.heading | escape }}</h2>
+        {% render 'lame-section-heading',
+          title: section.settings.heading,
+          alignment: 'left',
+          size: 'large'
+        %}
       </header>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="lame-beauty-love__scroller" data-beauty-love-scroller>
-        <ul class="lame-beauty-love__track" role="list">
-          {%- for block in section.blocks -%}
-            {%- liquid
-              assign card_image = block.settings.image
-              assign fallback_asset = block.settings.fallback_asset | strip
-              assign card_alt = block.settings.alt | strip
-              if card_alt == blank and card_image != blank
-                assign card_alt = card_image.alt
-              endif
-              if card_alt == blank
-                assign card_alt = block.settings.title | default: shop.name
-              endif
-              assign card_link = block.settings.link
-              assign brand_logo = block.settings.brand_logo
-              assign badge_text = block.settings.badge_text | strip
-              assign badge_bg = block.settings.badge_color | default: '#c47a5a'
-              assign title = block.settings.title | strip
-              assign subtitle = block.settings.subtitle | strip
-            -%}
+      <ul class="lame-beauty-love__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign card_image = block.settings.image
+            assign fallback_asset = block.settings.fallback_asset | strip
+            assign card_alt = block.settings.alt | strip
+            if card_alt == blank and card_image != blank
+              assign card_alt = card_image.alt
+            endif
+            if card_alt == blank
+              assign card_alt = block.settings.title | default: shop.name
+            endif
+            assign card_link = block.settings.link
+            assign brand_logo = block.settings.brand_logo
+            assign badge_text = block.settings.badge_text | strip
+            assign badge_bg = block.settings.badge_color | default: '#c47a5a'
+            assign title = block.settings.title | strip
+            assign subtitle = block.settings.subtitle | strip
+          -%}
 
-            <li class="lame-beauty-love__slide" {{ block.shopify_attributes }}>
-              {%- if card_link != blank -%}
-                <a
-                  class="lame-beauty-love__card"
-                  href="{{ card_link }}"
-                  {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
-                >
-              {%- else -%}
-                <div class="lame-beauty-love__card">
-              {%- endif -%}
+          <li class="lame-beauty-love__item" {{ block.shopify_attributes }}>
+            {%- if card_link != blank -%}
+              <a
+                class="lame-beauty-love__card"
+                href="{{ card_link }}"
+                {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
+              >
+            {%- else -%}
+              <div class="lame-beauty-love__card">
+            {%- endif -%}
 
-                <div class="lame-beauty-love__media">
-                  {%- if card_image != blank -%}
-                    {{
-                      card_image
-                      | image_url: width: 900
-                      | image_tag:
-                        class: 'lame-beauty-love__image',
-                        loading: 'lazy',
-                        widths: '280, 360, 480, 640, 800, 900',
-                        sizes: '(min-width: 1200px) 22vw, (min-width: 750px) 70vw, 78vw',
-                        alt: card_alt
-                    }}
-                  {%- elsif fallback_asset != blank -%}
-                    <img
-                      class="lame-beauty-love__image"
-                      src="{{ fallback_asset | asset_url }}"
-                      alt="{{ card_alt | escape }}"
-                      width="720"
-                      height="960"
-                      loading="lazy"
-                      decoding="async"
-                    >
-                  {%- else -%}
-                    {{ 'image' | placeholder_svg_tag: 'lame-beauty-love__image placeholder-svg' }}
-                  {%- endif -%}
-
-                  {%- if brand_logo != blank -%}
-                    <span class="lame-beauty-love__brand">
-                      {{
-                        brand_logo
-                        | image_url: width: 240
-                        | image_tag:
-                          class: 'lame-beauty-love__brand-image',
-                          loading: 'lazy',
-                          widths: '80, 120, 160, 240',
-                          sizes: '72px',
-                          alt: ''
-                      }}
-                    </span>
-                  {%- endif -%}
-
-                  {%- if badge_text != blank -%}
-                    <span class="lame-beauty-love__badge" style="--lame-bl-badge: {{ badge_bg }}">
-                      {{ badge_text | escape }}
-                    </span>
-                  {%- endif -%}
-                </div>
-
-                {%- if title != blank or subtitle != blank -%}
-                  <div class="lame-beauty-love__copy">
-                    {%- if title != blank -%}
-                      <p class="lame-beauty-love__title">{{ title | escape }}</p>
-                    {%- endif -%}
-                    {%- if subtitle != blank -%}
-                      <p class="lame-beauty-love__subtitle">{{ subtitle | escape }}</p>
-                    {%- endif -%}
-                  </div>
+              <div class="lame-beauty-love__media">
+                {%- if card_image != blank -%}
+                  {{
+                    card_image
+                    | image_url: width: 900
+                    | image_tag:
+                      class: 'lame-beauty-love__image',
+                      loading: 'lazy',
+                      widths: '280, 360, 480, 640, 800, 900',
+                      sizes: '(min-width: 1200px) 22vw, (min-width: 750px) 30vw, 46vw',
+                      alt: card_alt
+                  }}
+                {%- elsif fallback_asset != blank -%}
+                  <img
+                    class="lame-beauty-love__image"
+                    src="{{ fallback_asset | asset_url }}"
+                    alt="{{ card_alt | escape }}"
+                    width="720"
+                    height="960"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'lame-beauty-love__image placeholder-svg' }}
                 {%- endif -%}
 
-              {%- if card_link != blank -%}
-                </a>
-              {%- else -%}
+                {%- if brand_logo != blank -%}
+                  <span class="lame-beauty-love__brand">
+                    {{
+                      brand_logo
+                      | image_url: width: 240
+                      | image_tag:
+                        class: 'lame-beauty-love__brand-image',
+                        loading: 'lazy',
+                        widths: '80, 120, 160, 240',
+                        sizes: '72px',
+                        alt: ''
+                    }}
+                  </span>
+                {%- endif -%}
+
+                {%- if badge_text != blank -%}
+                  <span class="lame-beauty-love__badge" style="--lame-bl-badge: {{ badge_bg }}">
+                    {{ badge_text | escape }}
+                  </span>
+                {%- endif -%}
+              </div>
+
+              {%- if title != blank or subtitle != blank -%}
+                <div class="lame-beauty-love__copy">
+                  {%- if title != blank -%}
+                    <p class="lame-beauty-love__title">{{ title | escape }}</p>
+                  {%- endif -%}
+                  {%- if subtitle != blank -%}
+                    <p class="lame-beauty-love__subtitle">{{ subtitle | escape }}</p>
+                  {%- endif -%}
                 </div>
               {%- endif -%}
-            </li>
-          {%- endfor -%}
-        </ul>
-      </div>
+
+            {%- if card_link != blank -%}
+              </a>
+            {%- else -%}
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
     {%- elsif request.design_mode -%}
       <p class="lame-beauty-love__empty">Add promo cards with images in the theme editor.</p>
     {%- endif -%}
@@ -128,11 +130,11 @@
 
 {% stylesheet %}
   .lame-beauty-love {
-    --lame-bl-gap: clamp(0.65rem, 1.4vw, 1rem);
+    --lame-bl-gap: clamp(0.55rem, 1.2vw, 0.9rem);
     --lame-bl-radius: 12px;
     --lame-bl-ink: #1a1614;
     --lame-bl-muted: #6b6460;
-    --lame-bl-card-w: clamp(11.5rem, 22vw, 15.5rem);
+    --lame-bl-media-max: 11.5rem;
   }
 
   .lame-beauty-love__wrap {
@@ -149,58 +151,42 @@
 
   .lame-beauty-love__header {
     text-align: left;
-    margin-bottom: clamp(0.85rem, 1.8vw, 1.25rem);
+    margin-bottom: clamp(1rem, 2.2vw, 1.5rem);
   }
 
-  .lame-beauty-love__heading {
+  .lame-beauty-love__header .lame-section-heading {
     margin: 0;
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: clamp(1.15rem, 2.2vw, 1.45rem);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-    color: var(--lame-bl-ink);
   }
 
-  .lame-beauty-love__scroller {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    margin-inline: calc(var(--lame-bl-gap) * -0.15);
-    padding-inline: calc(var(--lame-bl-gap) * 0.15);
-    padding-bottom: 0.15rem;
+  .lame-beauty-love__header .lame-section-heading__title {
+    margin: 0;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(1.7rem, 3.4vw, 2.35rem);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1.12;
+    text-transform: uppercase;
+    color: rgb(45 74 34);
   }
 
-  .lame-beauty-love__scroller::-webkit-scrollbar {
-    display: none;
-  }
-
-  .lame-beauty-love__track {
+  .lame-beauty-love__grid {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--lame-bl-gap);
-    width: max-content;
-    min-width: 100%;
+    width: 100%;
   }
 
-  .lame-beauty-love__slide {
-    flex: 0 0 var(--lame-bl-card-w);
-    width: var(--lame-bl-card-w);
-    max-width: var(--lame-bl-card-w);
-    scroll-snap-align: start;
+  .lame-beauty-love__item {
+    min-width: 0;
   }
 
   .lame-beauty-love__card {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.45rem;
     width: 100%;
     height: 100%;
     text-decoration: none;
@@ -211,8 +197,12 @@
     position: relative;
     overflow: hidden;
     border-radius: var(--lame-bl-radius);
-    background: #f0ebe6;
-    aspect-ratio: 3 / 4;
+    background: #f7f4f1;
+    line-height: 0;
+    box-shadow: 0 2px 10px rgb(26 22 20 / 0.06);
+    aspect-ratio: 4 / 5;
+    width: min(100%, var(--lame-bl-media-max));
+    margin-inline: auto;
   }
 
   .lame-beauty-love__image {
@@ -284,7 +274,7 @@
   .lame-beauty-love__title {
     margin: 0;
     font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: clamp(0.92rem, 1.5vw, 1.05rem);
+    font-size: clamp(0.85rem, 1.4vw, 1rem);
     font-weight: 700;
     line-height: 1.25;
     color: var(--lame-bl-ink);
@@ -293,7 +283,7 @@
   .lame-beauty-love__subtitle {
     margin: 0;
     font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: clamp(0.78rem, 1.2vw, 0.88rem);
+    font-size: clamp(0.72rem, 1.1vw, 0.84rem);
     font-weight: 400;
     line-height: 1.35;
     color: var(--lame-bl-muted);
@@ -308,55 +298,33 @@
     border-radius: var(--lame-bl-radius);
   }
 
-  /* Tablet: match top discount tile footprint (large swipe cards) */
-  @media screen and (min-width: 750px) and (max-width: 1199px) {
-    .section--page-width .lame-beauty-love__wrap,
-    .section--full-width .lame-beauty-love__wrap {
-      max-width: none;
-      padding-inline: 0.5rem;
-    }
-
+  @media screen and (min-width: 750px) {
     .lame-beauty-love {
-      --lame-bl-gap: 0.75rem;
+      --lame-bl-gap: 0.85rem;
       --lame-bl-radius: 12px;
-      --lame-bl-card-w: 100%;
+      --lame-bl-media-max: 12.25rem;
     }
 
-    .lame-beauty-love__scroller {
-      margin-inline: 0;
-      padding-inline: 0;
+    .lame-beauty-love__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (min-width: 1100px) {
+    .lame-beauty-love {
+      --lame-bl-gap: 1rem;
+      --lame-bl-media-max: 12.75rem;
     }
 
-    .lame-beauty-love__track {
-      min-width: 0;
-      width: 100%;
-    }
-
-    .lame-beauty-love__slide {
-      flex: 0 0 100%;
-      width: 100%;
-      max-width: 100%;
-    }
-
-    .lame-beauty-love__media {
-      aspect-ratio: unset;
-      height: auto;
-      background: transparent;
-    }
-
-    .lame-beauty-love__image {
-      width: 100%;
-      height: auto !important;
-      max-height: none;
-      object-fit: contain;
-      object-position: center;
+    .lame-beauty-love__grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 
   @media screen and (max-width: 749px) {
     .lame-beauty-love {
-      --lame-bl-card-w: min(78vw, 16.5rem);
       --lame-bl-radius: 10px;
+      --lame-bl-media-max: 10.75rem;
     }
 
     .section--full-width .lame-beauty-love__wrap,
@@ -370,12 +338,17 @@
       transform: scale(1.03);
     }
 
+    .lame-beauty-love__card:hover .lame-beauty-love__media {
+      box-shadow: 0 8px 22px rgb(26 22 20 / 0.12);
+    }
+
     .lame-beauty-love__image {
       transition: transform 0.35s ease;
     }
 
     .lame-beauty-love__media {
       overflow: hidden;
+      transition: box-shadow 0.3s ease;
     }
   }
 {% endstylesheet %}
@@ -528,6 +501,34 @@
           "settings": {
             "fallback_asset": "lame-beauty-love-04-himalaya-ghee.png",
             "alt": "Himalaya Ayurveda Secrets Ghee Kesar Body Lotion"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "fallback_asset": "lame-beauty-love-10-plum-vanilla.png",
+            "alt": "Plum Body Lovin Vanilla Vibes Body Mist"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "fallback_asset": "lame-beauty-love-11-alps-powders.png",
+            "alt": "Alps Goodness Beetroot and Sandalwood Powder"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "fallback_asset": "lame-beauty-love-12-annina-roller.png",
+            "alt": "Annina Jade Roller Massager"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "fallback_asset": "lame-beauty-love-13-nykaa-paris.png",
+            "alt": "Nykaa Wanderlust Dreaming of Paris Shower Gel"
           }
         }
       ]

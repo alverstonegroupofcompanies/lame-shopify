@@ -1,8 +1,6 @@
 {% doc %}
-  Shop by category — collection cards.
-  Desktop (1200px+): all cards in one scalable row.
-  Tablet (750–1199): full-width scroll cards matching discount tiles.
-  Mobile: 2-column rounded card grid.
+  Shop by category — compact looping collection cards.
+  Mobile: peek carousel. Tablet: ~2 cards. Desktop: ~4–5 cards.
 {% enddoc %}
 {% liquid
   assign ai_gen_id = block.id | replace: '_', '' | downcase
@@ -16,160 +14,90 @@
   if category_count == 0
     assign category_count = 7
   endif
-  assign auto_slide_speed = block.settings.auto_slide_speed | default: 3
+  assign auto_slide_speed = block.settings.auto_slide_speed | default: 4
+  assign show_arrows = block.settings.show_navigation_arrows
 %}
 
 {% style %}
   .ai-category-carousel-{{ ai_gen_id }} {
     --ai-category-gap: {{ block.settings.card_gap }}px;
-    --ai-category-cols: {{ category_count }};
+    --ai-category-radius: {{ block.settings.card_border_radius }}px;
+    --ai-category-card-w: min(72vw, 14.5rem);
     width: {{ block.settings.desktop_width_percent }}%;
     max-width: 100%;
     display: block;
     margin-inline: auto;
-    padding: clamp(1.25rem, 2.5vw, 2rem) 0;
+    padding: clamp(0.85rem, 1.8vw, 1.35rem) 0;
     background-color: {{ block.settings.background_color }};
+    box-sizing: border-box;
   }
 
   .ai-category-carousel__container-{{ ai_gen_id }} {
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
+    position: relative;
+    padding-inline: clamp(0.75rem, 2.5vw, 1.25rem);
+    box-sizing: border-box;
+  }
+
+  .ai-category-carousel__header-{{ ai_gen_id }} {
+    margin-bottom: clamp(0.7rem, 1.4vw, 1.1rem);
   }
 
   .ai-category-carousel__header-{{ ai_gen_id }} .lame-section-heading__title {
-    font-size: {{ block.settings.heading_size }}px;
+    font-size: clamp(1.15rem, 2.2vw, {{ block.settings.heading_size }}px);
     color: {{ block.settings.heading_color }};
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
-  @media screen and (max-width: 749px) {
-    .ai-category-carousel__header-{{ ai_gen_id }} .lame-section-heading__title {
-      font-size: calc({{ block.settings.heading_size }}px * 0.75);
-    }
+  .ai-category-carousel__viewport-{{ ai_gen_id }} {
+    position: relative;
   }
 
-  /* Desktop: one grid row */
+  .ai-category-carousel__scroller-{{ ai_gen_id }} {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-category-carousel__scroller-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
   .ai-category-carousel__track-{{ ai_gen_id }} {
-    display: grid;
-    grid-template-columns: repeat(var(--ai-category-cols), minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
     gap: var(--ai-category-gap);
-    width: 100%;
-  }
-
-  /* Tablet: match top discount tile card size (full-bleed, contain) */
-  @media screen and (min-width: 750px) and (max-width: 1199px) {
-    .ai-category-carousel-{{ ai_gen_id }} {
-      --ai-category-gap: 0.75rem;
-      width: 100%;
-      padding-inline: 0.5rem;
-      box-sizing: border-box;
-    }
-
-    .ai-category-carousel__container-{{ ai_gen_id }} {
-      width: 100%;
-      max-width: none;
-    }
-
-    .ai-category-carousel__track-{{ ai_gen_id }} {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: var(--ai-category-gap);
-      width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .ai-category-carousel__track-{{ ai_gen_id }}::-webkit-scrollbar {
-      display: none;
-    }
-
-    .ai-category-carousel__card-{{ ai_gen_id }} {
-      flex: 0 0 100%;
-      width: 100%;
-      max-width: 100%;
-      scroll-snap-align: start;
-      border-radius: 12px;
-    }
-
-    .ai-category-carousel__card-{{ ai_gen_id }}:hover {
-      transform: none;
-    }
-
-    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
-      aspect-ratio: unset;
-      width: 100%;
-      height: auto;
-      background: transparent;
-    }
-
-    .ai-category-carousel__image-{{ ai_gen_id }} {
-      width: 100%;
-      height: auto !important;
-      max-height: none;
-      object-fit: contain;
-      object-position: center;
-    }
-  }
-
-  /* Mobile: match home offer banner card size */
-  @media screen and (max-width: 749px) {
-    .ai-category-carousel-{{ ai_gen_id }} {
-      --ai-category-gap: clamp(0.5rem, 1.4vw, 1rem);
-      width: 100%;
-      padding-inline: 0;
-    }
-
-    .ai-category-carousel__header-{{ ai_gen_id }} {
-      padding-inline: 0;
-    }
-
-    .ai-category-carousel__track-{{ ai_gen_id }} {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: var(--ai-category-gap);
-      width: 100%;
-      overflow: visible;
-      padding-inline: 0;
-      padding-bottom: 0;
-    }
-
-    .ai-category-carousel__card-{{ ai_gen_id }} {
-      flex: none;
-      width: 100%;
-      max-width: none;
-      border-radius: clamp(8px, 1vw, 14px);
-    }
-
-    .ai-category-carousel__card-{{ ai_gen_id }}:hover {
-      transform: none;
-    }
-
-    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
-      aspect-ratio: 1024 / 682;
-    }
-
-    .ai-category-carousel__image-{{ ai_gen_id }} {
-      object-position: center;
-    }
+    width: max-content;
+    padding-bottom: 0.15rem;
   }
 
   .ai-category-carousel__card-{{ ai_gen_id }} {
+    flex: 0 0 var(--ai-category-card-w);
+    width: var(--ai-category-card-w);
+    max-width: var(--ai-category-card-w);
     min-width: 0;
     position: relative;
     overflow: hidden;
-    border-radius: {{ block.settings.card_border_radius }}px;
-    border: 1px solid rgb(42 58 48 / 0.22);
-    transition: transform 0.3s ease;
+    border-radius: var(--ai-category-radius);
+    border: 1px solid rgb(42 58 48 / 0.14);
+    background: #fff;
+    scroll-snap-align: start;
+    box-shadow: 0 6px 16px rgb(26 22 20 / 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
     .ai-category-carousel__card-{{ ai_gen_id }}:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgb(26 22 20 / 0.1);
     }
   }
 
@@ -177,12 +105,14 @@
     display: block;
     text-decoration: none;
     color: inherit;
+    height: 100%;
   }
 
   .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
+    max-height: 9.5rem;
     overflow: hidden;
     background: rgb(42 58 48 / 0.04);
   }
@@ -192,7 +122,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: left center;
+    object-position: center;
   }
 
   .ai-category-carousel__placeholder-{{ ai_gen_id }} {
@@ -205,71 +135,99 @@
   }
 
   .ai-category-carousel__placeholder-{{ ai_gen_id }} svg {
-    width: 60%;
-    height: 60%;
+    width: 55%;
+    height: 55%;
     opacity: 0.3;
   }
 
-  .ai-category-carousel__overlay-{{ ai_gen_id }} {
+  .ai-category-carousel__nav-{{ ai_gen_id }} {
     position: absolute;
-    inset: auto 0 0 0;
-    padding: clamp(6px, 1vw, 12px);
-    display: flex;
-    justify-content: flex-start;
-    pointer-events: none;
-  }
-
-  .ai-category-carousel__cta-{{ ai_gen_id }} {
-    pointer-events: auto;
+    top: 50%;
+    z-index: 2;
+    transform: translateY(-50%);
+    width: 2.1rem;
+    height: 2.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.95);
+    color: #1a1614;
+    box-shadow: 0 4px 14px rgb(26 22 20 / 0.14);
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.28rem;
-    padding: clamp(0.22rem, 0.55vw, 0.35rem) clamp(0.4rem, 0.9vw, 0.6rem);
-    border-radius: 999px;
-    background: var(--lame-cta-bg-gradient, linear-gradient(135deg, #ff7043 0%, #ff5722 48%, #f4511e 100%));
-    border: 1px solid var(--lame-cta-bg, #ff5722);
-    color: #fff;
-    font-size: clamp(0.5rem, 0.85vw, 0.7rem);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    line-height: 1;
-    box-shadow: var(--lame-cta-shadow, 0 6px 18px rgb(255 87 34 / 0.35));
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    max-width: calc(100% - 4px);
-    white-space: nowrap;
+    justify-content: center;
+    padding: 0;
   }
 
-  .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper,
-  .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper svg {
-    width: clamp(0.45rem, 0.8vw, 0.75rem);
-    height: clamp(0.45rem, 0.8vw, 0.75rem);
+  .ai-category-carousel__nav-{{ ai_gen_id }} svg {
+    width: 0.85rem;
+    height: 0.85rem;
     display: block;
-    flex-shrink: 0;
   }
 
-  .ai-category-carousel__card-link-{{ ai_gen_id }}:hover .ai-category-carousel__cta-{{ ai_gen_id }} {
-    background: linear-gradient(135deg, #ff8a65 0%, var(--lame-cta-bg-hover, #e64a19) 100%);
-    border-color: var(--lame-cta-bg-hover, #e64a19);
+  .ai-category-carousel__nav--prev-{{ ai_gen_id }} {
+    left: 0.15rem;
+  }
+
+  .ai-category-carousel__nav--next-{{ ai_gen_id }} {
+    right: 0.15rem;
+  }
+
+  .ai-category-carousel__nav-{{ ai_gen_id }}:hover {
+    background: #fff;
   }
 
   @media screen and (max-width: 749px) {
-    .ai-category-carousel__overlay-{{ ai_gen_id }} {
-      padding: 10px 12px;
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-gap: 0.65rem;
+      --ai-category-card-w: min(70vw, 14rem);
     }
 
-    .ai-category-carousel__cta-{{ ai_gen_id }} {
-      padding: 0.35rem 0.55rem;
-      font-size: clamp(0.58rem, 2.6vw, 0.7rem);
-      letter-spacing: 0.05em;
-      box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+      max-height: 8.75rem;
     }
 
-    .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper,
-    .ai-category-carousel__cta-{{ ai_gen_id }} .svg-wrapper svg {
-      width: 0.65rem;
-      height: 0.65rem;
+    .ai-category-carousel__nav-{{ ai_gen_id }} {
+      display: none;
+    }
+  }
+
+  /* Medium: two compact cards, never full-bleed */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-gap: 0.75rem;
+      --ai-category-card-w: min(42vw, 17rem);
+    }
+
+    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+      max-height: 10rem;
+    }
+  }
+
+  /* Desktop: compact cards, ~4–5 visible */
+  @media screen and (min-width: 990px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-gap: 0.85rem;
+      --ai-category-card-w: min(14.5rem, 18.5vw);
+    }
+
+    .ai-category-carousel__container-{{ ai_gen_id }} {
+      padding-inline: 0;
+    }
+
+    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+      max-height: 11rem;
+      aspect-ratio: 5 / 4;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .ai-category-carousel-{{ ai_gen_id }} {
+      --ai-category-card-w: min(13.75rem, 16vw);
+    }
+
+    .ai-category-carousel__image-wrapper-{{ ai_gen_id }} {
+      max-height: 11.5rem;
     }
   }
 {% endstyle %}
@@ -291,44 +249,71 @@
       </div>
     {% endif %}
 
-    <div class="ai-category-carousel__track-{{ ai_gen_id }}" data-ai-category-track>
-      {% for i in (1..7) %}
-        {% liquid
-          assign collection_key = 'collection_' | append: i
-          assign collection = block.settings[collection_key]
-        %}
-        {% if collection != blank %}
-          <div class="ai-category-carousel__card-{{ ai_gen_id }}" data-ai-category-card>
-            <a href="{{ collection.url }}" class="ai-category-carousel__card-link-{{ ai_gen_id }}">
-              <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
-                {% if collection.image %}
-                  <img
-                    src="{{ collection.image | image_url: width: 800 }}"
-                    alt="{{ collection.title | escape }}"
-                    class="ai-category-carousel__image-{{ ai_gen_id }}"
-                    loading="lazy"
-                    width="800"
-                    height="600"
-                  >
-                {% elsif collection.products.first and collection.products.first.featured_image %}
-                  <img
-                    src="{{ collection.products.first.featured_image | image_url: width: 800 }}"
-                    alt="{{ collection.title | escape }}"
-                    class="ai-category-carousel__image-{{ ai_gen_id }}"
-                    loading="lazy"
-                    width="800"
-                    height="600"
-                  >
-                {% else %}
-                  <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
-                    {{ 'collection-apparel-1' | placeholder_svg_tag }}
+    <div class="ai-category-carousel__viewport-{{ ai_gen_id }}">
+      {% if show_arrows %}
+        <button
+          type="button"
+          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--prev-{{ ai_gen_id }}"
+          data-ai-category-prev
+          aria-label="Previous categories"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="ai-category-carousel__nav-{{ ai_gen_id }} ai-category-carousel__nav--next-{{ ai_gen_id }}"
+          data-ai-category-next
+          aria-label="Next categories"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      {% endif %}
+
+      <div class="ai-category-carousel__scroller-{{ ai_gen_id }}" data-ai-category-scroller>
+        <div class="ai-category-carousel__track-{{ ai_gen_id }}" data-ai-category-track>
+          {% for i in (1..7) %}
+            {% liquid
+              assign collection_key = 'collection_' | append: i
+              assign collection = block.settings[collection_key]
+            %}
+            {% if collection != blank %}
+              <div class="ai-category-carousel__card-{{ ai_gen_id }}" data-ai-category-card>
+                <a href="{{ collection.url }}" class="ai-category-carousel__card-link-{{ ai_gen_id }}">
+                  <div class="ai-category-carousel__image-wrapper-{{ ai_gen_id }}">
+                    {% if collection.image %}
+                      <img
+                        src="{{ collection.image | image_url: width: 640 }}"
+                        alt="{{ collection.title | escape }}"
+                        class="ai-category-carousel__image-{{ ai_gen_id }}"
+                        loading="lazy"
+                        width="640"
+                        height="480"
+                      >
+                    {% elsif collection.products.first and collection.products.first.featured_image %}
+                      <img
+                        src="{{ collection.products.first.featured_image | image_url: width: 640 }}"
+                        alt="{{ collection.title | escape }}"
+                        class="ai-category-carousel__image-{{ ai_gen_id }}"
+                        loading="lazy"
+                        width="640"
+                        height="480"
+                      >
+                    {% else %}
+                      <div class="ai-category-carousel__placeholder-{{ ai_gen_id }}">
+                        {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                      </div>
+                    {% endif %}
                   </div>
-                {% endif %}
+                </a>
               </div>
-            </a>
-          </div>
-        {% endif %}
-      {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -342,24 +327,109 @@
     if (!root) return;
 
     var track = root.querySelector('[data-ai-category-track]');
-    if (!track) return;
+    var scroller = root.querySelector('[data-ai-category-scroller]');
+    if (!track || !scroller) return;
 
-    var mobileQuery = window.matchMedia('(max-width: 749px)');
+    var cards = Array.prototype.slice.call(track.querySelectorAll('[data-ai-category-card]:not([data-clone])'));
+    if (cards.length < 2) {
+      cards = Array.prototype.slice.call(track.querySelectorAll('[data-ai-category-card]'));
+    }
+    if (cards.length < 2) return;
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var autoplayMs = Math.max(2, parseInt(root.getAttribute('data-auto-slide-speed') || '4', 10)) * 1000;
+    var timer = null;
+    var looping = false;
+    var prevBtn = root.querySelector('[data-ai-category-prev]');
+    var nextBtn = root.querySelector('[data-ai-category-next]');
 
     function clearClones() {
       track.querySelectorAll('[data-clone="true"]').forEach(function (node) {
         node.remove();
       });
-      track.scrollLeft = 0;
     }
 
-    if (typeof mobileQuery.addEventListener === 'function') {
-      mobileQuery.addEventListener('change', clearClones);
-    } else if (typeof mobileQuery.addListener === 'function') {
-      mobileQuery.addListener(clearClones);
+    function cloneForLoop() {
+      clearClones();
+      cards.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('data-clone', 'true');
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      });
     }
 
-    clearClones();
+    function cardStep() {
+      var first = track.querySelector('[data-ai-category-card]');
+      if (!first) return 0;
+      var style = window.getComputedStyle(track);
+      var gap = parseFloat(style.columnGap || style.gap || '0') || 0;
+      return first.getBoundingClientRect().width + gap;
+    }
+
+    function normalizeLoop() {
+      if (looping) return;
+      var step = cardStep();
+      if (!step) return;
+      var max = step * cards.length;
+      if (scroller.scrollLeft >= max - 2) {
+        looping = true;
+        scroller.scrollLeft = scroller.scrollLeft - max;
+        requestAnimationFrame(function () {
+          looping = false;
+        });
+      }
+    }
+
+    function advance(dir) {
+      var step = cardStep();
+      if (!step) return;
+      scroller.scrollBy({ left: step * (dir || 1), behavior: 'smooth' });
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      if (reduceMotion) return;
+      timer = window.setInterval(function () {
+        if (!document.hidden) advance(1);
+      }, autoplayMs);
+    }
+
+    function stopAutoplay() {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    cloneForLoop();
+    scroller.addEventListener('scroll', normalizeLoop, { passive: true });
+    scroller.addEventListener('pointerenter', stopAutoplay);
+    scroller.addEventListener('pointerleave', startAutoplay);
+    scroller.addEventListener('touchstart', stopAutoplay, { passive: true });
+    scroller.addEventListener('touchend', startAutoplay, { passive: true });
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function () {
+        stopAutoplay();
+        advance(-1);
+        startAutoplay();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function () {
+        stopAutoplay();
+        advance(1);
+        startAutoplay();
+      });
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+    window.addEventListener('resize', normalizeLoop);
+    startAutoplay();
   })();
 </script>
 
@@ -383,18 +453,9 @@
       "id": "heading_alignment",
       "label": "Heading alignment",
       "options": [
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        }
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
       ],
       "default": "center"
     },
@@ -402,41 +463,13 @@
       "type": "header",
       "content": "Collections"
     },
-    {
-      "type": "collection",
-      "id": "collection_1",
-      "label": "Collection 1"
-    },
-    {
-      "type": "collection",
-      "id": "collection_2",
-      "label": "Collection 2"
-    },
-    {
-      "type": "collection",
-      "id": "collection_3",
-      "label": "Collection 3"
-    },
-    {
-      "type": "collection",
-      "id": "collection_4",
-      "label": "Collection 4"
-    },
-    {
-      "type": "collection",
-      "id": "collection_5",
-      "label": "Collection 5"
-    },
-    {
-      "type": "collection",
-      "id": "collection_6",
-      "label": "Collection 6"
-    },
-    {
-      "type": "collection",
-      "id": "collection_7",
-      "label": "Collection 7"
-    },
+    { "type": "collection", "id": "collection_1", "label": "Collection 1" },
+    { "type": "collection", "id": "collection_2", "label": "Collection 2" },
+    { "type": "collection", "id": "collection_3", "label": "Collection 3" },
+    { "type": "collection", "id": "collection_4", "label": "Collection 4" },
+    { "type": "collection", "id": "collection_5", "label": "Collection 5" },
+    { "type": "collection", "id": "collection_6", "label": "Collection 6" },
+    { "type": "collection", "id": "collection_7", "label": "Collection 7" },
     {
       "type": "header",
       "content": "Layout"
@@ -454,7 +487,7 @@
     {
       "type": "range",
       "id": "card_width",
-      "label": "Card width (unused — cards scale to row)",
+      "label": "Card width (unused — responsive)",
       "min": 450,
       "max": 800,
       "step": 50,
@@ -479,7 +512,7 @@
       "max": 40,
       "step": 4,
       "unit": "px",
-      "default": 16
+      "default": 12
     },
     {
       "type": "range",
@@ -493,7 +526,7 @@
     },
     {
       "type": "header",
-      "content": "Mobile carousel"
+      "content": "Carousel"
     },
     {
       "type": "range",
@@ -503,13 +536,13 @@
       "max": 10,
       "step": 1,
       "unit": "s",
-      "default": 3
+      "default": 4
     },
     {
       "type": "checkbox",
       "id": "show_navigation_arrows",
       "label": "Show previous / next arrows",
-      "default": false
+      "default": true
     },
     {
       "type": "header",
@@ -525,7 +558,7 @@
       "type": "color",
       "id": "heading_color",
       "label": "Heading",
-      "default": "#000000"
+      "default": "#1a1614"
     },
     {
       "type": "header",
@@ -539,7 +572,7 @@
       "max": 60,
       "step": 2,
       "unit": "px",
-      "default": 32
+      "default": 28
     },
     {
       "type": "range",

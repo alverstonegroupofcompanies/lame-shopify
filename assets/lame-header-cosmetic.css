@@ -333,8 +333,8 @@ body.template-index:has(#header-component.header--cosmetic-luxury)
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   MAIN NAVBAR â€” centered logo, luxury cream bar
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   MAIN NAVBAR — left logo, uppercase menu, luxury bar
+   ============================================================ */
 
 #header-group {
   position: relative;
@@ -354,7 +354,7 @@ body.template-index:has(#header-component.header--cosmetic-luxury)
   --header-luxury-icon-glyph: 1.05rem;
   --header-luxury-logo-max-w: min(18rem, 48vw);
   --header-luxury-logo-max-h: clamp(4.25rem, 8vw, 5.15rem);
-  --lame-nav-font: 'Inter', var(--lame-font-body, 'Jost', system-ui, sans-serif);
+  --lame-nav-font: 'Jost', var(--lame-font-body, system-ui, sans-serif);
   --lame-mobile-menu-z: 100000;
 
   /* Navbar — deep forest green (reference luxury bar) */
@@ -442,10 +442,10 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
   border-radius: 0;
   background: transparent;
   color: rgb(var(--lame-nav-text));
-  font-family: var(--lame-lux-font-display, 'Playfair Display', Georgia, serif);
-  font-size: clamp(0.8125rem, 1vw, 0.9375rem);
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-family: var(--lame-nav-font);
+  font-size: clamp(0.75rem, 0.9vw, 0.875rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -662,10 +662,10 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 #header-component.header--cosmetic-luxury .header-menu .menu-list__link {
   position: relative;
   font-family: var(--lame-nav-font);
-  font-size: clamp(0.8125rem, 0.95vw, 0.9375rem);
+  font-size: clamp(0.75rem, 0.9vw, 0.875rem);
   font-weight: 500;
-  letter-spacing: 0.01em;
-  text-transform: none;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   padding: 0.4rem 0.55rem;
   color: rgb(var(--lame-nav-cream) / 0.92);
   background: transparent;
@@ -909,9 +909,9 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury .header__navigation-bar-row .menu-list__item {
-  font-family: var(--lame-font-menu, var(--font-body--family));
-  font-size: clamp(0.8125rem, 2.2vw, 0.9375rem);
-  font-weight: 700;
+  font-family: var(--lame-nav-font);
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgb(var(--lame-nav-text) / 0.88);
@@ -3678,7 +3678,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     font-family: var(--lame-nav-font);
     font-size: clamp(0.6875rem, 0.8vw, 0.75rem);
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     padding: 0.45rem 0.7rem;
     color: rgb(var(--lame-nav-text) / 0.92);
@@ -3849,6 +3849,22 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     padding-inline: 15px;
   }
 
+  /* Left logo: logo + menu flush left, actions right — no empty center track */
+  #header-component.header--cosmetic-luxury[data-logo-position='left'][data-menu-row='top'] .header__row--top .header__columns {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'left right';
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='left'] .header__column--left {
+    justify-content: flex-start;
+    gap: clamp(0.75rem, 1.6vw, 1.35rem);
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='left'] .header__column--left .header-logo {
+    flex: 0 0 auto;
+    margin-inline-end: 0;
+  }
+
   #header-component.header--cosmetic-luxury .header__column--left {
     grid-area: left;
     flex: none;
@@ -3874,10 +3890,21 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     gap: var(--lame-header-action-gap) !important;
   }
 
+  /* Centered logo: equal side gutters so logo sits on true viewport center */
+  #header-component.header--cosmetic-luxury[data-logo-position='center'][data-menu-row='top'] .header__row--top .header__columns {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: 'left center right';
+  }
+
+  #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--left {
+    justify-content: flex-start;
+  }
+
   #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--center {
     justify-content: center;
     max-width: none;
-    width: 100%;
+    width: auto;
+    flex: 0 0 auto;
   }
 
   #header-component.header--cosmetic-luxury[data-logo-position='center'] .header__column--center .header-logo {
@@ -3892,7 +3919,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
   #header-component.header--cosmetic-luxury[data-logo-position='center'][data-search-position='right'] .header__column--right .search-action {
     display: flex !important;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     max-width: min(18rem, 28vw);
     margin-inline-end: 0.5rem;
@@ -3900,6 +3927,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
   #header-component.header--cosmetic-luxury[data-logo-position='center'][data-search-position='right'] .header__column--right {
     flex-wrap: nowrap;
+    justify-content: flex-end;
     gap: clamp(0.5rem, 1vw, 0.85rem);
   }
 
@@ -3922,7 +3950,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
     font-family: var(--lame-nav-font);
     padding: 0.35rem 0.65rem;
     font-size: clamp(0.75rem, 0.85vw, 0.8125rem);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     white-space: nowrap;
   }
