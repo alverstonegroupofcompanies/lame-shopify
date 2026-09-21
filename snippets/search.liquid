@@ -1,8 +1,8 @@
 {%- doc -%}
   Renders the header search control.
 
-  Single magnifying-glass icon that opens the shared #search-modal.
-  No duplicate pill bar — one button, one modal.
+  Desktop: pill search bar with gold submit (matches luxury navbar).
+  Mobile/tablet: icon that opens the shared #search-modal.
 
   @param {string} [style] - The style of the search action.
   @param {string} [class] - Additional classes for the search action.
@@ -11,8 +11,41 @@
 
 {% unless style == 'none' %}
   <search-button
-    class="search-action search-action--icon{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
+    class="search-action search-action--icon search-action--pill{% if display_style == 'text' %} search-action--text{% endif %}{% if class != blank %} {{ class | strip }}{% endif %}"
   >
+    <form
+      class="lame-header-search-pill"
+      action="{{ routes.search_url }}"
+      method="get"
+      role="search"
+      aria-label="{{ 'content.search_input_label' | t }}"
+    >
+      <label class="visually-hidden" for="HeaderSearchInput">
+        {{ 'content.search_input_label' | t }}
+      </label>
+      <input
+        id="HeaderSearchInput"
+        class="lame-header-search-pill__input"
+        type="search"
+        name="q"
+        placeholder="{{ 'lame_search.placeholder_nav' | t }}"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      >
+      <input name="options[prefix]" type="hidden" value="last">
+      <button
+        type="submit"
+        class="lame-header-search-pill__submit"
+        aria-label="{{ 'content.search_input_label' | t }}"
+      >
+        <span class="svg-wrapper" aria-hidden="true">
+          {{ 'icon-search.svg' | inline_asset_content }}
+        </span>
+      </button>
+    </form>
+
     <button
       type="button"
       on:click="#search-modal/showDialog"
