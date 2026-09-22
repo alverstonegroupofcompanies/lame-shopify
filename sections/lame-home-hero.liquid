@@ -130,7 +130,7 @@
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--desktop">
-            <p>Add desktop slides with images for tablets ~7″+ and desktop (768px and wider).</p>
+            <p>Add desktop slides with images for tablets and desktop (600px and wider).</p>
           </div>
         {%- endif -%}
 
@@ -148,7 +148,7 @@
           %}
         {%- elsif request.design_mode -%}
           <div class="lame-home-hero__placeholder lame-home-hero__placeholder--mobile">
-            <p>Add mobile slides for phones and small devices under ~7″ (under 768px), or enable “Use desktop slides on mobile”.</p>
+            <p>Add mobile slides for phones only (under 600px), or enable “Use desktop slides on mobile”.</p>
           </div>
         {%- endif -%}
       {%- endif -%}
@@ -165,7 +165,7 @@
     /* Header + announcement take space above; banner fills the rest of the first screen */
     --lame-hero-height-offset: var(--header-group-height, 0px);
     --lame-hero-display-height: auto;
-    --lame-hero-desktop-min: 768px;
+    --lame-hero-desktop-min: 600px;
     --lame-hero-desktop-ratio: 2.4;
     --lame-hero-mobile-ratio: 0.5625;
     --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
@@ -238,13 +238,13 @@
     position: relative;
   }
 
-  /* Mobile: show mobile carousel only */
+  /* Default / tablet+desktop: horizontal desktop banners */
   .lame-home-hero__frame--desktop {
-    display: none;
+    display: block;
   }
 
   .lame-home-hero__frame--mobile {
-    display: block;
+    display: none;
   }
 
   .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
@@ -349,8 +349,8 @@
     max-height: var(--lame-hero-frame-max-height) !important;
   }
 
-  /* Phones / small devices under ~7″: mobile banners */
-  @media screen and (max-width: 767px) {
+  /* Phones only (under 600px): vertical mobile banners */
+  @media screen and (max-width: 599px) {
     .lame-home-hero {
       --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
       --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
@@ -551,8 +551,8 @@
     }
   }
 
-  /* Tablets ~7″+ and desktop (768px+): always full viewport height, full-width image, no crop */
-  @media screen and (min-width: 768px) {
+  /* Tablets + desktop (600px+): horizontal desktop banners, full viewport height */
+  @media screen and (min-width: 600px) {
     .lame-home-hero {
       --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
       --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
@@ -727,7 +727,7 @@
   }
 
   /* Re-assert desktop/tablet: full height + full image (wins over base cover) */
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 600px) {
     .lame-home-hero__carousel .slide__image,
     .lame-home-hero__carousel .slide__image-container img,
     .lame-home-hero__slide-link .slide__image,
@@ -844,7 +844,7 @@
     stroke: currentColor;
   }
 
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 599px) {
     .lame-home-hero__carousel slideshow-arrows,
     .lame-home-hero__carousel slideshow-arrows[position='center'] {
       --lame-hero-arrow-side-gap: 0.75rem;
@@ -866,13 +866,13 @@
     font-size: 0.9rem;
   }
 
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 600px) {
     .lame-home-hero__placeholder--mobile {
       display: none;
     }
   }
 
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 599px) {
     .lame-home-hero__placeholder--desktop {
       display: none;
     }
@@ -1017,7 +1017,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Desktop image",
-          "info": "Shown on tablets ~7″+ and desktop (768px and wider). Hidden on phones when mobile slides exist."
+          "info": "Shown on tablets and desktop (600px and wider). Hidden on phones when mobile slides exist."
         },
         {
           "type": "url",
@@ -1040,7 +1040,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "Mobile image",
-          "info": "Shown on phones and small devices under ~7″ (under 768px). Prefer portrait/tall crop so key content stays visible."
+          "info": "Shown on phones only (under 600px). Prefer portrait/tall crop so key content stays visible."
         },
         {
           "type": "url",

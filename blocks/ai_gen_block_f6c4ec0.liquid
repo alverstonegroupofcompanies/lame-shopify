@@ -22,7 +22,7 @@
   .ai-category-carousel-{{ ai_gen_id }} {
     --ai-category-gap: {{ block.settings.card_gap }}px;
     --ai-category-radius: {{ block.settings.card_border_radius }}px;
-    --ai-category-card-w: min(28vw, 7.25rem);
+    --ai-category-card-w: min(30vw, 8.5rem);
     --ai-category-icon-color: rgb(45 74 34);
     --ai-category-title-size: {{ block.settings.card_title_size }}px;
     width: {{ block.settings.desktop_width_percent }}%;
@@ -77,8 +77,10 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
+    justify-content: center;
     gap: var(--ai-category-gap);
     width: max-content;
+    min-width: 100%;
   }
 
   .ai-category-carousel__card-{{ ai_gen_id }} {
@@ -108,8 +110,8 @@
 
   .ai-category-carousel__icon-orb-{{ ai_gen_id }} {
     position: relative;
-    width: clamp(4.25rem, 11vw, 5.5rem);
-    height: clamp(4.25rem, 11vw, 5.5rem);
+    width: clamp(5.25rem, 14vw, 7rem);
+    height: clamp(5.25rem, 14vw, 7rem);
     border-radius: 50%;
     display: grid;
     place-items: center;
@@ -140,15 +142,15 @@
 
   .ai-category-carousel__icon-orb-{{ ai_gen_id }} .lame-op-category-icon,
   .ai-category-carousel__icon-orb-{{ ai_gen_id }} .lame-op-category-icon svg {
-    width: 46%;
-    height: 46%;
+    width: 72%;
+    height: 72%;
     display: block;
     position: relative;
     z-index: 1;
   }
 
   .ai-category-carousel__icon-orb-{{ ai_gen_id }} .lame-op-category-icon svg [stroke] {
-    stroke-width: 1.85;
+    stroke-width: 1.7;
   }
 
   .ai-category-carousel__title-{{ ai_gen_id }} {
@@ -227,12 +229,17 @@
   @media screen and (max-width: 749px) {
     .ai-category-carousel-{{ ai_gen_id }} {
       --ai-category-gap: 0.85rem;
-      --ai-category-card-w: min(31vw, 6.75rem);
+      --ai-category-card-w: min(34vw, 7.5rem);
+    }
+
+    .ai-category-carousel__track-{{ ai_gen_id }} {
+      justify-content: flex-start;
+      min-width: 0;
     }
 
     .ai-category-carousel__icon-orb-{{ ai_gen_id }} {
-      width: 4.35rem;
-      height: 4.35rem;
+      width: 5.5rem;
+      height: 5.5rem;
     }
 
     .ai-category-carousel__nav-{{ ai_gen_id }} {
@@ -243,19 +250,19 @@
   @media screen and (min-width: 750px) and (max-width: 989px) {
     .ai-category-carousel-{{ ai_gen_id }} {
       --ai-category-gap: 1rem;
-      --ai-category-card-w: min(18vw, 8rem);
+      --ai-category-card-w: min(20vw, 9rem);
     }
 
     .ai-category-carousel__icon-orb-{{ ai_gen_id }} {
-      width: 5rem;
-      height: 5rem;
+      width: 6.25rem;
+      height: 6.25rem;
     }
   }
 
   @media screen and (min-width: 990px) {
     .ai-category-carousel-{{ ai_gen_id }} {
-      --ai-category-gap: 1.1rem;
-      --ai-category-card-w: min(7.5rem, 11vw);
+      --ai-category-gap: 1.25rem;
+      --ai-category-card-w: min(8.75rem, 12vw);
     }
 
     .ai-category-carousel__container-{{ ai_gen_id }} {
@@ -263,19 +270,19 @@
     }
 
     .ai-category-carousel__icon-orb-{{ ai_gen_id }} {
-      width: 5.35rem;
-      height: 5.35rem;
+      width: 6.75rem;
+      height: 6.75rem;
     }
   }
 
   @media screen and (min-width: 1200px) {
     .ai-category-carousel-{{ ai_gen_id }} {
-      --ai-category-card-w: min(7.75rem, 9.5vw);
+      --ai-category-card-w: min(9rem, 10.5vw);
     }
 
     .ai-category-carousel__icon-orb-{{ ai_gen_id }} {
-      width: 5.6rem;
-      height: 5.6rem;
+      width: 7rem;
+      height: 7rem;
     }
   }
 
@@ -366,66 +373,46 @@
     var scroller = root.querySelector('[data-ai-category-scroller]');
     if (!track || !scroller) return;
 
-    var cards = Array.prototype.slice.call(track.querySelectorAll('[data-ai-category-card]:not([data-clone])'));
-    if (cards.length < 2) {
-      cards = Array.prototype.slice.call(track.querySelectorAll('[data-ai-category-card]'));
-    }
+    var cards = Array.prototype.slice.call(track.querySelectorAll('[data-ai-category-card]'));
     if (cards.length < 2) return;
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var autoplayMs = Math.max(2, parseInt(root.getAttribute('data-auto-slide-speed') || '4', 10)) * 1000;
     var timer = null;
-    var looping = false;
     var prevBtn = root.querySelector('[data-ai-category-prev]');
     var nextBtn = root.querySelector('[data-ai-category-next]');
 
-    function clearClones() {
-      track.querySelectorAll('[data-clone="true"]').forEach(function (node) {
-        node.remove();
-      });
-    }
-
-    function cloneForLoop() {
-      clearClones();
-      cards.forEach(function (card) {
-        var clone = card.cloneNode(true);
-        clone.setAttribute('data-clone', 'true');
-        clone.setAttribute('aria-hidden', 'true');
-        track.appendChild(clone);
-      });
-    }
-
     function cardStep() {
-      var first = track.querySelector('[data-ai-category-card]');
+      var first = cards[0];
       if (!first) return 0;
       var style = window.getComputedStyle(track);
       var gap = parseFloat(style.columnGap || style.gap || '0') || 0;
       return first.getBoundingClientRect().width + gap;
     }
 
-    function normalizeLoop() {
-      if (looping) return;
-      var step = cardStep();
-      if (!step) return;
-      var max = step * cards.length;
-      if (scroller.scrollLeft >= max - 2) {
-        looping = true;
-        scroller.scrollLeft = scroller.scrollLeft - max;
-        requestAnimationFrame(function () {
-          looping = false;
-        });
-      }
+    function maxScroll() {
+      return Math.max(0, scroller.scrollWidth - scroller.clientWidth);
     }
 
     function advance(dir) {
       var step = cardStep();
       if (!step) return;
+      var next = scroller.scrollLeft + step * (dir || 1);
+      var max = maxScroll();
+      if (next > max + 2) {
+        scroller.scrollTo({ left: 0, behavior: 'smooth' });
+        return;
+      }
+      if (next < -2) {
+        scroller.scrollTo({ left: max, behavior: 'smooth' });
+        return;
+      }
       scroller.scrollBy({ left: step * (dir || 1), behavior: 'smooth' });
     }
 
     function startAutoplay() {
       stopAutoplay();
-      if (reduceMotion) return;
+      if (reduceMotion || maxScroll() < 8) return;
       timer = window.setInterval(function () {
         if (!document.hidden) advance(1);
       }, autoplayMs);
@@ -438,8 +425,6 @@
       }
     }
 
-    cloneForLoop();
-    scroller.addEventListener('scroll', normalizeLoop, { passive: true });
     scroller.addEventListener('pointerenter', stopAutoplay);
     scroller.addEventListener('pointerleave', startAutoplay);
     scroller.addEventListener('touchstart', stopAutoplay, { passive: true });
@@ -464,7 +449,7 @@
       if (document.hidden) stopAutoplay();
       else startAutoplay();
     });
-    window.addEventListener('resize', normalizeLoop);
+    window.addEventListener('resize', startAutoplay);
     startAutoplay();
   })();
 </script>

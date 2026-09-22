@@ -2,7 +2,7 @@
  * Mobile home hero — instant slide snap (no smooth-scroll animation on swipe).
  * Scoped to .lame-home-hero__carousel--mobile only.
  */
-const MOBILE_HERO_MQ = window.matchMedia('(max-width: 767px)');
+const MOBILE_HERO_MQ = window.matchMedia('(max-width: 599px)');
 
 /** @param {HTMLElement} scroller */
 function patchMobileHeroScroller(scroller) {
