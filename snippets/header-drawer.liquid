@@ -169,6 +169,21 @@
               <div class="menu-drawer__section menu-drawer__section--info">
                 {% render 'lame-drawer-info-links' %}
               </div>
+
+              {% liquid
+                assign drawer_community_heading = block_settings.drawer_social_heading | default: 'Join our community'
+                assign drawer_community_text = block_settings.drawer_social_text
+              %}
+              <div class="menu-drawer__section menu-drawer__section--community">
+                {% render 'lame-social-links',
+                  block: block,
+                  setting_prefix: 'drawer_',
+                  class: 'lame-drawer-community',
+                  heading: drawer_community_heading,
+                  text: drawer_community_text,
+                  show_labels: true
+                %}
+              </div>
             </div>
         {% elsif linklist.levels < 3 %}
             <ul class="menu-drawer__menu has-submenu" role="list">
@@ -694,7 +709,18 @@
       </div>
 
       {% if data_header_drawer_type == 'mobile-drawer' and drawer_luxury_layout == false %}
-        {% render 'menu-drawer-social-icons', block: block, linklist: linklist %}
+        {% liquid
+          assign drawer_community_heading = block_settings.drawer_social_heading | default: 'Join our community'
+          assign drawer_community_text = block_settings.drawer_social_text
+        %}
+        {% render 'lame-social-links',
+          block: block,
+          setting_prefix: 'drawer_',
+          class: 'menu-drawer__social lame-drawer-community',
+          heading: drawer_community_heading,
+          text: drawer_community_text,
+          show_labels: true
+        %}
       {% endif %}
 
       {% unless drawer_simple_menu %}

@@ -1,0 +1,129 @@
+{%- doc -%}
+  Shared Instagram / Facebook / YouTube / WhatsApp links for header + drawer.
+  Reads URLs from a block using a setting prefix (default: drawer_).
+
+  @param {object} block - Block with social URL settings
+  @param {string} [setting_prefix] - Prefix before *_url keys (default: drawer_)
+  @param {string} [class] - Extra class on the root
+  @param {string} [heading] - Optional section heading
+  @param {string} [text] - Optional supporting text
+  @param {boolean} [show_labels] - Show text labels next to icons (default: true)
+  @param {boolean} [icon_only] - Compact icon buttons without labels
+{%- enddoc -%}
+
+{%- liquid
+  assign prefix = setting_prefix | default: 'drawer_'
+  assign show_labels = show_labels | default: true, allow_false: true
+  assign icon_only = icon_only | default: false
+
+  if icon_only
+    assign show_labels = false
+  endif
+
+  assign key_ig = prefix | append: 'instagram_url'
+  assign key_fb = prefix | append: 'facebook_url'
+  assign key_yt = prefix | append: 'youtube_url'
+  assign key_wa = prefix | append: 'whatsapp_url'
+  assign ig = block.settings[key_ig] | strip
+  assign fb = block.settings[key_fb] | strip
+  assign yt = block.settings[key_yt] | strip
+  assign wa = block.settings[key_wa] | strip
+
+  assign has_links = false
+  if ig != blank or fb != blank or yt != blank or wa != blank
+    assign has_links = true
+  endif
+-%}
+
+{%- if has_links -%}
+  <div class="lame-social-links{% if class != blank %} {{ class }}{% endif %}{% if icon_only %} lame-social-links--icons{% endif %}">
+    {%- if heading != blank -%}
+      <p class="lame-social-links__heading">{{ heading | escape }}</p>
+    {%- endif -%}
+    {%- if text != blank -%}
+      <p class="lame-social-links__text">{{ text | escape }}</p>
+    {%- endif -%}
+    <ul class="lame-social-links__list" role="list">
+      {%- if ig != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ ig }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            {% if icon_only %}title="Instagram"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor"/>
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">Instagram</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+      {%- if fb != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ fb }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            {% if icon_only %}title="Facebook"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M14 8.5h2.5l-.4 3H14V21h-3.2v-9.5H9v-3h1.8V7.2c0-1.9 1.1-3.2 3.2-3.2.9 0 1.7.1 1.9.1v2.3H15c-.9 0-1 .4-1 1v1.1z"/>
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">Facebook</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+      {%- if yt != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ yt }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+            {% if icon_only %}title="YouTube"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18 5 12 5 12 5s-6 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8C2 9 2 12 2 12s0 3 .4 4.8a2.5 2.5 0 0 0 1.8 1.8C6 19 12 19 12 19s6 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.8.4-4.8.4-4.8s0-3-.4-4.8z"/>
+                <path fill="#fff" d="M10 15.5V8.5l5.5 3.5L10 15.5z"/>
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">YouTube</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+      {%- if wa != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ wa }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp Channel"
+            {% if icon_only %}title="WhatsApp Channel"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path fill="currentColor" d="M12 3.2a8.8 8.8 0 0 0-7.6 13.3L3.2 21l4.6-1.2A8.8 8.8 0 1 0 12 3.2zm0 15.9c-1.3 0-2.6-.3-3.7-1l-.3-.2-2.6.7.7-2.5-.2-.3a7 7 0 1 1 6.1 3.3z"/>
+                <path fill="currentColor" d="M16.1 14.2c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.2.2-.6.7-.8.8-.1.2-.3.2-.5.1-.2-.1-.9-.3-1.8-1.2-.7-.6-1.1-1.3-1.2-1.5-.1-.2 0-.3.1-.4l.3-.3c.1-.1.1-.2.2-.3.1-.1 0-.2 0-.3 0-.1-.5-1.3-.7-1.8-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.7.7-.7 1.8s.8 2.2.9 2.3c.1.2 1.5 2.4 3.7 3.3.5.2.9.3 1.2.4.5.1.9.1 1.3.1.4-.1 1.2-.5 1.4-.9.2-.4.2-.8.1-.9 0-.1-.2-.2-.4-.3z"/>
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">WhatsApp</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+    </ul>
+  </div>
+{%- endif -%}
