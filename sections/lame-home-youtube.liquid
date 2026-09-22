@@ -4,10 +4,8 @@
     assign video_id = section.settings.youtube_url.id
   endif
 
-  assign poster_url = ''
-  if video_id != blank
-    assign poster_url = 'https://i.ytimg.com/vi/' | append: video_id | append: '/hqdefault.jpg'
-  endif
+  assign cover_image = section.settings.cover_image
+  assign poster_alt = section.settings.heading | default: 'Blow Dry Brush demo'
 
   assign watch_url = section.settings.watch_link
   if watch_url == blank and video_id != blank
@@ -39,15 +37,28 @@
                 class="lame-home-youtube__poster"
                 aria-label="{{ section.settings.play_label | default: 'Play video' | escape }}"
               >
-                <img
-                  class="lame-home-youtube__poster-img"
-                  src="{{ poster_url }}"
-                  alt="{{ section.settings.heading | default: 'Blow Dry Brush demo' | escape }}"
-                  width="480"
-                  height="360"
-                  loading="lazy"
-                  decoding="async"
-                >
+                {%- if cover_image != blank -%}
+                  {{
+                    cover_image
+                    | image_url: width: 1600
+                    | image_tag:
+                      class: 'lame-home-youtube__poster-img',
+                      loading: 'lazy',
+                      widths: '480,720,960,1200,1600',
+                      sizes: '(min-width: 750px) 55vw, 94vw',
+                      alt: poster_alt
+                  }}
+                {%- else -%}
+                  <img
+                    class="lame-home-youtube__poster-img"
+                    src="{{ 'lame-blow-dry-brush-youtube-thumb.png' | asset_url }}"
+                    alt="{{ poster_alt | escape }}"
+                    width="1280"
+                    height="720"
+                    loading="lazy"
+                    decoding="async"
+                  >
+                {%- endif -%}
                 <span class="lame-home-youtube__play" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
                     <path d="M8.5 6.8v10.4L18 12 8.5 6.8Z"/>
@@ -409,6 +420,12 @@
       "label": "YouTube URL",
       "accept": ["youtube"],
       "info": "Use a YouTube watch or Shorts link."
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_image",
+      "label": "Custom thumbnail",
+      "info": "Optional. Leave empty to use the Blow Dry Brush thumbnail asset."
     },
     {
       "type": "select",

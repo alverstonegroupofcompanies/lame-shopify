@@ -231,83 +231,85 @@
         </ul>
       </div>
     </div>
+  </div>
 
-    {%- comment -%} Ventures {%- endcomment -%}
-    {% if section.settings.show_ventures %}
-      {% if venture_blocks.size > 0 or request.design_mode %}
-        <div class="footer-premium__ventures-bar" aria-label="{{ section.settings.ventures_heading | default: 'Our Ventures' | escape }}">
-          <div class="footer-premium__ventures-bar-inner">
-            {% if section.settings.ventures_heading != blank %}
-              <p class="footer-premium__ventures-bar-label">{{ section.settings.ventures_heading | escape }}</p>
-              <div class="footer-premium__ventures-ornament" aria-hidden="true">
-                <span class="footer-premium__ventures-ornament-line"></span>
-                <span class="footer-premium__ventures-ornament-mark"></span>
-                <span class="footer-premium__ventures-ornament-line"></span>
-              </div>
-            {% endif %}
-            <ul class="footer-premium__ventures-row" role="list">
-              {% for block in venture_blocks %}
-                {% liquid
-                  assign venture_image = block.settings.image
-                  assign venture_alt = block.settings.alt | default: block.settings.title
-                  assign venture_asset = block.settings.asset | strip
-                  assign has_venture_logo = false
-                  if venture_image != blank or venture_asset != blank
-                    assign has_venture_logo = true
-                  endif
-                %}
-                {% if has_venture_logo == false and request.design_mode == false %}
-                  {% continue %}
+  {%- comment -%} Ventures {%- endcomment -%}
+  {% if section.settings.show_ventures %}
+    {% if venture_blocks.size > 0 or request.design_mode %}
+      <div class="footer-premium__ventures-bar" aria-label="{{ section.settings.ventures_heading | default: 'Our Ventures' | escape }}">
+        <div class="footer-premium__ventures-bar-inner">
+          {% if section.settings.ventures_heading != blank %}
+            <p class="footer-premium__ventures-bar-label">{{ section.settings.ventures_heading | escape }}</p>
+            <div class="footer-premium__ventures-ornament" aria-hidden="true">
+              <span class="footer-premium__ventures-ornament-line"></span>
+              <span class="footer-premium__ventures-ornament-mark"></span>
+              <span class="footer-premium__ventures-ornament-line"></span>
+            </div>
+          {% endif %}
+          <ul class="footer-premium__ventures-row" role="list">
+            {% for block in venture_blocks %}
+              {% liquid
+                assign venture_image = block.settings.image
+                assign venture_alt = block.settings.alt | default: block.settings.title
+                assign venture_asset = block.settings.asset | strip
+                assign has_venture_logo = false
+                if venture_image != blank or venture_asset != blank
+                  assign has_venture_logo = true
+                endif
+              %}
+              {% if has_venture_logo == false and request.design_mode == false %}
+                {% continue %}
+              {% endif %}
+              <li class="footer-premium__venture-item" {{ block.shopify_attributes }}>
+                {% if block.settings.link != blank %}
+                  <a
+                    href="{{ block.settings.link }}"
+                    class="footer-premium__venture-link"
+                    aria-label="{{ venture_alt | escape }}"
+                    {% if block.settings.open_in_new_tab %}
+                      target="_blank" rel="noopener noreferrer"
+                    {% endif %}
+                  >
+                {% else %}
+                  <span class="footer-premium__venture-link">
                 {% endif %}
-                <li class="footer-premium__venture-item" {{ block.shopify_attributes }}>
-                  {% if block.settings.link != blank %}
-                    <a
-                      href="{{ block.settings.link }}"
-                      class="footer-premium__venture-link"
-                      aria-label="{{ venture_alt | escape }}"
-                      {% if block.settings.open_in_new_tab %}
-                        target="_blank" rel="noopener noreferrer"
-                      {% endif %}
-                    >
-                  {% else %}
-                    <span class="footer-premium__venture-link">
-                  {% endif %}
-                  {% if venture_image != blank %}
-                    {{
-                      venture_image
-                      | image_url: width: 1920
-                      | image_tag:
-                        class: 'footer-premium__venture-logo',
-                        loading: 'lazy',
-                        widths: '320,480,640,800,960,1200,1440,1920',
-                        sizes: '(max-width: 749px) 44vw, 320px',
-                        alt: venture_alt
-                    }}
-                  {% elsif venture_asset != blank %}
-                    <img
-                      class="footer-premium__venture-logo"
-                      src="{{ venture_asset | asset_url }}"
-                      alt="{{ venture_alt | escape }}"
-                      width="560"
-                      height="180"
-                      loading="lazy"
-                    >
-                  {% elsif request.design_mode %}
-                    <span class="footer-premium__venture-placeholder">Add venture logo</span>
-                  {% endif %}
-                  {% if block.settings.link != blank %}
-                    </a>
-                  {% else %}
-                    </span>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
+                {% if venture_image != blank %}
+                  {{
+                    venture_image
+                    | image_url: width: 1920
+                    | image_tag:
+                      class: 'footer-premium__venture-logo',
+                      loading: 'lazy',
+                      widths: '320,480,640,800,960,1200,1440,1920',
+                      sizes: '(max-width: 749px) 44vw, 320px',
+                      alt: venture_alt
+                  }}
+                {% elsif venture_asset != blank %}
+                  <img
+                    class="footer-premium__venture-logo"
+                    src="{{ venture_asset | asset_url }}"
+                    alt="{{ venture_alt | escape }}"
+                    width="560"
+                    height="180"
+                    loading="lazy"
+                  >
+                {% elsif request.design_mode %}
+                  <span class="footer-premium__venture-placeholder">Add venture logo</span>
+                {% endif %}
+                {% if block.settings.link != blank %}
+                  </a>
+                {% else %}
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
         </div>
-      {% endif %}
+      </div>
     {% endif %}
+  {% endif %}
 
+  <div class="footer-premium__shell footer-premium__shell--bottom">
     {%- comment -%} Legal {%- endcomment -%}
     <div class="footer-premium__legal">
       {% if section.settings.trust_badges != blank %}
@@ -367,7 +369,10 @@
     margin-inline: auto;
     display: grid;
     gap: clamp(1.75rem, 3.5vw, 2.75rem);
-    overflow: visible;
+  }
+
+  #footer-{{ section.id }} .footer-premium__shell--bottom {
+    padding-block: clamp(1.25rem, 2.5vw, 1.75rem);
   }
 
   #footer-{{ section.id }} .footer-premium__top {
@@ -570,8 +575,7 @@
   }
 
   #footer-{{ section.id }} .footer-premium__ventures-bar {
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
+    width: 100%;
     border-top: 1px solid #c5a059;
     border-bottom: 1px solid #c5a059;
     background-color: #f9f8f3;
