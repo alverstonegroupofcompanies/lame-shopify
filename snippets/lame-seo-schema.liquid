@@ -9,6 +9,8 @@
   if settings.logo != blank
     assign lame_logo = settings.logo | image_url: width: 512 | prepend: 'https:'
   endif
+  assign lame_search_placeholder = '{' | append: 'search_term_string' | append: '}'
+  assign lame_search_template = lame_org_url | append: '/search?q=' | append: lame_search_placeholder
 -%}
 
 <script type="application/ld+json">
@@ -58,7 +60,7 @@
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": {{ lame_org_url | append: '/search?q={search_term_string}' | json }}
+          "urlTemplate": {{ lame_search_template | json }}
         },
         "query-input": "required name=search_term_string"
       }
