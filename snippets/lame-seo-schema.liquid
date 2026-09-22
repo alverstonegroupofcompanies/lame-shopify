@@ -1,0 +1,93 @@
+{% doc %}
+  Sitewide Organization + homepage WebSite JSON-LD for Google brand entity and search understanding.
+{% enddoc %}
+
+{%- liquid
+  assign lame_org_name = shop.name | default: 'My Lamstone'
+  assign lame_org_url = request.origin
+  assign lame_logo = blank
+  if settings.logo != blank
+    assign lame_logo = settings.logo | image_url: width: 512 | prepend: 'https:'
+  endif
+-%}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ lame_org_name | json }},
+    "url": {{ lame_org_url | json }},
+    {%- if lame_logo != blank -%}
+    "logo": {{ lame_logo | json }},
+    "image": {{ lame_logo | json }},
+    {%- endif -%}
+    "email": "mail@mylamstone.com",
+    "telephone": "+91-7012357019",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Z Avenue, 10/20/E-10/20/G, NH 66, Mangalapuram",
+      "addressLocality": "Thiruvananthapuram",
+      "addressRegion": "Kerala",
+      "postalCode": "695317",
+      "addressCountry": "IN"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91-7012357019",
+      "contactType": "customer service",
+      "areaServed": "IN",
+      "availableLanguage": ["en", "ml"]
+    }
+  }
+</script>
+
+{%- if request.page_type == 'index' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": {{ lame_org_name | json }},
+      "alternateName": "MyLamstone",
+      "url": {{ lame_org_url | json }},
+      "publisher": {
+        "@type": "Organization",
+        "name": {{ lame_org_name | json }},
+        "url": {{ lame_org_url | json }}
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": {{ lame_org_url | append: '/search?q={search_term_string}' | json }}
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  </script>
+{%- endif -%}
+
+{%- if request.page_type == 'collection' and collection != blank -%}
+  {%- liquid
+    assign lame_collection_desc = collection.description | strip_html | truncate: 300
+    if lame_collection_desc == blank
+      assign lame_collection_desc = 'Shop ' | append: collection.title | append: ' at ' | append: lame_org_name
+    endif
+  -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": {{ collection.title | json }},
+      "description": {{ lame_collection_desc | json }},
+      "url": {{ request.origin | append: collection.url | json }},
+      {%- if collection.image -%}
+      "image": {{ collection.image | image_url: width: 1200 | prepend: 'https:' | json }},
+      {%- endif -%}
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": {{ lame_org_name | json }},
+        "url": {{ lame_org_url | json }}
+      }
+    }
+  </script>
+{%- endif -%}

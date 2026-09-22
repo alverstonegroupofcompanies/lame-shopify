@@ -34,6 +34,7 @@
   assign og_site_name = shop.name
   assign document_title = page_title
   assign meta_description = page_description
+  assign robots_content = nil
 
   if request.page_type == 'index'
     assign og_title = lame_home_seo_title
@@ -43,10 +44,27 @@
     assign meta_description = lame_home_seo_description
   endif
 
+  comment
+    Utility pages should not appear as Google sitelinks (e.g. "Your cart is empty").
+  endcomment
+  if request.page_type == 'cart' or request.page_type == 'search' or request.page_type == '404' or request.page_type == 'password' or request.page_type == 'captcha' or request.page_type contains 'customers'
+    assign robots_content = 'noindex, nofollow'
+  endif
+
   if request.page_type == 'product'
     assign og_type = 'product'
   elsif request.page_type == 'article'
     assign og_type = 'article'
+  elsif request.page_type == 'collection'
+    assign og_type = 'website'
+    if meta_description == blank and collection.description != blank
+      assign meta_description = collection.description | strip_html | truncate: 155
+      assign og_description = meta_description
+    endif
+    if meta_description == blank
+      assign meta_description = 'Shop ' | append: collection.title | append: ' at ' | append: lame_brand_name | append: '. Premium skincare, cosmetics and beauty essentials delivered from Kerala.'
+      assign og_description = meta_description
+    endif
   elsif request.page_type == 'password'
     assign og_url = request.origin
   endif
@@ -60,6 +78,9 @@
   endif
   if og_image == blank and request.page_type == 'product' and product.featured_media
     assign og_image = product.featured_media.preview_image
+  endif
+  if og_image == blank and request.page_type == 'collection' and collection.image
+    assign og_image = collection.image
   endif
   if og_image == blank and settings.social_sharing_image != blank
     assign og_image = settings.social_sharing_image
@@ -162,3 +183,10 @@
     content="{{ meta_description | escape }}"
   >
 {% endif %}
+
+{%- if robots_content != blank -%}
+  <meta
+    name="robots"
+    content="{{ robots_content }}"
+  >
+{%- endif -%}

@@ -1,0 +1,24 @@
+{% comment %}
+  Preserve Shopify defaults and reinforce blocking of utility paths
+  that should never become Google sitelinks.
+{% endcomment %}
+{% for group in robots.default_groups %}
+  {{- group.user_agent -}}
+
+  {% for rule in group.rules %}
+    {{- rule -}}
+  {% endfor %}
+
+  {%- if group.user_agent.value == '*' -%}
+    {{ 'Disallow: /cart' }}
+    {{ 'Disallow: /account' }}
+    {{ 'Disallow: /search' }}
+    {{ 'Disallow: /orders' }}
+    {{ 'Disallow: /checkouts/' }}
+    {{ 'Disallow: /checkout' }}
+  {%- endif -%}
+
+  {%- if group.sitemap != blank -%}
+    {{ group.sitemap }}
+  {%- endif -%}
+{% endfor %}

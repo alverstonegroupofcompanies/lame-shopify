@@ -699,27 +699,52 @@ body.template-index .lame-store-stats__heading {
   margin-inline: auto;
 }
 
-/* Category cards: uniform crop so carousel shows multiple cards cleanly */
-.template-index [class*='ai-category-carousel__image-wrapper-'] {
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
+/* Category icon tiles — keep compact orb + label layout */
+.template-index [class*='ai-category-carousel__card-'] {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }
 
-.template-index [class*='ai-category-carousel__image-'] {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  object-fit: cover;
-  object-position: left center;
+.template-index [class*='ai-category-carousel__title-'] {
+  text-shadow: none !important;
+  color: rgb(var(--lame-cos-ink));
 }
 
-/* Tablet: match top discount tiles (full-width contain cards) */
 @media screen and (min-width: 750px) and (max-width: 1199px) {
   .template-index [class*='ai-category-carousel-']:not([class*='__']) {
     width: 100% !important;
+    max-width: var(--page-width) !important;
+    padding-inline: max(1rem, var(--page-margin)) !important;
+  }
+
+  .template-index [class*='ai-category-carousel__container-'] {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 0;
+  }
+
+  .template-index [class*='ai-category-carousel__track-'] {
+    display: flex !important;
+    flex-wrap: nowrap;
+    grid-template-columns: none !important;
+    width: max-content;
+  }
+
+  .template-index [class*='ai-category-carousel__card-'] {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    scroll-snap-align: start;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .template-index [class*='ai-category-carousel-']:not([class*='__']) {
+    width: 100% !important;
     max-width: none !important;
-    padding-inline: 0.5rem !important;
+    padding-inline: 0.75rem !important;
   }
 
   .template-index [class*='ai-category-carousel__container-'] {
@@ -732,78 +757,13 @@ body.template-index .lame-store-stats__heading {
     display: flex !important;
     flex-wrap: nowrap;
     grid-template-columns: none !important;
-    gap: 0.75rem;
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .template-index [class*='ai-category-carousel__track-']::-webkit-scrollbar {
-    display: none;
+    width: max-content;
+    gap: 0.85rem;
   }
 
   .template-index [class*='ai-category-carousel__card-'] {
-    flex: 0 0 100%;
-    width: 100%;
-    max-width: 100%;
-    scroll-snap-align: start;
-    overflow: hidden;
-    border-radius: 12px;
-  }
-
-  .template-index [class*='ai-category-carousel__image-wrapper-'] {
-    aspect-ratio: unset;
-    width: 100%;
-    height: auto;
-    background: transparent;
-  }
-
-  .template-index [class*='ai-category-carousel__image-'] {
-    width: 100%;
-    height: auto !important;
-    max-height: none;
-    object-fit: contain;
-    object-position: center;
-  }
-}
-
-@media screen and (max-width: 749px) {
-  .template-index [class*='ai-category-carousel-']:not([class*='__']) {
-    width: 100% !important;
-    max-width: none !important;
-    padding-inline: 0 !important;
-  }
-
-  .template-index [class*='ai-category-carousel__container-'] {
-    width: 100%;
+    width: auto;
     max-width: none;
-    padding-inline: 0;
-  }
-
-  .template-index [class*='ai-category-carousel__track-'] {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(0.5rem, 1.4vw, 1rem);
-    width: 100%;
-  }
-
-  .template-index [class*='ai-category-carousel__card-'] {
-    width: 100%;
-    max-width: none;
-    overflow: hidden;
-    border-radius: clamp(8px, 1vw, 14px);
-  }
-
-  .template-index [class*='ai-category-carousel__image-wrapper-'] {
-    width: 100%;
-    aspect-ratio: 1024 / 682;
-  }
-
-  .template-index [class*='ai-category-carousel__image-'] {
-    object-position: center;
   }
 }
 body.template-index .lame-signature__wrap {
