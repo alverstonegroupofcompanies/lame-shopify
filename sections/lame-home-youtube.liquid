@@ -23,7 +23,7 @@
       class="lame-home-youtube__wrap spacing-style"
       style="{% render 'spacing-padding', settings: section.settings %}"
     >
-      <div class="lame-home-youtube__grid" data-lame-reveal>
+      <div class="lame-home-youtube__grid">
         <div class="lame-home-youtube__media">
           {%- if video_id != blank -%}
             <div
@@ -75,11 +75,20 @@
 
         <div class="lame-home-youtube__content">
           {%- if section.settings.eyebrow != blank -%}
-            <p class="lame-home-youtube__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+            <p class="lame-home-youtube__eyebrow">
+              <span class="lame-home-youtube__eyebrow-mark" aria-hidden="true"></span>
+              {{ section.settings.eyebrow | escape }}
+            </p>
           {%- endif -%}
 
           {%- if section.settings.heading != blank -%}
-            <h2 class="lame-home-youtube__heading">{{ section.settings.heading | escape }}</h2>
+            <h2 class="lame-home-youtube__heading">
+              {%- if section.settings.heading contains 'Salon-smooth' -%}
+                {{ section.settings.heading | escape | replace: 'Salon-smooth', '<span class="lame-home-youtube__highlight">Salon-smooth</span>' }}
+              {%- else -%}
+                <span class="lame-home-youtube__highlight">{{ section.settings.heading | escape }}</span>
+              {%- endif -%}
+            </h2>
           {%- endif -%}
 
           {%- if section.settings.description != blank -%}
@@ -131,25 +140,6 @@
       const section = document.getElementById('shopify-section-{{ section.id }}');
       if (!section) return;
 
-      const reveal = section.querySelector('[data-lame-reveal]');
-      if (reveal) {
-        if ('IntersectionObserver' in window) {
-          const observer = new IntersectionObserver(
-            (entries, obs) => {
-              entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                entry.target.classList.add('is-visible');
-                obs.unobserve(entry.target);
-              });
-            },
-            { threshold: 0.15 }
-          );
-          observer.observe(reveal);
-        } else {
-          reveal.classList.add('is-visible');
-        }
-      }
-
       const player = section.querySelector('[data-lame-youtube]');
       if (!player) return;
       const poster = player.querySelector('.lame-home-youtube__poster');
@@ -191,14 +181,6 @@
     background:
       radial-gradient(ellipse 70% 80% at 100% 0%, rgb(var(--brand-gold, 201 169 98) / 0.12), transparent 55%),
       linear-gradient(160deg, rgb(var(--color-background-rgb)) 0%, rgb(var(--color-foreground-rgb) / 0.03) 100%);
-    opacity: 0;
-    transform: translateY(14px);
-    transition: opacity 0.55s ease, transform 0.55s ease;
-  }
-
-  .lame-home-youtube__grid.is-visible {
-    opacity: 1;
-    transform: none;
   }
 
   .lame-home-youtube__player {
@@ -277,101 +259,157 @@
 
   .lame-home-youtube__content {
     display: grid;
-    gap: clamp(0.85rem, 1.6vw, 1.15rem);
+    gap: clamp(0.95rem, 1.8vw, 1.25rem);
     align-content: center;
-    max-width: 36rem;
+    max-width: 38rem;
   }
 
   .lame-home-youtube__eyebrow {
     margin: 0;
-    font-size: 0.78rem;
-    letter-spacing: 0.16em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: fit-content;
+    padding: 0.35rem 0.75rem 0.35rem 0.55rem;
+    border-radius: 999px;
+    background: rgb(20 63 46 / 0.08);
+    border: 1px solid rgb(20 63 46 / 0.12);
+    font-family: 'Jost', var(--font-body--family), sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgb(var(--color-foreground-rgb) / 0.55);
+    color: #154230;
+  }
+
+  .lame-home-youtube__eyebrow-mark {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: #c5a059;
+    box-shadow: 0 0 0 3px rgb(197 160 89 / 0.22);
   }
 
   .lame-home-youtube__heading {
     margin: 0;
-    font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1.65rem, 3.2vw, 2.35rem);
-    font-weight: 500;
-    letter-spacing: -0.025em;
-    line-height: 1.18;
-    color: rgb(var(--color-foreground-heading-rgb));
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-size: clamp(2.05rem, 4.2vw, 3.15rem);
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    color: #122018;
+  }
+
+  .lame-home-youtube__highlight {
+    display: inline;
+    padding: 0.05em 0.18em;
+    border-radius: 0.18em;
+    background: linear-gradient(
+      180deg,
+      transparent 55%,
+      rgb(197 160 89 / 0.42) 55%,
+      rgb(197 160 89 / 0.42) 92%,
+      transparent 92%
+    );
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
 
   .lame-home-youtube__description {
     margin: 0;
-    font-size: clamp(0.98rem, 1.4vw, 1.08rem);
-    line-height: 1.6;
-    color: rgb(var(--color-foreground-rgb) / 0.72);
+    font-family: 'Jost', var(--font-body--family), sans-serif;
+    font-size: clamp(1.02rem, 1.55vw, 1.14rem);
+    font-weight: 400;
+    line-height: 1.65;
+    color: rgb(18 32 24 / 0.78);
   }
 
   .lame-home-youtube__description p {
     margin: 0;
   }
 
+  .lame-home-youtube__description strong,
+  .lame-home-youtube__description b {
+    color: #154230;
+    font-weight: 600;
+  }
+
   .lame-home-youtube__features {
     display: grid;
-    gap: 0.55rem;
-    margin: 0.2rem 0 0;
+    gap: 0.7rem;
+    margin: 0.35rem 0 0;
+    padding: 1rem 1.1rem;
+    border-radius: 14px;
+    background: rgb(20 63 46 / 0.045);
+    border: 1px solid rgb(20 63 46 / 0.08);
   }
 
   .lame-home-youtube__feature {
     display: flex;
     align-items: flex-start;
-    gap: 0.7rem;
-    font-size: clamp(0.95rem, 1.3vw, 1.05rem);
-    line-height: 1.45;
-    color: rgb(var(--color-foreground-rgb) / 0.82);
+    gap: 0.75rem;
+    font-family: 'Jost', var(--font-body--family), sans-serif;
+    font-size: clamp(1rem, 1.35vw, 1.1rem);
+    font-weight: 500;
+    line-height: 1.4;
+    color: #1a2c22;
   }
 
   .lame-home-youtube__feature-mark {
-    width: 0.55rem;
-    height: 0.55rem;
-    margin-top: 0.45rem;
+    width: 0.62rem;
+    height: 0.62rem;
+    margin-top: 0.38rem;
     border-radius: 999px;
     flex-shrink: 0;
-    background: rgb(var(--brand-gold, 201 169 98));
+    background: linear-gradient(145deg, #ddc482, #c5a059);
+    box-shadow: 0 0 0 3px rgb(197 160 89 / 0.18);
   }
 
   .lame-home-youtube__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 0.45rem;
+    gap: 0.8rem;
+    margin-top: 0.55rem;
   }
 
   .lame-home-youtube__btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    min-height: 2.85rem;
-    padding: 0.7rem 1.35rem;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.45rem;
     border-radius: 999px;
-    font-size: 0.88rem;
-    letter-spacing: 0.04em;
+    font-family: 'Jost', var(--font-body--family), sans-serif;
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .lame-home-youtube__btn--primary {
     color: #fff;
-    background: rgb(var(--color-foreground-rgb));
+    background: #154230;
+    box-shadow: 0 10px 24px rgb(21 66 48 / 0.22);
   }
 
   .lame-home-youtube__btn--primary:hover {
-    opacity: 0.88;
+    background: #1c5640;
+    transform: translateY(-1px);
   }
 
   .lame-home-youtube__btn--ghost {
-    color: rgb(var(--color-foreground-rgb));
-    border: 1px solid rgb(var(--color-foreground-rgb) / 0.2);
-    background: transparent;
+    color: #154230;
+    border: 1.5px solid rgb(21 66 48 / 0.28);
+    background: #fff;
   }
 
   .lame-home-youtube__btn--ghost:hover {
-    border-color: rgb(var(--color-foreground-rgb) / 0.45);
+    border-color: #c5a059;
+    color: #154230;
+    box-shadow: 0 8px 20px rgb(197 160 89 / 0.18);
   }
 
   @media screen and (min-width: 750px) {
