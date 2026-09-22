@@ -1,0 +1,504 @@
+{%- liquid
+  assign video_id = ''
+  if section.settings.youtube_url != blank
+    assign video_id = section.settings.youtube_url.id
+  endif
+
+  assign poster_url = ''
+  if video_id != blank
+    assign poster_url = 'https://i.ytimg.com/vi/' | append: video_id | append: '/hqdefault.jpg'
+  endif
+
+  assign watch_url = section.settings.watch_link
+  if watch_url == blank and video_id != blank
+    assign watch_url = 'https://www.youtube.com/watch?v=' | append: video_id
+  endif
+-%}
+
+{%- if video_id != blank or section.settings.heading != blank -%}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <section
+    class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-home-youtube"
+    {{ section.shopify_attributes }}
+  >
+    <div
+      class="lame-home-youtube__wrap spacing-style"
+      style="{% render 'spacing-padding', settings: section.settings %}"
+    >
+      <div class="lame-home-youtube__grid" data-lame-reveal>
+        <div class="lame-home-youtube__media">
+          {%- if video_id != blank -%}
+            <div
+              class="lame-home-youtube__player"
+              style="--lame-yt-aspect: {{ section.settings.aspect_ratio }};"
+              data-lame-youtube
+              data-video-id="{{ video_id | escape }}"
+            >
+              <button
+                type="button"
+                class="lame-home-youtube__poster"
+                aria-label="{{ section.settings.play_label | default: 'Play video' | escape }}"
+              >
+                <img
+                  class="lame-home-youtube__poster-img"
+                  src="{{ poster_url }}"
+                  alt="{{ section.settings.heading | default: 'Blow Dry Brush demo' | escape }}"
+                  width="480"
+                  height="360"
+                  loading="lazy"
+                  decoding="async"
+                >
+                <span class="lame-home-youtube__play" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                    <path d="M8.5 6.8v10.4L18 12 8.5 6.8Z"/>
+                  </svg>
+                </span>
+              </button>
+            </div>
+          {%- else -%}
+            <div class="lame-home-youtube__player lame-home-youtube__player--empty" style="--lame-yt-aspect: {{ section.settings.aspect_ratio }};">
+              <p>Add a YouTube URL in the theme editor.</p>
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="lame-home-youtube__content">
+          {%- if section.settings.eyebrow != blank -%}
+            <p class="lame-home-youtube__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+          {%- endif -%}
+
+          {%- if section.settings.heading != blank -%}
+            <h2 class="lame-home-youtube__heading">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+
+          {%- if section.settings.description != blank -%}
+            <div class="lame-home-youtube__description rte">{{ section.settings.description }}</div>
+          {%- endif -%}
+
+          {%- if section.blocks.size > 0 -%}
+            <ul class="lame-home-youtube__features list-unstyled" role="list">
+              {%- for block in section.blocks -%}
+                <li class="lame-home-youtube__feature" {{ block.shopify_attributes }}>
+                  <span class="lame-home-youtube__feature-mark" aria-hidden="true"></span>
+                  <span>{{ block.settings.text | escape }}</span>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          <div class="lame-home-youtube__actions">
+            {%- if section.settings.button_label != blank -%}
+              <a
+                class="lame-home-youtube__btn lame-home-youtube__btn--primary"
+                href="{{ section.settings.button_link | default: routes.root_url }}"
+              >
+                {{ section.settings.button_label | escape }}
+              </a>
+            {%- endif -%}
+
+            {%- if section.settings.watch_label != blank and watch_url != blank -%}
+              <a
+                class="lame-home-youtube__btn lame-home-youtube__btn--ghost"
+                href="{{ watch_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.5 31.5 0 0 0 0 12a31.5 31.5 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.5 31.5 0 0 0 24 12a31.5 31.5 0 0 0-.5-5.8ZM9.8 15.5v-7l6.3 3.5-6.3 3.5Z"/>
+                </svg>
+                {{ section.settings.watch_label | escape }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const section = document.getElementById('shopify-section-{{ section.id }}');
+      if (!section) return;
+
+      const reveal = section.querySelector('[data-lame-reveal]');
+      if (reveal) {
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(
+            (entries, obs) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('is-visible');
+                obs.unobserve(entry.target);
+              });
+            },
+            { threshold: 0.15 }
+          );
+          observer.observe(reveal);
+        } else {
+          reveal.classList.add('is-visible');
+        }
+      }
+
+      const player = section.querySelector('[data-lame-youtube]');
+      if (!player) return;
+      const poster = player.querySelector('.lame-home-youtube__poster');
+      const videoId = player.getAttribute('data-video-id');
+      if (!poster || !videoId) return;
+
+      poster.addEventListener('click', () => {
+        const iframe = document.createElement('iframe');
+        iframe.className = 'lame-home-youtube__iframe';
+        iframe.src =
+          'https://www.youtube-nocookie.com/embed/' +
+          encodeURIComponent(videoId) +
+          '?autoplay=1&rel=0&modestbranding=1';
+        iframe.title = {{ section.settings.heading | default: 'Product video' | json }};
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.setAttribute('loading', 'lazy');
+        player.replaceChildren(iframe);
+      });
+    })();
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-home-youtube__wrap {
+    padding-inline: var(--page-margin);
+  }
+
+  .lame-home-youtube__grid {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    align-items: center;
+    max-width: 920px;
+    margin-inline: auto;
+    padding: clamp(1.1rem, 2.5vw, 1.6rem);
+    border-radius: 18px;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    background:
+      radial-gradient(ellipse 70% 80% at 100% 0%, rgb(var(--brand-gold, 201 169 98) / 0.12), transparent 55%),
+      linear-gradient(160deg, rgb(var(--color-background-rgb)) 0%, rgb(var(--color-foreground-rgb) / 0.03) 100%);
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+
+  .lame-home-youtube__grid.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lame-home-youtube__player {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--lame-yt-aspect, 16 / 9);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #111;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.12);
+  }
+
+  .lame-home-youtube__player--empty {
+    display: grid;
+    place-items: center;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+    font-size: 0.85rem;
+    background: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+
+  .lame-home-youtube__poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: #111;
+  }
+
+  .lame-home-youtube__poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.45s ease;
+  }
+
+  .lame-home-youtube__poster:hover .lame-home-youtube__poster-img {
+    transform: scale(1.03);
+  }
+
+  .lame-home-youtube__play {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    translate: -50% -50%;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgb(200 40 40 / 0.92);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
+    transition: transform 0.25s ease, background 0.25s ease;
+  }
+
+  .lame-home-youtube__poster:hover .lame-home-youtube__play {
+    transform: scale(1.06);
+    background: rgb(220 45 45 / 0.96);
+  }
+
+  .lame-home-youtube__iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .lame-home-youtube__content {
+    display: grid;
+    gap: 0.7rem;
+    align-content: center;
+  }
+
+  .lame-home-youtube__eyebrow {
+    margin: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .lame-home-youtube__heading {
+    margin: 0;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-home-youtube__description {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: rgb(var(--color-foreground-rgb) / 0.72);
+  }
+
+  .lame-home-youtube__description p {
+    margin: 0;
+  }
+
+  .lame-home-youtube__features {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.15rem 0 0;
+  }
+
+  .lame-home-youtube__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: rgb(var(--color-foreground-rgb) / 0.8);
+  }
+
+  .lame-home-youtube__feature-mark {
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-top: 0.4rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+    background: rgb(var(--brand-gold, 201 169 98));
+  }
+
+  .lame-home-youtube__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.35rem;
+  }
+
+  .lame-home-youtube__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.4rem;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .lame-home-youtube__btn--primary {
+    color: #fff;
+    background: rgb(var(--color-foreground-rgb));
+  }
+
+  .lame-home-youtube__btn--primary:hover {
+    opacity: 0.88;
+  }
+
+  .lame-home-youtube__btn--ghost {
+    color: rgb(var(--color-foreground-rgb));
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.2);
+    background: transparent;
+  }
+
+  .lame-home-youtube__btn--ghost:hover {
+    border-color: rgb(var(--color-foreground-rgb) / 0.45);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-home-youtube__grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 1.75rem;
+      padding: 1.35rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Home YouTube spotlight",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": { "templates": ["index"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Watch & learn"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Salon-smooth hair at home"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>See how the Blow Dry Brush dries and styles in one pass — for smoother, fuller-looking hair with less effort.</p>"
+    },
+    {
+      "type": "video_url",
+      "id": "youtube_url",
+      "label": "YouTube URL",
+      "accept": ["youtube"],
+      "info": "Use a YouTube watch or Shorts link."
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Video aspect ratio",
+      "options": [
+        { "value": "16 / 9", "label": "Landscape (16:9)" },
+        { "value": "9 / 16", "label": "Vertical (9:16)" },
+        { "value": "4 / 5", "label": "Portrait (4:5)" },
+        { "value": "1 / 1", "label": "Square (1:1)" }
+      ],
+      "default": "16 / 9"
+    },
+    {
+      "type": "text",
+      "id": "play_label",
+      "label": "Play button label",
+      "default": "Play Blow Dry Brush video"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Primary button label",
+      "default": "Shop haircare"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "watch_label",
+      "label": "YouTube button label",
+      "default": "Watch on YouTube"
+    },
+    {
+      "type": "url",
+      "id": "watch_link",
+      "label": "YouTube button link",
+      "info": "Optional. Defaults to the video URL above."
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Dry + style in one tool"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home YouTube spotlight",
+      "category": "Media",
+      "blocks": [
+        { "type": "feature", "settings": { "text": "Dry and style in one pass" } },
+        { "type": "feature", "settings": { "text": "Smooth, voluminous finish" } },
+        { "type": "feature", "settings": { "text": "360° swivel cord for easy movement" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
