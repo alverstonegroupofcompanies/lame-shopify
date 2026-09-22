@@ -1,4 +1,4 @@
-{%- liquid
+﻿{%- liquid
   assign categories_menu = linklists[section.settings.categories_menu]
   assign quick_links_menu = linklists[section.settings.quick_links_menu]
   assign use_collection_links = false
@@ -1408,16 +1408,10 @@
     }
 
     #footer-{{ section.id }} .footer-premium__mid {
-      gap: 1rem;
-    }
-
-    #footer-{{ section.id }} .footer-premium__contact-grid {
-      padding: 0;
-      border-radius: 0;
       gap: 0;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-block {
+    #footer-{{ section.id }} .footer-premium__info-cell {
       padding: 0.7rem 0;
     }
 
@@ -1427,7 +1421,8 @@
       font-size: 0.92rem;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-block :is(p, a) {
+    #footer-{{ section.id }} .footer-premium__contact-block :is(p, a),
+    #footer-{{ section.id }} .footer-premium__contact-body :is(p, a) {
       font-size: 0.8125rem;
       line-height: 1.45;
     }
@@ -1507,60 +1502,84 @@
       min-width: 0;
     }
 
-    #footer-{{ section.id }} .footer-premium__map-wrap,
-    #footer-{{ section.id }} .footer-premium__contact-grid {
+    #footer-{{ section.id }} .footer-premium__info-cell {
       min-width: 0;
       max-width: 100%;
-    }
-
-    #footer-{{ section.id }} .footer-premium__contact-grid {
-      grid-template-columns: 1fr;
-    }
-
-    #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
-      border-inline-start: none;
-      padding-inline-start: 0;
-      border-top: 1px solid rgb(255 255 255 / 0.1);
-      padding-top: 0.85rem;
     }
   }
 
   @media screen and (min-width: 750px) {
     #footer-{{ section.id }} .footer-premium__main {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
       align-items: start;
-      gap: clamp(1.25rem, 2.5vw, 2.5rem);
+      gap: 0;
     }
 
-    #footer-{{ section.id }} .footer-premium__column:not(:last-child),
-    #footer-{{ section.id }} .footer-premium__newsletter {
-      padding-inline-end: clamp(1rem, 2vw, 1.75rem);
-      border-inline-end: 1px solid rgb(255 255 255 / 0.08);
+    #footer-{{ section.id }} .footer-premium__main--cols-2 {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+    }
+
+    #footer-{{ section.id }} .footer-premium__main--cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #footer-{{ section.id }} .footer-premium__main > :not(:last-child) {
+      padding-inline-end: clamp(1.25rem, 2.5vw, 2rem);
+      border-inline-end: 1px solid rgb(255 255 255 / 0.12);
+    }
+
+    #footer-{{ section.id }} .footer-premium__main > * {
+      padding-inline-start: clamp(1.25rem, 2.5vw, 2rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__main > :first-child {
+      padding-inline-start: 0;
     }
 
     #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-      gap: clamp(1.25rem, 2.5vw, 2.25rem);
+      gap: 0;
       align-items: start;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-grid {
-      display: grid;
+    #footer-{{ section.id }} .footer-premium__mid--cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1rem 1.25rem;
-      height: auto;
-      justify-content: start;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-block {
-      display: block;
+    #footer-{{ section.id }} .footer-premium__mid--cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    #footer-{{ section.id }} .footer-premium__info-cell {
       padding: 0;
+      display: grid;
+      align-content: start;
     }
 
-    #footer-{{ section.id }} .footer-premium__contact-block + .footer-premium__contact-block {
+    #footer-{{ section.id }} .footer-premium__info-cell + .footer-premium__info-cell {
       border-top: none;
-      border-inline-start: 1px solid rgb(255 255 255 / 0.1);
-      padding-inline-start: 1.25rem;
+      border-inline-start: 1px solid rgb(255 255 255 / 0.12);
+      padding-inline-start: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__mid > .footer-premium__info-cell:not(:last-child) {
+      padding-inline-end: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    /* Keep store-row titles on one baseline for a calmer, more trustworthy read */
+    #footer-{{ section.id }} .footer-premium__mid .footer-premium__heading {
+      margin: 0 0 0.65rem;
+      padding-bottom: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+      min-height: 1.5rem;
+    }
+
+    #footer-{{ section.id }} .footer-premium__mid .footer-premium__heading::after {
+      display: none;
+    }
+
+    #footer-{{ section.id }} .footer-premium__contact-title,
+    #footer-{{ section.id }} .footer-premium__contact-block h4 {
+      margin-bottom: 0.65rem;
     }
 
     #footer-{{ section.id }} .footer-premium__bottom {
@@ -1576,10 +1595,28 @@
   }
 
   @media screen and (min-width: 990px) {
-    #footer-{{ section.id }} .footer-premium__mid {
-      grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
-      gap: clamp(1.5rem, 3vw, 2.5rem);
-      align-items: start;
+    #footer-{{ section.id }} .footer-premium__main--cols-2 {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.7fr);
+    }
+
+    #footer-{{ section.id }} .footer-premium__main > :not(:last-child) {
+      padding-inline-end: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__main > * {
+      padding-inline-start: clamp(1.5rem, 3vw, 2.5rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__main > :first-child {
+      padding-inline-start: 0;
+    }
+
+    #footer-{{ section.id }} .footer-premium__info-cell + .footer-premium__info-cell {
+      padding-inline-start: clamp(1.25rem, 2.5vw, 1.85rem);
+    }
+
+    #footer-{{ section.id }} .footer-premium__mid > .footer-premium__info-cell:not(:last-child) {
+      padding-inline-end: clamp(1.25rem, 2.5vw, 1.85rem);
     }
   }
 {% endstyle %}
@@ -1851,7 +1888,7 @@
       "type": "text",
       "id": "copyright_text",
       "label": "Copyright text",
-      "default": "© 2026 Lamstone Healthcare (P) Ltd",
+      "default": "Â© 2026 Lamstone Healthcare (P) Ltd",
       "info": "Press Enter for a second line (e.g. brand disclaimer)."
     },
     {
@@ -2005,4 +2042,3 @@
   ]
 }
 {% endschema %}
-
