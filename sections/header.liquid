@@ -77,13 +77,17 @@
   endcapture
   # theme-check-enable UniqueStaticBlockId
 
-  assign header_menu_block = section.blocks['header-menu']
   assign search_class = ''
 %}
 
 {%- capture actions -%}
-  {%- if header_menu_block != blank -%}
-    {% render 'lame-social-links', block: header_menu_block, setting_prefix: 'drawer_', class: 'lame-header-social', icon_only: true %}
+  {%- if section.settings.show_nav_social -%}
+    {% render 'lame-social-links',
+      settings: section.settings,
+      setting_prefix: 'nav_',
+      class: 'lame-header-social',
+      icon_only: true
+    %}
   {%- endif -%}
   {% render 'header-actions', customer_account_menu: section.settings.customer_account_menu, display_style: section.settings.actions_display_style, section: section %}
 {%- endcapture -%}
@@ -1865,6 +1869,57 @@
       "id": "actions_cart_badge_text",
       "label": "Cart badge text",
       "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Social icons (navbar)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_nav_social",
+      "label": "Show social icons in navbar",
+      "default": true,
+      "info": "Desktop only. Mobile icons appear in the side menu."
+    },
+    {
+      "type": "text",
+      "id": "nav_instagram_url",
+      "label": "Instagram URL",
+      "default": "https://www.instagram.com/mylamstone/",
+      "visible_if": "{{ section.settings.show_nav_social }}"
+    },
+    {
+      "type": "text",
+      "id": "nav_facebook_url",
+      "label": "Facebook URL",
+      "default": "https://www.facebook.com/mylamstone/",
+      "visible_if": "{{ section.settings.show_nav_social }}"
+    },
+    {
+      "type": "text",
+      "id": "nav_youtube_url",
+      "label": "YouTube URL",
+      "default": "https://www.youtube.com/@MyLamstone-ecom",
+      "visible_if": "{{ section.settings.show_nav_social }}"
+    },
+    {
+      "type": "text",
+      "id": "nav_whatsapp_url",
+      "label": "WhatsApp channel URL",
+      "default": "https://whatsapp.com/channel/0029VbE3V0kD38CUs4ivfl1A",
+      "visible_if": "{{ section.settings.show_nav_social }}"
+    },
+    {
+      "type": "text",
+      "id": "nav_twitter_url",
+      "label": "X (Twitter) URL",
+      "visible_if": "{{ section.settings.show_nav_social }}"
+    },
+    {
+      "type": "text",
+      "id": "nav_threads_url",
+      "label": "Threads URL",
+      "visible_if": "{{ section.settings.show_nav_social }}"
     },
     {
       "type": "header",

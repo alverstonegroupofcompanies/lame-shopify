@@ -1,8 +1,9 @@
 {%- doc -%}
   Shared social links for header + drawer.
-  Reads URLs from a block using a setting prefix (default: drawer_).
+  Reads URLs from a settings object (section or block) using a setting prefix.
 
-  @param {object} block - Block with social URL settings
+  @param {object} [block] - Block with social URL settings (uses block.settings)
+  @param {object} [settings] - Settings object to read from (section.settings or block.settings)
   @param {string} [setting_prefix] - Prefix before *_url keys (default: drawer_)
   @param {string} [class] - Extra class on the root
   @param {string} [heading] - Optional section heading
@@ -15,6 +16,11 @@
   assign prefix = setting_prefix | default: 'drawer_'
   assign show_labels = show_labels | default: true, allow_false: true
   assign icon_only = icon_only | default: false
+  assign social_settings = settings
+
+  if social_settings == blank and block != blank
+    assign social_settings = block.settings
+  endif
 
   if icon_only
     assign show_labels = false
@@ -27,12 +33,12 @@
   assign key_threads = prefix | append: 'threads_url'
   assign key_wa = prefix | append: 'whatsapp_url'
 
-  assign url_x = block.settings[key_x] | strip
-  assign url_yt = block.settings[key_yt] | strip
-  assign url_ig = block.settings[key_ig] | strip
-  assign url_fb = block.settings[key_fb] | strip
-  assign url_threads = block.settings[key_threads] | strip
-  assign url_wa = block.settings[key_wa] | strip
+  assign url_x = social_settings[key_x] | strip
+  assign url_yt = social_settings[key_yt] | strip
+  assign url_ig = social_settings[key_ig] | strip
+  assign url_fb = social_settings[key_fb] | strip
+  assign url_threads = social_settings[key_threads] | strip
+  assign url_wa = social_settings[key_wa] | strip
 
   assign has_links = false
   if url_x != blank or url_yt != blank or url_ig != blank or url_fb != blank or url_threads != blank or url_wa != blank

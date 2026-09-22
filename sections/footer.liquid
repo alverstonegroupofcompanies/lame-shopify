@@ -22,12 +22,22 @@
   assign social_facebook = section.settings.social_facebook_url | strip
   assign social_youtube = section.settings.social_youtube_url | strip
   assign social_whatsapp = section.settings.social_whatsapp_url | strip
-  assign show_social = false
-  if section.settings.show_social
-    if social_instagram != blank or social_facebook != blank or social_youtube != blank or social_whatsapp != blank
-      assign show_social = true
-    endif
+
+  if social_instagram == blank
+    assign social_instagram = 'https://www.instagram.com/mylamstone/'
   endif
+  if social_facebook == blank
+    assign social_facebook = 'https://www.facebook.com/mylamstone/'
+  endif
+  if social_youtube == blank
+    assign social_youtube = 'https://www.youtube.com/@MyLamstone-ecom'
+  endif
+  if social_whatsapp == blank
+    assign social_whatsapp = 'https://whatsapp.com/channel/0029VbE3V0kD38CUs4ivfl1A'
+  endif
+
+  # Show whenever the theme-editor toggle is on (defaults true in schema)
+  assign show_social = section.settings.show_social
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -1172,27 +1182,27 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 0.65rem;
+    gap: 0.75rem;
   }
 
   #footer-{{ section.id }} .footer-premium__social-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    min-height: 2.55rem;
-    padding: 0.5rem 0.95rem 0.5rem 0.55rem;
-    border-radius: 999px;
-    border: 1px solid rgb(221 196 130 / 0.45);
-    background: rgb(255 255 255 / 0.06);
-    color: var(--footer-text);
+    display: grid;
+    place-items: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgb(255 255 255 / 0.88);
+    background: transparent;
+    color: #fff;
     text-decoration: none;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   }
 
   #footer-{{ section.id }} .footer-premium__social-link:hover {
-    background: rgb(221 196 130 / 0.16);
-    border-color: var(--footer-gold);
-    color: var(--footer-gold);
+    background: rgb(255 255 255 / 0.1);
+    border-color: #fff;
+    color: #fff;
     transform: translateY(-1px);
   }
 
@@ -1204,24 +1214,29 @@
   #footer-{{ section.id }} .footer-premium__social-icon {
     display: grid;
     place-items: center;
-    width: 1.7rem;
-    height: 1.7rem;
-    border-radius: 50%;
-    background: rgb(221 196 130 / 0.18);
-    color: var(--footer-gold-bright);
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
     flex-shrink: 0;
   }
 
   #footer-{{ section.id }} .footer-premium__social-icon .footer-premium__icon-svg {
-    width: 0.95rem;
-    height: 0.95rem;
+    width: 100%;
+    height: 100%;
   }
 
   #footer-{{ section.id }} .footer-premium__social-label {
-    font-family: var(--footer-font-body);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   #footer-{{ section.id }} .footer-premium__legal {
@@ -1423,18 +1438,27 @@
 
     #footer-{{ section.id }} .footer-premium__social-list {
       width: 100%;
-      gap: 0.5rem;
+      gap: 0.65rem;
+      justify-content: center;
     }
 
     #footer-{{ section.id }} .footer-premium__social-link {
-      flex: 1 1 calc(50% - 0.35rem);
-      justify-content: center;
-      min-width: 0;
-      padding-inline: 0.5rem;
+      flex: 0 0 auto;
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
     }
 
     #footer-{{ section.id }} .footer-premium__social-label {
-      font-size: 0.72rem;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     #footer-{{ section.id }} .footer-premium__trust {
@@ -1749,6 +1773,10 @@
       "content": "Join our community"
     },
     {
+      "type": "paragraph",
+      "content": "Appears above Our Ventures. Toggle visibility and edit heading, text, and social links here."
+    },
+    {
       "type": "checkbox",
       "id": "show_social",
       "label": "Show community section",
@@ -1767,28 +1795,32 @@
       "default": "Follow Lamstone for beauty tips, new launches, and exclusive offers."
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "social_instagram_url",
       "label": "Instagram URL",
-      "info": "https://www.instagram.com/mylamstone/"
+      "default": "https://www.instagram.com/mylamstone/",
+      "info": "Clear the field to use the default Lamstone Instagram link."
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "social_facebook_url",
       "label": "Facebook URL",
-      "info": "https://www.facebook.com/mylamstone/"
+      "default": "https://www.facebook.com/mylamstone/",
+      "info": "Clear the field to use the default Lamstone Facebook link."
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "social_youtube_url",
       "label": "YouTube URL",
-      "info": "https://www.youtube.com/@MyLamstone-ecom"
+      "default": "https://www.youtube.com/@MyLamstone-ecom",
+      "info": "Clear the field to use the default Lamstone YouTube link."
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "social_whatsapp_url",
       "label": "WhatsApp channel URL",
-      "info": "https://whatsapp.com/channel/0029VbE3V0kD38CUs4ivfl1A"
+      "default": "https://whatsapp.com/channel/0029VbE3V0kD38CUs4ivfl1A",
+      "info": "Clear the field to use the default Lamstone WhatsApp channel."
     },
     {
       "type": "header",
