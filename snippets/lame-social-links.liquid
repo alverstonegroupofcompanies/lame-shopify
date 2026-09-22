@@ -1,5 +1,5 @@
 {%- doc -%}
-  Shared Instagram / Facebook / YouTube / WhatsApp links for header + drawer.
+  Shared social links for header + drawer.
   Reads URLs from a block using a setting prefix (default: drawer_).
 
   @param {object} block - Block with social URL settings
@@ -20,17 +20,22 @@
     assign show_labels = false
   endif
 
+  assign key_x = prefix | append: 'twitter_url'
+  assign key_yt = prefix | append: 'youtube_url'
   assign key_ig = prefix | append: 'instagram_url'
   assign key_fb = prefix | append: 'facebook_url'
-  assign key_yt = prefix | append: 'youtube_url'
+  assign key_threads = prefix | append: 'threads_url'
   assign key_wa = prefix | append: 'whatsapp_url'
-  assign ig = block.settings[key_ig] | strip
-  assign fb = block.settings[key_fb] | strip
-  assign yt = block.settings[key_yt] | strip
-  assign wa = block.settings[key_wa] | strip
+
+  assign url_x = block.settings[key_x] | strip
+  assign url_yt = block.settings[key_yt] | strip
+  assign url_ig = block.settings[key_ig] | strip
+  assign url_fb = block.settings[key_fb] | strip
+  assign url_threads = block.settings[key_threads] | strip
+  assign url_wa = block.settings[key_wa] | strip
 
   assign has_links = false
-  if ig != blank or fb != blank or yt != blank or wa != blank
+  if url_x != blank or url_yt != blank or url_ig != blank or url_fb != blank or url_threads != blank or url_wa != blank
     assign has_links = true
   endif
 -%}
@@ -44,80 +49,114 @@
       <p class="lame-social-links__text">{{ text | escape }}</p>
     {%- endif -%}
     <ul class="lame-social-links__list" role="list">
-      {%- if ig != blank -%}
+      {%- if url_x != blank -%}
         <li>
           <a
             class="lame-social-links__link"
-            href="{{ ig }}"
+            href="{{ url_x }}"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Instagram"
-            {% if icon_only %}title="Instagram"{% endif %}
+            aria-label="X"
+            {% if icon_only %}title="X"{% endif %}
           >
             <span class="lame-social-links__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false">
-                <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.75"/>
-                <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75"/>
-                <circle cx="17.5" cy="6.5" r="1.1" fill="currentColor"/>
+              <svg viewBox="0 0 20 20" focusable="false" fill="currentColor">
+                {%- render 'icon', icon: 'twitter' -%}
               </svg>
             </span>
-            {%- if show_labels -%}<span class="lame-social-links__label">Instagram</span>{%- endif -%}
+            {%- if show_labels -%}<span class="lame-social-links__label">X</span>{%- endif -%}
           </a>
         </li>
       {%- endif -%}
-      {%- if fb != blank -%}
+      {%- if url_yt != blank -%}
         <li>
           <a
             class="lame-social-links__link"
-            href="{{ fb }}"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Facebook"
-            {% if icon_only %}title="Facebook"{% endif %}
-          >
-            <span class="lame-social-links__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false">
-                <path fill="currentColor" d="M14 8.5h2.5l-.4 3H14V21h-3.2v-9.5H9v-3h1.8V7.2c0-1.9 1.1-3.2 3.2-3.2.9 0 1.7.1 1.9.1v2.3H15c-.9 0-1 .4-1 1v1.1z"/>
-              </svg>
-            </span>
-            {%- if show_labels -%}<span class="lame-social-links__label">Facebook</span>{%- endif -%}
-          </a>
-        </li>
-      {%- endif -%}
-      {%- if yt != blank -%}
-        <li>
-          <a
-            class="lame-social-links__link"
-            href="{{ yt }}"
+            href="{{ url_yt }}"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="YouTube"
             {% if icon_only %}title="YouTube"{% endif %}
           >
             <span class="lame-social-links__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false">
-                <path fill="currentColor" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18 5 12 5 12 5s-6 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8C2 9 2 12 2 12s0 3 .4 4.8a2.5 2.5 0 0 0 1.8 1.8C6 19 12 19 12 19s6 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.8.4-4.8.4-4.8s0-3-.4-4.8z"/>
-                <path fill="#fff" d="M10 15.5V8.5l5.5 3.5L10 15.5z"/>
+              <svg viewBox="0 0 20 20" focusable="false" fill="currentColor">
+                {%- render 'icon', icon: 'youtube' -%}
               </svg>
             </span>
             {%- if show_labels -%}<span class="lame-social-links__label">YouTube</span>{%- endif -%}
           </a>
         </li>
       {%- endif -%}
-      {%- if wa != blank -%}
+      {%- if url_ig != blank -%}
         <li>
           <a
             class="lame-social-links__link"
-            href="{{ wa }}"
+            href="{{ url_ig }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            {% if icon_only %}title="Instagram"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" focusable="false" fill="currentColor">
+                {%- render 'icon', icon: 'instagram' -%}
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">Instagram</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+      {%- if url_fb != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ url_fb }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            {% if icon_only %}title="Facebook"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" focusable="false" fill="currentColor">
+                {%- render 'icon', icon: 'facebook' -%}
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">Facebook</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+      {%- if url_threads != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ url_threads }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Threads"
+            {% if icon_only %}title="Threads"{% endif %}
+          >
+            <span class="lame-social-links__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" focusable="false" fill="currentColor">
+                {%- render 'icon', icon: 'threads' -%}
+              </svg>
+            </span>
+            {%- if show_labels -%}<span class="lame-social-links__label">Threads</span>{%- endif -%}
+          </a>
+        </li>
+      {%- endif -%}
+      {%- if url_wa != blank -%}
+        <li>
+          <a
+            class="lame-social-links__link"
+            href="{{ url_wa }}"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp Channel"
             {% if icon_only %}title="WhatsApp Channel"{% endif %}
           >
             <span class="lame-social-links__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false">
-                <path fill="currentColor" d="M12 3.2a8.8 8.8 0 0 0-7.6 13.3L3.2 21l4.6-1.2A8.8 8.8 0 1 0 12 3.2zm0 15.9c-1.3 0-2.6-.3-3.7-1l-.3-.2-2.6.7.7-2.5-.2-.3a7 7 0 1 1 6.1 3.3z"/>
-                <path fill="currentColor" d="M16.1 14.2c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.2.2-.6.7-.8.8-.1.2-.3.2-.5.1-.2-.1-.9-.3-1.8-1.2-.7-.6-1.1-1.3-1.2-1.5-.1-.2 0-.3.1-.4l.3-.3c.1-.1.1-.2.2-.3.1-.1 0-.2 0-.3 0-.1-.5-1.3-.7-1.8-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.7.7-.7 1.8s.8 2.2.9 2.3c.1.2 1.5 2.4 3.7 3.3.5.2.9.3 1.2.4.5.1.9.1 1.3.1.4-.1 1.2-.5 1.4-.9.2-.4.2-.8.1-.9 0-.1-.2-.2-.4-.3z"/>
+              <svg viewBox="0 0 20 20" focusable="false" fill="currentColor">
+                {%- render 'icon', icon: 'whatsapp' -%}
               </svg>
             </span>
             {%- if show_labels -%}<span class="lame-social-links__label">WhatsApp</span>{%- endif -%}
