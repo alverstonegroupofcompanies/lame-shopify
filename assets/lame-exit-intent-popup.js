@@ -1,30 +1,35 @@
 /**
- * LAMÉ exit-intent coupon popup
- * Shows capture form first; WELCOME10 (coupon) is revealed only after email submit.
- * Desktop: mouse moves into the upper half of the viewport.
- * Mobile: user scrolls upward (instead of down).
- * All devices: no movement / activity for ~10s → show (guests who have not purchased).
+ * LAMÉ welcome coupon popup
+ * Shows capture form first; coupon is revealed only after email submit.
+ * Trigger: no mouse / scroll / touch / keyboard activity for ~10s.
+ * Frequency: once per browser (guests) or once per signed-in customer.
+ * Never again after claim, code use, or dismiss (once_forever).
  */
 (() => {
   const root = document.querySelector('[data-lame-exit-popup]');
   if (!root) return;
 
+  const customerId = (root.dataset.customerId || '').trim();
+  const baseKey = root.dataset.storageKey || 'lame_exit_intent_welcome';
+  const storageKey = customerId ? `${baseKey}_c_${customerId}` : `${baseKey}_guest`;
+
   const cfg = {
     delayMs: Number(root.dataset.delayMs || 0),
     inactivityMs: Number(root.dataset.inactivityMs || 10000),
     requireProductView: root.dataset.requireProductView === 'true',
-    frequency: root.dataset.frequency || 'once_every_7_days',
-    storageKey: root.dataset.storageKey || 'lame_exit_intent_v2',
+    frequency: root.dataset.frequency || 'once_forever',
+    storageKey,
     couponCode: root.dataset.couponCode || 'WELCOME10',
     contactUrl: root.dataset.contactUrl || window.location.pathname || '/',
+    codeUsed: root.dataset.codeUsed === 'true',
   };
 
   const STORAGE = {
     dismissedAt: `${cfg.storageKey}:dismissed`,
     claimedAt: `${cfg.storageKey}:claimed`,
     subscribed: `${cfg.storageKey}:subscribed`,
-    productViews: `${cfg.storageKey}:product_views`,
-    purchased: `${cfg.storageKey}:purchased`,
+    productViews: `${baseKey}:product_views`,
+    purchased: `${baseKey}:purchased`,
     shownSession: `${cfg.storageKey}:shown_session`,
   };
 
@@ -42,10 +47,6 @@
   let armed = false;
   let closedByUser = false;
   let inactivityTimer = null;
-  let lastScrollY = window.scrollY || 0;
-  let upwardScrollAccum = 0;
-  let lastMouseY = null;
-  let wasInLowerHalf = false;
 
   const now = () => Date.now();
 
@@ -95,9 +96,12 @@
   };
 
   const frequencyAllows = () => {
+    // Server already knows the customer used / claimed the code
+    if (cfg.codeUsed) return false;
     if (read(STORAGE.claimedAt) || read(STORAGE.subscribed)) return false;
     if (read(STORAGE.purchased)) return false;
 
+    // Default: once forever after dismiss (any visitor / signed-in customer)
     if (cfg.frequency === 'once_forever' && read(STORAGE.dismissedAt)) return false;
     if (cfg.frequency === 'once_per_session' && readSession(STORAGE.shownSession)) return false;
 
@@ -126,11 +130,12 @@
     if (!canShow()) return;
     opened = true;
     writeSession(STORAGE.shownSession, '1');
+    // Persist immediately so refresh / new tab do not reopen before close
+    write(STORAGE.dismissedAt, String(now()));
     root.hidden = false;
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('is-open');
     lockScroll(true);
-    // Always start on email capture — coupon only after submit
     if (capture) capture.hidden = false;
     if (success) success.hidden = true;
     window.requestAnimationFrame(() => {
@@ -155,6 +160,7 @@
   const showSuccess = () => {
     write(STORAGE.subscribed, '1');
     write(STORAGE.claimedAt, String(now()));
+    write(STORAGE.dismissedAt, String(now()));
     if (capture) capture.hidden = true;
     if (success) success.hidden = false;
     if (codeEl) codeEl.textContent = cfg.couponCode || 'WELCOME10';
@@ -167,70 +173,11 @@
     errorEl.hidden = !message;
   };
 
-  const isTouchish = () =>
-    window.matchMedia('(hover: none), (pointer: coarse)').matches ||
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0;
-
-  const midY = () => Math.max(window.innerHeight || 0, 1) * 0.5;
-
   /** No mouse / scroll / touch / keyboard activity for inactivityMs → show */
   const resetInactivity = () => {
     if (!armed || opened || closedByUser) return;
     window.clearTimeout(inactivityTimer);
     inactivityTimer = window.setTimeout(() => open(), Math.max(1000, cfg.inactivityMs));
-  };
-
-  /**
-   * Desktop: pointer moved into the upper half of the screen
-   * (must have been in the lower half first, then moved up / into top half).
-   */
-  const onMouseMove = (event) => {
-    resetInactivity();
-    if (!armed || isTouchish()) return;
-    if (typeof event.clientY !== 'number') return;
-
-    const half = midY();
-    const y = event.clientY;
-    const movingUp = lastMouseY != null && y < lastMouseY - 2;
-    lastMouseY = y;
-
-    if (y >= half) {
-      wasInLowerHalf = true;
-      return;
-    }
-
-    // In upper half: trigger when crossing from below, or moving further up while above half
-    if (wasInLowerHalf || movingUp) {
-      open();
-    }
-  };
-
-  /**
-   * Mobile: any clear upward scroll (finger/content moving toward top of page).
-   * Also counts as activity (resets idle timer) on all devices.
-   */
-  const onScroll = () => {
-    resetInactivity();
-
-    if (!armed || !isTouchish()) {
-      lastScrollY = window.scrollY || 0;
-      return;
-    }
-
-    const y = window.scrollY || 0;
-    const dy = lastScrollY - y; // positive = scrolled up
-    lastScrollY = y;
-
-    if (dy > 0) {
-      upwardScrollAccum += dy;
-    } else if (dy < -8) {
-      // Reset streak when user scrolls down again
-      upwardScrollAccum = 0;
-    }
-
-    // ~80px of upward travel in one streak is enough to feel intentional
-    if (upwardScrollAccum >= 80) open();
   };
 
   const onActivity = () => resetInactivity();
@@ -240,26 +187,19 @@
   const bindTriggers = () => {
     if (triggersBound) return;
     triggersBound = true;
-    lastScrollY = window.scrollY || 0;
-    upwardScrollAccum = 0;
-    lastMouseY = null;
-    wasInLowerHalf = false;
 
-    document.addEventListener('mousemove', onMouseMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((type) => {
-      document.addEventListener(type, onActivity, { passive: true });
+    ['mousemove', 'pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'].forEach((type) => {
+      const target = type === 'scroll' ? window : document;
+      target.addEventListener(type, onActivity, { passive: true });
     });
 
-    // Idle: no movement for inactivityMs (default 10s)
     resetInactivity();
   };
 
   const teardownTriggers = () => {
-    document.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('scroll', onScroll);
-    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach((type) => {
-      document.removeEventListener(type, onActivity);
+    ['mousemove', 'pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'].forEach((type) => {
+      const target = type === 'scroll' ? window : document;
+      target.removeEventListener(type, onActivity);
     });
     window.clearTimeout(inactivityTimer);
     triggersBound = false;
@@ -347,7 +287,6 @@
     };
 
     try {
-      // Shopify newsletter / customer capture must POST to /contact
       const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
@@ -403,7 +342,6 @@
       const isNetwork = /failed to fetch|networkerror|load failed|network/i.test(msg);
 
       if (isNetwork) {
-        // Native POST still creates the customer (full page reload)
         HTMLFormElement.prototype.submit.call(form);
         return;
       }

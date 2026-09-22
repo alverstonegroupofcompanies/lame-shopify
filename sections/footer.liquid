@@ -20,14 +20,11 @@
 
   assign social_instagram = section.settings.social_instagram_url | strip
   assign social_facebook = section.settings.social_facebook_url | strip
+  assign social_youtube = section.settings.social_youtube_url | strip
   assign social_whatsapp = section.settings.social_whatsapp_url | strip
-  if social_whatsapp == blank and phone_href != blank
-    assign whatsapp_digits = phone_href | remove: '+'
-    assign social_whatsapp = 'https://wa.me/' | append: whatsapp_digits
-  endif
   assign show_social = false
   if section.settings.show_social
-    if social_instagram != blank or social_facebook != blank or social_whatsapp != blank
+    if social_instagram != blank or social_facebook != blank or social_youtube != blank or social_whatsapp != blank
       assign show_social = true
     endif
   endif
@@ -273,70 +270,96 @@
           </ul>
         </div>
       </div>
-
-      {% if show_social %}
-        <div class="footer-premium__social" aria-label="{{ section.settings.social_heading | default: 'Follow us' | escape }}">
-          {% if section.settings.social_heading != blank %}
-            <h4 class="footer-premium__social-heading">
-              <span class="footer-premium__icon" aria-hidden="true">{% render 'footer-icon', name: 'sparkle' %}</span>
-              {{ section.settings.social_heading }}
-            </h4>
-          {% endif %}
-          <ul class="footer-premium__social-list" role="list">
-            {% if social_instagram != blank %}
-              <li>
-                <a
-                  class="footer-premium__social-link"
-                  href="{{ social_instagram }}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                >
-                  <span class="footer-premium__social-icon" aria-hidden="true">
-                    {% render 'footer-icon', name: 'instagram' %}
-                  </span>
-                  <span class="footer-premium__social-label">Instagram</span>
-                </a>
-              </li>
-            {% endif %}
-            {% if social_facebook != blank %}
-              <li>
-                <a
-                  class="footer-premium__social-link"
-                  href="{{ social_facebook }}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                >
-                  <span class="footer-premium__social-icon" aria-hidden="true">
-                    {% render 'footer-icon', name: 'facebook' %}
-                  </span>
-                  <span class="footer-premium__social-label">Facebook</span>
-                </a>
-              </li>
-            {% endif %}
-            {% if social_whatsapp != blank %}
-              <li>
-                <a
-                  class="footer-premium__social-link"
-                  href="{{ social_whatsapp }}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                >
-                  <span class="footer-premium__social-icon" aria-hidden="true">
-                    {% render 'footer-icon', name: 'whatsapp' %}
-                  </span>
-                  <span class="footer-premium__social-label">WhatsApp</span>
-                </a>
-              </li>
-            {% endif %}
-          </ul>
-        </div>
-      {% endif %}
     </div>
     </div>
   </div>
+
+  {% if show_social %}
+    <div
+      class="footer-premium__community"
+      aria-label="{{ section.settings.social_heading | default: 'Join our community' | escape }}"
+    >
+      <div class="footer-premium__community-inner">
+        {% if section.settings.social_heading != blank %}
+          <h3 class="footer-premium__community-heading">{{ section.settings.social_heading }}</h3>
+          <div class="footer-premium__community-ornament" aria-hidden="true">
+            <span class="footer-premium__community-ornament-line"></span>
+            <span class="footer-premium__community-ornament-mark"></span>
+            <span class="footer-premium__community-ornament-line"></span>
+          </div>
+        {% endif %}
+        {% if section.settings.social_text != blank %}
+          <p class="footer-premium__community-text">{{ section.settings.social_text }}</p>
+        {% endif %}
+        <ul class="footer-premium__social-list" role="list">
+          {% if social_instagram != blank %}
+            <li>
+              <a
+                class="footer-premium__social-link"
+                href="{{ social_instagram }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                <span class="footer-premium__social-icon" aria-hidden="true">
+                  {% render 'footer-icon', name: 'instagram' %}
+                </span>
+                <span class="footer-premium__social-label">Instagram</span>
+              </a>
+            </li>
+          {% endif %}
+          {% if social_facebook != blank %}
+            <li>
+              <a
+                class="footer-premium__social-link"
+                href="{{ social_facebook }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                <span class="footer-premium__social-icon" aria-hidden="true">
+                  {% render 'footer-icon', name: 'facebook' %}
+                </span>
+                <span class="footer-premium__social-label">Facebook</span>
+              </a>
+            </li>
+          {% endif %}
+          {% if social_youtube != blank %}
+            <li>
+              <a
+                class="footer-premium__social-link"
+                href="{{ social_youtube }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
+                <span class="footer-premium__social-icon" aria-hidden="true">
+                  {% render 'footer-icon', name: 'youtube' %}
+                </span>
+                <span class="footer-premium__social-label">YouTube</span>
+              </a>
+            </li>
+          {% endif %}
+          {% if social_whatsapp != blank %}
+            <li>
+              <a
+                class="footer-premium__social-link"
+                href="{{ social_whatsapp }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp Channel"
+              >
+                <span class="footer-premium__social-icon" aria-hidden="true">
+                  {% render 'footer-icon', name: 'whatsapp' %}
+                </span>
+                <span class="footer-premium__social-label">WhatsApp</span>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
 
   {% if section.settings.show_ventures %}
     {% liquid
@@ -1080,46 +1103,75 @@
     color: var(--footer-gold);
   }
 
-  #footer-{{ section.id }} .footer-premium__social {
-    margin-top: clamp(1.15rem, 2.5vw, 1.65rem);
-    padding-top: clamp(1rem, 2.2vw, 1.35rem);
-    border-top: 1px solid rgb(255 255 255 / 0.12);
+  #footer-{{ section.id }} .footer-premium__community {
+    border-top: 1px solid rgb(221 196 130 / 0.35);
+    border-bottom: 1px solid rgb(221 196 130 / 0.35);
+    background:
+      radial-gradient(ellipse 70% 80% at 50% 0%, rgb(221 196 130 / 0.1), transparent 60%),
+      #123a2a;
+  }
+
+  #footer-{{ section.id }} .footer-premium__community-inner {
+    width: 100%;
+    max-width: min(920px, 100%);
+    margin-inline: auto;
+    padding: clamp(1.5rem, 3.2vw, 2.25rem) clamp(1rem, 3vw, 2.5rem);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.85rem;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
   }
 
-  #footer-{{ section.id }} .footer-premium__social-heading {
+  #footer-{{ section.id }} .footer-premium__community-heading {
     margin: 0;
+    font-family: var(--footer-font-display);
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--footer-gold);
+  }
+
+  #footer-{{ section.id }} .footer-premium__community-ornament {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    font-family: var(--footer-font-display);
-    font-size: 1.05rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: var(--footer-text);
+    gap: 0.55rem;
+    width: min(14rem, 55vw);
   }
 
-  #footer-{{ section.id }} .footer-premium__social-heading .footer-premium__icon {
-    width: 1.35rem;
-    height: 1.35rem;
-    color: var(--footer-gold-bright);
+  #footer-{{ section.id }} .footer-premium__community-ornament-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(221 196 130 / 0.7), transparent);
   }
 
-  #footer-{{ section.id }} .footer-premium__social-heading .footer-premium__icon-svg {
-    width: 0.8125rem;
-    height: 0.8125rem;
+  #footer-{{ section.id }} .footer-premium__community-ornament-mark {
+    width: 0.4rem;
+    height: 0.4rem;
+    border: 1px solid var(--footer-gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  #footer-{{ section.id }} .footer-premium__community-text {
+    margin: 0 0 0.35rem;
+    max-width: 36rem;
+    font-family: var(--footer-font-body);
+    font-size: clamp(0.82rem, 1.4vw, 0.95rem);
+    line-height: 1.55;
+    color: var(--footer-text-muted);
   }
 
   #footer-{{ section.id }} .footer-premium__social-list {
     list-style: none;
-    margin: 0;
+    margin: 0.25rem 0 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 0.65rem;
   }
 
@@ -1127,8 +1179,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    min-height: 2.5rem;
-    padding: 0.45rem 0.9rem 0.45rem 0.55rem;
+    min-height: 2.55rem;
+    padding: 0.5rem 0.95rem 0.5rem 0.55rem;
     border-radius: 999px;
     border: 1px solid rgb(221 196 130 / 0.45);
     background: rgb(255 255 255 / 0.06);
@@ -1152,8 +1204,8 @@
   #footer-{{ section.id }} .footer-premium__social-icon {
     display: grid;
     place-items: center;
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 1.7rem;
+    height: 1.7rem;
     border-radius: 50%;
     background: rgb(221 196 130 / 0.18);
     color: var(--footer-gold-bright);
@@ -1354,9 +1406,19 @@
       gap: 0.4rem;
     }
 
-    #footer-{{ section.id }} .footer-premium__social {
-      margin-top: 1rem;
-      padding-top: 0.9rem;
+    #footer-{{ section.id }} .footer-premium__community-inner {
+      padding-block: 1.25rem;
+      gap: 0.6rem;
+    }
+
+    #footer-{{ section.id }} .footer-premium__community-heading {
+      letter-spacing: 0.1em;
+      font-size: 1.05rem;
+    }
+
+    #footer-{{ section.id }} .footer-premium__community-text {
+      font-size: 0.8rem;
+      margin-bottom: 0.15rem;
     }
 
     #footer-{{ section.id }} .footer-premium__social-list {
@@ -1365,10 +1427,10 @@
     }
 
     #footer-{{ section.id }} .footer-premium__social-link {
-      flex: 1 1 calc(33.333% - 0.4rem);
+      flex: 1 1 calc(50% - 0.35rem);
       justify-content: center;
       min-width: 0;
-      padding-inline: 0.45rem;
+      padding-inline: 0.5rem;
     }
 
     #footer-{{ section.id }} .footer-premium__social-label {
@@ -1684,37 +1746,49 @@
     },
     {
       "type": "header",
-      "content": "Social media"
+      "content": "Join our community"
     },
     {
       "type": "checkbox",
       "id": "show_social",
-      "label": "Show social icons",
+      "label": "Show community section",
       "default": true
     },
     {
       "type": "text",
       "id": "social_heading",
-      "label": "Social heading",
-      "default": "Follow us"
+      "label": "Heading",
+      "default": "Join our community"
+    },
+    {
+      "type": "textarea",
+      "id": "social_text",
+      "label": "Supporting text",
+      "default": "Follow Lamstone for beauty tips, new launches, and exclusive offers."
     },
     {
       "type": "url",
       "id": "social_instagram_url",
       "label": "Instagram URL",
-      "info": "Example: https://www.instagram.com/mylamstone/"
+      "info": "https://www.instagram.com/mylamstone/"
     },
     {
       "type": "url",
       "id": "social_facebook_url",
       "label": "Facebook URL",
-      "info": "Example: https://www.facebook.com/mylamstone/"
+      "info": "https://www.facebook.com/mylamstone/"
+    },
+    {
+      "type": "url",
+      "id": "social_youtube_url",
+      "label": "YouTube URL",
+      "info": "https://www.youtube.com/@MyLamstone-ecom"
     },
     {
       "type": "url",
       "id": "social_whatsapp_url",
-      "label": "WhatsApp URL",
-      "info": "Example: https://wa.me/917012357019. If empty, uses the Phone number above."
+      "label": "WhatsApp channel URL",
+      "info": "https://whatsapp.com/channel/0029VbE3V0kD38CUs4ivfl1A"
     },
     {
       "type": "header",

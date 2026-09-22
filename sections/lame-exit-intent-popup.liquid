@@ -1,7 +1,10 @@
 {%- liquid
   assign show_popup = false
   assign form_posted = false
+  assign code_used = false
   assign page_type = request.page_type | default: template.name
+  assign coupon_code = section.settings.coupon_code | default: 'WELCOME10'
+  assign coupon_code_up = coupon_code | upcase
 
   if section.settings.enabled
     if page_type == 'index' and section.settings.show_on_home
@@ -25,14 +28,30 @@
     assign show_popup = false
   endif
 
-  if customer
-    assign show_popup = false
+  if customer and show_popup
+    if customer.tags contains 'exit-intent' or customer.tags contains coupon_code or customer.tags contains coupon_code_up
+      assign code_used = true
+      assign show_popup = false
+    endif
+
+    if show_popup and customer.orders_count > 0
+      for order in customer.orders limit: 50
+        unless code_used
+          for discount_application in order.discount_applications
+            assign discount_title = discount_application.title | upcase
+            if discount_title == coupon_code_up
+              assign code_used = true
+              assign show_popup = false
+            endif
+          endfor
+        endunless
+      endfor
+    endif
   endif
 
   assign delay_ms = section.settings.delay_seconds | times: 1000
   assign inactivity_ms = section.settings.inactivity_seconds | default: 10 | times: 1000
   assign fallback_ms = section.settings.fallback_seconds | default: 18 | times: 1000
-  assign coupon_code = section.settings.coupon_code | default: 'WELCOME10'
   assign coupon_tags = 'newsletter,exit-intent,first-time'
   if coupon_code != blank
     assign coupon_tags = coupon_tags | append: ',' | append: coupon_code
@@ -51,7 +70,9 @@
     data-fallback-ms="{{ fallback_ms }}"
     data-require-product-view="{{ section.settings.require_product_view }}"
     data-frequency="{{ section.settings.frequency }}"
-    data-storage-key="lame_exit_intent_v2_{{ section.id }}"
+    data-storage-key="lame_exit_intent_welcome"
+    data-customer-id="{% if customer %}{{ customer.id }}{% endif %}"
+    data-code-used="{% if code_used %}true{% else %}false{% endif %}"
     data-coupon-code="{{ section.settings.coupon_code | default: 'WELCOME10' | escape }}"
     data-contact-url="{{ routes.root_url }}contact"
     data-template="{{ template.name }}"
@@ -396,7 +417,7 @@
       "step": 1,
       "unit": "s",
       "default": 10,
-      "info": "If the visitor does not move the mouse, scroll, or tap for this long, show the popup."
+      "info": "Only trigger: if the visitor does not move the mouse, scroll, or tap for this long, show the popup. Does not open on page load."
     },
     {
       "type": "range",
@@ -420,27 +441,28 @@
       "type": "select",
       "id": "frequency",
       "label": "Show frequency",
-      "default": "once_per_session",
+      "default": "once_forever",
       "options": [
+        { "value": "once_forever", "label": "Once only (recommended)" },
         { "value": "once_per_session", "label": "Once per browser session" },
         { "value": "once_per_day", "label": "Once per day" },
-        { "value": "once_every_7_days", "label": "Once every 7 days" },
-        { "value": "once_forever", "label": "Once (until browser data cleared)" }
-      ]
+        { "value": "once_every_7_days", "label": "Once every 7 days" }
+      ],
+      "info": "Shows after 10s of no movement. Signed-in customers are tracked per account; never again after claim or code use."
     },
     {
       "type": "checkbox",
       "id": "hide_for_subscribers",
       "label": "Hide for marketing subscribers (legacy)",
       "default": true,
-      "info": "Popup is already hidden for all signed-in customers."
+      "info": "Signed-in customers who already claimed / used the welcome code are always excluded."
     },
     {
       "type": "checkbox",
       "id": "hide_after_purchase",
       "label": "Hide after purchase (local + thank-you)",
       "default": true,
-      "info": "Signed-in customers are always excluded. Guests who complete checkout are also excluded via browser storage."
+      "info": "Also hides when a signed-in customer has already used this discount code on an order."
     },
     {
       "type": "header",
