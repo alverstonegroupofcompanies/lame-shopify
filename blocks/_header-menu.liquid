@@ -42,8 +42,8 @@
               {% liquid
                 assign menu_link_title = link.title
                 assign menu_link_title_down = link.title | downcase
-                if menu_link_title_down == 'our products'
-                  assign menu_link_title = 'Shop'
+                if menu_link_title_down == 'our products' or menu_link_title_down == 'shop'
+                  assign menu_link_title = 'Beauty'
                 endif
               %}
               <li>
@@ -94,8 +94,8 @@
         {% liquid
           assign menu_link_title = link.title
           assign menu_link_title_down = link.title | downcase
-          if menu_link_title_down == 'our products'
-            assign menu_link_title = 'Shop'
+          if menu_link_title_down == 'our products' or menu_link_title_down == 'shop'
+            assign menu_link_title = 'Beauty'
           endif
           assign use_shop_mega_menu = false
           if menu_link_title_down == 'shop' or menu_link_title_down == 'our products'
@@ -194,9 +194,6 @@
       data-hydration-key="header-menu"
     >
       <div class="header-menu__inner">
-        {% if section.settings.menu_row == 'bottom' %}
-          {% render 'lame-header-category-dropdown', menu: block_settings.menu, section: section %}
-        {% endif %}
         <nav
           class="menu-list"
           aria-label="{{ 'accessibility.header_navigation_label' | t }}"
@@ -212,6 +209,11 @@
             attributes: 'data-skip-node-update'
           %}
         </nav>
+        {% render 'lame-header-category-dropdown',
+          menu: block_settings.menu,
+          section: section,
+          label: 'Category'
+        %}
       </div>
 
       <script

@@ -1,9 +1,17 @@
 {%- comment -%}
   Discover Beauty — spotlight-style promo cards (4:5 media + overlays).
+  Each card can link product-wise, brand-wise (shop filter), collection, or custom URL.
 {%- endcomment -%}
 
 {%- liquid
   assign open_new_tab = section.settings.open_in_new_tab
+  assign products_url = routes.all_products_collection_url
+  if collections['our-products'] != blank and collections['our-products'].url != blank
+    assign products_url = collections['our-products'].url
+  endif
+  if section.settings.products_collection != blank
+    assign products_url = section.settings.products_collection.url
+  endif
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -36,19 +44,62 @@
             if card_alt == blank
               assign card_alt = block.settings.title | default: shop.name
             endif
-            assign card_link = block.settings.link
+
             assign brand_logo = block.settings.brand_logo
             assign brand_text = block.settings.brand_text | strip
             assign badge_text = block.settings.badge_text | strip
             assign badge_bg = block.settings.badge_color | default: '#8b6b5a'
             assign title = block.settings.title | strip
             assign subtitle = block.settings.subtitle | strip
+
+            assign link_type = block.settings.link_type | default: 'brand'
+            assign card_link = blank
+
+            case link_type
+              when 'product'
+                if block.settings.product != blank
+                  assign card_link = block.settings.product.url
+                endif
+              when 'collection'
+                if block.settings.collection != blank
+                  assign card_link = block.settings.collection.url
+                endif
+              when 'brand'
+                assign brand_name = block.settings.link_brand | strip
+                if brand_name == blank or brand_name == 'other'
+                  if block.settings.link_brand_other != blank
+                    assign brand_name = block.settings.link_brand_other | strip
+                  else
+                    assign brand_name = brand_text
+                  endif
+                endif
+                if brand_name != blank
+                  assign brand_slug = brand_name | handleize
+                  assign brand_name_down = brand_name | downcase
+                  if brand_name_down contains 'lamstone'
+                    assign brand_slug = 'lamstone-healthcare'
+                  endif
+                  if brand_name_down == 'jovees'
+                    assign brand_slug = 'jovees-herbal'
+                  endif
+                  if brand_name_down == 'sebamed'
+                    assign brand_slug = 'sebamed'
+                  endif
+                  assign card_link = products_url | append: '?brand=' | append: brand_slug
+                endif
+              when 'custom'
+                assign card_link = block.settings.link
+            endcase
+
+            if card_link == blank and block.settings.link != blank
+              assign card_link = block.settings.link
+            endif
           -%}
 
           <li class="lame-beauty-love__item" {{ block.shopify_attributes }}>
             {%- if card_link != blank -%}
               <a
-                class="lame-beauty-love__card"
+                class="lame-beauty-love__card lame-beauty-love__card--link"
                 href="{{ card_link }}"
                 {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
               >
@@ -184,6 +235,10 @@
     height: 100%;
     text-decoration: none;
     color: inherit;
+  }
+
+  .lame-beauty-love__card--link {
+    cursor: pointer;
   }
 
   .lame-beauty-love__media {
@@ -420,6 +475,16 @@
       "default": "Discover Beauty"
     },
     {
+      "type": "paragraph",
+      "content": "Each promo card can open a product page, a brand filter on the shop/collection page, a collection, or a custom URL. Edit this per card in the blocks below."
+    },
+    {
+      "type": "collection",
+      "id": "products_collection",
+      "label": "Shop / products page",
+      "info": "Used when a card links brand-wise. Defaults to Our Products if available, otherwise All products."
+    },
+    {
       "type": "checkbox",
       "id": "open_in_new_tab",
       "label": "Open links in new tab",
@@ -522,9 +587,83 @@
           "label": "Subtitle"
         },
         {
+          "type": "header",
+          "content": "Click destination"
+        },
+        {
+          "type": "select",
+          "id": "link_type",
+          "label": "Link type",
+          "info": "Choose product-wise, brand-wise (shop filter), a collection page, or a custom URL.",
+          "options": [
+            { "value": "product", "label": "Product page" },
+            { "value": "brand", "label": "Brand on shop / collection" },
+            { "value": "collection", "label": "Collection page" },
+            { "value": "custom", "label": "Custom URL" }
+          ],
+          "default": "brand"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product",
+          "info": "Used when Link type is Product page."
+        },
+        {
+          "type": "select",
+          "id": "link_brand",
+          "label": "Brand / vendor",
+          "info": "Opens the shop page with this brand filter ticked. Leave as “Use brand name above” to use the Brand name field.",
+          "options": [
+            { "value": "", "label": "Use brand name above" },
+            { "value": "Cetaphil", "label": "Cetaphil" },
+            { "value": "DR.RASHEL", "label": "DR.RASHEL" },
+            { "value": "Dot & Key", "label": "Dot & Key" },
+            { "value": "Dove", "label": "Dove" },
+            { "value": "Faces Canada", "label": "Faces Canada" },
+            { "value": "Fair & Lovely", "label": "Fair & Lovely" },
+            { "value": "Femisafe", "label": "Femisafe" },
+            { "value": "Hamam", "label": "Hamam" },
+            { "value": "Himalaya", "label": "Himalaya" },
+            { "value": "Indulekha", "label": "Indulekha" },
+            { "value": "Jovees Herbal", "label": "Jovees Herbal" },
+            { "value": "Korean", "label": "Korean" },
+            { "value": "Lakme", "label": "Lakme" },
+            { "value": "Lifebuoy", "label": "Lifebuoy" },
+            { "value": "Lotus", "label": "Lotus" },
+            { "value": "Lux", "label": "Lux" },
+            { "value": "Mamaearth", "label": "Mamaearth" },
+            { "value": "NIVEA MEN", "label": "NIVEA MEN" },
+            { "value": "Nykaa", "label": "Nykaa" },
+            { "value": "Pears", "label": "Pears" },
+            { "value": "Plum", "label": "Plum" },
+            { "value": "Ponds", "label": "Ponds" },
+            { "value": "SebaMed", "label": "SebaMed" },
+            { "value": "Sirona", "label": "Sirona" },
+            { "value": "TRESemmé", "label": "TRESemmé" },
+            { "value": "other", "label": "Other brand (type below)" }
+          ],
+          "default": "",
+          "visible_if": "{{ block.settings.link_type == 'brand' }}"
+        },
+        {
+          "type": "text",
+          "id": "link_brand_other",
+          "label": "Other brand name",
+          "info": "Used when Brand / vendor is Other, or to override. Type it exactly as it appears in the Brand filter.",
+          "visible_if": "{{ block.settings.link_type == 'brand' }}"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Used when Link type is Collection page."
+        },
+        {
           "type": "url",
           "id": "link",
-          "label": "Link"
+          "label": "Fallback / custom URL",
+          "info": "Required when Link type is Custom URL. Also used if the product, brand, or collection above is empty."
         }
       ]
     }
@@ -543,7 +682,9 @@
             "badge_text": "Gentle Care",
             "badge_color": "#4a7fb5",
             "title": "Baby Gentle Wash",
-            "subtitle": "For delicate skin"
+            "subtitle": "For delicate skin",
+            "link_type": "brand",
+            "link_brand": "SebaMed"
           }
         },
         {
@@ -555,7 +696,9 @@
             "badge_text": "Strawberry Fresh",
             "badge_color": "#c45a6a",
             "title": "Up To 25% Off",
-            "subtitle": "Strawberry Face Wash"
+            "subtitle": "Strawberry Face Wash",
+            "link_type": "brand",
+            "link_brand": "Jovees Herbal"
           }
         },
         {
@@ -567,7 +710,9 @@
             "badge_text": "Dark Spot Care",
             "badge_color": "#c4a035",
             "title": "Turmeric Serum",
-            "subtitle": "Clear & glow"
+            "subtitle": "Clear & glow",
+            "link_type": "brand",
+            "link_brand": "Himalaya"
           }
         },
         {
@@ -579,7 +724,9 @@
             "badge_text": "Ghee + Kesar",
             "badge_color": "#b07a3a",
             "title": "Body Lotion",
-            "subtitle": "Ayurveda secrets"
+            "subtitle": "Ayurveda secrets",
+            "link_type": "brand",
+            "link_brand": "Himalaya"
           }
         },
         {
@@ -591,7 +738,9 @@
             "badge_text": "Vanilla Vibes",
             "badge_color": "#8b6b5a",
             "title": "Body Mist",
-            "subtitle": "All-day scent"
+            "subtitle": "All-day scent",
+            "link_type": "brand",
+            "link_brand": "Plum"
           }
         },
         {
@@ -603,7 +752,9 @@
             "badge_text": "SPF 50+",
             "badge_color": "#8b1e2d",
             "title": "Gloss Boss Lip Balm",
-            "subtitle": "Cocoa Mint SPF"
+            "subtitle": "Cocoa Mint SPF",
+            "link_type": "brand",
+            "link_brand": "Dot & Key"
           }
         }
       ]
