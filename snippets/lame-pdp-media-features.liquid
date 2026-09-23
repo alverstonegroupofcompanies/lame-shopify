@@ -1,7 +1,8 @@
 {% doc %}
-  Product media feature strip (BPA Free, silicone, etc.)
+  Combined delivery + feature highlights banner under the PDP hero.
+  No product-specific accent copy — safe for all products.
 
-  @param {object} settings - Section settings with feature_1_title, feature_1_subtitle, etc.
+  @param {object} settings - Section settings
 {% enddoc %}
 
 {% liquid
@@ -22,55 +23,89 @@
       break
     endif
   endfor
+
+  assign delivery_heading = settings.delivery_heading | default: 'Fast, friendly delivery'
+  assign delivery_message = settings.delivery_message | default: 'Most orders arrive in 2–4 business days across India. Free shipping on orders above ₹999 — we’ll keep you updated every step of the way.'
+  assign show_delivery = false
+  if delivery_heading != blank or delivery_message != blank
+    assign show_delivery = true
+  endif
 %}
 
-{% if has_features %}
-  <div class="lame-pdp-media-features" role="list">
-    {% for i in (1..4) %}
-      {% liquid
-        case i
-          when 1
-            assign icon = settings.feature_1_icon
-            assign title = settings.feature_1_title
-            assign subtitle = settings.feature_1_subtitle
-          when 2
-            assign icon = settings.feature_2_icon
-            assign title = settings.feature_2_title
-            assign subtitle = settings.feature_2_subtitle
-          when 3
-            assign icon = settings.feature_3_icon
-            assign title = settings.feature_3_title
-            assign subtitle = settings.feature_3_subtitle
-          when 4
-            assign icon = settings.feature_4_icon
-            assign title = settings.feature_4_title
-            assign subtitle = settings.feature_4_subtitle
-        endcase
-      %}
-      {% if title != blank %}
-        <div class="lame-pdp-media-features__item" role="listitem">
-          <span class="lame-pdp-media-features__icon" aria-hidden="true">
-            {% case icon %}
-              {% when 'leaf' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-4-6-8-6-12 0-3 2-5 6-5s6 2 6 5c0 4-2 8-6 12Z" stroke="currentColor" stroke-width="1.35"/><path d="M12 21V9" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
-              {% when 'shield' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.35"/><path d="M9 12.5 11 15l5-5.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
-              {% when 'sparkle' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
-              {% when 'cup' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12v6a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V8Z" stroke="currentColor" stroke-width="1.35"/><path d="M18 10h1.5a2.5 2.5 0 0 1 0 5H18" stroke="currentColor" stroke-width="1.35"/></svg>
-              {% else %}
-                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.35"/></svg>
-            {% endcase %}
-          </span>
-          <span class="lame-pdp-media-features__copy">
-            <strong>{{ title | escape }}</strong>
-            {% if subtitle != blank %}
-              <span>{{ subtitle | escape }}</span>
+{% if has_features or show_delivery %}
+  <section class="lame-pdp-feature-banner" aria-label="Delivery and product highlights">
+    <div class="lame-pdp-feature-banner__inner">
+      {% if show_delivery %}
+        <div class="lame-pdp-delivery lame-pdp-delivery--banner">
+          <div class="lame-pdp-delivery__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+              <path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.35"/>
+              <path d="M14 10h4l3 3v2h-7v-5Z" stroke="currentColor" stroke-width="1.35"/>
+              <circle cx="7" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/>
+              <circle cx="17" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/>
+            </svg>
+          </div>
+          <div class="lame-pdp-delivery__copy">
+            {% if delivery_heading != blank %}
+              <p class="lame-pdp-delivery__title">{{ delivery_heading | escape }}</p>
             {% endif %}
-          </span>
+            {% if delivery_message != blank %}
+              <p class="lame-pdp-delivery__text">{{ delivery_message | escape }}</p>
+            {% endif %}
+          </div>
         </div>
       {% endif %}
-    {% endfor %}
-  </div>
+
+      {% if has_features %}
+        <div class="lame-pdp-media-features lame-pdp-media-features--banner" role="list">
+          {% for i in (1..4) %}
+            {% liquid
+              case i
+                when 1
+                  assign icon = settings.feature_1_icon
+                  assign title = settings.feature_1_title
+                  assign subtitle = settings.feature_1_subtitle
+                when 2
+                  assign icon = settings.feature_2_icon
+                  assign title = settings.feature_2_title
+                  assign subtitle = settings.feature_2_subtitle
+                when 3
+                  assign icon = settings.feature_3_icon
+                  assign title = settings.feature_3_title
+                  assign subtitle = settings.feature_3_subtitle
+                when 4
+                  assign icon = settings.feature_4_icon
+                  assign title = settings.feature_4_title
+                  assign subtitle = settings.feature_4_subtitle
+              endcase
+            %}
+            {% if title != blank %}
+              <div class="lame-pdp-media-features__item" role="listitem">
+                <span class="lame-pdp-media-features__icon" aria-hidden="true">
+                  {% case icon %}
+                    {% when 'leaf' %}
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-4-4-6-8-6-12 0-3 2-5 6-5s6 2 6 5c0 4-2 8-6 12Z" stroke="currentColor" stroke-width="1.35"/><path d="M12 21V9" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+                    {% when 'shield' %}
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.35"/><path d="M9 12.5 11 15l5-5.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+                    {% when 'sparkle' %}
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+                    {% when 'cup' %}
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12v6a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V8Z" stroke="currentColor" stroke-width="1.35"/><path d="M18 10h1.5a2.5 2.5 0 0 1 0 5H18" stroke="currentColor" stroke-width="1.35"/></svg>
+                    {% else %}
+                      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.35"/></svg>
+                  {% endcase %}
+                </span>
+                <span class="lame-pdp-media-features__copy">
+                  <strong>{{ title | escape }}</strong>
+                  {% if subtitle != blank %}
+                    <span>{{ subtitle | escape }}</span>
+                  {% endif %}
+                </span>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
 {% endif %}

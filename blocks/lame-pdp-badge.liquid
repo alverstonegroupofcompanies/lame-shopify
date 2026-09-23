@@ -1,38 +1,47 @@
 {%- liquid
-  assign show_badge = false
   assign badge_product = closest.product
   if badge_product == blank
     assign badge_product = product
   endif
 
+  assign brand_label = block.settings.brand_text
+  if brand_label == blank and badge_product != blank and badge_product.vendor != blank
+    assign brand_label = badge_product.vendor
+  endif
+
+  assign show_bestseller = false
   if badge_product != blank
     for tag in badge_product.tags
       assign tag_down = tag | downcase
       if tag_down == 'bestseller' or tag_down == 'best seller' or tag_down == 'best-seller' or tag_down == 'best-sellers'
-        assign show_badge = true
+        assign show_bestseller = true
         break
       endif
     endfor
 
-    unless show_badge
+    unless show_bestseller
       for coll in badge_product.collections
         assign coll_handle = coll.handle | downcase
         if coll_handle == 'best-sellers' or coll_handle == 'bestsellers' or coll_handle == 'best-seller'
-          assign show_badge = true
+          assign show_bestseller = true
           break
         endif
       endfor
     endunless
   endif
+
+  assign bestseller_text = block.settings.text | default: 'Best seller'
 -%}
 
-{% if show_badge and block.settings.text != blank %}
-  <span
-    class="lame-pdp-badge{% if block.settings.style == 'accent' %} lame-pdp-badge--accent{% endif %}"
-    {{ block.shopify_attributes }}
-  >
-    {{ block.settings.text | escape }}
-  </span>
+{% if brand_label != blank or show_bestseller %}
+  <div class="lame-pdp-badge-row" {{ block.shopify_attributes }}>
+    {% if brand_label != blank %}
+      <span class="lame-pdp-badge lame-pdp-badge--brand">{{ brand_label | escape }}</span>
+    {% endif %}
+    {% if show_bestseller and bestseller_text != blank %}
+      <span class="lame-pdp-badge">{{ bestseller_text | escape }}</span>
+    {% endif %}
+  </div>
 {% endif %}
 
 {% schema %}
@@ -41,28 +50,25 @@
   "tag": null,
   "settings": [
     {
-      "type": "paragraph",
-      "content": "Shows only on products tagged bestseller / best seller, or in a Best Sellers collection. Not shown on every product."
+      "type": "text",
+      "id": "brand_text",
+      "label": "Brand badge (optional)",
+      "info": "Defaults to the product vendor when left blank."
     },
     {
       "type": "text",
       "id": "text",
-      "label": "Badge text",
-      "default": "Best seller"
+      "label": "Bestseller badge text",
+      "default": "Best seller",
+      "info": "Only shown on products tagged bestseller or in a Best Sellers collection."
     },
     {
       "type": "select",
       "id": "style",
-      "label": "Style",
+      "label": "Bestseller style",
       "options": [
-        {
-          "value": "default",
-          "label": "Green pill"
-        },
-        {
-          "value": "accent",
-          "label": "Muted"
-        }
+        { "value": "default", "label": "Green pill" },
+        { "value": "accent", "label": "Muted" }
       ],
       "default": "default"
     }

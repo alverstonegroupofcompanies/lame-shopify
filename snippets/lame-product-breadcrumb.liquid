@@ -1,19 +1,104 @@
 {%- doc -%}
-  Premium product breadcrumb: Home → Collection → Product
+  Product breadcrumb: Home → Beauty → Category → Brand → Product
+  Each crumb (except the current product) is a link.
+
+  @param {object} product
+  @param {object} [collection] - Current collection context, if any
 {%- enddoc -%}
 
-<nav class="lame-product-breadcrumb" aria-label="Breadcrumb">
-  <ol class="lame-product-breadcrumb__list">
-    <li class="lame-product-breadcrumb__item">
-      <a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a>
-    </li>
-    {% if collection %}
+{%- liquid
+  assign crumb_product = product
+  if crumb_product == blank
+    assign crumb_product = closest.product
+  endif
+
+  assign beauty_url = routes.all_products_collection_url
+  if collections['our-products'] != blank
+    assign beauty_url = collections['our-products'].url
+  elsif collections['all'] != blank
+    assign beauty_url = collections['all'].url
+  endif
+
+  assign category_collection = blank
+  assign category_handles = 'skin-care,bath-body,hair-care,make-up,fragrance,baby-mom,wellness,body-care,body-lotion,face-wash,face-care' | split: ','
+
+  if collection != blank
+    assign col_handle = collection.handle | downcase
+    unless col_handle == 'all' or col_handle == 'our-products' or col_handle == 'products' or col_handle == 'frontpage'
+      assign category_collection = collection
+    endunless
+  endif
+
+  if category_collection == blank and crumb_product != blank
+    for handle in category_handles
+      assign candidate = collections[handle]
+      if candidate == blank
+        continue
+      endif
+      for pcoll in crumb_product.collections
+        if pcoll.handle == handle
+          assign category_collection = pcoll
+          break
+        endif
+      endfor
+      if category_collection != blank
+        break
+      endif
+    endfor
+  endif
+
+  if category_collection == blank and crumb_product != blank
+    for pcoll in crumb_product.collections
+      assign ph = pcoll.handle | downcase
+      unless ph == 'all' or ph == 'our-products' or ph == 'products' or ph == 'frontpage' or ph == 'best-sellers' or ph == 'bestsellers'
+        assign category_collection = pcoll
+        break
+      endunless
+    endfor
+  endif
+
+  assign brand_name = crumb_product.vendor | strip
+  assign brand_url = blank
+  if brand_name != blank
+    capture brand_slug_capture
+      render 'lame-vendor-slug', vendor: brand_name
+    endcapture
+    assign brand_slug = brand_slug_capture | strip
+    assign brand_collection = collections[brand_slug]
+    if brand_collection != blank
+      assign brand_url = brand_collection.url
+    else
+      assign brand_url = beauty_url | append: '?brand=' | append: brand_slug
+    endif
+  endif
+-%}
+
+{% if crumb_product != blank %}
+  <nav class="lame-product-breadcrumb" aria-label="Breadcrumb">
+    <ol class="lame-product-breadcrumb__list">
       <li class="lame-product-breadcrumb__item">
-        <a href="{{ collection.url }}">{{ collection.title | escape }}</a>
+        <a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a>
       </li>
-    {% endif %}
-    <li class="lame-product-breadcrumb__item lame-product-breadcrumb__item--current" aria-current="page">
-      <span>{{ product.title | escape }}</span>
-    </li>
-  </ol>
-</nav>
+
+      <li class="lame-product-breadcrumb__item">
+        <a href="{{ beauty_url }}">{{ 'lame_product.breadcrumb_beauty' | t }}</a>
+      </li>
+
+      {% if category_collection != blank %}
+        <li class="lame-product-breadcrumb__item">
+          <a href="{{ category_collection.url }}">{{ category_collection.title | escape }}</a>
+        </li>
+      {% endif %}
+
+      {% if brand_name != blank and brand_url != blank %}
+        <li class="lame-product-breadcrumb__item">
+          <a href="{{ brand_url }}">{{ brand_name | escape }}</a>
+        </li>
+      {% endif %}
+
+      <li class="lame-product-breadcrumb__item lame-product-breadcrumb__item--current" aria-current="page">
+        <span>{{ crumb_product.title | escape }}</span>
+      </li>
+    </ol>
+  </nav>
+{% endif %}

@@ -1,17 +1,322 @@
 {%- liquid
-  assign heading = block.settings.heading | default: 'Description'
+  assign heading = block.settings.heading | default: 'Product Description'
   assign description_html = closest.product.description
+
+  assign benefits_html = block.settings.benefits
+  assign howto_html = block.settings.how_to_use
+  assign ingredients_html = block.settings.ingredients
+  assign faqs_html = block.settings.faqs
+
+  if benefits_html == blank and closest.product.metafields.custom.key_benefits != blank
+    assign benefits_html = closest.product.metafields.custom.key_benefits | metafield_tag
+  endif
+  if howto_html == blank and closest.product.metafields.custom.how_to_use != blank
+    assign howto_html = closest.product.metafields.custom.how_to_use | metafield_tag
+  endif
+  if ingredients_html == blank and closest.product.metafields.custom.ingredients != blank
+    assign ingredients_html = closest.product.metafields.custom.ingredients | metafield_tag
+  endif
+  if faqs_html == blank and closest.product.metafields.custom.faqs != blank
+    assign faqs_html = closest.product.metafields.custom.faqs | metafield_tag
+  endif
 -%}
 
-{% if description_html != blank %}
-  <div class="lame-pdp-description product-description" {{ block.shopify_attributes }}>
-    {% if heading != blank %}
-      <h2 class="lame-pdp-description__heading">{{ heading | escape }}</h2>
-    {% endif %}
-    <div class="lame-pdp-description__content rte">
-      {{ description_html }}
+{% if description_html != blank or benefits_html != blank or howto_html != blank or ingredients_html != blank or faqs_html != blank %}
+  <div
+    class="lame-pdp-description product-description"
+    data-lame-pdp-tabs
+    {{ block.shopify_attributes }}
+  >
+    <div class="lame-pdp-description__tabs" role="tablist" aria-label="Product information">
+      <button
+        type="button"
+        class="lame-pdp-description__tab is-active"
+        role="tab"
+        id="lame-pdp-tab-description-{{ block.id }}"
+        aria-selected="true"
+        aria-controls="lame-pdp-panel-description-{{ block.id }}"
+        data-lame-pdp-tab="description"
+      >
+        Description
+      </button>
+      <button
+        type="button"
+        class="lame-pdp-description__tab"
+        role="tab"
+        id="lame-pdp-tab-benefits-{{ block.id }}"
+        aria-selected="false"
+        aria-controls="lame-pdp-panel-benefits-{{ block.id }}"
+        data-lame-pdp-tab="benefits"
+        hidden
+      >
+        Key Benefits
+      </button>
+      <button
+        type="button"
+        class="lame-pdp-description__tab"
+        role="tab"
+        id="lame-pdp-tab-howto-{{ block.id }}"
+        aria-selected="false"
+        aria-controls="lame-pdp-panel-howto-{{ block.id }}"
+        data-lame-pdp-tab="howto"
+        hidden
+      >
+        How to Use
+      </button>
+      <button
+        type="button"
+        class="lame-pdp-description__tab"
+        role="tab"
+        id="lame-pdp-tab-ingredients-{{ block.id }}"
+        aria-selected="false"
+        aria-controls="lame-pdp-panel-ingredients-{{ block.id }}"
+        data-lame-pdp-tab="ingredients"
+        hidden
+      >
+        Ingredients
+      </button>
+      <button
+        type="button"
+        class="lame-pdp-description__tab"
+        role="tab"
+        id="lame-pdp-tab-faqs-{{ block.id }}"
+        aria-selected="false"
+        aria-controls="lame-pdp-panel-faqs-{{ block.id }}"
+        data-lame-pdp-tab="faqs"
+        hidden
+      >
+        FAQs
+      </button>
+    </div>
+
+    <div class="lame-pdp-description__panels">
+      <div
+        class="lame-pdp-description__panel is-active"
+        role="tabpanel"
+        id="lame-pdp-panel-description-{{ block.id }}"
+        aria-labelledby="lame-pdp-tab-description-{{ block.id }}"
+        data-lame-pdp-panel="description"
+      >
+        <div class="lame-pdp-description__layout">
+          <div class="lame-pdp-description__main">
+            {% if heading != blank %}
+              <h2 class="lame-pdp-description__heading">{{ heading | escape }}</h2>
+            {% endif %}
+            <div class="lame-pdp-description__content rte" data-lame-pdp-source>
+              {{ description_html }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="lame-pdp-description__panel"
+        role="tabpanel"
+        id="lame-pdp-panel-benefits-{{ block.id }}"
+        aria-labelledby="lame-pdp-tab-benefits-{{ block.id }}"
+        data-lame-pdp-panel="benefits"
+        hidden
+      >
+        <h2 class="lame-pdp-description__heading">Key Benefits</h2>
+        <div class="lame-pdp-description__content rte" data-lame-pdp-target="benefits">
+          {{ benefits_html }}
+        </div>
+      </div>
+
+      <div
+        class="lame-pdp-description__panel"
+        role="tabpanel"
+        id="lame-pdp-panel-howto-{{ block.id }}"
+        aria-labelledby="lame-pdp-tab-howto-{{ block.id }}"
+        data-lame-pdp-panel="howto"
+        hidden
+      >
+        <h2 class="lame-pdp-description__heading">How to Use</h2>
+        <div class="lame-pdp-description__content rte" data-lame-pdp-target="howto">
+          {{ howto_html }}
+        </div>
+      </div>
+
+      <div
+        class="lame-pdp-description__panel"
+        role="tabpanel"
+        id="lame-pdp-panel-ingredients-{{ block.id }}"
+        aria-labelledby="lame-pdp-tab-ingredients-{{ block.id }}"
+        data-lame-pdp-panel="ingredients"
+        hidden
+      >
+        <h2 class="lame-pdp-description__heading">Ingredients</h2>
+        <div class="lame-pdp-description__content rte" data-lame-pdp-target="ingredients">
+          {{ ingredients_html }}
+        </div>
+      </div>
+
+      <div
+        class="lame-pdp-description__panel"
+        role="tabpanel"
+        id="lame-pdp-panel-faqs-{{ block.id }}"
+        aria-labelledby="lame-pdp-tab-faqs-{{ block.id }}"
+        data-lame-pdp-panel="faqs"
+        hidden
+      >
+        <h2 class="lame-pdp-description__heading">FAQs</h2>
+        <div class="lame-pdp-description__content rte" data-lame-pdp-target="faqs">
+          {{ faqs_html }}
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      var root = document.currentScript && document.currentScript.previousElementSibling;
+      if (!root || !root.hasAttribute('data-lame-pdp-tabs')) {
+        root = document.querySelector('[data-lame-pdp-tabs]');
+      }
+      if (!root || root.dataset.tabsReady === '1') return;
+      root.dataset.tabsReady = '1';
+
+      var SECTION_MAP = [
+        { key: 'benefits', patterns: [/key\s*benefits?/i, /^benefits$/i] },
+        { key: 'howto', patterns: [/how\s*to\s*use/i, /directions?/i, /usage/i] },
+        { key: 'ingredients', patterns: [/ingredients?/i, /composition/i] },
+        { key: 'faqs', patterns: [/faqs?/i, /frequently\s+asked/i, /^questions?$/i] }
+      ];
+
+      var source = root.querySelector('[data-lame-pdp-source]');
+      if (source) {
+        var nodes = Array.prototype.slice.call(source.childNodes);
+        var currentKey = 'description';
+        var buckets = { description: [], benefits: [], howto: [], ingredients: [], faqs: [] };
+
+        nodes.forEach(function (node) {
+          if (node.nodeType === 1) {
+            var tag = node.tagName.toLowerCase();
+            var text = (node.textContent || '').replace(/\s+/g, ' ').trim();
+            var isHeading = /^h[1-4]$/.test(tag);
+            var isBoldLead =
+              !isHeading &&
+              text.length > 0 &&
+              text.length < 48 &&
+              (
+                tag === 'strong' ||
+                tag === 'b' ||
+                (tag === 'p' && node.children.length <= 2 && node.querySelector('strong, b, em'))
+              );
+
+            if (isHeading || isBoldLead) {
+              var matched = null;
+              SECTION_MAP.forEach(function (section) {
+                if (matched) return;
+                section.patterns.forEach(function (re) {
+                  if (!matched && re.test(text)) matched = section.key;
+                });
+              });
+              if (matched) {
+                currentKey = matched;
+                return;
+              }
+              if (/product\s*description|^description$/i.test(text)) {
+                currentKey = 'description';
+                return;
+              }
+            }
+          }
+          if (node.nodeType === 3 && !(node.textContent || '').trim()) return;
+          buckets[currentKey].push(node);
+        });
+
+        Object.keys(buckets).forEach(function (key) {
+          if (!buckets[key].length) return;
+          var target =
+            key === 'description'
+              ? source
+              : root.querySelector('[data-lame-pdp-target="' + key + '"]');
+          if (!target) return;
+          if (key !== 'description') target.innerHTML = '';
+          else source.innerHTML = '';
+          buckets[key].forEach(function (n) {
+            target.appendChild(n);
+          });
+        });
+      }
+
+      function panelHasContent(key) {
+        var panel = root.querySelector('[data-lame-pdp-panel="' + key + '"]');
+        if (!panel) return false;
+        var content = panel.querySelector('.lame-pdp-description__content');
+        if (!content) return false;
+        return (content.textContent || '').replace(/\s+/g, '').length > 0;
+      }
+
+      SECTION_MAP.forEach(function (section) {
+        var tab = root.querySelector('[data-lame-pdp-tab="' + section.key + '"]');
+        var panel = root.querySelector('[data-lame-pdp-panel="' + section.key + '"]');
+        if (!tab || !panel) return;
+        if (panelHasContent(section.key)) {
+          tab.hidden = false;
+          tab.removeAttribute('hidden');
+        } else {
+          tab.hidden = true;
+          panel.hidden = true;
+        }
+      });
+
+      var descTab = root.querySelector('[data-lame-pdp-tab="description"]');
+      if (descTab) {
+        descTab.hidden = false;
+        descTab.removeAttribute('hidden');
+      }
+
+      function activate(key) {
+        root.querySelectorAll('[data-lame-pdp-tab]').forEach(function (tab) {
+          var on = tab.getAttribute('data-lame-pdp-tab') === key;
+          tab.classList.toggle('is-active', on);
+          tab.setAttribute('aria-selected', on ? 'true' : 'false');
+          if (on) tab.removeAttribute('tabindex');
+          else tab.setAttribute('tabindex', '-1');
+        });
+        root.querySelectorAll('[data-lame-pdp-panel]').forEach(function (panel) {
+          var on = panel.getAttribute('data-lame-pdp-panel') === key;
+          panel.classList.toggle('is-active', on);
+          if (on) {
+            panel.hidden = false;
+            panel.removeAttribute('hidden');
+          } else {
+            panel.hidden = true;
+          }
+        });
+      }
+
+      root.addEventListener('click', function (e) {
+        var tab = e.target.closest('[data-lame-pdp-tab]');
+        if (!tab || tab.hidden || !root.contains(tab)) return;
+        e.preventDefault();
+        activate(tab.getAttribute('data-lame-pdp-tab'));
+      });
+
+      root.addEventListener('keydown', function (e) {
+        var tab = e.target.closest('[data-lame-pdp-tab]');
+        if (!tab || !root.contains(tab)) return;
+        var tabs = Array.prototype.slice.call(
+          root.querySelectorAll('[data-lame-pdp-tab]:not([hidden])')
+        );
+        var idx = tabs.indexOf(tab);
+        if (idx < 0) return;
+        var next = -1;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % tabs.length;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + tabs.length) % tabs.length;
+        if (e.key === 'Home') next = 0;
+        if (e.key === 'End') next = tabs.length - 1;
+        if (next < 0) return;
+        e.preventDefault();
+        tabs[next].focus();
+        activate(tabs[next].getAttribute('data-lame-pdp-tab'));
+      });
+
+      activate('description');
+    })();
+  </script>
 {% endif %}
 
 {% schema %}
@@ -22,8 +327,29 @@
     {
       "type": "text",
       "id": "heading",
-      "label": "Heading",
-      "default": "Description"
+      "label": "Description heading",
+      "default": "Product Description"
+    },
+    {
+      "type": "richtext",
+      "id": "benefits",
+      "label": "Key Benefits",
+      "info": "Optional. If empty, content is taken from headings inside the product description (e.g. Key Benefits)."
+    },
+    {
+      "type": "richtext",
+      "id": "how_to_use",
+      "label": "How to Use"
+    },
+    {
+      "type": "richtext",
+      "id": "ingredients",
+      "label": "Ingredients"
+    },
+    {
+      "type": "richtext",
+      "id": "faqs",
+      "label": "FAQs"
     }
   ],
   "presets": [

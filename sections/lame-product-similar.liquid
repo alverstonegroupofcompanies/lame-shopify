@@ -109,9 +109,18 @@
   >
     <div class="lame-pdp-similar__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
       <header class="lame-pdp-similar__header">
-        <h2 class="lame-pdp-similar__heading">{{ section.settings.heading | escape }}</h2>
-        {% if section.settings.subheading != blank %}
-          <p class="lame-pdp-similar__subheading">{{ section.settings.subheading | escape }}</p>
+        <div class="lame-pdp-similar__heading-group">
+          <h2 class="lame-pdp-similar__heading">{{ section.settings.heading | escape }}</h2>
+          {% if section.settings.subheading != blank %}
+            <p class="lame-pdp-similar__subheading">{{ section.settings.subheading | escape }}</p>
+          {% endif %}
+        </div>
+        {% if section.settings.view_all_label != blank %}
+          {% assign view_all_url = section.settings.view_all_url | default: routes.all_products_collection_url %}
+          <a class="lame-pdp-similar__view-all" href="{{ view_all_url }}">
+            {{ section.settings.view_all_label | escape }}
+            <span aria-hidden="true">→</span>
+          </a>
         {% endif %}
       </header>
 
@@ -194,21 +203,54 @@
   }
 
   .lame-pdp-similar__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
     margin-bottom: 1.15rem;
+  }
+
+  .lame-pdp-similar__heading-group {
+    min-width: 0;
   }
 
   .lame-pdp-similar__heading {
     margin: 0;
-    font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+    font-family: 'Cormorant Garamond', Georgia, var(--font-heading--family), serif;
+    font-size: clamp(1.45rem, 2.4vw, 1.85rem);
     font-weight: 600;
-    color: #121212;
+    color: #143f2e;
   }
 
   .lame-pdp-similar__subheading {
     margin: 0.35rem 0 0;
     font-size: 0.95rem;
     color: #6b7280;
+  }
+
+  .lame-pdp-similar__view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #143f2e;
+    text-decoration: none;
+  }
+
+  .lame-pdp-similar__view-all:hover {
+    opacity: 0.8;
+  }
+
+  .lame-pdp-similar__slide .lame-catlog-card__atc {
+    background: #e7f0ea !important;
+    color: #143f2e !important;
+    border-color: transparent !important;
+  }
+
+  .lame-pdp-similar__slide .lame-catlog-card__atc:hover {
+    background: #d5e6db !important;
   }
 
   .lame-pdp-similar__carousel {
@@ -321,6 +363,17 @@
       "id": "subheading",
       "label": "Subheading",
       "default": "Handpicked picks with a similar look and feel"
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "View all label",
+      "default": "View all"
+    },
+    {
+      "type": "url",
+      "id": "view_all_url",
+      "label": "View all link"
     },
     {
       "type": "range",
