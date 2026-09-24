@@ -1,0 +1,45 @@
+{%- doc -%}
+  Estimated delivery range: today through +7 days (auto-updates via JS each day).
+
+  @param {string} [variant] - 'line' (default under cart item) | 'inline' (summary / compact)
+  @param {number} [days] - End offset in days from today (default 7)
+{%- enddoc -%}
+
+{%- liquid
+  assign eta_days = days | default: 7
+  assign start_ts = 'now' | date: '%s'
+  assign day_seconds = eta_days | times: 86400
+  assign end_ts = start_ts | plus: day_seconds
+  assign start_label = start_ts | date: '%d %b'
+  assign end_label = end_ts | date: '%d %b'
+  assign eta_variant = variant | default: 'line'
+-%}
+
+{%- if eta_variant == 'inline' -%}
+  <span
+    class="lame-delivery-eta lame-delivery-eta--inline"
+    data-lame-delivery-eta
+    data-days="{{ eta_days }}"
+  >
+    <span data-lame-delivery-eta-range>{{ start_label }} – {{ end_label }}</span>
+  </span>
+{%- else -%}
+  <p
+    class="lame-delivery-eta"
+    data-lame-delivery-eta
+    data-days="{{ eta_days }}"
+  >
+    <span class="lame-delivery-eta__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" width="14" height="14" focusable="false">
+        <path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.35"/>
+        <path d="M14 10h4l3 3v2h-7v-5Z" stroke="currentColor" stroke-width="1.35"/>
+        <circle cx="7" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/>
+        <circle cx="17" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/>
+      </svg>
+    </span>
+    <span class="lame-delivery-eta__text">
+      {{ 'lame_cart.delivery_eta_label' | t }}
+      <span data-lame-delivery-eta-range>{{ start_label }} – {{ end_label }}</span>
+    </span>
+  </p>
+{%- endif -%}
