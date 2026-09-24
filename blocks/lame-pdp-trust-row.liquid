@@ -1,11 +1,15 @@
 <div class="lame-pdp-trust-row" {{ block.shopify_attributes }}>
   {% for i in (1..3) %}
     {% liquid
+      assign use_eta = false
       case i
         when 1
           assign icon = block.settings.icon_1
           assign title = block.settings.title_1
           assign subtitle = block.settings.subtitle_1
+          if block.settings.use_delivery_eta_1
+            assign use_eta = true
+          endif
         when 2
           assign icon = block.settings.icon_2
           assign title = block.settings.title_2
@@ -16,7 +20,7 @@
           assign subtitle = block.settings.subtitle_3
       endcase
     %}
-    {% if title != blank %}
+    {% if use_eta or title != blank %}
       <div class="lame-pdp-trust-row__item">
         <span class="lame-pdp-trust-row__icon" aria-hidden="true">
           {% case icon %}
@@ -31,9 +35,13 @@
           {% endcase %}
         </span>
         <span class="lame-pdp-trust-row__copy">
-          <strong>{{ title | escape }}</strong>
-          {% if subtitle != blank %}
-            <span>{{ subtitle | escape }}</span>
+          {% if use_eta %}
+            {% render 'lame-delivery-eta', variant: 'trust' %}
+          {% else %}
+            <strong>{{ title | escape }}</strong>
+            {% if subtitle != blank %}
+              <span>{{ subtitle | escape }}</span>
+            {% endif %}
           {% endif %}
         </span>
       </div>
@@ -62,16 +70,25 @@
       "default": "shipping"
     },
     {
+      "type": "checkbox",
+      "id": "use_delivery_eta_1",
+      "label": "Show delivery date if booked now",
+      "info": "Replaces the title and subtitle with a live delivery date",
+      "default": true
+    },
+    {
       "type": "text",
       "id": "title_1",
       "label": "Title",
-      "default": "Free shipping"
+      "default": "Free shipping",
+      "visible_if": "{{ block.settings.use_delivery_eta_1 == false }}"
     },
     {
       "type": "text",
       "id": "subtitle_1",
       "label": "Subtitle",
-      "default": "On orders above Rs. 999"
+      "default": "On orders above Rs. 999",
+      "visible_if": "{{ block.settings.use_delivery_eta_1 == false }}"
     },
     {
       "type": "header",
