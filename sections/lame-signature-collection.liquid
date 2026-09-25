@@ -112,7 +112,7 @@
                         class: 'lame-signature__showcase-image',
                         loading: 'lazy',
                         widths: '360,480,600,720,900',
-                        sizes: '(min-width: 1200px) 280px, (min-width: 750px) 22vw, 78vw',
+                        sizes: '(min-width: 1200px) 340px, (min-width: 750px) 40vw, 82vw',
                         alt: block.settings.image.alt | default: block.settings.heading | escape
                     }}
                   {% elsif block.settings.image_asset != blank %}
@@ -270,6 +270,12 @@
     let dots = [];
 
     const getSlidesPerView = () => {
+      const isShowcase = section.querySelector('.lame-signature__card--showcase');
+      if (isShowcase) {
+        if (window.matchMedia('(min-width: 1200px)').matches) return 3;
+        if (window.matchMedia('(min-width: 750px)').matches) return 2;
+        return 1;
+      }
       if (window.matchMedia('(min-width: 990px)').matches) return 3;
       if (window.matchMedia('(min-width: 750px)').matches) return 2;
       return 1;
@@ -517,7 +523,7 @@
     grid-template-columns: 1fr;
   }
 
-  /* Coming soon — full-bleed square showcase */
+  /* Coming soon — roomy vertical showcase cards */
   .lame-signature--showcase .lame-signature__wrap {
     max-width: none;
     padding-inline: 0;
@@ -530,14 +536,15 @@
   .lame-signature--showcase .lame-signature__carousel {
     width: 100%;
     max-width: none;
-    --signature-card-size: clamp(220px, calc((100vw - 7rem) / 4.2), 280px);
+    --signature-card-size: min(82vw, 300px);
   }
 
   .lame-signature--showcase .lame-signature__track {
     grid-auto-columns: var(--signature-card-size);
-    gap: clamp(0.65rem, 1.2vw, 0.85rem);
-    padding: 0.25rem max(1rem, var(--page-margin)) 0.35rem;
-    justify-content: safe center;
+    gap: clamp(0.85rem, 1.8vw, 1.25rem);
+    padding: 0.35rem max(1rem, var(--page-margin)) 0.5rem;
+    justify-content: flex-start;
+    scroll-padding-inline: max(1rem, var(--page-margin));
   }
 
   .lame-signature--showcase .lame-signature__slide {
@@ -546,28 +553,29 @@
 
   .lame-signature__card--showcase {
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
     width: 100%;
-    height: auto;
+    height: 100%;
     aspect-ratio: auto;
     min-height: 0;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     background: #fff;
     border: 1px solid rgb(var(--lame-sig-forest) / 0.1);
-    box-shadow: 0 6px 20px rgb(20 20 20 / 0.08);
+    box-shadow: 0 8px 24px rgb(20 20 20 / 0.08);
     transition: box-shadow 0.35s ease, transform 0.35s ease;
   }
 
   .lame-signature__card--showcase:is(:hover, :focus-within) {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgb(20 20 20 / 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 34px rgb(20 20 20 / 0.12);
   }
 
   .lame-signature__showcase-media {
     position: relative;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1 / 1;
     min-height: 0;
     overflow: hidden;
     background: #ece8e2;
@@ -589,13 +597,15 @@
   .lame-signature__showcase-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.9rem 0.75rem;
+    gap: 0.5rem;
+    padding: 1.15rem 1.1rem 1.35rem;
     text-align: center;
     background: linear-gradient(160deg, rgb(250 247 241) 0%, rgb(244 238 228) 100%);
-    border-inline-start: 1px solid rgb(var(--lame-sig-forest) / 0.08);
+    border-inline-start: 0;
+    border-block-start: 1px solid rgb(var(--lame-sig-forest) / 0.08);
+    min-height: 10.5rem;
   }
 
   .lame-signature__showcase-brand {
@@ -610,7 +620,7 @@
 
   .lame-signature__showcase-tag {
     display: inline-block;
-    padding: 0.2rem 0.55rem;
+    padding: 0.25rem 0.65rem;
     border: 1px solid rgb(var(--lame-sig-forest) / 0.2);
     border-radius: 999px;
     font-size: 0.6875rem;
@@ -625,13 +635,13 @@
   .lame-signature__showcase-name {
     margin: 0;
     font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
-    font-size: clamp(1rem, 1.35vw, 1.2rem);
+    font-size: clamp(1.15rem, 2.2vw, 1.4rem);
     font-weight: 500;
     letter-spacing: 0.02em;
-    line-height: 1.25;
+    line-height: 1.3;
     color: rgb(var(--lame-sig-forest));
     text-align: center;
-    max-width: 14ch;
+    max-width: 18ch;
   }
 
   .lame-signature__showcase-notes {
@@ -640,26 +650,56 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: rgb(var(--lame-sig-forest) / 0.62);
-    line-height: 1.35;
+    line-height: 1.4;
     text-align: center;
-    max-width: 22ch;
+    max-width: 26ch;
   }
 
   .lame-signature__showcase-coming-soon {
-    margin: 0.35rem 0 0;
+    margin: 0.45rem 0 0;
     font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
-    font-size: clamp(1.2rem, 1.65vw, 1.5rem);
+    font-size: clamp(1.25rem, 2.4vw, 1.55rem);
     font-weight: 700;
     letter-spacing: 0.04em;
     line-height: 1.2;
     color: var(--lame-cta-bg, #ff5722);
     text-align: center;
-    max-width: 16ch;
+    max-width: none;
     text-transform: none;
     background: none;
     border: none;
     box-shadow: none;
     padding: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-signature--showcase .lame-signature__carousel {
+      --signature-card-size: calc((100% - 1.25rem) / 2);
+    }
+
+    .lame-signature--showcase .lame-signature__track {
+      gap: 1.25rem;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .lame-signature--showcase .lame-signature__carousel {
+      --signature-card-size: calc((100% - 2.5rem) / 3);
+      max-width: min(1200px, calc(100% - 2 * max(1rem, var(--page-margin))));
+      margin-inline: auto;
+    }
+
+    .lame-signature--showcase .lame-signature__track {
+      gap: 1.25rem;
+      padding-inline: 0;
+      justify-content: flex-start;
+    }
+
+    .lame-signature--showcase .lame-signature__controls {
+      max-width: min(1200px, calc(100% - 2 * max(1rem, var(--page-margin))));
+      margin-inline: auto;
+      padding-inline: 0;
+    }
   }
 
   .lame-signature--showcase .lame-signature__values {
@@ -1007,17 +1047,18 @@
     }
 
     .lame-signature--showcase .lame-signature__carousel {
-      --signature-card-size: min(84vw, 320px);
+      --signature-card-size: min(82vw, 320px);
     }
 
     .lame-signature--showcase .lame-signature__track {
       max-width: none;
-      width: max-content;
+      width: 100%;
       margin-inline: 0;
       padding-inline: max(1rem, var(--page-margin));
       grid-auto-columns: var(--signature-card-size);
       justify-content: flex-start;
-      gap: 0.65rem;
+      gap: 0.85rem;
+      scroll-padding-inline: max(1rem, var(--page-margin));
     }
 
     .lame-signature--showcase .lame-signature__slide {
@@ -1025,12 +1066,24 @@
     }
 
     .lame-signature--showcase .lame-signature__card--showcase {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      grid-template-rows: 1fr;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
       max-width: none;
       width: 100%;
       aspect-ratio: auto;
       margin-inline: 0;
+    }
+
+    .lame-signature--showcase .lame-signature__showcase-content {
+      min-height: 9.75rem;
+      padding: 1.1rem 1rem 1.25rem;
+    }
+
+    .lame-signature--showcase .lame-signature__controls {
+      width: 100%;
+      max-width: none;
+      margin-inline: 0;
+      padding-inline: max(1rem, var(--page-margin));
     }
 
     .lame-signature__carousel {
