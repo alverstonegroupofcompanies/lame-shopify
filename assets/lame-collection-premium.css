@@ -162,9 +162,9 @@
 @media screen and (min-width: 750px) {
   .lame-collection-premium-active .collection-wrapper.lame-collection-layout--sidebar-left:has(.facets-block-wrapper--vertical:not(.hidden)) {
     display: grid !important;
-    grid-template-columns: minmax(180px, 200px) minmax(0, 1fr) !important;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) !important;
     grid-template-rows: minmax(0, 1fr) !important;
-    column-gap: clamp(1rem, 1.8vw, 1.5rem) !important;
+    column-gap: clamp(1.25rem, 2.2vw, 2rem) !important;
     row-gap: 0 !important;
     width: 100%;
     max-width: 100%;
@@ -254,11 +254,11 @@
 
 .lame-collection-filters-head__title {
   margin: 0;
-  font-family: var(--font-heading--family);
-  font-size: 1.125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: rgb(var(--lame-col-gold));
+  font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgb(var(--lame-col-forest));
   text-transform: none;
 }
 
@@ -266,8 +266,8 @@
   display: flex;
   width: 1.35rem;
   height: 1.35rem;
-  color: rgb(var(--lame-col-gold));
-  opacity: 0.85;
+  color: rgb(var(--lame-col-forest));
+  opacity: 0.75;
 }
 
 .lame-collection-filters-head__icon svg {
@@ -291,11 +291,11 @@
 
 @media screen and (min-width: 750px) {
   .lame-collection-premium-active .facets-block-wrapper--vertical:not(#filters-drawer) .facets--vertical {
-    padding: 1.5rem;
-    border-radius: var(--lame-col-radius-panel);
-    background: var(--lame-col-panel);
-    border: 1px solid rgb(var(--lame-col-ink) / 0.06);
-    box-shadow: var(--lame-col-shadow-panel);
+    padding: 1.35rem 1.25rem 1.5rem;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid rgb(var(--lame-col-ink) / 0.07);
+    box-shadow: 0 10px 28px rgb(20 30 24 / 0.06);
   }
 
 }
@@ -362,13 +362,25 @@
 
 .lame-collection-facet-actions__clear {
   width: 100%;
-  min-height: 2.75rem;
-  border-radius: 10px;
-  border: 1px solid rgb(var(--lame-col-gold-soft) / 0.55) !important;
-  background: var(--lame-col-white) !important;
-  color: rgb(var(--lame-col-gold)) !important;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  min-height: 2.65rem;
+  border-radius: 999px;
+  border: 1.5px solid rgb(var(--lame-col-forest) / 0.28) !important;
+  background: #fff !important;
+  color: rgb(var(--lame-col-forest)) !important;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.lame-collection-facet-actions__clear:not(:disabled):hover {
+  background: rgb(var(--lame-col-forest)) !important;
+  border-color: rgb(var(--lame-col-forest)) !important;
+  color: #fff !important;
 }
 
 .lame-collection-facet-actions__clear:disabled {
@@ -458,28 +470,31 @@
   align-items: stretch !important;
   height: 100% !important;
   padding: 0 !important;
-  gap: 0.35rem !important;
+  gap: 0 !important;
   text-align: left !important;
-  border: none !important;
-  border-radius: var(--lame-col-radius-card) !important;
-  background: var(--lame-col-white) !important;
-  box-shadow: none !important;
+  border: 1px solid rgb(var(--lame-col-ink) / 0.07) !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 8px 24px rgb(20 30 24 / 0.06) !important;
   overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important,
+    box-shadow 0.35s ease !important,
+    border-color 0.35s ease !important;
 }
 
 .lame-collection-premium-active .product-grid__item .product-grid__card > :not(.card-gallery) {
-  padding-inline: 0.5rem;
+  padding-inline: 0.85rem;
 }
 
 .lame-collection-premium-active .product-grid__item .product-grid__card > .buy-buttons-block {
-  padding-block-end: 0.5rem;
+  padding-block: 0.35rem 0.85rem;
 }
 
 .lame-collection-premium-active .product-grid__item:is(:hover, :focus-within) .product-grid__card {
-  transform: translateY(-5px) !important;
-  border: none !important;
-  box-shadow: none !important;
+  transform: translateY(-4px) !important;
+  border-color: rgb(var(--lame-col-forest) / 0.18) !important;
+  box-shadow: 0 16px 36px rgb(20 30 24 / 0.12) !important;
 }
 
 /* Our Products images — padded square well in lame-our-products-collection.css */
@@ -500,17 +515,41 @@
 
 .lame-collection-premium-active .product-grid__item .card-gallery {
   --gallery-aspect-ratio: 1;
+  position: relative;
   aspect-ratio: 1 / 1;
   height: auto !important;
   min-height: 0;
   max-height: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: linear-gradient(165deg, #f7f5f0 0%, #efece6 100%);
+  overflow: hidden;
 }
 
 .lame-collection-premium-active .product-grid__item .card-gallery .product-media-container,
 .lame-collection-premium-active .product-grid__item .card-gallery .product-media-container.constrain-height {
-  aspect-ratio: 1 / 1 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: unset !important;
   max-height: none !important;
   --constrained-height: unset !important;
+}
+
+.lame-collection-premium-active .product-grid__item .card-gallery :is(img, .product-media__image, .image-magnify-lightbox) {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  padding: 0 !important;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lame-collection-premium-active .product-grid__item:is(:hover, :focus-within) .card-gallery :is(img, .product-media__image) {
+  transform: scale(1.05);
 }
 
 
@@ -537,11 +576,20 @@
 .lame-collection-premium-active .product-grid__card a.contents .text-block,
 .lame-collection-premium-active .product-title,
 .lame-collection-premium-active .product-title a,
+.lame-collection-premium-active .product-grid__card .text-block {
+  font-family: var(--font-body--family, system-ui, sans-serif) !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  color: rgb(var(--lame-col-ink)) !important;
+  margin-block-start: 0.7rem !important;
+}
 .lame-collection-premium-active .product-title p,
 .lame-collection-premium-active .product-grid__card .text-block p {
   font-family: var(--font-body--family) !important;
-  font-size: 0.8125rem !important;
-  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
   font-style: normal !important;
   line-height: 1.35 !important;
   letter-spacing: 0;
@@ -634,16 +682,17 @@
 
 .lame-collection-premium-active:not(.lame-our-products-card-scope) .buy-buttons-block .add-to-cart-button {
   width: 100%;
-  min-height: 2.5rem;
-  border-radius: 10px;
+  min-height: 2.65rem;
+  border-radius: 999px;
   border: none !important;
-  background: var(--lame-cta-bg-gradient) !important;
-  color: var(--lame-cta-color) !important;
-  font-size: 0.6875rem;
+  background: rgb(var(--lame-col-forest)) !important;
+  background-image: none !important;
+  color: #fff !important;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  box-shadow: var(--lame-cta-shadow);
+  box-shadow: 0 6px 18px rgb(var(--lame-col-forest) / 0.22);
   cursor: pointer;
   transition:
     background 0.25s ease,
@@ -657,10 +706,11 @@
 }
 
 .lame-collection-premium-active:not(.lame-our-products-card-scope) .buy-buttons-block .add-to-cart-button:not(:disabled):hover {
-  background: linear-gradient(135deg, var(--lame-cta-bg-hover) 0%, var(--lame-cta-bg) 100%) !important;
-  color: var(--lame-cta-color) !important;
+  background: rgb(35 58 26) !important;
+  background-image: none !important;
+  color: #fff !important;
   transform: translateY(-1px);
-  box-shadow: var(--lame-cta-shadow-hover);
+  box-shadow: 0 10px 22px rgb(var(--lame-col-forest) / 0.28);
 }
 
 .lame-collection-premium-active .quick-add {
