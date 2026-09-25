@@ -159,7 +159,8 @@
     const fab = fabEl || document.querySelector('[data-lame-wishlist-open].lame-wishlist-fab');
     if (fab instanceof HTMLElement) {
       fabEl = fab;
-      fab.hidden = n === 0 || isHomepage();
+      // Floating FAB stays hidden — wishlist opens from product cards / account only
+      fab.hidden = true;
       fab.setAttribute('data-count', String(n));
 
       const badge = fab.querySelector('[data-wishlist-count]');

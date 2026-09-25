@@ -736,20 +736,22 @@ body:has(#header-component.header--cosmetic-luxury .menu-drawer-container.menu-o
 }
 
 #header-component.header--cosmetic-luxury {
-  --lame-header-action-width: 2.75rem;
-  --lame-header-action-icon-box: 2.25rem;
-  --lame-header-action-icon-inner: 1.375rem;
-  --lame-header-action-gap: 0.35rem;
+  --lame-header-action-width: 3rem;
+  --lame-header-action-icon-box: 2.5rem;
+  --lame-header-action-icon-inner: 1.5rem;
+  --lame-header-action-gap: 0.45rem;
   --lame-header-left-gap: clamp(0.85rem, 1.6vw, 1.35rem);
 }
 
 @media screen and (max-width: 749px) {
   #header-component.header--cosmetic-luxury .header-actions__action,
-  #header-component.header--cosmetic-luxury .header__icon--menu {
-    width: 2.65rem;
-    height: 2.65rem;
-    min-width: 2.65rem;
-    min-height: 2.65rem;
+  #header-component.header--cosmetic-luxury .header__icon--menu,
+  #header-component.header--cosmetic-luxury .lame-header-search-icon,
+  #header-component.header--cosmetic-luxury .search-action .header-actions__action {
+    width: var(--header-mobile-icon-size, 2.5rem);
+    height: var(--header-mobile-icon-size, 2.5rem);
+    min-width: var(--header-mobile-icon-size, 2.5rem);
+    min-height: var(--header-mobile-icon-size, 2.5rem);
     padding: 0;
     border-radius: 50%;
     background: rgb(255 255 255 / 0.08);
@@ -1172,9 +1174,9 @@ body:has(#header-component.header--cosmetic-luxury) {
 /* Mobile header â€” premium icon row (Nykaa / Sephora style) */
 @media screen and (max-width: 767px) {
   #header-component.header--cosmetic-luxury {
-    --header-mobile-icon-size: 2rem;
-    --header-mobile-icon-inner: 1rem;
-    --header-mobile-icon-gap: 0.4rem;
+    --header-mobile-icon-size: 2.5rem;
+    --header-mobile-icon-inner: 1.25rem;
+    --header-mobile-icon-gap: 0.45rem;
     --header-luxury-min-height: 4.5rem;
     --header-luxury-logo-max-w: min(14.5rem, 62vw);
     --header-luxury-logo-max-h: clamp(3.4rem, 13vw, 4.15rem);
@@ -3107,8 +3109,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   stroke: currentColor;
 }
 
-#header-component.header--cosmetic-luxury header-actions .header-actions__cart,
-#header-component.header--cosmetic-luxury header-actions .header-actions__wishlist {
+#header-component.header--cosmetic-luxury header-actions .header-actions__cart {
   display: inline-flex !important;
   overflow: visible !important;
   width: var(--lame-header-action-icon-box) !important;
@@ -4015,12 +4016,62 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   HEADER LAYOUT â€” single search, 3-column grid, readable UI
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* Tablet — keep search / account / cart equal & slightly larger */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  #header-component.header--cosmetic-luxury {
+    --lame-header-action-icon-box: 2.6rem;
+    --lame-header-action-icon-inner: 1.45rem;
+    --lame-header-action-gap: 0.5rem;
+    --header-mobile-icon-size: 2.6rem;
+    --header-mobile-icon-inner: 1.45rem;
+  }
 
-#header-component.header--cosmetic-luxury:not([data-show-wishlist='true']) .header-actions__wishlist {
+  #header-component.header--cosmetic-luxury .header__column--right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--lame-header-action-gap) !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__column--right .search-action,
+  #header-component.header--cosmetic-luxury .header__column--right search-button.search-action,
+  #header-component.header--cosmetic-luxury .lame-header-search-icon,
+  #header-component.header--cosmetic-luxury header-actions .lame-account.header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .header-actions__cart {
+    width: var(--lame-header-action-icon-box) !important;
+    min-width: var(--lame-header-action-icon-box) !important;
+    max-width: var(--lame-header-action-icon-box) !important;
+    height: var(--lame-header-action-icon-box) !important;
+    min-height: var(--lame-header-action-icon-box) !important;
+    flex: 0 0 var(--lame-header-action-icon-box) !important;
+  }
+
+  #header-component.header--cosmetic-luxury header-actions {
+    gap: var(--lame-header-action-gap) !important;
+    align-items: center;
+  }
+}
+
+
+#header-component.header--cosmetic-luxury:not([data-show-wishlist='true']) .header-actions__wishlist,
+#header-component.header--cosmetic-luxury:not([data-show-wishlist='true']) header-actions .header-actions__wishlist {
   display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Floating wishlist pill — removed from UI */
+.lame-wishlist-fab {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 @media screen and (min-width: 990px) {
