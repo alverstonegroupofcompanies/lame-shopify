@@ -178,51 +178,86 @@
 
       var SECTION_MAP = [
         { key: 'benefits', patterns: [/key\s*benefits?/i, /^benefits$/i] },
-        { key: 'howto', patterns: [/how\s*to\s*use/i, /directions?/i, /usage/i] },
-        { key: 'ingredients', patterns: [/ingredients?/i, /composition/i] },
+        { key: 'howto', patterns: [/how\s*to\s*use/i, /directions?/i, /^usage$/i] },
+        { key: 'ingredients', patterns: [/^ingredients?/i, /^composition$/i] },
         { key: 'faqs', patterns: [/faqs?/i, /frequently\s+asked/i, /^questions?$/i] }
       ];
 
+      function normalizeText(value) {
+        return (value || '').replace(/\s+/g, ' ').trim();
+      }
+
+      function matchSectionKey(text) {
+        var key = null;
+        SECTION_MAP.forEach(function (section) {
+          if (key) return;
+          section.patterns.forEach(function (re) {
+            if (!key && re.test(text)) key = section.key;
+          });
+        });
+        if (key) return key;
+        if (/product\s*description|^description$/i.test(text)) return 'description';
+        return null;
+      }
+
+      function isTitleNode(node) {
+        if (!node || node.nodeType !== 1) return false;
+        var tag = node.tagName.toLowerCase();
+        var text = normalizeText(node.textContent);
+        if (!text || text.length > 90) return false;
+        if (/^h[1-6]$/.test(tag)) return true;
+        if (tag === 'strong' || tag === 'b') return true;
+        if (tag === 'p' || tag === 'div' || tag === 'span') {
+          var childCount = node.children.length;
+          if (childCount === 0) return text.length < 90 && text.split(' ').length <= 10;
+          if (childCount <= 2 && node.querySelector('strong, b, em')) {
+            var inner = normalizeText((node.querySelector('strong, b, em') || {}).textContent);
+            return inner.length > 0 && inner.length <= 90 && inner.length >= text.length * 0.6;
+          }
+        }
+        return false;
+      }
+
+      function unwrapSingleWrappers(source) {
+        var guard = 0;
+        while (
+          guard < 5 &&
+          source.children.length === 1 &&
+          /^(div|span|section)$/i.test(source.firstElementChild.tagName) &&
+          !isTitleNode(source.firstElementChild)
+        ) {
+          var wrap = source.firstElementChild;
+          while (wrap.firstChild) source.insertBefore(wrap.firstChild, wrap);
+          wrap.remove();
+          guard += 1;
+        }
+      }
+
+      function collectBlocks(source) {
+        unwrapSingleWrappers(source);
+        return Array.prototype.slice.call(source.childNodes).filter(function (node) {
+          if (node.nodeType === 3) return normalizeText(node.textContent).length > 0;
+          return node.nodeType === 1;
+        });
+      }
+
       var source = root.querySelector('[data-lame-pdp-source]');
       if (source) {
-        var nodes = Array.prototype.slice.call(source.childNodes);
+        var nodes = collectBlocks(source);
         var currentKey = 'description';
         var buckets = { description: [], benefits: [], howto: [], ingredients: [], faqs: [] };
 
         nodes.forEach(function (node) {
-          if (node.nodeType === 1) {
-            var tag = node.tagName.toLowerCase();
-            var text = (node.textContent || '').replace(/\s+/g, ' ').trim();
-            var isHeading = /^h[1-4]$/.test(tag);
-            var isBoldLead =
-              !isHeading &&
-              text.length > 0 &&
-              text.length < 48 &&
-              (
-                tag === 'strong' ||
-                tag === 'b' ||
-                (tag === 'p' && node.children.length <= 2 && node.querySelector('strong, b, em'))
-              );
-
-            if (isHeading || isBoldLead) {
-              var matched = null;
-              SECTION_MAP.forEach(function (section) {
-                if (matched) return;
-                section.patterns.forEach(function (re) {
-                  if (!matched && re.test(text)) matched = section.key;
-                });
-              });
-              if (matched) {
-                currentKey = matched;
-                return;
-              }
-              if (/product\s*description|^description$/i.test(text)) {
-                currentKey = 'description';
-                return;
-              }
+          if (isTitleNode(node)) {
+            var text = normalizeText(node.textContent);
+            var matched = matchSectionKey(text);
+            if (matched) {
+              currentKey = matched;
+              return;
             }
+            // Unknown titles (e.g. "Why Choose…") stay in Description
+            currentKey = 'description';
           }
-          if (node.nodeType === 3 && !(node.textContent || '').trim()) return;
           buckets[currentKey].push(node);
         });
 
@@ -233,8 +268,7 @@
               ? source
               : root.querySelector('[data-lame-pdp-target="' + key + '"]');
           if (!target) return;
-          if (key !== 'description') target.innerHTML = '';
-          else source.innerHTML = '';
+          target.innerHTML = '';
           buckets[key].forEach(function (n) {
             target.appendChild(n);
           });
@@ -246,7 +280,7 @@
         if (!panel) return false;
         var content = panel.querySelector('.lame-pdp-description__content');
         if (!content) return false;
-        return (content.textContent || '').replace(/\s+/g, '').length > 0;
+        return normalizeText(content.textContent).replace(/\s+/g, '').length > 0;
       }
 
       SECTION_MAP.forEach(function (section) {
