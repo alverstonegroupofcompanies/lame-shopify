@@ -1,6 +1,6 @@
 {%- comment -%}
   Discover Beauty — spotlight-style promo cards (4:5 media + overlays).
-  Each card can link product-wise, brand-wise (shop filter), collection, or custom URL.
+  Cards are grouped into category subsections (Skin Care, Baby Care, etc.).
 {%- endcomment -%}
 
 {%- liquid
@@ -12,6 +12,8 @@
   if section.settings.products_collection != blank
     assign products_url = section.settings.products_collection.url
   endif
+
+  assign cat_order = 'skin-care,baby-care,hair-care,makeup,body-care' | split: ','
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -32,152 +34,200 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <ul class="lame-beauty-love__grid" role="list">
-        {%- for block in section.blocks -%}
+      <div class="lame-beauty-love__groups">
+        {%- for cat_key in cat_order -%}
           {%- liquid
-            assign card_image = block.settings.image
-            assign fallback_asset = block.settings.fallback_asset | strip
-            assign card_alt = block.settings.alt | strip
-            if card_alt == blank and card_image != blank
-              assign card_alt = card_image.alt
-            endif
-            if card_alt == blank
-              assign card_alt = block.settings.title | default: shop.name
-            endif
-
-            assign brand_logo = block.settings.brand_logo
-            assign brand_text = block.settings.brand_text | strip
-            assign badge_text = block.settings.badge_text | strip
-            assign badge_bg = block.settings.badge_color | default: '#8b6b5a'
-            assign title = block.settings.title | strip
-            assign subtitle = block.settings.subtitle | strip
-
-            assign link_type = block.settings.link_type | default: 'brand'
-            assign card_link = blank
-
-            case link_type
-              when 'product'
-                if block.settings.product != blank
-                  assign card_link = block.settings.product.url
-                endif
-              when 'collection'
-                if block.settings.collection != blank
-                  assign card_link = block.settings.collection.url
-                endif
-              when 'brand'
-                assign brand_name = block.settings.link_brand | strip
-                if brand_name == blank or brand_name == 'other'
-                  if block.settings.link_brand_other != blank
-                    assign brand_name = block.settings.link_brand_other | strip
-                  else
-                    assign brand_name = brand_text
-                  endif
-                endif
-                if brand_name != blank
-                  assign brand_slug = brand_name | handleize
-                  assign brand_name_down = brand_name | downcase
-                  if brand_name_down contains 'lamstone'
-                    assign brand_slug = 'lamstone-healthcare'
-                  endif
-                  if brand_name_down == 'jovees'
-                    assign brand_slug = 'jovees-herbal'
-                  endif
-                  if brand_name_down == 'sebamed'
-                    assign brand_slug = 'sebamed'
-                  endif
-                  assign card_link = products_url | append: '?brand=' | append: brand_slug
-                endif
-              when 'custom'
-                assign card_link = block.settings.link
+            assign cat_label = ''
+            case cat_key
+              when 'skin-care'
+                assign cat_label = 'Skin Care'
+              when 'baby-care'
+                assign cat_label = 'Baby Care'
+              when 'hair-care'
+                assign cat_label = 'Hair Care'
+              when 'makeup'
+                assign cat_label = 'Makeup'
+              when 'body-care'
+                assign cat_label = 'Body Care'
             endcase
 
-            if card_link == blank and block.settings.link != blank
-              assign card_link = block.settings.link
-            endif
+            assign cat_count = 0
+            for block in section.blocks
+              assign block_cat = block.settings.category | default: 'skin-care'
+              assign block_has_image = false
+              if block.settings.image != blank or block.settings.fallback_asset != blank
+                assign block_has_image = true
+              endif
+              if block_cat == cat_key and block_has_image
+                assign cat_count = cat_count | plus: 1
+              endif
+            endfor
           -%}
 
-          <li class="lame-beauty-love__item" {{ block.shopify_attributes }}>
-            {%- if card_link != blank -%}
-              <a
-                class="lame-beauty-love__card lame-beauty-love__card--link"
-                href="{{ card_link }}"
-                {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
-              >
-            {%- else -%}
-              <div class="lame-beauty-love__card">
-            {%- endif -%}
+          {%- if cat_count > 0 -%}
+            <section class="lame-beauty-love__group" aria-labelledby="lame-beauty-cat-{{ section.id }}-{{ cat_key }}">
+              <h3 class="lame-beauty-love__group-title" id="lame-beauty-cat-{{ section.id }}-{{ cat_key }}">
+                {{ cat_label }}
+              </h3>
 
-              <div class="lame-beauty-love__media">
-                {%- if card_image != blank -%}
-                  {{
-                    card_image
-                    | image_url: width: 900
-                    | image_tag:
-                      class: 'lame-beauty-love__image',
-                      loading: 'lazy',
-                      widths: '280, 360, 480, 640, 800, 900',
-                      sizes: '(min-width: 1100px) 18vw, (min-width: 990px) 24vw, 30vw',
-                      alt: card_alt
-                  }}
-                {%- elsif fallback_asset != blank -%}
-                  <img
-                    class="lame-beauty-love__image"
-                    src="{{ fallback_asset | asset_url }}"
-                    alt="{{ card_alt | escape }}"
-                    width="720"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  >
-                {%- else -%}
-                  {{ 'image' | placeholder_svg_tag: 'lame-beauty-love__image placeholder-svg' }}
-                {%- endif -%}
+              <ul class="lame-beauty-love__grid" role="list">
+                {%- for block in section.blocks -%}
+                  {%- liquid
+                    assign block_cat = block.settings.category | default: 'skin-care'
+                    if block_cat != cat_key
+                      continue
+                    endif
 
-                {%- if brand_logo != blank or brand_text != blank -%}
-                  <span class="lame-beauty-love__brand">
-                    {%- if brand_logo != blank -%}
-                      {{
-                        brand_logo
-                        | image_url: width: 240
-                        | image_tag:
-                          class: 'lame-beauty-love__brand-image',
-                          loading: 'lazy',
-                          widths: '80, 120, 160, 240',
-                          sizes: '80px',
-                          alt: ''
-                      }}
+                    assign card_image = block.settings.image
+                    assign fallback_asset = block.settings.fallback_asset | strip
+                    unless card_image != blank or fallback_asset != blank
+                      continue
+                    endunless
+                    assign card_alt = block.settings.alt | strip
+                    if card_alt == blank and card_image != blank
+                      assign card_alt = card_image.alt
+                    endif
+                    if card_alt == blank
+                      assign card_alt = block.settings.title | default: shop.name
+                    endif
+
+                    assign brand_logo = block.settings.brand_logo
+                    assign brand_text = block.settings.brand_text | strip
+                    assign badge_text = block.settings.badge_text | strip
+                    assign badge_bg = block.settings.badge_color | default: '#8b6b5a'
+                    assign title = block.settings.title | strip
+                    assign subtitle = block.settings.subtitle | strip
+
+                    assign link_type = block.settings.link_type | default: 'brand'
+                    assign card_link = blank
+
+                    case link_type
+                      when 'product'
+                        if block.settings.product != blank
+                          assign card_link = block.settings.product.url
+                        endif
+                      when 'collection'
+                        if block.settings.collection != blank
+                          assign card_link = block.settings.collection.url
+                        endif
+                      when 'brand'
+                        assign brand_name = block.settings.link_brand | strip
+                        if brand_name == blank or brand_name == 'other'
+                          if block.settings.link_brand_other != blank
+                            assign brand_name = block.settings.link_brand_other | strip
+                          else
+                            assign brand_name = brand_text
+                          endif
+                        endif
+                        if brand_name != blank
+                          assign brand_slug = brand_name | handleize
+                          assign brand_name_down = brand_name | downcase
+                          if brand_name_down contains 'lamstone'
+                            assign brand_slug = 'lamstone-healthcare'
+                          endif
+                          if brand_name_down == 'jovees'
+                            assign brand_slug = 'jovees-herbal'
+                          endif
+                          if brand_name_down == 'sebamed'
+                            assign brand_slug = 'sebamed'
+                          endif
+                          assign card_link = products_url | append: '?brand=' | append: brand_slug
+                        endif
+                      when 'custom'
+                        assign card_link = block.settings.link
+                    endcase
+
+                    if card_link == blank and block.settings.link != blank
+                      assign card_link = block.settings.link
+                    endif
+                  -%}
+
+                  <li class="lame-beauty-love__item" {{ block.shopify_attributes }}>
+                    {%- if card_link != blank -%}
+                      <a
+                        class="lame-beauty-love__card lame-beauty-love__card--link"
+                        href="{{ card_link }}"
+                        {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
+                      >
                     {%- else -%}
-                      <span class="lame-beauty-love__brand-text">{{ brand_text | escape }}</span>
+                      <div class="lame-beauty-love__card">
                     {%- endif -%}
-                  </span>
-                {%- endif -%}
 
-                {%- if badge_text != blank -%}
-                  <span class="lame-beauty-love__badge" style="--lame-bl-badge: {{ badge_bg }}">
-                    {{ badge_text | escape }}
-                  </span>
-                {%- endif -%}
-              </div>
+                      <div class="lame-beauty-love__media">
+                        {%- if card_image != blank -%}
+                          {{
+                            card_image
+                            | image_url: width: 900
+                            | image_tag:
+                              class: 'lame-beauty-love__image',
+                              loading: 'lazy',
+                              widths: '280, 360, 480, 640, 800, 900',
+                              sizes: '(min-width: 1100px) 18vw, (min-width: 990px) 24vw, 30vw',
+                              alt: card_alt
+                          }}
+                        {%- elsif fallback_asset != blank -%}
+                          <img
+                            class="lame-beauty-love__image"
+                            src="{{ fallback_asset | asset_url }}"
+                            alt="{{ card_alt | escape }}"
+                            width="720"
+                            height="900"
+                            loading="lazy"
+                            decoding="async"
+                          >
+                        {%- else -%}
+                          {{ 'image' | placeholder_svg_tag: 'lame-beauty-love__image placeholder-svg' }}
+                        {%- endif -%}
 
-              {%- if title != blank or subtitle != blank -%}
-                <div class="lame-beauty-love__copy">
-                  {%- if title != blank -%}
-                    <p class="lame-beauty-love__title">{{ title | escape }}</p>
-                  {%- endif -%}
-                  {%- if subtitle != blank -%}
-                    <p class="lame-beauty-love__subtitle">{{ subtitle | escape }}</p>
-                  {%- endif -%}
-                </div>
-              {%- endif -%}
+                        {%- if brand_logo != blank or brand_text != blank -%}
+                          <span class="lame-beauty-love__brand">
+                            {%- if brand_logo != blank -%}
+                              {{
+                                brand_logo
+                                | image_url: width: 240
+                                | image_tag:
+                                  class: 'lame-beauty-love__brand-image',
+                                  loading: 'lazy',
+                                  widths: '80, 120, 160, 240',
+                                  sizes: '80px',
+                                  alt: ''
+                              }}
+                            {%- else -%}
+                              <span class="lame-beauty-love__brand-text">{{ brand_text | escape }}</span>
+                            {%- endif -%}
+                          </span>
+                        {%- endif -%}
 
-            {%- if card_link != blank -%}
-              </a>
-            {%- else -%}
-              </div>
-            {%- endif -%}
-          </li>
+                        {%- if badge_text != blank -%}
+                          <span class="lame-beauty-love__badge" style="--lame-bl-badge: {{ badge_bg }}">
+                            {{ badge_text | escape }}
+                          </span>
+                        {%- endif -%}
+                      </div>
+
+                      {%- if title != blank or subtitle != blank -%}
+                        <div class="lame-beauty-love__copy">
+                          {%- if title != blank -%}
+                            <p class="lame-beauty-love__title">{{ title | escape }}</p>
+                          {%- endif -%}
+                          {%- if subtitle != blank -%}
+                            <p class="lame-beauty-love__subtitle">{{ subtitle | escape }}</p>
+                          {%- endif -%}
+                        </div>
+                      {%- endif -%}
+
+                    {%- if card_link != blank -%}
+                      </a>
+                    {%- else -%}
+                      </div>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </section>
+          {%- endif -%}
         {%- endfor -%}
-      </ul>
+      </div>
     {%- elsif request.design_mode -%}
       <p class="lame-beauty-love__empty">Add promo cards with images in the theme editor.</p>
     {%- endif -%}
@@ -187,9 +237,11 @@
 {% stylesheet %}
   .lame-beauty-love {
     --lame-bl-gap: 0.75rem;
+    --lame-bl-col-gap: clamp(0.4rem, 1.2vw, 0.75rem);
     --lame-bl-radius: 10px;
     --lame-bl-ink: #1a1a1a;
     --lame-bl-muted: #5c5c5c;
+    --lame-bl-max-cols: 5;
   }
 
   .lame-beauty-love__wrap {
@@ -198,6 +250,8 @@
     margin-inline: auto;
     box-sizing: border-box;
     padding-inline: clamp(0.85rem, 2.5vw, 1.25rem);
+    container-type: inline-size;
+    container-name: lame-beauty;
   }
 
   .section--full-width .lame-beauty-love__wrap {
@@ -213,18 +267,54 @@
     margin: 0;
   }
 
+  /* Pack categories side-by-side so sparse groups fill empty row space */
+  .lame-beauty-love__groups {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: clamp(1.5rem, 3vw, 2.5rem) var(--lame-bl-col-gap);
+    width: 100%;
+  }
+
+  .lame-beauty-love__group {
+    flex: 0 1 auto;
+    width: max-content;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .lame-beauty-love__group-title {
+    margin: 0 0 0.85rem;
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.2rem, 2vw, 1.45rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    color: #143f2e;
+  }
+
   .lame-beauty-love__grid {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--lame-bl-gap) clamp(0.4rem, 1.2vw, 0.75rem);
-    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lame-bl-gap) var(--lame-bl-col-gap);
+    width: max-content;
+    max-width: 100%;
   }
 
+  /* Max 5 cards across the section row */
   .lame-beauty-love__item {
+    --lame-bl-card: calc(
+      (100cqi - (var(--lame-bl-max-cols) - 1) * var(--lame-bl-col-gap)) / var(--lame-bl-max-cols)
+    );
+    flex: 0 0 var(--lame-bl-card);
+    width: var(--lame-bl-card);
+    max-width: 100%;
     min-width: 0;
+    box-sizing: border-box;
   }
 
   .lame-beauty-love__card {
@@ -372,27 +462,20 @@
     .lame-beauty-love {
       --lame-bl-gap: 0.9rem;
       --lame-bl-radius: 10px;
-    }
-
-    /* Tablet / medium (e.g. Realme Pad 2) — 4 across */
-    .lame-beauty-love__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      --lame-bl-max-cols: 5;
     }
   }
 
   @media screen and (min-width: 990px) {
-    .lame-beauty-love__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+    .lame-beauty-love {
+      --lame-bl-max-cols: 5;
     }
   }
 
   @media screen and (min-width: 1100px) {
     .lame-beauty-love {
       --lame-bl-gap: 1rem;
-    }
-
-    .lame-beauty-love__grid {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      --lame-bl-max-cols: 5;
     }
 
     .lame-beauty-love__brand {
@@ -415,10 +498,20 @@
     .lame-beauty-love {
       --lame-bl-radius: 8px;
       --lame-bl-gap: 0.55rem;
+      --lame-bl-max-cols: 2;
     }
 
     .lame-beauty-love__wrap {
       padding-inline: 0.75rem;
+    }
+
+    .lame-beauty-love__group {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .lame-beauty-love__grid {
+      width: 100%;
     }
 
     .lame-beauty-love__brand {
@@ -592,6 +685,20 @@
           "type": "text",
           "id": "subtitle",
           "label": "Subtitle"
+        },
+        {
+          "type": "select",
+          "id": "category",
+          "label": "Category",
+          "info": "Groups this card under a Discover Beauty subsection. Empty categories (no cards with images) are hidden.",
+          "options": [
+            { "value": "skin-care", "label": "Skin Care" },
+            { "value": "baby-care", "label": "Baby Care" },
+            { "value": "hair-care", "label": "Hair Care" },
+            { "value": "makeup", "label": "Makeup" },
+            { "value": "body-care", "label": "Body Care" }
+          ],
+          "default": "skin-care"
         },
         {
           "type": "header",
