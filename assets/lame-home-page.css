@@ -63,20 +63,27 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   display: none !important;
 }
 
-/* Hero flush under navbar — pull up to close sticky/body seam */
+/* Hero starts exactly after navbar — no tuck-under, no gap */
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child {
-  margin-top: -10px !important;
+  margin-top: 0 !important;
+  margin-block-start: 0 !important;
   padding-top: 0 !important;
+  padding-block-start: 0 !important;
   border-top: none !important;
   position: relative;
   z-index: 0;
+  isolation: isolate;
 }
 
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child .section-background,
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child .lame-home-hero,
-.template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child .lame-home-hero__slideshow {
+.template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child .lame-home-hero__slideshow,
+.template-index .content-for-layout > .shopify-section:has(.lame-home-hero):first-child .lame-home-hero__frame {
   margin-top: 0 !important;
+  margin-block-start: 0 !important;
   padding-top: 0 !important;
+  padding-block-start: 0 !important;
+  border-top: none !important;
 }
 
 /* PC: minimum breathing room between sections below the hero */
@@ -98,7 +105,7 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   }
 }
 
-/* Hero fills width; height follows banner aspect (capped to viewport) */
+/* Hero fills width; height follows selected setting (half ≈ 48svh) */
 .template-index .shopify-section:has(.lame-home-hero--full_screen) .lame-home-hero,
 .template-index .shopify-section:has(.lame-home-hero--mobile-full_screen) .lame-home-hero {
   --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
@@ -127,10 +134,11 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   min-height: 100%;
   max-width: none;
   object-fit: cover !important;
+  /* Pin to top so the banner top stays visible under the navbar (crop bottom if needed) */
   object-position: center top !important;
 }
 
-/* Contain only on tablet/desktop — mobile always fills full width */
+/* Contain only when Image fit = contain */
 @media screen and (min-width: 600px) {
   .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
     object-fit: contain !important;
@@ -177,9 +185,14 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 }
 
 @media screen and (min-width: 600px) {
-  .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+  .template-index .shopify-section:has(.lame-home-hero--fit-cover) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
     object-fit: cover !important;
-    object-position: center 10px !important;
+    object-position: center top !important;
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+    object-fit: contain !important;
+    object-position: center center !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
@@ -195,7 +208,7 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   }
 
   .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section {
-    margin-top: clamp(2rem, 3.5vw, 3.25rem);
+    margin-top: clamp(1.75rem, 3vw, 2.75rem);
     z-index: auto;
   }
 

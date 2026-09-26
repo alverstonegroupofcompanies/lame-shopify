@@ -323,6 +323,13 @@
   {%- if request.page_type == 'index' -%}
     <h1 class="visually-hidden">My Lamstone</h1>
   {%- endif -%}
+  {%- if request.page_type == 'index' -%}
+    <div class="lame-header-announce" role="note">
+      <p class="lame-header-announce__text">
+        Free shipping over ₹999 · <strong>100% authentic</strong> beauty essentials
+      </p>
+    </div>
+  {%- endif -%}
   {%- if section.settings.show_utility_bar and section.settings.utility_bar_position == 'above' -%}
     {% render 'header-utility-bar', section: section %}
   {%- endif -%}
@@ -347,6 +354,7 @@
         when 'bottom'
           assign first = ''
           assign class = class | append: ' mobile:hidden'
+          assign class = class | append: ' lame-header-split-nav'
 
           assign border_bottom_setting_id = 'border_width'
       endcase
@@ -382,9 +390,18 @@
           style="{{ style | strip }}"
         {%- endif -%}
       >
-        <div class="header__columns spacing-style">
+        <div class="header__columns spacing-style{% if row == 'bottom' %} lame-header-split-nav__menu{% endif %}">
           {{ content }}
         </div>
+        {%- if row == 'bottom' -%}
+          <a
+            class="lame-header-nav-promo"
+            href="{{ routes.all_products_collection_url }}"
+          >
+            <span class="lame-header-nav-promo__star" aria-hidden="true">✦</span>
+            <span class="lame-header-nav-promo__text">New Autumn Collection is here</span>
+          </a>
+        {%- endif -%}
       </div>
     {% endif %}
   {% endfor %}
@@ -577,6 +594,9 @@
   .header-section:has(> #header-component.header--cosmetic-luxury[sticky='always']),
   .header-section:has(> #header-component.header--cosmetic-luxury[sticky='scroll-up'][data-sticky-state='active']) {
     top: 0;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
   }
 
   #header-component.header--cosmetic-luxury .header__row--top:not(.divider--page-width),
@@ -584,6 +604,7 @@
   #header-component.header--cosmetic-luxury .header__row--bottom {
     border-bottom: none !important;
     border-block-end: none !important;
+    margin-bottom: 0 !important;
   }
 
   .header[data-sticky-state] {
