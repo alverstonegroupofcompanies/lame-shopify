@@ -38,16 +38,32 @@
   --cart-bubble-right: 1px;
 }
 
-/* ── Announcement strip ── */
+/* ── Announcement strip (hides on scroll) ── */
 #header-component.header--cosmetic-luxury .lame-header-announce {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 2.35rem;
+  max-height: 4rem;
   padding: 0.45rem 1rem;
+  overflow: hidden;
   background: var(--lame-nav-green) !important;
   color: #fff;
   text-align: center;
+  opacity: 1;
+  transition:
+    max-height 0.28s ease,
+    min-height 0.28s ease,
+    padding 0.28s ease,
+    opacity 0.22s ease;
+}
+
+#header-component.header--cosmetic-luxury[data-lame-scroll='away'] .lame-header-announce {
+  max-height: 0;
+  min-height: 0;
+  padding-block: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-announce__text {
@@ -748,7 +764,14 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
 @media screen and (max-width: 989px) {
   #header-component.header--cosmetic-luxury .lame-header-announce {
     min-height: 2.1rem;
+    max-height: 3.5rem;
     padding: 0.35rem 0.75rem;
+  }
+
+  #header-component.header--cosmetic-luxury[data-lame-scroll='away'] .lame-header-announce {
+    max-height: 0;
+    min-height: 0;
+    padding-block: 0;
   }
 
   #header-component.header--cosmetic-luxury .lame-header-announce__text {
