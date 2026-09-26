@@ -6,10 +6,6 @@
   assign heading_suffix = section.settings.heading_suffix | default: 'from you'
 
   assign form_id = 'LameContactForm-' | append: section.id
-  assign info_intro = section.settings.info_intro
-  if info_intro == blank
-    assign info_intro = 'lame_contact.get_in_touch_intro' | t
-  endif
 -%}
 
 <div
@@ -36,48 +32,46 @@
 
     <div class="lame-contact-page__layout">
       <aside class="lame-contact-page__info" aria-label="{{ 'lame_contact.get_in_touch' | t }}">
-        <div class="lame-contact-page__info-card">
-          <div class="lame-contact-page__info-glow" aria-hidden="true"></div>
+        <div class="lame-contact-page__details">
+          {% if section.settings.phone != blank %}
+            <div class="lame-contact-page__info-detail">
+              <span class="lame-contact-page__info-label">{{ 'lame_contact.phone' | t }}</span>
+              <a
+                class="lame-contact-page__info-value lame-contact-page__info-value--link"
+                href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}"
+              >
+                {{ section.settings.phone | escape }}
+              </a>
+            </div>
+          {% endif %}
 
-          <div class="lame-contact-page__info-top">
-            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.get_in_touch' | t }}</h2>
-            {% if info_intro != blank %}
-              <p class="lame-contact-page__info-text">{{ info_intro | escape }}</p>
-            {% endif %}
+          {% if section.settings.head_office_email != blank %}
+            <div class="lame-contact-page__info-detail">
+              <span class="lame-contact-page__info-label">{{ 'lame_contact.email' | t }}</span>
+              <a
+                class="lame-contact-page__info-value lame-contact-page__info-value--link"
+                href="mailto:{{ section.settings.head_office_email | strip }}"
+              >
+                {{ section.settings.head_office_email | escape }}
+              </a>
+            </div>
+          {% endif %}
 
-            {% if section.settings.phone != blank %}
-              <div class="lame-contact-page__info-detail">
-                <span class="lame-contact-page__info-label">{{ 'lame_contact.phone' | t }}</span>
-                <a
-                  class="lame-contact-page__info-value"
-                  href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}"
-                >
-                  {{ section.settings.phone | escape }}
-                </a>
-              </div>
-            {% endif %}
-
-            {% if section.settings.head_office_email != blank %}
-              <div class="lame-contact-page__info-detail">
-                <span class="lame-contact-page__info-label">{{ 'lame_contact.email' | t }}</span>
-                <a
-                  class="lame-contact-page__info-value"
-                  href="mailto:{{ section.settings.head_office_email | strip }}"
-                >
-                  {{ section.settings.head_office_email | escape }}
-                </a>
-              </div>
-            {% endif %}
-          </div>
+          {% if section.settings.hours != blank %}
+            <div class="lame-contact-page__info-detail">
+              <span class="lame-contact-page__info-label">{{ section.settings.hours_label | default: 'Hours' | escape }}</span>
+              <p class="lame-contact-page__info-value">
+                {{ section.settings.hours | escape | newline_to_br }}
+              </p>
+            </div>
+          {% endif %}
 
           {% if section.settings.show_head_office and section.settings.head_office_address != blank %}
-            <div class="lame-contact-page__studio">
+            <div class="lame-contact-page__info-detail">
               <span class="lame-contact-page__info-label">{{ section.settings.studio_label | default: 'Studio' | escape }}</span>
-              <div class="lame-contact-page__studio-box">
-                <p class="lame-contact-page__studio-address">
-                  {{ section.settings.head_office_address | escape | newline_to_br }}
-                </p>
-              </div>
+              <p class="lame-contact-page__info-value">
+                {{ section.settings.head_office_address | escape | newline_to_br }}
+              </p>
             </div>
           {% endif %}
         </div>
@@ -242,6 +236,18 @@
       "id": "head_office_email",
       "label": "Email",
       "default": "mail@lamstonehealthcare.com"
+    },
+    {
+      "type": "textarea",
+      "id": "hours",
+      "label": "Hours",
+      "default": "Monday – Saturday\n10am – 6pm IST"
+    },
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "Hours label",
+      "default": "Hours"
     },
     {
       "type": "checkbox",
