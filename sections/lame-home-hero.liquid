@@ -589,6 +589,31 @@
       --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
     }
 
+    /*
+      Tablet / small laptop: 48svh is taller than a wide banner aspect,
+      so cover crops left/right. Size the frame to the banner ratio so
+      the full-width image stays visible like wide desktop.
+    */
+    @media screen and (max-width: 989px) {
+      .lame-home-hero--half,
+      .lame-home-hero--small,
+      .lame-home-hero--medium,
+      .lame-home-hero--large {
+        --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-desktop-ratio, 2.4), 0.75));
+        --lame-hero-frame-max-height: var(--lame-hero-natural-height);
+        --lame-hero-frame-min-height: var(--lame-hero-natural-height);
+      }
+
+      .lame-home-hero--full_screen {
+        --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-desktop-ratio, 2.4), 0.75));
+        --lame-hero-frame-max-height: min(
+          calc(100svh - var(--lame-hero-height-offset, 0px)),
+          var(--lame-hero-natural-height)
+        );
+        --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
+      }
+    }
+
     /* Transparent header overlays the banner — use full viewport only for full_screen */
     body:has(.header[transparent]) .lame-home-hero--full_screen,
     body:has(header-component[transparent]) .lame-home-hero--full_screen {
