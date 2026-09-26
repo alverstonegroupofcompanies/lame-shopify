@@ -1,57 +1,86 @@
 {{ 'lame-contact-page.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign page_heading = section.settings.heading
-  if page_heading == blank and page != blank
-    assign page_heading = page.title
-  endif
-  if page_heading == blank
-    assign page_heading = 'lame_contact.heading' | t
-  endif
+  assign heading_prefix = section.settings.heading_prefix | default: "We'd love to"
+  assign heading_accent = section.settings.heading_accent | default: 'hear'
+  assign heading_suffix = section.settings.heading_suffix | default: 'from you'
 
   assign form_id = 'LameContactForm-' | append: section.id
+  assign info_intro = section.settings.info_intro
+  if info_intro == blank
+    assign info_intro = 'lame_contact.get_in_touch_intro' | t
+  endif
 -%}
 
-<div class="lame-contact-page section spacing-style color-{{ section.settings.color_scheme }}" style="{% render 'spacing-style', settings: section.settings %}">
+<div
+  class="lame-contact-page section spacing-style color-{{ section.settings.color_scheme }}"
+  style="{% render 'spacing-style', settings: section.settings %}"
+>
   <div class="lame-contact-page__shell page-width">
     <header class="lame-contact-page__head">
-      <h1 class="lame-contact-page__title">{{ page_heading | escape }}</h1>
+      <h1 class="lame-contact-page__title">
+        {%- if heading_prefix != blank -%}
+          <span class="lame-contact-page__title-text">{{ heading_prefix | escape }}</span>
+        {%- endif -%}
+        {%- if heading_accent != blank -%}
+          <em class="lame-contact-page__title-accent">{{ heading_accent | escape }}</em>
+        {%- endif -%}
+        {%- if heading_suffix != blank -%}
+          <span class="lame-contact-page__title-text">{{ heading_suffix | escape }}</span>
+        {%- endif -%}
+      </h1>
       {% if section.settings.subheading != blank %}
         <p class="lame-contact-page__subtitle">{{ section.settings.subheading | escape }}</p>
       {% endif %}
     </header>
 
     <div class="lame-contact-page__layout">
-      <aside class="lame-contact-page__info">
-        <div class="lame-contact-page__info-card lame-contact-page__info-card--primary">
-          <h2 class="lame-contact-page__info-title">{{ 'lame_contact.get_in_touch' | t }}</h2>
-          <p class="lame-contact-page__info-text">{{ 'lame_contact.get_in_touch_intro' | t }}</p>
+      <aside class="lame-contact-page__info" aria-label="{{ 'lame_contact.get_in_touch' | t }}">
+        <div class="lame-contact-page__info-card">
+          <div class="lame-contact-page__info-glow" aria-hidden="true"></div>
 
-          {% if section.settings.phone != blank %}
-            <div class="lame-contact-page__info-detail">
-              <span class="lame-contact-page__info-label">{{ 'lame_contact.phone' | t }}</span>
-              <a class="lame-contact-page__phone-link" href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}">
-                {{ section.settings.phone | escape }}
-              </a>
-            </div>
-          {% endif %}
+          <div class="lame-contact-page__info-top">
+            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.get_in_touch' | t }}</h2>
+            {% if info_intro != blank %}
+              <p class="lame-contact-page__info-text">{{ info_intro | escape }}</p>
+            {% endif %}
 
-          {% if section.settings.head_office_email != blank %}
-            <div class="lame-contact-page__info-detail">
-              <span class="lame-contact-page__info-label">{{ 'lame_contact.email' | t }}</span>
-              <a class="lame-contact-page__phone-link" href="mailto:{{ section.settings.head_office_email | strip }}">
-                {{ section.settings.head_office_email | escape }}
-              </a>
+            {% if section.settings.phone != blank %}
+              <div class="lame-contact-page__info-detail">
+                <span class="lame-contact-page__info-label">{{ 'lame_contact.phone' | t }}</span>
+                <a
+                  class="lame-contact-page__info-value"
+                  href="tel:{{ section.settings.phone | replace: ' ', '' | replace: '-', '' }}"
+                >
+                  {{ section.settings.phone | escape }}
+                </a>
+              </div>
+            {% endif %}
+
+            {% if section.settings.head_office_email != blank %}
+              <div class="lame-contact-page__info-detail">
+                <span class="lame-contact-page__info-label">{{ 'lame_contact.email' | t }}</span>
+                <a
+                  class="lame-contact-page__info-value"
+                  href="mailto:{{ section.settings.head_office_email | strip }}"
+                >
+                  {{ section.settings.head_office_email | escape }}
+                </a>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if section.settings.show_head_office and section.settings.head_office_address != blank %}
+            <div class="lame-contact-page__studio">
+              <span class="lame-contact-page__info-label">{{ section.settings.studio_label | default: 'Studio' | escape }}</span>
+              <div class="lame-contact-page__studio-box">
+                <p class="lame-contact-page__studio-address">
+                  {{ section.settings.head_office_address | escape | newline_to_br }}
+                </p>
+              </div>
             </div>
           {% endif %}
         </div>
-
-        {% if section.settings.show_head_office and section.settings.head_office_address != blank %}
-          <div class="lame-contact-page__info-card">
-            <h2 class="lame-contact-page__info-title">{{ 'lame_contact.head_office' | t }}</h2>
-            <p class="lame-contact-page__info-text">{{ section.settings.head_office_address | escape | newline_to_br }}</p>
-          </div>
-        {% endif %}
       </aside>
 
       <div class="lame-contact-page__form-panel">
@@ -116,7 +145,7 @@
           </div>
 
           <div class="lame-contact-page__field">
-            <label for="{{ form_id }}-phone">{{ 'blocks.contact_form.phone' | t }}</label>
+            <label for="{{ form_id }}-phone">{{ 'lame_contact.phone_optional' | t }}</label>
             <input
               type="tel"
               id="{{ form_id }}-phone"
@@ -140,7 +169,7 @@
             >{{- form.body -}}</textarea>
           </div>
 
-          <button type="submit" class="lame-contact-page__submit button">
+          <button type="submit" class="lame-contact-page__submit">
             {%- if section.settings.submit_label != blank -%}
               {{ section.settings.submit_label }}
             {%- else -%}
@@ -150,7 +179,6 @@
         {%- endform -%}
       </div>
     </div>
-
   </div>
 </div>
 
@@ -162,50 +190,80 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Submissions use Shopify’s contact form. Set the store contact email in Shopify Admin → Settings → Store details (not shown on this page)."
+      "content": "Submissions use Shopify’s contact form. Set the store contact email in Shopify Admin → Settings → Store details."
     },
     {
       "type": "header",
-      "content": "Head office"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_head_office",
-      "label": "Show head office block",
-      "default": true
-    },
-    {
-      "type": "textarea",
-      "id": "head_office_address",
-      "label": "Head office address",
-      "default": "Bio 360, Kerala Life Sciences Industries Park, Thiruvananthapuram-695317"
+      "content": "Heading"
     },
     {
       "type": "text",
-      "id": "head_office_email",
-      "label": "Head office email",
-      "default": "mail@lamstonehealthcare.com"
-    },
-    {
-      "type": "header",
-      "content": "Page content"
+      "id": "heading_prefix",
+      "label": "Heading (before accent)",
+      "default": "We'd love to"
     },
     {
       "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Contact Us"
+      "id": "heading_accent",
+      "label": "Accent word",
+      "default": "hear",
+      "info": "Shown in italic terracotta."
+    },
+    {
+      "type": "text",
+      "id": "heading_suffix",
+      "label": "Heading (after accent)",
+      "default": "from you"
     },
     {
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "default": "We’d love to hear from you. Send us a message and our team will respond as soon as possible."
+      "default": "Questions about an order, a product, or a partnership — send us a note and someone from our team will reply within one business day."
+    },
+    {
+      "type": "header",
+      "content": "Get in touch card"
+    },
+    {
+      "type": "textarea",
+      "id": "info_intro",
+      "label": "Intro text",
+      "default": "Reach us directly, or use the form and we'll follow up by email."
     },
     {
       "type": "text",
       "id": "phone",
-      "label": "Phone (optional)"
+      "label": "Phone",
+      "default": "+91 974 639 7686"
+    },
+    {
+      "type": "text",
+      "id": "head_office_email",
+      "label": "Email",
+      "default": "mail@lamstonehealthcare.com"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_head_office",
+      "label": "Show studio / address block",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "studio_label",
+      "label": "Address label",
+      "default": "Studio"
+    },
+    {
+      "type": "textarea",
+      "id": "head_office_address",
+      "label": "Address",
+      "default": "Z Avenue, 10/20/E-10/20/G, NH 66,\nMangalapuram, Kerala 695317"
+    },
+    {
+      "type": "header",
+      "content": "Form"
     },
     {
       "type": "text",
@@ -227,7 +285,7 @@
       "max": 120,
       "step": 4,
       "unit": "px",
-      "default": 48
+      "default": 56
     },
     {
       "type": "range",
