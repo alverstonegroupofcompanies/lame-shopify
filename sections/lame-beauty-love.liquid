@@ -15,13 +15,18 @@
   endif
 
   assign cat_order = 'skin-care,baby-care,hair-care,makeup,body-care' | split: ','
-  assign autoplay_ms = section.settings.autoplay_seconds | default: 4 | times: 1000
+  assign autoplay_ms = section.settings.autoplay_seconds | default: 5 | times: 1000
+  assign fade_ms = section.settings.fade_ms | default: 900
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-beauty-love"
   aria-label="{{ section.settings.heading | default: 'Discover Beauty' | escape }}"
+  data-beauty-sync
+  data-autoplay="{{ autoplay_ms }}"
+  data-fade="{{ fade_ms }}"
+  style="--lame-bl-fade: {{ fade_ms }}ms;"
   {{ section.shopify_attributes }}
 >
   <div class="lame-beauty-love__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -184,7 +189,6 @@
                       <article
                         class="lame-beauty-love__card lame-beauty-love__card--slider"
                         data-beauty-slider
-                        data-autoplay="{{ autoplay_ms }}"
                         aria-roledescription="carousel"
                         aria-label="{{ brand_text | default: 'Brand' | escape }} products"
                       >
@@ -517,17 +521,23 @@
 
 <script>
   (() => {
-    const AUTO_MS = 4000;
+    const DEFAULT_INTERVAL = 5000;
+    const SWIPE_THRESHOLD = 36;
+    const sliders = [];
+    let sharedTimer = null;
+    let intervalMs = DEFAULT_INTERVAL;
+    let pausedByHover = 0;
+    let sectionEl = null;
 
     class BeautyBrandSlider {
       constructor(root) {
         this.root = root;
+        this.media = root.querySelector('.lame-beauty-love__media');
         this.slides = [...root.querySelectorAll('[data-beauty-slide]')];
         this.copies = [...root.querySelectorAll('[data-beauty-copy]')];
         this.dots = [...root.querySelectorAll('[data-beauty-dot]')];
         this.index = 0;
-        this.timer = null;
-        this.interval = Number(root.dataset.autoplay) || AUTO_MS;
+        this.suppressClick = false;
         if (this.slides.length < 2) return;
 
         this.dots.forEach((dot) => {
@@ -535,34 +545,135 @@
             event.preventDefault();
             event.stopPropagation();
             this.goTo(Number(dot.dataset.index) || 0);
-            this.start();
+            restartShared();
           });
         });
 
-        this.root.addEventListener('mouseenter', () => this.stop());
-        this.root.addEventListener('mouseleave', () => this.start());
-        this.root.addEventListener('focusin', () => this.stop());
-        this.root.addEventListener('focusout', () => {
-          if (!this.root.contains(document.activeElement)) this.start();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden) this.stop();
-          else this.start();
-        });
-
+        this.bindGestures();
         this.goTo(0);
-        this.start();
+      }
+
+      bindGestures() {
+        if (!this.media) return;
+
+        let tracking = false;
+        let axis = null;
+        let dragged = false;
+        let startX = 0;
+        let startY = 0;
+        let pointerId = null;
+
+        const endGesture = (event) => {
+          if (!tracking) return;
+          tracking = false;
+          this.media.classList.remove('is-dragging');
+
+          if (pointerId != null && this.media.hasPointerCapture?.(pointerId)) {
+            try {
+              this.media.releasePointerCapture(pointerId);
+            } catch (_) {
+              /* ignore */
+            }
+          }
+          pointerId = null;
+
+          const dx = event.clientX - startX;
+          if (axis === 'x' && Math.abs(dx) >= SWIPE_THRESHOLD) {
+            if (dx < 0) this.next();
+            else this.prev();
+            this.suppressClick = true;
+          } else {
+            this.suppressClick = dragged;
+          }
+
+          axis = null;
+          dragged = false;
+          restartShared();
+        };
+
+        this.media.addEventListener('pointerdown', (event) => {
+          if (event.pointerType === 'mouse' && event.button !== 0) return;
+          if (event.target.closest('[data-beauty-dot]')) return;
+
+          tracking = true;
+          axis = null;
+          dragged = false;
+          this.suppressClick = false;
+          startX = event.clientX;
+          startY = event.clientY;
+          pointerId = event.pointerId;
+          this.media.classList.add('is-dragging');
+          stopShared();
+
+          try {
+            this.media.setPointerCapture(event.pointerId);
+          } catch (_) {
+            /* ignore */
+          }
+        });
+
+        this.media.addEventListener(
+          'pointermove',
+          (event) => {
+            if (!tracking) return;
+
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+
+            if (!axis) {
+              if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+              axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+              if (axis === 'y') {
+                tracking = false;
+                this.media.classList.remove('is-dragging');
+                if (pointerId != null && this.media.hasPointerCapture?.(pointerId)) {
+                  try {
+                    this.media.releasePointerCapture(pointerId);
+                  } catch (_) {
+                    /* ignore */
+                  }
+                }
+                pointerId = null;
+                restartShared();
+                return;
+              }
+            }
+
+            if (axis === 'x') {
+              if (event.cancelable) event.preventDefault();
+              if (Math.abs(dx) > 10) dragged = true;
+            }
+          },
+          { passive: false }
+        );
+
+        this.media.addEventListener('pointerup', endGesture);
+        this.media.addEventListener('pointercancel', endGesture);
+
+        this.root.addEventListener(
+          'click',
+          (event) => {
+            if (!this.suppressClick) return;
+            event.preventDefault();
+            event.stopPropagation();
+            this.suppressClick = false;
+          },
+          true
+        );
       }
 
       goTo(next) {
         const total = this.slides.length;
+        if (total < 2) return;
         this.index = ((next % total) + total) % total;
 
         this.slides.forEach((slide, i) => {
           const active = i === this.index;
           slide.classList.toggle('is-active', active);
           slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+          if (slide.tagName === 'A') {
+            slide.tabIndex = active ? 0 : -1;
+          }
         });
 
         this.copies.forEach((copy, i) => {
@@ -582,35 +693,105 @@
         this.goTo(this.index + 1);
       }
 
-      start() {
-        this.stop();
-        if (this.interval <= 0 || this.slides.length < 2) return;
-        this.timer = window.setInterval(() => this.next(), this.interval);
-      }
-
-      stop() {
-        if (this.timer) {
-          window.clearInterval(this.timer);
-          this.timer = null;
-        }
+      prev() {
+        this.goTo(this.index - 1);
       }
     }
 
-    const init = () => {
-      document.querySelectorAll('[data-beauty-slider]').forEach((el) => {
+    function stopShared() {
+      if (sharedTimer) {
+        window.clearInterval(sharedTimer);
+        sharedTimer = null;
+      }
+    }
+
+    function startShared() {
+      stopShared();
+      if (intervalMs <= 0 || sliders.length === 0 || pausedByHover > 0) return;
+      if (document.hidden) return;
+      sharedTimer = window.setInterval(() => {
+        sliders.forEach((slider) => slider.next());
+      }, intervalMs);
+    }
+
+    function restartShared() {
+      stopShared();
+      startShared();
+    }
+
+    function bindSectionPause(section) {
+      if (!section || section.dataset.beautyPauseBound) return;
+      section.dataset.beautyPauseBound = '1';
+
+      const refreshPause = () => {
+        const anyHovered = [...section.querySelectorAll('[data-beauty-slider]')].some((card) => {
+          return card.matches(':hover') || card.contains(document.activeElement);
+        });
+        if (anyHovered) {
+          pausedByHover = 1;
+          stopShared();
+        } else {
+          pausedByHover = 0;
+          startShared();
+        }
+      };
+
+      section.querySelectorAll('[data-beauty-slider]').forEach((card) => {
+        card.addEventListener('mouseenter', refreshPause);
+        card.addEventListener('mouseleave', refreshPause);
+        card.addEventListener('focusin', refreshPause);
+        card.addEventListener('focusout', () => {
+          window.requestAnimationFrame(refreshPause);
+        });
+      });
+    }
+
+    function init() {
+      sectionEl = document.querySelector('[data-beauty-sync]');
+      if (!sectionEl) return;
+
+      const rawInterval = Number(sectionEl.dataset.autoplay);
+      intervalMs = Number.isFinite(rawInterval) ? rawInterval : DEFAULT_INTERVAL;
+
+      sectionEl.querySelectorAll('[data-beauty-slider]').forEach((el) => {
         if (el.dataset.beautySliderReady) return;
         el.dataset.beautySliderReady = '1';
-        new BeautyBrandSlider(el);
+        const slider = new BeautyBrandSlider(el);
+        if (slider.slides.length >= 2) sliders.push(slider);
       });
-    };
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
+      bindSectionPause(sectionEl);
+      startShared();
+    }
+
+    function boot() {
+      /* Start as soon as DOM is ready so slides advance before the section is scrolled into view */
       init();
     }
 
-    document.addEventListener('shopify:section:load', init);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+      boot();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopShared();
+      else if (pausedByHover === 0) startShared();
+    });
+
+    document.addEventListener('shopify:section:load', (event) => {
+      if (!event.target.querySelector?.('[data-beauty-sync], [data-beauty-slider]')) return;
+      stopShared();
+      sliders.length = 0;
+      pausedByHover = 0;
+      document.querySelectorAll('[data-beauty-slider]').forEach((el) => {
+        delete el.dataset.beautySliderReady;
+      });
+      const section = document.querySelector('[data-beauty-sync]');
+      if (section) delete section.dataset.beautyPauseBound;
+      boot();
+    });
   })();
 </script>
 
@@ -622,6 +803,7 @@
     --lame-bl-ink: #1a1a1a;
     --lame-bl-muted: #5c5c5c;
     --lame-bl-max-cols: 2;
+    --lame-bl-fade: 900ms;
   }
 
   .lame-beauty-love__wrap {
@@ -721,9 +903,26 @@
     width: 100%;
   }
 
+  .lame-beauty-love__card--slider .lame-beauty-love__media {
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .lame-beauty-love__card--slider .lame-beauty-love__media.is-dragging {
+    cursor: grabbing;
+  }
+
+  .lame-beauty-love__card--slider .lame-beauty-love__slide {
+    -webkit-user-drag: none;
+  }
+
   .lame-beauty-love__slides {
     position: absolute;
     inset: 0;
+    transform: translateZ(0);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lame-beauty-love__slide {
@@ -736,16 +935,17 @@
     text-decoration: none;
     color: inherit;
     opacity: 0;
-    visibility: hidden;
+    z-index: 0;
     pointer-events: none;
-    transition: opacity 0.45s ease, visibility 0.45s ease;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    transition: opacity var(--lame-bl-fade, 900ms) cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .lame-beauty-love__slide.is-active {
     opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
     z-index: 1;
+    pointer-events: auto;
   }
 
   .lame-beauty-love__image {
@@ -870,22 +1070,23 @@
 
   .lame-beauty-love__copy-stack {
     position: relative;
-    min-height: 2.4em;
+    min-height: 2.6em;
   }
 
   .lame-beauty-love__copy-stack .lame-beauty-love__copy {
     position: absolute;
     inset-inline: 0;
     top: 0;
+    width: 100%;
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.35s ease, visibility 0.35s ease;
+    pointer-events: none;
+    transition: opacity var(--lame-bl-fade, 900ms) cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .lame-beauty-love__copy-stack .lame-beauty-love__copy.is-active {
-    position: relative;
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
   }
 
   .lame-beauty-love__title {
@@ -1007,13 +1208,13 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .lame-beauty-love__card:hover .lame-beauty-love__slide.is-active .lame-beauty-love__image,
+    .lame-beauty-love__card:hover .lame-beauty-love__slides,
     .lame-beauty-love__card:hover > .lame-beauty-love__media > .lame-beauty-love__image {
       transform: scale(1.03);
     }
 
-    .lame-beauty-love__image {
-      transition: transform 0.35s ease;
+    .lame-beauty-love__media > .lame-beauty-love__image {
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .lame-beauty-love__media {
@@ -1026,9 +1227,14 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .lame-beauty-love {
+      --lame-bl-fade: 1ms;
+    }
+
     .lame-beauty-love__slide,
     .lame-beauty-love__copy-stack .lame-beauty-love__copy,
-    .lame-beauty-love__image {
+    .lame-beauty-love__slides,
+    .lame-beauty-love__media > .lame-beauty-love__image {
       transition: none;
     }
   }
@@ -1063,12 +1269,23 @@
       "type": "range",
       "id": "autoplay_seconds",
       "label": "Brand slide autoplay",
-      "info": "Seconds between product slides inside a brand card. Set to 0 to disable autoplay.",
+      "info": "All brand cards advance together on this interval from page load (even before you scroll to the section). Set to 0 to disable.",
       "min": 0,
       "max": 10,
       "step": 1,
       "unit": "s",
-      "default": 4
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "fade_ms",
+      "label": "Slide fade duration",
+      "info": "Crossfade length between products inside a brand card.",
+      "min": 400,
+      "max": 1400,
+      "step": 100,
+      "unit": "ms",
+      "default": 900
     },
     {
       "type": "checkbox",
