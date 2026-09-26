@@ -247,7 +247,7 @@
 
 /* ── Product cards ── */
 .lame-search-dropdown {
-  --lame-search-card-body-min: 4.25rem;
+  --lame-search-card-body-height: 4.5rem;
 }
 
 .lame-search-popular-grid,
@@ -340,6 +340,7 @@
   transform: translateY(-1px);
 }
 
+/* Square media — image fills every corner (1:1, full width) */
 .lame-search-card__media {
   position: relative;
   flex: 0 0 auto;
@@ -348,63 +349,67 @@
   height: auto;
   max-height: none;
   overflow: hidden;
-  background: linear-gradient(165deg, #fcfbf8 0%, #f2eee6 100%);
+  background: #f4f1ec;
   contain: layout style;
 }
 
 .lame-search-card__media-link {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 0.65rem;
+  padding: 0;
+  margin: 0;
   box-sizing: border-box;
 }
 
 .lame-search-card__image {
   display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
   object-position: center center;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  flex-shrink: 1;
 }
 
 .lame-search-card__image--placeholder {
   width: 100%;
   height: 100%;
-  background: rgb(236 231 223 / 0.35);
+  background: rgb(236 231 223 / 0.55);
 }
 
+/* Fixed body height — same for every card */
 .lame-search-card__body {
-  flex: 1 1 auto;
+  flex: 0 0 var(--lame-search-card-body-height);
+  height: var(--lame-search-card-body-height);
+  min-height: var(--lame-search-card-body-height);
+  max-height: var(--lame-search-card-body-height);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  gap: 0.35rem;
-  min-height: var(--lame-search-card-body-min);
-  padding: 0.75rem 0.8rem 0.9rem;
+  justify-content: space-between;
+  gap: 0.3rem;
+  padding: 0.7rem 0.75rem 0.8rem;
   box-sizing: border-box;
   border-top: 1px solid rgb(11 61 46 / 0.05);
+  overflow: hidden;
 }
 
 .lame-search-card__title {
   margin: 0;
-  flex: 1 1 auto;
-  min-height: 2.45rem;
+  flex: 0 0 auto;
+  height: 2.4rem;
+  min-height: 2.4rem;
+  max-height: 2.4rem;
   font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
   font-size: 0.875rem;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.35;
   letter-spacing: 0.005em;
   color: #1a1a1a;
   display: -webkit-box;
@@ -425,13 +430,15 @@
 
 .lame-search-card__price {
   flex: 0 0 auto;
-  margin-top: auto;
+  margin-top: 0;
   font-size: 0.9375rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: 0.01em;
   color: #0b3d2e;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lame-search-card__price .compare-at-price {
@@ -730,21 +737,27 @@
   }
 
   .lame-search-card__media-link {
-    padding: 0.5rem;
+    padding: 0;
   }
 
   .lame-search-card__title {
     font-size: 0.8125rem;
-    min-height: 2.25rem;
+    height: 2.2rem;
+    min-height: 2.2rem;
+    max-height: 2.2rem;
   }
 
   .lame-search-card__price {
     font-size: 0.875rem;
   }
 
+  .lame-search-dropdown {
+    --lame-search-card-body-height: 4.15rem;
+  }
+
   .lame-search-card__body {
-    padding: 0.6rem 0.65rem 0.75rem;
-    gap: 0.3rem;
+    padding: 0.55rem 0.6rem 0.65rem;
+    gap: 0.25rem;
   }
 
   .lame-search-footer {
