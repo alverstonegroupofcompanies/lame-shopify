@@ -147,19 +147,13 @@
         class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
       >
       {% endif %}
-        {% unless lame_category_shop_page %}
-          {% if lame_our_products_op_cards %}
-            <aside class="lame-op-page__sidebar">
-          {% endif %}
+        {% unless lame_category_shop_page or lame_our_products_op_cards %}
           {% content_for 'block',
             type: 'filters',
             id: 'filters',
             results: collection,
             results_size: collection.products_count
           %}
-          {% if lame_our_products_op_cards %}
-            </aside>
-          {% endif %}
         {% endunless %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
@@ -199,6 +193,16 @@
           {% if lame_has_promo_images %}
             {% render 'lame-our-products-promo-images', section: section %}
           {% endif %}
+          {% unless lame_category_shop_page %}
+            <aside class="lame-op-page__sidebar lame-op-page__filters">
+              {% content_for 'block',
+                type: 'filters',
+                id: 'filters',
+                results: collection,
+                results_size: collection.products_count
+              %}
+            </aside>
+          {% endunless %}
         <main class="lame-op-page__main lame-collection-products-column" data-lame-products-scroll>
         {% else %}
         <div class="lame-collection-products-column" data-lame-products-scroll>

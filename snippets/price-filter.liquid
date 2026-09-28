@@ -124,6 +124,69 @@
             assign slider_max_value = filter.max_value.value | money_without_currency
           endif
         %}
+        {% if our_products_price_slider %}
+          {% liquid
+            assign price_steps = '0,250,500,750,1000,1250,1500,1750,2000' | split: ','
+            assign selected_min = 0
+            assign selected_max = 2000
+            if filter.min_value.value != null
+              assign selected_min = filter.min_value.value | money_without_currency | plus: 0
+            endif
+            if filter.max_value.value != null
+              assign selected_max = filter.max_value.value | money_without_currency | plus: 0
+            endif
+            assign min_snap = selected_min | divided_by: 250 | times: 250
+            assign min_remainder = selected_min | modulo: 250
+            if min_remainder >= 125
+              assign min_snap = min_snap | plus: 250
+            endif
+            assign max_snap = selected_max | divided_by: 250 | times: 250
+            assign max_remainder = selected_max | modulo: 250
+            if max_remainder >= 125
+              assign max_snap = max_snap | plus: 250
+            endif
+            if min_snap > 2000
+              assign min_snap = 2000
+            endif
+            if max_snap > 2000
+              assign max_snap = 2000
+            endif
+            if max_snap < min_snap
+              assign max_snap = min_snap
+            endif
+          %}
+          <div class="price-facet__selects">
+            <label class="price-facet__select-field">
+              <span class="price-facet__select-label">From</span>
+              <select class="price-facet__select" data-price-bound="min">
+                {% for step in price_steps %}
+                  {% assign step_num = step | plus: 0 %}
+                  <option
+                    value="{% if step_num == 0 %}{% else %}{{ step_num }}{% endif %}"
+                    {% if min_snap == step_num %}selected{% endif %}
+                  >
+                    {{ cart.currency.symbol }}{{ step_num }}
+                  </option>
+                {% endfor %}
+              </select>
+            </label>
+            <span class="price-facet__select-separator" aria-hidden="true">&ndash;</span>
+            <label class="price-facet__select-field">
+              <span class="price-facet__select-label">To</span>
+              <select class="price-facet__select" data-price-bound="max">
+                {% for step in price_steps %}
+                  {% assign step_num = step | plus: 0 %}
+                  <option
+                    value="{% if step_num == 2000 %}{% else %}{{ step_num }}{% endif %}"
+                    {% if max_snap == step_num %}selected{% endif %}
+                  >
+                    {{ cart.currency.symbol }}{{ step_num }}
+                  </option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+        {% else %}
         <div class="price-facet__range" ref="rangeSlider">
           <div class="price-facet__range-track-wrap">
             <div class="price-facet__range-thumb-labels" aria-hidden="true">
@@ -167,6 +230,7 @@
             </span>
           </div>
         </div>
+        {% endif %}
 
         <div class="facets__inputs-wrapper facets__inputs-wrapper--row visually-hidden">
           <div
@@ -275,6 +339,45 @@
   disable_animation_on_desktop: is_horizontal,
   close_with_escape: is_horizontal
 %}
+
+{% if our_products_price_slider %}
+  <script>
+    if (!window.__lameOpPriceSelect) {
+      window.__lameOpPriceSelect = true;
+      document.addEventListener('change', function (event) {
+        var select = event.target;
+        if (!(select instanceof HTMLSelectElement) || !select.classList.contains('price-facet__select')) return;
+        var root = select.closest('price-facet-component');
+        if (!root) return;
+        var minSelect = root.querySelector('[data-price-bound="min"]');
+        var maxSelect = root.querySelector('[data-price-bound="max"]');
+        var minInput = root.querySelector('[ref="minInput"]');
+        var maxInput = root.querySelector('[ref="maxInput"]');
+        if (!(minSelect instanceof HTMLSelectElement) || !(maxSelect instanceof HTMLSelectElement)) return;
+        if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) return;
+
+        var minValue = minSelect.value === '' ? 0 : parseInt(minSelect.value, 10);
+        var maxValue = maxSelect.value === '' ? 2000 : parseInt(maxSelect.value, 10);
+        if (!Number.isFinite(minValue)) minValue = 0;
+        if (!Number.isFinite(maxValue)) maxValue = 2000;
+
+        if (minValue > maxValue) {
+          if (select === minSelect) {
+            maxValue = minValue;
+            maxSelect.value = maxValue >= 2000 ? '' : String(maxValue);
+          } else {
+            minValue = maxValue;
+            minSelect.value = minValue <= 0 ? '' : String(minValue);
+          }
+        }
+
+        minInput.value = minValue > 0 ? String(minValue) : '';
+        maxInput.value = maxValue < 2000 ? String(maxValue) : '';
+        minInput.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    }
+  </script>
+{% endif %}
 
 {% stylesheet %}
   /* Price filter */

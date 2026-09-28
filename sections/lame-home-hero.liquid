@@ -113,6 +113,9 @@
         {%- if desktop_slide_count > 0 -%}
           {%- liquid
             assign desktop_prioritize_loading = true
+            if has_mobile_carousel
+              assign desktop_prioritize_loading = false
+            endif
           -%}
           {% render 'lame-home-hero-slideshow',
             section: section,
@@ -140,7 +143,7 @@
             slideshow_slide_size: slideshow_slide_size,
             autoplay: section.settings.autoplay,
             autoplay_speed: section.settings.autoplay_speed,
-            prioritize_first_slide: false,
+            prioritize_first_slide: true,
             media_fit: image_fit
           %}
         {%- elsif request.design_mode -%}
@@ -548,65 +551,6 @@
       }
     }
 
-    /* Temporary: phones show the desktop banner; mobile slides stay hidden. */
-    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile {
-      display: none !important;
-    }
-
-    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop {
-      display: block !important;
-    }
-
-    .lame-home-hero--has-mobile-banners {
-      --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
-      --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-desktop-ratio, 2.4), 0.75));
-      --lame-hero-frame-max-height: var(--lame-hero-natural-height);
-      --lame-hero-frame-min-height: var(--lame-hero-natural-height);
-    }
-
-    .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--desktop slideshow-component,
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--desktop slideshow-container {
-      width: 100% !important;
-      max-width: 100% !important;
-      height: var(--lame-hero-frame-max-height) !important;
-      min-height: var(--lame-hero-frame-max-height) !important;
-      max-height: var(--lame-hero-frame-max-height) !important;
-      aspect-ratio: unset !important;
-      overflow: hidden;
-    }
-
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--desktop slideshow-slides {
-      display: flex !important;
-      flex-wrap: nowrap !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      height: var(--lame-hero-frame-max-height) !important;
-      min-height: var(--lame-hero-frame-max-height) !important;
-      max-height: var(--lame-hero-frame-max-height) !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      scroll-snap-type: x mandatory !important;
-      scroll-snap-stop: always;
-      scroll-behavior: auto !important;
-      overscroll-behavior-x: contain;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x pan-y;
-      cursor: grab;
-    }
-
-    .lame-home-hero--has-mobile-banners .lame-home-hero__carousel--desktop slideshow-slide {
-      flex: 0 0 100% !important;
-      width: 100% !important;
-      min-width: 100% !important;
-      max-width: 100% !important;
-      height: 100% !important;
-      min-height: 100% !important;
-      max-height: 100% !important;
-      scroll-snap-align: start;
-      content-visibility: visible !important;
-      contain-intrinsic-size: unset !important;
-    }
   }
 
   /* Tablets + desktop (600px+): horizontal banners; height follows setting (half by default) */
