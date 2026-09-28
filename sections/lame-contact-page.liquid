@@ -6,6 +6,7 @@
   assign heading_suffix = section.settings.heading_suffix | default: 'from you'
 
   assign form_id = 'LameContactForm-' | append: section.id
+  assign contact_success = false
 -%}
 
 <div
@@ -82,6 +83,10 @@
           <input type="hidden" name="contact[id]" value="{{ form_id }}">
           <input type="hidden" name="contact[tags]" value="contact-page">
 
+          {%- if form.posted_successfully? and form.id == form_id -%}
+            {%- assign contact_success = true -%}
+          {%- endif -%}
+
           {%- if form.errors and form.id == form_id -%}
             <div class="lame-contact-page__message lame-contact-page__message--error" tabindex="-1" autofocus role="alert">
               {{- 'icon-error.svg' | inline_asset_content -}}
@@ -93,13 +98,6 @@
                   {% endfor %}
                 </ul>
               </div>
-            </div>
-          {%- endif -%}
-
-          {%- if form.posted_successfully? and form.id == form_id -%}
-            <div class="lame-contact-page__message lame-contact-page__message--success" tabindex="-1" autofocus role="status">
-              {{- 'icon-checkmark.svg' | inline_asset_content -}}
-              <p>{{ 'lame_contact.success' | t }}</p>
             </div>
           {%- endif -%}
 
@@ -174,7 +172,86 @@
       </div>
     </div>
   </div>
+
+  {%- if contact_success -%}
+    <div
+      class="lame-contact-alert"
+      data-lame-contact-alert
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="LameContactAlertTitle-{{ section.id }}"
+      aria-describedby="LameContactAlertText-{{ section.id }}"
+    >
+      <div class="lame-contact-alert__backdrop" data-lame-contact-alert-close></div>
+      <div class="lame-contact-alert__card">
+        <div class="lame-contact-alert__icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M7.5 12.5l3 3 6-6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2 class="lame-contact-alert__title" id="LameContactAlertTitle-{{ section.id }}">Message sent</h2>
+        <p class="lame-contact-alert__text" id="LameContactAlertText-{{ section.id }}">
+          {{ 'lame_contact.success' | t }}
+        </p>
+        <button type="button" class="lame-contact-alert__btn" data-lame-contact-alert-close>
+          Close
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
 </div>
+
+<script>
+  (() => {
+    const COPY_TO = {{ section.settings.copy_email | default: 'creative@alverstones.com' | json }};
+    const form = document.getElementById({{ form_id | json }});
+    const alertEl = document.querySelector('[data-lame-contact-alert]');
+
+    if (alertEl) {
+      const close = () => {
+        alertEl.classList.add('is-closing');
+        window.setTimeout(() => alertEl.remove(), 280);
+      };
+      alertEl.querySelectorAll('[data-lame-contact-alert-close]').forEach((el) => {
+        el.addEventListener('click', close);
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') close();
+      });
+      window.requestAnimationFrame(() => alertEl.classList.add('is-open'));
+    }
+
+    if (!form || !COPY_TO) return;
+
+    let copySent = false;
+    form.addEventListener('submit', () => {
+      if (copySent) return;
+      copySent = true;
+
+      const data = new FormData(form);
+      const payload = {
+        name: data.get('contact[name]') || '',
+        email: data.get('contact[email]') || '',
+        phone: data.get('contact[phone]') || '',
+        message: data.get('contact[body]') || '',
+        _replyto: data.get('contact[email]') || '',
+        _subject: 'Lamstone Healthcare — Contact form copy',
+        _template: 'table',
+      };
+
+      fetch('https://formsubmit.co/ajax/' + encodeURIComponent(COPY_TO), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    });
+  })();
+</script>
 
 {% schema %}
 {
@@ -184,7 +261,13 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Submissions use Shopify’s contact form. Set the store contact email in Shopify Admin → Settings → Store details."
+      "content": "Submissions go to the store contact email (Shopify Admin → Settings → Store details). A copy is also sent to the address below. On first use, FormSubmit may email that inbox once for activation."
+    },
+    {
+      "type": "text",
+      "id": "copy_email",
+      "label": "Also send a copy to",
+      "default": "creative@alverstones.com"
     },
     {
       "type": "header",

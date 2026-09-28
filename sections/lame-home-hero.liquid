@@ -47,9 +47,9 @@
       assign lame_hero_h_desktop = '100svh'
       assign slideshow_slide_size = 'large'
     when 'half'
-      # Nykaa-style: ~45–50% of viewport, one full banner at a time
-      assign lame_hero_h = '48svh'
-      assign lame_hero_h_desktop = '48svh'
+      # Shared frame for every slide — tall enough to show the banner bottom
+      assign lame_hero_h = '56svh'
+      assign lame_hero_h_desktop = '56svh'
       assign slideshow_slide_size = 'large'
     when 'small'
       assign lame_hero_h = '200px'
@@ -66,7 +66,7 @@
     when 'full_screen'
       assign lame_hero_h_mobile = '100svh'
     when 'half'
-      assign lame_hero_h_mobile = '45svh'
+      assign lame_hero_h_mobile = '52svh'
     when 'small'
       assign lame_hero_h_mobile = '180px'
     when 'medium'
@@ -159,8 +159,8 @@
 
 {% stylesheet %}
   .lame-home-hero {
-    --lame-hero-height: 48svh;
-    --lame-hero-height-desktop: 48svh;
+    --lame-hero-height: 56svh;
+    --lame-hero-height-desktop: 56svh;
     --lame-hero-height-mobile: 220px;
     /* Header + announcement take space above; banner fills configured height */
     --lame-hero-height-offset: var(--header-group-height, 0px);
@@ -573,7 +573,7 @@
       }
     }
 
-    /* Half screen: ~48% viewport, capped so header never overflows */
+    /* Half screen: shared height for every slide, tall enough to show the banner bottom */
     .lame-home-hero--half {
       --lame-hero-frame-max-height: min(
         var(--lame-hero-height-desktop),
@@ -590,7 +590,7 @@
     }
 
     /*
-      Tablet / small laptop: 48svh is taller than a wide banner aspect,
+      Tablet / small laptop: a viewport height is taller than a wide banner aspect,
       so cover crops left/right. Size the frame to the banner ratio so
       the full-width image stays visible like wide desktop.
     */
