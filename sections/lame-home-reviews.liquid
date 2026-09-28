@@ -34,11 +34,12 @@
 
     {%- if review_count > 0 and section.settings.show_summary -%}
       <div class="lame-home-reviews__summary">
-        <p class="lame-home-reviews__score">{{ review_average }}</p>
+        <p class="lame-home-reviews__score" data-lame-review-score>{{ review_average }}</p>
         <div class="lame-home-reviews__summary-copy">
-          <span class="lame-home-reviews__stars" style="--lame-rating: {{ review_average }};" aria-hidden="true">
-            <span class="lame-home-reviews__stars-base">★★★★★</span>
-            <span class="lame-home-reviews__stars-fill">★★★★★</span>
+          <span class="lame-home-reviews__stars" style="--lame-rating: {{ review_average }};" data-lame-summary-stars aria-hidden="true">
+            {%- for star_index in (0..4) -%}
+              <span class="lame-home-reviews__star" style="--i: {{ star_index }}">★</span>
+            {%- endfor -%}
           </span>
           <p class="lame-home-reviews__count">
             Rating for {{ store_name | escape }}
@@ -84,11 +85,12 @@
                 assign card_rating = 5
               endif
             -%}
-            <article class="lame-home-reviews__card" {{ block.shopify_attributes }}>
+            <article class="lame-home-reviews__card" data-review-rating="{{ card_rating }}" {{ block.shopify_attributes }}>
               <div class="lame-home-reviews__card-top">
                 <span class="lame-home-reviews__stars lame-home-reviews__stars--card" style="--lame-rating: {{ card_rating }};" aria-label="{{ card_rating }} out of 5 stars">
-                  <span class="lame-home-reviews__stars-base" aria-hidden="true">★★★★★</span>
-                  <span class="lame-home-reviews__stars-fill" aria-hidden="true">★★★★★</span>
+                  {%- for star_index in (0..4) -%}
+                    <span class="lame-home-reviews__star" style="--i: {{ star_index }}" aria-hidden="true">★</span>
+                  {%- endfor -%}
                 </span>
                 {%- if block.settings.date != blank -%}
                   <time class="lame-home-reviews__date" datetime="{{ block.settings.date | escape }}">{{ block.settings.date | escape }}</time>
@@ -329,6 +331,7 @@
 
       const paragraph = article.querySelector('.lame-home-reviews__quote p');
       if (paragraph) paragraph.textContent = text;
+      refreshSummary();
     };
 
     const addCard = ({ id, rating, title, body, author, date, detail, href }, place) => {
@@ -357,15 +360,14 @@
       stars.className = 'lame-home-reviews__stars lame-home-reviews__stars--card';
       stars.style.setProperty('--lame-rating', String(score));
       stars.setAttribute('aria-label', score + ' out of 5 stars');
-      const base = document.createElement('span');
-      base.className = 'lame-home-reviews__stars-base';
-      base.setAttribute('aria-hidden', 'true');
-      base.textContent = '★★★★★';
-      const fill = document.createElement('span');
-      fill.className = 'lame-home-reviews__stars-fill';
-      fill.setAttribute('aria-hidden', 'true');
-      fill.textContent = '★★★★★';
-      stars.append(base, fill);
+      for (let index = 0; index < 5; index += 1) {
+        const star = document.createElement('span');
+        star.className = 'lame-home-reviews__star';
+        star.style.setProperty('--i', String(index));
+        star.setAttribute('aria-hidden', 'true');
+        star.textContent = '★';
+        stars.append(star);
+      }
       top.append(stars);
 
       const meta = document.createElement('div');
@@ -461,14 +463,30 @@
     };
 
     const countNode = root.querySelector('[data-lame-review-count]');
-    let officialTotal = 0;
+    const scoreNode = root.querySelector('[data-lame-review-score]');
+    const summaryStars = root.querySelector('[data-lame-summary-stars]');
 
-    const refreshCount = () => {
-      if (!countNode) return;
-      const shown = grid.querySelectorAll('.lame-home-reviews__card').length;
-      const total = Math.max(shown, officialTotal);
-      countNode.textContent = total === 1 ? '1 review' : total + ' reviews';
+    const cardRating = (card) => {
+      const fromData = Number(card.dataset.reviewRating);
+      if (fromData >= 1) return Math.min(5, fromData);
+      const stars = card.querySelector('.lame-home-reviews__stars');
+      const fromStyle = Number(stars?.style.getPropertyValue('--lame-rating'));
+      if (fromStyle >= 1) return Math.min(5, fromStyle);
+      return 0;
     };
+
+    const refreshSummary = () => {
+      const ratings = [...grid.querySelectorAll('.lame-home-reviews__card')].map(cardRating).filter((rating) => rating > 0);
+      const count = ratings.length;
+      const average = count ? ratings.reduce((sum, rating) => sum + rating, 0) / count : 0;
+      const rounded = Math.round(average * 10) / 10;
+
+      if (scoreNode) scoreNode.textContent = count ? rounded.toFixed(1) : '0.0';
+      if (summaryStars) summaryStars.style.setProperty('--lame-rating', String(rounded));
+      if (countNode) countNode.textContent = count === 1 ? '1 review' : count + ' reviews';
+    };
+
+    const refreshCount = () => refreshSummary();
 
     const scrollReviews = (direction) => {
       const card = grid.querySelector('.lame-home-reviews__card');
@@ -499,10 +517,6 @@
           const response = await fetch(url);
           if (!response.ok) return;
           const data = await response.json();
-          officialTotal = Math.max(
-            officialTotal,
-            Number(data.number_of_product_reviews || 0) + Number(data.number_of_shop_reviews || 0)
-          );
           found.push(...readReviews(data.html));
         })
       );
@@ -656,6 +670,12 @@
 </script>
 
 {% stylesheet %}
+  @media screen and (max-width: 989px) {
+    .shopify-section:has(.lame-signature--showcase) + .shopify-section:has(.lame-home-reviews) {
+      margin-block-start: 1.5rem;
+    }
+  }
+
   .lame-home-reviews__wrap {
     width: min(1120px, 100%);
     margin-inline: auto;
@@ -721,10 +741,9 @@
   }
 
   .lame-home-reviews__stars {
-    position: relative;
-    display: inline-block;
+    display: inline-flex;
+    gap: 0.12em;
     font-size: 1.15rem;
-    letter-spacing: 0.12em;
     line-height: 1;
     white-space: nowrap;
   }
@@ -733,17 +752,19 @@
     font-size: 0.95rem;
   }
 
-  .lame-home-reviews__stars-base {
+  .lame-home-reviews__star {
+    position: relative;
+    display: inline-block;
     color: #e4e4e4;
   }
 
-  .lame-home-reviews__stars-fill {
+  .lame-home-reviews__star::after {
+    content: '★';
     position: absolute;
     inset: 0 auto 0 0;
-    width: calc((var(--lame-rating) / 5) * 100%);
+    width: calc(clamp(0, var(--lame-rating) - var(--i), 1) * 100%);
     overflow: hidden;
     color: #f5a623;
-    white-space: nowrap;
   }
 
   .lame-home-reviews__carousel {

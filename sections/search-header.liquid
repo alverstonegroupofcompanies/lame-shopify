@@ -10,6 +10,28 @@
     "
   >
     <div class="lame-search-hero__copy">
+      <nav class="lame-search-path" aria-label="Breadcrumb">
+        <ol class="lame-search-path__list">
+          <li class="lame-search-path__item">
+            <a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a>
+          </li>
+          <li class="lame-search-path__sep" aria-hidden="true">/</li>
+          {%- if search.performed and search.terms != blank -%}
+            <li class="lame-search-path__item">
+              <a href="{{ routes.search_url }}">{{ 'content.search' | t }}</a>
+            </li>
+            <li class="lame-search-path__sep" aria-hidden="true">/</li>
+            <li class="lame-search-path__item lame-search-path__item--current" aria-current="page">
+              <span>{{ search.terms | escape }}</span>
+            </li>
+          {%- else -%}
+            <li class="lame-search-path__item lame-search-path__item--current" aria-current="page">
+              <span>{{ 'content.search' | t }}</span>
+            </li>
+          {%- endif -%}
+        </ol>
+      </nav>
+
       {% assign heading_text = 'content.search' | t %}
 
       {% if search.performed %}
