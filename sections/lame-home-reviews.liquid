@@ -230,16 +230,138 @@
 
 <script>
   (() => {
-    const form = document.querySelector('[data-lame-review-form]');
     const root = document.querySelector('[data-lame-reviews]');
-    if (!form || !root) return;
+    const grid = document.querySelector('[data-lame-review-grid]');
+    const form = document.querySelector('[data-lame-review-form]');
+    if (!root || !grid) return;
 
+    const shopDomain = root.dataset.shopDomain || '';
+
+    const existingBodies = () =>
+      [...grid.querySelectorAll('.lame-home-reviews__quote p')].map((node) => node.textContent.trim().toLowerCase());
+
+    const addCard = ({ rating, title, body, author, date, detail, href }, place) => {
+      const text = (body || '').trim();
+      if (!text) return;
+      if (existingBodies().includes(text.toLowerCase())) return;
+
+      const score = Math.min(5, Math.max(1, Number(rating) || 5));
+      const article = document.createElement('article');
+      article.className = 'lame-home-reviews__card';
+
+      const top = document.createElement('div');
+      top.className = 'lame-home-reviews__card-top';
+      const stars = document.createElement('span');
+      stars.className = 'lame-home-reviews__stars lame-home-reviews__stars--card';
+      stars.style.setProperty('--lame-rating', String(score));
+      stars.setAttribute('aria-label', score + ' out of 5 stars');
+      const base = document.createElement('span');
+      base.className = 'lame-home-reviews__stars-base';
+      base.setAttribute('aria-hidden', 'true');
+      base.textContent = '★★★★★';
+      const fill = document.createElement('span');
+      fill.className = 'lame-home-reviews__stars-fill';
+      fill.setAttribute('aria-hidden', 'true');
+      fill.textContent = '★★★★★';
+      stars.append(base, fill);
+      top.append(stars);
+      if (date) {
+        const time = document.createElement('time');
+        time.className = 'lame-home-reviews__date';
+        time.dateTime = date;
+        time.textContent = date;
+        top.append(time);
+      }
+
+      article.append(top);
+      if (title) {
+        const heading = document.createElement('h3');
+        heading.className = 'lame-home-reviews__title';
+        heading.textContent = title;
+        article.append(heading);
+      }
+
+      const quote = document.createElement('blockquote');
+      quote.className = 'lame-home-reviews__quote';
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      quote.append(paragraph);
+      article.append(quote);
+
+      const footer = document.createElement('footer');
+      footer.className = 'lame-home-reviews__byline';
+      const cite = document.createElement('cite');
+      cite.textContent = author || 'Customer';
+      footer.append(cite);
+      if (detail) {
+        if (href && href.indexOf('/products/') === 0) {
+          const link = document.createElement('a');
+          link.href = href;
+          link.textContent = detail;
+          footer.append(link);
+        } else {
+          const span = document.createElement('span');
+          span.textContent = detail;
+          footer.append(span);
+        }
+      }
+      article.append(footer);
+
+      if (place === 'start') grid.prepend(article);
+      else grid.append(article);
+    };
+
+    const readReviews = (html) => {
+      const doc = new DOMParser().parseFromString(html || '', 'text/html');
+      return [...doc.querySelectorAll('.jdgm-rev')].map((node) => {
+        const product = node.querySelector('.jdgm-rev__prod-link');
+        const href = product ? product.getAttribute('href') || '' : '';
+        return {
+          rating: node.querySelector('.jdgm-rev__rating')?.dataset.score || '5',
+          title: node.querySelector('.jdgm-rev__title')?.textContent.trim() || '',
+          body: node.querySelector('.jdgm-rev__body')?.textContent.trim() || '',
+          author: node.querySelector('.jdgm-rev__author')?.textContent.trim() || '',
+          date: (node.querySelector('.jdgm-rev__timestamp')?.dataset.content || '').slice(0, 10),
+          detail: href.indexOf('/products/') === 0 ? product.textContent.trim() : '',
+          href,
+        };
+      });
+    };
+
+    const loadStoredReviews = async () => {
+      if (!shopDomain) return;
+      const types = ['product-reviews', 'shop-reviews'];
+      const found = [];
+      await Promise.all(
+        types.map(async (type) => {
+          const url = new URL('https://cdn.judge.me/reviews/all_reviews_js_based');
+          url.searchParams.set('url', shopDomain);
+          url.searchParams.set('shop_domain', shopDomain);
+          url.searchParams.set('platform', 'shopify');
+          url.searchParams.set('page', '1');
+          url.searchParams.set('per_page', '6');
+          url.searchParams.set('review_type', type);
+          const response = await fetch(url);
+          if (!response.ok) return;
+          const data = await response.json();
+          found.push(...readReviews(data.html));
+        })
+      );
+      found
+        .sort((a, b) => (a.date < b.date ? -1 : 1))
+        .forEach((review) => addCard(review, 'start'));
+    };
+
+    loadStoredReviews();
+
+    if (!form) return;
     const status = form.querySelector('[data-lame-review-status]');
     const button = form.querySelector('.lame-home-reviews__submit');
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const body = form.querySelector('[name="body"]').value.trim();
+      const title = form.querySelector('[name="title"]').value.trim();
       const rating = form.querySelector('input[name="rating"]:checked');
       if (!rating || body.length < 4) {
         status.textContent = 'Add a star rating and a short review.';
@@ -248,14 +370,14 @@
       }
 
       const payload = new FormData();
-      payload.append('shop_domain', root.dataset.shopDomain || '');
-      payload.append('url', root.dataset.shopDomain || '');
+      payload.append('shop_domain', shopDomain);
+      payload.append('url', shopDomain);
       payload.append('platform', 'shopify');
       payload.append('name', form.dataset.customerName || '');
       payload.append('email', form.dataset.customerEmail || '');
       payload.append('shopify_customer_id', form.dataset.customerId || '');
       payload.append('rating', rating.value);
-      payload.append('title', form.querySelector('[name="title"]').value.trim());
+      payload.append('title', title);
       payload.append('body', body);
       payload.append('source', 'all-reviews-page');
 
@@ -279,10 +401,24 @@
           }
           throw new Error(message);
         }
+
+        addCard(
+          {
+            rating: rating.value,
+            title,
+            body,
+            author: form.dataset.customerName || 'You',
+            date: new Date().toISOString().slice(0, 10),
+            detail: '',
+            href: '',
+          },
+          'start'
+        );
+        grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         form.reset();
         const five = form.querySelector('input[name="rating"][value="5"]');
         if (five) five.checked = true;
-        status.textContent = 'Thank you. Your review is in and will show here shortly.';
+        status.textContent = 'Posted. Your review is saved and shown above.';
         status.dataset.state = 'success';
       } catch (error) {
         status.textContent = error.message || 'Your review could not be posted. Please try again.';
