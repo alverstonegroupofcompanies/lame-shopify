@@ -486,44 +486,125 @@
       if (countNode) countNode.textContent = count === 1 ? '1 review' : count + ' reviews';
     };
 
-    const refreshCount = () => refreshSummary();
-
-    const scrollReviews = (direction) => {
-      const card = grid.querySelector('.lame-home-reviews__card');
-      const gap = 14;
-      const amount = card ? card.getBoundingClientRect().width + gap : grid.clientWidth;
-      grid.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    const refreshCount = () => {
+      refreshSummary();
+      paintArrows();
     };
 
-    root.querySelector('[data-lame-review-prev]')?.addEventListener('click', () => scrollReviews(-1));
-    root.querySelector('[data-lame-review-next]')?.addEventListener('click', () => scrollReviews(1));
+    const prevBtn = root.querySelector('[data-lame-review-prev]');
+    const nextBtn = root.querySelector('[data-lame-review-next]');
+    const carousel = root.querySelector('[data-lame-review-carousel]');
+    let autoTimer = 0;
+    let resumeTimer = 0;
+
+    const stepSize = () => {
+      const card = grid.querySelector('.lame-home-reviews__card');
+      const styles = getComputedStyle(grid);
+      const gap = parseFloat(styles.columnGap || styles.gap) || 14;
+      return card ? card.getBoundingClientRect().width + gap : grid.clientWidth;
+    };
+
+    const maxScroll = () => Math.max(0, grid.scrollWidth - grid.clientWidth);
+    const atStart = () => grid.scrollLeft <= 8;
+    const atEnd = () => grid.scrollLeft >= maxScroll() - 8;
+
+    const paintArrows = () => {
+      const canMove = maxScroll() > 8;
+      const start = atStart();
+      const end = atEnd();
+      prevBtn?.classList.toggle('is-active', canMove && end);
+      nextBtn?.classList.toggle('is-active', canMove && !end);
+      prevBtn?.classList.toggle('is-ended', canMove && start);
+      nextBtn?.classList.toggle('is-ended', canMove && end);
+      if (prevBtn) prevBtn.setAttribute('aria-disabled', canMove && start ? 'true' : 'false');
+      if (nextBtn) nextBtn.setAttribute('aria-disabled', canMove && end ? 'true' : 'false');
+    };
+
+    const scrollReviews = (direction) => {
+      const max = maxScroll();
+      if (max <= 8) return;
+      if (direction > 0 && atEnd()) grid.scrollTo({ left: 0, behavior: 'smooth' });
+      else if (direction < 0 && atStart()) grid.scrollTo({ left: max, behavior: 'smooth' });
+      else grid.scrollBy({ left: direction * stepSize(), behavior: 'smooth' });
+    };
+
+    const stopAuto = () => {
+      window.clearInterval(autoTimer);
+      autoTimer = 0;
+    };
+
+    const startAuto = () => {
+      stopAuto();
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (maxScroll() <= 8) return;
+      autoTimer = window.setInterval(() => scrollReviews(1), 4200);
+    };
+
+    const pauseAuto = () => {
+      stopAuto();
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(startAuto, 7000);
+    };
+
+    const resetToStart = () => {
+      grid.scrollLeft = 0;
+      paintArrows();
+      startAuto();
+    };
+
+    prevBtn?.addEventListener('click', () => {
+      scrollReviews(-1);
+      pauseAuto();
+    });
+    nextBtn?.addEventListener('click', () => {
+      scrollReviews(1);
+      pauseAuto();
+    });
+    grid.addEventListener('scroll', () => paintArrows(), { passive: true });
+    grid.addEventListener('pointerdown', pauseAuto);
+    window.addEventListener('resize', () => {
+      paintArrows();
+      startAuto();
+    });
+    carousel?.addEventListener('mouseenter', stopAuto);
+    carousel?.addEventListener('mouseleave', startAuto);
+    carousel?.addEventListener('focusin', stopAuto);
+    carousel?.addEventListener('focusout', startAuto);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopAuto();
+      else startAuto();
+    });
+    paintArrows();
 
     const loadStoredReviews = async () => {
-      if (!shopDomain) {
+      try {
+        if (!shopDomain) return;
+        const types = ['product-reviews', 'shop-reviews'];
+        const found = [];
+        await Promise.all(
+          types.map(async (type) => {
+            const url = new URL('https://cdn.judge.me/reviews/all_reviews_js_based');
+            url.searchParams.set('url', shopDomain);
+            url.searchParams.set('shop_domain', shopDomain);
+            url.searchParams.set('platform', 'shopify');
+            url.searchParams.set('page', '1');
+            url.searchParams.set('per_page', '24');
+            url.searchParams.set('review_type', type);
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const data = await response.json();
+            found.push(...readReviews(data.html));
+          })
+        );
+        found
+          .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+          .forEach((review) => addCard(review, 'start'));
+      } catch (error) {
+        /* Keep the reviews already on the page if Judge.me is unavailable. */
+      } finally {
         refreshCount();
-        return;
+        resetToStart();
       }
-      const types = ['product-reviews', 'shop-reviews'];
-      const found = [];
-      await Promise.all(
-        types.map(async (type) => {
-          const url = new URL('https://cdn.judge.me/reviews/all_reviews_js_based');
-          url.searchParams.set('url', shopDomain);
-          url.searchParams.set('shop_domain', shopDomain);
-          url.searchParams.set('platform', 'shopify');
-          url.searchParams.set('page', '1');
-          url.searchParams.set('per_page', '24');
-          url.searchParams.set('review_type', type);
-          const response = await fetch(url);
-          if (!response.ok) return;
-          const data = await response.json();
-          found.push(...readReviews(data.html));
-        })
-      );
-      found
-        .sort((a, b) => (a.date < b.date ? -1 : 1))
-        .forEach((review) => addCard(review, 'start'));
-      refreshCount();
     };
 
     loadStoredReviews();
@@ -653,6 +734,8 @@
           },
           'start'
         );
+        grid.scrollLeft = 0;
+        paintArrows();
         grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         form.reset();
         const five = form.querySelector('input[name="rating"][value="5"]');
@@ -777,6 +860,7 @@
     gap: 0.9rem;
     margin: 0;
     overflow-x: auto;
+    overflow-anchor: none;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     scrollbar-width: none;
@@ -813,6 +897,36 @@
     right: -0.2rem;
   }
 
+  .lame-home-reviews__nav.is-active {
+    background: #2d4a22;
+    color: #fff;
+    border-color: #2d4a22;
+    box-shadow: 0 0 0 3px rgb(45 74 34 / 0.28);
+    animation: lame-review-arrow 1.6s ease-in-out infinite;
+  }
+
+  .lame-home-reviews__nav.is-ended {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+
+  @keyframes lame-review-arrow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(45 74 34 / 0.4);
+    }
+
+    70% {
+      box-shadow: 0 0 0 7px rgb(45 74 34 / 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lame-home-reviews__nav.is-active {
+      animation: none;
+    }
+  }
+
   .lame-home-reviews__card {
     display: flex;
     flex: 0 0 100%;
@@ -843,6 +957,90 @@
 
     .lame-home-reviews__nav--next {
       right: -0.7rem;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-home-reviews__carousel {
+      display: grid;
+      grid-template-columns: auto auto;
+      grid-template-areas:
+        "cards cards"
+        "prev next";
+      justify-content: center;
+      column-gap: 0.75rem;
+      row-gap: 0.7rem;
+      margin-top: 1rem;
+    }
+
+    .lame-home-reviews__grid {
+      grid-area: cards;
+      width: 100%;
+      gap: 0.6rem;
+    }
+
+    .lame-home-reviews__card {
+      flex-basis: calc((100% - 0.6rem) / 2);
+      gap: 0.35rem;
+      padding: 0.7rem 0.6rem 0.65rem;
+    }
+
+    .lame-home-reviews__stars--card {
+      font-size: 0.68rem;
+    }
+
+    .lame-home-reviews__date {
+      font-size: 0.62rem;
+    }
+
+    .lame-home-reviews__title {
+      font-size: 0.78rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .lame-home-reviews__quote p {
+      font-size: 0.72rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .lame-home-reviews__nav {
+      position: static;
+      top: auto;
+      width: 2.2rem;
+      height: 2.2rem;
+      font-size: 1.3rem;
+    }
+
+    .lame-home-reviews__nav--prev {
+      grid-area: prev;
+      left: auto;
+    }
+
+    .lame-home-reviews__nav--next {
+      grid-area: next;
+      right: auto;
+    }
+
+    .lame-home-reviews__compose {
+      margin-top: 0.25rem;
+    }
+
+    .lame-home-reviews__form {
+      gap: 0.75rem;
+      padding: 1.1rem 0.95rem 1rem;
+    }
+
+    .lame-home-reviews__field textarea {
+      min-height: 5.5rem;
     }
   }
 

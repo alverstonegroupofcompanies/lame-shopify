@@ -9,7 +9,7 @@
 -%}
 
 <section
-  class="section section--full-width lame-trust-banner"
+  class="section section--full-width lame-trust-banner{% if section.settings.full_bleed %} lame-trust-banner--bleed{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-trust-banner__wrap">
@@ -94,6 +94,30 @@
     object-fit: contain;
     object-position: center center;
   }
+
+  .shopify-section:has(.lame-trust-banner--bleed) {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin-inline: 0;
+  }
+
+  .lame-trust-banner--bleed .lame-trust-banner__wrap,
+  .lame-trust-banner--bleed .lame-trust-banner__image {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  @media screen and (min-width: 990px) {
+    body.template-index .lame-trust-banner.lame-trust-banner--bleed.section--full-width > .lame-trust-banner__wrap {
+      width: 100% !important;
+      max-width: none !important;
+      margin-inline: 0 !important;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -127,6 +151,13 @@
       "type": "checkbox",
       "id": "open_in_new_tab",
       "label": "Open link in new tab",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "full_bleed",
+      "label": "Full width",
+      "info": "Stretch the image to both edges of the screen.",
       "default": false
     }
   ],
