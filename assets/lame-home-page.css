@@ -312,12 +312,27 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   }
 
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame,
-  .template-index .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container, slideshow-slides) {
+  .template-index .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container) {
     height: var(--lame-hero-frame-max-height) !important;
     min-height: var(--lame-hero-frame-max-height) !important;
     max-height: var(--lame-hero-frame-max-height) !important;
     aspect-ratio: unset !important;
     overflow: hidden;
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero) slideshow-slides {
+    height: var(--lame-hero-frame-max-height) !important;
+    min-height: var(--lame-hero-frame-max-height) !important;
+    max-height: var(--lame-hero-frame-max-height) !important;
+    aspect-ratio: unset !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) slideshow-slide,
@@ -352,16 +367,20 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
     --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
   }
 
-  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__carousel--mobile slideshow-slides {
+  .template-index .shopify-section:has(.lame-home-hero) :is(.lame-home-hero__carousel--mobile, .lame-home-hero__carousel--desktop) slideshow-slides {
     scroll-behavior: auto !important;
     scroll-snap-type: x mandatory;
     scroll-snap-stop: always;
     overscroll-behavior-x: contain;
   }
 
-  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__carousel--mobile slideshow-slide {
+  .template-index .shopify-section:has(.lame-home-hero) :is(.lame-home-hero__carousel--mobile, .lame-home-hero__carousel--desktop) slideshow-slide {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
     scroll-snap-align: start;
     content-visibility: visible !important;
+    contain-intrinsic-size: unset !important;
     view-timeline-name: none !important;
   }
 }
