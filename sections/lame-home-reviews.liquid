@@ -126,8 +126,10 @@
           data-customer-email="{{ customer.email | escape }}"
           novalidate
         >
-          <p class="lame-home-reviews__form-title">Write a review</p>
-          <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
+          <div class="lame-home-reviews__form-head">
+            <p class="lame-home-reviews__form-title">Write a review</p>
+            <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
+          </div>
           <fieldset class="lame-home-reviews__stars-input">
             <legend>Your rating</legend>
             <div class="lame-home-reviews__stars-row">
@@ -154,7 +156,10 @@
             <span>Review</span>
             <textarea name="body" rows="4" maxlength="1500" required placeholder="How was your experience?"></textarea>
           </label>
-          <button type="submit" class="lame-home-reviews__submit">Post review</button>
+          <div class="lame-home-reviews__form-actions">
+            <button type="submit" class="lame-home-reviews__submit">Post review</button>
+            <button type="button" class="lame-home-reviews__cancel" data-lame-review-cancel hidden>Cancel</button>
+          </div>
           <p class="lame-home-reviews__form-status" data-lame-review-status role="status"></p>
         </form>
       {%- else -%}
@@ -245,6 +250,8 @@
     const ownerName = (form?.dataset.customerName || '').trim().toLowerCase().replace(/\s+/g, ' ');
     const ownerId = form?.dataset.customerId || 'guest';
     const hideKey = 'lame-hidden-reviews:' + ownerId;
+    const editStoreKey = 'lame-edited-reviews:' + ownerId;
+    let editingKey = '';
 
     const hiddenReviews = () => {
       try {
@@ -262,6 +269,30 @@
 
     const reviewKey = (review) => review.id || 'body:' + (review.body || '').trim().toLowerCase();
 
+    const editedReviews = () => {
+      try {
+        const data = JSON.parse(localStorage.getItem(editStoreKey) || '{}');
+        return data && typeof data === 'object' ? data : {};
+      } catch (error) {
+        return {};
+      }
+    };
+
+    const rememberEdit = (key, review) => {
+      const edits = editedReviews();
+      edits[key] = {
+        rating: String(review.rating),
+        title: review.title || '',
+        body: review.body || '',
+      };
+      localStorage.setItem(editStoreKey, JSON.stringify(edits));
+    };
+
+    const savedReview = (review, key) => {
+      const edits = editedReviews();
+      return edits[key] || edits['body:' + (review.body || '').trim().toLowerCase()] || null;
+    };
+
     const isOwner = (author) => {
       const name = (author || '').trim().toLowerCase().replace(/\s+/g, ' ');
       return Boolean(ownerName) && name === ownerName;
@@ -270,16 +301,55 @@
     const existingBodies = () =>
       [...grid.querySelectorAll('.lame-home-reviews__quote p')].map((node) => node.textContent.trim().toLowerCase());
 
-    const addCard = ({ id, rating, title, body, author, date, detail, href }, place) => {
+    const paintCard = (article, { rating, title, body }) => {
+      const score = Math.min(5, Math.max(1, Number(rating) || 5));
       const text = (body || '').trim();
+      article.dataset.reviewRating = String(score);
+      article.dataset.reviewTitle = title || '';
+      article.dataset.reviewBody = text;
+
+      const stars = article.querySelector('.lame-home-reviews__stars--card');
+      if (stars) {
+        stars.style.setProperty('--lame-rating', String(score));
+        stars.setAttribute('aria-label', score + ' out of 5 stars');
+      }
+
+      let heading = article.querySelector('.lame-home-reviews__title');
+      if (title) {
+        if (!heading) {
+          heading = document.createElement('h3');
+          heading.className = 'lame-home-reviews__title';
+          const quote = article.querySelector('.lame-home-reviews__quote');
+          article.insertBefore(heading, quote);
+        }
+        heading.textContent = title;
+      } else if (heading) {
+        heading.remove();
+      }
+
+      const paragraph = article.querySelector('.lame-home-reviews__quote p');
+      if (paragraph) paragraph.textContent = text;
+    };
+
+    const addCard = ({ id, rating, title, body, author, date, detail, href }, place) => {
+      const original = (body || '').trim();
+      if (!original) return;
+      const key = reviewKey({ id, body: original });
+      if (hiddenReviews().has(key) || hiddenReviews().has('body:' + original.toLowerCase())) return;
+      const saved = savedReview({ body: original }, key);
+      const nextTitle = saved ? saved.title || '' : title || '';
+      const text = (saved && saved.body ? saved.body : original).trim();
+      const nextRating = saved && saved.rating ? saved.rating : rating;
       if (!text) return;
-      const key = reviewKey({ id, body: text });
-      if (hiddenReviews().has(key)) return;
       if (existingBodies().includes(text.toLowerCase())) return;
 
-      const score = Math.min(5, Math.max(1, Number(rating) || 5));
+      const score = Math.min(5, Math.max(1, Number(nextRating) || 5));
       const article = document.createElement('article');
       article.className = 'lame-home-reviews__card';
+      article.dataset.reviewKey = key;
+      article.dataset.reviewRating = String(score);
+      article.dataset.reviewTitle = nextTitle;
+      article.dataset.reviewBody = text;
 
       const top = document.createElement('div');
       top.className = 'lame-home-reviews__card-top';
@@ -297,19 +367,23 @@
       fill.textContent = '★★★★★';
       stars.append(base, fill);
       top.append(stars);
+
+      const meta = document.createElement('div');
+      meta.className = 'lame-home-reviews__meta';
       if (date) {
         const time = document.createElement('time');
         time.className = 'lame-home-reviews__date';
         time.dateTime = date;
         time.textContent = date;
-        top.append(time);
+        meta.append(time);
       }
+      top.append(meta);
 
       article.append(top);
-      if (title) {
+      if (nextTitle) {
         const heading = document.createElement('h3');
         heading.className = 'lame-home-reviews__title';
-        heading.textContent = title;
+        heading.textContent = nextTitle;
         article.append(heading);
       }
 
@@ -338,17 +412,28 @@
         }
       }
       if (isOwner(author)) {
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'lame-home-reviews__edit';
+        edit.setAttribute('aria-label', 'Edit your review');
+        edit.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.6 6.4 17.6 10.4"/><path d="M5.2 18.8 4.6 15.6 15.2 5a1.6 1.6 0 0 1 2.3 0l1.5 1.5a1.6 1.6 0 0 1 0 2.3L8.4 19.4 5.2 18.8z"/></svg>';
+        edit.addEventListener('click', () => beginEdit(article));
+
         const remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'lame-home-reviews__remove';
-        remove.textContent = 'Remove';
+        remove.setAttribute('aria-label', 'Remove your review');
+        remove.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.2 4.8h5.6M5.4 7.2h13.2"/><path d="M8.1 7.2l.55 11.1a1.3 1.3 0 0 0 1.3 1.25h4.1a1.3 1.3 0 0 0 1.3-1.25L15.9 7.2"/><path d="M10.3 10.4v5.1M13.7 10.4v5.1"/></svg>';
         remove.addEventListener('click', () => {
           if (!window.confirm('Remove your review? Only you can remove a review you posted.')) return;
           rememberHidden(key);
+          if (editingKey === key) resetComposer();
           article.remove();
           refreshCount();
         });
-        footer.append(remove);
+        meta.append(edit, remove);
       }
       article.append(footer);
 
@@ -432,6 +517,52 @@
     if (!form) return;
     const status = form.querySelector('[data-lame-review-status]');
     const button = form.querySelector('.lame-home-reviews__submit');
+    const cancel = form.querySelector('[data-lame-review-cancel]');
+    const formTitle = form.querySelector('.lame-home-reviews__form-title');
+
+    const markEditing = (article) => {
+      grid.querySelectorAll('.lame-home-reviews__card.is-editing').forEach((node) => {
+        node.classList.remove('is-editing');
+      });
+      if (article) article.classList.add('is-editing');
+    };
+
+    const resetComposer = () => {
+      editingKey = '';
+      delete form.dataset.mode;
+      markEditing(null);
+      if (formTitle) formTitle.textContent = 'Write a review';
+      if (button) button.textContent = 'Post review';
+      if (cancel) cancel.hidden = true;
+    };
+
+    const beginEdit = (article) => {
+      editingKey = article.dataset.reviewKey || '';
+      form.dataset.mode = 'edit';
+      markEditing(article);
+      form.querySelector('[name="title"]').value = article.dataset.reviewTitle || '';
+      form.querySelector('[name="body"]').value = article.dataset.reviewBody || '';
+      const ratingInput = form.querySelector(
+        'input[name="rating"][value="' + (article.dataset.reviewRating || '5') + '"]'
+      );
+      if (ratingInput) ratingInput.checked = true;
+      if (formTitle) formTitle.textContent = 'Edit your review';
+      button.textContent = 'Update review';
+      if (cancel) cancel.hidden = false;
+      status.textContent = '';
+      status.dataset.state = '';
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      form.querySelector('[name="body"]').focus();
+    };
+
+    cancel?.addEventListener('click', () => {
+      form.reset();
+      const five = form.querySelector('input[name="rating"][value="5"]');
+      if (five) five.checked = true;
+      resetComposer();
+      status.textContent = '';
+      status.dataset.state = '';
+    });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -442,6 +573,25 @@
         status.textContent = 'Add a star rating and a short review.';
         status.dataset.state = 'error';
         return;
+      }
+
+      if (editingKey) {
+        const article = [...grid.querySelectorAll('.lame-home-reviews__card')].find(
+          (node) => node.dataset.reviewKey === editingKey
+        );
+        if (article) {
+          rememberEdit(editingKey, { rating: rating.value, title, body });
+          paintCard(article, { rating: rating.value, title, body });
+          form.reset();
+          const five = form.querySelector('input[name="rating"][value="5"]');
+          if (five) five.checked = true;
+          resetComposer();
+          article.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          status.textContent = 'Updated. Your review is shown above.';
+          status.dataset.state = 'success';
+          return;
+        }
+        resetComposer();
       }
 
       const payload = new FormData();
@@ -682,6 +832,13 @@
     gap: 0.75rem;
   }
 
+  .lame-home-reviews__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+  }
+
   .lame-home-reviews__date {
     font-size: 0.75rem;
     color: rgb(var(--color-foreground-rgb) / 0.55);
@@ -710,8 +867,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
-    margin-top: auto;
-    padding-top: 0.35rem;
+    padding-top: 0.15rem;
   }
 
   .lame-home-reviews__byline cite {
@@ -721,22 +877,50 @@
     color: rgb(var(--color-foreground-heading-rgb));
   }
 
-  .lame-home-reviews__remove {
-    align-self: flex-start;
-    margin-top: 0.2rem;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #9b2c2c;
-    font: inherit;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
+  .lame-home-reviews__card.is-editing {
+    border-color: rgb(45 74 34 / 0.35);
   }
 
+  .lame-home-reviews__edit,
+  .lame-home-reviews__remove {
+    all: unset;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 999px;
+    color: rgb(var(--color-foreground-rgb) / 0.38);
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .lame-home-reviews__edit svg,
+  .lame-home-reviews__remove svg {
+    width: 15px;
+    height: 15px;
+    overflow: visible;
+  }
+
+  .lame-home-reviews__edit svg path,
+  .lame-home-reviews__remove svg path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .lame-home-reviews__edit:hover,
   .lame-home-reviews__remove:hover {
-    text-decoration: underline;
-    text-underline-offset: 2px;
+    color: rgb(var(--color-foreground-rgb) / 0.72);
+    background: rgb(var(--color-foreground-rgb) / 0.05);
+  }
+
+  .lame-home-reviews__edit:focus-visible,
+  .lame-home-reviews__remove:focus-visible {
+    outline: 2px solid rgb(var(--color-foreground-rgb) / 0.28);
+    outline-offset: 1px;
   }
 
   .lame-home-reviews__byline span,
@@ -747,62 +931,80 @@
   }
 
   .lame-home-reviews__compose {
-    max-width: 34rem;
+    max-width: 32rem;
     margin: 1.75rem auto 0;
   }
 
   .lame-home-reviews__form {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
-    padding: 1.35rem 1.25rem 1.2rem;
-    border: 1px solid rgb(0 0 0 / 0.08);
-    border-radius: 16px;
+    gap: 0.95rem;
+    padding: 1.45rem 1.35rem 1.3rem;
+    border: 1px solid rgb(0 0 0 / 0.06);
+    border-radius: 18px;
     background: #fff;
-    box-shadow: 0 8px 28px rgb(28 32 24 / 0.05);
+    box-shadow: 0 10px 28px rgb(28 32 24 / 0.04);
+  }
+
+  .lame-home-reviews__form-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.28rem;
+    margin-bottom: 0.15rem;
   }
 
   .lame-home-reviews__form-title {
     margin: 0;
     text-align: center;
     font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     font-weight: 600;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #1c1c1c;
   }
 
   .lame-home-reviews__form-as {
-    margin: -0.35rem 0 0;
+    margin: 0;
     text-align: center;
-    font-size: 0.86rem;
+    font-size: 0.84rem;
     color: #6b6460;
   }
 
   .lame-home-reviews__stars-input {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    width: 100%;
+    min-inline-size: 0;
     margin: 0;
     padding: 0;
     border: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
   }
 
   .lame-home-reviews__stars-input legend {
+    float: left;
+    width: 100%;
+    margin: 0;
     padding: 0;
     font-size: 0.78rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
+    line-height: 1.2;
     color: #1c1c1c;
   }
 
   .lame-home-reviews__stars-row {
     display: flex;
     flex-direction: row-reverse;
-    justify-content: center;
-    gap: 0.2rem;
+    justify-content: flex-end;
+    clear: both;
+    gap: 0.15rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.1rem 0 0.15rem;
   }
 
   .lame-home-reviews__stars-row input {
@@ -814,7 +1016,7 @@
 
   .lame-home-reviews__stars-row label {
     cursor: pointer;
-    font-size: 1.85rem;
+    font-size: 1.55rem;
     line-height: 1;
     color: #e4e4e4;
   }
@@ -859,15 +1061,16 @@
   .lame-home-reviews__field textarea {
     width: 100%;
     margin: 0;
-    padding: 0.75rem 0.85rem;
-    border: 1px solid #e6e6e6;
-    border-radius: 10px;
-    background: #fff;
+    padding: 0.72rem 0.85rem;
+    border: 1px solid #e7e4df;
+    border-radius: 12px;
+    background: #fafaf8;
     color: #1c1c1c;
     font: inherit;
     font-size: 0.95rem;
     line-height: 1.45;
     box-shadow: none;
+    appearance: none;
   }
 
   .lame-home-reviews__field textarea {
@@ -886,10 +1089,11 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.75rem;
+    width: 100%;
+    min-height: 2.85rem;
     padding: 0.7rem 1.2rem;
     border: 0;
-    border-radius: 999px;
+    border-radius: 12px;
     background: #2d4a22;
     color: #fff;
     font: inherit;
@@ -897,6 +1101,33 @@
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
+  }
+
+  .lame-home-reviews__form-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+    margin-top: 0.15rem;
+  }
+
+  .lame-home-reviews__cancel {
+    align-self: center;
+    padding: 0.15rem 0.4rem;
+    border: 0;
+    background: transparent;
+    color: rgb(var(--color-foreground-rgb) / 0.5);
+    font: inherit;
+    font-size: 0.84rem;
+    cursor: pointer;
+  }
+
+  .lame-home-reviews__cancel:hover {
+    color: rgb(var(--color-foreground-rgb) / 0.82);
+  }
+
+  .lame-home-reviews__cancel[hidden] {
+    display: none;
   }
 
   .lame-home-reviews__login {
