@@ -1,0 +1,557 @@
+{%- liquid
+  assign review_sum = 0
+  assign review_count = 0
+
+  for block in section.blocks
+    if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank
+      assign review_sum = review_sum | plus: block.settings.rating
+      assign review_count = review_count | plus: 1
+    endif
+  endfor
+
+  assign review_average = 0
+  if review_count > 0
+    assign review_average = review_sum | times: 1.0 | divided_by: review_count | round: 1
+  endif
+
+  assign store_name = shop.name | default: 'My Lamstone'
+  assign store_url = request.origin
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-home-reviews"
+  style="{% render 'spacing-padding', settings: section.settings %}"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-home-reviews__wrap" data-lame-reviews data-shop-domain="{{ shop.permanent_domain | escape }}">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="lame-home-reviews__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+    {%- if section.settings.subheading != blank -%}
+      <p class="lame-home-reviews__subheading">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+
+    {%- if review_count > 0 and section.settings.show_summary -%}
+      <div class="lame-home-reviews__summary">
+        <p class="lame-home-reviews__score">{{ review_average }}</p>
+        <div class="lame-home-reviews__summary-copy">
+          <span class="lame-home-reviews__stars" style="--lame-rating: {{ review_average }};" aria-hidden="true">
+            <span class="lame-home-reviews__stars-base">★★★★★</span>
+            <span class="lame-home-reviews__stars-fill">★★★★★</span>
+          </span>
+          <p class="lame-home-reviews__count">
+            Rating for {{ store_name | escape }}
+            ·
+            {% if review_count == 1 %}
+              1 review
+            {% else %}
+              {{ review_count }} reviews
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- liquid
+      assign reviewer_name = ''
+      if customer
+        assign reviewer_name = customer.first_name | append: ' ' | append: customer.last_name | strip
+        if reviewer_name == blank
+          assign reviewer_name = customer.email | split: '@' | first
+        endif
+      endif
+      capture review_login_url
+        render 'lame-customer-auth-url', type: 'login', return_url: request.path
+      endcapture
+      assign review_login_url = review_login_url | strip
+    -%}
+
+    <div class="lame-home-reviews__compose" id="lame-write-review">
+      {%- if customer -%}
+        <form
+          class="lame-home-reviews__form"
+          data-lame-review-form
+          data-customer-id="{{ customer.id }}"
+          data-customer-name="{{ reviewer_name | escape }}"
+          data-customer-email="{{ customer.email | escape }}"
+          novalidate
+        >
+          <p class="lame-home-reviews__form-title">Write a review</p>
+          <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
+          <fieldset class="lame-home-reviews__stars-input">
+            <legend>Your rating</legend>
+            {%- for star in (1..5) -%}
+              <label>
+                <input type="radio" name="rating" value="{{ star }}" {% if star == 5 %}checked{% endif %}>
+                <span aria-hidden="true">★</span>
+                <span class="visually-hidden">{{ star }} star{% if star > 1 %}s{% endif %}</span>
+              </label>
+            {%- endfor -%}
+          </fieldset>
+          <label class="lame-home-reviews__field">
+            <span>Title</span>
+            <input type="text" name="title" maxlength="120" autocomplete="off">
+          </label>
+          <label class="lame-home-reviews__field">
+            <span>Review</span>
+            <textarea name="body" rows="4" maxlength="1500" required></textarea>
+          </label>
+          <button type="submit" class="lame-home-reviews__submit">Post review</button>
+          <p class="lame-home-reviews__form-status" data-lame-review-status role="status"></p>
+        </form>
+      {%- else -%}
+        <a class="lame-home-reviews__login" href="{{ review_login_url }}">Log in to write a review</a>
+      {%- endif -%}
+    </div>
+
+    <div class="lame-home-reviews__grid" data-lame-review-grid>
+      {%- if review_count > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank -%}
+            {%- liquid
+              assign card_rating = block.settings.rating | times: 1
+              if card_rating < 1
+                assign card_rating = 1
+              endif
+              if card_rating > 5
+                assign card_rating = 5
+              endif
+            -%}
+            <article class="lame-home-reviews__card" {{ block.shopify_attributes }}>
+              <div class="lame-home-reviews__card-top">
+                <span class="lame-home-reviews__stars lame-home-reviews__stars--card" style="--lame-rating: {{ card_rating }};" aria-label="{{ card_rating }} out of 5 stars">
+                  <span class="lame-home-reviews__stars-base" aria-hidden="true">★★★★★</span>
+                  <span class="lame-home-reviews__stars-fill" aria-hidden="true">★★★★★</span>
+                </span>
+                {%- if block.settings.date != blank -%}
+                  <time class="lame-home-reviews__date" datetime="{{ block.settings.date | escape }}">{{ block.settings.date | escape }}</time>
+                {%- endif -%}
+              </div>
+              {%- if block.settings.title != blank -%}
+                <h3 class="lame-home-reviews__title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+              <blockquote class="lame-home-reviews__quote">
+                <p>{{ block.settings.quote | escape }}</p>
+              </blockquote>
+              <footer class="lame-home-reviews__byline">
+                <cite>{{ block.settings.author | escape }}</cite>
+                {%- if block.settings.product != blank -%}
+                  <a href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
+                {%- elsif block.settings.detail != blank -%}
+                  <span>{{ block.settings.detail | escape }}</span>
+                {%- endif -%}
+              </footer>
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{%- if review_count > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "OnlineStore",
+          "@id": {{ store_url | append: '/#store' | json }},
+          "name": {{ store_name | json }},
+          "url": {{ store_url | json }},
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": {{ review_average | json }},
+            "reviewCount": {{ review_count | json }},
+            "bestRating": 5,
+            "worstRating": 1
+          },
+          "review": [
+            {%- assign emitted = 0 -%}
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank -%}
+                {%- if emitted > 0 -%},{%- endif -%}
+                { "@id": {{ store_url | append: '/#review-' | append: block.id | json }} }
+                {%- assign emitted = emitted | plus: 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+          ]
+        }
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank -%}
+            {%- liquid
+              assign card_rating = block.settings.rating | times: 1
+              if card_rating < 1
+                assign card_rating = 1
+              endif
+              if card_rating > 5
+                assign card_rating = 5
+              endif
+            -%}
+            ,{
+              "@type": "Review",
+              "@id": {{ store_url | append: '/#review-' | append: block.id | json }},
+              "author": {
+                "@type": "Person",
+                "name": {{ block.settings.author | json }}
+              },
+              {%- if block.settings.date != blank -%}
+              "datePublished": {{ block.settings.date | json }},
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+              "name": {{ block.settings.title | json }},
+              {%- endif -%}
+              "reviewBody": {{ block.settings.quote | json }},
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": {{ card_rating | json }},
+                "bestRating": 5,
+                "worstRating": 1
+              },
+              "itemReviewed": {
+                "@id": {{ store_url | append: '/#store' | json }}
+              }
+            }
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .lame-home-reviews__wrap {
+    width: min(1120px, 100%);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .lame-home-reviews__eyebrow {
+    margin: 0 0 0.4rem;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb) / 0.62);
+  }
+
+  .lame-home-reviews__heading {
+    margin: 0;
+    text-align: center;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-home-reviews__subheading {
+    max-width: 38rem;
+    margin: 0.55rem auto 0;
+    text-align: center;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: rgb(var(--color-foreground-rgb) / 0.72);
+  }
+
+  .lame-home-reviews__summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    margin: 1.35rem auto 0;
+  }
+
+  .lame-home-reviews__score {
+    margin: 0;
+    font-family: var(--lame-font-display, var(--font-heading--family));
+    font-size: 2.6rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-home-reviews__summary-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .lame-home-reviews__count {
+    margin: 0;
+    font-size: 0.86rem;
+    color: rgb(var(--color-foreground-rgb) / 0.7);
+  }
+
+  .lame-home-reviews__stars {
+    position: relative;
+    display: inline-block;
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .lame-home-reviews__stars--card {
+    font-size: 0.95rem;
+  }
+
+  .lame-home-reviews__stars-base {
+    color: #e4e4e4;
+  }
+
+  .lame-home-reviews__stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc((var(--lame-rating) / 5) * 100%);
+    overflow: hidden;
+    color: #f5a623;
+    white-space: nowrap;
+  }
+
+  .lame-home-reviews__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    margin-top: 1.5rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-home-reviews__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .lame-home-reviews__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 1.1rem 1.05rem 1rem;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+    border-radius: 16px;
+    background: rgb(var(--color-background-rgb));
+  }
+
+  .lame-home-reviews__card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .lame-home-reviews__date {
+    font-size: 0.75rem;
+    color: rgb(var(--color-foreground-rgb) / 0.55);
+  }
+
+  .lame-home-reviews__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-home-reviews__quote {
+    margin: 0;
+  }
+
+  .lame-home-reviews__quote p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: rgb(var(--color-foreground-rgb) / 0.84);
+  }
+
+  .lame-home-reviews__byline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-top: auto;
+    padding-top: 0.35rem;
+  }
+
+  .lame-home-reviews__byline cite {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-home-reviews__byline span,
+  .lame-home-reviews__byline a {
+    font-size: 0.78rem;
+    color: rgb(var(--color-foreground-rgb) / 0.58);
+    text-decoration: none;
+  }
+
+  .lame-product-rating-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.6rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .lame-product-rating-line__stars {
+    position: relative;
+    display: inline-block;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+
+  .lame-product-rating-line__base {
+    color: #e4e4e4;
+  }
+
+  .lame-product-rating-line__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc((var(--lame-rating) / 5) * 100%);
+    overflow: hidden;
+    color: #f5a623;
+    white-space: nowrap;
+  }
+
+  .lame-product-rating-line__text {
+    font-size: 0.86rem;
+    color: rgb(var(--color-foreground-rgb) / 0.72);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Customer reviews",
+  "tag": "section",
+  "class": "section-wrapper",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Customer reviews"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shoppers rate My Lamstone"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_summary",
+      "label": "Show star summary",
+      "default": true
+    },
+    {
+      "type": "paragraph",
+      "content": "Use real customer reviews only. Google shows stars on product results when a product has genuine reviews. It does not show stars for a store rating written about itself."
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Stars",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Review title"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Review"
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Reviewer name"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date (YYYY-MM-DD)",
+          "info": "Google uses this date. Example: 2026-08-21"
+        },
+        {
+          "type": "text",
+          "id": "detail",
+          "label": "Detail",
+          "info": "Shown under the name, such as a city."
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Related product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer reviews",
+      "blocks": [
+        { "type": "review" },
+        { "type": "review" },
+        { "type": "review" }
+      ]
+    }
+  ]
+}
+{% endschema %}

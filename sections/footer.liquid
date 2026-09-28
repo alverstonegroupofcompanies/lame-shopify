@@ -246,64 +246,72 @@
               <span class="footer-premium__ventures-ornament-line"></span>
             </div>
           {% endif %}
-          <ul class="footer-premium__ventures-row" role="list">
-            {% for block in venture_blocks %}
-              {% liquid
-                assign venture_image = block.settings.image
-                assign venture_alt = block.settings.alt | default: block.settings.title
-                assign venture_asset = block.settings.asset | strip
-                assign has_venture_logo = false
-                if venture_image != blank or venture_asset != blank
-                  assign has_venture_logo = true
-                endif
-              %}
-              {% if has_venture_logo == false and request.design_mode == false %}
-                {% continue %}
-              {% endif %}
-              <li class="footer-premium__venture-item" {{ block.shopify_attributes }}>
-                {% if block.settings.link != blank %}
-                  <a
-                    href="{{ block.settings.link }}"
-                    class="footer-premium__venture-link"
-                    aria-label="{{ venture_alt | escape }}"
-                    {% if block.settings.open_in_new_tab %}
-                      target="_blank" rel="noopener noreferrer"
-                    {% endif %}
-                  >
-                {% else %}
-                  <span class="footer-premium__venture-link">
+          <div
+            class="footer-premium__venture-stage"
+            data-venture-carousel
+            aria-roledescription="carousel"
+            aria-label="{{ section.settings.ventures_heading | default: 'Our Ventures' | escape }}"
+          >
+            <ul class="footer-premium__venture-track" role="list">
+              {% for block in venture_blocks %}
+                {% liquid
+                  assign venture_image = block.settings.image
+                  assign venture_alt = block.settings.alt | default: block.settings.title
+                  assign venture_asset = block.settings.asset | strip
+                  assign has_venture_logo = false
+                  if venture_image != blank or venture_asset != blank
+                    assign has_venture_logo = true
+                  endif
+                %}
+                {% if has_venture_logo == false and request.design_mode == false %}
+                  {% continue %}
                 {% endif %}
-                {% if venture_image != blank %}
-                  {{
-                    venture_image
-                    | image_url: width: 1920
-                    | image_tag:
-                      class: 'footer-premium__venture-logo',
-                      loading: 'lazy',
-                      widths: '320,480,640,800,960,1200,1440,1920',
-                      sizes: '(max-width: 749px) 44vw, 320px',
-                      alt: venture_alt
-                  }}
-                {% elsif venture_asset != blank %}
-                  <img
-                    class="footer-premium__venture-logo"
-                    src="{{ venture_asset | asset_url }}"
-                    alt="{{ venture_alt | escape }}"
-                    width="560"
-                    height="180"
-                    loading="lazy"
-                  >
-                {% elsif request.design_mode %}
-                  <span class="footer-premium__venture-placeholder">Add venture logo</span>
-                {% endif %}
-                {% if block.settings.link != blank %}
-                  </a>
-                {% else %}
-                  </span>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
+                <li class="footer-premium__venture-slide" data-venture-slide {{ block.shopify_attributes }}>
+                  {% if block.settings.link != blank %}
+                    <a
+                      href="{{ block.settings.link }}"
+                      class="footer-premium__venture-link"
+                      aria-label="{{ venture_alt | escape }}"
+                      {% if block.settings.open_in_new_tab %}
+                        target="_blank" rel="noopener noreferrer"
+                      {% endif %}
+                    >
+                  {% else %}
+                    <span class="footer-premium__venture-link">
+                  {% endif %}
+                  {% if venture_image != blank %}
+                    {{
+                      venture_image
+                      | image_url: width: 1200
+                      | image_tag:
+                        class: 'footer-premium__venture-logo',
+                        loading: 'lazy',
+                        widths: '240,360,480,640,800,1000,1200',
+                        sizes: '(max-width: 749px) 42vw, 420px',
+                        alt: venture_alt
+                    }}
+                  {% elsif venture_asset != blank %}
+                    <img
+                      class="footer-premium__venture-logo"
+                      src="{{ venture_asset | asset_url }}"
+                      alt="{{ venture_alt | escape }}"
+                      width="640"
+                      height="240"
+                      loading="lazy"
+                    >
+                  {% elsif request.design_mode %}
+                    <span class="footer-premium__venture-placeholder">Add venture logo</span>
+                  {% endif %}
+                  {% if block.settings.link != blank %}
+                    </a>
+                  {% else %}
+                    </span>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <script src="{{ 'lame-footer-ventures.js' | asset_url }}"></script>
         </div>
       </div>
     {% endif %}
@@ -641,49 +649,143 @@
     border: 1px solid rgb(197 160 89 / 0.55);
   }
 
-  #footer-{{ section.id }} .footer-premium__ventures-row {
+  #footer-{{ section.id }} .footer-premium__venture-stage {
+    --venture-shift: 108%;
+    --venture-center-scale: 1.12;
+    --venture-side-scale: 0.58;
+    position: relative;
+    width: min(100%, 1040px);
+    height: clamp(9.5rem, 22vw, 12.5rem);
+    margin-inline: auto;
+    overflow: hidden;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-stage::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 54%;
+    z-index: 0;
+    width: min(46%, 22rem);
+    height: 68%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse at center, rgb(197 160 89 / 0.22), transparent 70%);
+    pointer-events: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background:
+      linear-gradient(90deg, #f9f8f3 0%, transparent 4%, transparent 96%, #f9f8f3 100%);
+    pointer-events: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-track {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(0.75rem, 2vw, 1.5rem);
+    position: relative;
     width: 100%;
+    height: 100%;
   }
 
-  #footer-{{ section.id }} .footer-premium__venture-item {
-    flex: 0 1 auto;
-    min-width: 0;
+  #footer-{{ section.id }} .footer-premium__venture-slide {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38%;
+    height: 78%;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(-50%, -50%, 0) scale(0.58);
+    transition: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide.is-instant {
+    transition: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='-3'],
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='3'] {
+    opacity: 0;
+    transition: none;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='-3'] {
+    transform: translate(calc(-50% - 230%), -50%) scale(0.68);
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='3'] {
+    transform: translate(calc(-50% + 230%), -50%) scale(0.68);
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='-2'] {
+    z-index: 1;
+    opacity: 0;
+    transform: translate(calc(-50% - (var(--venture-shift) * 1.65)), -50%) scale(0.68);
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='2'] {
+    z-index: 1;
+    opacity: 0;
+    transform: translate(calc(-50% + (var(--venture-shift) * 1.65)), -50%) scale(0.68);
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='-1'],
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='1'] {
+    z-index: 2;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='-1'] {
+    transform: translate(calc(-50% - var(--venture-shift)), -50%) scale(var(--venture-side-scale));
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='1'] {
+    transform: translate(calc(-50% + var(--venture-shift)), -50%) scale(var(--venture-side-scale));
+  }
+
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='0'] {
+    z-index: 3;
+    opacity: 1;
+    pointer-events: auto;
+    filter: drop-shadow(0 14px 18px rgb(1 42 28 / 0.1));
+    transform: translate(-50%, -50%) scale(var(--venture-center-scale));
   }
 
   #footer-{{ section.id }} .footer-premium__venture-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.5rem;
-    padding: 0.35rem 0.5rem;
+    width: 100%;
+    height: 100%;
+    padding: 0.2rem 0.35rem;
     text-decoration: none;
-    transition: opacity 180ms ease, transform 180ms ease;
+    box-sizing: border-box;
   }
 
-  #footer-{{ section.id }} .footer-premium__venture-link:is(:hover, :focus-visible) {
-    opacity: 0.82;
-    transform: translateY(-1px);
+  #footer-{{ section.id }} .footer-premium__venture-slide[data-pos='0'] .footer-premium__venture-link:is(:hover, :focus-visible) {
+    transform: translateY(-2px);
   }
 
   #footer-{{ section.id }} .footer-premium__venture-logo {
     display: block;
     width: auto;
-    max-width: min(10rem, 38vw);
+    max-width: 100%;
     height: auto;
-    max-height: 3.75rem;
+    max-height: 100%;
     object-fit: contain;
     object-position: center;
     background: transparent;
-    filter: invert(1);
-    mix-blend-mode: multiply;
   }
 
   #footer-{{ section.id }} .footer-premium__venture-placeholder {
@@ -706,46 +808,26 @@
 
     #footer-{{ section.id }} .footer-premium__ventures-ornament {
       max-width: 12.5rem;
-      margin-bottom: 1.65rem;
+      margin-bottom: 1.15rem;
     }
 
-    #footer-{{ section.id }} .footer-premium__ventures-row {
-      gap: clamp(1.5rem, 3vw, 2.75rem);
-    }
-
-    #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 5.5rem;
-      padding: 0.55rem 0.75rem;
-    }
-
-    #footer-{{ section.id }} .footer-premium__venture-logo {
-      max-width: 15rem;
-      max-height: 6rem;
+    #footer-{{ section.id }} .footer-premium__venture-stage {
+      height: 12.75rem;
     }
   }
 
-  @media screen and (max-width: 989px) {
-    #footer-{{ section.id }} .footer-premium__ventures-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      justify-items: center;
-      gap: 0.85rem 1rem;
+  @media screen and (max-width: 749px) {
+    #footer-{{ section.id }} .footer-premium__venture-stage {
+      --venture-shift: 102%;
+      --venture-center-scale: 1.05;
+      --venture-side-scale: 0.54;
+      height: 8.25rem;
     }
+  }
 
-    #footer-{{ section.id }} .footer-premium__venture-item {
-      width: 100%;
-    }
-
-    #footer-{{ section.id }} .footer-premium__venture-link {
-      min-height: 4.75rem;
-      width: 100%;
-      padding: 0.5rem 0.55rem;
-    }
-
-    #footer-{{ section.id }} .footer-premium__venture-logo {
-      width: 100%;
-      max-width: 100%;
-      max-height: clamp(4rem, 18vw, 5.5rem);
+  @media (prefers-reduced-motion: reduce) {
+    #footer-{{ section.id }} .footer-premium__venture-slide {
+      transition: none;
     }
   }
 
@@ -1202,62 +1284,71 @@
         "trust_badges": "Cruelty-free · Dermatologist tested · Secure checkout"
       },
       "blocks": {
-        "venture_pharmacare": {
-          "type": "venture",
-          "settings": {
-            "title": "Alverstone Pharmacare",
-            "asset": "alverstone-pharmacare-logo.png",
-            "alt": "Alverstone Pharmacare"
-          }
-        },
         "venture_healthcare": {
           "type": "venture",
           "settings": {
             "title": "Alverstone Healthcare Pvt Ltd",
-            "asset": "alverstone-healthcare-logo.png",
+            "asset": "venture-alverstone-healthcare.png",
             "alt": "Alverstone Healthcare Pvt Ltd"
-          }
-        },
-        "venture_drug_house": {
-          "type": "venture",
-          "settings": {
-            "title": "Alverstone Drug House (P) Ltd",
-            "asset": "alverstone-drug-house-logo.png",
-            "alt": "Alverstone Drug House (P) Ltd"
-          }
-        },
-        "venture_lame": {
-          "type": "venture",
-          "settings": {
-            "title": "Lamé Luxury Cosmetics & Fragrances",
-            "asset": "lame-luxury-logo.png",
-            "alt": "Lamé Luxury Cosmetics & Fragrances"
           }
         },
         "venture_ihed": {
           "type": "venture",
           "settings": {
             "title": "Alverstone IHED LLC",
-            "asset": "alverstone-ihed-logo.png",
+            "asset": "venture-alverstone-ihed.png",
             "alt": "Alverstone IHED LLC"
+          }
+        },
+        "venture_pharmacare": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone Pharmacare",
+            "asset": "venture-alverstone-pharmacare.png",
+            "alt": "Alverstone Pharmacare"
+          }
+        },
+        "venture_alver_connect": {
+          "type": "venture",
+          "settings": {
+            "title": "Alver Connect",
+            "asset": "venture-alver-connect.png",
+            "alt": "Alver Connect"
           }
         },
         "venture_medcity": {
           "type": "venture",
           "settings": {
             "title": "Alverstone Medcity",
-            "asset": "alverstone-medcity-logo.png",
+            "asset": "venture-alverstone-medcity.png",
             "alt": "Alverstone Medcity"
+          }
+        },
+        "venture_drug_house": {
+          "type": "venture",
+          "settings": {
+            "title": "Alverstone Drug House (P) Ltd",
+            "asset": "venture-alverstone-drug-house.png",
+            "alt": "Alverstone Drug House (P) Ltd"
+          }
+        },
+        "venture_lame": {
+          "type": "venture",
+          "settings": {
+            "title": "Lamé",
+            "asset": "venture-lame.png",
+            "alt": "Lamé"
           }
         }
       },
       "block_order": [
-        "venture_pharmacare",
         "venture_healthcare",
-        "venture_drug_house",
-        "venture_lame",
         "venture_ihed",
-        "venture_medcity"
+        "venture_pharmacare",
+        "venture_alver_connect",
+        "venture_medcity",
+        "venture_drug_house",
+        "venture_lame"
       ]
     }
   ]

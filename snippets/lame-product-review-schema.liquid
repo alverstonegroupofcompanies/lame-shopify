@@ -1,0 +1,83 @@
+{% doc %}
+  Product review JSON-LD for Google star results.
+  Uses Shopify review metafields, then the Judge.me badge metafield.
+  Outputs nothing when this product has no real rating.
+
+  @param {object} product - Product to describe
+  @param {string} [mode] - "schema" (default) or "visible"
+{% enddoc %}
+
+{%- liquid
+  assign review_product = product
+  assign rating = blank
+  assign scale_max = 5
+  assign scale_min = 1
+  assign rating_count_num = 0
+
+  if review_product != blank
+    assign rating_obj = review_product.metafields.reviews.rating.value
+    if rating_obj != blank
+      assign rating = rating_obj.rating
+      assign scale_max = rating_obj.scale_max | default: 5
+      assign scale_min = rating_obj.scale_min | default: 1
+    endif
+
+    assign rating_count = review_product.metafields.reviews.rating_count.value | default: review_product.metafields.reviews.rating_count
+    assign rating_count_num = rating_count | plus: 0
+
+    if rating == blank
+      assign badge_html = review_product.metafields.judgeme.badge | append: ''
+      if badge_html contains 'data-average-rating='
+        if badge_html contains "data-average-rating='"
+          assign rating = badge_html | split: "data-average-rating='" | last | split: "'" | first
+          assign rating_count_num = badge_html | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+        else
+          assign rating = badge_html | split: 'data-average-rating="' | last | split: '"' | first
+          assign rating_count_num = badge_html | split: 'data-number-of-reviews="' | last | split: '"' | first | plus: 0
+        endif
+      endif
+    endif
+  endif
+
+  assign rating_value = rating | times: 1
+  assign show_rating = false
+  if rating != blank and rating_value > 0 and rating_count_num > 0
+    assign show_rating = true
+  endif
+
+  assign output_mode = mode | default: 'schema'
+-%}
+
+{%- if show_rating and output_mode == 'visible' -%}
+  <p class="lame-product-rating-line">
+    <span class="lame-product-rating-line__stars" style="--lame-rating: {{ rating_value }};" aria-hidden="true">
+      <span class="lame-product-rating-line__base">★★★★★</span>
+      <span class="lame-product-rating-line__fill">★★★★★</span>
+    </span>
+    <span class="lame-product-rating-line__text">
+      {{ rating_value | round: 1 }} out of {{ scale_max }}
+      {% if rating_count_num == 1 %}
+        · 1 review
+      {% else %}
+        · {{ rating_count_num }} reviews
+      {% endif %}
+    </span>
+  </p>
+{%- elsif show_rating and output_mode == 'schema' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "@id": {{ review_product.url | append: '#product' | json }},
+      "name": {{ review_product.title | json }},
+      "url": {{ request.origin | append: review_product.url | json }},
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": {{ rating_value | json }},
+        "reviewCount": {{ rating_count_num | json }},
+        "bestRating": {{ scale_max | json }},
+        "worstRating": {{ scale_min | json }}
+      }
+    }
+  </script>
+{%- endif -%}
