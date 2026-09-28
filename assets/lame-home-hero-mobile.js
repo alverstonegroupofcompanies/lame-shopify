@@ -26,7 +26,7 @@ function initMobileHeroSnap() {
 
   document
     .querySelectorAll(
-      '.lame-home-hero__carousel--mobile slideshow-slides, .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slides'
+      '.lame-home-hero__carousel--mobile slideshow-slides, .lame-home-hero__carousel--desktop slideshow-slides'
     )
     .forEach((scroller) => patchMobileHeroScroller(/** @type {HTMLElement} */ (scroller)));
 }
