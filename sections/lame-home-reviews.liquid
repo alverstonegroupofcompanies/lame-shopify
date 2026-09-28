@@ -67,44 +67,6 @@
       assign review_login_url = review_login_url | strip
     -%}
 
-    <div class="lame-home-reviews__compose" id="lame-write-review">
-      {%- if customer -%}
-        <form
-          class="lame-home-reviews__form"
-          data-lame-review-form
-          data-customer-id="{{ customer.id }}"
-          data-customer-name="{{ reviewer_name | escape }}"
-          data-customer-email="{{ customer.email | escape }}"
-          novalidate
-        >
-          <p class="lame-home-reviews__form-title">Write a review</p>
-          <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
-          <fieldset class="lame-home-reviews__stars-input">
-            <legend>Your rating</legend>
-            {%- for star in (1..5) -%}
-              <label>
-                <input type="radio" name="rating" value="{{ star }}" {% if star == 5 %}checked{% endif %}>
-                <span aria-hidden="true">★</span>
-                <span class="visually-hidden">{{ star }} star{% if star > 1 %}s{% endif %}</span>
-              </label>
-            {%- endfor -%}
-          </fieldset>
-          <label class="lame-home-reviews__field">
-            <span>Title</span>
-            <input type="text" name="title" maxlength="120" autocomplete="off">
-          </label>
-          <label class="lame-home-reviews__field">
-            <span>Review</span>
-            <textarea name="body" rows="4" maxlength="1500" required></textarea>
-          </label>
-          <button type="submit" class="lame-home-reviews__submit">Post review</button>
-          <p class="lame-home-reviews__form-status" data-lame-review-status role="status"></p>
-        </form>
-      {%- else -%}
-        <a class="lame-home-reviews__login" href="{{ review_login_url }}">Log in to write a review</a>
-      {%- endif -%}
-    </div>
-
     <div class="lame-home-reviews__grid" data-lame-review-grid>
       {%- if review_count > 0 -%}
         {%- for block in section.blocks -%}
@@ -145,6 +107,52 @@
             </article>
           {%- endif -%}
         {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <div class="lame-home-reviews__compose" id="lame-write-review">
+      {%- if customer -%}
+        <form
+          class="lame-home-reviews__form"
+          data-lame-review-form
+          data-customer-id="{{ customer.id }}"
+          data-customer-name="{{ reviewer_name | escape }}"
+          data-customer-email="{{ customer.email | escape }}"
+          novalidate
+        >
+          <p class="lame-home-reviews__form-title">Write a review</p>
+          <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
+          <fieldset class="lame-home-reviews__stars-input">
+            <legend>Your rating</legend>
+            <div class="lame-home-reviews__stars-row">
+              {%- for star in (1..5) reversed -%}
+                <input
+                  type="radio"
+                  id="LameReviewStar-{{ section.id }}-{{ star }}"
+                  name="rating"
+                  value="{{ star }}"
+                  {% if star == 5 %}checked{% endif %}
+                >
+                <label for="LameReviewStar-{{ section.id }}-{{ star }}">
+                  <span aria-hidden="true">★</span>
+                  <span class="lame-home-reviews__sr">{{ star }} star{% if star > 1 %}s{% endif %}</span>
+                </label>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+          <label class="lame-home-reviews__field">
+            <span>Title</span>
+            <input type="text" name="title" maxlength="120" autocomplete="off" placeholder="Sum it up">
+          </label>
+          <label class="lame-home-reviews__field">
+            <span>Review</span>
+            <textarea name="body" rows="4" maxlength="1500" required placeholder="How was your experience?"></textarea>
+          </label>
+          <button type="submit" class="lame-home-reviews__submit">Post review</button>
+          <p class="lame-home-reviews__form-status" data-lame-review-status role="status"></p>
+        </form>
+      {%- else -%}
+        <a class="lame-home-reviews__login" href="{{ review_login_url }}">Log in to write a review</a>
       {%- endif -%}
     </div>
   </div>
@@ -219,6 +227,72 @@
     }
   </script>
 {%- endif -%}
+
+<script>
+  (() => {
+    const form = document.querySelector('[data-lame-review-form]');
+    const root = document.querySelector('[data-lame-reviews]');
+    if (!form || !root) return;
+
+    const status = form.querySelector('[data-lame-review-status]');
+    const button = form.querySelector('.lame-home-reviews__submit');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const body = form.querySelector('[name="body"]').value.trim();
+      const rating = form.querySelector('input[name="rating"]:checked');
+      if (!rating || body.length < 4) {
+        status.textContent = 'Add a star rating and a short review.';
+        status.dataset.state = 'error';
+        return;
+      }
+
+      const payload = new FormData();
+      payload.append('shop_domain', root.dataset.shopDomain || '');
+      payload.append('url', root.dataset.shopDomain || '');
+      payload.append('platform', 'shopify');
+      payload.append('name', form.dataset.customerName || '');
+      payload.append('email', form.dataset.customerEmail || '');
+      payload.append('shopify_customer_id', form.dataset.customerId || '');
+      payload.append('rating', rating.value);
+      payload.append('title', form.querySelector('[name="title"]').value.trim());
+      payload.append('body', body);
+      payload.append('source', 'all-reviews-page');
+
+      button.disabled = true;
+      status.textContent = 'Posting your review…';
+      status.dataset.state = '';
+
+      try {
+        const response = await fetch('https://api.judge.me/api/v1/reviews', {
+          method: 'POST',
+          body: payload,
+        });
+        if (!response.ok) {
+          let message = 'Your review could not be posted. Please try again.';
+          try {
+            const data = await response.json();
+            if (typeof data.error === 'string' && data.error) message = data.error;
+            else if (Array.isArray(data.errors) && data.errors[0]) message = data.errors.join(', ');
+          } catch (error) {
+            message = 'Your review could not be posted. Please try again.';
+          }
+          throw new Error(message);
+        }
+        form.reset();
+        const five = form.querySelector('input[name="rating"][value="5"]');
+        if (five) five.checked = true;
+        status.textContent = 'Thank you. Your review is in and will show here shortly.';
+        status.dataset.state = 'success';
+      } catch (error) {
+        status.textContent = error.message || 'Your review could not be posted. Please try again.';
+        status.dataset.state = 'error';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  })();
+</script>
 
 {% stylesheet %}
   .lame-home-reviews__wrap {
@@ -386,6 +460,191 @@
     font-size: 0.78rem;
     color: rgb(var(--color-foreground-rgb) / 0.58);
     text-decoration: none;
+  }
+
+  .lame-home-reviews__compose {
+    max-width: 34rem;
+    margin: 1.75rem auto 0;
+  }
+
+  .lame-home-reviews__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.35rem 1.25rem 1.2rem;
+    border: 1px solid rgb(0 0 0 / 0.08);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgb(28 32 24 / 0.05);
+  }
+
+  .lame-home-reviews__form-title {
+    margin: 0;
+    text-align: center;
+    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #1c1c1c;
+  }
+
+  .lame-home-reviews__form-as {
+    margin: -0.35rem 0 0;
+    text-align: center;
+    font-size: 0.86rem;
+    color: #6b6460;
+  }
+
+  .lame-home-reviews__stars-input {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .lame-home-reviews__stars-input legend {
+    padding: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #1c1c1c;
+  }
+
+  .lame-home-reviews__stars-row {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 0.2rem;
+  }
+
+  .lame-home-reviews__stars-row input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .lame-home-reviews__stars-row label {
+    cursor: pointer;
+    font-size: 1.85rem;
+    line-height: 1;
+    color: #e4e4e4;
+  }
+
+  .lame-home-reviews__stars-row input:checked ~ label,
+  .lame-home-reviews__stars-row label:hover,
+  .lame-home-reviews__stars-row label:hover ~ label {
+    color: #f5a623;
+  }
+
+  .lame-home-reviews__stars-row input:focus-visible + label {
+    outline: 2px solid #2d4a22;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .lame-home-reviews__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .lame-home-reviews__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lame-home-reviews__field span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #1c1c1c;
+  }
+
+  .lame-home-reviews__field input,
+  .lame-home-reviews__field textarea {
+    width: 100%;
+    margin: 0;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background: #fff;
+    color: #1c1c1c;
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    box-shadow: none;
+  }
+
+  .lame-home-reviews__field textarea {
+    min-height: 7rem;
+    resize: vertical;
+  }
+
+  .lame-home-reviews__field input:focus,
+  .lame-home-reviews__field textarea:focus {
+    outline: 2px solid rgb(45 74 34 / 0.35);
+    border-color: #2d4a22;
+  }
+
+  .lame-home-reviews__submit,
+  .lame-home-reviews__login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.7rem 1.2rem;
+    border: 0;
+    border-radius: 999px;
+    background: #2d4a22;
+    color: #fff;
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .lame-home-reviews__login {
+    width: 100%;
+    max-width: 18rem;
+    margin-inline: auto;
+  }
+
+  .lame-home-reviews__submit:hover,
+  .lame-home-reviews__login:hover {
+    background: #243c1b;
+  }
+
+  .lame-home-reviews__submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+
+  .lame-home-reviews__form-status {
+    min-height: 1.2em;
+    margin: 0;
+    text-align: center;
+    font-size: 0.86rem;
+    color: #6b6460;
+  }
+
+  .lame-home-reviews__form-status[data-state='success'] {
+    color: #2d4a22;
+  }
+
+  .lame-home-reviews__form-status[data-state='error'] {
+    color: #9b2c2c;
   }
 
   .lame-product-rating-line {
