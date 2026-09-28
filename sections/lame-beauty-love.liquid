@@ -1,7 +1,6 @@
 {%- comment -%}
   Discover Beauty — spotlight-style promo cards (4:5 media + overlays).
-  Cards are grouped into category subsections (Skin Care, Baby Care, etc.).
-  Same-brand cards within a category merge into one tile with an internal slide.
+  All cards render in one grid. Same-brand cards merge into one tile with an internal slide.
 {%- endcomment -%}
 
 {%- liquid
@@ -14,7 +13,6 @@
     assign products_url = section.settings.products_collection.url
   endif
 
-  assign cat_order = 'skin-care,baby-care,hair-care,makeup,body-care' | split: ','
   assign autoplay_ms = section.settings.autoplay_seconds | default: 5 | times: 1000
   assign fade_ms = section.settings.fade_ms | default: 900
 -%}
@@ -41,66 +39,13 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="lame-beauty-love__groups">
-        {%- for cat_key in cat_order -%}
+      <ul class="lame-beauty-love__grid" role="list">
+        {%- liquid
+          assign rendered_brands = '|'
+        -%}
+        {%- for block in section.blocks -%}
           {%- liquid
-            assign cat_label = ''
-            case cat_key
-              when 'skin-care'
-                assign cat_label = 'Skin Care'
-              when 'baby-care'
-                assign cat_label = 'Baby Care'
-              when 'hair-care'
-                assign cat_label = 'Hair Care'
-              when 'makeup'
-                assign cat_label = 'Makeup'
-              when 'body-care'
-                assign cat_label = 'Body Care'
-            endcase
-
-            assign cat_count = 0
-            assign counted_brands = '|'
-            for block in section.blocks
-              assign block_cat = block.settings.category | default: 'skin-care'
-              assign block_has_image = false
-              if block.settings.image != blank or block.settings.fallback_asset != blank
-                assign block_has_image = true
-              endif
-              unless block_cat == cat_key and block_has_image
-                continue
-              endunless
-
-              assign brand_key = block.settings.brand_text | strip | downcase
-              if brand_key == blank
-                assign brand_key = 'id-' | append: block.id
-              endif
-              assign brand_token = '|' | append: brand_key | append: '|'
-              if counted_brands contains brand_token
-                continue
-              endif
-              assign counted_brands = counted_brands | append: brand_key | append: '|'
-              assign cat_count = cat_count | plus: 1
-            endfor
-          -%}
-
-          {%- if cat_count > 0 -%}
-            <section class="lame-beauty-love__group" aria-labelledby="lame-beauty-cat-{{ section.id }}-{{ cat_key }}">
-              <h3 class="lame-beauty-love__group-title" id="lame-beauty-cat-{{ section.id }}-{{ cat_key }}">
-                {{ cat_label }}
-              </h3>
-
-              <ul class="lame-beauty-love__grid" role="list">
-                {%- liquid
-                  assign rendered_brands = '|'
-                -%}
-                {%- for block in section.blocks -%}
-                  {%- liquid
-                    assign block_cat = block.settings.category | default: 'skin-care'
-                    if block_cat != cat_key
-                      continue
-                    endif
-
-                    assign card_image = block.settings.image
+            assign card_image = block.settings.image
                     assign fallback_asset = block.settings.fallback_asset | strip
                     unless card_image != blank or fallback_asset != blank
                       continue
@@ -121,10 +66,6 @@
 
                     assign slide_count = 0
                     for slide_block in section.blocks
-                      assign slide_cat = slide_block.settings.category | default: 'skin-care'
-                      if slide_cat != cat_key
-                        continue
-                      endif
                       unless slide_block.settings.image != blank or slide_block.settings.fallback_asset != blank
                         continue
                       endunless
@@ -216,10 +157,6 @@
                             {%- assign slide_index = 0 -%}
                             {%- for slide_block in section.blocks -%}
                               {%- liquid
-                                assign slide_cat = slide_block.settings.category | default: 'skin-care'
-                                if slide_cat != cat_key
-                                  continue
-                                endif
                                 unless slide_block.settings.image != blank or slide_block.settings.fallback_asset != blank
                                   continue
                                 endunless
@@ -369,10 +306,6 @@
                           {%- assign slide_index = 0 -%}
                           {%- for slide_block in section.blocks -%}
                             {%- liquid
-                              assign slide_cat = slide_block.settings.category | default: 'skin-care'
-                              if slide_cat != cat_key
-                                continue
-                              endif
                               unless slide_block.settings.image != blank or slide_block.settings.fallback_asset != blank
                                 continue
                               endunless
@@ -506,13 +439,9 @@
                         </div>
                       {%- endif -%}
                     {%- endif -%}
-                  </li>
-                {%- endfor -%}
-              </ul>
-            </section>
-          {%- endif -%}
+          </li>
         {%- endfor -%}
-      </div>
+      </ul>
     {%- elsif request.design_mode -%}
       <p class="lame-beauty-love__empty">Add promo cards with images in the theme editor.</p>
     {%- endif -%}
@@ -829,33 +758,6 @@
     margin: 0;
   }
 
-  /* Pack categories side-by-side so sparse groups fill empty row space */
-  .lame-beauty-love__groups {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: clamp(1.5rem, 3vw, 2.5rem) var(--lame-bl-col-gap);
-    width: 100%;
-  }
-
-  .lame-beauty-love__group {
-    flex: 0 1 auto;
-    width: max-content;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-  }
-
-  .lame-beauty-love__group-title {
-    margin: 0 0 0.85rem;
-    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-    font-size: clamp(1.2rem, 2vw, 1.45rem);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
-    color: #143f2e;
-  }
-
   .lame-beauty-love__grid {
     list-style: none;
     margin: 0;
@@ -863,8 +765,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--lame-bl-gap) var(--lame-bl-col-gap);
-    width: max-content;
-    max-width: 100%;
+    width: 100%;
   }
 
   /* Max 5 cards across the section row */
@@ -1163,15 +1064,6 @@
       padding-inline: 0.75rem;
     }
 
-    .lame-beauty-love__group {
-      width: 100%;
-      max-width: 100%;
-    }
-
-    .lame-beauty-love__grid {
-      width: 100%;
-    }
-
     .lame-beauty-love__brand {
       max-width: min(92%, 10rem);
       min-height: 1.3rem;
@@ -1257,7 +1149,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Same-brand promo cards in a category automatically combine into one card with a slideshow. Each promo card can open a product page, a brand filter on the shop/collection page, a collection, or a custom URL."
+      "content": "All promo cards show in one grid. Matching brand names combine into one card with a slideshow. Each promo card can open a product page, a brand filter on the shop/collection page, a collection, or a custom URL."
     },
     {
       "type": "collection",
@@ -1366,7 +1258,7 @@
           "type": "text",
           "id": "brand_text",
           "label": "Brand name",
-          "info": "Shown in the top-left badge when no logo is uploaded. Matching brand names in the same category become slides in one card."
+          "info": "Shown in the top-left badge when no logo is uploaded. Matching brand names become slides in one card."
         },
         {
           "type": "text",
@@ -1388,20 +1280,6 @@
           "type": "text",
           "id": "subtitle",
           "label": "Subtitle"
-        },
-        {
-          "type": "select",
-          "id": "category",
-          "label": "Category",
-          "info": "Groups this card under a Discover Beauty subsection. Empty categories (no cards with images) are hidden.",
-          "options": [
-            { "value": "skin-care", "label": "Skin Care" },
-            { "value": "baby-care", "label": "Baby Care" },
-            { "value": "hair-care", "label": "Hair Care" },
-            { "value": "makeup", "label": "Makeup" },
-            { "value": "body-care", "label": "Body Care" }
-          ],
-          "default": "skin-care"
         },
         {
           "type": "header",

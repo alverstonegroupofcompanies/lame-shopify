@@ -43,11 +43,13 @@
           <p class="lame-home-reviews__count">
             Rating for {{ store_name | escape }}
             ·
-            {% if review_count == 1 %}
-              1 review
-            {% else %}
-              {{ review_count }} reviews
-            {% endif %}
+            <span data-lame-review-count>
+              {% if review_count == 1 %}
+                1 review
+              {% else %}
+                {{ review_count }} reviews
+              {% endif %}
+            </span>
           </p>
         </div>
       </div>
@@ -67,7 +69,9 @@
       assign review_login_url = review_login_url | strip
     -%}
 
-    <div class="lame-home-reviews__grid" data-lame-review-grid>
+    <div class="lame-home-reviews__carousel" data-lame-review-carousel>
+      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--prev" data-lame-review-prev aria-label="Previous reviews">&#8249;</button>
+      <div class="lame-home-reviews__grid" data-lame-review-grid>
       {%- if review_count > 0 -%}
         {%- for block in section.blocks -%}
           {%- if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank -%}
@@ -108,6 +112,8 @@
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
+      </div>
+      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--next" data-lame-review-next aria-label="Next reviews">&#8250;</button>
     </div>
 
     <div class="lame-home-reviews__compose" id="lame-write-review">
@@ -142,7 +148,7 @@
           </fieldset>
           <label class="lame-home-reviews__field">
             <span>Title</span>
-            <input type="text" name="title" maxlength="120" autocomplete="off" placeholder="Sum it up">
+            <input type="text" name="title" maxlength="120" autocomplete="off">
           </label>
           <label class="lame-home-reviews__field">
             <span>Review</span>
@@ -236,13 +242,39 @@
     if (!root || !grid) return;
 
     const shopDomain = root.dataset.shopDomain || '';
+    const ownerName = (form?.dataset.customerName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const ownerId = form?.dataset.customerId || 'guest';
+    const hideKey = 'lame-hidden-reviews:' + ownerId;
+
+    const hiddenReviews = () => {
+      try {
+        return new Set(JSON.parse(localStorage.getItem(hideKey) || '[]'));
+      } catch (error) {
+        return new Set();
+      }
+    };
+
+    const rememberHidden = (key) => {
+      const hidden = hiddenReviews();
+      hidden.add(key);
+      localStorage.setItem(hideKey, JSON.stringify([...hidden]));
+    };
+
+    const reviewKey = (review) => review.id || 'body:' + (review.body || '').trim().toLowerCase();
+
+    const isOwner = (author) => {
+      const name = (author || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      return Boolean(ownerName) && name === ownerName;
+    };
 
     const existingBodies = () =>
       [...grid.querySelectorAll('.lame-home-reviews__quote p')].map((node) => node.textContent.trim().toLowerCase());
 
-    const addCard = ({ rating, title, body, author, date, detail, href }, place) => {
+    const addCard = ({ id, rating, title, body, author, date, detail, href }, place) => {
       const text = (body || '').trim();
       if (!text) return;
+      const key = reviewKey({ id, body: text });
+      if (hiddenReviews().has(key)) return;
       if (existingBodies().includes(text.toLowerCase())) return;
 
       const score = Math.min(5, Math.max(1, Number(rating) || 5));
@@ -305,10 +337,24 @@
           footer.append(span);
         }
       }
+      if (isOwner(author)) {
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'lame-home-reviews__remove';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => {
+          if (!window.confirm('Remove your review? Only you can remove a review you posted.')) return;
+          rememberHidden(key);
+          article.remove();
+          refreshCount();
+        });
+        footer.append(remove);
+      }
       article.append(footer);
 
       if (place === 'start') grid.prepend(article);
       else grid.append(article);
+      refreshCount();
     };
 
     const readReviews = (html) => {
@@ -317,6 +363,7 @@
         const product = node.querySelector('.jdgm-rev__prod-link');
         const href = product ? product.getAttribute('href') || '' : '';
         return {
+          id: node.getAttribute('data-review-id') || '',
           rating: node.querySelector('.jdgm-rev__rating')?.dataset.score || '5',
           title: node.querySelector('.jdgm-rev__title')?.textContent.trim() || '',
           body: node.querySelector('.jdgm-rev__body')?.textContent.trim() || '',
@@ -328,8 +375,31 @@
       });
     };
 
+    const countNode = root.querySelector('[data-lame-review-count]');
+    let officialTotal = 0;
+
+    const refreshCount = () => {
+      if (!countNode) return;
+      const shown = grid.querySelectorAll('.lame-home-reviews__card').length;
+      const total = Math.max(shown, officialTotal);
+      countNode.textContent = total === 1 ? '1 review' : total + ' reviews';
+    };
+
+    const scrollReviews = (direction) => {
+      const card = grid.querySelector('.lame-home-reviews__card');
+      const gap = 14;
+      const amount = card ? card.getBoundingClientRect().width + gap : grid.clientWidth;
+      grid.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    };
+
+    root.querySelector('[data-lame-review-prev]')?.addEventListener('click', () => scrollReviews(-1));
+    root.querySelector('[data-lame-review-next]')?.addEventListener('click', () => scrollReviews(1));
+
     const loadStoredReviews = async () => {
-      if (!shopDomain) return;
+      if (!shopDomain) {
+        refreshCount();
+        return;
+      }
       const types = ['product-reviews', 'shop-reviews'];
       const found = [];
       await Promise.all(
@@ -339,17 +409,22 @@
           url.searchParams.set('shop_domain', shopDomain);
           url.searchParams.set('platform', 'shopify');
           url.searchParams.set('page', '1');
-          url.searchParams.set('per_page', '6');
+          url.searchParams.set('per_page', '24');
           url.searchParams.set('review_type', type);
           const response = await fetch(url);
           if (!response.ok) return;
           const data = await response.json();
+          officialTotal = Math.max(
+            officialTotal,
+            Number(data.number_of_product_reviews || 0) + Number(data.number_of_shop_reviews || 0)
+          );
           found.push(...readReviews(data.html));
         })
       );
       found
         .sort((a, b) => (a.date < b.date ? -1 : 1))
         .forEach((review) => addCard(review, 'start'));
+      refreshCount();
     };
 
     loadStoredReviews();
@@ -521,21 +596,55 @@
     white-space: nowrap;
   }
 
-  .lame-home-reviews__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.9rem;
+  .lame-home-reviews__carousel {
+    position: relative;
     margin-top: 1.5rem;
   }
 
-  @media screen and (min-width: 750px) {
-    .lame-home-reviews__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+  .lame-home-reviews__grid {
+    display: flex;
+    gap: 0.9rem;
+    margin: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .lame-home-reviews__grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-home-reviews__nav {
+    position: absolute;
+    top: 42%;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    border-radius: 999px;
+    background: #fff;
+    color: #1c1c1c;
+    font-size: 1.55rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgb(0 0 0 / 0.08);
+  }
+
+  .lame-home-reviews__nav--prev {
+    left: -0.2rem;
+  }
+
+  .lame-home-reviews__nav--next {
+    right: -0.2rem;
   }
 
   .lame-home-reviews__card {
     display: flex;
+    flex: 0 0 100%;
     flex-direction: column;
     gap: 0.55rem;
     margin: 0;
@@ -543,6 +652,27 @@
     border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
     border-radius: 16px;
     background: rgb(var(--color-background-rgb));
+    scroll-snap-align: start;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-home-reviews__card {
+      flex-basis: calc((100% - 0.9rem) / 2);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-home-reviews__card {
+      flex-basis: calc((100% - 1.8rem) / 3);
+    }
+
+    .lame-home-reviews__nav--prev {
+      left: -0.7rem;
+    }
+
+    .lame-home-reviews__nav--next {
+      right: -0.7rem;
+    }
   }
 
   .lame-home-reviews__card-top {
@@ -589,6 +719,24 @@
     font-weight: 600;
     font-size: 0.9rem;
     color: rgb(var(--color-foreground-heading-rgb));
+  }
+
+  .lame-home-reviews__remove {
+    align-self: flex-start;
+    margin-top: 0.2rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #9b2c2c;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .lame-home-reviews__remove:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .lame-home-reviews__byline span,
