@@ -13,21 +13,10 @@
 -%}
 
 {%- liquid
-  assign shop_nav_link = blank
-  for link in menu.links
-    assign link_down = link.title | downcase
-    if link_down == 'shop' or link_down == 'our products'
-      assign shop_nav_link = link
-      break
-    endif
-  endfor
-
-  assign view_all_url = routes.collections_url
-  if shop_nav_link != blank
-    assign view_all_url = shop_nav_link.url
-  endif
-
-  assign category_handles = 'all,skin-care,make-up,frontpage,bath-body,fragrance,baby-mom,wellness' | split: ','
+  comment
+    icon_key|label|collection handle (blank uses icon_key)|fallback url
+  endcomment
+  assign category_rows = 'all|Products|all|/collections/all,skin-care|Skin Care|skin-care|/collections/skin-care,make-up|Make-up|make-up|/collections/make-up,hair-care|Hair care|frontpage|/collections/frontpage,bath-body|Bath & Body|bath-body|/collections/bath-body,fragrance|Fragrance|fragrance|/collections/fragrance,baby-mom|Mom & baby|baby-mom|/collections/baby-mom,wellness|Wellness|wellness|/collections/wellness,feminine|Feminine Hygiene||/search?q=feminine&type=product,combos|Combos||/search?q=combo&type=product,top-deals|Top Deals||/collections/all?sort_by=best-selling,shop-more|Shop More|our-products|/collections/our-products' | split: ','
 -%}
 
 <div class="lame-header-shop-category" data-lame-category-dropdown>
@@ -51,25 +40,33 @@
     hidden
     data-lame-category-panel
   >
-    <div class="lame-header-shop-category-panel__inner">
-      <ul class="lame-header-shop-category-panel__list list-unstyled" role="list">
-        {%- for handle in category_handles -%}
-          {%- assign category_collection = collections[handle] -%}
-          {%- if category_collection != blank -%}
-            <li>
-              <a href="{{ category_collection.url }}" class="lame-header-shop-category-panel__link">
-                {% render 'lame-shop-mega-menu-icon', handle: category_collection.handle %}
-                <span>{{ category_collection.title | escape }}</span>
-              </a>
-            </li>
-          {%- endif -%}
-        {%- endfor -%}
-      </ul>
-      <a href="{{ view_all_url }}" class="lame-header-shop-category-panel__view-all">
-        {{ 'lame_search.view_all' | t }}
-        <span aria-hidden="true">→</span>
-      </a>
-    </div>
+    <ul class="lame-header-shop-category-panel__list list-unstyled" role="list">
+      {%- for row in category_rows -%}
+        {%- liquid
+          assign parts = row | split: '|'
+          assign icon_key = parts[0]
+          assign item_label = parts[1]
+          assign collection_handle = parts[2]
+          assign fallback_url = parts[3]
+          if collection_handle == blank
+            assign collection_handle = icon_key
+          endif
+          assign category_collection = collections[collection_handle]
+          assign item_url = fallback_url
+          if category_collection != blank
+            assign item_url = category_collection.url
+          endif
+        -%}
+        <li class="lame-header-shop-category-panel__item">
+          <a href="{{ item_url }}" class="lame-header-shop-category-panel__link">
+            <span class="lame-header-shop-category-panel__icon" aria-hidden="true">
+              {% render 'lame-op-category-icon', handle: icon_key %}
+            </span>
+            <span class="lame-header-shop-category-panel__label">{{ item_label | escape }}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
   </div>
 </div>
 

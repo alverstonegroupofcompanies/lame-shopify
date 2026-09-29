@@ -3542,7 +3542,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
 #header-component.header--cosmetic-luxury[data-menu-row='top'] .lame-header-shop-category,
 #header-component.header--cosmetic-luxury[data-menu-row='bottom'] .lame-header-shop-category {
-  position: relative;
+  position: static;
   flex-shrink: 0;
 }
 
@@ -3636,82 +3636,118 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 }
 
 #header-component.header--cosmetic-luxury .lame-header-shop-category {
-  position: relative;
+  position: static;
   flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel[hidden] {
+  display: none !important;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel {
   position: absolute;
-  top: calc(100% + 0.45rem);
-  left: 0;
-  z-index: 30;
-  min-width: min(22rem, 88vw);
-  max-width: min(26rem, 92vw);
-  max-height: min(70vh, 28rem);
-  overflow: auto;
-  padding: 0.65rem;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid rgb(var(--brand-gold) / 0.22);
-  box-shadow: 0 14px 40px rgb(24 18 16 / 0.14);
-}
-
-/* Invisible bridge so the menu stays open while moving from button to panel */
-#header-component.header--cosmetic-luxury .lame-header-shop-category-panel::before {
-  content: '';
-  position: absolute;
+  top: 100%;
   left: 0;
   right: 0;
-  bottom: 100%;
-  height: 0.55rem;
+  z-index: 40;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  padding: 0.85rem 1rem 0.95rem;
+  border-radius: 0;
+  background: #fff;
+  border: 0;
+  border-top: 1px solid #eee8e0;
+  box-shadow: 0 14px 28px rgb(28 28 28 / 0.1);
 }
 
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.15rem;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: safe center;
+  gap: clamp(0.55rem, 1.4vw, 1.15rem);
+  width: max-content;
+  min-width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0.1rem 0.25rem 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-@media screen and (min-width: 480px) {
-  #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.2rem 0.35rem;
-  }
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__list::-webkit-scrollbar {
+  display: none;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__item {
+  flex: 0 0 auto;
+  width: 5.1rem;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.5rem 0.55rem;
-  border-radius: 6px;
-  color: rgb(var(--brand-ink));
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 0.78rem;
+  gap: 0.4rem;
+  padding: 0;
+  border-radius: 12px;
+  color: #1c1c1c;
+  font-family: 'Jost', system-ui, sans-serif;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-decoration: none;
-  transition: background 0.18s ease, color 0.18s ease;
+  text-transform: none;
 }
 
-#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link .lame-shop-mega__icon {
-  flex-shrink: 0;
-  width: 1.35rem;
-  height: 1.35rem;
-  color: rgb(var(--lame-sig-forest, 45 74 34));
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__icon {
+  display: grid;
+  place-items: center;
+  width: 3.55rem;
+  height: 3.55rem;
+  border-radius: 50%;
+  background: var(--lame-cta-bg, #ff5722);
+  color: #fff;
+  box-shadow: 0 6px 14px rgb(255 87 34 / 0.22);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link .lame-shop-mega__icon svg {
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__icon .lame-cat-glyph,
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__icon .lame-op-category-icon {
+  display: block;
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__icon .lame-op-category-icon svg {
+  display: block;
   width: 100%;
   height: 100%;
 }
 
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__label {
+  display: block;
+  max-width: 5.1rem;
+  line-height: 1.25;
+  text-align: center;
+  color: #2a2a2a;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link:hover .lame-header-shop-category-panel__icon,
+#header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link:focus-visible .lame-header-shop-category-panel__icon {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 18px rgb(255 87 34 / 0.28);
+}
+
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link:hover,
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link:focus-visible {
-  background: rgb(var(--lame-sig-forest, 45 74 34) / 0.08);
-  color: rgb(var(--lame-sig-forest, 45 74 34));
+  background: transparent;
+  color: #1c1c1c;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__view-all {

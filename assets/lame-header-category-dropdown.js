@@ -24,23 +24,7 @@
       const panel = root.querySelector('[data-lame-category-panel]');
       if (!trigger || !panel) return;
 
-      /** @type {ReturnType<typeof setTimeout> | undefined} */
-      let closeTimer;
-
-      const clearCloseTimer = () => {
-        if (closeTimer) {
-          clearTimeout(closeTimer);
-          closeTimer = undefined;
-        }
-      };
-
-      const isInside = (node) => {
-        if (!(node instanceof Node)) return false;
-        return trigger.contains(node) || panel.contains(node);
-      };
-
       const open = () => {
-        clearCloseTimer();
         closeAll(root);
         trigger.setAttribute('aria-expanded', 'true');
         panel.hidden = false;
@@ -48,20 +32,9 @@
       };
 
       const close = () => {
-        clearCloseTimer();
         trigger.setAttribute('aria-expanded', 'false');
         panel.hidden = true;
         root.classList.remove('is-open');
-      };
-
-      const scheduleClose = () => {
-        clearCloseTimer();
-        closeTimer = setTimeout(close, 180);
-      };
-
-      const handlePointerLeave = (event) => {
-        if (isInside(event.relatedTarget)) return;
-        scheduleClose();
       };
 
       const toggle = () => {
@@ -77,14 +50,6 @@
         event.stopPropagation();
         toggle();
       });
-
-      // Hover open only on fine pointers; touch uses click toggle only
-      if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-        trigger.addEventListener('pointerenter', open);
-        panel.addEventListener('pointerenter', open);
-        trigger.addEventListener('pointerleave', handlePointerLeave);
-        panel.addEventListener('pointerleave', handlePointerLeave);
-      }
 
       panel.querySelectorAll('a').forEach((link) => {
         link.addEventListener('click', close);
