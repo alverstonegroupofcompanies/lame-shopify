@@ -881,8 +881,45 @@ function readPersistedRangesFromDiscountFilter() {
   }
 }
 
+const BRAND_BAR_OPEN_KEY = 'lame-brand-bar-open';
+
+function setBrandBarOpen(open) {
+  const root = document.querySelector('.lame-brand-bar');
+  if (!(root instanceof HTMLElement)) return;
+  const panel = root.querySelector('.lame-brand-bar__panel');
+  const toggle = root.querySelector('.lame-brand-bar__toggle');
+  if (panel instanceof HTMLElement) panel.hidden = !open;
+  if (toggle instanceof HTMLElement) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  sessionStorage.setItem(BRAND_BAR_OPEN_KEY, open ? '1' : '0');
+}
+
+function restoreBrandBarOpen() {
+  if (!document.querySelector('.lame-brand-bar')) return;
+  if (sessionStorage.getItem(BRAND_BAR_OPEN_KEY) === '1') setBrandBarOpen(true);
+}
+
+document.addEventListener('click', (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const toggle = target.closest('.lame-brand-bar__toggle');
+  if (!(toggle instanceof HTMLElement)) return;
+  setBrandBarOpen(toggle.getAttribute('aria-expanded') !== 'true');
+});
+
+document.addEventListener(
+  'toggle',
+  (event) => {
+    const panel = event.target;
+    if (!(panel instanceof HTMLDetailsElement) || !panel.open || panel.closest('.lame-brand-bar')) return;
+    if (!panel.closest('.lame-op-filters-stack')) return;
+    setBrandBarOpen(false);
+  },
+  true
+);
+
 class LameBrandFilter extends HTMLElement {
   connectedCallback() {
+    restoreBrandBarOpen();
     this.addEventListener('change', (event) => {
       const { target } = event;
       if (!(target instanceof HTMLInputElement)) return;

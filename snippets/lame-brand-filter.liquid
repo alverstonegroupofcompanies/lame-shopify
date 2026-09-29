@@ -156,8 +156,24 @@
     {% if presentation == 'bar' %}class="lame-brand-bar"{% endif %}
   >
     {% if presentation == 'bar' %}
-      <div class="lame-brand-bar__panel">
-        <p class="lame-brand-bar__label">{{ 'lame_collection.filter_brand' | t }}</p>
+      <button
+        type="button"
+        class="facets__summary lame-brand-bar__toggle"
+        aria-expanded="false"
+        aria-controls="facet-inputs-brand-{{ id_prefix }}"
+      >
+        <span class="facets__label">{{ 'lame_collection.filter_brand' | t }}</span>
+        <div class="facets__status-wrapper">
+          <span
+            class="facets__status facets__bubble hide-when-empty"
+            data-brand-filter-status
+          ></span>
+          <span class="svg-wrapper icon-caret icon-animated">
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </span>
+        </div>
+      </button>
+      <div class="lame-brand-bar__panel" id="facet-inputs-brand-{{ id_prefix }}" hidden>
         <div class="facets__inputs-wrapper">
           {% unless vendor_facet_present %}
             <p class="lame-brand-filter-admin-hint" role="note">
