@@ -9,16 +9,26 @@
   for block in section.blocks
     if block.type == 'slide' and block.settings.image != blank
       assign desktop_slide_count = desktop_slide_count | plus: 1
+      assign slide_ratio = block.settings.image.aspect_ratio | default: 2.4
       unless desktop_ratio_set
-        assign desktop_banner_ratio = block.settings.image.aspect_ratio | default: 2.4
+        assign desktop_banner_ratio = slide_ratio
         assign desktop_ratio_set = true
+      else
+        if slide_ratio < desktop_banner_ratio
+          assign desktop_banner_ratio = slide_ratio
+        endif
       endunless
     endif
     if block.type == 'mobile_slide' and block.settings.image != blank
       assign mobile_slide_count = mobile_slide_count | plus: 1
+      assign slide_ratio = block.settings.image.aspect_ratio | default: 0.5625
       unless mobile_ratio_set
-        assign mobile_banner_ratio = block.settings.image.aspect_ratio | default: 0.5625
+        assign mobile_banner_ratio = slide_ratio
         assign mobile_ratio_set = true
+      else
+        if slide_ratio < mobile_banner_ratio
+          assign mobile_banner_ratio = slide_ratio
+        endif
       endunless
     endif
   endfor
@@ -418,22 +428,29 @@
       }
     }
 
-    /* Fixed remaining-viewport height — banner always fits first screen */
+    /* Fixed phone height: 60% of the screen. Image scales inside so nothing is cropped. */
     .lame-home-hero__frame--mobile,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop,
-    .lame-home-hero__carousel--mobile slideshow-component,
-    .lame-home-hero__carousel--mobile slideshow-container,
-    .lame-home-hero__carousel--mobile slideshow-slides,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-component,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-container,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slides {
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
+      position: relative !important;
       width: 100% !important;
       max-width: 100% !important;
-      height: var(--lame-hero-frame-max-height) !important;
-      min-height: var(--lame-hero-frame-max-height) !important;
-      max-height: var(--lame-hero-frame-max-height) !important;
-      aspect-ratio: unset !important;
+      height: 60svh !important;
+      min-height: 60svh !important;
+      max-height: 60svh !important;
+      aspect-ratio: auto !important;
       overflow: hidden;
+      background: #fff !important;
+    }
+
+    .lame-home-hero__carousel--mobile :is(slideshow-component, slideshow-container, slideshow-slides),
+    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop :is(slideshow-component, slideshow-container, slideshow-slides) {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
     }
 
     .lame-home-hero__carousel--mobile slideshow-slide,
@@ -506,8 +523,7 @@
       padding-inline: 0 !important;
     }
 
-    /* Always cover on mobile (ignore Image fit = contain) so sides never letterbox;
-       pin to top so only the bottom can crop */
+    /* Cover the 60% frame edge to edge on every slide */
     .lame-home-hero__carousel .slide__image,
     .lame-home-hero__carousel .slide__image-container img,
     .lame-home-hero__slide-link .slide__image,
@@ -530,25 +546,18 @@
       max-height: none !important;
     }
 
+    .lame-home-hero--mobile-small,
+    .lame-home-hero--mobile-medium,
+    .lame-home-hero--mobile-large,
+    .lame-home-hero--mobile-half,
     .lame-home-hero--mobile-full_screen,
-    .lame-home-hero--full_screen {
-      /* Width-locked height = full-bleed banner with almost no side crop */
-      --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-banner-ratio), 0.75));
-      --lame-hero-frame-max-height: min(
-        calc(100svh - var(--lame-hero-height-offset, 0px)),
-        var(--lame-hero-natural-height)
-      );
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    @supports not (height: 100svh) {
-      .lame-home-hero--mobile-full_screen,
-      .lame-home-hero--full_screen {
-        --lame-hero-frame-max-height: min(
-          calc(100vh - var(--lame-hero-height-offset, 0px)),
-          var(--lame-hero-natural-height)
-        );
-      }
+    .lame-home-hero--full_screen,
+    .lame-home-hero--small,
+    .lame-home-hero--medium,
+    .lame-home-hero--large,
+    .lame-home-hero--half {
+      --lame-hero-frame-max-height: 60svh;
+      --lame-hero-frame-min-height: 60svh;
     }
 
   }

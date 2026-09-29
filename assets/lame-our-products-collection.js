@@ -14,6 +14,14 @@ function initOurProductsCollectionCart() {
   if (document.documentElement.dataset.lameOurProductsCartInit === 'true') return;
   document.documentElement.dataset.lameOurProductsCartInit = 'true';
 
+  document.addEventListener('cart:update', (event) => {
+    const count = event.detail?.resource?.item_count;
+    if (typeof count !== 'number') return;
+    document.querySelectorAll('[data-lame-op-cart-count]').forEach((node) => {
+      node.textContent = String(count);
+    });
+  });
+
   document.addEventListener(CartAddEvent.eventName, (event) => {
     if (!(event.target instanceof Element)) return;
     if (event.detail?.data?.didError) return;

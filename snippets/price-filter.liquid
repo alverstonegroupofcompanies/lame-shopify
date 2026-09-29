@@ -340,45 +340,6 @@
   close_with_escape: is_horizontal
 %}
 
-{% if our_products_price_slider %}
-  <script>
-    if (!window.__lameOpPriceSelect) {
-      window.__lameOpPriceSelect = true;
-      document.addEventListener('change', function (event) {
-        var select = event.target;
-        if (!(select instanceof HTMLSelectElement) || !select.classList.contains('price-facet__select')) return;
-        var root = select.closest('price-facet-component');
-        if (!root) return;
-        var minSelect = root.querySelector('[data-price-bound="min"]');
-        var maxSelect = root.querySelector('[data-price-bound="max"]');
-        var minInput = root.querySelector('[ref="minInput"]');
-        var maxInput = root.querySelector('[ref="maxInput"]');
-        if (!(minSelect instanceof HTMLSelectElement) || !(maxSelect instanceof HTMLSelectElement)) return;
-        if (!(minInput instanceof HTMLInputElement) || !(maxInput instanceof HTMLInputElement)) return;
-
-        var minValue = minSelect.value === '' ? 0 : parseInt(minSelect.value, 10);
-        var maxValue = maxSelect.value === '' ? 2000 : parseInt(maxSelect.value, 10);
-        if (!Number.isFinite(minValue)) minValue = 0;
-        if (!Number.isFinite(maxValue)) maxValue = 2000;
-
-        if (minValue > maxValue) {
-          if (select === minSelect) {
-            maxValue = minValue;
-            maxSelect.value = maxValue >= 2000 ? '' : String(maxValue);
-          } else {
-            minValue = maxValue;
-            minSelect.value = minValue <= 0 ? '' : String(minValue);
-          }
-        }
-
-        minInput.value = minValue > 0 ? String(minValue) : '';
-        maxInput.value = maxValue < 2000 ? String(maxValue) : '';
-        minInput.dispatchEvent(new Event('input', { bubbles: true }));
-      });
-    }
-  </script>
-{% endif %}
-
 {% stylesheet %}
   /* Price filter */
   .price-facet {

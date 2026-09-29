@@ -251,11 +251,9 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 
 /* Phones + small tablets: banner scrolls with the page — no sticky/hover/stack effects */
 @media screen and (max-width: 599px) {
-  .template-index .shopify-section:has(.lame-home-hero--mobile-small) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--mobile-medium) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--mobile-large) .lame-home-hero {
-    --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
-    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
+  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero {
+    --lame-hero-frame-max-height: 60svh;
+    --lame-hero-frame-min-height: 60svh;
   }
 
   .template-index .content-for-layout > .shopify-section:has(.lame-home-hero),
@@ -311,20 +309,37 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
     border-radius: 0 !important;
   }
 
-  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame,
-  .template-index .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container) {
-    height: var(--lame-hero-frame-max-height) !important;
-    min-height: var(--lame-hero-frame-max-height) !important;
-    max-height: var(--lame-hero-frame-max-height) !important;
-    aspect-ratio: unset !important;
+  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame {
+    position: relative !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 60svh !important;
+    min-height: 60svh !important;
+    max-height: 60svh !important;
+    aspect-ratio: auto !important;
     overflow: hidden;
+    background: #fff !important;
+  }
+
+  @supports not (height: 60svh) {
+    .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame {
+      height: 60vh !important;
+      min-height: 60vh !important;
+      max-height: 60vh !important;
+    }
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame :is(slideshow-component, slideshow-container, slideshow-slides) {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) slideshow-slides {
-    height: var(--lame-hero-frame-max-height) !important;
-    min-height: var(--lame-hero-frame-max-height) !important;
-    max-height: var(--lame-hero-frame-max-height) !important;
-    aspect-ratio: unset !important;
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
@@ -343,7 +358,7 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
     max-height: 100% !important;
   }
 
-  /* Edge-to-edge on phones: fill width, keep top visible, crop bottom if needed */
+  /* Full-bleed cover inside the 60% frame — start at the top so the top of the artwork stays visible */
   .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img),
   .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img),
   .template-index .shopify-section:has(.lame-home-hero--fit-cover) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
@@ -355,16 +370,6 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
     max-height: none !important;
     object-fit: cover !important;
     object-position: center top !important;
-  }
-
-  .template-index .shopify-section:has(.lame-home-hero--mobile-full_screen) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--full_screen) .lame-home-hero {
-    --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-banner-ratio), 0.75));
-    --lame-hero-frame-max-height: min(
-      calc(100svh - max(var(--header-group-height, 0px), var(--header-height, 60px))),
-      var(--lame-hero-natural-height)
-    );
-    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
   }
 
   .template-index .shopify-section:has(.lame-home-hero) :is(.lame-home-hero__carousel--mobile, .lame-home-hero__carousel--desktop) slideshow-slides {
