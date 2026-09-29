@@ -3657,8 +3657,8 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   min-width: 0;
   max-width: none;
   max-height: none;
-  overflow: visible;
-  padding: 0.85rem 1rem 0.95rem;
+  overflow: hidden;
+  padding: 0.85rem 0 0.95rem;
   border-radius: 0;
   background: #fff;
   border: 0;
@@ -3672,11 +3672,17 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   align-items: flex-start;
   justify-content: safe center;
   gap: clamp(0.55rem, 1.4vw, 1.15rem);
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin: 0;
-  padding: 0.1rem 0.25rem 0.2rem;
+  padding: 0.1rem 0.85rem 0.2rem;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
 }
 
@@ -3687,6 +3693,7 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__item {
   flex: 0 0 auto;
   width: 5.1rem;
+  scroll-snap-align: start;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-shop-category-panel__link {
@@ -3803,9 +3810,22 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 
 @media screen and (min-width: 750px) and (max-width: 989px) {
   #header-component.header--cosmetic-luxury .header__row--bottom .lame-header-shop-category {
-    display: block;
+    display: flex;
+    align-items: center;
     position: static;
     flex-shrink: 0;
+  }
+
+  #header-component.header--cosmetic-luxury .header__row--bottom.lame-header-split-nav {
+    position: relative;
+  }
+
+  #header-component.header--cosmetic-luxury .header__row--bottom .lame-header-shop-category-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
   }
 }
 

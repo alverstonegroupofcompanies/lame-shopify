@@ -24,18 +24,51 @@
       const panel = root.querySelector('[data-lame-category-panel]');
       if (!trigger || !panel) return;
 
+      const place = () => {
+        const row = root.closest('.header__row--bottom');
+        const tablet = window.matchMedia('(max-width: 989px)').matches;
+        if (!row || !tablet) {
+          panel.style.position = '';
+          panel.style.top = '';
+          panel.style.left = '';
+          panel.style.width = '';
+          return;
+        }
+        const rect = row.getBoundingClientRect();
+        panel.style.position = 'fixed';
+        panel.style.top = `${Math.round(rect.bottom)}px`;
+        panel.style.left = '0';
+        panel.style.width = '100%';
+      };
+
       const open = () => {
         closeAll(root);
         trigger.setAttribute('aria-expanded', 'true');
         panel.hidden = false;
         root.classList.add('is-open');
+        place();
       };
 
       const close = () => {
         trigger.setAttribute('aria-expanded', 'false');
         panel.hidden = true;
         root.classList.remove('is-open');
+        panel.style.position = '';
+        panel.style.top = '';
+        panel.style.left = '';
+        panel.style.width = '';
       };
+
+      window.addEventListener('resize', () => {
+        if (root.classList.contains('is-open')) place();
+      });
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (root.classList.contains('is-open')) place();
+        },
+        { passive: true }
+      );
 
       const toggle = () => {
         if (root.classList.contains('is-open')) {
