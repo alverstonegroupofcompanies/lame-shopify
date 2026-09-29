@@ -29,6 +29,19 @@
 
     const items = () => [...track.querySelectorAll(':scope > .lame-flash-deal__item')];
 
+    const mobileNewArrivals = () =>
+      section.classList.contains('lame-new-products') && window.matchMedia('(max-width: 749px)').matches;
+
+    const pageSize = () => {
+      if (!mobileNewArrivals()) return 1;
+      const cards = items();
+      if (cards.length < 2) return 1;
+      const cardWidth = cards[0].offsetWidth + gapOf(track);
+      if (cardWidth <= 1) return 1;
+      const visible = Math.max(1, Math.round(scrollEl.clientWidth / cardWidth));
+      return Math.min(visible, cards.length - 1);
+    };
+
     const updateLayout = () => {
       const overflows = track.scrollWidth > scrollEl.clientWidth + 4;
       scrollEl.classList.toggle('is-scrollable', overflows);
@@ -59,11 +72,12 @@
 
     const step = (direction) => {
       const cards = items();
-      if (busy || cards.length < 2) return;
+      const count = pageSize();
+      if (busy || cards.length < 2 || count < 1) return;
       if (!scrollEl.classList.contains('is-scrollable')) return;
 
-      const card = direction > 0 ? cards[0] : cards[cards.length - 1];
-      const delta = card.offsetWidth + gapOf(track);
+      const stride = cards[0].offsetWidth + gapOf(track);
+      const delta = stride * count;
       if (delta <= 1) return;
 
       busy = true;
@@ -73,7 +87,8 @@
         const previousSnap = scrollEl.style.scrollSnapType;
         scrollEl.style.scrollBehavior = 'auto';
         scrollEl.style.scrollSnapType = 'none';
-        track.insertBefore(card, cards[0]);
+        const incoming = cards.slice(-count);
+        incoming.forEach((card) => track.insertBefore(card, cards[0]));
         scrollEl.scrollLeft += delta;
         requestAnimationFrame(() => {
           scrollEl.style.scrollBehavior = previousBehavior;
@@ -90,7 +105,9 @@
         const previousSnap = scrollEl.style.scrollSnapType;
         scrollEl.style.scrollBehavior = 'auto';
         scrollEl.style.scrollSnapType = 'none';
-        track.appendChild(card);
+        items()
+          .slice(0, count)
+          .forEach((card) => track.appendChild(card));
         scrollEl.scrollLeft = Math.max(0, scrollEl.scrollLeft - delta);
         requestAnimationFrame(() => {
           scrollEl.style.scrollBehavior = previousBehavior;
