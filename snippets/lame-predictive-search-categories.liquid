@@ -3,7 +3,7 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign category_defs = 'skin-care:Skincare|hair-care:Hair Care|bath-body:Personal Care|wellness:Wellness|make-up:Make-up|baby-mom:Baby Care' | split: '|'
+  assign category_defs = 'skin-care:Skin Care|make-up:Makeup|frontpage:Hair Care|bath-body:Bath & Body|fragrance:Perfumes|baby-mom:Baby Care|wellness:Wellness' | split: '|'
 -%}
 
 <section class="lame-search-section lame-search-section--categories" aria-label="{{ 'lame_search.shop_by_category' | t }}">
@@ -29,7 +29,12 @@
           <li class="lame-search-categories__item">
             <a href="{{ cat_collection.url }}" class="lame-search-categories__pill">
               <span class="lame-search-categories__pill-icon" aria-hidden="true">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3 4 9v12h16V9l-8-6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                {%- capture lame_glyph -%}{%- render 'lame-category-glyph', handle: handle -%}{%- endcapture -%}
+                {%- if lame_glyph != blank -%}
+                  {{ lame_glyph }}
+                {%- else -%}
+                  {% render 'lame-shop-mega-menu-icon', handle: handle %}
+                {%- endif -%}
               </span>
               <span class="lame-search-categories__pill-label">{{ label }}</span>
             </a>

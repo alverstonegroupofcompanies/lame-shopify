@@ -8,6 +8,10 @@
 -%}
 
 <span class="lame-drawer-nav__icon" aria-hidden="true">
+  {%- capture lame_glyph -%}{%- render 'lame-category-glyph', handle: icon_key -%}{%- endcapture -%}
+  {%- if lame_glyph != blank -%}
+    {{ lame_glyph }}
+  {%- else -%}
   {%- case icon_key -%}
     {%- when 'home', 'frontpage' -%}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"/></svg>
@@ -39,5 +43,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4 1.8c0 1.7-2.5 2-2.5 3.7"/><path d="M12 17h.01"/></svg>
     {%- else -%}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg>
-  {%- endcase -%}
+    {%- endcase -%}
+  {%- endif -%}
 </span>

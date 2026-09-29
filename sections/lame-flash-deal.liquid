@@ -107,6 +107,7 @@
       </p>
     {% endif %}
 
+    {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.subtitle != blank or countdown_active %}
     <header class="lame-flash-deal__header" data-lame-reveal>
       {%- if section.settings.eyebrow != blank -%}
         <p class="lame-flash-deal__eyebrow">{{ section.settings.eyebrow | escape }}</p>
@@ -156,6 +157,7 @@
         </div>
       {% endif %}
     </header>
+    {% endif %}
 
     <div class="lame-flash-deal__carousel">
       <button
@@ -261,43 +263,6 @@
       tick();
       window.setInterval(tick, 1000);
     });
-
-    const viewport = section.querySelector('[data-flash-viewport]');
-    const track = section.querySelector('[data-flash-track]');
-    const prev = section.querySelector('[data-flash-prev]');
-    const next = section.querySelector('[data-flash-next]');
-    const scrollEl = viewport || track;
-
-    if (scrollEl && track) {
-      const updateCarouselLayout = () => {
-        const overflows = track.scrollWidth > scrollEl.clientWidth + 4;
-        scrollEl.classList.toggle('is-scrollable', overflows);
-        scrollEl.classList.toggle('is-centered', !overflows);
-        prev?.toggleAttribute('hidden', !overflows);
-        next?.toggleAttribute('hidden', !overflows);
-        if (!overflows) {
-          scrollEl.scrollLeft = 0;
-        }
-      };
-
-      const scrollBySlide = (dir) => {
-        const slide = track.querySelector('.lame-flash-deal__item');
-        if (!slide) return;
-        const gap = parseFloat(getComputedStyle(track).gap) || 16;
-        scrollEl.scrollBy({ left: dir * (slide.offsetWidth + gap), behavior: 'smooth' });
-      };
-
-      updateCarouselLayout();
-      window.addEventListener('resize', () => {
-        updateCarouselLayout();
-        if (!scrollEl.classList.contains('is-scrollable')) {
-          scrollEl.scrollLeft = 0;
-        }
-      });
-
-      prev?.addEventListener('click', () => scrollBySlide(-1));
-      next?.addEventListener('click', () => scrollBySlide(1));
-    }
 
     section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
       form.addEventListener('submit', async (event) => {

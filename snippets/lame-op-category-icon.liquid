@@ -9,6 +9,10 @@
 -%}
 
 <span class="lame-op-category-icon lame-op-category-icon--{{ icon_handle }}" aria-hidden="true">
+  {%- capture lame_glyph -%}{%- render 'lame-category-glyph', handle: icon_handle -%}{%- endcapture -%}
+  {%- if lame_glyph != blank -%}
+    {{ lame_glyph }}
+  {%- else -%}
   {%- case icon_handle -%}
     {%- when 'skin-care', 'skincare' -%}
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -92,5 +96,6 @@
         <circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.9"/>
         <path d="M12 8.2v4.2l2.4 1.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-  {%- endcase -%}
+    {%- endcase -%}
+  {%- endif -%}
 </span>

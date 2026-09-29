@@ -1,0 +1,35 @@
+{%- doc -%}
+  Masked category artwork. Renders nothing when this handle has no icon.
+  @param {string} handle - Collection handle or icon key
+{%- enddoc -%}
+
+{%- liquid
+  assign icon_handle = handle | downcase | strip | replace: ' ', '-' | replace: '_', '-' | replace: '&', ''
+  assign glyph_asset = ''
+
+  case icon_handle
+    when 'all', 'our-products', 'products', 'catalog', 'shop-all', 'all-products'
+      assign glyph_asset = 'lame-icon-all.png'
+    when 'make-up', 'makeup', 'lipcare', 'lips'
+      assign glyph_asset = 'lame-icon-makeup.png'
+    when 'skin-care', 'skincare', 'face-care', 'face-eyes'
+      assign glyph_asset = 'lame-icon-skin-care.png'
+    when 'hair-care', 'haircare', 'hair', 'frontpage'
+      assign glyph_asset = 'lame-icon-hair-care.png'
+    when 'bath-body', 'bath-and-body', 'bathbody'
+      assign glyph_asset = 'lame-icon-bath-body.png'
+    when 'fragrance', 'perfume', 'perfumes'
+      assign glyph_asset = 'lame-icon-fragrance.png'
+    when 'feminine', 'feminine-hygiene', 'intimate', 'intimate-care', 'hygiene'
+      assign glyph_asset = 'lame-icon-feminine.png'
+    when 'combos', 'combo', 'bundles', 'bundle'
+      assign glyph_asset = 'lame-icon-combos.png'
+    when 'top-deals', 'deals', 'offers', 'sale', 'flash-deal', 'flash-deals'
+      assign glyph_asset = 'lame-icon-top-deals.png'
+    when 'shop-more'
+      assign glyph_asset = 'lame-icon-shop-more.png'
+  endcase
+-%}
+{%- if glyph_asset != blank -%}
+  <span class="lame-cat-glyph" style="--lame-cat-mask: url('{{ glyph_asset | asset_url }}');"></span>
+{%- endif -%}

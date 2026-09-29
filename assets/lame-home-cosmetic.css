@@ -15,7 +15,7 @@
   --lame-cos-radius: 12px;
   --lame-cos-radius-lg: 16px;
   --lame-font-display: 'Cormorant Garamond', Georgia, serif;
-  --lame-font-body: 'Jost', system-ui, sans-serif;
+  --lame-font-body: 'Manrope', system-ui, sans-serif;
   --lame-section-heading-color: rgb(var(--lame-cos-forest));
   --lame-section-heading-ornament: rgb(var(--lame-cos-forest));
 }
@@ -1419,27 +1419,43 @@ body.template-index [data-lame-reveal][data-lame-delay='4'] { transition-delay: 
     padding-inline: 0;
   }
 
-  body.template-index .lame-flash-deal__viewport {
-    overflow: visible;
+  body.template-index .lame-flash-deal {
+    --lame-flash-desktop-gap: 1.1rem;
+    --lame-flash-desktop-visible: 4;
   }
 
-  body.template-index .lame-flash-deal__track {
-    display: grid;
-    grid-template-columns: repeat(var(--lame-flash-visible-count, 5), minmax(0, 1fr));
-    gap: 1.1rem;
-    width: 100%;
+  body.template-index .lame-flash-deal__viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    container-type: inline-size;
+    container-name: flash-desktop;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body.template-index .lame-flash-deal__track,
+  body.template-index .lame-flash-deal__viewport.is-centered .lame-flash-deal__track {
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    max-width: none;
+    grid-template-columns: none;
+    gap: var(--lame-flash-desktop-gap);
   }
 
   body.template-index .lame-flash-deal__item,
   body.template-index .lame-flash-deal__viewport.is-centered .lame-flash-deal__item {
-    width: auto;
+    flex: 0 0 calc(
+      (100cqi - (var(--lame-flash-desktop-visible) - 1) * var(--lame-flash-desktop-gap)) /
+        var(--lame-flash-desktop-visible)
+    );
+    width: calc(
+      (100cqi - (var(--lame-flash-desktop-visible) - 1) * var(--lame-flash-desktop-gap)) /
+        var(--lame-flash-desktop-visible)
+    );
     max-width: none;
     min-width: 0;
-    flex: none;
-  }
-
-  body.template-index .lame-flash-deal__nav {
-    display: none;
+    scroll-snap-align: start;
   }
 }
 

@@ -365,7 +365,7 @@ function catalogKey() {
 function getPageSize() {
   const resultsList = getResultsList();
   if (resultsList?.hasAttribute('data-lame-our-products') || resultsList?.hasAttribute('data-lame-category-shop')) {
-    return 12;
+    return 24;
   }
   return 24;
 }
@@ -419,16 +419,9 @@ function extractCards(source) {
  */
 function filterCatalogItems(items, rules) {
   const brandSlugs = getActiveBrandSlugs();
-  const withBrand = items.filter((item) => matchesBrand(item.brand, brandSlugs));
-  const withDiscount = withBrand.filter((item) => matchesDiscount(item.percent, rules));
-
-  // Keep brand results if none of those products fall in the ticked discount bands
-  // (compare-at price missing, or the offer is wider than 0–20%).
-  if (!withDiscount.length && brandSlugs.size && withBrand.length) {
-    return withBrand;
-  }
-
-  return withDiscount;
+  return items.filter(
+    (item) => matchesBrand(item.brand, brandSlugs) && matchesDiscount(item.percent, rules)
+  );
 }
 
 /**
@@ -812,7 +805,6 @@ function applyLocalHideOnly() {
   const items = root.querySelectorAll(CARD_SELECTOR);
   const brandSlugs = getActiveBrandSlugs();
   let visibleCount = 0;
-  let discountVisible = 0;
 
   for (const item of items) {
     const percent = Number(item.getAttribute('data-discount-percent') || 0);
@@ -823,16 +815,6 @@ function applyLocalHideOnly() {
     item.classList.toggle(HIDDEN_CLASS, !show);
     if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) {
       visibleCount += 1;
-      if (discountOk) discountVisible += 1;
-    }
-  }
-
-  if (hasFilter && discountVisible === 0 && brandSlugs.size) {
-    visibleCount = 0;
-    for (const item of items) {
-      const show = matchesBrand(cardBrandSlug(item), brandSlugs);
-      item.classList.toggle(HIDDEN_CLASS, !show);
-      if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) visibleCount += 1;
     }
   }
 

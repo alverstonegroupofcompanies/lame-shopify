@@ -1,0 +1,318 @@
+{%- liquid
+  assign heading = section.settings.heading
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-shop-by-category"
+  style="--lame-sbc-ink: {{ section.settings.icon_color }}; --lame-sbc-circle: {{ section.settings.circle_color }};"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-shop-by-category__wrap">
+    {%- if heading != blank -%}
+      <h2 class="lame-shop-by-category__title">{{ heading | escape }}</h2>
+    {%- endif -%}
+
+    <nav class="lame-shop-by-category__nav" aria-label="{{ heading | default: 'Shop by category' | escape }}">
+      <ul class="lame-shop-by-category__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign label = block.settings.label | strip
+            assign icon_key = block.settings.icon_key | strip | downcase
+            assign cat = block.settings.collection
+
+            if label == blank and cat != blank
+              assign label = cat.title
+            endif
+            if label == blank
+              assign label = 'Category'
+            endif
+            if icon_key == blank and cat != blank
+              assign icon_key = cat.handle
+            endif
+            if icon_key == blank
+              assign icon_key = label | downcase | replace: ' & ', '-' | replace: ' ', '-'
+            endif
+
+            assign href = block.settings.link
+            if href == blank and cat != blank
+              assign href = cat.url
+            endif
+            if href == blank and block.settings.fallback_link != blank
+              assign href = block.settings.fallback_link
+            endif
+            if href == blank
+              assign href = routes.all_products_collection_url
+            endif
+          -%}
+          <li class="lame-shop-by-category__item" {{ block.shopify_attributes }}>
+            <a class="lame-shop-by-category__link" href="{{ href }}">
+              <span class="lame-shop-by-category__icon" aria-hidden="true">
+                {% capture lame_glyph %}{% render 'lame-category-glyph', handle: icon_key %}{% endcapture %}
+                {%- if lame_glyph != blank -%}
+                  {{ lame_glyph }}
+                {%- else -%}
+                  {% render 'lame-op-category-icon', handle: icon_key %}
+                {%- endif -%}
+              </span>
+              <span class="lame-shop-by-category__label">{{ label | escape }}</span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-shop-by-category {
+    background: transparent;
+  }
+
+  .lame-shop-by-category__wrap {
+    width: min(100% - 1.25rem, var(--lame-home-rail, 78rem));
+    margin-inline: auto;
+    padding: 0 0 0.15rem;
+  }
+
+  .lame-shop-by-category__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .lame-shop-by-category__nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    margin-inline: 0;
+    padding: 0.7rem 0.35rem 0.45rem;
+    border-radius: 22px;
+    background: #fff;
+    border: 1px solid #eee8e0;
+    box-shadow: 0 14px 32px rgb(28 28 28 / 0.08);
+    mask-image: linear-gradient(90deg, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  }
+
+  .lame-shop-by-category__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-shop-by-category__list {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: safe center;
+    gap: clamp(0.65rem, 1.6vw, 1.35rem);
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    padding: 0.15rem 0 0.45rem;
+    list-style: none;
+  }
+
+  .lame-shop-by-category__item {
+    flex: 0 0 auto;
+    width: 4.7rem;
+  }
+
+  .lame-shop-by-category__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    color: #1c1c1c;
+  }
+
+  .lame-shop-by-category__icon {
+    display: grid;
+    place-items: center;
+    width: 3.35rem;
+    height: 3.35rem;
+    border-radius: 50%;
+    background: var(--lame-sbc-circle, #2d4a22);
+    color: var(--lame-sbc-ink, #fff);
+    box-shadow: 0 6px 14px rgb(45 74 34 / 0.16);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .lame-shop-by-category__icon .lame-cat-glyph,
+  .lame-shop-by-category__icon .lame-op-category-icon {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .lame-shop-by-category__icon .lame-op-category-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-shop-by-category__label {
+    display: block;
+    max-width: 4.7rem;
+    font-family: 'Jost', system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    text-align: center;
+    color: #2a2a2a;
+  }
+
+  .lame-shop-by-category__link:hover .lame-shop-by-category__icon,
+  .lame-shop-by-category__link:focus-visible .lame-shop-by-category__icon {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 18px rgb(45 74 34 / 0.22);
+  }
+
+  .lame-shop-by-category__link:focus-visible {
+    outline: 2px solid #2d4a22;
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-shop-by-category__wrap {
+      padding-top: 0;
+      padding-bottom: 0.15rem;
+    }
+
+    .lame-shop-by-category__item {
+      width: 5.4rem;
+    }
+
+    .lame-shop-by-category__icon {
+      width: 3.65rem;
+      height: 3.65rem;
+    }
+
+    .lame-shop-by-category__label {
+      max-width: 5.4rem;
+      font-size: 0.74rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lame-shop-by-category__icon {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Shop by category",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "color",
+      "id": "circle_color",
+      "label": "Icon circle",
+      "default": "#2d4a22"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Category"
+        },
+        {
+          "type": "select",
+          "id": "icon_key",
+          "label": "Icon",
+          "options": [
+            { "value": "all", "label": "All" },
+            { "value": "skin-care", "label": "Skin care" },
+            { "value": "make-up", "label": "Makeup" },
+            { "value": "hair-care", "label": "Hair care" },
+            { "value": "bath-body", "label": "Bath & body" },
+            { "value": "fragrance", "label": "Perfumes" },
+            { "value": "feminine", "label": "Feminine hygiene" },
+            { "value": "combos", "label": "Combos" },
+            { "value": "top-deals", "label": "Top deals" },
+            { "value": "shop-more", "label": "Shop more" }
+          ],
+          "default": "all"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link",
+          "info": "Used when set. Otherwise the collection URL is used."
+        },
+        {
+          "type": "text",
+          "id": "fallback_link",
+          "label": "Fallback link",
+          "info": "Used when the collection does not exist. Example: /search?q=hair&type=product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop by category",
+      "category": "Navigation",
+      "blocks": [
+        { "type": "category", "settings": { "label": "All", "icon_key": "all" } },
+        { "type": "category", "settings": { "label": "Skin Care", "icon_key": "skin-care" } },
+        { "type": "category", "settings": { "label": "Makeup", "icon_key": "make-up" } },
+        { "type": "category", "settings": { "label": "Hair Care", "icon_key": "hair-care" } },
+        { "type": "category", "settings": { "label": "Bath & Body", "icon_key": "bath-body" } },
+        { "type": "category", "settings": { "label": "Perfumes", "icon_key": "fragrance" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

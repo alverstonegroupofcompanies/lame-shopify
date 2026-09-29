@@ -74,12 +74,14 @@
       {% if is_bogo %}
         <span class="lame-cat-card__badge lame-cat-card__badge--promo">Buy 1 Get 1 Free</span>
       {% endif %}
-      {% if lame_on_sale == 1 %}
-        {% if lame_sale_badge_label != blank %}
-          <span class="lame-cat-card__badge">{{ lame_sale_badge_label | escape }}</span>
-        {% elsif lame_discount_percent > 0 %}
-          <span class="lame-cat-card__badge">-{{ lame_discount_percent }}%</span>
-        {% endif %}
+      {% if lame_discount_percent > 0 %}
+        <span class="lame-cat-card__badge">
+          {%- if lame_sale_badge_label != blank -%}
+            {{ lame_sale_badge_label | escape }}
+          {%- else -%}
+            -{{ lame_discount_percent }}%
+          {%- endif -%}
+        </span>
       {% endif %}
     </div>
 
