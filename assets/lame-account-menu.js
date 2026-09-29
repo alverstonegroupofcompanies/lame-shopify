@@ -1,5 +1,5 @@
 import { Component } from '@theme/component';
-import { debounce, isMobileBreakpoint } from '@theme/utilities';
+import { debounce } from '@theme/utilities';
 
 /**
  * Premium account menu — mobile slide-in drawer and desktop dropdown.
@@ -105,6 +105,7 @@ class AccountMenuComponent extends Component {
     this.classList.add('is-open');
     document.documentElement.classList.add('lame-account-menu-open');
     this.refs.trigger.setAttribute('aria-expanded', 'true');
+    this.#portalPanel();
 
     requestAnimationFrame(() => {
       this.#positionPanel();
@@ -186,34 +187,21 @@ class AccountMenuComponent extends Component {
   #handleReposition = debounce(() => {
     if (!this.classList.contains('is-open')) return;
 
-    this.#unlockScroll();
-    this.#unportalPanel();
     this.#positionPanel();
   }, 50);
 
   #portalPanel() {
-    if (!isMobileBreakpoint()) return;
-
     const panel = this.#getPanel();
-    const backdrop = this.#getBackdrop();
     if (!panel || panel.parentElement === document.body) return;
 
     const panelParent = panel.parentElement;
-    if (panelParent) {
-      this.#panelAnchor = document.createComment('lame-account-panel-anchor');
-      panelParent.insertBefore(this.#panelAnchor, panel);
-      panel.classList.add('lame-account__panel--portaled');
-      document.body.appendChild(panel);
-      this.#panelEl = panel;
-    }
+    if (!panelParent) return;
 
-    if (backdrop?.parentElement && backdrop.parentElement !== document.body) {
-      this.#backdropAnchor = document.createComment('lame-account-backdrop-anchor');
-      backdrop.parentElement.insertBefore(this.#backdropAnchor, backdrop);
-      backdrop.classList.add('lame-account__backdrop--portaled');
-      document.body.appendChild(backdrop);
-      this.#backdropEl = backdrop;
-    }
+    this.#panelAnchor = document.createComment('lame-account-panel-anchor');
+    panelParent.insertBefore(this.#panelAnchor, panel);
+    panel.classList.add('lame-account__panel--portaled');
+    document.body.appendChild(panel);
+    this.#panelEl = panel;
   }
 
   #unportalPanel() {

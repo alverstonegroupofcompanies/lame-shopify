@@ -680,6 +680,15 @@
         },
         true
       );
+
+      document.addEventListener('change', function (event) {
+        var target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (!target.matches('input[type="checkbox"], input[type="radio"], select')) return;
+        var panel = target.closest('.lame-op-filters-stack details.facets__panel');
+        if (!(panel instanceof HTMLDetailsElement) || !panel.open) return;
+        panel.open = false;
+      });
     }
 
     if (!window.__lameOpPriceSelect) {
