@@ -1230,43 +1230,25 @@
     }
   }
 
-  /* Tablet: one row, three cards visible, the rest scroll in */
+  /* Tablet: wrapping grid so every card is on the page */
   @media screen and (min-width: 750px) and (max-width: 1199px) {
     .lame-beauty-love__viewport {
-      overflow-x: auto;
-      overflow-y: hidden;
-      container-type: inline-size;
-      container-name: beauty-row;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .lame-beauty-love__viewport::-webkit-scrollbar {
-      display: none;
+      overflow: visible;
     }
 
     .lame-beauty-love__grid,
     .lame-beauty-love--category .lame-beauty-love__grid {
-      display: flex;
-      flex-wrap: nowrap;
-      width: max-content;
-      max-width: none;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
+      max-width: 100%;
       margin-inline: 0;
-      grid-template-columns: none;
     }
 
     .lame-beauty-love__item {
-      flex: 0 0 calc((100cqi - (2 * var(--lame-bl-col-gap))) / 3);
-      width: calc((100cqi - (2 * var(--lame-bl-col-gap))) / 3);
+      width: auto;
       max-width: none;
-      scroll-snap-align: start;
-    }
-
-    .lame-beauty-love__viewport.is-centered .lame-beauty-love__grid {
-      width: 100%;
-      justify-content: center;
+      min-width: 0;
     }
   }
 
