@@ -59,6 +59,7 @@
 
   assign brand_name = crumb_product.vendor | strip
   assign brand_url = blank
+  assign brand_collection = blank
   if brand_name != blank
     capture brand_slug_capture
       render 'lame-vendor-slug', vendor: brand_name
@@ -69,6 +70,22 @@
       assign brand_url = brand_collection.url
     else
       assign brand_url = beauty_url | append: '?brand=' | append: brand_slug
+    endif
+  endif
+
+  assign show_brand = false
+  if brand_name != blank and brand_url != blank
+    assign show_brand = true
+    assign brand_key = brand_name | downcase | strip
+    assign beauty_key = 'lame_product.breadcrumb_beauty' | t | downcase | strip
+    if brand_key == beauty_key
+      assign show_brand = false
+    endif
+    if show_brand and category_collection != blank
+      assign category_key = category_collection.title | downcase | strip
+      if brand_key == category_key or brand_collection.handle == category_collection.handle
+        assign show_brand = false
+      endif
     endif
   endif
 -%}
@@ -90,7 +107,7 @@
         </li>
       {% endif %}
 
-      {% if brand_name != blank and brand_url != blank %}
+      {% if show_brand %}
         <li class="lame-product-breadcrumb__item">
           <a href="{{ brand_url }}">{{ brand_name | escape }}</a>
         </li>
