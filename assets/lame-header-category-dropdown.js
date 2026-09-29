@@ -10,7 +10,7 @@
       document.querySelectorAll('[data-lame-category-dropdown]').forEach((root) => {
         if (root === except) return;
         const trigger = root.querySelector('[data-lame-category-trigger]');
-        const panel = root.querySelector('[data-lame-category-panel]');
+        const panel = document.querySelector('[data-lame-category-panel]');
         if (!trigger || !panel) return;
         trigger.setAttribute('aria-expanded', 'false');
         panel.hidden = true;
@@ -24,51 +24,21 @@
       const panel = root.querySelector('[data-lame-category-panel]');
       if (!trigger || !panel) return;
 
-      const place = () => {
-        const row = root.closest('.header__row--bottom');
-        const tablet = window.matchMedia('(max-width: 989px)').matches;
-        if (!row || !tablet) {
-          panel.style.position = '';
-          panel.style.top = '';
-          panel.style.left = '';
-          panel.style.width = '';
-          return;
-        }
-        const rect = row.getBoundingClientRect();
-        panel.style.position = 'fixed';
-        panel.style.top = `${Math.round(rect.bottom)}px`;
-        panel.style.left = '0';
-        panel.style.width = '100%';
-      };
+      const row = root.closest('.header__row--bottom') || root.closest('.header__row');
+      if (row) row.insertAdjacentElement('afterend', panel);
 
       const open = () => {
         closeAll(root);
         trigger.setAttribute('aria-expanded', 'true');
         panel.hidden = false;
         root.classList.add('is-open');
-        place();
       };
 
       const close = () => {
         trigger.setAttribute('aria-expanded', 'false');
         panel.hidden = true;
         root.classList.remove('is-open');
-        panel.style.position = '';
-        panel.style.top = '';
-        panel.style.left = '';
-        panel.style.width = '';
       };
-
-      window.addEventListener('resize', () => {
-        if (root.classList.contains('is-open')) place();
-      });
-      window.addEventListener(
-        'scroll',
-        () => {
-          if (root.classList.contains('is-open')) place();
-        },
-        { passive: true }
-      );
 
       const toggle = () => {
         if (root.classList.contains('is-open')) {
@@ -93,12 +63,15 @@
       window.__lameCategoryDropdownDocBound = true;
 
       document.addEventListener('click', (event) => {
-        if (event.target instanceof Element && event.target.closest('[data-lame-category-dropdown]')) {
+        if (
+          event.target instanceof Element &&
+          event.target.closest('[data-lame-category-dropdown], [data-lame-category-panel]')
+        ) {
           return;
         }
         document.querySelectorAll('[data-lame-category-dropdown].is-open').forEach((root) => {
           const trigger = root.querySelector('[data-lame-category-trigger]');
-          const panel = root.querySelector('[data-lame-category-panel]');
+          const panel = document.querySelector('[data-lame-category-panel]');
           if (!trigger || !panel) return;
           trigger.setAttribute('aria-expanded', 'false');
           panel.hidden = true;
@@ -110,7 +83,7 @@
         if (event.key !== 'Escape') return;
         document.querySelectorAll('[data-lame-category-dropdown].is-open').forEach((root) => {
           const trigger = root.querySelector('[data-lame-category-trigger]');
-          const panel = root.querySelector('[data-lame-category-panel]');
+          const panel = document.querySelector('[data-lame-category-panel]');
           if (!trigger || !panel) return;
           trigger.setAttribute('aria-expanded', 'false');
           panel.hidden = true;
