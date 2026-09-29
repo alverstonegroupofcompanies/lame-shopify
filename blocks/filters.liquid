@@ -203,30 +203,7 @@
                   assign filters_head_active = true
                 endif
               %}
-              {% if lame_our_products_active %}
-                {% if filters_head_active %}
-                  <div class="lame-op-filters-applied">
-                    <div class="lame-op-filters-applied__row">
-                      <span class="lame-op-filters-applied__title">Filters Applied</span>
-                      <facet-remove-component
-                        class="lame-op-filters-applied__clear-wrap"
-                        data-url="{{ results_url }}"
-                        active-class="is-active"
-                      >
-                        <button
-                          type="button"
-                          class="lame-op-filters-applied__clear"
-                          ref="clearButton"
-                          on:click="/removeFilter?form=FacetFiltersForm--{{ section.id }}-desktop"
-                          on:keydown="/removeFilter?form=FacetFiltersForm--{{ section.id }}-desktop"
-                        >
-                          Clear All
-                        </button>
-                      </facet-remove-component>
-                    </div>
-                  </div>
-                {% endif %}
-              {% else %}
+              {% unless lame_our_products_active %}
                 {% render 'lame-collection-filters-panel-head',
                   active_count: filters_head_active_count,
                   show_clear_all: false,
@@ -234,14 +211,20 @@
                   section_id: section.id,
                   is_active: filters_head_active
                 %}
-              {% endif %}
+              {% endunless %}
             {% endif %}
 
+            {% liquid
+              assign show_inline_clear_all = true
+              if lame_our_products_active
+                assign show_inline_clear_all = false
+              endif
+            %}
             {% render 'filter-remove-buttons',
               filters: filters,
               results_url: results_url,
               show_filter_label: block_settings.show_filter_label,
-              should_show_clear_all: true
+              should_show_clear_all: show_inline_clear_all
             %}
 
             {% if block_settings.enable_filtering %}

@@ -1653,49 +1653,47 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
 @media screen and (max-width: 749px) {
   .lame-account__panel,
   .lame-account__panel.lame-account__panel--portaled {
-    top: 0 !important;
-    right: 0 !important;
-    left: auto !important;
-    width: var(--lame-acct-menu-drawer-width) !important;
-    max-width: min(20rem, 92vw);
-    height: 100dvh;
-    max-height: 100dvh;
-    border-radius: 20px 0 0 20px;
-    border-right: none;
-    --lame-acct-panel-x: 100%;
-    --lame-acct-panel-y: 0;
-    transform: translate3d(var(--lame-acct-panel-x), 0, 0);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-  }
-
-  .lame-account.is-open .lame-account__panel {
+    top: auto;
+    right: auto;
+    left: auto;
+    width: min(20rem, calc(100vw - 1.5rem)) !important;
+    max-width: calc(100vw - 1.5rem);
+    height: auto;
+    max-height: min(32rem, calc(100dvh - 5rem));
+    border-radius: var(--lame-acct-menu-radius);
     --lame-acct-panel-x: 0;
-    transform: translate3d(0, 0, 0);
+    --lame-acct-panel-y: -6px;
+    transform: translate3d(0, var(--lame-acct-panel-y), 0) scale(0.98);
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
+  .lame-account.is-open .lame-account__panel,
   html.lame-account-menu-open .lame-account__panel--portaled {
     --lame-acct-panel-x: 0;
+    --lame-acct-panel-y: 0;
     opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
-    transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) scale(1) !important;
   }
 
+  .lame-account__backdrop,
+  .lame-account__backdrop.lame-account__backdrop--portaled,
   html.lame-account-menu-open .lame-account__backdrop--portaled {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
+    display: none !important;
+  }
+
+  .lame-account__close {
+    display: none;
   }
 
   .lame-account__header {
-    padding: max(1rem, env(safe-area-inset-top)) 1rem 0.9rem;
+    padding: 0.85rem 0.9rem 0.75rem;
   }
 
   .lame-account__body {
-    padding: 0.85rem 1rem max(1rem, env(safe-area-inset-bottom));
+    padding: 0.7rem 0.75rem 0.85rem;
   }
 
   .lame-account__menu {
@@ -1767,5 +1765,97 @@ html.lame-account-menu-open .lame-account__backdrop--portaled {
 
   .lame-account__row:active {
     transform: none;
+  }
+}
+
+.lame-account:has(.lame-account__panel--plain) .lame-account__backdrop {
+  display: none !important;
+}
+
+.lame-account__panel--plain .lame-account__link-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.lame-account__panel.lame-account__panel--plain {
+  width: 14.5rem;
+  max-width: calc(100vw - 1.5rem);
+  height: auto;
+  max-height: min(24rem, calc(100dvh - 5rem));
+  padding: 0.25rem 0;
+  border: 1px solid rgba(26, 42, 36, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(26, 42, 36, 0.08);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.lame-account__panel--plain .lame-account__menu {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+.lame-account__panel--plain .lame-account__who {
+  padding: 0.5rem 0.85rem 0.4rem;
+  border-bottom: 1px solid rgba(26, 42, 36, 0.08);
+}
+
+.lame-account__panel--plain .lame-account__heading {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.lame-account__panel--plain .lame-account__email {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+}
+
+.lame-account__panel--plain .lame-account__link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.85rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1a2a24;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  text-decoration: none;
+}
+
+.lame-account__panel--plain .lame-account__link:hover,
+.lame-account__panel--plain .lame-account__link:focus-visible {
+  background: rgba(26, 42, 36, 0.05);
+  color: #1a2a24;
+  outline: none;
+  transform: none;
+}
+
+@media screen and (max-width: 749px) {
+  .lame-account__panel.lame-account__panel--plain,
+  .lame-account__panel.lame-account__panel--plain.lame-account__panel--portaled {
+    width: 14.5rem !important;
+    height: auto !important;
+    max-height: min(24rem, calc(100dvh - 5rem)) !important;
   }
 }

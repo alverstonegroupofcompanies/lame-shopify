@@ -40,6 +40,7 @@ class AccountMenuComponent extends Component {
     document.addEventListener('keydown', this.#handleDocumentKeyDown);
     window.addEventListener('resize', this.#handleReposition);
     window.addEventListener('scroll', this.#handleReposition, true);
+    this.#syncSignedInMenu();
   }
 
   disconnectedCallback() {
@@ -63,6 +64,32 @@ class AccountMenuComponent extends Component {
     if (this.refs.backdrop) this.#backdropEl = this.refs.backdrop;
   }
 
+  /**
+   * Header HTML can be cached as a guest. A fresh section render includes the
+   * signed-in customer, so swap the menu when that render is logged in.
+   */
+  #syncSignedInMenu() {
+    const sectionId = this.dataset.sectionId;
+    const panel = this.#getPanel();
+    if (!sectionId || !panel || panel.dataset.loggedIn === 'true') return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('section_id', sectionId);
+
+    fetch(url.toString(), { credentials: 'same-origin' })
+      .then((response) => (response.ok ? response.text() : ''))
+      .then((html) => {
+        if (!html || !html.includes('data-logged-in')) return;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const freshPanel = doc.querySelector('.lame-account__panel--plain[data-logged-in="true"]');
+        const current = this.#getPanel();
+        if (!freshPanel || !current || current.dataset.loggedIn === 'true') return;
+        current.innerHTML = freshPanel.innerHTML;
+        current.dataset.loggedIn = 'true';
+      })
+      .catch(() => {});
+  }
+
   #getPanel() {
     return this.refs.panel ?? this.#panelEl;
   }
@@ -79,16 +106,9 @@ class AccountMenuComponent extends Component {
     document.documentElement.classList.add('lame-account-menu-open');
     this.refs.trigger.setAttribute('aria-expanded', 'true');
 
-    if (isMobileBreakpoint()) {
-      this.#lockScroll();
-      this.#portalPanel();
-    }
-
     requestAnimationFrame(() => {
-      if (!isMobileBreakpoint()) {
-        this.#positionPanel();
-        requestAnimationFrame(() => this.#positionPanel());
-      }
+      this.#positionPanel();
+      requestAnimationFrame(() => this.#positionPanel());
     });
   }
 
@@ -122,7 +142,7 @@ class AccountMenuComponent extends Component {
   #positionPanel() {
     const trigger = this.refs.trigger;
     const panel = this.#getPanel();
-    if (!trigger || !panel || isMobileBreakpoint()) return;
+    if (!trigger || !panel) return;
 
     const rect = trigger.getBoundingClientRect();
     const gap = 12;
@@ -165,15 +185,6 @@ class AccountMenuComponent extends Component {
 
   #handleReposition = debounce(() => {
     if (!this.classList.contains('is-open')) return;
-
-    if (isMobileBreakpoint()) {
-      if (document.body.style.position !== 'fixed') {
-        this.#lockScroll();
-      }
-      this.#clearPanelPosition();
-      this.#portalPanel();
-      return;
-    }
 
     this.#unlockScroll();
     this.#unportalPanel();

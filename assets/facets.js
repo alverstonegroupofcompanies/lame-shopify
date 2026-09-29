@@ -781,7 +781,12 @@ class FacetRemoveComponent extends Component {
     const url = this.dataset.url;
     if (!url) return;
 
-    const facetsForm = form ? document.getElementById(form) : this.closest('facets-form-component');
+    // Clear-all buttons pass the <form> id. Filter updates live on the parent component.
+    let facetsForm = form ? document.getElementById(form) : null;
+    if (!facetsForm) facetsForm = this.closest('facets-form-component');
+    if (facetsForm instanceof HTMLFormElement) {
+      facetsForm = facetsForm.closest('facets-form-component');
+    }
 
     if (!(facetsForm instanceof FacetsFormComponent)) return;
 
@@ -793,7 +798,26 @@ class FacetRemoveComponent extends Component {
       (event?.target instanceof Element && event.target.closest(clearAllSelector));
 
     if (clickedClearAll) {
-      facetsForm.updateFiltersByURL(url);
+      let nextUrl = url;
+      try {
+        const parsed = new URL(url, window.location.origin);
+        for (const key of [...parsed.searchParams.keys()]) {
+          if (
+            key === 'brand' ||
+            key === 'discount' ||
+            key === 'page' ||
+            key === 'section_id' ||
+            key.startsWith('filter.')
+          ) {
+            parsed.searchParams.delete(key);
+          }
+        }
+        nextUrl = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        // Keep the original clear URL if parsing fails.
+      }
+
+      facetsForm.updateFiltersByURL(nextUrl);
       document.dispatchEvent(new CustomEvent('lame:clear-brand-filter'));
       return;
     }
