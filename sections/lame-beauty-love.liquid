@@ -1057,12 +1057,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: min(78%, 18rem);
+    max-width: min(65%, 8rem);
     min-height: 0;
-    padding: clamp(0.4rem, 1.8cqi, 0.7rem) clamp(0.55rem, 2.4cqi, 0.95rem);
-    background: rgb(255 255 255 / 0.78);
-    border-radius: 0 0 0.55rem 0;
-    backdrop-filter: blur(1.5px);
+    padding: 0.2rem 0.45rem;
+    background: rgb(255 255 255 / 0.85);
+    border-radius: 0 0 0.35rem 0;
+    backdrop-filter: blur(2px);
     box-sizing: border-box;
     overflow: hidden;
   }
@@ -1070,16 +1070,16 @@
   .lame-beauty-love__brand-image {
     display: block;
     width: auto;
-    max-width: 34cqi;
-    max-height: 8cqi;
+    max-width: 4rem;
+    max-height: 1.35rem;
     height: auto;
     object-fit: contain;
   }
 
   .lame-beauty-love__brand-text {
     font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: clamp(0.78rem, 5.6cqi, 1.2rem);
-    font-weight: 700;
+    font-size: 0.68rem;
+    font-weight: 600;
     letter-spacing: 0.04em;
     line-height: 1.15;
     text-transform: uppercase;
@@ -1215,6 +1215,16 @@
       --lame-bl-radius: 10px;
       --lame-bl-max-cols: 3;
     }
+
+    /* Discover Beauty (3-column layout): hide incomplete last row if not full */
+    .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(1):nth-child(3n + 1) {
+      display: none !important;
+    }
+
+    .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(2):nth-child(3n + 1),
+    .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(2):nth-child(3n + 1) ~ .lame-beauty-love__item {
+      display: none !important;
+    }
   }
 
   @media screen and (min-width: 990px) {
@@ -1260,7 +1270,12 @@
     }
 
     .lame-beauty-love__brand {
-      max-width: min(78%, 18rem);
+      max-width: min(60%, 7.5rem);
+      padding: 0.2rem 0.42rem;
+    }
+
+    .lame-beauty-love__brand-text {
+      font-size: 0.65rem;
     }
   }
 
@@ -1270,6 +1285,11 @@
       --lame-bl-gap: 0.55rem;
       --lame-bl-col-gap: 0.7rem;
       --lame-bl-max-cols: 2;
+    }
+
+    /* Discover Beauty (2-column layout): hide incomplete last row if not full */
+    .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 3):nth-last-child(1):nth-child(2n + 1) {
+      display: none !important;
     }
 
     .lame-beauty-love__wrap {
@@ -1283,7 +1303,12 @@
     }
 
     .lame-beauty-love__brand {
-      max-width: min(84%, 14rem);
+      max-width: min(72%, 6.5rem);
+      padding: 0.18rem 0.38rem;
+    }
+
+    .lame-beauty-love__brand-text {
+      font-size: 0.62rem;
     }
 
     .lame-beauty-love__badge {
@@ -1314,6 +1339,11 @@
       font-size: 0.75rem;
       line-height: 1.3;
     }
+  }
+
+  .shopify-design-mode .lame-beauty-love__grid > .lame-beauty-love__item.shopify-block--selected,
+  .shopify-design-mode .lame-beauty-love__grid > .lame-beauty-love__item:focus-within {
+    display: block !important;
   }
 
   @media (hover: hover) and (pointer: fine) {
