@@ -107,7 +107,7 @@
       </p>
     {% endif %}
 
-    {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.subtitle != blank or section.settings.heading_image != blank or countdown_active %}
+    {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.subtitle != blank or section.settings.heading_image != blank or section.settings.heading_image_asset != blank or countdown_active %}
     <header class="lame-flash-deal__header" data-lame-reveal>
       {%- if section.settings.eyebrow != blank -%}
         <p class="lame-flash-deal__eyebrow">{{ section.settings.eyebrow | escape }}</p>
@@ -115,7 +115,7 @@
 
       {%- liquid
         assign heading_image = section.settings.heading_image
-        assign heading_image_asset = section.settings.heading_image_asset | default: 'lame-best-selling-title.png' | strip
+        assign heading_image_asset = section.settings.heading_image_asset | strip
         assign heading_alt = section.settings.heading | default: 'Best Selling'
         assign use_heading_image = false
         if heading_image != blank or heading_image_asset != blank
@@ -133,7 +133,7 @@
                 class: 'lame-flash-deal__title-img',
                 loading: 'lazy',
                 widths: '600,900,1200,1600',
-                sizes: '100vw',
+                sizes: '(min-width: 1200px) 1200px, 100vw',
                 alt: heading_alt
             }}
           {%- else -%}
@@ -141,8 +141,8 @@
               class="lame-flash-deal__title-img"
               src="{{ heading_image_asset | asset_url }}"
               alt="{{ heading_alt | escape }}"
-              width="1920"
-              height="360"
+              width="1024"
+              height="192"
               loading="lazy"
             >
           {%- endif -%}
@@ -366,14 +366,13 @@
       "type": "image_picker",
       "id": "heading_image",
       "label": "Title image",
-      "info": "Replaces the text heading. Leave empty to use the theme title banner."
+      "info": "Replaces the text heading with an image banner. Leave empty to use text or asset filename."
     },
     {
       "type": "text",
       "id": "heading_image_asset",
       "label": "Title image asset filename",
-      "default": "lame-best-selling-title.png",
-      "info": "Theme asset used when Title image is empty."
+      "info": "Optional theme asset file name (e.g. lame-best-selling-title.png). Leave empty if you want a normal text title."
     },
     {
       "type": "textarea",

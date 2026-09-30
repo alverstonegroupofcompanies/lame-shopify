@@ -127,11 +127,50 @@
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     <header class="lame-flash-deal__header lame-new-products__header" data-lame-reveal>
       <div class="lame-new-products__header-row">
-        {% render 'lame-section-heading',
-          title: section.settings.heading,
-          alignment: 'center',
-          size: 'large'
-        %}
+        {%- liquid
+          assign heading_image = section.settings.heading_image
+          assign heading_image_asset = section.settings.heading_image_asset | strip
+          assign heading_alt = section.settings.heading | default: 'New Arrivals'
+          assign use_heading_image = false
+          if heading_image != blank or heading_image_asset != blank
+            assign use_heading_image = true
+          endif
+        -%}
+
+        {%- if use_heading_image -%}
+          <h2 class="lame-flash-deal__title-image">
+            {%- if heading_image != blank -%}
+              {{
+                heading_image
+                | image_url: width: 1600
+                | image_tag:
+                  class: 'lame-flash-deal__title-img',
+                  loading: 'lazy',
+                  widths: '600,900,1200,1600',
+                  sizes: '(min-width: 1200px) 1200px, 100vw',
+                  alt: heading_alt
+              }}
+            {%- else -%}
+              <img
+                class="lame-flash-deal__title-img"
+                src="{{ heading_image_asset | asset_url }}"
+                alt="{{ heading_alt | escape }}"
+                width="1024"
+                height="216"
+                loading="lazy"
+              >
+            {%- endif -%}
+          </h2>
+          {%- if section.settings.subtitle != blank -%}
+            <p class="lame-flash-deal__title-subtitle">{{ section.settings.subtitle | escape }}</p>
+          {%- endif -%}
+        {%- else -%}
+          {% render 'lame-section-heading',
+            title: section.settings.heading,
+            alignment: 'center',
+            size: 'large'
+          %}
+        {%- endif -%}
       </div>
     </header>
 
@@ -291,7 +330,24 @@
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index"] },
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals", "info": "Used as image alt text when a title image is set." },
+    {
+      "type": "image_picker",
+      "id": "heading_image",
+      "label": "Title image",
+      "info": "Replaces the text heading with an image banner. Leave empty to use text or asset filename."
+    },
+    {
+      "type": "text",
+      "id": "heading_image_asset",
+      "label": "Title image asset filename",
+      "info": "Optional theme asset file name (e.g. lame-new-arrivals-title.png). Leave empty if you want a normal text title."
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle"
+    },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
     { "type": "text", "id": "save_label_prefix", "label": "Savings label", "default": "You Save" },
