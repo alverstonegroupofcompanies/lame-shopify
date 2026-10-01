@@ -1,0 +1,287 @@
+{{ 'lame-pdp-gift-hint.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign current_product = closest.product
+  if current_product == blank
+    assign current_product = product
+  endif
+
+  assign current_variant = current_product.selected_or_first_available_variant
+  assign threshold_val = block.settings.threshold | default: 499
+  assign threshold_cents = threshold_val | times: 100
+  assign current_price = current_variant.price | default: 0
+
+  assign is_qualified = false
+  if current_price >= threshold_cents
+    assign is_qualified = true
+  endif
+
+  assign diff_cents = threshold_cents | minus: current_price
+  if diff_cents < 0
+    assign diff_cents = 0
+  endif
+  assign diff_formatted = diff_cents | money
+
+  assign progress_percent = 0
+  if threshold_cents > 0
+    if is_qualified
+      assign progress_percent = 100
+    else
+      assign progress_percent = current_price | times: 100 | divided_by: threshold_cents
+      if progress_percent > 100
+        assign progress_percent = 100
+      elsif progress_percent < 5
+        assign progress_percent = 5
+      endif
+    endif
+  endif
+
+  assign def_unqual_title = 'Free Gift on orders over ₹' | append: threshold_val
+  assign def_unqual_msg = 'Add items worth ' | append: diff_formatted | append: ' more to unlock your free gift!'
+  assign def_qual_title = 'Free Gift with this order!'
+  assign def_qual_msg = 'This item is over ₹' | append: threshold_val | append: ' and qualifies for a complimentary free gift at checkout.'
+%}
+
+<div
+  class="lame-pdp-gift-hint lame-pdp-gift-hint--{{ block.settings.style_variant | default: 'soft_green' }}{% if is_qualified %} is-qualified{% endif %}"
+  data-threshold="{{ threshold_val }}"
+  data-threshold-cents="{{ threshold_cents }}"
+  data-product-id="{{ current_product.id }}"
+  data-current-price="{{ current_price }}"
+  data-show-diff="{{ block.settings.show_diff }}"
+  data-show-progress="{{ block.settings.show_progress }}"
+  {{ block.shopify_attributes }}
+  role="status"
+  aria-live="polite"
+>
+  <div class="lame-pdp-gift-hint__wrapper">
+    <div class="lame-pdp-gift-hint__icon-box" aria-hidden="true">
+      <svg class="lame-pdp-gift-hint__icon" viewBox="0 0 24 24" fill="none" width="22" height="22">
+        <path d="M20 12v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 7H3a1 1 0 0 0-1 1v4h20V8a1 1 0 0 0-1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M12 7v15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      <span class="lame-pdp-gift-hint__sparkle" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0l2.5 8.5L23 11l-8.5 2.5L12 22l-2.5-8.5L1 11l8.5-2.5z"/></svg>
+      </span>
+    </div>
+
+    <div class="lame-pdp-gift-hint__content">
+      <div class="lame-pdp-gift-hint__header">
+        <span class="lame-pdp-gift-hint__title" data-gift-title>
+          {% if is_qualified %}
+            {{ block.settings.qualified_heading | default: def_qual_title }}
+          {% else %}
+            {{ block.settings.unqualified_heading | default: def_unqual_title }}
+          {% endif %}
+        </span>
+        {% if block.settings.show_badge %}
+          <span class="lame-pdp-gift-hint__badge" data-gift-badge>
+            {% if is_qualified %}
+              {{ block.settings.qualified_badge | default: "UNLOCKED" }}
+            {% else %}
+              {{ block.settings.badge_text | default: "SPECIAL OFFER" }}
+            {% endif %}
+          </span>
+        {% endif %}
+      </div>
+
+      <p class="lame-pdp-gift-hint__message" data-gift-message>
+        {% if is_qualified %}
+          {{ block.settings.qualified_text | default: def_qual_msg }}
+        {% else %}
+          {% if block.settings.show_diff and diff_cents > 0 %}
+            Add items worth <strong>{{ diff_formatted }}</strong> more to unlock your free gift!
+          {% else %}
+            {{ block.settings.unqualified_text | default: "Purchase for ₹499 or more across the store to receive an exclusive free gift!" }}
+          {% endif %}
+        {% endif %}
+      </p>
+
+      {% if block.settings.show_progress %}
+        <div class="lame-pdp-gift-hint__progress-track" aria-hidden="true">
+          <div
+            class="lame-pdp-gift-hint__progress-fill"
+            data-gift-progress-fill
+            style="width: {{ progress_percent }}%;"
+          ></div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const hintElement = document.currentScript ? document.currentScript.previousElementSibling : null;
+    if (!hintElement || !hintElement.classList.contains('lame-pdp-gift-hint')) return;
+
+    const thresholdCents = parseInt(hintElement.dataset.thresholdCents || '49900', 10);
+    const thresholdVal = hintElement.dataset.threshold || '499';
+    const showDiff = hintElement.dataset.showDiff === 'true';
+    const showProgress = hintElement.dataset.showProgress === 'true';
+
+    const qualTitle = {{ block.settings.qualified_heading | default: def_qual_title | json }};
+    const qualMsg = {{ block.settings.qualified_text | default: def_qual_msg | json }};
+    const qualBadge = {{ block.settings.qualified_badge | default: 'UNLOCKED' | json }};
+    const unqualTitle = {{ block.settings.unqualified_heading | default: def_unqual_title | json }};
+    const unqualMsg = {{ block.settings.unqualified_text | default: 'Purchase for ₹499 or more across the store to receive an exclusive free gift!' | json }};
+    const unqualBadge = {{ block.settings.badge_text | default: 'SPECIAL OFFER' | json }};
+
+    function formatMoney(cents) {
+      if (window.Shopify && typeof window.Shopify.formatMoney === 'function') {
+        return window.Shopify.formatMoney(cents);
+      }
+      return '₹' + Math.ceil(cents / 100);
+    }
+
+    function updateView(price) {
+      if (price == null) return;
+      const isQual = price >= thresholdCents;
+      hintElement.classList.toggle('is-qualified', isQual);
+
+      const titleEl = hintElement.querySelector('[data-gift-title]');
+      const badgeEl = hintElement.querySelector('[data-gift-badge]');
+      const msgEl = hintElement.querySelector('[data-gift-message]');
+      const progressFill = hintElement.querySelector('[data-gift-progress-fill]');
+
+      if (isQual) {
+        if (titleEl) titleEl.textContent = qualTitle;
+        if (badgeEl) badgeEl.textContent = qualBadge;
+        if (msgEl) msgEl.textContent = qualMsg;
+        if (progressFill) progressFill.style.width = '100%';
+      } else {
+        if (titleEl) titleEl.textContent = unqualTitle;
+        if (badgeEl) badgeEl.textContent = unqualBadge;
+        if (msgEl) {
+          if (showDiff) {
+            const diff = Math.max(0, thresholdCents - price);
+            msgEl.innerHTML = 'Add items worth <strong>' + formatMoney(diff) + '</strong> more to unlock your free gift!';
+          } else {
+            msgEl.textContent = unqualMsg;
+          }
+        }
+        if (progressFill && thresholdCents > 0) {
+          const pct = Math.min(100, Math.max(5, Math.round((price / thresholdCents) * 100)));
+          progressFill.style.width = pct + '%';
+        }
+      }
+    }
+
+    const section = hintElement.closest('.shopify-section') || document;
+    section.addEventListener('variant:update', function(e) {
+      if (e && e.detail && e.detail.data && e.detail.data.html) {
+        const fresh = e.detail.data.html.querySelector('.lame-pdp-gift-hint');
+        if (fresh) {
+          hintElement.innerHTML = fresh.innerHTML;
+          hintElement.className = fresh.className;
+          return;
+        }
+      }
+      const variant = (e && e.detail && e.detail.resource) || (e && e.detail && e.detail.variant);
+      if (variant && variant.price != null) {
+        updateView(variant.price);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Free gift hint",
+  "tag": null,
+  "settings": [
+    {
+      "type": "number",
+      "id": "threshold",
+      "label": "Free gift threshold (₹)",
+      "default": 499
+    },
+    {
+      "type": "header",
+      "content": "When product is under threshold"
+    },
+    {
+      "type": "text",
+      "id": "unqualified_heading",
+      "label": "Headline (Under ₹499)",
+      "default": "Free Gift on orders over ₹499"
+    },
+    {
+      "type": "textarea",
+      "id": "unqualified_text",
+      "label": "Description (Under ₹499)",
+      "default": "Purchase for ₹499 or more across the store to receive an exclusive free gift!"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Offer badge text",
+      "default": "SPECIAL OFFER"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_diff",
+      "label": "Show amount needed to unlock (e.g. Add ₹X more)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress",
+      "label": "Show progress bar toward ₹499",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "When product is ₹499 or more"
+    },
+    {
+      "type": "text",
+      "id": "qualified_heading",
+      "label": "Headline (₹499 or more)",
+      "default": "Free Gift with this order!"
+    },
+    {
+      "type": "textarea",
+      "id": "qualified_text",
+      "label": "Description (₹499 or more)",
+      "default": "This item qualifies your order for an exclusive free gift at checkout."
+    },
+    {
+      "type": "text",
+      "id": "qualified_badge",
+      "label": "Qualified badge text",
+      "default": "FREE GIFT UNLOCKED"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "select",
+      "id": "style_variant",
+      "label": "Card style",
+      "options": [
+        { "value": "soft_green", "label": "Soft Green (Theme default)" },
+        { "value": "card_border", "label": "Outlined Card" },
+        { "value": "minimal", "label": "Minimal Accent" }
+      ],
+      "default": "soft_green"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badge",
+      "label": "Show badge pill",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Free gift hint",
+      "category": "Product"
+    }
+  ]
+}
+{% endschema %}
