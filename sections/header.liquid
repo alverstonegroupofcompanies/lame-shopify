@@ -329,17 +329,17 @@
     <a href="/collections/all" class="lame-header-announce__ticker" title="Shop all products">
       <div class="lame-header-announce__track">
         <div class="lame-header-announce__group">
-          <span class="lame-header-announce__item">
+          <span class="lame-header-announce__item is-active" data-index="0">
             <span class="lame-header-announce__icon" aria-hidden="true">🎁</span>
             Purchase for <strong>₹499+</strong> and earn a <strong>Free Gift!</strong>
           </span>
           <span class="lame-header-announce__sep" aria-hidden="true">✦</span>
-          <span class="lame-header-announce__item">
+          <span class="lame-header-announce__item" data-index="1">
             <span class="lame-header-announce__icon" aria-hidden="true">🚚</span>
             Free shipping over <strong>₹999</strong>
           </span>
           <span class="lame-header-announce__sep" aria-hidden="true">✦</span>
-          <span class="lame-header-announce__item">
+          <span class="lame-header-announce__item" data-index="2">
             <span class="lame-header-announce__icon" aria-hidden="true">✨</span>
             <strong>100% authentic</strong> beauty essentials
           </span>
@@ -347,6 +347,114 @@
       </div>
     </a>
   </aside>
+  <script>
+    (function () {
+      function initMobileAnnounce() {
+        var container = document.querySelector('.lame-header-announce');
+        if (!container || container.dataset.rotatorInit) return;
+        var items = container.querySelectorAll('.lame-header-announce__item');
+        if (items.length <= 1) return;
+
+        container.dataset.rotatorInit = 'true';
+        var currentIndex = 0;
+        var timer = null;
+        var delay = 5000;
+        var mql = window.matchMedia('(max-width: 989px)');
+
+        function updateItems(nextIndex) {
+          items.forEach(function (item, idx) {
+            item.classList.remove('is-exiting');
+            if (idx === nextIndex) {
+              item.classList.add('is-active');
+              item.setAttribute('aria-hidden', 'false');
+            } else {
+              item.classList.remove('is-active');
+              item.setAttribute('aria-hidden', 'true');
+            }
+          });
+        }
+
+        function tick() {
+          if (!mql.matches) return;
+          if (document.hidden) return;
+          var prev = items[currentIndex];
+          currentIndex = (currentIndex + 1) % items.length;
+          var next = items[currentIndex];
+
+          prev.classList.remove('is-active');
+          prev.classList.add('is-exiting');
+          prev.setAttribute('aria-hidden', 'true');
+
+          next.classList.remove('is-exiting');
+          next.classList.add('is-active');
+          next.setAttribute('aria-hidden', 'false');
+
+          setTimeout(function () {
+            prev.classList.remove('is-exiting');
+          }, 500);
+        }
+
+        function start() {
+          stop();
+          if (mql.matches) {
+            timer = setInterval(tick, delay);
+          }
+        }
+
+        function stop() {
+          if (timer) {
+            clearInterval(timer);
+            timer = null;
+          }
+        }
+
+        function syncState() {
+          if (mql.matches) {
+            updateItems(currentIndex);
+            start();
+          } else {
+            stop();
+            items.forEach(function (item) {
+              item.classList.remove('is-active', 'is-exiting');
+              item.removeAttribute('aria-hidden');
+            });
+          }
+        }
+
+        if (mql.addEventListener) {
+          mql.addEventListener('change', syncState);
+        } else if (mql.addListener) {
+          mql.addListener(syncState);
+        }
+
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) {
+            stop();
+          } else if (mql.matches) {
+            start();
+          }
+        });
+
+        container.addEventListener('mouseenter', stop);
+        container.addEventListener('mouseleave', function () {
+          if (mql.matches) start();
+        });
+
+        container.addEventListener('touchstart', stop, { passive: true });
+        container.addEventListener('touchend', function () {
+          if (mql.matches) start();
+        }, { passive: true });
+
+        syncState();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMobileAnnounce);
+      } else {
+        initMobileAnnounce();
+      }
+    })();
+  </script>
   {%- if section.settings.show_utility_bar and section.settings.utility_bar_position == 'above' -%}
     {% render 'header-utility-bar', section: section %}
   {%- endif -%}
