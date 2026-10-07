@@ -1,0 +1,324 @@
+{%- doc -%}
+  Festive Glow Combo hint block for Product Details Page.
+  Informs shoppers that pairing Lakme Sheet Mask + Jovees Face Wash gives both for ₹199,
+  and offers 1-click addition of both products or the paired product.
+{%- enddoc -%}
+
+{%- liquid
+  assign current_product = closest.product
+  if current_product == blank
+    assign current_product = product
+  endif
+
+  assign prod_str = current_product.title | append: ' ' | append: current_product.vendor | append: ' ' | append: current_product.type | downcase
+  assign handle = current_product.handle
+
+  assign is_lakme = false
+  assign is_jovees = false
+
+  if prod_str contains 'lakme' or prod_str contains 'lakmé'
+    assign is_lakme = true
+  endif
+  if prod_str contains 'jovees'
+    assign is_jovees = true
+  endif
+
+  assign current_variant_id = current_product.selected_or_first_available_variant.id
+  assign partner_variant_id = ''
+  assign partner_name = ''
+
+  if handle contains 'watermelon'
+    assign partner_variant_id = '45585066131558'
+    assign partner_name = 'Jovees Herbal Strawberry Face Wash (50ml)'
+  elsif handle contains 'kiwi'
+    assign partner_variant_id = '45585094312038'
+    assign partner_name = 'Jovees Herbal Grape Face Wash (50ml)'
+  elsif handle contains 'strawberry'
+    assign partner_variant_id = '67651899392102'
+    assign partner_name = 'Lakmé Watermelon Burst Sheet Mask'
+  elsif handle contains 'grape'
+    assign partner_variant_id = '67651822125158'
+    assign partner_name = 'Lakmé Kiwi Crush Sheet Mask'
+  elsif is_lakme
+    assign partner_variant_id = '45585066131558'
+    assign partner_name = 'Jovees Strawberry Face Wash (50ml)'
+  elsif is_jovees
+    assign partner_variant_id = '67651899392102'
+    assign partner_name = 'Lakmé Watermelon Sheet Mask'
+  endif
+-%}
+
+<div
+  class="lame-pdp-combo-hint{% if is_lakme %} lame-pdp-combo-hint--lakme{% elsif is_jovees %} lame-pdp-combo-hint--jovees{% endif %}"
+  {{ block.shopify_attributes }}
+  role="region"
+  aria-label="Festive Glow Combo Offer"
+>
+  <div class="lame-pdp-combo-hint__card">
+    <div class="lame-pdp-combo-hint__header">
+      <span class="lame-pdp-combo-hint__sparkle" aria-hidden="true">✦</span>
+      <span class="lame-pdp-combo-hint__badge">
+        {{ block.settings.badge | default: 'NAVARATHRI SPECIAL • ₹199 COMBO' }}
+      </span>
+      <span class="lame-pdp-combo-hint__sparkle" aria-hidden="true">✦</span>
+    </div>
+
+    <div class="lame-pdp-combo-hint__body">
+      <div class="lame-pdp-combo-hint__icon-box" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M20 12v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 7H3a1 1 0 0 0-1 1v4h20V8a1 1 0 0 0-1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M12 7v15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <div class="lame-pdp-combo-hint__text-wrap">
+        <h4 class="lame-pdp-combo-hint__title">
+          {%- if is_lakme -%}
+            Pair with Jovees Face Wash & get both for ₹199!
+          {%- elsif is_jovees -%}
+            Pair with Lakmé Sheet Mask & get both for ₹199!
+          {%- else -%}
+            Festive Glow Combo: Sheet Mask + Face Wash at ₹199!
+          {%- endif -%}
+        </h4>
+
+        <p class="lame-pdp-combo-hint__desc">
+          {%- if partner_name != blank -%}
+            Pair with <strong>{{ partner_name }}</strong> to unlock the special festive price of just <strong>₹199/-</strong> (Save up to ₹35).
+          {%- elsif is_lakme -%}
+            Add any <strong>Jovees Face Wash</strong> alongside this Lakme Sheet Mask to unlock the festive combo deal at just <strong>₹199/-</strong>.
+          {%- elsif is_jovees -%}
+            Add any <strong>Lakme Sheet Mask</strong> alongside this Jovees Face Wash to unlock the festive combo deal at just <strong>₹199/-</strong>.
+          {%- else -%}
+            Buy Lakme Sheet Mask + Jovees Face Wash together to unlock the festive combo price of just <strong>₹199/-</strong>!
+          {%- endif -%}
+        </p>
+
+        <div class="lame-pdp-combo-hint__cta-wrap">
+          {%- if partner_variant_id != blank -%}
+            <!-- 1-Click Buy Full Combo (Both Items) -->
+            <button
+              type="button"
+              class="lame-pdp-combo-hint__btn lame-pdp-combo-hint__btn--primary"
+              data-lame-combo-add
+              data-items='[{"id":"{{ current_variant_id }}","quantity":1},{"id":"{{ partner_variant_id }}","quantity":1}]'
+            >
+              <span>Add Full Combo to Cart (Both for ₹199)</span>
+            </button>
+
+            <!-- 1-Click Add Paired Item Only -->
+            <button
+              type="button"
+              class="lame-pdp-combo-hint__btn lame-pdp-combo-hint__btn--secondary"
+              data-lame-combo-add
+              data-items='[{"id":"{{ partner_variant_id }}","quantity":1}]'
+            >
+              <span>+ Add {{ partner_name }}</span>
+            </button>
+          {%- elsif is_lakme -%}
+            <a href="/collections/skin-care?brand=jovees-herbal" class="lame-pdp-combo-hint__btn">
+              <span>Explore Jovees Face Washes</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          {%- elsif is_jovees -%}
+            <a href="/collections/skin-care?brand=lakme" class="lame-pdp-combo-hint__btn">
+              <span>Explore Lakme Sheet Masks</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          {%- else -%}
+            <a href="/#festive-combos" class="lame-pdp-combo-hint__btn">
+              <span>Explore Festive Combos</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .lame-pdp-combo-hint {
+    margin-block: 0.85rem;
+    width: 100%;
+  }
+
+  .lame-pdp-combo-hint__card {
+    background: linear-gradient(135deg, #fdfbf7 0%, #f9f3e9 100%);
+    border: 1px solid rgba(212, 163, 89, 0.45);
+    border-radius: 14px;
+    padding: 0.95rem 1.15rem;
+    box-shadow: 0 4px 16px rgba(212, 163, 89, 0.12);
+  }
+
+  .lame-pdp-combo-hint--lakme .lame-pdp-combo-hint__card {
+    border-color: rgba(167, 35, 50, 0.35);
+    background: linear-gradient(135deg, #fff9f9 0%, #fdf2f2 100%);
+  }
+
+  .lame-pdp-combo-hint--jovees .lame-pdp-combo-hint__card {
+    border-color: rgba(28, 107, 62, 0.35);
+    background: linear-gradient(135deg, #f7fbf8 0%, #edf6f0 100%);
+  }
+
+  .lame-pdp-combo-hint__header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .lame-pdp-combo-hint__sparkle {
+    color: #d4a359;
+    font-size: 0.75rem;
+  }
+
+  .lame-pdp-combo-hint__badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #925310;
+  }
+
+  .lame-pdp-combo-hint--lakme .lame-pdp-combo-hint__badge {
+    color: #9e1f2b;
+  }
+
+  .lame-pdp-combo-hint--jovees .lame-pdp-combo-hint__badge {
+    color: #176336;
+  }
+
+  .lame-pdp-combo-hint__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .lame-pdp-combo-hint__icon-box {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(212, 163, 89, 0.15);
+    color: #b86214;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lame-pdp-combo-hint--lakme .lame-pdp-combo-hint__icon-box {
+    background: rgba(167, 35, 50, 0.12);
+    color: #9e1f2b;
+  }
+
+  .lame-pdp-combo-hint--jovees .lame-pdp-combo-hint__icon-box {
+    background: rgba(28, 107, 62, 0.12);
+    color: #176336;
+  }
+
+  .lame-pdp-combo-hint__text-wrap {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lame-pdp-combo-hint__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.3;
+  }
+
+  .lame-pdp-combo-hint__desc {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #555555;
+    line-height: 1.4;
+  }
+
+  .lame-pdp-combo-hint__cta-wrap {
+    margin-top: 0.45rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .lame-pdp-combo-hint__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.95rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 200ms ease, transform 150ms ease, box-shadow 200ms ease;
+  }
+
+  .lame-pdp-combo-hint__btn--primary {
+    background: #9e1f2b;
+    color: #ffffff;
+    box-shadow: 0 3px 8px rgba(158, 31, 43, 0.25);
+  }
+
+  .lame-pdp-combo-hint__btn--primary:hover {
+    background: #750e1c;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(117, 14, 28, 0.35);
+  }
+
+  .lame-pdp-combo-hint--jovees .lame-pdp-combo-hint__btn--primary {
+    background: #176336;
+    box-shadow: 0 3px 8px rgba(23, 99, 54, 0.25);
+  }
+
+  .lame-pdp-combo-hint--jovees .lame-pdp-combo-hint__btn--primary:hover {
+    background: #0f4625;
+  }
+
+  .lame-pdp-combo-hint__btn--secondary {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .lame-pdp-combo-hint__btn--secondary:hover {
+    background: #f7f7f7;
+    border-color: rgba(0, 0, 0, 0.4);
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Festive Glow Combo Hint",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge text",
+      "default": "NAVARATHRI SPECIAL • ₹199 COMBO"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Festive Glow Combo Hint"
+    }
+  ]
+}
+{% endschema %}

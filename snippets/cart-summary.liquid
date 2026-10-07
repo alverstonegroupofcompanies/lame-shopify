@@ -253,6 +253,29 @@
     endif
   -%}
 
+  {%- liquid
+    assign has_lakme = false
+    assign has_jovees = false
+    for item in cart.items
+      assign item_str = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.product.type | downcase
+      if item_str contains 'lakme' or item_str contains 'lakmé'
+        assign has_lakme = true
+      endif
+      if item_str contains 'jovees'
+        assign has_jovees = true
+      endif
+    endfor
+  -%}
+  {%- if has_lakme and has_jovees -%}
+    <div class="lame-cart-festive-discount-callout" style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;font-size:0.85rem;border-bottom:1px dashed rgba(28,107,62,0.35);margin-bottom:0.6rem;">
+      <span style="color:#176336;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+        <span>🎉 Festive Combo Deal:</span>
+      </span>
+      <span style="color:#176336;font-weight:700;">₹199 Combo Unlocked</span>
+    </div>
+    <input type="hidden" name="discount" value="FESTIVE199" form="cart-form">
+  {%- endif -%}
+
   <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}">
     <span
       class="cart-totals__item cart-totals__total"

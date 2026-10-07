@@ -1,0 +1,279 @@
+{%- doc -%}
+  Festive Glow Combo banner for Cart page & Cart drawer.
+  Alerts the user when they have one combo item to add the matching item for ₹199,
+  and confirms unlocked savings when both items are in cart.
+{%- enddoc -%}
+
+{%- liquid
+  assign has_lakme = false
+  assign has_jovees = false
+
+  for item in cart.items
+    assign item_str = item.title | append: ' ' | append: item.vendor | append: ' ' | append: item.product.type | downcase
+    if item_str contains 'lakme' or item_str contains 'lakmé'
+      assign has_lakme = true
+    endif
+    if item_str contains 'jovees'
+      assign has_jovees = true
+    endif
+  endfor
+
+  assign combo_unlocked = false
+  if has_lakme and has_jovees
+    assign combo_unlocked = true
+  endif
+-%}
+
+{%- unless cart.empty? -%}
+  <aside
+    class="lame-cart-combo-banner{% if combo_unlocked %} lame-cart-combo-banner--unlocked{% elsif has_lakme or has_jovees %} lame-cart-combo-banner--active{% else %} lame-cart-combo-banner--teaser{% endif %}"
+    role="status"
+    aria-live="polite"
+    aria-label="Festive Glow Combo Offer"
+  >
+    <div class="lame-cart-combo-banner__card">
+      <div class="lame-cart-combo-banner__icon-wrap" aria-hidden="true">
+        {%- if combo_unlocked -%}
+          <svg class="lame-cart-combo-banner__icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#1c6b3e" stroke="#1c6b3e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        {%- elsif has_lakme or has_jovees -%}
+          <svg class="lame-cart-combo-banner__icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#b86214" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        {%- else -%}
+          <svg class="lame-cart-combo-banner__icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M20 12v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9" stroke="#b86214" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 7H3a1 1 0 0 0-1 1v4h20V8a1 1 0 0 0-1-1Z" stroke="#b86214" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M12 7v15" stroke="#b86214" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        {%- endif -%}
+      </div>
+
+      <div class="lame-cart-combo-banner__content">
+        {%- if combo_unlocked -%}
+          <div class="lame-cart-combo-banner__badge lame-cart-combo-banner__badge--success">🎉 Festive Deal Active</div>
+          <h4 class="lame-cart-combo-banner__title">Festive Glow Combo Unlocked!</h4>
+          <p class="lame-cart-combo-banner__text">
+            Your Lakmé Sheet Mask + Jovees Face Wash pair qualifies for the special <strong>₹199/-</strong> combo deal!
+          </p>
+          <div class="lame-cart-combo-deal-pill">
+            <span class="lame-cart-combo-deal-pill__price">Combo Price: <strong>₹199.00</strong></span>
+            <span class="lame-cart-combo-deal-pill__save">You Save ₹16!</span>
+          </div>
+          <button
+            type="button"
+            class="lame-cart-combo-code-btn"
+            data-lame-apply-festive-code="FESTIVE199"
+          >
+            <span>Apply Coupon <strong>FESTIVE199</strong></span>
+          </button>
+        {%- elsif has_lakme and has_jovees == false -%}
+          <div class="lame-cart-combo-banner__badge">Save with Combo Deal</div>
+          <h4 class="lame-cart-combo-banner__title">Complete Your ₹199 Festive Glow Combo!</h4>
+          <p class="lame-cart-combo-banner__text">
+            You have a <strong>Lakmé Sheet Mask</strong> in your cart. Add <strong>Jovees Strawberry Face Wash</strong> to get both for just <strong>₹199/-</strong>!
+          </p>
+          <button
+            type="button"
+            class="button lame-cart-combo-banner__btn"
+            data-lame-combo-add
+            data-items='[{"id":"45585066131558","quantity":1}]'
+          >
+            <span>+ Quick Add Jovees Face Wash (₹199 Combo)</span>
+          </button>
+        {%- elsif has_jovees and has_lakme == false -%}
+          <div class="lame-cart-combo-banner__badge">Save with Combo Deal</div>
+          <h4 class="lame-cart-combo-banner__title">Complete Your ₹199 Festive Glow Combo!</h4>
+          <p class="lame-cart-combo-banner__text">
+            You have a <strong>Jovees Face Wash</strong> in your cart. Add <strong>Lakmé Watermelon Sheet Mask</strong> to get both for just <strong>₹199/-</strong>!
+          </p>
+          <button
+            type="button"
+            class="button lame-cart-combo-banner__btn"
+            data-lame-combo-add
+            data-items='[{"id":"67651899392102","quantity":1}]'
+          >
+            <span>+ Quick Add Lakmé Sheet Mask (₹199 Combo)</span>
+          </button>
+        {%- else -%}
+          <div class="lame-cart-combo-banner__teaser-row">
+            <p class="lame-cart-combo-banner__text">
+              ✨ <strong>Navarathri Special:</strong> Lakme Sheet Mask + Jovees Face Wash combo at just <strong>₹199/-</strong>
+            </p>
+            <a
+              href="/#festive-combos"
+              class="lame-cart-combo-banner__link"
+            >
+              Shop Combo →
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </aside>
+{%- endunless -%}
+
+<style>
+  .lame-cart-combo-banner {
+    margin-block: 0.85rem;
+    position: relative;
+    width: 100%;
+  }
+
+  .lame-cart-combo-banner__card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.95rem 1.15rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fffdf9 0%, #fdf6ec 100%);
+    border: 1px solid rgba(212, 163, 89, 0.45);
+    box-shadow: 0 4px 14px rgba(212, 163, 89, 0.1);
+  }
+
+  .lame-cart-combo-banner--unlocked .lame-cart-combo-banner__card {
+    background: linear-gradient(135deg, #f5faf6 0%, #ebf6ee 100%);
+    border-color: rgba(28, 107, 62, 0.35);
+    box-shadow: 0 4px 14px rgba(28, 107, 62, 0.08);
+  }
+
+  .lame-cart-combo-banner--teaser .lame-cart-combo-banner__card {
+    padding: 0.65rem 1rem;
+    align-items: center;
+    background: #fdfbf7;
+  }
+
+  .lame-cart-combo-banner__icon-wrap {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .lame-cart-combo-banner__content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .lame-cart-combo-banner__badge {
+    align-self: flex-start;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #f0e2cd;
+    color: #925310;
+  }
+
+  .lame-cart-combo-banner__badge--success {
+    background: #d4ebd9;
+    color: #176336;
+  }
+
+  .lame-cart-combo-banner__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.25;
+  }
+
+  .lame-cart-combo-banner__text {
+    margin: 0;
+    font-size: 0.84rem;
+    color: #4a4a4a;
+    line-height: 1.4;
+  }
+
+  .lame-cart-combo-deal-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.25rem;
+    padding: 0.3rem 0.65rem;
+    background: #ffffff;
+    border: 1px solid rgba(28, 107, 62, 0.25);
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
+
+  .lame-cart-combo-deal-pill__price {
+    color: #176336;
+  }
+
+  .lame-cart-combo-deal-pill__save {
+    background: #e6f4ea;
+    color: #137333;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .lame-cart-combo-code-btn {
+    align-self: flex-start;
+    margin-top: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 6px;
+    background: #176336;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: background 200ms ease;
+  }
+
+  .lame-cart-combo-code-btn:hover {
+    background: #0f4625;
+  }
+
+  .lame-cart-combo-banner__btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background: #9e1f2b;
+    color: #ffffff;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(158, 31, 43, 0.25);
+    transition: background 200ms ease, transform 200ms ease;
+  }
+
+  .lame-cart-combo-banner__btn:hover {
+    background: #750e1c;
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .lame-cart-combo-banner__teaser-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .lame-cart-combo-banner__link {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #b86214;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .lame-cart-combo-banner__link:hover {
+    text-decoration: underline;
+  }
+</style>

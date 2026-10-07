@@ -1,0 +1,845 @@
+{%- liquid
+  assign card_1_img = section.settings.card_1_image
+  assign card_1_asset = section.settings.card_1_asset | default: 'lame-festive-glow-strawberry.jpg'
+  assign card_1_title = section.settings.card_1_title | default: 'Festive Glow Combo — Strawberry & Watermelon'
+  assign card_1_desc = section.settings.card_1_desc | default: 'Lakme Blush & Glow Watermelon Sheet Mask + Jovees Herbal Strawberry Face Wash (50ml)'
+  assign card_1_badge = section.settings.card_1_badge | default: 'Navarathri Special • ₹199'
+  assign card_1_price = section.settings.card_1_price | default: '₹199'
+  assign card_1_mrp = section.settings.card_1_mrp | default: '₹275'
+  assign card_1_link = section.settings.card_1_link | default: '/collections/skin-care'
+  assign card_1_btn = section.settings.card_1_btn_text | default: 'Shop Strawberry Combo'
+
+  assign card_2_img = section.settings.card_2_image
+  assign card_2_asset = section.settings.card_2_asset | default: 'lame-festive-glow-grape.jpg'
+  assign card_2_title = section.settings.card_2_title | default: 'Festive Glow Combo — Grape & Kiwi'
+  assign card_2_desc = section.settings.card_2_desc | default: 'Lakme Blush & Glow Kiwi Crush Sheet Mask + Jovees Grape Face Wash'
+  assign card_2_badge = section.settings.card_2_badge | default: 'Navarathri Special • ₹199'
+  assign card_2_price = section.settings.card_2_price | default: '₹199'
+  assign card_2_mrp = section.settings.card_2_mrp | default: '₹275'
+  assign card_2_link = section.settings.card_2_link | default: '/collections/skin-care'
+  assign card_2_btn = section.settings.card_2_btn_text | default: 'Shop Grape Combo'
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-festive-combos"
+  id="LameFestiveCombos-{{ section.id }}"
+  data-section-id="{{ section.id }}"
+  {{ section.shopify_attributes }}
+>
+  <div
+    class="lame-festive-combos__wrap spacing-style"
+    style="{% render 'spacing-padding', settings: section.settings %}"
+  >
+    <header class="lame-festive-combos__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="lame-festive-combos__eyebrow-wrap">
+          <span class="lame-festive-combos__sparkle" aria-hidden="true">✦</span>
+          <span class="lame-festive-combos__eyebrow">{{ section.settings.eyebrow | escape }}</span>
+          <span class="lame-festive-combos__sparkle" aria-hidden="true">✦</span>
+        </div>
+      {%- endif -%}
+
+      {% render 'lame-section-heading',
+        title: section.settings.heading,
+        subtitle: section.settings.subtitle,
+        alignment: 'center',
+        size: 'large'
+      %}
+    </header>
+
+    <div class="lame-festive-combos__grid">
+      <!-- Card 1: Strawberry & Watermelon -->
+      <article class="lame-festive-combos__card lame-festive-combos__card--strawberry" data-lame-reveal>
+        <div class="lame-festive-combos__media-wrap">
+          <a
+            href="{{ card_1_link }}"
+            class="lame-festive-combos__media-link"
+            aria-label="{{ card_1_title | escape }}"
+            tabindex="-1"
+          >
+            {%- if card_1_img != blank -%}
+              {{
+                card_1_img
+                | image_url: width: 1024
+                | image_tag:
+                  class: 'lame-festive-combos__img',
+                  loading: 'lazy',
+                  widths: '360, 540, 720, 1024',
+                  sizes: '(min-width: 990px) 48vw, 94vw',
+                  alt: card_1_title
+              }}
+            {%- else -%}
+              <img
+                class="lame-festive-combos__img"
+                src="{{ card_1_asset | asset_url }}"
+                alt="{{ card_1_title | escape }}"
+                width="819"
+                height="1024"
+                loading="lazy"
+                decoding="async"
+              >
+            {%- endif -%}
+          </a>
+          <span class="lame-festive-combos__chip">{{ card_1_badge }}</span>
+        </div>
+
+        <div class="lame-festive-combos__info">
+          <div class="lame-festive-combos__meta-top">
+            <span class="lame-festive-combos__tag">Festive Duo</span>
+            <div class="lame-festive-combos__price-block">
+              {%- if card_1_mrp != blank -%}
+                <span class="lame-festive-combos__mrp">MRP {{ card_1_mrp }}</span>
+              {%- endif -%}
+              <span class="lame-festive-combos__price">{{ card_1_price }}</span>
+            </div>
+          </div>
+
+          <h3 class="lame-festive-combos__card-title">
+            <a href="{{ card_1_link }}">{{ card_1_title }}</a>
+          </h3>
+
+          <p class="lame-festive-combos__desc">{{ card_1_desc }}</p>
+
+          <div class="lame-festive-combos__bundle-hint">
+            <svg class="lame-festive-combos__hint-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Buy Lakme Sheet Mask + Jovees Face Wash together for just <strong>₹199/-</strong></span>
+          </div>
+
+          <div class="lame-festive-combos__actions">
+            <button
+              type="button"
+              class="button lame-festive-combos__cta lame-festive-combos__cta--atc"
+              data-lame-combo-add
+              data-items='[{"id":"67651899392102","quantity":1},{"id":"45585066131558","quantity":1}]'
+              aria-label="Add Strawberry and Watermelon Combo to cart for ₹199"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="2"/>
+                <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <span>Add Combo (Both for ₹199)</span>
+            </button>
+            <a
+              href="{{ card_1_link }}"
+              class="lame-festive-combos__secondary-link"
+            >
+              <span>View Individual Products →</span>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2: Grape & Kiwi -->
+      <article class="lame-festive-combos__card lame-festive-combos__card--grape" data-lame-reveal data-lame-delay="1">
+        <div class="lame-festive-combos__media-wrap">
+          <a
+            href="{{ card_2_link }}"
+            class="lame-festive-combos__media-link"
+            aria-label="{{ card_2_title | escape }}"
+            tabindex="-1"
+          >
+            {%- if card_2_img != blank -%}
+              {{
+                card_2_img
+                | image_url: width: 1024
+                | image_tag:
+                  class: 'lame-festive-combos__img',
+                  loading: 'lazy',
+                  widths: '360, 540, 720, 1024',
+                  sizes: '(min-width: 990px) 48vw, 94vw',
+                  alt: card_2_title
+              }}
+            {%- else -%}
+              <img
+                class="lame-festive-combos__img"
+                src="{{ card_2_asset | asset_url }}"
+                alt="{{ card_2_title | escape }}"
+                width="819"
+                height="1024"
+                loading="lazy"
+                decoding="async"
+              >
+            {%- endif -%}
+          </a>
+          <span class="lame-festive-combos__chip">{{ card_2_badge }}</span>
+        </div>
+
+        <div class="lame-festive-combos__info">
+          <div class="lame-festive-combos__meta-top">
+            <span class="lame-festive-combos__tag">Festive Duo</span>
+            <div class="lame-festive-combos__price-block">
+              {%- if card_2_mrp != blank -%}
+                <span class="lame-festive-combos__mrp">MRP {{ card_2_mrp }}</span>
+              {%- endif -%}
+              <span class="lame-festive-combos__price">{{ card_2_price }}</span>
+            </div>
+          </div>
+
+          <h3 class="lame-festive-combos__card-title">
+            <a href="{{ card_2_link }}">{{ card_2_title }}</a>
+          </h3>
+
+          <p class="lame-festive-combos__desc">{{ card_2_desc }}</p>
+
+          <div class="lame-festive-combos__bundle-hint">
+            <svg class="lame-festive-combos__hint-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Buy Lakme Sheet Mask + Jovees Face Wash together for just <strong>₹199/-</strong></span>
+          </div>
+
+          <div class="lame-festive-combos__actions">
+            <button
+              type="button"
+              class="button lame-festive-combos__cta lame-festive-combos__cta--atc"
+              data-lame-combo-add
+              data-items='[{"id":"67651822125158","quantity":1},{"id":"45585094312038","quantity":1}]'
+              aria-label="Add Grape and Kiwi Combo to cart for ₹199"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" stroke-width="2"/>
+                <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              <span>Add Combo (Both for ₹199)</span>
+            </button>
+            <a
+              href="{{ card_2_link }}"
+              class="lame-festive-combos__secondary-link"
+            >
+              <span>View Individual Products →</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- How the Combo Works Step Bar -->
+    {%- if section.settings.show_how_it_works -%}
+      <div class="lame-festive-combos__steps-banner" role="region" aria-label="How the combo works">
+        <div class="lame-festive-combos__steps-title">
+          <span class="lame-festive-combos__steps-sparkle" aria-hidden="true">✦</span>
+          <span>{{ section.settings.how_it_works_title | default: 'How The ₹199 Festive Offer Works' }}</span>
+        </div>
+        <ol class="lame-festive-combos__steps-list">
+          <li class="lame-festive-combos__step-item">
+            <span class="lame-festive-combos__step-num">1</span>
+            <span class="lame-festive-combos__step-text">{{ section.settings.step_1_text | default: 'Add any Lakme Sheet Mask to cart' }}</span>
+          </li>
+          <li class="lame-festive-combos__step-arrow" aria-hidden="true">➔</li>
+          <li class="lame-festive-combos__step-item">
+            <span class="lame-festive-combos__step-num">2</span>
+            <span class="lame-festive-combos__step-text">{{ section.settings.step_2_text | default: 'Add any Jovees Face Wash to cart' }}</span>
+          </li>
+          <li class="lame-festive-combos__step-arrow" aria-hidden="true">➔</li>
+          <li class="lame-festive-combos__step-item lame-festive-combos__step-item--highlight">
+            <span class="lame-festive-combos__step-num">3</span>
+            <span class="lame-festive-combos__step-text">{{ section.settings.step_3_text | default: 'Get both together for just ₹199/-!' }}</span>
+          </li>
+        </ol>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-festive-combos {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lame-festive-combos__wrap {
+    max-width: var(--page-width, 1280px);
+    margin-inline: auto;
+  }
+
+  .lame-festive-combos__header {
+    text-align: center;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .lame-festive-combos__eyebrow-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 1rem;
+    background: linear-gradient(135deg, rgba(212, 163, 89, 0.16), rgba(243, 112, 33, 0.14));
+    border: 1px solid rgba(212, 163, 89, 0.38);
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
+  }
+
+  .lame-festive-combos__sparkle {
+    color: #e5a93b;
+    font-size: 0.9rem;
+    animation: lame-festive-pulse 2s ease-in-out infinite alternate;
+  }
+
+  .lame-festive-combos__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #b86214;
+  }
+
+  @keyframes lame-festive-pulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.15); opacity: 1; }
+  }
+
+  /* Grid Layout */
+  .lame-festive-combos__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1rem, 2.4vw, 2rem);
+  }
+
+  @media (max-width: 749px) {
+    .lame-festive-combos__grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  /* Cards */
+  .lame-festive-combos__card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid rgba(212, 163, 89, 0.32);
+    box-shadow: 0 10px 30px rgba(18, 18, 18, 0.06), 0 2px 8px rgba(212, 163, 89, 0.08);
+    overflow: hidden;
+    transition: transform 320ms cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 320ms ease, border-color 320ms ease;
+  }
+
+  .lame-festive-combos__card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 42px rgba(18, 18, 18, 0.12), 0 6px 16px rgba(212, 163, 89, 0.18);
+    border-color: rgba(212, 163, 89, 0.65);
+  }
+
+  .lame-festive-combos__media-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #f8f6f2;
+    overflow: hidden;
+  }
+
+  .lame-festive-combos__media-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-festive-combos__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .lame-festive-combos__card:hover .lame-festive-combos__img {
+    transform: scale(1.03);
+  }
+
+  .lame-festive-combos__chip {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: linear-gradient(135deg, #a72332 0%, #750e1c 100%);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px rgba(117, 14, 28, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    z-index: 2;
+  }
+
+  .lame-festive-combos__card--grape .lame-festive-combos__chip {
+    background: linear-gradient(135deg, #1c6b3e 0%, #0d4624 100%);
+    box-shadow: 0 4px 12px rgba(13, 70, 36, 0.35);
+  }
+
+  /* Info block */
+  .lame-festive-combos__info {
+    padding: clamp(1.1rem, 2vw, 1.6rem);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background: linear-gradient(180deg, #ffffff 0%, #fffdfa 100%);
+  }
+
+  .lame-festive-combos__meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .lame-festive-combos__tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8c6a38;
+    background: rgba(212, 163, 89, 0.12);
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+  }
+
+  .lame-festive-combos__price-block {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+  }
+
+  .lame-festive-combos__mrp {
+    font-size: 0.82rem;
+    color: #888888;
+    text-decoration: line-through;
+  }
+
+  .lame-festive-combos__price {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #9e1f2b;
+    letter-spacing: -0.02em;
+  }
+
+  .lame-festive-combos__card--grape .lame-festive-combos__price {
+    color: #176336;
+  }
+
+  .lame-festive-combos__card-title {
+    margin: 0 0 0.45rem 0;
+    font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .lame-festive-combos__card-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .lame-festive-combos__card-title a:hover {
+    color: #d4a359;
+  }
+
+  .lame-festive-combos__desc {
+    margin: 0 0 1rem 0;
+    font-size: 0.88rem;
+    color: #555555;
+    line-height: 1.45;
+  }
+
+  .lame-festive-combos__bundle-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 0.85rem;
+    background: #fbf8f2;
+    border: 1px dashed rgba(212, 163, 89, 0.5);
+    border-radius: 10px;
+    font-size: 0.82rem;
+    color: #444444;
+    margin-bottom: 1.15rem;
+    line-height: 1.35;
+  }
+
+  .lame-festive-combos__hint-icon {
+    flex-shrink: 0;
+    color: #b86214;
+  }
+
+  .lame-festive-combos__actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+  }
+
+  .lame-festive-combos__secondary-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8c5d1e;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 200ms ease;
+  }
+
+  .lame-festive-combos__secondary-link:hover {
+    color: #9e1f2b;
+  }
+
+  .lame-festive-combos__card--grape .lame-festive-combos__secondary-link:hover {
+    color: #1c6b3e;
+  }
+
+  .lame-festive-combos__cta {
+    width: 100%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.4rem;
+    background: linear-gradient(135deg, #1b1b1b 0%, #2f2723 100%);
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 163, 89, 0.35);
+    transition: background 250ms ease, transform 200ms ease, box-shadow 250ms ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  }
+
+  .lame-festive-combos__cta.is-loading,
+  .lame-festive-combos__cta.is-success {
+    pointer-events: none;
+    opacity: 0.95;
+  }
+
+  .lame-festive-combos__cta.is-success {
+    background: #1c6b3e !important;
+    border-color: #1c6b3e !important;
+  }
+
+  .lame-festive-combos__cta:hover {
+    background: linear-gradient(135deg, #9e1f2b 0%, #750e1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(117, 14, 28, 0.35);
+    color: #ffffff;
+  }
+
+  .lame-festive-combos__card--grape .lame-festive-combos__cta:hover {
+    background: linear-gradient(135deg, #1c6b3e 0%, #0d4624 100%);
+    box-shadow: 0 6px 18px rgba(13, 70, 36, 0.35);
+  }
+
+  /* How it works steps bar */
+  .lame-festive-combos__steps-banner {
+    margin-top: clamp(1.8rem, 3.5vw, 2.8rem);
+    background: linear-gradient(135deg, #fdfbf7 0%, #f6f1e8 100%);
+    border: 1px solid rgba(212, 163, 89, 0.45);
+    border-radius: 16px;
+    padding: clamp(1rem, 2vw, 1.4rem) clamp(1rem, 2.5vw, 2rem);
+    box-shadow: 0 6px 20px rgba(212, 163, 89, 0.08);
+  }
+
+  .lame-festive-combos__steps-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8c5d1e;
+    margin-bottom: 0.85rem;
+  }
+
+  .lame-festive-combos__steps-sparkle {
+    color: #d4a359;
+  }
+
+  .lame-festive-combos__steps-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .lame-festive-combos__step-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333333;
+  }
+
+  .lame-festive-combos__step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #d4a359;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .lame-festive-combos__step-arrow {
+    color: #c49a56;
+    font-size: 1rem;
+  }
+
+  .lame-festive-combos__step-item--highlight {
+    font-weight: 700;
+    color: #9e1f2b;
+  }
+
+  .lame-festive-combos__step-item--highlight .lame-festive-combos__step-num {
+    background: #9e1f2b;
+  }
+
+  @media (max-width: 640px) {
+    .lame-festive-combos__steps-list {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .lame-festive-combos__step-arrow {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Festive Glow Combos",
+  "tag": "section",
+  "class": "lame-festive-combos-section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow badge",
+      "default": "NAVARATHRI SPECIAL OFFER"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Festive Glow Combos"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Lakme Sheet Mask + Jovees Face Wash — Combo At Just ₹199/-"
+    },
+    {
+      "type": "header",
+      "content": "Combo 1 (Strawberry & Watermelon)"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_image",
+      "label": "Combo 1 image"
+    },
+    {
+      "type": "text",
+      "id": "card_1_asset",
+      "label": "Combo 1 fallback asset",
+      "default": "lame-festive-glow-strawberry.jpg"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Combo 1 title",
+      "default": "Festive Glow Combo — Strawberry & Watermelon"
+    },
+    {
+      "type": "text",
+      "id": "card_1_desc",
+      "label": "Combo 1 description",
+      "default": "Lakme Blush & Glow Watermelon Burst Sheet Mask + Jovees Herbal Strawberry Face Wash"
+    },
+    {
+      "type": "text",
+      "id": "card_1_badge",
+      "label": "Combo 1 badge",
+      "default": "Navarathri Special • ₹199"
+    },
+    {
+      "type": "text",
+      "id": "card_1_price",
+      "label": "Combo 1 offer price",
+      "default": "₹199"
+    },
+    {
+      "type": "text",
+      "id": "card_1_mrp",
+      "label": "Combo 1 MRP",
+      "default": "₹275"
+    },
+    {
+      "type": "url",
+      "id": "card_1_link",
+      "label": "Combo 1 link"
+    },
+    {
+      "type": "text",
+      "id": "card_1_btn_text",
+      "label": "Combo 1 button text",
+      "default": "Shop Strawberry Combo"
+    },
+    {
+      "type": "header",
+      "content": "Combo 2 (Grape & Kiwi)"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_image",
+      "label": "Combo 2 image"
+    },
+    {
+      "type": "text",
+      "id": "card_2_asset",
+      "label": "Combo 2 fallback asset",
+      "default": "lame-festive-glow-grape.jpg"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Combo 2 title",
+      "default": "Festive Glow Combo — Grape & Kiwi"
+    },
+    {
+      "type": "text",
+      "id": "card_2_desc",
+      "label": "Combo 2 description",
+      "default": "Lakme Blush & Glow Kiwi Crush Sheet Mask + Jovees Grape Face Wash"
+    },
+    {
+      "type": "text",
+      "id": "card_2_badge",
+      "label": "Combo 2 badge",
+      "default": "Navarathri Special • ₹199"
+    },
+    {
+      "type": "text",
+      "id": "card_2_price",
+      "label": "Combo 2 offer price",
+      "default": "₹199"
+    },
+    {
+      "type": "text",
+      "id": "card_2_mrp",
+      "label": "Combo 2 MRP",
+      "default": "₹275"
+    },
+    {
+      "type": "url",
+      "id": "card_2_link",
+      "label": "Combo 2 link"
+    },
+    {
+      "type": "text",
+      "id": "card_2_btn_text",
+      "label": "Combo 2 button text",
+      "default": "Shop Grape Combo"
+    },
+    {
+      "type": "header",
+      "content": "How it works step bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_how_it_works",
+      "label": "Show 'How the combo works' step bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "how_it_works_title",
+      "label": "Step bar title",
+      "default": "How The ₹199 Festive Offer Works"
+    },
+    {
+      "type": "text",
+      "id": "step_1_text",
+      "label": "Step 1 text",
+      "default": "Add any Lakme Sheet Mask to cart"
+    },
+    {
+      "type": "text",
+      "id": "step_2_text",
+      "label": "Step 2 text",
+      "default": "Add any Jovees Face Wash to cart"
+    },
+    {
+      "type": "text",
+      "id": "step_3_text",
+      "label": "Step 3 text",
+      "default": "Get both together for just ₹199/-!"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width (framed)" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Festive Glow Combos"
+    }
+  ]
+}
+{% endschema %}
