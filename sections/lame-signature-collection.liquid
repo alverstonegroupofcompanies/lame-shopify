@@ -405,19 +405,7 @@
               </button>
 
               <div class="lame-signature__modal-media-frame">
-                {% if section.settings.reel_video != blank %}
-                  {{
-                    section.settings.reel_video
-                    | video_tag:
-                      autoplay: false,
-                      loop: true,
-                      muted: false,
-                      playsinline: true,
-                      class: 'lame-signature__modal-media',
-                      controls: true,
-                      image_size: '900x'
-                  }}
-                {% elsif section.settings.reel_video_url_external != blank %}
+                {% if section.settings.reel_video_url_external != blank %}
                   {% if section.settings.reel_video_url_external.type == 'youtube' %}
                     <iframe
                       class="lame-signature__modal-media lame-signature__modal-media--iframe"
@@ -437,24 +425,29 @@
                       title="{{ section.settings.reel_caption_title | default: 'Vertical video' | escape }}"
                     ></iframe>
                   {% endif %}
-                {% elsif section.settings.reel_video_url != blank %}
+                {% else %}
                   <video
                     class="lame-signature__modal-media"
+                    data-lame-modal-video
                     loop
                     playsinline
                     controls
-                    src="{{ section.settings.reel_video_url }}"
+                    preload="auto"
                     {% if section.settings.reel_poster != blank %}poster="{{ section.settings.reel_poster | image_url: width: 900 }}"{% endif %}
-                  ></video>
-                {% elsif section.settings.reel_video_asset != blank %}
-                  <video
-                    class="lame-signature__modal-media"
-                    loop
-                    playsinline
-                    controls
-                    src="{{ section.settings.reel_video_asset | asset_url }}"
-                    {% if section.settings.reel_poster != blank %}poster="{{ section.settings.reel_poster | image_url: width: 900 }}"{% endif %}
-                  ></video>
+                  >
+                    {%- if section.settings.reel_video != blank and section.settings.reel_video.sources.size > 0 -%}
+                      {%- for source in section.settings.reel_video.sources -%}
+                        <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                      {%- endfor -%}
+                    {%- endif -%}
+                    {%- if section.settings.reel_video_url != blank -%}
+                      <source src="{{ section.settings.reel_video_url }}" type="video/mp4">
+                    {%- endif -%}
+                    {%- if section.settings.reel_video_asset != blank -%}
+                      <source src="{{ section.settings.reel_video_asset | asset_url }}" type="video/mp4">
+                    {%- endif -%}
+                    <source src="{{ 'lame-home-spotlight.mp4' | asset_url }}" type="video/mp4">
+                  </video>
                 {% endif %}
 
                 <div class="lame-signature__modal-bar">
@@ -671,18 +664,28 @@
       }
 
       // Background Video Autoplay Guarantee
-      const bgVideo = section.querySelector('.lame-signature__bg-video');
+      const bgVideo = section.querySelector('[data-lame-bg-video], .lame-signature__bg-video');
       if (bgVideo && bgVideo.tagName === 'VIDEO') {
         bgVideo.muted = true;
         bgVideo.defaultMuted = true;
         bgVideo.setAttribute('muted', '');
         bgVideo.setAttribute('playsinline', '');
+        bgVideo.setAttribute('webkit-playsinline', '');
         const playBg = () => {
-          if (bgVideo.paused) bgVideo.play().catch(() => {});
+          if (bgVideo.paused) {
+            const p = bgVideo.play();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          }
         };
         playBg();
-        document.addEventListener('touchstart', playBg, { once: true });
-        document.addEventListener('click', playBg, { once: true });
+        bgVideo.addEventListener('loadeddata', playBg, { once: true });
+        bgVideo.addEventListener('canplay', playBg, { once: true });
+        ['scroll', 'touchstart', 'click', 'keydown', 'mousemove'].forEach((evt) => {
+          window.addEventListener(evt, playBg, { once: true, passive: true });
+        });
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) playBg();
+        });
       }
 
       // Video Reel Modal & Play Trigger
@@ -850,6 +853,21 @@
 </script>
 
 {% stylesheet %}
+  .lame-signature.section {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
+  }
+
+  .lame-signature.section > * {
+    grid-column: 1 / -1 !important;
+  }
+
   .lame-signature {
     --lame-sig-forest: 45 74 34;
     --lame-sig-forest-dark: 35 58 28;
@@ -1075,10 +1093,9 @@
     border-radius: 18px;
     overflow: hidden;
     background: #1a2e16;
-    border: 1px solid rgb(255 255 255 / 0.18);
+    border: none;
     box-shadow:
-      0 18px 40px rgb(20 30 18 / 0.16),
-      0 2px 0 rgb(255 255 255 / 0.35) inset;
+      0 18px 40px rgb(20 30 18 / 0.16);
     transition:
       transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.45s ease;
@@ -1409,7 +1426,7 @@
     overflow: hidden;
     background: #fff;
     box-shadow: 0 10px 28px rgb(20 20 20 / 0.08);
-    border: 1px solid rgb(var(--lame-sig-forest) / 0.12);
+    border: none;
     transition: box-shadow 240ms ease, transform 240ms ease;
   }
 
@@ -2267,22 +2284,24 @@
     color: inherit;
     border-radius: 28px;
     overflow: hidden;
-    background: linear-gradient(145deg, #fbfcf9 0%, #edf3ec 60%, #e3ece1 100%);
-    border: 1.5px solid rgba(45, 74, 34, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: none !important;
     box-shadow:
-      0 18px 45px -12px rgba(45, 74, 34, 0.14),
-      0 0 30px rgba(212, 175, 55, 0.08);
+      0 20px 48px -12px rgba(0, 0, 0, 0.08),
+      0 2px 14px rgba(0, 0, 0, 0.03);
     box-sizing: border-box;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
     cursor: pointer;
   }
 
   .lame-signature__barqat-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(212, 175, 55, 0.65);
+    border: none !important;
     box-shadow:
-      0 26px 60px -14px rgba(45, 74, 34, 0.24),
-      0 0 45px rgba(212, 175, 55, 0.22);
+      0 28px 65px -14px rgba(0, 0, 0, 0.14),
+      0 4px 18px rgba(0, 0, 0, 0.05);
   }
 
   @media (max-width: 989px) {
@@ -2399,11 +2418,11 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 0.32rem 0.75rem;
+    padding: 0.35rem 0.8rem;
     border-radius: 999px;
-    background: rgba(45, 74, 34, 0.12);
+    background: rgba(45, 74, 34, 0.08);
     color: #2d4a22;
-    border: 1px solid rgba(45, 74, 34, 0.2);
+    border: none !important;
   }
 
   .lame-signature__barqat-rating {
@@ -2426,29 +2445,31 @@
   .lame-signature__barqat-img-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 5;
-    max-height: 420px;
-    border-radius: 22px;
-    background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.22) 0%, rgba(45, 74, 34, 0.06) 65%, transparent 85%);
+    max-width: 380px;
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 1rem;
+    padding: 0 !important;
     box-sizing: border-box;
   }
 
   .lame-signature__barqat-image {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
-    filter: drop-shadow(0 16px 26px rgba(25, 45, 20, 0.24));
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: lameBarqatFloat 6s ease-in-out infinite;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .lame-signature__barqat-card:hover .lame-signature__barqat-image {
-    transform: scale(1.08) rotate(-1.5deg);
+    transform: scale(1.04);
   }
 
   @keyframes lameBarqatFloat {
@@ -2942,7 +2963,7 @@
         { "value": "page-width", "label": "Page width" },
         { "value": "full-width", "label": "Full width" }
       ],
-      "default": "page-width"
+      "default": "full-width"
     },
     {
       "type": "color_scheme",
