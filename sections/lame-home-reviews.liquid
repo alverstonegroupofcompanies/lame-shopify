@@ -86,174 +86,188 @@
       assign review_login_url = review_login_url | strip
     -%}
 
-    <div class="lame-home-reviews__carousel" data-lame-review-carousel>
-      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--prev" data-lame-review-prev aria-label="Previous reviews">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-      </button>
-
-      <div class="lame-home-reviews__grid" data-lame-review-grid>
-      {%- if review_count > 0 -%}
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank -%}
-            {%- liquid
-              assign card_rating = block.settings.rating | times: 1
-              if card_rating < 1
-                assign card_rating = 1
-              endif
-              if card_rating > 5
-                assign card_rating = 5
-              endif
-
-              assign author_name = block.settings.author | strip
-              assign author_initials = author_name | slice: 0, 1 | upcase
-              assign author_parts = author_name | split: ' '
-              if author_parts.size > 1
-                assign last_initial = author_parts.last | slice: 0, 1 | upcase
-                assign author_initials = author_initials | append: last_initial
-              endif
-
-              assign formatted_date = block.settings.date
-              if block.settings.date != blank and block.settings.date contains '-'
-                assign date_parts = block.settings.date | split: '-'
-                if date_parts.size == 3
-                  assign y = date_parts[0]
-                  assign m = date_parts[1]
-                  assign d = date_parts[2]
-                  case m
-                    when '01'
-                      assign month_name = 'Jan'
-                    when '02'
-                      assign month_name = 'Feb'
-                    when '03'
-                      assign month_name = 'Mar'
-                    when '04'
-                      assign month_name = 'Apr'
-                    when '05'
-                      assign month_name = 'May'
-                    when '06'
-                      assign month_name = 'Jun'
-                    when '07'
-                      assign month_name = 'Jul'
-                    when '08'
-                      assign month_name = 'Aug'
-                    when '09'
-                      assign month_name = 'Sep'
-                    when '10'
-                      assign month_name = 'Oct'
-                    when '11'
-                      assign month_name = 'Nov'
-                    when '12'
-                      assign month_name = 'Dec'
-                    else
-                      assign month_name = m
-                  endcase
-                  assign formatted_date = d | append: ' ' | append: month_name | append: ' ' | append: y
-                endif
-              endif
-            -%}
-            <article class="lame-home-reviews__card" data-review-rating="{{ card_rating }}" {{ block.shopify_attributes }}>
-              <span class="lame-home-reviews__card-quote-mark" aria-hidden="true">“</span>
-
-              <div class="lame-home-reviews__card-body">
-                <div class="lame-home-reviews__card-top">
-                  <span class="lame-home-reviews__stars lame-home-reviews__stars--card" style="--lame-rating: {{ card_rating }};" aria-label="{{ card_rating }} out of 5 stars">
-                    {%- for star_index in (0..4) -%}
-                      <span class="lame-home-reviews__star" style="--i: {{ star_index }}" aria-hidden="true">★</span>
-                    {%- endfor -%}
-                  </span>
-                  {%- if block.settings.date != blank -%}
-                    <time class="lame-home-reviews__date" datetime="{{ block.settings.date | escape }}">{{ formatted_date | escape }}</time>
-                  {%- endif -%}
-                </div>
-
-                {%- if block.settings.title != blank -%}
-                  <h3 class="lame-home-reviews__title">{{ block.settings.title | escape }}</h3>
-                {%- endif -%}
-
-                <blockquote class="lame-home-reviews__quote">
-                  <p>{{ block.settings.quote | escape }}</p>
-                </blockquote>
-                <button type="button" class="lame-home-reviews__read-more" aria-expanded="false" style="display: none;">Read more</button>
+    <div class="lame-home-reviews__content-row">
+      {%- comment -%} LEFT COLUMN: WRITE A REVIEW {%- endcomment -%}
+      <aside class="lame-home-reviews__side-col">
+        <div class="lame-home-reviews__compose" id="lame-write-review">
+          {%- if customer -%}
+            <form
+              class="lame-home-reviews__form"
+              data-lame-review-form
+              data-customer-id="{{ customer.id }}"
+              data-customer-name="{{ reviewer_name | escape }}"
+              data-customer-email="{{ customer.email | escape }}"
+              novalidate
+            >
+              <div class="lame-home-reviews__form-head">
+                <p class="lame-home-reviews__form-title">Write a review</p>
+                <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
               </div>
-
-              <footer class="lame-home-reviews__byline">
-                <div class="lame-home-reviews__author-wrap">
-                  <span class="lame-home-reviews__avatar" aria-hidden="true">{{ author_initials }}</span>
-                  <div class="lame-home-reviews__author-meta">
-                    <cite>{{ author_name | escape }}</cite>
-                    {%- if block.settings.product != blank -%}
-                      <a class="lame-home-reviews__product-link" href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
-                    {%- elsif block.settings.detail != blank -%}
-                      <span class="lame-home-reviews__detail">{{ block.settings.detail | escape }}</span>
-                    {%- endif -%}
-                  </div>
+              <fieldset class="lame-home-reviews__stars-input">
+                <legend>Your rating</legend>
+                <div class="lame-home-reviews__stars-row">
+                  {%- for star in (1..5) reversed -%}
+                    <input
+                      type="radio"
+                      id="LameReviewStar-{{ section.id }}-{{ star }}"
+                      name="rating"
+                      value="{{ star }}"
+                      {% if star == 5 %}checked{% endif %}
+                    >
+                    <label for="LameReviewStar-{{ section.id }}-{{ star }}">
+                      <span aria-hidden="true">★</span>
+                      <span class="lame-home-reviews__sr">{{ star }} star{% if star > 1 %}s{% endif %}</span>
+                    </label>
+                  {%- endfor -%}
                 </div>
-
-                <span class="lame-home-reviews__verified-tag" title="Verified Customer">
-                  <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>
-                  <span>Verified Buyer</span>
-                </span>
-              </footer>
-            </article>
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endif -%}
-      </div>
-
-      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--next" data-lame-review-next aria-label="Next reviews">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-    </div>
-
-    <div class="lame-home-reviews__compose" id="lame-write-review">
-      {%- if customer -%}
-        <form
-          class="lame-home-reviews__form"
-          data-lame-review-form
-          data-customer-id="{{ customer.id }}"
-          data-customer-name="{{ reviewer_name | escape }}"
-          data-customer-email="{{ customer.email | escape }}"
-          novalidate
-        >
-          <div class="lame-home-reviews__form-head">
-            <p class="lame-home-reviews__form-title">Write a review</p>
-            <p class="lame-home-reviews__form-as">Posting as {{ reviewer_name | escape }}</p>
-          </div>
-          <fieldset class="lame-home-reviews__stars-input">
-            <legend>Your rating</legend>
-            <div class="lame-home-reviews__stars-row">
-              {%- for star in (1..5) reversed -%}
-                <input
-                  type="radio"
-                  id="LameReviewStar-{{ section.id }}-{{ star }}"
-                  name="rating"
-                  value="{{ star }}"
-                  {% if star == 5 %}checked{% endif %}
-                >
-                <label for="LameReviewStar-{{ section.id }}-{{ star }}">
-                  <span aria-hidden="true">★</span>
-                  <span class="lame-home-reviews__sr">{{ star }} star{% if star > 1 %}s{% endif %}</span>
-                </label>
-              {%- endfor -%}
+              </fieldset>
+              <label class="lame-home-reviews__field">
+                <span>Title</span>
+                <input type="text" name="title" maxlength="120" autocomplete="off" placeholder="Summarize your review">
+              </label>
+              <label class="lame-home-reviews__field">
+                <span>Review</span>
+                <textarea name="body" rows="3" maxlength="1500" required placeholder="How was your experience?"></textarea>
+              </label>
+              <div class="lame-home-reviews__form-actions">
+                <button type="submit" class="lame-home-reviews__submit">Post review</button>
+                <button type="button" class="lame-home-reviews__cancel" data-lame-review-cancel hidden>Cancel</button>
+              </div>
+              <p class="lame-home-reviews__form-status" data-lame-review-status role="status"></p>
+            </form>
+          {%- else -%}
+            <div class="lame-home-reviews__login-card">
+              <div class="lame-home-reviews__form-head">
+                <p class="lame-home-reviews__form-title">Write a review</p>
+                <p class="lame-home-reviews__form-as">Share your experience with our products</p>
+              </div>
+              <a class="lame-home-reviews__login" href="{{ review_login_url }}">Log in to write a review</a>
             </div>
-          </fieldset>
-          <label class="lame-home-reviews__field">
-            <span>Title</span>
-            <input type="text" name="title" maxlength="120" autocomplete="off">
-          </label>
-          <label class="lame-home-reviews__field">
-            <span>Review</span>
-            <textarea name="body" rows="4" maxlength="1500" required placeholder="How was your experience?"></textarea>
-          </label>
-          <div class="lame-home-reviews__form-actions">
-            <button type="submit" class="lame-home-reviews__submit">Post review</button>
-            <button type="button" class="lame-home-reviews__cancel" data-lame-review-cancel hidden>Cancel</button>
+          {%- endif -%}
+        </div>
+      </aside>
+
+      {%- comment -%} RIGHT COLUMN: REVIEWS CAROUSEL {%- endcomment -%}
+      <div class="lame-home-reviews__carousel-col">
+        <div class="lame-home-reviews__carousel" data-lame-review-carousel>
+          <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--prev" data-lame-review-prev aria-label="Previous reviews">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+
+          <div class="lame-home-reviews__grid" data-lame-review-grid>
+          {%- if review_count > 0 -%}
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'review' and block.settings.quote != blank and block.settings.author != blank -%}
+                {%- liquid
+                  assign card_rating = block.settings.rating | times: 1
+                  if card_rating < 1
+                    assign card_rating = 1
+                  endif
+                  if card_rating > 5
+                    assign card_rating = 5
+                  endif
+
+                  assign author_name = block.settings.author | strip
+                  assign author_initials = author_name | slice: 0, 1 | upcase
+                  assign author_parts = author_name | split: ' '
+                  if author_parts.size > 1
+                    assign last_initial = author_parts.last | slice: 0, 1 | upcase
+                    assign author_initials = author_initials | append: last_initial
+                  endif
+
+                  assign formatted_date = block.settings.date
+                  if block.settings.date != blank and block.settings.date contains '-'
+                    assign date_parts = block.settings.date | split: '-'
+                    if date_parts.size == 3
+                      assign y = date_parts[0]
+                      assign m = date_parts[1]
+                      assign d = date_parts[2]
+                      case m
+                        when '01'
+                          assign month_name = 'Jan'
+                        when '02'
+                          assign month_name = 'Feb'
+                        when '03'
+                          assign month_name = 'Mar'
+                        when '04'
+                          assign month_name = 'Apr'
+                        when '05'
+                          assign month_name = 'May'
+                        when '06'
+                          assign month_name = 'Jun'
+                        when '07'
+                          assign month_name = 'Jul'
+                        when '08'
+                          assign month_name = 'Aug'
+                        when '09'
+                          assign month_name = 'Sep'
+                        when '10'
+                          assign month_name = 'Oct'
+                        when '11'
+                          assign month_name = 'Nov'
+                        when '12'
+                          assign month_name = 'Dec'
+                        else
+                          assign month_name = m
+                      endcase
+                      assign formatted_date = d | append: ' ' | append: month_name | append: ' ' | append: y
+                    endif
+                  endif
+                -%}
+                <article class="lame-home-reviews__card" data-review-rating="{{ card_rating }}" {{ block.shopify_attributes }}>
+                  <span class="lame-home-reviews__card-quote-mark" aria-hidden="true">“</span>
+
+                  <div class="lame-home-reviews__card-body">
+                    <div class="lame-home-reviews__card-top">
+                      <span class="lame-home-reviews__stars lame-home-reviews__stars--card" style="--lame-rating: {{ card_rating }};" aria-label="{{ card_rating }} out of 5 stars">
+                        {%- for star_index in (0..4) -%}
+                          <span class="lame-home-reviews__star" style="--i: {{ star_index }}" aria-hidden="true">★</span>
+                        {%- endfor -%}
+                      </span>
+                      {%- if block.settings.date != blank -%}
+                        <time class="lame-home-reviews__date" datetime="{{ block.settings.date | escape }}">{{ formatted_date | escape }}</time>
+                      {%- endif -%}
+                    </div>
+
+                    {%- if block.settings.title != blank -%}
+                      <h3 class="lame-home-reviews__title">{{ block.settings.title | escape }}</h3>
+                    {%- endif -%}
+
+                    <blockquote class="lame-home-reviews__quote">
+                      <p>{{ block.settings.quote | escape }}</p>
+                    </blockquote>
+                    <button type="button" class="lame-home-reviews__read-more" aria-expanded="false" style="display: none;">Read more</button>
+                  </div>
+
+                  <footer class="lame-home-reviews__byline">
+                    <div class="lame-home-reviews__author-wrap">
+                      <span class="lame-home-reviews__avatar" aria-hidden="true">{{ author_initials }}</span>
+                      <div class="lame-home-reviews__author-meta">
+                        <cite>{{ author_name | escape }}</cite>
+                        {%- if block.settings.product != blank -%}
+                          <a class="lame-home-reviews__product-link" href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
+                        {%- elsif block.settings.detail != blank -%}
+                          <span class="lame-home-reviews__detail">{{ block.settings.detail | escape }}</span>
+                        {%- endif -%}
+                      </div>
+                    </div>
+
+                    <span class="lame-home-reviews__verified-tag" title="Verified Customer">
+                      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>
+                      <span>Verified Buyer</span>
+                    </span>
+                  </footer>
+                </article>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
           </div>
-          <p class="lame-home-reviews__form-status" data-lame-review-status role="status"></p>
-        </form>
-      {%- else -%}
-        <a class="lame-home-reviews__login" href="{{ review_login_url }}">Log in to write a review</a>
-      {%- endif -%}
+
+          <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--next" data-lame-review-next aria-label="Next reviews">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -702,8 +716,14 @@
       const end = atEnd();
       prevBtn?.classList.toggle('is-ended', canMove && start);
       nextBtn?.classList.toggle('is-ended', canMove && end);
-      if (prevBtn) prevBtn.setAttribute('aria-disabled', canMove && start ? 'true' : 'false');
-      if (nextBtn) nextBtn.setAttribute('aria-disabled', canMove && end ? 'true' : 'false');
+      if (prevBtn) {
+        prevBtn.setAttribute('aria-disabled', canMove && start ? 'true' : 'false');
+        prevBtn.style.display = canMove ? '' : 'none';
+      }
+      if (nextBtn) {
+        nextBtn.setAttribute('aria-disabled', canMove && end ? 'true' : 'false');
+        nextBtn.style.display = canMove ? '' : 'none';
+      }
     };
 
     const scrollReviews = (direction) => {
@@ -956,9 +976,42 @@
   }
 
   .lame-home-reviews__wrap {
-    width: min(1180px, 100%);
+    width: min(1380px, 100%);
     margin-inline: auto;
     padding-inline: var(--page-margin, 1.5rem);
+  }
+
+  .lame-home-reviews__content-row {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    width: 100%;
+  }
+
+  .lame-home-reviews__side-col {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .lame-home-reviews__carousel-col {
+    width: 100%;
+    min-width: 0;
+    position: relative;
+  }
+
+  @media screen and (max-width: 989px) {
+    .lame-home-reviews__content-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .lame-home-reviews__side-col {
+      max-width: 32rem;
+      margin-inline: auto;
+      width: 100%;
+    }
   }
 
   .lame-home-reviews__head {
@@ -1084,15 +1137,15 @@
 
   .lame-home-reviews__carousel {
     position: relative;
-    margin-top: 0.5rem;
+    margin-top: 0;
   }
 
   .lame-home-reviews__grid {
     display: flex;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1.15rem;
     margin: 0;
-    padding: 0.5rem 0.25rem 1rem;
+    padding: 0.25rem 0.15rem 0.75rem;
     overflow-x: auto;
     overflow-anchor: none;
     scroll-snap-type: x mandatory;
@@ -1164,11 +1217,11 @@
     flex: 0 0 100%;
     flex-direction: column;
     justify-content: space-between;
-    height: 250px;
-    min-height: 250px;
-    max-height: 250px;
+    height: 255px;
+    min-height: 255px;
+    max-height: 255px;
     margin: 0;
-    padding: 1.45rem 1.4rem 1.2rem;
+    padding: 1.35rem 1.25rem 1.15rem;
     position: relative;
     overflow: hidden;
     background: #ffffff;
@@ -1195,12 +1248,12 @@
 
   .lame-home-reviews__card-quote-mark {
     position: absolute;
-    top: 0.25rem;
-    right: 1.1rem;
+    top: 0.5rem;
+    right: 1rem;
     font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
-    font-size: 5rem;
+    font-size: 4.25rem;
     line-height: 1;
-    color: rgba(212, 175, 55, 0.12);
+    color: rgba(212, 175, 55, 0.08);
     pointer-events: none;
     user-select: none;
     z-index: 0;
@@ -1211,15 +1264,19 @@
     z-index: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
     flex: 1 1 auto;
+    min-height: 0;
   }
 
   .lame-home-reviews__card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    height: 22px;
+    min-height: 22px;
+    flex-shrink: 0;
+    margin-bottom: 0.65rem;
   }
 
   .lame-home-reviews__meta {
@@ -1230,16 +1287,18 @@
   }
 
   .lame-home-reviews__date {
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     font-weight: 500;
     color: #8c9888;
     letter-spacing: 0.02em;
+    white-space: nowrap;
+    line-height: 1;
   }
 
   .lame-home-reviews__title {
-    margin: 0;
+    margin: 0 0 0.35rem;
     font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
-    font-size: 1.12rem;
+    font-size: 1.08rem;
     font-weight: 600;
     line-height: 1.25;
     letter-spacing: -0.01em;
@@ -1255,12 +1314,13 @@
 
   .lame-home-reviews__quote {
     margin: 0;
+    flex: 1 1 auto;
   }
 
   .lame-home-reviews__quote p {
     margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.55;
+    font-size: 0.88rem;
+    line-height: 1.5;
     color: #3f4d3c;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -1307,61 +1367,74 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
-    padding-top: 0.95rem;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.85rem;
     border-top: 1px solid rgba(45, 74, 34, 0.08);
     flex: 0 0 auto;
+    height: 46px;
+    min-height: 46px;
+    box-sizing: border-box;
   }
 
   .lame-home-reviews__author-wrap {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.55rem;
     min-width: 0;
+    flex: 1 1 auto;
   }
 
   .lame-home-reviews__avatar {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
     border-radius: 50%;
     background: linear-gradient(135deg, #2d4a22 0%, #3e682e 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     flex-shrink: 0;
     box-shadow: 0 3px 8px rgba(45, 74, 34, 0.18);
-    border: 2px solid #ffffff;
+    border: 1.5px solid #ffffff;
   }
 
   .lame-home-reviews__author-meta {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     min-width: 0;
+    height: 34px;
+    line-height: 1.25;
   }
 
   .lame-home-reviews__author-meta cite {
     font-style: normal;
     font-weight: 600;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
+    line-height: 1.25;
     color: #1a2c16;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
   }
 
   .lame-home-reviews__detail,
   .lame-home-reviews__product-link {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #72826e;
     text-decoration: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
+    line-height: 1.2;
+    margin-top: 2px;
   }
 
   .lame-home-reviews__product-link:hover {
@@ -1372,17 +1445,19 @@
   .lame-home-reviews__verified-tag {
     display: inline-flex;
     align-items: center;
-    gap: 0.28rem;
-    padding: 0.22rem 0.55rem;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
     border-radius: 999px;
     background: rgba(45, 74, 34, 0.06);
     color: #2d4a22;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.02em;
     border: 1px solid rgba(45, 74, 34, 0.12);
     white-space: nowrap;
     flex-shrink: 0;
+    height: 22px;
+    box-sizing: border-box;
   }
 
   .lame-home-reviews__verified-tag svg {
@@ -1398,15 +1473,16 @@
 
   @media screen and (min-width: 990px) {
     .lame-home-reviews__card {
-      flex-basis: calc((100% - 2.5rem) / 3);
+      flex: 0 0 calc((100% - 2 * 1.15rem) / 3);
+      min-width: 0;
     }
 
     .lame-home-reviews__nav--prev {
-      left: -1.25rem;
+      left: -0.75rem;
     }
 
     .lame-home-reviews__nav--next {
-      right: -1.25rem;
+      right: -0.75rem;
     }
   }
 
@@ -1528,68 +1604,75 @@
   }
 
   .lame-home-reviews__compose {
-    max-width: 32rem;
-    margin: 1.75rem auto 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
   }
 
-  .lame-home-reviews__form {
+  .lame-home-reviews__form,
+  .lame-home-reviews__login-card {
     display: flex;
     flex-direction: column;
-    gap: 0.95rem;
-    padding: 1.45rem 1.35rem 1.3rem;
-    border: 1px solid rgb(0 0 0 / 0.06);
-    border-radius: 18px;
-    background: #fff;
-    box-shadow: 0 10px 28px rgb(28 32 24 / 0.04);
+    gap: 0.85rem;
+    padding: 1.5rem 1.35rem 1.35rem;
+    border: 1px solid rgba(45, 74, 34, 0.12);
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px -6px rgba(28, 48, 20, 0.06);
+    box-sizing: border-box;
+    width: 100%;
   }
 
   .lame-home-reviews__form-head {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.28rem;
-    margin-bottom: 0.15rem;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(45, 74, 34, 0.08);
   }
 
   .lame-home-reviews__form-title {
     margin: 0;
-    text-align: center;
-    font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-    font-size: 0.74rem;
+    text-align: left;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: 1.35rem;
     font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #1c1c1c;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: #1a2c16;
+    text-transform: none;
   }
 
   .lame-home-reviews__form-as {
     margin: 0;
-    text-align: center;
-    font-size: 0.84rem;
-    color: #6b6460;
+    text-align: left;
+    font-size: 0.8rem;
+    color: #556250;
   }
 
   .lame-home-reviews__stars-input {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.35rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
     min-inline-size: 0;
     margin: 0;
-    padding: 0;
+    padding: 0.15rem 0;
     border: 0;
   }
 
   .lame-home-reviews__stars-input legend {
-    float: left;
-    width: 100%;
+    float: none;
+    width: auto;
     margin: 0;
     padding: 0;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0;
-    line-height: 1.2;
+    line-height: 1;
     color: #1c1c1c;
   }
 
@@ -1597,11 +1680,9 @@
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-end;
-    clear: both;
-    gap: 0.15rem;
-    width: 100%;
+    gap: 0.2rem;
     margin: 0;
-    padding: 0.1rem 0 0.15rem;
+    padding: 0;
   }
 
   .lame-home-reviews__stars-row input {
@@ -1613,9 +1694,14 @@
 
   .lame-home-reviews__stars-row label {
     cursor: pointer;
-    font-size: 1.55rem;
+    font-size: 1.45rem;
     line-height: 1;
     color: #e4e4e4;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .lame-home-reviews__stars-row label:hover {
+    transform: scale(1.15);
   }
 
   .lame-home-reviews__stars-row input:checked ~ label,
@@ -1645,40 +1731,58 @@
   .lame-home-reviews__field {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
   }
 
   .lame-home-reviews__field span {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
-    color: #1c1c1c;
+    color: #2d4a22;
+    letter-spacing: 0.02em;
   }
 
-  .lame-home-reviews__field input,
+  .lame-home-reviews__field input {
+    width: 100%;
+    margin: 0;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid rgba(45, 74, 34, 0.14);
+    border-radius: 10px;
+    background: #fafcf9;
+    color: #1c1c1c;
+    font: inherit;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    box-shadow: none;
+    appearance: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
   .lame-home-reviews__field textarea {
     width: 100%;
     margin: 0;
-    padding: 0.72rem 0.85rem;
-    border: 1px solid #e7e4df;
-    border-radius: 12px;
-    background: #fafaf8;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid rgba(45, 74, 34, 0.14);
+    border-radius: 10px;
+    background: #fafcf9;
     color: #1c1c1c;
     font: inherit;
-    font-size: 0.95rem;
-    line-height: 1.45;
+    font-size: 0.88rem;
+    line-height: 1.4;
     box-shadow: none;
     appearance: none;
-  }
-
-  .lame-home-reviews__field textarea {
-    min-height: 7rem;
+    min-height: 4.85rem;
     resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
   }
 
   .lame-home-reviews__field input:focus,
   .lame-home-reviews__field textarea:focus {
-    outline: 2px solid rgb(45 74 34 / 0.35);
+    outline: none;
     border-color: #2d4a22;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(45, 74, 34, 0.1);
   }
 
   .lame-home-reviews__submit,
@@ -1687,17 +1791,32 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 2.85rem;
-    padding: 0.7rem 1.2rem;
+    min-height: 2.65rem;
+    padding: 0.65rem 1.25rem;
     border: 0;
-    border-radius: 12px;
+    border-radius: 999px;
     background: #2d4a22;
-    color: #fff;
+    color: #ffffff;
     font: inherit;
-    font-size: 0.92rem;
+    font-size: 0.86rem;
     font-weight: 600;
+    letter-spacing: 0.04em;
     text-decoration: none;
     cursor: pointer;
+    box-shadow: 0 4px 14px rgba(45, 74, 34, 0.22);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .lame-home-reviews__submit:hover,
+  .lame-home-reviews__login:hover {
+    background: #1e3317;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(45, 74, 34, 0.32);
+  }
+
+  .lame-home-reviews__submit:active,
+  .lame-home-reviews__login:active {
+    transform: translateY(0);
   }
 
   .lame-home-reviews__form-actions {
