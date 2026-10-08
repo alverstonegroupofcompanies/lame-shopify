@@ -92,11 +92,14 @@
 
     {% if section.settings.layout == 'reel_split' or section.settings.layout == 'reel_and_carousel' %}
       {%- assign barqat_product = section.settings.reel_product -%}
+      {%- if barqat_product == blank and all_products['lame-barqat-eau-de-parfum-100ml'] != blank -%}
+        {%- assign barqat_product = all_products['lame-barqat-eau-de-parfum-100ml'] -%}
+      {%- endif -%}
       {%- assign barqat_url = section.settings.reel_product_link -%}
-      {%- if barqat_product != blank -%}
+      {%- if barqat_product != blank and barqat_product.url != blank -%}
         {%- assign barqat_url = barqat_product.url -%}
       {%- elsif barqat_url == blank -%}
-        {%- assign barqat_url = 'shopify://collections/fragrance' -%}
+        {%- assign barqat_url = '/products/lame-barqat-eau-de-parfum-100ml' -%}
       {%- endif -%}
 
       {%- assign barqat_title = section.settings.reel_product_title | default: 'Barqat' -%}
@@ -104,12 +107,12 @@
         {%- assign barqat_title = barqat_product.title -%}
       {%- endif -%}
 
-      {%- assign barqat_price = section.settings.reel_product_price | default: '₹1,499' -%}
+      {%- assign barqat_price = section.settings.reel_product_price | default: '₹3,999' -%}
       {%- if barqat_product != blank and barqat_product.price > 0 -%}
         {%- assign barqat_price = barqat_product.price | money -%}
       {%- endif -%}
 
-      {%- assign barqat_compare_price = section.settings.reel_product_price_compare | default: '₹1,999' -%}
+      {%- assign barqat_compare_price = section.settings.reel_product_price_compare -%}
       {%- if barqat_product != blank and barqat_product.compare_at_price > barqat_product.price -%}
         {%- assign barqat_compare_price = barqat_product.compare_at_price | money -%}
       {%- endif -%}
@@ -2583,13 +2586,13 @@
       "type": "text",
       "id": "reel_product_price",
       "label": "Price",
-      "default": "₹1,499"
+      "default": "₹3,999"
     },
     {
       "type": "text",
       "id": "reel_product_price_compare",
-      "label": "Compare price",
-      "default": "₹1,999"
+      "label": "Compare price (optional)",
+      "default": ""
     },
     {
       "type": "text",
