@@ -11,37 +11,7 @@
   {%- comment -%} FULL BACKGROUND CINEMATIC VIDEO IN BLACK & WHITE {%- endcomment -%}
   {% if has_reel_video %}
     <div class="lame-signature__bg-video-wrap" aria-hidden="true">
-      {% if section.settings.reel_video != blank %}
-        {{
-          section.settings.reel_video
-          | video_tag:
-            autoplay: true,
-            loop: true,
-            muted: true,
-            playsinline: true,
-            class: 'lame-signature__bg-video',
-            controls: false,
-            image_size: '1400x'
-        }}
-      {% elsif section.settings.reel_video_url != blank %}
-        <video
-          class="lame-signature__bg-video"
-          autoplay
-          loop
-          muted
-          playsinline
-          src="{{ section.settings.reel_video_url }}"
-        ></video>
-      {% elsif section.settings.reel_video_asset != blank %}
-        <video
-          class="lame-signature__bg-video"
-          autoplay
-          loop
-          muted
-          playsinline
-          src="{{ section.settings.reel_video_asset | asset_url }}"
-        ></video>
-      {% elsif section.settings.reel_video_url_external != blank %}
+      {% if section.settings.reel_video_url_external != blank %}
         {% if section.settings.reel_video_url_external.type == 'youtube' %}
           <iframe
             class="lame-signature__bg-video lame-signature__bg-video--iframe"
@@ -59,6 +29,30 @@
             title="Background video"
           ></iframe>
         {% endif %}
+      {% else %}
+        <video
+          class="lame-signature__bg-video"
+          data-lame-bg-video
+          autoplay
+          loop
+          muted
+          playsinline
+          webkit-playsinline
+          preload="auto"
+        >
+          {%- if section.settings.reel_video != blank and section.settings.reel_video.sources.size > 0 -%}
+            {%- for source in section.settings.reel_video.sources -%}
+              <source src="{{ source.url }}" type="{{ source.mime_type }}">
+            {%- endfor -%}
+          {%- endif -%}
+          {%- if section.settings.reel_video_url != blank -%}
+            <source src="{{ section.settings.reel_video_url }}" type="video/mp4">
+          {%- endif -%}
+          {%- if section.settings.reel_video_asset != blank -%}
+            <source src="{{ section.settings.reel_video_asset | asset_url }}" type="video/mp4">
+          {%- endif -%}
+          <source src="{{ 'lame-home-spotlight.mp4' | asset_url }}" type="video/mp4">
+        </video>
       {% endif %}
       <div class="lame-signature__bg-video-veil"></div>
     </div>
