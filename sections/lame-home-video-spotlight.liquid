@@ -61,15 +61,18 @@
 
         <button
           type="button"
-          class="lame-home-video-spotlight__sound"
+          class="lame-home-video-spotlight__sound is-muted"
           aria-label="{{ 'accessibility.play_video' | t | default: 'Unmute video' }}"
-          hidden
         >
           <span class="lame-home-video-spotlight__sound-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+            <svg class="lame-home-video-spotlight__icon-unmuted" viewBox="0 0 24 24" fill="none" width="18" height="18">
               <path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
               <path d="M15.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               <path d="M18 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <svg class="lame-home-video-spotlight__icon-muted" viewBox="0 0 24 24" fill="none" width="18" height="18">
+              <path d="M11 5 6 9H3v6h3l5 4V5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M22 9l-6 6M16 9l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </span>
         </button>
@@ -122,12 +125,15 @@
     if (!video || !soundBtn) return;
 
     const syncSoundButton = () => {
-      soundBtn.hidden = !video.muted;
+      soundBtn.classList.toggle('is-muted', video.muted);
+      soundBtn.setAttribute('aria-label', video.muted ? 'Unmute video' : 'Mute video');
     };
 
     soundBtn.addEventListener('click', () => {
-      video.muted = false;
-      video.volume = 1;
+      video.muted = !video.muted;
+      if (!video.muted) {
+        video.volume = 1;
+      }
       syncSoundButton();
     });
 
@@ -138,16 +144,25 @@
 
 {% stylesheet %}
   .lame-home-video-spotlight__wrap {
-    padding-inline: var(--page-margin);
+    width: 100%;
+    max-width: min(100%, 1600px);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 2.5vw, 1.5rem);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.85rem;
+    gap: 1rem;
+    box-sizing: border-box;
+  }
+
+  .section--full-width .lame-home-video-spotlight__wrap {
+    max-width: 100%;
+    padding-inline: 0;
   }
 
   .lame-home-video-spotlight__header {
     text-align: center;
-    max-width: 28rem;
+    max-width: 36rem;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -169,18 +184,20 @@
   .lame-home-video-spotlight__heading {
     margin: 0;
     font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+    font-size: clamp(1.2rem, 2.4vw, 1.65rem);
     font-weight: 500;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: rgb(var(--color-foreground-heading-rgb));
   }
 
   .lame-home-video-spotlight__card {
-    width: min(100%, var(--lame-video-spotlight-max-width, 280px));
+    width: 100%;
+    max-width: min(100%, var(--lame-video-spotlight-max-width, 1600px));
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.85rem;
     opacity: 0;
     transform: translateY(12px);
     transition: opacity 0.55s ease 0.05s, transform 0.55s ease 0.05s;
@@ -194,12 +211,25 @@
   .lame-home-video-spotlight__frame {
     position: relative;
     width: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     overflow: hidden;
     border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
-    box-shadow: 0 12px 32px rgb(0 0 0 / 0.08);
-    background: rgb(var(--color-foreground-rgb) / 0.04);
-    aspect-ratio: var(--lame-video-spotlight-aspect, 9 / 16);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.12);
+    background: #0d160b;
+    aspect-ratio: var(--lame-video-spotlight-aspect, 16 / 4);
+  }
+
+  .section--full-width .lame-home-video-spotlight__frame {
+    border-radius: 0;
+    border-inline: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-home-video-spotlight__frame {
+      aspect-ratio: 16 / 9 !important;
+      min-height: 210px;
+      border-radius: 12px;
+    }
   }
 
   .lame-home-video-spotlight__video {
@@ -207,6 +237,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
     vertical-align: middle;
   }
 
@@ -230,6 +261,22 @@
   .lame-home-video-spotlight__sound:hover {
     background: rgb(0 0 0 / 0.62);
     transform: scale(1.04);
+  }
+
+  .lame-home-video-spotlight__sound .lame-home-video-spotlight__icon-muted {
+    display: none;
+  }
+
+  .lame-home-video-spotlight__sound .lame-home-video-spotlight__icon-unmuted {
+    display: block;
+  }
+
+  .lame-home-video-spotlight__sound.is-muted .lame-home-video-spotlight__icon-muted {
+    display: block;
+  }
+
+  .lame-home-video-spotlight__sound.is-muted .lame-home-video-spotlight__icon-unmuted {
+    display: none;
   }
 
   .lame-home-video-spotlight__caption {
@@ -315,23 +362,27 @@
       "type": "range",
       "id": "max_width",
       "label": "Video max width",
-      "min": 200,
-      "max": 480,
-      "step": 20,
+      "min": 400,
+      "max": 1600,
+      "step": 40,
       "unit": "px",
-      "default": 280
+      "default": 1600
     },
     {
       "type": "select",
       "id": "aspect_ratio",
       "label": "Aspect ratio",
       "options": [
-        { "value": "9 / 16", "label": "Vertical (9:16)" },
-        { "value": "3 / 4", "label": "Portrait (3:4)" },
-        { "value": "1 / 1", "label": "Square (1:1)" },
-        { "value": "4 / 5", "label": "Portrait (4:5)" }
+        { "value": "16 / 4", "label": "Ultra-wide banner (16:4 / 1600x400)" },
+        { "value": "16 / 5", "label": "Wide banner (16:5)" },
+        { "value": "16 / 6", "label": "Panoramic banner (16:6)" },
+        { "value": "16 / 9", "label": "Widescreen (16:9)" },
+        { "value": "2.16 / 1", "label": "Native video (1408x652)" },
+        { "value": "21 / 9", "label": "Cinematic (21:9)" },
+        { "value": "4 / 5", "label": "Portrait (4:5)" },
+        { "value": "9 / 16", "label": "Vertical (9:16)" }
       ],
-      "default": "9 / 16"
+      "default": "16 / 4"
     },
     {
       "type": "select",

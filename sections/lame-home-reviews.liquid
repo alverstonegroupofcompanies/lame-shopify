@@ -25,36 +25,52 @@
   {{ section.shopify_attributes }}
 >
   <div class="lame-home-reviews__wrap" data-lame-reviews data-shop-domain="{{ shop.permanent_domain | escape }}">
-    {%- if section.settings.eyebrow != blank -%}
-      <p class="lame-home-reviews__eyebrow">{{ section.settings.eyebrow | escape }}</p>
-    {%- endif -%}
-    {%- if section.settings.subheading != blank -%}
-      <p class="lame-home-reviews__subheading">{{ section.settings.subheading | escape }}</p>
-    {%- endif -%}
-
-    {%- if review_count > 0 and section.settings.show_summary -%}
-      <div class="lame-home-reviews__summary">
-        <p class="lame-home-reviews__score" data-lame-review-score>{{ review_average }}</p>
-        <div class="lame-home-reviews__summary-copy">
-          <span class="lame-home-reviews__stars" style="--lame-rating: {{ review_average }};" data-lame-summary-stars aria-hidden="true">
-            {%- for star_index in (0..4) -%}
-              <span class="lame-home-reviews__star" style="--i: {{ star_index }}">★</span>
-            {%- endfor -%}
+    <header class="lame-home-reviews__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <div class="lame-home-reviews__badge-wrap">
+          <span class="lame-home-reviews__badge">
+            <span class="lame-home-reviews__badge-sparkle" aria-hidden="true">✦</span>
+            {{ section.settings.eyebrow | escape }}
+            <span class="lame-home-reviews__badge-sparkle" aria-hidden="true">✦</span>
           </span>
-          <p class="lame-home-reviews__count">
-            Rating for {{ store_name | escape }}
-            ·
-            <span data-lame-review-count>
-              {% if review_count == 1 %}
-                1 review
-              {% else %}
-                {{ review_count }} reviews
-              {% endif %}
-            </span>
-          </p>
         </div>
-      </div>
-    {%- endif -%}
+      {%- endif -%}
+
+      {%- assign heading_text = section.settings.heading | default: 'Loved by Our Customers' -%}
+      {%- if heading_text != blank -%}
+        <h2 class="lame-home-reviews__heading">{{ heading_text | escape }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.subheading != blank -%}
+        <p class="lame-home-reviews__subheading">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+
+      {%- if review_count > 0 and section.settings.show_summary -%}
+        <div class="lame-home-reviews__summary">
+          <div class="lame-home-reviews__summary-card">
+            <span class="lame-home-reviews__score" data-lame-review-score>{{ review_average }}</span>
+            <div class="lame-home-reviews__summary-copy">
+              <span class="lame-home-reviews__stars" style="--lame-rating: {{ review_average }};" data-lame-summary-stars aria-hidden="true">
+                {%- for star_index in (0..4) -%}
+                  <span class="lame-home-reviews__star" style="--i: {{ star_index }}">★</span>
+                {%- endfor -%}
+              </span>
+              <p class="lame-home-reviews__count">
+                Overall rating for {{ store_name | escape }}
+                ·
+                <span data-lame-review-count>
+                  {% if review_count == 1 %}
+                    1 verified review
+                  {% else %}
+                    {{ review_count }} verified reviews
+                  {% endif %}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+    </header>
 
     {%- liquid
       assign reviewer_name = ''
@@ -71,7 +87,10 @@
     -%}
 
     <div class="lame-home-reviews__carousel" data-lame-review-carousel>
-      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--prev" data-lame-review-prev aria-label="Previous reviews">&#8249;</button>
+      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--prev" data-lame-review-prev aria-label="Previous reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+
       <div class="lame-home-reviews__grid" data-lame-review-grid>
       {%- if review_count > 0 -%}
         {%- for block in section.blocks -%}
@@ -84,38 +103,105 @@
               if card_rating > 5
                 assign card_rating = 5
               endif
+
+              assign author_name = block.settings.author | strip
+              assign author_initials = author_name | slice: 0, 1 | upcase
+              assign author_parts = author_name | split: ' '
+              if author_parts.size > 1
+                assign last_initial = author_parts.last | slice: 0, 1 | upcase
+                assign author_initials = author_initials | append: last_initial
+              endif
+
+              assign formatted_date = block.settings.date
+              if block.settings.date != blank and block.settings.date contains '-'
+                assign date_parts = block.settings.date | split: '-'
+                if date_parts.size == 3
+                  assign y = date_parts[0]
+                  assign m = date_parts[1]
+                  assign d = date_parts[2]
+                  case m
+                    when '01'
+                      assign month_name = 'Jan'
+                    when '02'
+                      assign month_name = 'Feb'
+                    when '03'
+                      assign month_name = 'Mar'
+                    when '04'
+                      assign month_name = 'Apr'
+                    when '05'
+                      assign month_name = 'May'
+                    when '06'
+                      assign month_name = 'Jun'
+                    when '07'
+                      assign month_name = 'Jul'
+                    when '08'
+                      assign month_name = 'Aug'
+                    when '09'
+                      assign month_name = 'Sep'
+                    when '10'
+                      assign month_name = 'Oct'
+                    when '11'
+                      assign month_name = 'Nov'
+                    when '12'
+                      assign month_name = 'Dec'
+                    else
+                      assign month_name = m
+                  endcase
+                  assign formatted_date = d | append: ' ' | append: month_name | append: ' ' | append: y
+                endif
+              endif
             -%}
             <article class="lame-home-reviews__card" data-review-rating="{{ card_rating }}" {{ block.shopify_attributes }}>
-              <div class="lame-home-reviews__card-top">
-                <span class="lame-home-reviews__stars lame-home-reviews__stars--card" style="--lame-rating: {{ card_rating }};" aria-label="{{ card_rating }} out of 5 stars">
-                  {%- for star_index in (0..4) -%}
-                    <span class="lame-home-reviews__star" style="--i: {{ star_index }}" aria-hidden="true">★</span>
-                  {%- endfor -%}
-                </span>
-                {%- if block.settings.date != blank -%}
-                  <time class="lame-home-reviews__date" datetime="{{ block.settings.date | escape }}">{{ block.settings.date | escape }}</time>
+              <span class="lame-home-reviews__card-quote-mark" aria-hidden="true">“</span>
+
+              <div class="lame-home-reviews__card-body">
+                <div class="lame-home-reviews__card-top">
+                  <span class="lame-home-reviews__stars lame-home-reviews__stars--card" style="--lame-rating: {{ card_rating }};" aria-label="{{ card_rating }} out of 5 stars">
+                    {%- for star_index in (0..4) -%}
+                      <span class="lame-home-reviews__star" style="--i: {{ star_index }}" aria-hidden="true">★</span>
+                    {%- endfor -%}
+                  </span>
+                  {%- if block.settings.date != blank -%}
+                    <time class="lame-home-reviews__date" datetime="{{ block.settings.date | escape }}">{{ formatted_date | escape }}</time>
+                  {%- endif -%}
+                </div>
+
+                {%- if block.settings.title != blank -%}
+                  <h3 class="lame-home-reviews__title">{{ block.settings.title | escape }}</h3>
                 {%- endif -%}
+
+                <blockquote class="lame-home-reviews__quote">
+                  <p>{{ block.settings.quote | escape }}</p>
+                </blockquote>
               </div>
-              {%- if block.settings.title != blank -%}
-                <h3 class="lame-home-reviews__title">{{ block.settings.title | escape }}</h3>
-              {%- endif -%}
-              <blockquote class="lame-home-reviews__quote">
-                <p>{{ block.settings.quote | escape }}</p>
-              </blockquote>
+
               <footer class="lame-home-reviews__byline">
-                <cite>{{ block.settings.author | escape }}</cite>
-                {%- if block.settings.product != blank -%}
-                  <a href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
-                {%- elsif block.settings.detail != blank -%}
-                  <span>{{ block.settings.detail | escape }}</span>
-                {%- endif -%}
+                <div class="lame-home-reviews__author-wrap">
+                  <span class="lame-home-reviews__avatar" aria-hidden="true">{{ author_initials }}</span>
+                  <div class="lame-home-reviews__author-meta">
+                    <cite>{{ author_name | escape }}</cite>
+                    {%- if block.settings.product != blank -%}
+                      <a class="lame-home-reviews__product-link" href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
+                    {%- elsif block.settings.detail != blank -%}
+                      <span class="lame-home-reviews__detail">{{ block.settings.detail | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                <span class="lame-home-reviews__verified-tag" title="Verified Customer">
+                  <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>
+                  <span>Verified Buyer</span>
+                </span>
               </footer>
             </article>
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
       </div>
-      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--next" data-lame-review-next aria-label="Next reviews">&#8250;</button>
+
+      <button type="button" class="lame-home-reviews__nav lame-home-reviews__nav--next" data-lame-review-next aria-label="Next reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
     </div>
 
     <div class="lame-home-reviews__compose" id="lame-write-review">
@@ -303,6 +389,28 @@
     const existingBodies = () =>
       [...grid.querySelectorAll('.lame-home-reviews__quote p')].map((node) => node.textContent.trim().toLowerCase());
 
+    const formatReviewDate = (raw) => {
+      if (!raw || typeof raw !== 'string') return '';
+      const parts = raw.split('-');
+      if (parts.length === 3) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const m = parseInt(parts[1], 10) - 1;
+        if (m >= 0 && m < 12) {
+          return `${parts[2]} ${months[m]} ${parts[0]}`;
+        }
+      }
+      return raw;
+    };
+
+    const getAuthorInitials = (author) => {
+      const name = (author || 'Customer').trim();
+      const parts = name.split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    };
+
     const paintCard = (article, { rating, title, body }) => {
       const score = Math.min(5, Math.max(1, Number(rating) || 5));
       const text = (body || '').trim();
@@ -316,13 +424,14 @@
         stars.setAttribute('aria-label', score + ' out of 5 stars');
       }
 
+      const bodyWrap = article.querySelector('.lame-home-reviews__card-body') || article;
       let heading = article.querySelector('.lame-home-reviews__title');
       if (title) {
         if (!heading) {
           heading = document.createElement('h3');
           heading.className = 'lame-home-reviews__title';
           const quote = article.querySelector('.lame-home-reviews__quote');
-          article.insertBefore(heading, quote);
+          bodyWrap.insertBefore(heading, quote);
         }
         heading.textContent = title;
       } else if (heading) {
@@ -335,16 +444,16 @@
     };
 
     const addCard = ({ id, rating, title, body, author, date, detail, href }, place) => {
-      const original = (body || '').trim();
+      const original = (body || title || '').trim();
       if (!original) return;
       const key = reviewKey({ id, body: original });
       if (hiddenReviews().has(key) || hiddenReviews().has('body:' + original.toLowerCase())) return;
       const saved = savedReview({ body: original }, key);
       const nextTitle = saved ? saved.title || '' : title || '';
-      const text = (saved && saved.body ? saved.body : original).trim();
+      const text = (saved && saved.body ? saved.body : (body || '')).trim();
       const nextRating = saved && saved.rating ? saved.rating : rating;
-      if (!text) return;
-      if (existingBodies().includes(text.toLowerCase())) return;
+      if (!text && !nextTitle) return;
+      if (text && existingBodies().includes(text.toLowerCase())) return;
 
       const score = Math.min(5, Math.max(1, Number(nextRating) || 5));
       const article = document.createElement('article');
@@ -353,6 +462,15 @@
       article.dataset.reviewRating = String(score);
       article.dataset.reviewTitle = nextTitle;
       article.dataset.reviewBody = text;
+
+      const quoteMark = document.createElement('span');
+      quoteMark.className = 'lame-home-reviews__card-quote-mark';
+      quoteMark.setAttribute('aria-hidden', 'true');
+      quoteMark.textContent = '“';
+      article.append(quoteMark);
+
+      const bodyWrap = document.createElement('div');
+      bodyWrap.className = 'lame-home-reviews__card-body';
 
       const top = document.createElement('div');
       top.className = 'lame-home-reviews__card-top';
@@ -376,43 +494,72 @@
         const time = document.createElement('time');
         time.className = 'lame-home-reviews__date';
         time.dateTime = date;
-        time.textContent = date;
+        time.textContent = formatReviewDate(date);
         meta.append(time);
       }
       top.append(meta);
+      bodyWrap.append(top);
 
-      article.append(top);
       if (nextTitle) {
         const heading = document.createElement('h3');
         heading.className = 'lame-home-reviews__title';
         heading.textContent = nextTitle;
-        article.append(heading);
+        bodyWrap.append(heading);
       }
 
-      const quote = document.createElement('blockquote');
-      quote.className = 'lame-home-reviews__quote';
-      const paragraph = document.createElement('p');
-      paragraph.textContent = text;
-      quote.append(paragraph);
-      article.append(quote);
+      if (text) {
+        const quote = document.createElement('blockquote');
+        quote.className = 'lame-home-reviews__quote';
+        const paragraph = document.createElement('p');
+        paragraph.textContent = text;
+        quote.append(paragraph);
+        bodyWrap.append(quote);
+      }
+      article.append(bodyWrap);
 
       const footer = document.createElement('footer');
       footer.className = 'lame-home-reviews__byline';
+
+      const authorWrap = document.createElement('div');
+      authorWrap.className = 'lame-home-reviews__author-wrap';
+
+      const avatar = document.createElement('span');
+      avatar.className = 'lame-home-reviews__avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      avatar.textContent = getAuthorInitials(author);
+      authorWrap.append(avatar);
+
+      const authorMeta = document.createElement('div');
+      authorMeta.className = 'lame-home-reviews__author-meta';
+
       const cite = document.createElement('cite');
-      cite.textContent = author || 'Customer';
-      footer.append(cite);
+      cite.textContent = author || 'Verified Customer';
+      authorMeta.append(cite);
+
       if (detail) {
         if (href && href.indexOf('/products/') === 0) {
           const link = document.createElement('a');
+          link.className = 'lame-home-reviews__product-link';
           link.href = href;
           link.textContent = detail;
-          footer.append(link);
+          authorMeta.append(link);
         } else {
           const span = document.createElement('span');
+          span.className = 'lame-home-reviews__detail';
           span.textContent = detail;
-          footer.append(span);
+          authorMeta.append(span);
         }
       }
+      authorWrap.append(authorMeta);
+      footer.append(authorWrap);
+
+      const verified = document.createElement('span');
+      verified.className = 'lame-home-reviews__verified-tag';
+      verified.title = 'Verified Customer';
+      verified.innerHTML =
+        '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg><span>Verified Buyer</span>';
+      footer.append(verified);
+
       if (isOwner(author)) {
         const edit = document.createElement('button');
         edit.type = 'button';
@@ -512,8 +659,6 @@
       const canMove = maxScroll() > 8;
       const start = atStart();
       const end = atEnd();
-      prevBtn?.classList.toggle('is-active', canMove && end);
-      nextBtn?.classList.toggle('is-active', canMove && !end);
       prevBtn?.classList.toggle('is-ended', canMove && start);
       nextBtn?.classList.toggle('is-ended', canMove && end);
       if (prevBtn) prevBtn.setAttribute('aria-disabled', canMove && start ? 'true' : 'false');
@@ -760,72 +905,110 @@
   }
 
   .lame-home-reviews {
-    padding-block-start: var(--padding-block-start, 36px);
-    padding-block-end: var(--padding-block-end, 36px);
+    position: relative;
+    padding-block-start: var(--padding-block-start, 56px);
+    padding-block-end: var(--padding-block-end, 64px);
+    background: radial-gradient(circle at 50% -10%, rgba(45, 74, 34, 0.05) 0%, rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, #fbfdfa 0%, #ffffff 100%);
   }
 
   .lame-home-reviews__wrap {
-    width: min(1120px, 100%);
+    width: min(1180px, 100%);
     margin-inline: auto;
-    padding-inline: var(--page-margin);
+    padding-inline: var(--page-margin, 1.5rem);
   }
 
-  .lame-home-reviews__eyebrow {
-    margin: 0 0 0.4rem;
+  .lame-home-reviews__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    margin-bottom: 2.25rem;
+  }
+
+  .lame-home-reviews__badge-wrap {
+    margin-bottom: 0.85rem;
+  }
+
+  .lame-home-reviews__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    background: rgba(45, 74, 34, 0.06);
+    border: 1px solid rgba(45, 74, 34, 0.14);
+    color: #2d4a22;
+    font-family: var(--lame-font-body, system-ui, sans-serif);
     font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 700;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgb(var(--color-foreground-rgb) / 0.62);
+  }
+
+  .lame-home-reviews__badge-sparkle {
+    color: #d4af37;
+    font-size: 0.75rem;
   }
 
   .lame-home-reviews__heading {
     margin: 0;
     text-align: center;
-    font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(2rem, 3.8vw, 2.75rem);
     font-weight: 500;
+    line-height: 1.15;
     letter-spacing: -0.02em;
-    color: rgb(var(--color-foreground-heading-rgb));
+    color: #1a2c16;
   }
 
   .lame-home-reviews__subheading {
-    max-width: 38rem;
-    margin: 0.55rem auto 0;
+    max-width: 36rem;
+    margin: 0.65rem auto 0;
     text-align: center;
     font-size: 0.98rem;
-    line-height: 1.5;
-    color: rgb(var(--color-foreground-rgb) / 0.72);
+    line-height: 1.55;
+    color: #556250;
   }
 
   .lame-home-reviews__summary {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 0.9rem;
-    margin: 1.35rem auto 0;
+    margin-top: 1.5rem;
+  }
+
+  .lame-home-reviews__summary-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.7rem 1.6rem;
+    background: #ffffff;
+    border: 1px solid rgba(45, 74, 34, 0.12);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px -4px rgba(28, 48, 20, 0.06);
   }
 
   .lame-home-reviews__score {
     margin: 0;
-    font-family: var(--lame-font-display, var(--font-heading--family));
-    font-size: 2.6rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: 2.4rem;
     line-height: 1;
+    font-weight: 600;
     letter-spacing: -0.03em;
-    color: rgb(var(--color-foreground-heading-rgb));
+    color: #2d4a22;
   }
 
   .lame-home-reviews__summary-copy {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    text-align: left;
   }
 
   .lame-home-reviews__count {
     margin: 0;
-    font-size: 0.86rem;
-    color: rgb(var(--color-foreground-rgb) / 0.7);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #4a5c44;
   }
 
   .lame-home-reviews__stars {
@@ -837,13 +1020,13 @@
   }
 
   .lame-home-reviews__stars--card {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 
   .lame-home-reviews__star {
     position: relative;
     display: inline-block;
-    color: #e4e4e4;
+    color: #e5e5dc;
   }
 
   .lame-home-reviews__star::after {
@@ -852,18 +1035,19 @@
     inset: 0 auto 0 0;
     width: calc(clamp(0, var(--lame-rating) - var(--i), 1) * 100%);
     overflow: hidden;
-    color: #f5a623;
+    color: #e5a824;
   }
 
   .lame-home-reviews__carousel {
     position: relative;
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
   }
 
   .lame-home-reviews__grid {
     display: flex;
-    gap: 0.9rem;
+    gap: 1.25rem;
     margin: 0;
+    padding: 0.5rem 0.25rem 1rem;
     overflow-x: auto;
     overflow-anchor: none;
     scroll-snap-type: x mandatory;
@@ -877,190 +1061,103 @@
 
   .lame-home-reviews__nav {
     position: absolute;
-    top: 42%;
-    z-index: 2;
-    display: grid;
-    place-items: center;
-    width: 2.4rem;
-    height: 2.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.85rem;
+    height: 2.85rem;
     padding: 0;
-    border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
-    border-radius: 999px;
-    background: #fff;
-    color: #1c1c1c;
-    font-size: 1.55rem;
-    line-height: 1;
+    border: 1px solid rgba(45, 74, 34, 0.18);
+    border-radius: 50%;
+    background: #ffffff;
+    color: #2d4a22;
     cursor: pointer;
-    box-shadow: 0 8px 18px rgb(0 0 0 / 0.08);
+    box-shadow: 0 6px 20px -3px rgba(28, 48, 20, 0.12);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .lame-home-reviews__nav svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    pointer-events: none;
+    stroke: currentColor;
+  }
+
+  .lame-home-reviews__nav:hover:not(.is-ended):not([aria-disabled="true"]) {
+    background: #2d4a22;
+    color: #ffffff;
+    border-color: #2d4a22;
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 10px 24px -2px rgba(45, 74, 34, 0.32);
+  }
+
+  .lame-home-reviews__nav:active:not(.is-ended):not([aria-disabled="true"]) {
+    transform: translateY(-50%) scale(0.96);
   }
 
   .lame-home-reviews__nav--prev {
-    left: -0.2rem;
+    left: -1rem;
   }
 
   .lame-home-reviews__nav--next {
-    right: -0.2rem;
+    right: -1rem;
   }
 
-  .lame-home-reviews__nav.is-active {
-    background: #2d4a22;
-    color: #fff;
-    border-color: #2d4a22;
-    box-shadow: 0 0 0 3px rgb(45 74 34 / 0.28);
-    animation: lame-review-arrow 1.6s ease-in-out infinite;
-  }
-
-  .lame-home-reviews__nav.is-ended {
+  .lame-home-reviews__nav.is-ended,
+  .lame-home-reviews__nav[aria-disabled="true"] {
     opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
     box-shadow: none;
-  }
-
-  @keyframes lame-review-arrow {
-    0%,
-    100% {
-      box-shadow: 0 0 0 0 rgb(45 74 34 / 0.4);
-    }
-
-    70% {
-      box-shadow: 0 0 0 7px rgb(45 74 34 / 0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .lame-home-reviews__nav.is-active {
-      animation: none;
-    }
   }
 
   .lame-home-reviews__card {
     display: flex;
     flex: 0 0 100%;
     flex-direction: column;
-    gap: 0.55rem;
+    justify-content: space-between;
+    min-height: 290px;
     margin: 0;
-    padding: 1.1rem 1.05rem 1rem;
-    border: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
-    border-radius: 16px;
-    background: rgb(var(--color-background-rgb));
+    padding: 1.6rem 1.5rem 1.35rem;
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid rgba(45, 74, 34, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px -6px rgba(28, 48, 20, 0.06);
     scroll-snap-align: start;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
   }
 
-  @media screen and (min-width: 750px) {
-    .lame-home-reviews__card {
-      flex-basis: calc((100% - 0.9rem) / 2);
-    }
+  .lame-home-reviews__card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(45, 74, 34, 0.24);
+    box-shadow: 0 16px 36px -6px rgba(45, 74, 34, 0.12);
   }
 
-  @media screen and (min-width: 990px) {
-    .lame-home-reviews__card {
-      flex-basis: calc((100% - 1.8rem) / 3);
-    }
-
-    .lame-home-reviews__nav--prev {
-      left: -0.7rem;
-    }
-
-    .lame-home-reviews__nav--next {
-      right: -0.7rem;
-    }
+  .lame-home-reviews__card-quote-mark {
+    position: absolute;
+    top: 0.25rem;
+    right: 1.1rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: 5rem;
+    line-height: 1;
+    color: rgba(212, 175, 55, 0.12);
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
   }
 
-  @media screen and (max-width: 749px) {
-    .lame-home-reviews {
-      padding-block-start: max(var(--padding-block-start, 36px), 2rem);
-    }
-
-    .lame-home-reviews__eyebrow {
-      margin-top: 0.35rem;
-    }
-
-    .lame-home-reviews__carousel {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas:
-        "cards cards"
-        "prev next";
-      justify-content: stretch;
-      align-items: center;
-      column-gap: 0;
-      row-gap: 0.9rem;
-      width: 100%;
-      margin-top: 1rem;
-    }
-
-    .lame-home-reviews__grid {
-      grid-area: cards;
-      width: 100%;
-      gap: 0.6rem;
-    }
-
-    .lame-home-reviews__card {
-      flex-basis: calc((100% - 0.6rem) / 2);
-      gap: 0.35rem;
-      padding: 0.7rem 0.6rem 0.65rem;
-    }
-
-    .lame-home-reviews__stars--card {
-      font-size: 0.68rem;
-    }
-
-    .lame-home-reviews__date {
-      font-size: 0.62rem;
-    }
-
-    .lame-home-reviews__title {
-      font-size: 0.78rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .lame-home-reviews__quote p {
-      font-size: 0.72rem;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      line-clamp: 4;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .lame-home-reviews__nav {
-      position: static;
-      top: auto;
-      width: 2.2rem;
-      height: 2.2rem;
-      font-size: 1.3rem;
-    }
-
-    .lame-home-reviews__nav--prev {
-      grid-area: prev;
-      justify-self: start;
-      left: auto;
-      margin-inline-start: 0.1rem;
-    }
-
-    .lame-home-reviews__nav--next {
-      grid-area: next;
-      justify-self: end;
-      right: auto;
-      margin-inline-end: 0.1rem;
-    }
-
-    .lame-home-reviews__compose {
-      margin-top: 0.25rem;
-    }
-
-    .lame-home-reviews__form {
-      gap: 0.75rem;
-      padding: 1.1rem 0.95rem 1rem;
-    }
-
-    .lame-home-reviews__field textarea {
-      min-height: 5.5rem;
-    }
+  .lame-home-reviews__card-body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    flex: 1 1 auto;
   }
 
   .lame-home-reviews__card-top {
@@ -1078,16 +1175,20 @@
   }
 
   .lame-home-reviews__date {
-    font-size: 0.75rem;
-    color: rgb(var(--color-foreground-rgb) / 0.55);
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: #8c9888;
+    letter-spacing: 0.02em;
   }
 
   .lame-home-reviews__title {
     margin: 0;
-    font-size: 1rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', Georgia, serif);
+    font-size: 1.15rem;
     font-weight: 600;
+    line-height: 1.3;
     letter-spacing: -0.01em;
-    color: rgb(var(--color-foreground-heading-rgb));
+    color: #1a2c16;
   }
 
   .lame-home-reviews__quote {
@@ -1096,27 +1197,179 @@
 
   .lame-home-reviews__quote p {
     margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.55;
-    color: rgb(var(--color-foreground-rgb) / 0.84);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #3f4d3c;
   }
 
   .lame-home-reviews__byline {
+    position: relative;
+    z-index: 1;
     display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    padding-top: 0.15rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid rgba(45, 74, 34, 0.08);
+    flex: 0 0 auto;
   }
 
-  .lame-home-reviews__byline cite {
+  .lame-home-reviews__author-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+  }
+
+  .lame-home-reviews__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2d4a22 0%, #3e682e 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(45, 74, 34, 0.18);
+    border: 2px solid #ffffff;
+  }
+
+  .lame-home-reviews__author-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .lame-home-reviews__author-meta cite {
     font-style: normal;
     font-weight: 600;
-    font-size: 0.9rem;
-    color: rgb(var(--color-foreground-heading-rgb));
+    font-size: 0.92rem;
+    color: #1a2c16;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lame-home-reviews__detail,
+  .lame-home-reviews__product-link {
+    font-size: 0.75rem;
+    color: #72826e;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lame-home-reviews__product-link:hover {
+    color: #2d4a22;
+    text-decoration: underline;
+  }
+
+  .lame-home-reviews__verified-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(45, 74, 34, 0.06);
+    color: #2d4a22;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(45, 74, 34, 0.12);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .lame-home-reviews__verified-tag svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-home-reviews__card {
+      flex-basis: calc((100% - 1.25rem) / 2);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-home-reviews__card {
+      flex-basis: calc((100% - 2.5rem) / 3);
+    }
+
+    .lame-home-reviews__nav--prev {
+      left: -1.25rem;
+    }
+
+    .lame-home-reviews__nav--next {
+      right: -1.25rem;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-home-reviews {
+      padding-block-start: max(var(--padding-block-start, 36px), 2.25rem);
+      padding-block-end: max(var(--padding-block-end, 36px), 2.5rem);
+    }
+
+    .lame-home-reviews__carousel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "cards cards"
+        "prev next";
+      row-gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .lame-home-reviews__grid {
+      grid-area: cards;
+      gap: 0.85rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .lame-home-reviews__card {
+      flex-basis: calc(85% - 0.5rem);
+      min-height: 250px;
+      padding: 1.25rem 1.15rem 1rem;
+    }
+
+    .lame-home-reviews__nav {
+      position: static;
+      transform: none;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .lame-home-reviews__nav:hover:not(.is-ended):not([aria-disabled="true"]) {
+      transform: scale(1.05);
+    }
+
+    .lame-home-reviews__nav:active:not(.is-ended):not([aria-disabled="true"]) {
+      transform: scale(0.95);
+    }
+
+    .lame-home-reviews__nav--prev {
+      grid-area: prev;
+      justify-self: start;
+      margin-inline-start: 0.25rem;
+    }
+
+    .lame-home-reviews__nav--next {
+      grid-area: next;
+      justify-self: end;
+      margin-inline-end: 0.25rem;
+    }
   }
 
   .lame-home-reviews__card.is-editing {
-    border-color: rgb(45 74 34 / 0.35);
+    border-color: rgb(45 74 34 / 0.45);
+    box-shadow: 0 0 0 2px rgba(45, 74, 34, 0.2);
   }
 
   .lame-home-reviews__edit,

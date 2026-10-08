@@ -90,7 +90,324 @@
       {% endif %}
     </header>
 
-    <div class="lame-signature__carousel" data-signature-carousel>
+    {% if section.settings.layout == 'reel_split' or section.settings.layout == 'reel_and_carousel' %}
+      {%- assign barqat_product = section.settings.reel_product -%}
+      {%- assign barqat_url = section.settings.reel_product_link -%}
+      {%- if barqat_product != blank -%}
+        {%- assign barqat_url = barqat_product.url -%}
+      {%- elsif barqat_url == blank -%}
+        {%- assign barqat_url = 'shopify://collections/fragrance' -%}
+      {%- endif -%}
+
+      {%- assign barqat_title = section.settings.reel_product_title | default: 'Barqat' -%}
+      {%- if barqat_product != blank and section.settings.reel_product_title == blank -%}
+        {%- assign barqat_title = barqat_product.title -%}
+      {%- endif -%}
+
+      {%- assign barqat_price = section.settings.reel_product_price | default: '₹1,499' -%}
+      {%- if barqat_product != blank and barqat_product.price > 0 -%}
+        {%- assign barqat_price = barqat_product.price | money -%}
+      {%- endif -%}
+
+      {%- assign barqat_compare_price = section.settings.reel_product_price_compare | default: '₹1,999' -%}
+      {%- if barqat_product != blank and barqat_product.compare_at_price > barqat_product.price -%}
+        {%- assign barqat_compare_price = barqat_product.compare_at_price | money -%}
+      {%- endif -%}
+
+      <div class="lame-signature__reel-showcase" data-lame-reveal>
+        <div class="lame-signature__reel-grid">
+
+          {%- comment -%} LEFT COLUMN: VERTICAL REEL VIDEO {%- endcomment -%}
+          <div class="lame-signature__reel-col">
+            <div class="lame-signature__reel-frame" data-reel-container>
+              {% if section.settings.reel_video != blank %}
+                {{
+                  section.settings.reel_video
+                  | video_tag:
+                    autoplay: true,
+                    loop: true,
+                    muted: true,
+                    playsinline: true,
+                    class: 'lame-signature__reel-media',
+                    controls: false,
+                    image_size: '900x'
+                }}
+              {% elsif section.settings.reel_video_url_external != blank %}
+                {% if section.settings.reel_video_url_external.type == 'youtube' %}
+                  <iframe
+                    class="lame-signature__reel-media lame-signature__reel-media--iframe"
+                    src="https://www.youtube.com/embed/{{ section.settings.reel_video_url_external.id }}?autoplay=1&mute=1&loop=1&playlist={{ section.settings.reel_video_url_external.id }}&controls=0&playsinline=1"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen
+                    title="{{ section.settings.reel_caption_title | default: 'Vertical video' | escape }}"
+                  ></iframe>
+                {% elsif section.settings.reel_video_url_external.type == 'vimeo' %}
+                  <iframe
+                    class="lame-signature__reel-media lame-signature__reel-media--iframe"
+                    src="https://player.vimeo.com/video/{{ section.settings.reel_video_url_external.id }}?autoplay=1&muted=1&loop=1&autopause=0&background=1"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen
+                    title="{{ section.settings.reel_caption_title | default: 'Vertical video' | escape }}"
+                  ></iframe>
+                {% endif %}
+              {% elsif section.settings.reel_video_url != blank %}
+                <video
+                  class="lame-signature__reel-media"
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  src="{{ section.settings.reel_video_url }}"
+                  {% if section.settings.reel_poster != blank %}poster="{{ section.settings.reel_poster | image_url: width: 900 }}"{% endif %}
+                ></video>
+              {% elsif section.settings.reel_video_asset != blank %}
+                <video
+                  class="lame-signature__reel-media"
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  src="{{ section.settings.reel_video_asset | asset_url }}"
+                  {% if section.settings.reel_poster != blank %}poster="{{ section.settings.reel_poster | image_url: width: 900 }}"{% endif %}
+                ></video>
+              {% elsif section.settings.reel_poster != blank %}
+                {{
+                  section.settings.reel_poster
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'lame-signature__reel-media',
+                    loading: 'lazy',
+                    widths: '360,540,720,900',
+                    sizes: '(min-width: 990px) 360px, 85vw',
+                    alt: section.settings.reel_caption_title | default: 'LAMÉ Reel' | escape
+                }}
+              {% else %}
+                <div class="lame-signature__reel-placeholder">
+                  <span>Vertical Video Reel</span>
+                </div>
+              {% endif %}
+
+              <div class="lame-signature__reel-overlay" aria-hidden="true"></div>
+
+              {% if section.settings.show_sound_btn != false %}
+                <button
+                  type="button"
+                  class="lame-signature__reel-sound-btn"
+                  data-reel-sound-toggle
+                  aria-label="Toggle reel sound"
+                  title="Toggle sound"
+                >
+                  <span class="lame-signature__reel-sound-icon lame-signature__reel-sound-icon--muted" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                      <line x1="23" y1="9" x2="17" y2="15"/>
+                      <line x1="17" y1="9" x2="23" y2="15"/>
+                    </svg>
+                  </span>
+                  <span class="lame-signature__reel-sound-icon lame-signature__reel-sound-icon--unmuted" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </svg>
+                  </span>
+                  <span class="lame-signature__reel-sound-label">{{ section.settings.reel_sound_label | default: 'Audio' }}</span>
+                </button>
+              {% endif %}
+
+              <div class="lame-signature__reel-footer-caption">
+                {% if section.settings.reel_caption_brand != blank %}
+                  <p class="lame-signature__reel-caption-brand">{{ section.settings.reel_caption_brand }}</p>
+                {% endif %}
+                <p class="lame-signature__reel-caption-title">
+                  {% if section.settings.reel_caption_title != blank %}
+                    {{ section.settings.reel_caption_title }}
+                  {% else %}
+                    {{ barqat_title }} in Motion
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {%- comment -%} RIGHT COLUMN: BARQAT PRODUCT CARD (ENTIRE CARD CLICKABLE) {%- endcomment -%}
+          <div class="lame-signature__barqat-col">
+            <a href="{{ barqat_url }}" class="lame-signature__barqat-card" aria-label="View {{ barqat_title }} product page">
+              <div class="lame-signature__barqat-glow" aria-hidden="true"></div>
+
+              <div class="lame-signature__barqat-inner">
+                <div class="lame-signature__barqat-media">
+                  <div class="lame-signature__barqat-badge-wrap">
+                    {% if section.settings.reel_product_tag != blank %}
+                      <span class="lame-signature__barqat-tag">{{ section.settings.reel_product_tag }}</span>
+                    {% endif %}
+                    {% if section.settings.reel_product_rating != blank or section.settings.reel_product_rating_stars != blank %}
+                      <span class="lame-signature__barqat-rating">
+                        {% if section.settings.reel_product_rating_stars != blank %}
+                          <span class="lame-signature__barqat-stars">{{ section.settings.reel_product_rating_stars }}</span>
+                        {% endif %}
+                        {% if section.settings.reel_product_rating != blank %}
+                          <span class="lame-signature__barqat-score">{{ section.settings.reel_product_rating }}</span>
+                        {% endif %}
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <div class="lame-signature__barqat-img-wrap">
+                    {% if section.settings.reel_product_image != blank %}
+                      {{
+                        section.settings.reel_product_image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'lame-signature__barqat-image',
+                          loading: 'lazy',
+                          widths: '360,540,720,900',
+                          sizes: '(min-width: 990px) 380px, 85vw',
+                          alt: barqat_title | escape
+                      }}
+                    {% elsif barqat_product != blank and barqat_product.featured_image != blank %}
+                      {{
+                        barqat_product.featured_image
+                        | image_url: width: 900
+                        | image_tag:
+                          class: 'lame-signature__barqat-image',
+                          loading: 'lazy',
+                          widths: '360,540,720,900',
+                          sizes: '(min-width: 990px) 380px, 85vw',
+                          alt: barqat_title | escape
+                      }}
+                    {% elsif section.settings.reel_product_image_asset != blank %}
+                      <img
+                        class="lame-signature__barqat-image"
+                        src="{{ section.settings.reel_product_image_asset | asset_url }}"
+                        alt="{{ barqat_title | escape }}"
+                        loading="lazy"
+                        width="900"
+                        height="1125"
+                      >
+                    {% else %}
+                      <img
+                        class="lame-signature__barqat-image"
+                        src="{{ 'lame-coming-soon-barqat.png' | asset_url }}"
+                        alt="{{ barqat_title | escape }}"
+                        loading="lazy"
+                        width="900"
+                        height="1125"
+                      >
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="lame-signature__barqat-info">
+                  {% if section.settings.reel_product_brand != blank %}
+                    <p class="lame-signature__barqat-brand">{{ section.settings.reel_product_brand }}</p>
+                  {% endif %}
+                  <h3 class="lame-signature__barqat-title">{{ barqat_title }}</h3>
+
+                  {% if section.settings.reel_product_subtitle != blank %}
+                    <p class="lame-signature__barqat-subtitle">{{ section.settings.reel_product_subtitle }}</p>
+                  {% endif %}
+
+                  <div class="lame-signature__barqat-price-row">
+                    <span class="lame-signature__barqat-price">{{ barqat_price }}</span>
+                    {% if barqat_compare_price != blank %}
+                      <span class="lame-signature__barqat-compare">{{ barqat_compare_price }}</span>
+                    {% endif %}
+                    {% if section.settings.reel_product_tax_badge != blank %}
+                      <span class="lame-signature__barqat-tax-pill">{{ section.settings.reel_product_tax_badge }}</span>
+                    {% endif %}
+                  </div>
+
+                  {%- assign notes_label = section.settings.reel_product_notes_label | default: 'SCENT PROFILE' -%}
+                  <div class="lame-signature__barqat-notes-wrap">
+                    {% if notes_label != blank %}
+                      <span class="lame-signature__barqat-note-label">{{ notes_label }}</span>
+                    {% endif %}
+                    <div class="lame-signature__barqat-note-pills">
+                      {% if section.settings.reel_scent_note_1 != blank or section.settings.reel_scent_note_2 != blank or section.settings.reel_scent_note_3 != blank %}
+                        {% if section.settings.reel_scent_note_1 != blank %}
+                          <span class="lame-signature__barqat-note-pill">{{ section.settings.reel_scent_note_1 }}</span>
+                        {% endif %}
+                        {% if section.settings.reel_scent_note_2 != blank %}
+                          <span class="lame-signature__barqat-note-pill">{{ section.settings.reel_scent_note_2 }}</span>
+                        {% endif %}
+                        {% if section.settings.reel_scent_note_3 != blank %}
+                          <span class="lame-signature__barqat-note-pill">{{ section.settings.reel_scent_note_3 }}</span>
+                        {% endif %}
+                      {% else %}
+                        {%- assign notes_string = section.settings.reel_product_scent_notes | default: 'ORIENTAL • WOODY • AMBER' -%}
+                        {%- assign notes_array = notes_string | split: '•' -%}
+                        {% for note in notes_array %}
+                          {% assign trimmed_note = note | strip %}
+                          {% if trimmed_note != blank %}
+                            <span class="lame-signature__barqat-note-pill">
+                              <span class="lame-signature__note-icon">
+                                {% case forloop.index %}
+                                  {% when 1 %}🌿
+                                  {% when 2 %}🪵
+                                  {% when 3 %}✨
+                                  {% else %}⚜️
+                                {% endcase %}
+                              </span>
+                              {{ trimmed_note }}
+                            </span>
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  {% if section.settings.reel_product_description != blank %}
+                    <p class="lame-signature__barqat-desc">{{ section.settings.reel_product_description }}</p>
+                  {% endif %}
+
+                  <div class="lame-signature__barqat-cta-row">
+                    <span class="lame-signature__barqat-btn">
+                      <span>{{ section.settings.reel_button_label | default: 'Explore Barqat' }}</span>
+                      <svg class="lame-signature__barqat-btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </span>
+                    {% if section.settings.reel_click_hint != blank %}
+                      <span class="lame-signature__barqat-click-hint">{{ section.settings.reel_click_hint }}</span>
+                    {% endif %}
+                  </div>
+
+                  {% if section.settings.reel_trust_1 != blank or section.settings.reel_trust_2 != blank or section.settings.reel_trust_3 != blank %}
+                    <div class="lame-signature__barqat-trust">
+                      {% if section.settings.reel_trust_1 != blank %}
+                        <div class="lame-signature__trust-item">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                          <span>{{ section.settings.reel_trust_1 }}</span>
+                        </div>
+                      {% endif %}
+                      {% if section.settings.reel_trust_2 != blank %}
+                        <div class="lame-signature__trust-item">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                          <span>{{ section.settings.reel_trust_2 }}</span>
+                        </div>
+                      {% endif %}
+                      {% if section.settings.reel_trust_3 != blank %}
+                        <div class="lame-signature__trust-item">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                          <span>{{ section.settings.reel_trust_3 }}</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    {% endif %}
+
+    {% if section.settings.layout == 'carousel' or section.settings.layout == 'reel_and_carousel' %}
+    <div class="lame-signature__carousel{% if section.settings.layout == 'reel_and_carousel' %} lame-signature__carousel--below-reel{% endif %}" data-signature-carousel>
       <ul class="lame-signature__track" role="list" data-signature-track>
         {% for block in section.blocks %}
           {% if block.type == 'product' %}
@@ -144,7 +461,14 @@
                   {% if block.settings.scent_notes != blank %}
                     <p class="lame-signature__showcase-notes">{{ block.settings.scent_notes }}</p>
                   {% endif %}
-                  <span class="lame-signature__showcase-coming-soon">{{ section.settings.coming_soon_label }}</span>
+                  {% assign card_btn_text = block.settings.button_label | default: section.settings.coming_soon_label %}
+                  {% if block.settings.link != blank %}
+                    <a class="lame-signature__showcase-coming-soon" href="{{ block.settings.link }}">
+                      {{ card_btn_text }}
+                    </a>
+                  {% else %}
+                    <span class="lame-signature__showcase-coming-soon">{{ card_btn_text }}</span>
+                  {% endif %}
                 </div>
                 {% else %}
                 <div class="lame-signature__media">
@@ -218,6 +542,7 @@
         </button>
       </div>
     </div>
+    {% endif %}
 
     {% endif %}
 
@@ -255,117 +580,164 @@
 
 <script>
   (() => {
-    const section = document.getElementById('shopify-section-{{ section.id }}');
-    if (!section) return;
+    function initSignature(section) {
+      if (!section) return;
 
-    const track = section.querySelector('[data-signature-track]');
-    const slides = section.querySelectorAll('[data-signature-slide]');
-    const dotsWrap = section.querySelector('[data-signature-dots]');
-    const prev = section.querySelector('[data-signature-prev]');
-    const next = section.querySelector('[data-signature-next]');
-    if (!track || !slides.length) return;
+      // IntersectionObserver for reveal elements
+      const revealNodes = section.querySelectorAll('[data-lame-reveal]');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-visible');
+              obs.unobserve(entry.target);
+            });
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+        );
+        revealNodes.forEach((node) => observer.observe(node));
+      } else {
+        revealNodes.forEach((node) => node.classList.add('is-visible'));
+      }
 
-    let activeIndex = 0;
-    let dots = [];
+      // Reel Sound & Video toggle
+      const soundBtn = section.querySelector('[data-reel-sound-toggle]');
+      const reelContainer = section.querySelector('[data-reel-container]');
+      if (soundBtn && reelContainer) {
+        const video = reelContainer.querySelector('video');
+        if (video) {
+          soundBtn.style.display = '';
+          soundBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            video.muted = !video.muted;
+            soundBtn.classList.toggle('is-unmuted', !video.muted);
+            if (!video.muted && video.paused) {
+              video.play().catch(() => {});
+            }
+          };
 
-    const getSlidesPerView = () => {
-      const isShowcase = section.querySelector('.lame-signature__card--showcase');
-      if (isShowcase) {
-        if (window.matchMedia('(min-width: 1100px)').matches) return 3;
+          video.onclick = () => {
+            if (video.paused) {
+              video.play().catch(() => {});
+            } else {
+              video.pause();
+            }
+          };
+
+          // Try play if autoplay was prevented
+          if (video.paused) {
+            video.play().catch(() => {});
+          }
+        } else {
+          soundBtn.style.display = 'none';
+        }
+      }
+
+      const track = section.querySelector('[data-signature-track]');
+      const slides = section.querySelectorAll('[data-signature-slide]');
+      const dotsWrap = section.querySelector('[data-signature-dots]');
+      const prev = section.querySelector('[data-signature-prev]');
+      const next = section.querySelector('[data-signature-next]');
+      if (!track || !slides.length) return;
+
+      let activeIndex = 0;
+      let dots = [];
+
+      const getSlidesPerView = () => {
+        const isShowcase = section.querySelector('.lame-signature__card--showcase');
+        if (isShowcase) {
+          if (window.matchMedia('(min-width: 1100px)').matches) return 3;
+          if (window.matchMedia('(min-width: 750px)').matches) return 2;
+          return 1;
+        }
+        if (window.matchMedia('(min-width: 990px)').matches) return 3;
         if (window.matchMedia('(min-width: 750px)').matches) return 2;
         return 1;
-      }
-      if (window.matchMedia('(min-width: 990px)').matches) return 3;
-      if (window.matchMedia('(min-width: 750px)').matches) return 2;
-      return 1;
-    };
+      };
 
-    const getPageCount = () => {
-      const perView = getSlidesPerView();
-      return Math.max(1, Math.ceil(slides.length / perView));
-    };
+      const getPageCount = () => {
+        const perView = getSlidesPerView();
+        return Math.max(1, Math.ceil(slides.length / perView));
+      };
 
-    const buildDots = () => {
-      if (!dotsWrap) return;
-      dotsWrap.innerHTML = '';
-      dots = [];
-      const count = getPageCount();
-      for (let i = 0; i < count; i += 1) {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'lame-signature__dot';
-        dot.setAttribute('role', 'tab');
-        dot.setAttribute('aria-label', `Slide ${i + 1}`);
-        dot.addEventListener('click', () => goToPage(i));
-        dotsWrap.appendChild(dot);
-        dots.push(dot);
-      }
-    };
+      const buildDots = () => {
+        if (!dotsWrap) return;
+        dotsWrap.innerHTML = '';
+        dots = [];
+        const count = getPageCount();
+        for (let i = 0; i < count; i += 1) {
+          const dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'lame-signature__dot';
+          dot.setAttribute('role', 'tab');
+          dot.setAttribute('aria-label', `Slide ${i + 1}`);
+          dot.onclick = () => goToPage(i);
+          dotsWrap.appendChild(dot);
+          dots.push(dot);
+        }
+      };
 
-    const updateDots = () => {
-      dots.forEach((dot, i) => {
-        const isActive = i === activeIndex;
-        dot.classList.toggle('is-active', isActive);
-        dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
-      });
-    };
+      const updateDots = () => {
+        dots.forEach((dot, i) => {
+          const isActive = i === activeIndex;
+          dot.classList.toggle('is-active', isActive);
+          dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+      };
 
-    const goToPage = (pageIndex) => {
-      const perView = getSlidesPerView();
-      const maxPage = getPageCount() - 1;
-      activeIndex = Math.min(Math.max(pageIndex, 0), maxPage);
-      const targetSlide = slides[activeIndex * perView];
-      if (!targetSlide) return;
-      const offset = targetSlide.offsetLeft - track.offsetLeft;
-      track.scrollTo({ left: offset, behavior: 'smooth' });
-      updateDots();
-      updateArrows();
-    };
+      const goToPage = (pageIndex) => {
+        const perView = getSlidesPerView();
+        const maxPage = getPageCount() - 1;
+        activeIndex = Math.min(Math.max(pageIndex, 0), maxPage);
+        const targetSlide = slides[activeIndex * perView];
+        if (!targetSlide) return;
+        const offset = targetSlide.offsetLeft - track.offsetLeft;
+        track.scrollTo({ left: offset, behavior: 'smooth' });
+        updateDots();
+        updateArrows();
+      };
 
-    const updateArrows = () => {
-      const maxPage = getPageCount() - 1;
-      if (prev) prev.disabled = activeIndex <= 0;
-      if (next) next.disabled = activeIndex >= maxPage;
-    };
+      const updateArrows = () => {
+        const maxPage = getPageCount() - 1;
+        if (prev) prev.disabled = activeIndex <= 0;
+        if (next) next.disabled = activeIndex >= maxPage;
+      };
 
-    const syncFromScroll = () => {
-      const perView = getSlidesPerView();
-      const slideWidth = slides[0]?.offsetWidth || 1;
-      const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '0');
-      const approx = Math.round(track.scrollLeft / (slideWidth + gap));
-      activeIndex = Math.min(Math.max(Math.floor(approx / perView), 0), getPageCount() - 1);
-      updateDots();
-      updateArrows();
-    };
+      const syncFromScroll = () => {
+        const perView = getSlidesPerView();
+        const slideWidth = slides[0]?.offsetWidth || 1;
+        const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || '0');
+        const approx = Math.round(track.scrollLeft / (slideWidth + gap));
+        activeIndex = Math.min(Math.max(Math.floor(approx / perView), 0), getPageCount() - 1);
+        updateDots();
+        updateArrows();
+      };
 
-    buildDots();
-    updateDots();
-    updateArrows();
-
-    prev?.addEventListener('click', () => goToPage(activeIndex - 1));
-    next?.addEventListener('click', () => goToPage(activeIndex + 1));
-    track.addEventListener('scroll', syncFromScroll, { passive: true });
-    window.addEventListener('resize', () => {
       buildDots();
-      goToPage(activeIndex);
-    });
+      updateDots();
+      updateArrows();
 
-    const revealNodes = section.querySelectorAll('[data-lame-reveal]');
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries, obs) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('is-visible');
-            obs.unobserve(entry.target);
-          });
-        },
-        { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
-      );
-      revealNodes.forEach((node) => observer.observe(node));
-    } else {
-      revealNodes.forEach((node) => node.classList.add('is-visible'));
+      if (prev) prev.onclick = () => goToPage(activeIndex - 1);
+      if (next) next.onclick = () => goToPage(activeIndex + 1);
+      track.onscroll = syncFromScroll;
     }
+
+    const currentSection = document.getElementById('shopify-section-{{ section.id }}');
+    if (currentSection) {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => initSignature(currentSection));
+      } else {
+        initSignature(currentSection);
+      }
+    }
+
+    document.addEventListener('shopify:section:load', (e) => {
+      if (e.target && e.target.id === 'shopify-section-{{ section.id }}') {
+        initSignature(e.target);
+      }
+    });
   })();
 </script>
 
@@ -602,6 +974,8 @@
     transition:
       transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.45s ease;
+    isolation: isolate;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
   }
 
   .lame-signature__card.lame-signature__card--showcase:is(:hover, :focus-within) {
@@ -619,6 +993,18 @@
     min-height: 0;
     overflow: hidden;
     background: #243820;
+    border-radius: inherit;
+    isolation: isolate;
+  }
+
+  @keyframes lameShowcaseZoomPulse {
+    0%,
+    100% {
+      transform: scale(1) translateZ(0);
+    }
+    50% {
+      transform: scale(1.08) translateZ(0);
+    }
   }
 
   .lame-signature__showcase-image {
@@ -629,12 +1015,31 @@
     object-fit: cover;
     object-position: center;
     display: block;
-    transform: scale(1.01);
-    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: center center;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    animation: lameShowcaseZoomPulse 10s ease-in-out infinite;
   }
 
-  .lame-signature__card--showcase:is(:hover, :focus-within) .lame-signature__showcase-image {
-    transform: scale(1.07);
+  /* Natural asynchronous breathing effect across cards */
+  .lame-signature__slide:nth-child(3n + 1) .lame-signature__showcase-image {
+    animation-delay: 0s;
+  }
+
+  .lame-signature__slide:nth-child(3n + 2) .lame-signature__showcase-image {
+    animation-delay: -3.33s;
+  }
+
+  .lame-signature__slide:nth-child(3n) .lame-signature__showcase-image {
+    animation-delay: -6.66s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lame-signature__showcase-image {
+      animation: none !important;
+      transform: scale(1) !important;
+    }
   }
 
   .lame-signature__showcase-veil {
@@ -739,6 +1144,20 @@
     background: linear-gradient(135deg, #e8c97a 0%, #c9a962 55%, #b8924a 100%);
     box-shadow: 0 6px 18px rgb(0 0 0 / 0.22);
     max-width: none;
+    text-decoration: none;
+    cursor: default;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  }
+
+  a.lame-signature__showcase-coming-soon {
+    cursor: pointer;
+  }
+
+  a.lame-signature__showcase-coming-soon:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 22px rgb(0 0 0 / 0.32);
+    filter: brightness(1.08);
+    color: #12200f;
   }
 
   @media screen and (min-width: 750px) {
@@ -1412,6 +1831,610 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
+
+  /* =========================================================================
+     REEL + BARQAT SPLIT SHOWCASE
+     ========================================================================= */
+  .lame-signature__reel-showcase {
+    position: relative;
+    width: 100%;
+    margin-block: 1.5rem 2.5rem;
+    z-index: 2;
+  }
+
+  .lame-signature__carousel--below-reel {
+    margin-block-start: 3.5rem;
+    padding-block-start: 2.75rem;
+    border-block-start: 1px dashed rgba(var(--lame-sig-forest, 45 74 34) / 0.18);
+  }
+
+  .lame-signature__reel-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 2.25rem;
+    align-items: stretch;
+  }
+
+  @media (max-width: 1199px) and (min-width: 990px) {
+    .lame-signature__reel-grid {
+      grid-template-columns: 320px 1fr;
+      gap: 1.75rem;
+      align-items: stretch;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .lame-signature__reel-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  /* Reel Column & Frame - parallel to right card */
+  .lame-signature__reel-col {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-signature__reel-frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #0d160f;
+    border: 1.5px solid rgba(212, 175, 55, 0.4);
+    box-shadow:
+      0 18px 45px -12px rgba(15, 28, 12, 0.35),
+      0 0 30px rgba(212, 175, 55, 0.15);
+    box-sizing: border-box;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+
+  @media (min-width: 990px) {
+    .lame-signature__reel-frame:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 26px 60px -14px rgba(15, 28, 12, 0.45),
+        0 0 45px rgba(212, 175, 55, 0.28);
+      border-color: rgba(212, 175, 55, 0.75);
+    }
+  }
+
+  @media (max-width: 989px) {
+    .lame-signature__reel-col {
+      justify-content: center;
+      height: auto;
+    }
+
+    .lame-signature__reel-frame {
+      width: 100%;
+      max-width: 380px;
+      aspect-ratio: 9 / 16;
+      height: auto;
+      min-height: 0;
+      margin-inline: auto;
+    }
+  }
+
+  .lame-signature__reel-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+  }
+
+  .lame-signature__reel-media--iframe {
+    border: 0;
+    pointer-events: auto;
+  }
+
+  .lame-signature__reel-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #142216;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+  }
+
+  .lame-signature__reel-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 20, 10, 0.5) 0%,
+      transparent 22%,
+      transparent 60%,
+      rgba(10, 20, 10, 0.88) 100%
+    );
+  }
+
+  .lame-signature__reel-header-badge {
+    position: absolute;
+    inset-block-start: 1.1rem;
+    inset-inline-start: 1.1rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.38rem 0.85rem;
+    border-radius: 999px;
+    background: rgba(13, 22, 15, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .lame-signature__reel-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e53e3e;
+    box-shadow: 0 0 8px #e53e3e;
+    animation: lameReelPulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes lameReelPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.55; }
+  }
+
+  .lame-signature__reel-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .lame-signature__reel-sound-btn {
+    position: absolute;
+    inset-block-start: 1.1rem;
+    inset-inline-end: 1.1rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(13, 22, 15, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+  }
+
+  .lame-signature__reel-sound-btn:hover {
+    background: rgba(45, 74, 34, 0.9);
+    border-color: rgba(212, 175, 55, 0.6);
+  }
+
+  .lame-signature__reel-sound-btn.is-unmuted {
+    border-color: rgba(212, 175, 55, 0.75);
+    background: rgba(45, 74, 34, 0.92);
+    color: #f3e5ab;
+  }
+
+  .lame-signature__reel-sound-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lame-signature__reel-sound-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-signature__reel-sound-icon--unmuted {
+    display: none;
+  }
+
+  .lame-signature__reel-sound-btn.is-unmuted .lame-signature__reel-sound-icon--muted {
+    display: none;
+  }
+
+  .lame-signature__reel-sound-btn.is-unmuted .lame-signature__reel-sound-icon--unmuted {
+    display: inline-flex;
+  }
+
+  .lame-signature__reel-footer-caption {
+    position: absolute;
+    inset-block-end: 1.25rem;
+    inset-inline-start: 1.25rem;
+    inset-inline-end: 1.25rem;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .lame-signature__reel-caption-brand {
+    margin: 0 0 0.2rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #d4af37;
+  }
+
+  .lame-signature__reel-caption-title {
+    margin: 0;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1.2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* =========================================================================
+     BARQAT PRODUCT SPOTLIGHT CARD (RIGHT COLUMN)
+     ========================================================================= */
+  .lame-signature__barqat-col {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lame-signature__barqat-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 28px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #fbfcf9 0%, #edf3ec 60%, #e3ece1 100%);
+    border: 1.5px solid rgba(45, 74, 34, 0.16);
+    box-shadow:
+      0 18px 45px -12px rgba(45, 74, 34, 0.14),
+      0 0 30px rgba(212, 175, 55, 0.08);
+    box-sizing: border-box;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+    cursor: pointer;
+  }
+
+  .lame-signature__barqat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(212, 175, 55, 0.65);
+    box-shadow:
+      0 26px 60px -14px rgba(45, 74, 34, 0.24),
+      0 0 45px rgba(212, 175, 55, 0.22);
+  }
+
+  @media (max-width: 989px) {
+    .lame-signature__barqat-col {
+      height: auto;
+    }
+
+    .lame-signature__barqat-card {
+      height: auto;
+      min-height: 0;
+    }
+  }
+
+  .lame-signature__barqat-glow {
+    position: absolute;
+    inset-block-start: -20%;
+    inset-inline-end: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .lame-signature__barqat-inner {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(240px, 320px) 1fr;
+    gap: 2.25rem;
+    align-items: center;
+    padding: 2.5rem;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1199px) and (min-width: 990px) {
+    .lame-signature__barqat-inner {
+      grid-template-columns: 240px 1fr;
+      gap: 1.75rem;
+      padding: 2rem;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .lame-signature__barqat-inner {
+      grid-template-columns: 1fr;
+      padding: 2rem 1.5rem;
+      gap: 1.75rem;
+    }
+  }
+
+  /* Product Media Frame with Zoom effect */
+  .lame-signature__barqat-media {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .lame-signature__barqat-badge-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-block-end: 0.85rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .lame-signature__barqat-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.32rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(45, 74, 34, 0.12);
+    color: #2d4a22;
+    border: 1px solid rgba(45, 74, 34, 0.2);
+  }
+
+  .lame-signature__barqat-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .lame-signature__barqat-stars {
+    color: #d4af37;
+    letter-spacing: 0.1em;
+  }
+
+  .lame-signature__barqat-score {
+    font-weight: 600;
+    color: #4a6341;
+  }
+
+  .lame-signature__barqat-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-height: 420px;
+    border-radius: 22px;
+    background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.22) 0%, rgba(45, 74, 34, 0.06) 65%, transparent 85%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .lame-signature__barqat-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 26px rgba(25, 45, 20, 0.24));
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: lameBarqatFloat 6s ease-in-out infinite;
+  }
+
+  .lame-signature__barqat-card:hover .lame-signature__barqat-image {
+    transform: scale(1.08) rotate(-1.5deg);
+  }
+
+  @keyframes lameBarqatFloat {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-6px) scale(1.02); }
+  }
+
+  /* Product Information & Details */
+  .lame-signature__barqat-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .lame-signature__barqat-brand {
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #2d4a22;
+  }
+
+  .lame-signature__barqat-title {
+    margin: 0 0 0.25rem;
+    font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
+    font-size: clamp(2.2rem, 3.2vw, 3rem);
+    font-weight: 600;
+    color: #1a3014;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+
+  .lame-signature__barqat-subtitle {
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #55704a;
+    letter-spacing: 0.06em;
+  }
+
+  .lame-signature__barqat-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-block-end: 1.25rem;
+  }
+
+  .lame-signature__barqat-price {
+    font-family: var(--lame-font-display, 'Cormorant Garamond', serif);
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #1a3014;
+  }
+
+  .lame-signature__barqat-compare {
+    font-size: 1.1rem;
+    text-decoration: line-through;
+    color: #889980;
+  }
+
+  .lame-signature__barqat-tax-pill {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(45, 74, 34, 0.08);
+    color: #2d4a22;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+  }
+
+  .lame-signature__barqat-notes-wrap {
+    margin-block-end: 1.25rem;
+  }
+
+  .lame-signature__barqat-note-label {
+    display: block;
+    margin-block-end: 0.45rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #7b9470;
+  }
+
+  .lame-signature__barqat-note-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .lame-signature__barqat-note-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(212, 175, 55, 0.38);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #2d4a22;
+    box-shadow: 0 2px 6px rgba(45, 74, 34, 0.04);
+  }
+
+  .lame-signature__note-icon {
+    font-size: 0.85rem;
+  }
+
+  .lame-signature__barqat-desc {
+    margin: 0 0 1.5rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #3b5233;
+  }
+
+  .lame-signature__barqat-cta-row {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+    margin-block-end: 1.5rem;
+  }
+
+  .lame-signature__barqat-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.88rem 1.95rem;
+    border-radius: 999px;
+    background: #2d4a22;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(45, 74, 34, 0.28);
+    transition: all 0.3s ease;
+  }
+
+  .lame-signature__barqat-card:hover .lame-signature__barqat-btn {
+    background: #233b1a;
+    box-shadow: 0 8px 24px rgba(45, 74, 34, 0.38);
+  }
+
+  .lame-signature__barqat-btn-arrow {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .lame-signature__barqat-card:hover .lame-signature__barqat-btn-arrow {
+    transform: translateX(4px);
+  }
+
+  .lame-signature__barqat-click-hint {
+    font-size: 0.75rem;
+    color: #5d7753;
+    font-style: italic;
+  }
+
+  .lame-signature__barqat-trust {
+    display: flex;
+    gap: 1.35rem;
+    flex-wrap: wrap;
+    padding-block-start: 1.25rem;
+    border-block-start: 1px solid rgba(45, 74, 34, 0.12);
+  }
+
+  .lame-signature__trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.75rem;
+    color: #456139;
+    font-weight: 500;
+  }
+
+  .lame-signature__trust-item svg {
+    width: 15px;
+    height: 15px;
+    stroke: #2d4a22;
+    flex-shrink: 0;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -1426,10 +2449,228 @@
       "id": "layout",
       "label": "Layout",
       "options": [
+        { "value": "reel_split", "label": "Vertical Reel & Barqat spotlight" },
+        { "value": "reel_and_carousel", "label": "Vertical Reel & Barqat + Carousel" },
         { "value": "carousel", "label": "Product carousel" },
         { "value": "editorial_grid", "label": "Editorial grid (explore cards)" }
       ],
-      "default": "carousel"
+      "default": "reel_split"
+    },
+    {
+      "type": "header",
+      "content": "Vertical Reel Video (Left Column)"
+    },
+    {
+      "type": "video",
+      "id": "reel_video",
+      "label": "Vertical reel video (Upload / Select from Shopify)",
+      "info": "Upload an MP4/MOV or choose a video from your Shopify admin files."
+    },
+    {
+      "type": "video_url",
+      "id": "reel_video_url_external",
+      "label": "Or external video link (YouTube / Vimeo)",
+      "accept": ["youtube", "vimeo"],
+      "info": "Paste a YouTube or Vimeo link if hosting externally."
+    },
+    {
+      "type": "text",
+      "id": "reel_video_url",
+      "label": "Or direct video URL (MP4 / WebM)",
+      "info": "Paste direct .mp4 URL from Shopify Files or external CDN."
+    },
+    {
+      "type": "text",
+      "id": "reel_video_asset",
+      "label": "Or theme asset video filename (fallback)",
+      "default": "lame-home-spotlight.mp4",
+      "info": "Filename in theme assets/ (e.g. lame-home-spotlight.mp4)"
+    },
+    {
+      "type": "image_picker",
+      "id": "reel_poster",
+      "label": "Reel cover / poster image",
+      "info": "Thumbnail poster image, or fallback image if video is not available."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sound_btn",
+      "label": "Show audio sound toggle button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "reel_sound_label",
+      "label": "Audio button text",
+      "default": "Audio"
+    },
+    {
+      "type": "text",
+      "id": "reel_caption_brand",
+      "label": "Reel bottom brand label",
+      "default": "LAMÉ PARFUMS"
+    },
+    {
+      "type": "text",
+      "id": "reel_caption_title",
+      "label": "Reel bottom title",
+      "default": "Barqat in Motion"
+    },
+    {
+      "type": "header",
+      "content": "Featured Product - Card Content"
+    },
+    {
+      "type": "product",
+      "id": "reel_product",
+      "label": "Select Barqat product",
+      "info": "Select the product. Clicking anywhere on the card opens its product page."
+    },
+    {
+      "type": "url",
+      "id": "reel_product_link",
+      "label": "Product page link (fallback)",
+      "info": "Used when no product is picked above. Clicking the card opens this page."
+    },
+    {
+      "type": "image_picker",
+      "id": "reel_product_image",
+      "label": "Custom Barqat image"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_image_asset",
+      "label": "Theme asset image filename",
+      "default": "lame-coming-soon-barqat.png"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_tag",
+      "label": "Product badge / tag",
+      "default": "NOW LAUNCHED • SIGNATURE"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_rating_stars",
+      "label": "Rating stars",
+      "default": "★★★★★"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_rating",
+      "label": "Rating score",
+      "default": "4.9 / 5"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_brand",
+      "label": "Brand subtitle",
+      "default": "LAMÉ HAUTE PARFUMERIE"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_title",
+      "label": "Product title",
+      "default": "Barqat"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_subtitle",
+      "label": "Product subtitle / volume",
+      "default": "Eau De Parfum • 100ml / 3.4 FL. OZ."
+    },
+    {
+      "type": "text",
+      "id": "reel_product_price",
+      "label": "Price",
+      "default": "₹1,499"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_price_compare",
+      "label": "Compare price",
+      "default": "₹1,999"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_tax_badge",
+      "label": "Shipping / tax badge",
+      "default": "Free Express Shipping"
+    },
+    {
+      "type": "header",
+      "content": "Featured Product - Scent Profile & Notes"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_notes_label",
+      "label": "Scent notes section label",
+      "default": "SCENT PROFILE"
+    },
+    {
+      "type": "text",
+      "id": "reel_scent_note_1",
+      "label": "Scent note 1 (pill)",
+      "default": "🌿 Bergamot & Warm Spices"
+    },
+    {
+      "type": "text",
+      "id": "reel_scent_note_2",
+      "label": "Scent note 2 (pill)",
+      "default": "🪵 Royal Amber & Woody Heart"
+    },
+    {
+      "type": "text",
+      "id": "reel_scent_note_3",
+      "label": "Scent note 3 (pill)",
+      "default": "✨ Smoky Oriental Musk"
+    },
+    {
+      "type": "text",
+      "id": "reel_product_scent_notes",
+      "label": "Or bullet-separated notes fallback",
+      "default": "ORIENTAL • WOODY • AMBER",
+      "info": "Used if individual notes above are left empty"
+    },
+    {
+      "type": "textarea",
+      "id": "reel_product_description",
+      "label": "Description",
+      "default": "A regal oriental blend wrapped in golden warmth and smoky elegance. Handcrafted by LAMÉ for unforgettable distinction."
+    },
+    {
+      "type": "header",
+      "content": "Featured Product - Action & Trust Badges"
+    },
+    {
+      "type": "text",
+      "id": "reel_button_label",
+      "label": "Button label",
+      "default": "Explore Barqat"
+    },
+    {
+      "type": "text",
+      "id": "reel_click_hint",
+      "label": "Card click hint text",
+      "default": "Click card to view product page →"
+    },
+    {
+      "type": "text",
+      "id": "reel_trust_1",
+      "label": "Trust badge 1",
+      "default": "100% Authentic Blend"
+    },
+    {
+      "type": "text",
+      "id": "reel_trust_2",
+      "label": "Trust badge 2",
+      "default": "Long Lasting 12+ Hours"
+    },
+    {
+      "type": "text",
+      "id": "reel_trust_3",
+      "label": "Trust badge 3",
+      "default": "Free Secured Delivery"
     },
     {
       "type": "text",
