@@ -52,7 +52,15 @@
       endif
     endfor
 
-    # 2. Second priority: Native Shopify Collection Image & Metafields
+    # 2. Second priority: Direct section setting image (editable on this template in theme customizer)
+    if hero_image == blank and section.settings.image != blank
+      assign hero_image = section.settings.image
+      if section.settings.image_mobile != blank
+        assign hero_image_mobile = section.settings.image_mobile
+      endif
+    endif
+
+    # 3. Third priority: Native Shopify Collection Image & Metafields (Shopify Admin fallback)
     if hero_image == blank
       if collection.metafields.custom.hero_banner != blank
         assign hero_image = collection.metafields.custom.hero_banner.value
@@ -61,11 +69,6 @@
       elsif collection.image != blank
         assign hero_image = collection.image
       endif
-    endif
-
-    # 3. Third priority: Global fallback banner if explicitly enabled
-    if hero_image == blank and section.settings.enable_fallback_image and section.settings.image != blank
-      assign hero_image = section.settings.image
     endif
 
     if hero_heading == blank
@@ -296,19 +299,19 @@
     },
     {
       "type": "header",
-      "content": "Fallback Banner (Optional)"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_fallback_image",
-      "label": "Enable global fallback banner",
-      "default": false,
-      "info": "When disabled, categories without a unique banner will not show any image."
+      "content": "Category Banner Image"
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Global fallback banner image"
+      "label": "Banner image",
+      "info": "Upload the banner image for this category page. If left empty, falls back to the Collection Image from Shopify Admin."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile banner image (optional)",
+      "info": "Optional mobile banner image."
     },
     {
       "type": "header",
