@@ -2,14 +2,74 @@
   assign hero_heading = section.settings.heading
   assign hero_subtitle = section.settings.subtitle
   assign hero_eyebrow = section.settings.eyebrow
-  assign hero_image = section.settings.image
+  assign hero_image = nil
+  assign hero_image_mobile = nil
+  assign hero_link = nil
+  assign hero_open_new_tab = false
+  assign active_block = nil
+
   if collection != blank
-    if hero_heading == blank
-      assign hero_heading = collection.title
+    # 1. First priority: Check category_banner blocks defined in theme editor
+    for block in section.blocks
+      if block.type == 'category_banner'
+        assign is_match = false
+        if block.settings.collection != blank
+          if block.settings.collection.handle == collection.handle or block.settings.collection.id == collection.id
+            assign is_match = true
+          endif
+        endif
+        if is_match == false and block.settings.category_handle != blank
+          assign block_handle = block.settings.category_handle | downcase | strip
+          assign col_handle = collection.handle | downcase | strip
+          if block_handle == col_handle
+            assign is_match = true
+          endif
+        endif
+
+        if is_match
+          assign active_block = block
+          if block.settings.image != blank
+            assign hero_image = block.settings.image
+          endif
+          if block.settings.image_mobile != blank
+            assign hero_image_mobile = block.settings.image_mobile
+          endif
+          if block.settings.link != blank
+            assign hero_link = block.settings.link
+          endif
+          assign hero_open_new_tab = block.settings.open_in_new_tab
+          if block.settings.heading != blank
+            assign hero_heading = block.settings.heading
+          endif
+          if block.settings.subtitle != blank
+            assign hero_subtitle = block.settings.subtitle
+          endif
+          if block.settings.eyebrow != blank
+            assign hero_eyebrow = block.settings.eyebrow
+          endif
+          break
+        endif
+      endif
+    endfor
+
+    # 2. Second priority: Native Shopify Collection Image & Metafields
+    if hero_image == blank
+      if collection.metafields.custom.hero_banner != blank
+        assign hero_image = collection.metafields.custom.hero_banner.value
+      elsif collection.metafields.custom.banner != blank
+        assign hero_image = collection.metafields.custom.banner.value
+      elsif collection.image != blank
+        assign hero_image = collection.image
+      endif
     endif
 
-    if hero_image == blank and collection.image != blank
-      assign hero_image = collection.image
+    # 3. Third priority: Global fallback banner if explicitly enabled
+    if hero_image == blank and section.settings.enable_fallback_image and section.settings.image != blank
+      assign hero_image = section.settings.image
+    endif
+
+    if hero_heading == blank
+      assign hero_heading = collection.title
     endif
 
     case collection.handle
@@ -145,18 +205,65 @@
       </div>
 
       {%- if hero_image != blank -%}
-        <div class="lame-cosmetic-category-hero__media">
-          {{
-            hero_image
-            | image_url: width: 1600
-            | image_tag:
-              class: 'lame-cosmetic-category-hero__image',
-              loading: 'eager',
-              fetchpriority: 'high',
-              widths: '600,800,1000,1200,1600',
-              sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
-              alt: hero_heading | escape
-          }}
+        <div
+          class="lame-cosmetic-category-hero__media"
+          {% if active_block != blank %}{{ active_block.shopify_attributes }}{% endif %}
+        >
+          {%- if hero_link != blank -%}
+            <a
+              href="{{ hero_link }}"
+              class="lame-cosmetic-category-hero__media-link"
+              {% if hero_open_new_tab %}target="_blank" rel="noopener"{% endif %}
+            >
+          {%- endif -%}
+
+          {%- if hero_image_mobile != blank -%}
+            <picture>
+              <source media="(max-width: 749px)" srcset="{{ hero_image_mobile | image_url: width: 750 }} 1x, {{ hero_image_mobile | image_url: width: 1200 }} 2x">
+              {{
+                hero_image
+                | image_url: width: 1800
+                | image_tag:
+                  class: 'lame-cosmetic-category-hero__image',
+                  loading: 'eager',
+                  fetchpriority: 'high',
+                  widths: '600,800,1000,1200,1600,1800,2200',
+                  sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
+                  alt: hero_heading | escape
+              }}
+            </picture>
+          {%- else -%}
+            {{
+              hero_image
+              | image_url: width: 1800
+              | image_tag:
+                class: 'lame-cosmetic-category-hero__image',
+                loading: 'eager',
+                fetchpriority: 'high',
+                widths: '600,800,1000,1200,1600,1800,2200',
+                sizes: '(min-width: 990px) min(100vw, var(--page-width)), 100vw',
+                alt: hero_heading | escape
+            }}
+          {%- endif -%}
+
+          {%- if hero_link != blank -%}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- elsif request.design_mode -%}
+        <div
+          class="lame-cosmetic-category-hero__media lame-cosmetic-category-hero__media--placeholder"
+          {{ section.shopify_attributes }}
+          style="padding: 2.2rem 1.5rem; text-align: center; border: 2px dashed #ccd5ce; border-radius: 14px; background: rgba(245, 248, 245, 0.7); margin-top: 1rem;"
+        >
+          <div style="max-width: 520px; margin: 0 auto;">
+            <p style="margin: 0; font-size: 0.95rem; font-weight: 600; color: #1e3a2b;">
+              No unique banner set for &ldquo;{{ hero_heading }}&rdquo;
+            </p>
+            <p style="margin: 0.4rem 0 0; font-size: 0.82rem; color: #5c6b62; line-height: 1.45;">
+              To add a banner for this category without affecting others, add a <strong>Category Banner</strong> block in the left sidebar and select this collection, or upload a <strong>Collection Image</strong> in Shopify Admin.
+            </p>
+          </div>
         </div>
       {%- endif -%}
     </div>
@@ -172,14 +279,14 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Heading and subtitle auto-fill from the collection. Each category handle gets a tailored subtitle."
+      "content": "Add 'Category Banner' blocks below to set unique banners per category. Each category banner is fully independent and editing one will never affect other category pages."
     },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow (optional override)" },
-    { "type": "text", "id": "heading", "label": "Heading (optional override)" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow (global default override)" },
+    { "type": "text", "id": "heading", "label": "Heading (global default override)" },
     {
       "type": "textarea",
       "id": "subtitle",
-      "label": "Subtitle (optional override)"
+      "label": "Subtitle (global default override)"
     },
     {
       "type": "text",
@@ -188,9 +295,24 @@
       "default": "Explore our curated selection of premium cosmetic essentials."
     },
     {
+      "type": "header",
+      "content": "Fallback Banner (Optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_fallback_image",
+      "label": "Enable global fallback banner",
+      "default": false,
+      "info": "When disabled, categories without a unique banner will not show any image."
+    },
+    {
       "type": "image_picker",
       "id": "image",
-      "label": "Hero / promo banner image (optional — uses collection image if empty)"
+      "label": "Global fallback banner image"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Style"
     },
     {
       "type": "select",
@@ -229,9 +351,113 @@
       "default": 20
     }
   ],
+  "blocks": [
+    {
+      "type": "category_banner",
+      "name": "Category Banner",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select Collection / Category",
+          "info": "Pick the collection this banner applies to."
+        },
+        {
+          "type": "text",
+          "id": "category_handle",
+          "label": "Or Category Handle (slug)",
+          "info": "e.g. fragrance, skin-care, hair-care, make-up, bath-body, baby-mom, wellness"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Desktop Banner Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Mobile Banner Image (optional)"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Banner Click Link (optional)"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Content Overrides (Optional)"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow tag"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading override"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Subtitle override"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "Cosmetic category hero"
+      "name": "Cosmetic category hero",
+      "blocks": [
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "fragrance"
+          }
+        },
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "skin-care"
+          }
+        },
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "hair-care"
+          }
+        },
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "make-up"
+          }
+        },
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "bath-body"
+          }
+        },
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "baby-mom"
+          }
+        },
+        {
+          "type": "category_banner",
+          "settings": {
+            "category_handle": "wellness"
+          }
+        }
+      ]
     }
   ]
 }

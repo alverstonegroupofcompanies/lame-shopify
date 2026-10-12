@@ -1,0 +1,583 @@
+{%- comment -%}
+  Lamé Radiant Beauty Hero Banner
+  Matches the luxury organic aesthetic: models photography, Travertine stone architectural background,
+  foliage framing, and gold calligraphy script headline.
+{%- endcomment -%}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+
+<div class="section-background color-{{ section.settings.color_scheme }}" style="background-color: {{ section.settings.bg_color | default: '#FAF6F0' }};"></div>
+
+<section
+  id="LameRadiantHero-{{ section.id }}"
+  class="section section--full-width lame-radiant-hero color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  style="
+    --radiant-bg: {{ section.settings.bg_color | default: '#FAF6F0' }};
+    --radiant-headline: {{ section.settings.headline_color | default: '#153828' }};
+    --radiant-script: {{ section.settings.script_color | default: '#B88B38' }};
+    --radiant-text: {{ section.settings.text_color | default: '#3F4842' }};
+    {% render 'spacing-padding', settings: section.settings %}
+  "
+  {{ section.shopify_attributes }}
+>
+  {%- if section.settings.show_corner_foliage -%}
+    <!-- Realistic botanical leaf accents framing the corners -->
+    <div class="lame-radiant-hero__leaf-accent lame-radiant-hero__leaf-accent--top-left" aria-hidden="true"></div>
+    <div class="lame-radiant-hero__leaf-accent lame-radiant-hero__leaf-accent--bottom-left" aria-hidden="true"></div>
+    <div class="lame-radiant-hero__leaf-accent lame-radiant-hero__leaf-accent--top-right" aria-hidden="true"></div>
+    <div class="lame-radiant-hero__leaf-accent lame-radiant-hero__leaf-accent--bottom-right" aria-hidden="true"></div>
+  {%- endif -%}
+
+  <div class="lame-radiant-hero__container">
+    <div class="lame-radiant-hero__inner">
+      <!-- Visual Column (Models with beauty products) -->
+      <div class="lame-radiant-hero__visual-col">
+        <div class="lame-radiant-hero__media-wrapper">
+          {%- if section.settings.image != blank -%}
+            {{
+              section.settings.image
+              | image_url: width: 2400
+              | image_tag:
+                class: 'lame-radiant-hero__image',
+                loading: 'eager',
+                fetchpriority: 'high',
+                widths: '600, 900, 1200, 1600, 2000, 2400',
+                sizes: '(min-width: 990px) 62vw, 100vw',
+                alt: section.settings.headline | default: 'Pure Ingredients Radiant You' | escape
+            }}
+          {%- else -%}
+            <img
+              src="{{ 'lame-radiant-beauty-models-hd.jpg' | asset_url }}"
+              alt="{{ section.settings.headline | default: 'Pure Ingredients Radiant You' | escape }}"
+              class="lame-radiant-hero__image"
+              loading="eager"
+              fetchpriority="high"
+              width="1920"
+              height="1080"
+              onerror="this.onerror=null; this.src='{{ 'lame-radiant-beauty-banner.png' | asset_url }}';"
+            >
+          {%- endif -%}
+        </div>
+      </div>
+
+      <!-- Editorial Column (Brand, Pure Ingredients, Radiant You) -->
+      <div class="lame-radiant-hero__copy-col">
+        <div class="lame-radiant-hero__copy-content">
+          <!-- Lamé Brand Mark -->
+          <div class="lame-radiant-hero__brand">
+            <span class="lame-radiant-hero__brand-name">
+              Lam<span class="lame-radiant-hero__brand-accent">é<svg class="lame-radiant-hero__leaf-sprout" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18C4 18 6 11 14 7C14 7 13 13 7 17C6 17.5 5 18 4 18Z" fill="#245437"/><path d="M11 11C13 8 18 4 22 5C22 5 21 11 16 13C14 13.8 12.5 13.5 11 11Z" fill="#3D7D54"/></svg></span>
+            </span>
+            {%- if section.settings.brand_tagline != blank -%}
+              <span class="lame-radiant-hero__brand-tagline">{{ section.settings.brand_tagline }}</span>
+            {%- endif -%}
+          </div>
+
+          <!-- Decorative Floral / Leaf Separator -->
+          <div class="lame-radiant-hero__flourish" aria-hidden="true">
+            <span class="lame-radiant-hero__flourish-line"></span>
+            <span class="lame-radiant-hero__flourish-leaf">
+              <svg viewBox="0 0 20 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2C7.5 4.5 7.5 8 10 10C12.5 8 12.5 4.5 10 2Z" fill="currentColor"/>
+                <circle cx="4" cy="6" r="1.2" fill="currentColor"/>
+                <circle cx="16" cy="6" r="1.2" fill="currentColor"/>
+              </svg>
+            </span>
+            <span class="lame-radiant-hero__flourish-line"></span>
+          </div>
+
+          <!-- Main Serif Headline -->
+          <h1 class="lame-radiant-hero__headline">
+            {{ section.settings.headline | default: 'PURE INGREDIENTS.' }}
+          </h1>
+
+          <!-- Luxury Calligraphy Script Accent -->
+          <div class="lame-radiant-hero__script">
+            {{ section.settings.script_text | default: 'Radiant You.' }}
+          </div>
+
+          <!-- Single Centered Leaf Motif -->
+          <div class="lame-radiant-hero__leaf-center" aria-hidden="true">
+            <svg viewBox="0 0 24 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C8.5 5.5 8.5 11 12 14C15.5 11 15.5 5.5 12 2Z" fill="currentColor"/>
+              <path d="M12 4.5V12.5" stroke="#ffffff" stroke-width="0.8" opacity="0.6"/>
+            </svg>
+          </div>
+
+          <!-- Subtitle / Brand Promise -->
+          {%- if section.settings.subheading != blank -%}
+            <p class="lame-radiant-hero__subheading">
+              {{ section.settings.subheading }}
+            </p>
+          {%- endif -%}
+
+          {%- if section.settings.button_label != blank -%}
+            <div class="lame-radiant-hero__cta-wrapper">
+              <a href="{{ section.settings.button_link | default: routes.all_products_collection_url }}" class="lame-radiant-hero__btn">
+                <span>{{ section.settings.button_label }}</span>
+                <svg viewBox="0 0 20 20" fill="none" class="lame-radiant-hero__btn-arrow" aria-hidden="true">
+                  <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-radiant-hero {
+    position: relative;
+    width: 100%;
+    background-color: var(--radiant-bg, #FAF6F0);
+    overflow: hidden;
+    color: var(--radiant-text, #3F4842);
+    font-family: var(--font-body-family, 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif);
+  }
+
+  .lame-radiant-hero__container {
+    width: 100%;
+    max-width: 1680px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lame-radiant-hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-hero__inner {
+      flex-direction: row;
+      align-items: center;
+      min-height: 520px;
+    }
+  }
+
+  @media screen and (min-width: 1400px) {
+    .lame-radiant-hero__inner {
+      min-height: 580px;
+    }
+  }
+
+  /* Visual Column */
+  .lame-radiant-hero__visual-col {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-hero__visual-col {
+      width: 61%;
+      flex: 0 0 61%;
+      align-self: stretch;
+    }
+  }
+
+  .lame-radiant-hero__media-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .lame-radiant-hero__image {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: cover;
+    object-position: center bottom;
+    display: block;
+    filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.04));
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-hero__image {
+      height: 100%;
+      max-height: none;
+      object-fit: cover;
+      object-position: 70% center;
+    }
+  }
+
+  /* Copy Column */
+  .lame-radiant-hero__copy-col {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem 3.5rem;
+    position: relative;
+    z-index: 3;
+    text-align: center;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-hero__copy-col {
+      width: 39%;
+      flex: 0 0 39%;
+      padding: 3rem 3.5rem 3rem 1.5rem;
+      text-align: center;
+    }
+  }
+
+  @media screen and (min-width: 1400px) {
+    .lame-radiant-hero__copy-col {
+      padding: 4rem 5rem 4rem 2rem;
+    }
+  }
+
+  .lame-radiant-hero__copy-content {
+    max-width: 440px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Brand Mark */
+  .lame-radiant-hero__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .lame-radiant-hero__brand-name {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--radiant-headline, #153828);
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .lame-radiant-hero__brand-accent {
+    position: relative;
+    display: inline-block;
+  }
+
+  .lame-radiant-hero__leaf-sprout {
+    position: absolute;
+    top: -0.85em;
+    right: -0.35em;
+    width: 1.1em;
+    height: 1.1em;
+    transform: rotate(8deg);
+  }
+
+  .lame-radiant-hero__brand-tagline {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--radiant-headline, #153828);
+    opacity: 0.82;
+  }
+
+  /* Decorative Line Flourish */
+  .lame-radiant-hero__flourish {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 180px;
+    margin-bottom: 1.5rem;
+    color: var(--radiant-script, #B88B38);
+  }
+
+  .lame-radiant-hero__flourish-line {
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.45;
+  }
+
+  .lame-radiant-hero__flourish-leaf {
+    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .lame-radiant-hero__flourish-leaf svg {
+    width: 20px;
+    height: 12px;
+  }
+
+  /* Main Headline */
+  .lame-radiant-hero__headline {
+    margin: 0;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2rem, 3.4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--radiant-headline, #153828);
+    line-height: 1.08;
+  }
+
+  /* Calligraphy Script Highlight */
+  .lame-radiant-hero__script {
+    font-family: 'Alex Brush', cursive, serif;
+    font-size: clamp(2.8rem, 4.8vw, 4.5rem);
+    font-weight: 400;
+    color: var(--radiant-script, #B88B38);
+    line-height: 1.02;
+    margin-top: 0.15rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 8px rgba(184, 139, 56, 0.12);
+  }
+
+  /* Leaf Center */
+  .lame-radiant-hero__leaf-center {
+    width: 22px;
+    height: 16px;
+    color: var(--radiant-script, #B88B38);
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+
+  .lame-radiant-hero__leaf-center svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Subtitle */
+  .lame-radiant-hero__subheading {
+    margin: 0;
+    font-size: clamp(0.92rem, 1.25vw, 1.06rem);
+    line-height: 1.55;
+    color: var(--radiant-text, #3F4842);
+    font-weight: 400;
+    max-width: 380px;
+  }
+
+  /* CTA Button */
+  .lame-radiant-hero__cta-wrapper {
+    margin-top: 1.6rem;
+  }
+
+  .lame-radiant-hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.8rem;
+    background: var(--radiant-headline, #153828);
+    color: #FAF6F0;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow: 0 6px 18px rgba(21, 56, 40, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
+
+  .lame-radiant-hero__btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(21, 56, 40, 0.28);
+    background: #0E291C;
+  }
+
+  .lame-radiant-hero__btn-arrow {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.25s ease;
+  }
+
+  .lame-radiant-hero__btn:hover .lame-radiant-hero__btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Corner Foliage Accents */
+  .lame-radiant-hero__leaf-accent {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.9;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .lame-radiant-hero__leaf-accent--top-left {
+    top: 0;
+    left: 0;
+    width: clamp(90px, 14vw, 210px);
+    height: clamp(90px, 14vw, 210px);
+    background-image: radial-gradient(circle at 10% 10%, rgba(36, 84, 55, 0.18) 0%, transparent 60%);
+  }
+
+  .lame-radiant-hero__leaf-accent--bottom-left {
+    bottom: 0;
+    left: 0;
+    width: clamp(100px, 16vw, 240px);
+    height: clamp(100px, 16vw, 240px);
+    background-image: radial-gradient(circle at 10% 90%, rgba(36, 84, 55, 0.16) 0%, transparent 65%);
+  }
+
+  .lame-radiant-hero__leaf-accent--top-right {
+    top: 0;
+    right: 0;
+    width: clamp(100px, 16vw, 240px);
+    height: clamp(100px, 16vw, 240px);
+    background-image: radial-gradient(circle at 90% 10%, rgba(36, 84, 55, 0.16) 0%, transparent 65%);
+  }
+
+  .lame-radiant-hero__leaf-accent--bottom-right {
+    bottom: 0;
+    right: 0;
+    width: clamp(90px, 14vw, 200px);
+    height: clamp(90px, 14vw, 200px);
+    background-image: radial-gradient(circle at 90% 90%, rgba(36, 84, 55, 0.18) 0%, transparent 60%);
+  }
+
+  @media screen and (max-width: 989px) {
+    .lame-radiant-hero__media-wrapper {
+      max-height: 420px;
+    }
+
+    .lame-radiant-hero__copy-col {
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    .lame-radiant-hero__headline {
+      font-size: 2.2rem;
+    }
+
+    .lame-radiant-hero__script {
+      font-size: 3.2rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Radiant Beauty Hero",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Banner image",
+      "info": "Upload custom models banner photography. Leave empty to use default HD photography."
+    },
+    {
+      "type": "text",
+      "id": "brand_tagline",
+      "label": "Brand tagline",
+      "default": "BEAUTY INSPIRED BY NATURE"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "PURE INGREDIENTS."
+    },
+    {
+      "type": "text",
+      "id": "script_text",
+      "label": "Script cursive accent",
+      "default": "Radiant You."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Description",
+      "default": "Nature's finest, crafted to bring out your most beautiful glow."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_corner_foliage",
+      "label": "Show botanical accents in corners",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#FAF6F0"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Headline color",
+      "default": "#153828"
+    },
+    {
+      "type": "color",
+      "id": "script_color",
+      "label": "Calligraphy script color",
+      "default": "#B88B38"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#3F4842"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Radiant Beauty Hero",
+      "category": "Hero"
+    }
+  ]
+}
+{% endschema %}

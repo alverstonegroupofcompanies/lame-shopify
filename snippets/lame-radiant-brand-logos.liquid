@@ -1,0 +1,80 @@
+{%- comment -%}
+  Renders brand logos for Lamé Radiant Top Brands pill section.
+  @param {string} brand - Identifier for the brand logo
+  @param {image} image - Optional image object from Shopify
+{%- endcomment -%}
+{%- liquid
+  assign brand_key = brand | default: '' | downcase | strip | replace: ' ', '-' | replace: "'", '' | replace: '’', ''
+-%}
+
+{%- if image != blank -%}
+  {{
+    image
+    | image_url: width: 360
+    | image_tag:
+      class: 'lame-radiant-brand__img',
+      loading: 'lazy',
+      widths: '120, 180, 240, 360',
+      sizes: '160px',
+      alt: brand | default: 'Brand' | escape
+  }}
+{%- else -%}
+  {%- case brand_key -%}
+    {%- when 'dove' -%}
+      <img
+        src="{{ 'brand-logo-dove.png' | asset_url }}"
+        alt="Dove"
+        class="lame-radiant-brand__img"
+        loading="lazy"
+        width="120"
+        height="50"
+      >
+    {%- when 'ponds', 'pond-s', 'ponds-skin-institute' -%}
+      <img
+        src="{{ 'brand-logo-ponds.png' | asset_url }}"
+        alt="POND'S Skin Institute"
+        class="lame-radiant-brand__img"
+        loading="lazy"
+        width="130"
+        height="50"
+      >
+    {%- when 'pears' -%}
+      <img
+        src="{{ 'brand-logo-pears.png' | asset_url }}"
+        alt="Pears"
+        class="lame-radiant-brand__img"
+        loading="lazy"
+        width="110"
+        height="50"
+      >
+    {%- when 'femisafe', 'femi-safe' -%}
+      <img
+        src="{{ 'brand-logo-femisafe.png' | asset_url }}"
+        alt="FemiSafe"
+        class="lame-radiant-brand__img"
+        loading="lazy"
+        width="125"
+        height="50"
+      >
+    {%- when 'jovees', 'jovees-herbal' -%}
+      <img
+        src="{{ 'brand-logo-jovees.png' | asset_url }}"
+        alt="JOVEES HERBAL"
+        class="lame-radiant-brand__img"
+        loading="lazy"
+        width="120"
+        height="50"
+      >
+    {%- when 'sebamed' -%}
+      <img
+        src="{{ 'brand-logo-sebamed.png' | asset_url }}"
+        alt="sebamed"
+        class="lame-radiant-brand__img"
+        loading="lazy"
+        width="135"
+        height="55"
+      >
+    {%- else -%}
+      <span class="lame-radiant-brand__text">{{ brand | default: 'Brand' }}</span>
+  {%- endcase -%}
+{%- endif -%}

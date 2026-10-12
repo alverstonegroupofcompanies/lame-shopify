@@ -1,0 +1,594 @@
+{%- comment -%}
+  Lamé Radiant Category Pills Bar
+  Floating pill-shaped navigation bar with circular pastel icon badges,
+  smooth scrolling navigation arrows, active indicators, and links to collections.
+{%- endcomment -%}
+
+<section
+  id="LameRadiantCategories-{{ section.id }}"
+  class="section lame-radiant-categories{% if section.settings.overlap_hero %} lame-radiant-categories--overlap{% endif %} color-{{ section.settings.color_scheme }}"
+  data-section-id="{{ section.id }}"
+  style="
+    {% render 'spacing-padding', settings: section.settings %}
+  "
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-radiant-categories__wrapper">
+    <div class="lame-radiant-categories__pill-card">
+      <!-- Left Arrow -->
+      <button
+        type="button"
+        class="lame-radiant-categories__arrow lame-radiant-categories__arrow--prev"
+        data-radiant-cat-prev
+        aria-label="Previous categories"
+      >
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <!-- Scrollable Categories Track -->
+      <div class="lame-radiant-categories__viewport" data-radiant-cat-viewport>
+        <ul class="lame-radiant-categories__list" role="list" data-radiant-cat-list>
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign cat_collection = collections[block.settings.collection]
+              assign title = block.settings.title
+              if title == blank and cat_collection != blank
+                assign title = cat_collection.title
+              endif
+              if title == blank
+                assign title = 'Category'
+              endif
+
+              assign link = block.settings.link
+              if link == blank and cat_collection != blank
+                assign link = cat_collection.url
+              endif
+              if link == blank
+                assign link = routes.all_products_collection_url
+              endif
+
+              assign is_active = false
+              if block.settings.is_active_default
+                assign is_active = true
+              elsif cat_collection != blank and collection.handle == cat_collection.handle
+                assign is_active = true
+              endif
+
+              assign icon_name = block.settings.icon | default: 'leaf'
+            -%}
+            <li
+              class="lame-radiant-categories__item{% if is_active %} is-active{% endif %}"
+              data-radiant-cat-item
+              {{ block.shopify_attributes }}
+            >
+              <a
+                href="{{ link }}"
+                class="lame-radiant-categories__link"
+                {% if is_active %}aria-current="page"{% endif %}
+              >
+                <!-- Circular Icon Badge -->
+                <div
+                  class="lame-radiant-categories__icon-circle lame-radiant-categories__icon-circle--{{ icon_name }}"
+                  style="
+                    {% if block.settings.bg_color != blank and block.settings.bg_color != 'rgba(0,0,0,0)' %}background-color: {{ block.settings.bg_color }};{% endif %}
+                    {% if block.settings.icon_color != blank and block.settings.icon_color != 'rgba(0,0,0,0)' %}color: {{ block.settings.icon_color }};{% endif %}
+                  "
+                >
+                  {%- if block.settings.custom_icon_image != blank -%}
+                    {{
+                      block.settings.custom_icon_image
+                      | image_url: width: 120
+                      | image_tag:
+                        class: 'lame-radiant-categories__custom-icon',
+                        loading: 'lazy',
+                        widths: '60, 90, 120',
+                        sizes: '40px',
+                        alt: title | escape
+                    }}
+                  {%- else -%}
+                    {% render 'lame-radiant-icons', icon: icon_name %}
+                  {%- endif -%}
+                </div>
+
+                <!-- Label & Indicator -->
+                <span class="lame-radiant-categories__label-wrap">
+                  <span class="lame-radiant-categories__label">{{ title }}</span>
+                  <span class="lame-radiant-categories__indicator" aria-hidden="true"></span>
+                </span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      <!-- Right Arrow -->
+      <button
+        type="button"
+        class="lame-radiant-categories__arrow lame-radiant-categories__arrow--next"
+        data-radiant-cat-next
+        aria-label="Next categories"
+      >
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lame-radiant-categories {
+    position: relative;
+    width: 100%;
+    z-index: 10;
+  }
+
+  .lame-radiant-categories--overlap {
+    margin-top: -1.75rem;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-categories--overlap {
+      margin-top: -3.25rem;
+    }
+  }
+
+  .lame-radiant-categories__wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  @media screen and (min-width: 1200px) {
+    .lame-radiant-categories__wrapper {
+      padding: 0 2.5rem;
+    }
+  }
+
+  /* Floating Pill Container */
+  .lame-radiant-categories__pill-card {
+    background: #ffffff;
+    border-radius: 9999px;
+    box-shadow: 0 12px 36px rgba(22, 45, 33, 0.08), 0 3px 10px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(222, 218, 209, 0.7);
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    position: relative;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-categories__pill-card {
+      padding: 1.15rem 1.8rem;
+    }
+  }
+
+  /* Circular Arrow Buttons */
+  .lame-radiant-categories__arrow {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid rgba(215, 210, 200, 0.85);
+    color: #4A554E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    z-index: 3;
+    padding: 0;
+  }
+
+  .lame-radiant-categories__arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .lame-radiant-categories__arrow:hover {
+    transform: scale(1.08);
+    background: #FAF8F5;
+    border-color: #245437;
+    color: #153828;
+    box-shadow: 0 4px 14px rgba(21, 56, 40, 0.12);
+  }
+
+  /* Viewport & Track */
+  .lame-radiant-categories__viewport {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    padding: 0 0.5rem;
+  }
+
+  .lame-radiant-categories__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-radiant-categories__list {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem 0.5rem 0.2rem;
+    min-width: max-content;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-categories__list {
+      justify-content: space-around;
+      min-width: 100%;
+      gap: 1rem;
+    }
+  }
+
+  /* Category Item */
+  .lame-radiant-categories__item {
+    flex: 0 0 auto;
+  }
+
+  .lame-radiant-categories__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #2D3730;
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  .lame-radiant-categories__link:hover {
+    transform: translateY(-3px);
+  }
+
+  /* Circular Pastel Icon Badge */
+  .lame-radiant-categories__icon-circle {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.55rem;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-categories__icon-circle {
+      width: 58px;
+      height: 58px;
+      margin-bottom: 0.65rem;
+    }
+  }
+
+  .lame-radiant-categories__link:hover .lame-radiant-categories__icon-circle {
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .lame-radiant-categories__icon-circle svg {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s ease;
+  }
+
+  .lame-radiant-categories__custom-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  /* Pre-set Pastel Colors Matching Design */
+  .lame-radiant-categories__icon-circle--all-products,
+  .lame-radiant-categories__icon-circle--leaf {
+    background: #1B4931;
+    color: #FFFFFF;
+  }
+
+  .lame-radiant-categories__icon-circle--skincare {
+    background: #FDEAEB;
+    color: #B0435C;
+  }
+
+  .lame-radiant-categories__icon-circle--makeup {
+    background: #FCEBF0;
+    color: #C23E5E;
+  }
+
+  .lame-radiant-categories__icon-circle--haircare {
+    background: #FEF2E0;
+    color: #AA783D;
+  }
+
+  .lame-radiant-categories__icon-circle--bath-body {
+    background: #E7F7F0;
+    color: #298064;
+  }
+
+  .lame-radiant-categories__icon-circle--fragrance {
+    background: #EFEAF8;
+    color: #714FA8;
+  }
+
+  .lame-radiant-categories__icon-circle--baby-care,
+  .lame-radiant-categories__icon-circle--baby {
+    background: #FEF6D8;
+    color: #AF852E;
+  }
+
+  .lame-radiant-categories__icon-circle--wellness {
+    background: #FEEAEA;
+    color: #C83D55;
+  }
+
+  /* Active Ring for Selected */
+  .lame-radiant-categories__item.is-active .lame-radiant-categories__icon-circle {
+    box-shadow: 0 0 0 2.5px #1B4931, 0 8px 22px rgba(27, 73, 49, 0.18);
+  }
+
+  /* Category Label & Active Indicator */
+  .lame-radiant-categories__label-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .lame-radiant-categories__label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #2D3730;
+    white-space: nowrap;
+    transition: color 0.25s ease, font-weight 0.25s ease;
+  }
+
+  @media screen and (min-width: 990px) {
+    .lame-radiant-categories__label {
+      font-size: 0.875rem;
+    }
+  }
+
+  .lame-radiant-categories__link:hover .lame-radiant-categories__label {
+    color: #153828;
+  }
+
+  .lame-radiant-categories__indicator {
+    width: 0;
+    height: 2.5px;
+    background: #1B4931;
+    border-radius: 999px;
+    margin-top: 4px;
+    transition: width 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  .lame-radiant-categories__item.is-active .lame-radiant-categories__label {
+    font-weight: 700;
+    color: #153828;
+  }
+
+  .lame-radiant-categories__item.is-active .lame-radiant-categories__indicator {
+    width: 26px;
+  }
+
+  .lame-radiant-categories__link:hover .lame-radiant-categories__indicator {
+    width: 20px;
+  }
+{% endstylesheet %}
+
+<script>
+  (() => {
+    const section = document.getElementById('LameRadiantCategories-{{ section.id }}');
+    if (!section) return;
+
+    const viewport = section.querySelector('[data-radiant-cat-viewport]');
+    const prevBtn = section.querySelector('[data-radiant-cat-prev]');
+    const nextBtn = section.querySelector('[data-radiant-cat-next]');
+    if (!viewport) return;
+
+    const getScrollStep = () => {
+      return viewport.clientWidth * 0.65 || 240;
+    };
+
+    prevBtn?.addEventListener('click', () => {
+      viewport.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      viewport.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+    });
+
+    // Active item scroll into view
+    const activeItem = section.querySelector('.lame-radiant-categories__item.is-active');
+    if (activeItem) {
+      setTimeout(() => {
+        const itemLeft = activeItem.offsetLeft;
+        const viewportCenter = viewport.clientWidth / 2;
+        const itemCenter = activeItem.offsetWidth / 2;
+        viewport.scrollTo({
+          left: Math.max(0, itemLeft - viewportCenter + itemCenter),
+          behavior: 'smooth'
+        });
+      }, 150);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Radiant Category Pills",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "overlap_hero",
+      "label": "Overlap hero banner on top",
+      "info": "Creates the floating card effect overlapping the banner above",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Label",
+          "default": "Category"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom URL (optional)"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Category icon",
+          "options": [
+            { "value": "all-products", "label": "All Products (Leaf)" },
+            { "value": "skincare", "label": "Skincare (Cream Jar)" },
+            { "value": "makeup", "label": "Makeup (Lipstick)" },
+            { "value": "haircare", "label": "Haircare (Silhouette)" },
+            { "value": "bath-body", "label": "Bath & Body (Lotion Pump)" },
+            { "value": "fragrance", "label": "Fragrance (Perfume Bottle)" },
+            { "value": "baby-care", "label": "Baby Care (Baby Face)" },
+            { "value": "wellness", "label": "Wellness (Heart Pulse)" }
+          ],
+          "default": "all-products"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon_image",
+          "label": "Custom icon image (optional)"
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Circle background color (optional override)"
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Icon color (optional override)"
+        },
+        {
+          "type": "checkbox",
+          "id": "is_active_default",
+          "label": "Set as active / highlighted by default",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Radiant Category Pills",
+      "category": "Navigation",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "title": "All Products",
+            "icon": "all-products",
+            "is_active_default": true
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Skincare",
+            "icon": "skincare"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Makeup",
+            "icon": "makeup"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Haircare",
+            "icon": "haircare"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Bath & Body",
+            "icon": "bath-body"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Fragrance",
+            "icon": "fragrance"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Baby Care",
+            "icon": "baby-care"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "Wellness",
+            "icon": "wellness"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
