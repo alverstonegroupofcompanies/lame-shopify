@@ -1,10 +1,7 @@
 {% liquid
-  assign new_collection = collections[section.settings.collection]
-  if new_collection == blank
-    assign new_collection = collections.all
-  endif
-
-  assign products_to_show = section.settings.products_to_show
+  assign brand_filter = section.settings.brand_filter | default: 'lame_only'
+  assign target_vendor = section.settings.vendor_filter | default: 'lame' | downcase | strip
+  assign products_to_show = section.settings.products_to_show | default: 8
   assign per_brand_limit = section.settings.per_brand_limit | default: 1
   assign products_shown = 0
   assign seen_ids = '||'
@@ -12,57 +9,31 @@
   assign skip_ids = '||'
 
   comment
-    Avoid repeating products already shown in Best Selling (first items of All / selected skip collection).
+    Populate skip ids (Best Selling) — but never skip Lamé products!
   endcomment
   assign skip_collection = collections[section.settings.skip_collection]
-  if skip_collection == blank
-    assign skip_collection = collections.all
-  endif
-  if skip_collection != blank
+  if skip_collection != blank and section.settings.skip_bestseller_count > 0
     for skip_product in skip_collection.products limit: section.settings.skip_bestseller_count
-      assign skip_ids = skip_ids | append: skip_product.id | append: '||'
+      assign skip_vendor_down = skip_product.vendor | downcase | strip
+      unless skip_vendor_down == 'lame' or skip_vendor_down contains 'lamé' or skip_vendor_down contains 'lamstone'
+        assign skip_ids = skip_ids | append: skip_product.id | append: '||'
+      endunless
     endfor
+  endif
+
+  assign new_collection = collections[section.settings.collection]
+  if new_collection == blank
+    assign new_collection = collections.all
   endif
 %}
 
 {% capture arrival_products_markup %}
-  {% paginate new_collection.products by 250 %}
-    {% assign newest_products = new_collection.products | sort: 'created_at' | reverse %}
-
-    {% comment %}
-      Pass 1: newest product(s) per brand so the row mixes brands
-      instead of many items from one vendor that were added together.
-    {% endcomment %}
-    {% for product in newest_products %}
-      {% if products_shown >= products_to_show %}
-        {% break %}
-      {% endif %}
-
-      {% assign id_token = '||' | append: product.id | append: '||' %}
-      {% if seen_ids contains id_token %}
-        {% continue %}
-      {% endif %}
-      {% if skip_ids contains id_token %}
-        {% continue %}
-      {% endif %}
-
-      {% capture brand_raw %}
-        {% render 'lame-product-brand-name', product: product %}
-      {% endcapture %}
-      {% assign brand_key = brand_raw | strip | downcase | handleize %}
-      {% if brand_key == blank %}
-        {% assign brand_key = 'unknown' %}
-      {% endif %}
-
-      {% assign brand_token = '||' | append: brand_key | append: '||' %}
-      {% assign brand_parts = seen_brands | split: brand_token %}
-      {% assign brand_count = brand_parts.size | minus: 1 %}
-      {% if brand_count >= per_brand_limit %}
-        {% continue %}
-      {% endif %}
-
-      {% assign seen_brands = seen_brands | append: brand_key | append: '||' %}
-      {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+  {%- if section.settings.featured_products.count > 0 -%}
+    {%- for product in section.settings.featured_products -%}
+      {%- if products_shown >= products_to_show -%}{%- break -%}{%- endif -%}
+      {%- assign id_token = '||' | append: product.id | append: '||' -%}
+      {%- if seen_ids contains id_token -%}{%- continue -%}{%- endif -%}
+      {%- assign seen_ids = seen_ids | append: product.id | append: '||' -%}
 
       {% render 'lame-flash-deal-product',
         product: product,
@@ -76,44 +47,156 @@
         reveal_delay: products_shown,
         modulo: 2
       %}
-      {% assign products_shown = products_shown | plus: 1 %}
-    {% endfor %}
+      {%- assign products_shown = products_shown | plus: 1 -%}
+    {%- endfor -%}
+  {%- endif -%}
 
-    {% comment %}
-      Pass 2: if fewer brands than slots, fill with next unique newest products
-      (still no duplicate product ids, and still skip Best Selling items).
-    {% endcomment %}
-    {% if products_shown < products_to_show %}
-      {% for product in newest_products %}
-        {% if products_shown >= products_to_show %}
-          {% break %}
-        {% endif %}
+  {%- if brand_filter == 'lame_only' or brand_filter == 'lame_first' -%}
+    {%- if collections.fragrance != blank and products_shown < products_to_show -%}
+      {%- for product in collections.fragrance.products -%}
+        {%- if products_shown >= products_to_show -%}{%- break -%}{%- endif -%}
+        {%- assign id_token = '||' | append: product.id | append: '||' -%}
+        {%- if seen_ids contains id_token -%}{%- continue -%}{%- endif -%}
 
-        {% assign id_token = '||' | append: product.id | append: '||' %}
-        {% if seen_ids contains id_token %}
-          {% continue %}
-        {% endif %}
-        {% if skip_ids contains id_token %}
-          {% continue %}
-        {% endif %}
-        {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+        {%- assign v_down = product.vendor | downcase | strip -%}
+        {%- assign t_down = product.title | downcase -%}
+        {%- assign is_lame = false -%}
+        {%- if v_down == target_vendor or v_down contains 'lame' or v_down contains 'lamé' or v_down contains 'lamstone' -%}
+          {%- assign is_lame = true -%}
+        {%- elsif t_down contains 'lamé' or t_down contains 'lame ' -%}
+          {%- assign is_lame = true -%}
+        {%- endif -%}
 
-        {% render 'lame-flash-deal-product',
-          product: product,
-          product_index: products_shown,
-          products_limit: products_to_show,
-          badge_label: section.settings.badge_label,
-          add_to_cart_label: section.settings.add_to_cart_label,
-          sold_out_label: section.settings.sold_out_label,
-          review_count_fallback: section.settings.review_count_fallback,
-          save_label_prefix: section.settings.save_label_prefix,
-          reveal_delay: products_shown,
-          modulo: 2
-        %}
-        {% assign products_shown = products_shown | plus: 1 %}
-      {% endfor %}
-    {% endif %}
-  {% endpaginate %}
+        {%- if is_lame -%}
+          {%- assign seen_ids = seen_ids | append: product.id | append: '||' -%}
+          {% render 'lame-flash-deal-product',
+            product: product,
+            product_index: products_shown,
+            products_limit: products_to_show,
+            badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label,
+            review_count_fallback: section.settings.review_count_fallback,
+            save_label_prefix: section.settings.save_label_prefix,
+            reveal_delay: products_shown,
+            modulo: 2
+          %}
+          {%- assign products_shown = products_shown | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- if collections['our-products'] != blank and products_shown < products_to_show -%}
+      {%- for product in collections['our-products'].products -%}
+        {%- if products_shown >= products_to_show -%}{%- break -%}{%- endif -%}
+        {%- assign id_token = '||' | append: product.id | append: '||' -%}
+        {%- if seen_ids contains id_token -%}{%- continue -%}{%- endif -%}
+
+        {%- assign v_down = product.vendor | downcase | strip -%}
+        {%- assign t_down = product.title | downcase -%}
+        {%- assign is_lame = false -%}
+        {%- if v_down == target_vendor or v_down contains 'lame' or v_down contains 'lamé' or v_down contains 'lamstone' -%}
+          {%- assign is_lame = true -%}
+        {%- elsif t_down contains 'lamé' or t_down contains 'lame ' -%}
+          {%- assign is_lame = true -%}
+        {%- endif -%}
+
+        {%- if is_lame -%}
+          {%- assign seen_ids = seen_ids | append: product.id | append: '||' -%}
+          {% render 'lame-flash-deal-product',
+            product: product,
+            product_index: products_shown,
+            products_limit: products_to_show,
+            badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label,
+            review_count_fallback: section.settings.review_count_fallback,
+            save_label_prefix: section.settings.save_label_prefix,
+            reveal_delay: products_shown,
+            modulo: 2
+          %}
+          {%- assign products_shown = products_shown | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- if new_collection != blank and products_shown < products_to_show -%}
+      {%- for product in new_collection.products -%}
+        {%- if products_shown >= products_to_show -%}{%- break -%}{%- endif -%}
+        {%- assign id_token = '||' | append: product.id | append: '||' -%}
+        {%- if seen_ids contains id_token -%}{%- continue -%}{%- endif -%}
+
+        {%- assign v_down = product.vendor | downcase | strip -%}
+        {%- assign t_down = product.title | downcase -%}
+        {%- assign is_lame = false -%}
+        {%- if v_down == target_vendor or v_down contains 'lame' or v_down contains 'lamé' or v_down contains 'lamstone' -%}
+          {%- assign is_lame = true -%}
+        {%- elsif t_down contains 'lamé' or t_down contains 'lame ' -%}
+          {%- assign is_lame = true -%}
+        {%- endif -%}
+
+        {%- if is_lame -%}
+          {%- assign seen_ids = seen_ids | append: product.id | append: '||' -%}
+          {% render 'lame-flash-deal-product',
+            product: product,
+            product_index: products_shown,
+            products_limit: products_to_show,
+            badge_label: section.settings.badge_label,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label,
+            review_count_fallback: section.settings.review_count_fallback,
+            save_label_prefix: section.settings.save_label_prefix,
+            reveal_delay: products_shown,
+            modulo: 2
+          %}
+          {%- assign products_shown = products_shown | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if brand_filter != 'lame_only' and products_shown < products_to_show -%}
+    {%- assign newest_products = new_collection.products | sort: 'created_at' | reverse -%}
+    {%- for product in newest_products -%}
+      {%- if products_shown >= products_to_show -%}{%- break -%}{%- endif -%}
+
+      {%- assign id_token = '||' | append: product.id | append: '||' -%}
+      {%- if seen_ids contains id_token -%}{%- continue -%}{%- endif -%}
+      {%- if skip_ids contains id_token -%}{%- continue -%}{%- endif -%}
+
+      {%- capture brand_raw -%}
+        {% render 'lame-product-brand-name', product: product %}
+      {%- endcapture -%}
+      {%- assign brand_key = brand_raw | strip | downcase | handleize -%}
+      {%- if brand_key == blank -%}
+        {%- assign brand_key = 'unknown' -%}
+      {%- endif -%}
+
+      {%- assign brand_token = '||' | append: brand_key | append: '||' -%}
+      {%- assign brand_parts = seen_brands | split: brand_token -%}
+      {%- assign brand_count = brand_parts.size | minus: 1 -%}
+      {%- if brand_count >= per_brand_limit -%}
+        {%- continue -%}
+      {%- endif -%}
+
+      {%- assign seen_brands = seen_brands | append: brand_key | append: '||' -%}
+      {%- assign seen_ids = seen_ids | append: product.id | append: '||' -%}
+
+      {% render 'lame-flash-deal-product',
+        product: product,
+        product_index: products_shown,
+        products_limit: products_to_show,
+        badge_label: section.settings.badge_label,
+        add_to_cart_label: section.settings.add_to_cart_label,
+        sold_out_label: section.settings.sold_out_label,
+        review_count_fallback: section.settings.review_count_fallback,
+        save_label_prefix: section.settings.save_label_prefix,
+        reveal_delay: products_shown,
+        modulo: 2
+      %}
+      {%- assign products_shown = products_shown | plus: 1 -%}
+    {%- endfor -%}
+  {%- endif -%}
 {% endcapture %}
 
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
@@ -265,6 +348,12 @@
     text-decoration: underline;
     text-underline-offset: 3px;
   }
+
+  @media screen and (min-width: 750px) {
+    .lame-new-products .lame-flash-deal__track {
+      margin-inline: auto;
+    }
+  }
 {% endstylesheet %}
 
 <script>
@@ -348,16 +437,40 @@
       "id": "subtitle",
       "label": "Subtitle"
     },
-    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
-    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
-    { "type": "text", "id": "save_label_prefix", "label": "Savings label", "default": "You Save" },
-    { "type": "text", "id": "badge_label", "label": "New badge", "default": "NEW" },
-    { "type": "text", "id": "review_count_fallback", "label": "Review count fallback", "default": "120" },
+    {
+      "type": "header",
+      "content": "Brand & Product Filtering"
+    },
+    {
+      "type": "select",
+      "id": "brand_filter",
+      "label": "Brand filter mode",
+      "options": [
+        { "value": "lame_only", "label": "Lamé products only" },
+        { "value": "lame_first", "label": "Lamé products first (fill rest with other new arrivals)" },
+        { "value": "all", "label": "All brands (mixed)" }
+      ],
+      "default": "lame_only",
+      "info": "Choose whether to show Lamé brand products exclusively or prioritize them."
+    },
+    {
+      "type": "product_list",
+      "id": "featured_products",
+      "label": "Featured Lamé products",
+      "info": "Select specific Lamé products to display. If left empty, Lamé products are automatically discovered from the catalog."
+    },
+    {
+      "type": "text",
+      "id": "vendor_filter",
+      "label": "Vendor name to match",
+      "default": "Lame",
+      "info": "Matches vendor 'Lame', 'Lamé', or 'Lamstone'."
+    },
     {
       "type": "collection",
       "id": "collection",
-      "label": "Collection",
-      "info": "Newest products are picked first, limited per brand so the same vendor does not fill the row."
+      "label": "Fallback collection",
+      "info": "Used when filling extra slots or when filter is set to all."
     },
     {
       "type": "range",
@@ -376,13 +489,13 @@
       "max": 3,
       "step": 1,
       "default": 1,
-      "info": "Keeps New Arrivals mixed across brands. Extra slots fill with other newest products if needed."
+      "info": "Keeps New Arrivals mixed when displaying multiple non-Lamé brands."
     },
     {
       "type": "collection",
       "id": "skip_collection",
       "label": "Skip products from (Best Selling)",
-      "info": "Products already shown in this collection (usually All / Best Selling) are not repeated here."
+      "info": "Products already shown in this collection (usually All / Best Selling) are not repeated here (Lamé products are never skipped)."
     },
     {
       "type": "range",
@@ -391,13 +504,25 @@
       "min": 0,
       "max": 12,
       "step": 1,
-      "default": 8,
-      "info": "Match Best Selling “products to show” so those cards do not repeat below."
+      "default": 0
     },
+    {
+      "type": "header",
+      "content": "Labels & Badges"
+    },
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
+    { "type": "text", "id": "save_label_prefix", "label": "Savings label", "default": "You Save" },
+    { "type": "text", "id": "badge_label", "label": "New badge", "default": "NEW" },
+    { "type": "text", "id": "review_count_fallback", "label": "Review count fallback", "default": "120" },
     { "type": "text", "id": "prev_label", "label": "Previous label", "default": "Previous products" },
     { "type": "text", "id": "next_label", "label": "Next label", "default": "Next products" },
     { "type": "text", "id": "placeholder_title", "label": "Placeholder title", "default": "Product title" },
     { "type": "text", "id": "placeholder_price", "label": "Placeholder price", "default": "₹899" },
+    {
+      "type": "header",
+      "content": "Layout & Padding"
+    },
     {
       "type": "select",
       "id": "section_width",
@@ -435,6 +560,15 @@
       "default": 32
     }
   ],
-  "presets": [{ "name": "New arrivals grid", "category": "Products" }]
+  "presets": [
+    {
+      "name": "New arrivals grid",
+      "category": "Products",
+      "settings": {
+        "brand_filter": "lame_only",
+        "vendor_filter": "Lame"
+      }
+    }
+  ]
 }
 {% endschema %}
