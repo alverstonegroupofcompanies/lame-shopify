@@ -115,28 +115,28 @@
             <ul class="footer-premium__socials" role="list">
               {% if social_instagram != blank %}
                 <li>
-                  <a class="footer-premium__social" href="{{ social_instagram }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <a class="footer-premium__social footer-premium__social--instagram" href="{{ social_instagram }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                     <span aria-hidden="true">{% render 'footer-icon', name: 'instagram' %}</span>
                   </a>
                 </li>
               {% endif %}
               {% if social_facebook != blank %}
                 <li>
-                  <a class="footer-premium__social" href="{{ social_facebook }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <a class="footer-premium__social footer-premium__social--facebook" href="{{ social_facebook }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                     <span aria-hidden="true">{% render 'footer-icon', name: 'facebook' %}</span>
                   </a>
                 </li>
               {% endif %}
               {% if social_youtube != blank %}
                 <li>
-                  <a class="footer-premium__social" href="{{ social_youtube }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                  <a class="footer-premium__social footer-premium__social--youtube" href="{{ social_youtube }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                     <span aria-hidden="true">{% render 'footer-icon', name: 'youtube' %}</span>
                   </a>
                 </li>
               {% endif %}
               {% if social_whatsapp != blank %}
                 <li>
-                  <a class="footer-premium__social" href="{{ social_whatsapp }}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Channel">
+                  <a class="footer-premium__social footer-premium__social--whatsapp" href="{{ social_whatsapp }}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Channel">
                     <span aria-hidden="true">{% render 'footer-icon', name: 'whatsapp' %}</span>
                   </a>
                 </li>
@@ -485,22 +485,65 @@
     display: grid;
     place-items: center;
     border-radius: 999px;
-    border: 1px solid rgb(255 255 255 / 0.18);
-    color: var(--footer-text);
-    background: rgb(255 255 255 / 0.04);
+    border: 1px solid transparent;
+    color: #ffffff;
     text-decoration: none;
-    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, filter 0.25s ease;
   }
 
-  #footer-{{ section.id }} .footer-premium__social:hover {
-    border-color: var(--footer-gold);
-    color: var(--footer-gold);
-    background: rgb(221 196 130 / 0.08);
+  #footer-{{ section.id }} .footer-premium__social--instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #ffffff;
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--instagram:hover {
+    filter: brightness(1.12);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(220 39 67 / 0.45);
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--facebook {
+    background: #1877f2;
+    color: #ffffff;
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--facebook:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(24 119 242 / 0.45);
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--youtube {
+    background: #ff0000;
+    color: #ffffff;
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--youtube:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(255 0 0 / 0.45);
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--whatsapp {
+    background: #25d366;
+    color: #ffffff;
+  }
+
+  #footer-{{ section.id }} .footer-premium__social--whatsapp:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(37 211 102 / 0.45);
+  }
+
+  #footer-{{ section.id }} .footer-premium__social:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
   }
 
   #footer-{{ section.id }} .footer-premium__social .footer-premium__icon-svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.15rem;
+    height: 1.15rem;
   }
 
   #footer-{{ section.id }} .footer-premium__grid {
