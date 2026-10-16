@@ -1,15 +1,24 @@
 {%- liquid
   assign banner_image = section.settings.image
+  assign mobile_image = section.settings.mobile_image
   assign banner_alt = section.settings.image_alt | default: shop.name | escape
+  assign mobile_ratio = section.settings.mobile_ratio | default: '2/1'
+  assign mobile_focus_x = section.settings.mobile_focus_x | default: 50
   assign use_theme_asset = false
 
   if banner_image == blank
     assign use_theme_asset = true
   endif
+
+  assign img_loading = 'lazy'
+  if section.index == 1
+    assign img_loading = 'eager'
+  endif
 -%}
 
 <section
-  class="section section--full-width lame-trust-banner{% if section.settings.full_bleed %} lame-trust-banner--bleed{% endif %}"
+  id="lame-trust-banner-{{ section.id }}"
+  class="section section--full-width lame-trust-banner lame-trust-banner--{{ section.id }}{% if section.settings.full_bleed %} lame-trust-banner--bleed{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-trust-banner__wrap">
@@ -25,26 +34,79 @@
     {%- endif -%}
 
     {%- if use_theme_asset -%}
-      <img
-        src="{{ 'lame-trust-banner.png' | asset_url }}"
-        class="lame-trust-banner__image"
-        alt="{{ banner_alt }}"
-        width="1920"
-        height="auto"
-        loading="lazy"
-        decoding="async"
-      >
+      {%- if mobile_image != blank -%}
+        <picture>
+          <source
+            media="(max-width: 749px)"
+            srcset="
+              {{ mobile_image | image_url: width: 360 }} 360w,
+              {{ mobile_image | image_url: width: 540 }} 540w,
+              {{ mobile_image | image_url: width: 750 }} 750w,
+              {{ mobile_image | image_url: width: 1080 }} 1080w
+            "
+            sizes="100vw"
+            width="{{ mobile_image.width }}"
+            height="{{ mobile_image.height }}"
+          >
+          <img
+            src="{{ 'lame-trust-banner.png' | asset_url }}"
+            class="lame-trust-banner__image"
+            alt="{{ banner_alt }}"
+            width="1920"
+            height="auto"
+            loading="{{ img_loading }}"
+            decoding="async"
+          >
+        </picture>
+      {%- else -%}
+        <img
+          src="{{ 'lame-trust-banner.png' | asset_url }}"
+          class="lame-trust-banner__image"
+          alt="{{ banner_alt }}"
+          width="1920"
+          height="auto"
+          loading="{{ img_loading }}"
+          decoding="async"
+        >
+      {%- endif -%}
     {%- else -%}
-      {{
-        banner_image
-        | image_url: width: 3840
-        | image_tag:
-          class: 'lame-trust-banner__image',
-          loading: 'lazy',
-          widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
-          sizes: '100vw',
-          alt: banner_alt
-      }}
+      {%- if mobile_image != blank -%}
+        <picture>
+          <source
+            media="(max-width: 749px)"
+            srcset="
+              {{ mobile_image | image_url: width: 360 }} 360w,
+              {{ mobile_image | image_url: width: 540 }} 540w,
+              {{ mobile_image | image_url: width: 750 }} 750w,
+              {{ mobile_image | image_url: width: 1080 }} 1080w
+            "
+            sizes="100vw"
+            width="{{ mobile_image.width }}"
+            height="{{ mobile_image.height }}"
+          >
+          {{
+            banner_image
+            | image_url: width: 3840
+            | image_tag:
+              class: 'lame-trust-banner__image',
+              loading: img_loading,
+              widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+              sizes: '100vw',
+              alt: banner_alt
+          }}
+        </picture>
+      {%- else -%}
+        {{
+          banner_image
+          | image_url: width: 3840
+          | image_tag:
+            class: 'lame-trust-banner__image',
+            loading: img_loading,
+            widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+            sizes: '100vw',
+            alt: banner_alt
+        }}
+      {%- endif -%}
     {%- endif -%}
 
     {%- if section.settings.link != blank -%}
@@ -52,6 +114,19 @@
     {%- endif -%}
   </div>
 </section>
+
+{%- if mobile_image == blank and mobile_ratio != 'original' -%}
+  <style>
+    @media screen and (max-width: 749px) {
+      .lame-trust-banner--{{ section.id }} .lame-trust-banner__image {
+        width: 100%;
+        aspect-ratio: {{ mobile_ratio }};
+        object-fit: cover;
+        object-position: {{ mobile_focus_x }}% center;
+      }
+    }
+  </style>
+{%- endif -%}
 
 {% stylesheet %}
   .shopify-section:has(.lame-trust-banner) {
@@ -134,6 +209,46 @@
       "id": "image",
       "label": "Banner image",
       "info": "Leave empty to use the built-in LAMÉ trust banner. Recommended: wide image (~1920×400px or similar)."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile banner image",
+      "info": "Optional. Recommended 1080x720 px. Shown on phones instead of the desktop image."
+    },
+    {
+      "type": "select",
+      "id": "mobile_ratio",
+      "label": "Mobile height (when no mobile image)",
+      "default": "2/1",
+      "options": [
+        {
+          "value": "original",
+          "label": "Original"
+        },
+        {
+          "value": "2/1",
+          "label": "2:1"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "mobile_focus_x",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Mobile focus (left to right)",
+      "default": 50
     },
     {
       "type": "text",
