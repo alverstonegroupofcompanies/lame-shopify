@@ -38,12 +38,13 @@
   --cart-bubble-right: 1px;
 }
 
-/* ── Announcement strip (fixed top bar — no loop) ── */
+/* ── Announcement strip (top bar: hide on scroll down, reveal on scroll up) ── */
 #header-component.header--cosmetic-luxury .lame-header-announce {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 2.35rem;
+  max-height: 3rem;
   padding: 0.38rem 1rem;
   background: var(--lame-nav-green, #143f2e) !important;
   color: #fff;
@@ -52,15 +53,41 @@
   width: 100%;
   opacity: 1;
   z-index: 1;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform-origin: top center;
+  transition: max-height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              min-height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              opacity 0.25s ease,
+              padding 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Always keep announcement strip visible even when scrolling down */
-#header-component.header--cosmetic-luxury .lame-header-announce,
-#header-component.header--cosmetic-luxury[data-lame-scroll='away'] .lame-header-announce {
-  display: flex !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  visibility: visible !important;
+/* Hide announcement strip when scrolling down */
+#header-component.header--cosmetic-luxury[data-scroll-direction='down'] .lame-header-announce,
+#header-component.header--cosmetic-luxury[data-lame-scroll-dir='down'] .lame-header-announce {
+  max-height: 0 !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  padding-block: 0 !important;
+  margin-block: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transform: translateY(-100%);
+}
+
+/* Reveal announcement strip when scrolling up or at top */
+#header-component.header--cosmetic-luxury[data-scroll-direction='up'] .lame-header-announce,
+#header-component.header--cosmetic-luxury[data-scroll-direction='top'] .lame-header-announce,
+#header-component.header--cosmetic-luxury[data-lame-scroll-dir='up'] .lame-header-announce,
+#header-component.header--cosmetic-luxury[data-lame-scroll-dir='top'] .lame-header-announce,
+#header-component.header--cosmetic-luxury:not([data-scroll-direction='down']):not([data-lame-scroll-dir='down']) .lame-header-announce {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .lame-header-announce__ticker {
@@ -825,20 +852,37 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
    Tablet: [Logo] .............. [🔍] [👤][♡][🛒]  · links in bottom nav
 */
 @media screen and (max-width: 989px) {
-  #header-component.header--cosmetic-luxury .lame-header-announce,
-  #header-component.header--cosmetic-luxury[data-lame-scroll='away'] .lame-header-announce {
+  #header-component.header--cosmetic-luxury .lame-header-announce {
     height: 2.2rem;
     min-height: 2.2rem;
     max-height: 2.2rem;
     padding: 0 0.5rem;
     overflow: hidden;
-    display: flex !important;
+    display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
     box-sizing: border-box;
+    transform-origin: top center;
+    transition: max-height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                min-height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 0.25s ease,
+                padding 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  #header-component.header--cosmetic-luxury[data-scroll-direction='down'] .lame-header-announce,
+  #header-component.header--cosmetic-luxury[data-lame-scroll-dir='down'] .lame-header-announce {
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding-block: 0 !important;
+    margin-block: 0 !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(-100%) !important;
   }
 
   .lame-header-announce__ticker {

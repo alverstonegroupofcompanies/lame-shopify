@@ -1,0 +1,690 @@
+{%- comment -%}
+  LAMÉ — Luxury Floating "Review Us" & Community Widget
+  - Deep emerald & champagne gold aesthetic
+  - Ambient gold pulse & shimmer micro-animations
+  - Smooth spring popover with branded SVG cards (Google, Instagram, WhatsApp)
+  - Smart footer collision prevention (auto-lifts when scrolling near footer to avoid covering "EXPLORE")
+  - Accessible: click outside to close, ESC key support, ARIA attributes
+{%- endcomment -%}
+
+<style>
+  /* -------------------------------------------------------------
+     LAMÉ FLOATING REVIEW WIDGET — LUXURY STYLING & ANIMATIONS
+  ------------------------------------------------------------- */
+  .lam-fab-wrap {
+    position: fixed;
+    left: max(20px, env(safe-area-inset-left));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 998;
+    font-family: var(--font-body-family, 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none; /* children re-enable */
+  }
+
+  /* Trigger Button */
+  .lam-fab-btn {
+    pointer-events: auto;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 20px 11px 16px;
+    background: linear-gradient(135deg, #072318 0%, #0d3829 55%, #051b12 100%);
+    color: #ffffff;
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 10px 26px rgba(4, 20, 14, 0.4),
+      0 0 0 1px rgba(212, 175, 55, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease,
+      border-color 0.25s ease,
+      background 0.25s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ambient Gold Pulse Ring */
+  .lam-fab-btn::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(212, 175, 55, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    animation: lamPulseRing 3.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  }
+
+  /* Glossy Shimmer Sweep */
+  .lam-fab-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.22) 50%,
+      transparent
+    );
+    transform: skewX(-22deg);
+    pointer-events: none;
+    border-radius: 999px;
+    animation: lamShimmerSweep 5.5s ease-in-out infinite;
+  }
+
+  @keyframes lamPulseRing {
+    0% {
+      transform: scale(0.96);
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.8;
+    }
+    70% {
+      transform: scale(1.15);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.15);
+      opacity: 0;
+    }
+  }
+
+  @keyframes lamShimmerSweep {
+    0%, 65% {
+      left: -120%;
+    }
+    85%, 100% {
+      left: 180%;
+    }
+  }
+
+  /* Button Hover & Active */
+  .lam-fab-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(212, 175, 55, 0.8);
+    background: linear-gradient(135deg, #092c1f 0%, #124835 55%, #072318 100%);
+    box-shadow:
+      0 14px 32px rgba(4, 20, 14, 0.55),
+      0 0 20px rgba(212, 175, 55, 0.35),
+      0 0 0 1px rgba(212, 175, 55, 0.5);
+  }
+
+  .lam-fab-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Star Icon container */
+  .lam-fab-icon-box {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .lam-fab-star-icon,
+  .lam-fab-close-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  }
+
+  .lam-fab-star-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 1px 3px rgba(212, 175, 55, 0.6));
+  }
+
+  .lam-fab-close-icon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+    color: #e5c07b;
+  }
+
+  /* Text inside button */
+  .lam-fab-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .lam-fab-rating-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    background: rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.38);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffd778;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+  }
+
+  /* When Open: Button active state */
+  .lam-fab-wrap.is-open .lam-fab-btn {
+    background: linear-gradient(135deg, #10382b 0%, #061e14 100%);
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.45),
+      0 0 16px rgba(212, 175, 55, 0.25);
+  }
+
+  .lam-fab-wrap.is-open .lam-fab-star-icon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.6);
+  }
+
+  .lam-fab-wrap.is-open .lam-fab-close-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+
+  /* -------------------------------------------------------------
+     POPOVER MENU PANEL
+  ------------------------------------------------------------- */
+  .lam-fab-popover {
+    pointer-events: none;
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 0;
+    width: 310px;
+    max-width: calc(100vw - 36px);
+    background: rgba(7, 28, 20, 0.96);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(14px) scale(0.95);
+    transform-origin: bottom left;
+    transition:
+      opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0.28s;
+  }
+
+  .lam-fab-wrap.is-open .lam-fab-popover {
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Popover Header */
+  .lam-fab-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.16);
+  }
+
+  .lam-fab-head-title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .lam-fab-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #d4af37;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .lam-fab-stars-cluster {
+    display: inline-flex;
+    gap: 2px;
+    color: #ffc107;
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .lam-fab-heading {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .lam-fab-dismiss-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #c9d5d0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+
+  .lam-fab-dismiss-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #ffd778;
+    transform: rotate(90deg);
+  }
+
+  /* Menu Items List */
+  .lam-fab-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Card Item */
+  .lam-fab-item {
+    display: block;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 14px;
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    transition:
+      transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.22s ease,
+      border-color 0.22s ease,
+      box-shadow 0.22s ease;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  /* Staggered entrance */
+  .lam-fab-wrap.is-open .lam-fab-item:nth-child(1) {
+    animation: lamItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.04s forwards;
+  }
+  .lam-fab-wrap.is-open .lam-fab-item:nth-child(2) {
+    animation: lamItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.09s forwards;
+  }
+  .lam-fab-wrap.is-open .lam-fab-item:nth-child(3) {
+    animation: lamItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.14s forwards;
+  }
+
+  @keyframes lamItemIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .lam-fab-item:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(212, 175, 55, 0.55);
+    transform: translateY(-2px) translateX(2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Icon Badges */
+  .lam-fab-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .lam-fab-badge--google {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .lam-fab-badge--instagram {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+    box-shadow: 0 2px 8px rgba(214, 36, 159, 0.35);
+  }
+
+  .lam-fab-badge--instagram svg {
+    color: #ffffff;
+  }
+
+  .lam-fab-badge--whatsapp {
+    background: #25d366;
+    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.35);
+  }
+
+  .lam-fab-item:hover .lam-fab-badge {
+    transform: scale(1.1) rotate(-4deg);
+  }
+
+  /* Item Info */
+  .lam-fab-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .lam-fab-name {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+  }
+
+  .lam-fab-desc {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: #a3bbb2;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Action Arrow */
+  .lam-fab-arrow {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffd778;
+    flex-shrink: 0;
+    transition: transform 0.22s ease, background 0.22s ease;
+  }
+
+  .lam-fab-item:hover .lam-fab-arrow {
+    transform: translateX(3px);
+    background: rgba(212, 175, 55, 0.35);
+    color: #ffffff;
+  }
+
+  /* Mobile Tweaks */
+  @media screen and (max-width: 749px) {
+    .lam-fab-wrap {
+      left: max(16px, env(safe-area-inset-left));
+      bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    .lam-fab-btn {
+      padding: 10px 17px 10px 14px;
+      font-size: 13px;
+    }
+
+    .lam-fab-popover {
+      width: 290px;
+      padding: 14px;
+    }
+
+    .lam-fab-item {
+      padding: 9px 11px;
+      gap: 10px;
+    }
+
+    .lam-fab-badge {
+      width: 34px;
+      height: 34px;
+    }
+  }
+</style>
+
+<div class="lam-fab-wrap" id="lamFabWrap">
+  <!-- Popover Menu Panel -->
+  <div class="lam-fab-popover" id="lamFabPopover" role="dialog" aria-modal="false" aria-label="Review and community links">
+    <div class="lam-fab-head">
+      <div class="lam-fab-head-title">
+        <span class="lam-fab-eyebrow">
+          <span class="lam-fab-stars-cluster" aria-label="5 stars">★★★★★</span>
+          LAMÉ Community
+        </span>
+        <h3 class="lam-fab-heading">Share Your Experience</h3>
+      </div>
+      <button
+        type="button"
+        class="lam-fab-dismiss-btn"
+        id="lamFabDismiss"
+        aria-label="Close menu"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <ul class="lam-fab-list" role="list">
+      <!-- Google Review -->
+      <li>
+        <a
+          class="lam-fab-item"
+          href="https://search.google.com/local/writereview?placeid=ChIJe4_y4IfBBTsRs8ZHwODV-vM"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="lam-fab-badge lam-fab-badge--google" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+          </span>
+          <div class="lam-fab-info">
+            <p class="lam-fab-name">Review on Google</p>
+            <p class="lam-fab-desc">Rate 5 stars on Google Maps</p>
+          </div>
+          <span class="lam-fab-arrow" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </a>
+      </li>
+
+      <!-- Instagram -->
+      <li>
+        <a
+          class="lam-fab-item"
+          href="https://www.instagram.com/mylamstone"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="lam-fab-badge lam-fab-badge--instagram" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2.5"></line>
+            </svg>
+          </span>
+          <div class="lam-fab-info">
+            <p class="lam-fab-name">Follow on Instagram</p>
+            <p class="lam-fab-desc">@mylamstone · Tips & launches</p>
+          </div>
+          <span class="lam-fab-arrow" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </a>
+      </li>
+
+      <!-- WhatsApp -->
+      <li>
+        <a
+          class="lam-fab-item"
+          href="https://whatsapp.com/channel/0029VbE3V0kD38CUs4ivfl1A"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="lam-fab-badge lam-fab-badge--whatsapp" aria-hidden="true">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
+              <path d="M20.52 3.48A11.9 11.9 0 0 0 12.07 0C5.46 0 .09 5.37.09 11.98c0 2.11.55 4.17 1.6 5.99L0 24l6.2-1.63a11.93 11.93 0 0 0 5.86 1.51h.01c6.61 0 11.98-5.37 11.98-11.98 0-3.2-.1-6.25-1.25-4.4a11.87 11.87 0 0 0-3.28-4.02z" fill="#25D366"/>
+              <path d="M17.9 14.4c-.31-.15-1.84-.91-2.12-1.01-.28-.11-.49-.15-.7.15-.21.31-.8 1.01-.98 1.22-.18.21-.36.23-.67.08-.31-.15-1.3-.48-2.48-1.53-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.48.13-.63.14-.14.31-.36.47-.54.15-.18.21-.31.31-.51.1-.21.05-.39-.02-.54-.08-.15-.7-1.69-.96-2.31-.25-.6-.51-.52-.7-.53h-.6c-.21 0-.54.08-.82.39-.28.31-1.08 1.06-1.08 2.58s1.1 3 1.26 3.21c.15.21 2.17 3.32 5.26 4.65.74.32 1.31.51 1.76.65.74.24 1.41.2 1.94.12.59-.09 1.84-.75 2.1-1.48.26-.72.26-1.34.18-1.48-.08-.13-.28-.21-.59-.36z" fill="#FFFFFF"/>
+            </svg>
+          </span>
+          <div class="lam-fab-info">
+            <p class="lam-fab-name">Join WhatsApp VIP</p>
+            <p class="lam-fab-desc">Exclusive perks & early access</p>
+          </div>
+          <span class="lam-fab-arrow" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Trigger FAB Pill -->
+  <button
+    type="button"
+    class="lam-fab-btn"
+    id="lamFabTrigger"
+    aria-expanded="false"
+    aria-controls="lamFabPopover"
+    aria-label="Open review and community links"
+  >
+    <span class="lam-fab-icon-box" aria-hidden="true">
+      <svg class="lam-fab-star-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="url(#lamFabGoldGrad)"/>
+        <defs>
+          <linearGradient id="lamFabGoldGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FFF2A3"/>
+            <stop offset="0.4" stop-color="#F4C430"/>
+            <stop offset="1" stop-color="#E09F00"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <svg class="lam-fab-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </span>
+    <span class="lam-fab-label">
+      <span>Review us</span>
+      <span class="lam-fab-rating-pill">4.9 ★</span>
+    </span>
+  </button>
+</div>
+
+<script>
+  (function () {
+    const wrap = document.getElementById('lamFabWrap');
+    const trigger = document.getElementById('lamFabTrigger');
+    const dismiss = document.getElementById('lamFabDismiss');
+    if (!wrap || !trigger) return;
+
+    function toggleMenu(forceState) {
+      const willOpen = typeof forceState === 'boolean' ? forceState : !wrap.classList.contains('is-open');
+      wrap.classList.toggle('is-open', willOpen);
+      trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    if (dismiss) {
+      dismiss.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleMenu(false);
+      });
+    }
+
+    // Click outside to close
+    document.addEventListener('click', function (e) {
+      if (wrap.classList.contains('is-open') && !wrap.contains(e.target)) {
+        toggleMenu(false);
+      }
+    });
+
+    // Escape key to close
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && wrap.classList.contains('is-open')) {
+        toggleMenu(false);
+        trigger.focus();
+      }
+    });
+
+    // -------------------------------------------------------------
+    // SMART FOOTER COLLISION AVOIDANCE
+    // When the user scrolls down near the footer, lift the widget
+    // smoothly so it never overlaps footer columns like "EXPLORE"
+    // -------------------------------------------------------------
+    let ticking = false;
+    function updateFabPosition() {
+      ticking = false;
+      const footer = document.querySelector('.footer-premium') || document.querySelector('footer');
+      if (!footer || !wrap) return;
+
+      const footerRect = footer.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const baseMargin = window.innerWidth <= 749 ? 16 : 20;
+
+      // If footer top has entered the viewport above the button's bottom threshold
+      if (footerRect.top < viewportHeight - baseMargin) {
+        const overlap = (viewportHeight - baseMargin) - footerRect.top;
+        wrap.style.transform = `translate3d(0, -${Math.max(0, overlap + 10)}px, 0)`;
+      } else {
+        wrap.style.transform = 'translate3d(0, 0, 0)';
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(updateFabPosition);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    // Run once on load
+    updateFabPosition();
+  })();
+</script>
