@@ -9,8 +9,13 @@
   endif
 
   assign is_full_width = false
-  if section.settings.full_bleed or section.settings.section_width == 'full-width'
+  if section.settings.full_bleed
     assign is_full_width = true
+  elsif section.settings.full_bleed == nil and section.settings.section_width == 'full-width'
+    assign is_full_width = true
+  endif
+  if section.settings.section_width == 'page-width'
+    assign is_full_width = false
   endif
 
   assign show_mobile = true
@@ -25,6 +30,8 @@
 
   assign mobile_full_width = false
   if section.settings.mobile_full_width
+    assign mobile_full_width = true
+  elsif section.settings.mobile_full_width == nil and is_full_width
     assign mobile_full_width = true
   endif
 -%}
@@ -119,9 +126,10 @@
   }
 
   .lame-trust-banner--boxed {
-    max-width: var(--page-width, 1400px);
-    margin-inline: auto;
-    padding-inline: var(--page-margin, 1.5rem);
+    max-width: var(--page-width, 1200px) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
   }
 
   .lame-trust-banner__wrap {
@@ -134,7 +142,7 @@
   }
 
   .lame-trust-banner--boxed .lame-trust-banner__wrap {
-    border-radius: clamp(8px, 1.5vw, 16px);
+    border-radius: clamp(6px, 1.2vw, 12px) !important;
   }
 
   .lame-trust-banner__link {
@@ -165,18 +173,20 @@
 
   .lame-trust-banner--bleed .lame-trust-banner__wrap,
   .lame-trust-banner--bleed .lame-trust-banner__image {
-    width: 100%;
-    max-width: none;
-    margin-inline: 0;
-    padding: 0;
-    border-radius: 0;
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
   }
 
   @media screen and (min-width: 990px) {
-    body.template-index .lame-trust-banner.lame-trust-banner--bleed.section--full-width > .lame-trust-banner__wrap {
+    body.template-index .lame-trust-banner.lame-trust-banner--bleed > .lame-trust-banner__wrap {
       width: 100% !important;
       max-width: none !important;
       margin-inline: 0 !important;
+      padding-inline: 0 !important;
+      border-radius: 0 !important;
     }
   }
 
@@ -187,21 +197,42 @@
       display: none !important;
     }
 
+    /* Mobile edge-to-edge bleed: 0 padding, 0 margin, 0 radius */
+    .lame-trust-banner.lame-trust-banner--mobile-bleed,
+    .shopify-section:has(.lame-trust-banner--mobile-bleed) {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding-inline: 0 !important;
+      margin-inline: 0 !important;
+    }
+
+    .lame-trust-banner--mobile-bleed .lame-trust-banner__wrap,
+    .lame-trust-banner--mobile-bleed .lame-trust-banner__image {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-inline: 0 !important;
+      padding-inline: 0 !important;
+      border-radius: 0 !important;
+    }
+
     /* Mobile gap & rounded corners: matches New Arrivals and Glow Up Daily */
     .lame-trust-banner:not(.lame-trust-banner--mobile-bleed),
-    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) {
+    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed),
+    .lame-trust-banner--mobile-boxed {
       padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
       box-sizing: border-box !important;
     }
 
     .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
-    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap {
+    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
+    .lame-trust-banner--mobile-boxed .lame-trust-banner__wrap {
       border-radius: clamp(6px, 1.2vw, 12px) !important;
       overflow: hidden !important;
     }
 
     .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
-    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image {
+    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
+    .lame-trust-banner--mobile-boxed .lame-trust-banner__image {
       border-radius: clamp(6px, 1.2vw, 12px) !important;
     }
   }
@@ -271,7 +302,7 @@
       "type": "checkbox",
       "id": "full_bleed",
       "label": "Full width (edge to edge)",
-      "info": "Stretch banner edge to edge with no side margins.",
+      "info": "Stretch banner edge to edge removing all padding and margins. When unchecked, matches boxed gap and rounded corners.",
       "default": true
     },
     {
