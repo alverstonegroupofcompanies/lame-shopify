@@ -7,11 +7,21 @@
   if banner_image == blank
     assign use_theme_asset = true
   endif
+
+  assign show_mobile = true
+  if section.settings.show_on_mobile == false
+    assign show_mobile = false
+  endif
+
+  assign show_desktop = true
+  if section.settings.show_on_desktop == false
+    assign show_desktop = false
+  endif
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-beauty-tips-banner"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-beauty-tips-banner{% unless show_desktop %} lame-beauty-tips-banner--hide-desktop{% endunless %}{% unless show_mobile %} lame-beauty-tips-banner--hide-mobile{% endunless %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-beauty-tips-banner__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -106,7 +116,11 @@
 
   .section--full-width .lame-beauty-tips-banner__wrap {
     max-width: 100%;
-    padding-inline: clamp(0.75rem, 3vw, 1.5rem);
+    padding-inline: 0;
+  }
+
+  .section--full-width .lame-beauty-tips-banner__frame {
+    border-radius: 0;
   }
 
   .lame-beauty-tips-banner__frame {
@@ -141,8 +155,17 @@
   }
 
   @media screen and (max-width: 749px) {
+    .lame-beauty-tips-banner--hide-mobile,
+    .shopify-section:has(.lame-beauty-tips-banner--hide-mobile) {
+      display: none !important;
+    }
+
     .lame-beauty-tips-banner__frame {
       border-radius: 10px;
+    }
+
+    .section--full-width .lame-beauty-tips-banner__frame {
+      border-radius: 0;
     }
 
     .lame-beauty-tips-banner:has(.lame-beauty-tips-banner__image--mobile) .lame-beauty-tips-banner__image--desktop {
@@ -151,6 +174,13 @@
 
     .lame-beauty-tips-banner:has(.lame-beauty-tips-banner__image--mobile) .lame-beauty-tips-banner__image--mobile {
       display: block;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-beauty-tips-banner--hide-desktop,
+    .shopify-section:has(.lame-beauty-tips-banner--hide-desktop) {
+      display: none !important;
     }
   }
 {% endstylesheet %}
@@ -171,10 +201,23 @@
       "info": "Replace with your own beauty tips graphic. Leave empty to use the built-in daily skincare tips banner. Recommended: wide image (~1920×640px)."
     },
     {
+      "type": "checkbox",
+      "id": "show_on_desktop",
+      "label": "Show banner on desktop",
+      "default": true
+    },
+    {
       "type": "image_picker",
       "id": "image_mobile",
       "label": "Mobile banner image",
       "info": "Optional. Shown on phones instead of the main banner."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_mobile",
+      "label": "Show banner on mobile",
+      "info": "Turn on or off this banner on mobile devices.",
+      "default": true
     },
     {
       "type": "text",
