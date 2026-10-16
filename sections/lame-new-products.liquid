@@ -212,37 +212,58 @@
       <div class="lame-new-products__header-row">
         {%- liquid
           assign heading_image = section.settings.heading_image
+          assign heading_image_mobile = section.settings.heading_image_mobile
           assign heading_image_asset = section.settings.heading_image_asset | strip
           assign heading_alt = section.settings.heading | default: 'New Arrivals'
+          assign show_heading_mobile = true
+          if section.settings.show_heading_image_mobile == false
+            assign show_heading_mobile = false
+          endif
           assign use_heading_image = false
-          if heading_image != blank or heading_image_asset != blank
+          if heading_image != blank or heading_image_asset != blank or heading_image_mobile != blank
             assign use_heading_image = true
           endif
         -%}
 
         {%- if use_heading_image -%}
-          <h2 class="lame-flash-deal__title-image">
-            {%- if heading_image != blank -%}
-              {{
-                heading_image
-                | image_url: width: 1600
-                | image_tag:
-                  class: 'lame-flash-deal__title-img',
-                  loading: 'lazy',
-                  widths: '600,900,1200,1600',
-                  sizes: '(min-width: 1200px) 1200px, 100vw',
-                  alt: heading_alt
-              }}
-            {%- else -%}
-              <img
-                class="lame-flash-deal__title-img"
-                src="{{ heading_image_asset | asset_url }}"
-                alt="{{ heading_alt | escape }}"
-                width="1024"
-                height="216"
-                loading="lazy"
-              >
-            {%- endif -%}
+          <h2 class="lame-flash-deal__title-image{% unless show_heading_mobile %} lame-title-image--hide-mobile{% endunless %}{% if section.settings.heading_image_full_width %} lame-title-image--full-width{% endif %}">
+            <picture class="lame-flash-deal__title-picture">
+              {%- if heading_image_mobile != blank -%}
+                <source media="(max-width: 749px)" srcset="{{ heading_image_mobile | image_url: width: 900 }}">
+              {%- endif -%}
+              {%- if heading_image != blank -%}
+                {{
+                  heading_image
+                  | image_url: width: 1600
+                  | image_tag:
+                    class: 'lame-flash-deal__title-img',
+                    loading: 'lazy',
+                    widths: '600,900,1200,1600',
+                    sizes: '(min-width: 1200px) 1200px, 100vw',
+                    alt: heading_alt
+                }}
+              {%- elsif heading_image_mobile != blank -%}
+                {{
+                  heading_image_mobile
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'lame-flash-deal__title-img',
+                    loading: 'lazy',
+                    widths: '600,900',
+                    sizes: '100vw',
+                    alt: heading_alt
+                }}
+              {%- else -%}
+                <img
+                  class="lame-flash-deal__title-img"
+                  src="{{ heading_image_asset | asset_url }}"
+                  alt="{{ heading_alt | escape }}"
+                  width="1024"
+                  height="216"
+                  loading="lazy"
+                >
+              {%- endif -%}
+            </picture>
           </h2>
           {%- if section.settings.subtitle != blank -%}
             <p class="lame-flash-deal__title-subtitle">{{ section.settings.subtitle | escape }}</p>
@@ -423,8 +444,26 @@
     {
       "type": "image_picker",
       "id": "heading_image",
-      "label": "Title image",
+      "label": "Title image (Desktop)",
       "info": "Replaces the text heading with an image banner. Leave empty to use text or asset filename."
+    },
+    {
+      "type": "image_picker",
+      "id": "heading_image_mobile",
+      "label": "Title image (Mobile)",
+      "info": "Optional. Dedicated title banner for mobile screens (up to 749px)."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading_image_mobile",
+      "label": "Show title banner on mobile",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_image_full_width",
+      "label": "Title banner full width",
+      "default": false
     },
     {
       "type": "text",

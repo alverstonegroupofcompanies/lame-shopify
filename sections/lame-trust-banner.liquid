@@ -1,15 +1,32 @@
 {%- liquid
   assign banner_image = section.settings.image
+  assign mobile_image = section.settings.image_mobile
   assign banner_alt = section.settings.image_alt | default: shop.name | escape
   assign use_theme_asset = false
 
-  if banner_image == blank
+  if banner_image == blank and mobile_image == blank
     assign use_theme_asset = true
+  endif
+
+  assign is_full_width = false
+  if section.settings.full_bleed or section.settings.section_width == 'full-width'
+    assign is_full_width = true
+  endif
+
+  assign show_mobile = true
+  if section.settings.show_on_mobile == false
+    assign show_mobile = false
+  endif
+
+  assign show_desktop = true
+  if section.settings.show_on_desktop == false
+    assign show_desktop = false
   endif
 -%}
 
 <section
-  class="section section--full-width lame-trust-banner{% if section.settings.full_bleed %} lame-trust-banner--bleed{% endif %}"
+  class="section {% if is_full_width %}section--full-width lame-trust-banner--bleed{% else %}section--page-width lame-trust-banner--boxed{% endif %} lame-trust-banner{% unless show_desktop %} lame-trust-banner--hide-desktop{% endunless %}{% unless show_mobile %} lame-trust-banner--hide-mobile{% endunless %}"
+  style="{% render 'spacing-padding', settings: section.settings %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-trust-banner__wrap">
@@ -35,16 +52,38 @@
         decoding="async"
       >
     {%- else -%}
-      {{
-        banner_image
-        | image_url: width: 3840
-        | image_tag:
-          class: 'lame-trust-banner__image',
-          loading: 'lazy',
-          widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
-          sizes: '100vw',
-          alt: banner_alt
-      }}
+      <picture class="lame-trust-banner__picture">
+        {%- if mobile_image != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ mobile_image | image_url: width: 750 }} 1x, {{ mobile_image | image_url: width: 1200 }} 2x"
+          >
+        {%- endif -%}
+
+        {%- if banner_image != blank -%}
+          {{
+            banner_image
+            | image_url: width: 3840
+            | image_tag:
+              class: 'lame-trust-banner__image',
+              loading: 'lazy',
+              widths: '750, 990, 1200, 1600, 1920, 2560, 3840',
+              sizes: '100vw',
+              alt: banner_alt
+          }}
+        {%- elsif mobile_image != blank -%}
+          {{
+            mobile_image
+            | image_url: width: 1200
+            | image_tag:
+              class: 'lame-trust-banner__image',
+              loading: 'lazy',
+              widths: '375, 550, 750, 990, 1200',
+              sizes: '100vw',
+              alt: banner_alt
+          }}
+        {%- endif -%}
+      </picture>
     {%- endif -%}
 
     {%- if section.settings.link != blank -%}
@@ -54,16 +93,30 @@
 </section>
 
 {% stylesheet %}
-  .shopify-section:has(.lame-trust-banner) {
-    width: 100%;
-    max-width: none;
+  .shopify-section:has(.lame-trust-banner--bleed) {
+    width: 100% !important;
+    max-width: none !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
   }
 
   .lame-trust-banner {
     width: 100%;
-    max-width: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
+  }
+
+  .lame-trust-banner--bleed {
+    width: 100%;
+    max-width: none !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
+  }
+
+  .lame-trust-banner--boxed {
+    max-width: var(--page-width, 1400px);
+    margin-inline: auto;
+    padding-inline: var(--page-margin, 1.5rem);
   }
 
   .lame-trust-banner__wrap {
@@ -75,11 +128,21 @@
     overflow: hidden;
   }
 
+  .lame-trust-banner--boxed .lame-trust-banner__wrap {
+    border-radius: clamp(8px, 1.5vw, 16px);
+  }
+
   .lame-trust-banner__link {
     display: block;
     width: 100%;
     line-height: 0;
     text-decoration: none;
+  }
+
+  .lame-trust-banner__picture {
+    display: block;
+    width: 100%;
+    line-height: 0;
   }
 
   .lame-trust-banner__image {
@@ -93,13 +156,6 @@
     box-shadow: none;
     object-fit: contain;
     object-position: center center;
-  }
-
-  .shopify-section:has(.lame-trust-banner--bleed) {
-    width: 100%;
-    max-width: none;
-    padding: 0;
-    margin-inline: 0;
   }
 
   .lame-trust-banner--bleed .lame-trust-banner__wrap,
@@ -118,28 +174,95 @@
       margin-inline: 0 !important;
     }
   }
+
+  /* ── Turn On/Off on Mobile or Desktop ── */
+  @media screen and (max-width: 749px) {
+    .lame-trust-banner--hide-mobile,
+    .shopify-section:has(.lame-trust-banner--hide-mobile) {
+      display: none !important;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .lame-trust-banner--hide-desktop,
+    .shopify-section:has(.lame-trust-banner--hide-desktop) {
+      display: none !important;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Trust banner (full width)",
+  "name": "Title / Trust Banner",
   "tag": "section",
-  "class": "section-wrapper section-wrapper--full-width",
+  "class": "section-wrapper",
   "enabled_on": {
     "templates": ["*"]
   },
   "settings": [
     {
+      "type": "header",
+      "content": "Desktop Banner"
+    },
+    {
       "type": "image_picker",
       "id": "image",
-      "label": "Banner image",
-      "info": "Leave empty to use the built-in LAMÉ trust banner. Recommended: wide image (~1920×400px or similar)."
+      "label": "Desktop banner image",
+      "info": "Recommended: wide horizontal image (~1920×300px or similar). Leave empty for theme default."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_desktop",
+      "label": "Show banner on desktop",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Mobile Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile banner image",
+      "info": "Optional. Dedicated banner for mobile screens (up to 749px). If empty, the desktop image is used."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_on_mobile",
+      "label": "Show banner on mobile",
+      "info": "Turn on or off this banner on mobile devices.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout & Width"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_bleed",
+      "label": "Full width (edge to edge)",
+      "info": "Stretch banner edge to edge with no side margins.",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "full-width", "label": "Full width" },
+        { "value": "page-width", "label": "Page width (boxed)" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "header",
+      "content": "Link & Accessibility"
     },
     {
       "type": "text",
       "id": "image_alt",
       "label": "Image alt text",
-      "info": "Optional. Describe the banner for accessibility."
+      "info": "Describe the banner for SEO and accessibility (e.g. Discover Beauty, Best Selling, Exclusive Offers)."
     },
     {
       "type": "url",
@@ -154,16 +277,33 @@
       "default": false
     },
     {
-      "type": "checkbox",
-      "id": "full_bleed",
-      "label": "Full width",
-      "info": "Stretch the image to both edges of the screen.",
-      "default": false
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 0
     }
   ],
   "presets": [
     {
-      "name": "Trust banner (full width)",
+      "name": "Title / Trust Banner",
       "category": "Banners"
     }
   ]
