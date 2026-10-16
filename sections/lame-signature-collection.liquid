@@ -244,6 +244,9 @@
         {% if section.settings.heading_line_1 != blank or section.settings.heading_line_2 != blank %}
           <header class="lame-signature__cinematic-topbar">
             <div class="lame-signature__cinematic-badge">
+              <span class="lame-signature__cinematic-badge-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z"/></svg>
+              </span>
               {% if section.settings.heading_line_1 != blank %}
                 <span class="lame-signature__cinematic-badge-kicker">{{ section.settings.heading_line_1 }}</span>
               {% endif %}
@@ -255,8 +258,9 @@
 
             {% if section.settings.view_all_label != blank %}
               <a href="{{ section.settings.view_all_link | default: routes.collections_url }}" class="lame-signature__cinematic-view-all">
-                <span>{{ section.settings.view_all_label }}</span>
-                <span aria-hidden="true">→</span>
+                <span class="lame-signature__cinematic-view-all-text lame-signature__cinematic-view-all-text--desktop">{{ section.settings.view_all_label }}</span>
+                <span class="lame-signature__cinematic-view-all-text lame-signature__cinematic-view-all-text--mobile">View All</span>
+                <span class="lame-signature__cinematic-view-all-arrow" aria-hidden="true">→</span>
               </a>
             {% endif %}
           </header>
@@ -276,17 +280,19 @@
             <p class="lame-signature__cinematic-desc" data-hero-desc>{{ initial_hero_desc }}</p>
 
             <div class="lame-signature__cinematic-actions">
-              <button
-                type="button"
-                class="lame-signature__cinematic-btn-icon"
-                data-cinematic-bookmark
-                aria-label="Save or explore {{ initial_hero_title }}"
-                title="Save / Explore"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                </svg>
-              </button>
+              {% if section.settings.show_bookmark_button %}
+                <button
+                  type="button"
+                  class="lame-signature__cinematic-btn-icon"
+                  data-cinematic-bookmark
+                  aria-label="Save or explore {{ initial_hero_title }}"
+                  title="Save / Explore"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </button>
+              {% endif %}
 
               <a
                 href="{{ initial_hero_link }}"
@@ -3345,6 +3351,20 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   }
 
+  .lame-signature__cinematic-badge-icon {
+    display: inline-flex;
+    align-items: center;
+    color: #f37021;
+    margin-right: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  .lame-signature__cinematic-badge-icon svg {
+    width: 13px;
+    height: 13px;
+    display: block;
+  }
+
   .lame-signature__cinematic-badge-kicker {
     color: #f37021;
   }
@@ -3374,6 +3394,10 @@
   .lame-signature__cinematic-view-all:hover {
     color: #f37021;
     transform: translateX(3px);
+  }
+
+  .lame-signature__cinematic-view-all-text--mobile {
+    display: none;
   }
 
   /* Interactive Stage (Hero on left, Cards slider on right) */
@@ -3768,103 +3792,182 @@
 
   @media (max-width: 749px) {
     .lame-signature__cinematic-topbar {
-      padding-inline: 1rem;
-      padding-top: 1rem;
+      padding-inline: 0.85rem;
+      padding-top: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
     }
 
     .lame-signature__cinematic-badge {
-      padding: 0.3rem 0.75rem;
-      font-size: 0.66rem;
-      gap: 0.4rem;
-      letter-spacing: 0.08em;
+      padding: 0.22rem 0.55rem;
+      font-size: 0.56rem;
+      gap: 0.3rem;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      flex-shrink: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .lame-signature__cinematic-badge-icon {
+      margin-right: 0;
+    }
+
+    .lame-signature__cinematic-badge-icon svg {
+      width: 9px;
+      height: 9px;
     }
 
     .lame-signature__cinematic-badge-kicker {
       font-weight: 700;
     }
 
+    .lame-signature__cinematic-badge-sep {
+      font-size: 0.5rem;
+      opacity: 0.5;
+    }
+
+    .lame-signature__cinematic-badge-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .lame-signature__cinematic-view-all {
-      font-size: 0.68rem;
-      gap: 0.35rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.56rem;
       letter-spacing: 0.08em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding: 0.22rem 0.55rem;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 9999px;
+      line-height: 1.2;
+    }
+
+    .lame-signature__cinematic-view-all-text--desktop {
+      display: none !important;
+    }
+
+    .lame-signature__cinematic-view-all-text--mobile {
+      display: inline !important;
+    }
+
+    .lame-signature__cinematic-view-all-arrow {
+      font-size: 0.62rem;
     }
 
     .lame-signature__cinematic-stage {
-      padding-inline: 1rem;
-      padding-block: 0.75rem 1.25rem;
-      gap: 1.35rem;
+      padding-inline: 0.85rem;
+      padding-block: 0.65rem 1rem;
+      gap: 1.15rem;
     }
 
     .lame-signature__cinematic-eyebrow-wrap {
-      font-size: 0.68rem;
-      gap: 0.45rem;
-      margin-bottom: 0.35rem;
+      font-size: 0.65rem;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
       letter-spacing: 0.12em;
     }
 
     .lame-signature__cinematic-title {
-      font-size: clamp(1.85rem, 8vw, 2.35rem);
+      font-size: clamp(1.75rem, 7.5vw, 2.2rem);
       line-height: 1;
-      margin: 0 0 0.55rem;
+      margin: 0 0 0.45rem;
       letter-spacing: 0.02em;
     }
 
     .lame-signature__cinematic-desc {
-      font-size: 0.82rem;
-      line-height: 1.45;
-      margin: 0 0 1.15rem;
-      max-width: 90%;
-      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.78rem;
+      line-height: 1.42;
+      margin: 0 0 0.95rem;
+      max-width: 95%;
+      color: rgba(255, 255, 255, 0.85);
     }
 
     .lame-signature__cinematic-actions {
-      gap: 0.75rem;
+      gap: 0;
     }
 
     .lame-signature__cinematic-btn-icon {
-      width: 42px;
-      height: 42px;
-    }
-
-    .lame-signature__cinematic-btn-icon svg {
-      width: 17px;
-      height: 17px;
+      display: none !important;
     }
 
     .lame-signature__cinematic-btn-cta {
-      height: 42px;
-      padding: 0 1.35rem;
+      height: 38px;
+      padding: 0 1.4rem;
       font-size: 0.72rem;
       letter-spacing: 0.12em;
     }
 
     .lame-signature__cinematic-cards-wrapper {
-      gap: 1rem;
+      gap: 0.75rem;
+    }
+
+    .lame-signature__cinematic-cards-viewport {
+      padding: 0.4rem 0.15rem;
+    }
+
+    .lame-signature__cinematic-cards-track {
+      gap: 0.65rem;
     }
 
     .lame-signature__cinematic-card {
-      width: 135px;
-      border-radius: 14px;
+      width: 108px;
+      aspect-ratio: 1 / 1.38;
+      border-radius: 12px;
     }
 
     .lame-signature__cinematic-card-body {
-      padding: 0.75rem 0.65rem;
-      gap: 0.15rem;
+      padding: 0.5rem 0.45rem;
+      gap: 0.12rem;
     }
 
     .lame-signature__cinematic-card-cat {
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
+      font-size: 0.52rem;
+      letter-spacing: 0.08em;
     }
 
     .lame-signature__cinematic-card-title {
-      font-size: 1.05rem;
+      font-size: 0.85rem;
       line-height: 1.05;
+      letter-spacing: 0.02em;
+    }
+
+    .lame-signature__cinematic-nav-row {
+      gap: 0.85rem;
+      padding-inline: 0.25rem;
+    }
+
+    .lame-signature__cinematic-nav-arrows {
+      gap: 0.45rem;
+    }
+
+    .lame-signature__cinematic-nav-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    .lame-signature__cinematic-nav-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .lame-signature__cinematic-counter {
+      font-size: 1.55rem;
+      min-width: 30px;
     }
 
     .lame-signature__cinematic-footer {
-      padding-inline: 1rem;
-      padding-bottom: 1.25rem;
+      padding-inline: 0.85rem;
+      padding-bottom: 1rem;
     }
   }
 {% endstylesheet %}
@@ -3958,6 +4061,12 @@
       "type": "url",
       "id": "hero_button_link",
       "label": "Hero CTA button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bookmark_button",
+      "label": "Show bookmark button in video hero",
+      "default": false
     },
     {
       "type": "range",
