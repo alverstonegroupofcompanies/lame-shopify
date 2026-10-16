@@ -4,7 +4,7 @@
 
 /* ── Modal shell ── */
 .search-modal.lame-search-modal .search-modal__content {
-  --modal-width: min(720px, 92vw);
+  --modal-width: min(860px, 92vw);
   --modal-max-height: min(88dvh, 860px);
   --lame-search-surface: #faf9f6;
   --lame-search-ink: #0b3d2e;
@@ -253,7 +253,7 @@
 .lame-search-popular-grid,
 .lame-search-panel .lame-search-carousel {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.85rem;
   list-style: none;
   margin: 0;
@@ -292,9 +292,18 @@
   display: flex;
 }
 
-/* Keep popular products as a neat 2×2 — never 4 tiny columns */
-.lame-search-popular-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Popular products grid: 3 in a row on desktop, 2 on mobile */
+@media screen and (min-width: 750px) {
+  .lame-search-popular-grid,
+  .lame-search-dropdown .predictive-search-results__wrapper-products:not(.lame-search-carousel) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+@media screen and (max-width: 749px) {
+  .lame-search-popular-grid,
+  .lame-search-dropdown .predictive-search-results__wrapper-products:not(.lame-search-carousel) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
 }
 
 .lame-search-panel .lame-search-carousel {
@@ -340,7 +349,7 @@
   transform: translateY(-1px);
 }
 
-/* Square media — image fills every corner (1:1, full width) */
+/* Square media — image contained inside 1:1 container, full image visible with zero overflow or cropping */
 .lame-search-card__media {
   position: relative;
   flex: 0 0 auto;
@@ -349,33 +358,44 @@
   height: auto;
   max-height: none;
   overflow: hidden;
-  background: #f4f1ec;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   contain: layout style;
 }
 
 .lame-search-card__media-link {
   position: absolute;
   inset: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 0;
+  padding: 8px;
   margin: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .lame-search-card__image {
   display: block;
   width: 100%;
   height: 100%;
-  max-width: none;
-  max-height: none;
-  object-fit: cover;
-  object-position: center center;
-  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: auto;
   padding: 0;
   box-sizing: border-box;
+  transition: transform 0.25s ease;
+}
+
+.lame-search-card:hover .lame-search-card__image {
+  transform: scale(1.04);
 }
 
 .lame-search-card__image--placeholder {
@@ -586,7 +606,7 @@
 .lame-search-dropdown .predictive-search-results__wrapper-products:not(.lame-search-carousel),
 .lame-search-popular-grid {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 0.85rem;
   align-items: stretch;
 }
@@ -598,16 +618,23 @@
   color: rgb(42 58 48 / 0.75);
 }
 
-@media screen and (min-width: 600px) {
+@media screen and (max-width: 749px) {
   .lame-search-dropdown .predictive-search-results__wrapper-products:not(.lame-search-carousel),
   .lame-search-popular-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
+@media screen and (min-width: 750px) {
+  .lame-search-dropdown .predictive-search-results__wrapper-products:not(.lame-search-carousel),
+  .lame-search-popular-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
 @media screen and (min-width: 990px) {
   .search-modal.lame-search-modal .search-modal__content {
-    --modal-width: min(720px, 90vw);
+    --modal-width: min(860px, 90vw);
     --modal-max-height: min(86dvh, 820px);
   }
 }
@@ -717,7 +744,7 @@
   }
 
   .lame-search-card__media-link {
-    padding: 0;
+    padding: 6px;
   }
 
   .lame-search-card__title {

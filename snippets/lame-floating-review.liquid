@@ -17,7 +17,8 @@
     bottom: max(20px, env(safe-area-inset-bottom));
     z-index: 998;
     font-family: var(--font-body-family, 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 0.12s ease-out;
+    will-change: transform;
     pointer-events: none; /* children re-enable */
   }
 
@@ -27,15 +28,15 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    padding: 11px 20px 11px 16px;
+    gap: 8px;
+    padding: 9px 18px 9px 13px;
     background: linear-gradient(135deg, #072318 0%, #0d3829 55%, #051b12 100%);
     color: #ffffff;
     border: 1px solid rgba(212, 175, 55, 0.45);
     border-radius: 999px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
     letter-spacing: 0.03em;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -153,6 +154,12 @@
     opacity: 1;
     transform: rotate(0deg) scale(1);
     filter: drop-shadow(0 1px 3px rgba(212, 175, 55, 0.6));
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+  }
+
+  .lam-fab-btn:hover .lam-fab-star-icon {
+    transform: rotate(15deg) scale(1.15);
+    filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.9));
   }
 
   .lam-fab-close-icon {
@@ -170,19 +177,6 @@
     line-height: 1;
   }
 
-  .lam-fab-rating-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 6px;
-    background: rgba(212, 175, 55, 0.2);
-    border: 1px solid rgba(212, 175, 55, 0.38);
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #ffd778;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-  }
 
   /* When Open: Button active state */
   .lam-fab-wrap.is-open .lam-fab-btn {
@@ -201,6 +195,59 @@
   .lam-fab-wrap.is-open .lam-fab-close-icon {
     opacity: 1;
     transform: rotate(0deg) scale(1);
+  }
+
+  /* Small Pill Dismiss Button */
+  .lam-fab-trigger-group {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    pointer-events: auto;
+  }
+
+  .lam-fab-pill-close {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #061e14;
+    border: 1px solid rgba(212, 175, 55, 0.55);
+    color: #e5c07b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    padding: 0;
+    z-index: 3;
+    opacity: 0.85;
+    transition:
+      transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.2s ease,
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .lam-fab-pill-close:hover {
+    opacity: 1;
+    transform: scale(1.18);
+    background: #0d3829;
+    border-color: rgba(212, 175, 55, 0.95);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 10px rgba(212, 175, 55, 0.4);
+  }
+
+  .lam-fab-pill-close:active {
+    transform: scale(0.95);
+  }
+
+  .lam-fab-wrap.is-open .lam-fab-pill-close {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.6);
   }
 
   /* -------------------------------------------------------------
@@ -580,35 +627,50 @@
   </div>
 
   <!-- Trigger FAB Pill -->
-  <button
-    type="button"
-    class="lam-fab-btn"
-    id="lamFabTrigger"
-    aria-expanded="false"
-    aria-controls="lamFabPopover"
-    aria-label="Open review and community links"
-  >
-    <span class="lam-fab-icon-box" aria-hidden="true">
-      <svg class="lam-fab-star-icon" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="url(#lamFabGoldGrad)"/>
-        <defs>
-          <linearGradient id="lamFabGoldGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#FFF2A3"/>
-            <stop offset="0.4" stop-color="#F4C430"/>
-            <stop offset="1" stop-color="#E09F00"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <svg class="lam-fab-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <div class="lam-fab-trigger-group">
+    <button
+      type="button"
+      class="lam-fab-btn"
+      id="lamFabTrigger"
+      aria-expanded="false"
+      aria-controls="lamFabPopover"
+      aria-label="Open review and community links"
+    >
+      <span class="lam-fab-icon-box" aria-hidden="true">
+        <svg class="lam-fab-star-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="url(#lamFabGoldGrad)"/>
+          <defs>
+            <linearGradient id="lamFabGoldGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFF2A3"/>
+              <stop offset="0.4" stop-color="#F4C430"/>
+              <stop offset="1" stop-color="#E09F00"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <svg class="lam-fab-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </span>
+      <span class="lam-fab-label">
+        <span>Review us</span>
+      </span>
+    </button>
+
+    <!-- Small Close Button to dismiss the floating icon -->
+    <button
+      type="button"
+      class="lam-fab-pill-close"
+      id="lamFabPillClose"
+      aria-label="Close Review us icon"
+      title="Close"
+    >
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
-    </span>
-    <span class="lam-fab-label">
-      <span>Review us</span>
-      <span class="lam-fab-rating-pill">4.9 ★</span>
-    </span>
-  </button>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -650,6 +712,31 @@
         trigger.focus();
       }
     });
+
+    // Small close button on the floating icon to dismiss it
+    const pillClose = document.getElementById('lamFabPillClose');
+    if (pillClose) {
+      pillClose.addEventListener('click', function (e) {
+        e.stopPropagation();
+        wrap.style.transition = 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
+        wrap.style.transform = 'scale(0.7) translateY(20px)';
+        wrap.style.opacity = '0';
+        wrap.style.pointerEvents = 'none';
+        setTimeout(function () {
+          wrap.style.display = 'none';
+        }, 280);
+        try {
+          sessionStorage.setItem('lam_fab_dismissed', 'true');
+        } catch (err) {}
+      });
+    }
+
+    // Check if previously dismissed in this session
+    try {
+      if (sessionStorage.getItem('lam_fab_dismissed') === 'true') {
+        wrap.style.display = 'none';
+      }
+    } catch (err) {}
 
     // -------------------------------------------------------------
     // SMART FOOTER COLLISION AVOIDANCE

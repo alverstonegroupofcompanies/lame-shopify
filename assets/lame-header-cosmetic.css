@@ -4347,14 +4347,14 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   justify-content: center;
 }
 
-/* Search dropdown — wider panel so a 2×2 product grid stays easy to scan */
+/* Search dropdown — wider panel for 3 in a row on desktop */
 #header-component.header--cosmetic-luxury .lame-header-inline-search__dropdown {
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  width: min(36rem, 100%);
+  width: min(46rem, 100%);
   min-width: 0;
-  max-width: min(36rem, 94vw);
+  max-width: min(46rem, 94vw);
 }
 
 #header-component.header--cosmetic-luxury .lame-header-inline-search .predictive-search-form__content-wrapper {
@@ -4397,10 +4397,23 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   .lame-header-inline-search
   .lame-search-popular-grid {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 0.85rem !important;
   flex-direction: unset !important;
   align-items: stretch;
+}
+
+@media screen and (max-width: 749px) {
+  #header-component.header--cosmetic-luxury
+    .lame-header-inline-search
+    .lame-search-dropdown
+    .predictive-search-results__wrapper-products:not(.lame-search-carousel),
+  #header-component.header--cosmetic-luxury
+    .lame-header-inline-search
+    .lame-search-popular-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.7rem !important;
+  }
 }
 
 #header-component.header--cosmetic-luxury
@@ -4434,33 +4447,46 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 }
 
 #header-component.header--cosmetic-luxury .lame-header-inline-search .lame-search-card__media {
+  position: relative;
   flex: 0 0 auto;
   width: 100%;
   max-width: none;
   aspect-ratio: 1 / 1;
   max-height: none;
   overflow: hidden;
-  background: #f4f1ec;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-inline-search .lame-search-card__media-link {
   position: absolute;
   inset: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  padding: 0;
-  margin: 0;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 #header-component.header--cosmetic-luxury .lame-header-inline-search .lame-search-card__image {
   display: block;
   width: 100%;
   height: 100%;
-  max-width: none;
-  max-height: none;
-  object-fit: cover;
-  object-position: center center;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: auto;
+  transition: transform 0.25s ease;
+}
+
+#header-component.header--cosmetic-luxury .lame-header-inline-search .lame-search-card:hover .lame-search-card__image {
+  transform: scale(1.04);
 }
 
 #header-component.header--cosmetic-luxury .lame-header-inline-search .lame-search-card__body {
