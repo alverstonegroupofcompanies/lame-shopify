@@ -2,7 +2,7 @@
   const header = document.getElementById('header-component');
   if (!header?.classList.contains('header--cosmetic-luxury')) return;
 
-  const threshold = 30;
+  const threshold = 15;
   let lastScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
   let ticking = false;
 

@@ -29,9 +29,11 @@
     const updateSlide = (newIndex) => {
       currentIndex = (newIndex + total) % total;
       track.style.transform = `translateX(-${currentIndex * 100}%)`;
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('is-active', i === currentIndex);
-      });
+      if (dots.length > 0) {
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('is-active', i === currentIndex);
+        });
+      }
     };
 
     const startTimer = (delay = interval) => {
@@ -61,15 +63,17 @@
       startTimer(interval);
     });
 
-    // Tap/Click dots to switch
-    dots.forEach((dot, i) => {
-      dot.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        updateSlide(i);
-        startTimer(interval);
+    // Tap/Click dots to switch (if dots present)
+    if (dots.length > 0) {
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          updateSlide(i);
+          startTimer(interval);
+        });
       });
-    });
+    }
 
     // Touch swipe support on phones
     let touchStartX = 0;

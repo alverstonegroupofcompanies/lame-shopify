@@ -63,7 +63,8 @@
               transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Hide announcement strip when scrolling down */
+/* Hide top bar when scrolled down / away from top */
+#header-component.header--cosmetic-luxury[data-lame-scroll='away'] .lame-header-announce,
 #header-component.header--cosmetic-luxury[data-scroll-direction='down'] .lame-header-announce,
 #header-component.header--cosmetic-luxury[data-lame-scroll-dir='down'] .lame-header-announce {
   max-height: 0 !important;
@@ -75,15 +76,12 @@
   overflow: hidden !important;
   pointer-events: none !important;
   visibility: hidden !important;
-  transform: translateY(-100%);
+  transform: translateY(-100%) !important;
 }
 
-/* Reveal announcement strip when scrolling up or at top */
-#header-component.header--cosmetic-luxury[data-scroll-direction='up'] .lame-header-announce,
-#header-component.header--cosmetic-luxury[data-scroll-direction='top'] .lame-header-announce,
-#header-component.header--cosmetic-luxury[data-lame-scroll-dir='up'] .lame-header-announce,
-#header-component.header--cosmetic-luxury[data-lame-scroll-dir='top'] .lame-header-announce,
-#header-component.header--cosmetic-luxury:not([data-scroll-direction='down']):not([data-lame-scroll-dir='down']) .lame-header-announce {
+/* Reveal top bar ONLY when reached the top again */
+#header-component.header--cosmetic-luxury[data-lame-scroll='top'] .lame-header-announce,
+#header-component.header--cosmetic-luxury:not([data-lame-scroll='away']) .lame-header-announce {
   opacity: 1;
   pointer-events: auto;
   visibility: visible;
@@ -871,6 +869,7 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
                 transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
+  #header-component.header--cosmetic-luxury[data-lame-scroll='away'] .lame-header-announce,
   #header-component.header--cosmetic-luxury[data-scroll-direction='down'] .lame-header-announce,
   #header-component.header--cosmetic-luxury[data-lame-scroll-dir='down'] .lame-header-announce {
     height: 0 !important;
@@ -883,6 +882,14 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
     visibility: hidden !important;
     pointer-events: none !important;
     transform: translateY(-100%) !important;
+  }
+
+  #header-component.header--cosmetic-luxury[data-lame-scroll='top'] .lame-header-announce,
+  #header-component.header--cosmetic-luxury:not([data-lame-scroll='away']) .lame-header-announce {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
   }
 
   .lame-header-announce__ticker {
