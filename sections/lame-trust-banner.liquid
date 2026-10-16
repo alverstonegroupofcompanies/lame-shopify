@@ -22,10 +22,15 @@
   if section.settings.show_on_desktop == false
     assign show_desktop = false
   endif
+
+  assign mobile_full_width = false
+  if section.settings.mobile_full_width
+    assign mobile_full_width = true
+  endif
 -%}
 
 <section
-  class="section {% if is_full_width %}section--full-width lame-trust-banner--bleed{% else %}section--page-width lame-trust-banner--boxed{% endif %} lame-trust-banner{% unless show_desktop %} lame-trust-banner--hide-desktop{% endunless %}{% unless show_mobile %} lame-trust-banner--hide-mobile{% endunless %}"
+  class="section {% if is_full_width %}section--full-width lame-trust-banner--bleed{% else %}section--page-width lame-trust-banner--boxed{% endif %} lame-trust-banner{% unless show_desktop %} lame-trust-banner--hide-desktop{% endunless %}{% unless show_mobile %} lame-trust-banner--hide-mobile{% endunless %}{% if mobile_full_width %} lame-trust-banner--mobile-bleed{% else %} lame-trust-banner--mobile-boxed{% endif %}"
   style="{% render 'spacing-padding', settings: section.settings %}"
   {{ section.shopify_attributes }}
 >
@@ -181,6 +186,24 @@
     .shopify-section:has(.lame-trust-banner--hide-mobile) {
       display: none !important;
     }
+
+    /* Mobile gap & rounded corners: matches New Arrivals and Glow Up Daily */
+    .lame-trust-banner:not(.lame-trust-banner--mobile-bleed),
+    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) {
+      padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+      box-sizing: border-box !important;
+    }
+
+    .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
+    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap {
+      border-radius: clamp(6px, 1.2vw, 12px) !important;
+      overflow: hidden !important;
+    }
+
+    .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
+    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image {
+      border-radius: clamp(6px, 1.2vw, 12px) !important;
+    }
   }
 
   @media screen and (min-width: 750px) {
@@ -232,6 +255,13 @@
       "label": "Show banner on mobile",
       "info": "Turn on or off this banner on mobile devices.",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_full_width",
+      "label": "Full width on mobile (edge-to-edge)",
+      "info": "Leave unchecked to have the same side margin/padding and rounded corners as New Arrivals and Glow Up Daily.",
+      "default": false
     },
     {
       "type": "header",
