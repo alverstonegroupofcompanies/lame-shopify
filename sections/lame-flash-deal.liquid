@@ -92,10 +92,24 @@
 %}
 
 {% if show_deal_section %}
+{%- liquid
+  assign title_full_width = false
+  if section.settings.heading_image_full_width
+    assign title_full_width = true
+  endif
+
+  assign title_mobile_full_width = false
+  if section.settings.heading_image_mobile_full_width
+    assign title_mobile_full_width = true
+  elsif section.settings.heading_image_mobile_full_width == nil and title_full_width
+    assign title_mobile_full_width = true
+  endif
+-%}
+
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}"
   data-flash-deal-carousel
   style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};"
   {{ section.shopify_attributes }}
@@ -108,7 +122,7 @@
     {% endif %}
 
     {% if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.subtitle != blank or section.settings.heading_image != blank or section.settings.heading_image_asset != blank or countdown_active %}
-    <header class="lame-flash-deal__header" data-lame-reveal>
+    <header class="lame-flash-deal__header{% if title_full_width %} lame-flash-deal__header--full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal__header--mobile-full-width{% endif %}" data-lame-reveal>
       {%- if section.settings.eyebrow != blank -%}
         <p class="lame-flash-deal__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
@@ -129,7 +143,7 @@
       -%}
 
       {%- if use_heading_image -%}
-        <h2 class="lame-flash-deal__title-image{% unless show_heading_mobile %} lame-title-image--hide-mobile{% endunless %}{% if section.settings.heading_image_full_width %} lame-title-image--full-width{% endif %}">
+        <h2 class="lame-flash-deal__title-image{% unless show_heading_mobile %} lame-title-image--hide-mobile{% endunless %}{% if title_full_width %} lame-title-image--full-width{% endif %}{% if title_mobile_full_width %} lame-title-image--mobile-full-width{% endif %}">
           <picture class="lame-flash-deal__title-picture">
             {%- if heading_image_mobile != blank -%}
               <source media="(max-width: 749px)" srcset="{{ heading_image_mobile | image_url: width: 900 }}">
