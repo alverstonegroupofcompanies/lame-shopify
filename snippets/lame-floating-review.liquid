@@ -713,7 +713,7 @@
       }
     });
 
-    // Small close button on the floating icon to dismiss it
+    // Small close button on the floating icon to dismiss it for current view
     const pillClose = document.getElementById('lamFabPillClose');
     if (pillClose) {
       pillClose.addEventListener('click', function (e) {
@@ -725,17 +725,12 @@
         setTimeout(function () {
           wrap.style.display = 'none';
         }, 280);
-        try {
-          sessionStorage.setItem('lam_fab_dismissed', 'true');
-        } catch (err) {}
       });
     }
 
-    // Check if previously dismissed in this session
+    // Always clear any previous dismissal so the floating icon appears back on every fresh page load
     try {
-      if (sessionStorage.getItem('lam_fab_dismissed') === 'true') {
-        wrap.style.display = 'none';
-      }
+      sessionStorage.removeItem('lam_fab_dismissed');
     } catch (err) {}
 
     // -------------------------------------------------------------
