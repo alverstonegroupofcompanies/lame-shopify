@@ -233,6 +233,27 @@
     </header>
     {% endif %}
 
+    {%- assign card_blocks = section.blocks | where: 'type', 'card' -%}
+    {%- if card_blocks.size > 0 -%}
+      {{ 'lame-beauty-love.css' | asset_url | stylesheet_tag }}
+      <div
+        class="lame-flash-deal__spotlight lame-beauty-love lame-beauty-love--category"
+        data-beauty-sync
+        data-autoplay="5000"
+        data-fade="900"
+        style="--lame-bl-fade: 900ms;"
+      >
+        <div class="lame-beauty-love__wrap">
+          {% render 'lame-beauty-love-grid',
+            blocks: card_blocks,
+            open_new_tab: false,
+            products_url: routes.all_products_collection_url
+          %}
+        </div>
+      </div>
+      <script src="{{ 'lame-beauty-love.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
     <div class="lame-flash-deal__carousel">
       <button
         type="button"
@@ -598,6 +619,164 @@
           "type": "product",
           "id": "product",
           "label": "Product"
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "name": "Promo card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Card image",
+          "info": "Upload or replace this card’s promo image in the theme editor. Recommended: portrait ~4:5."
+        },
+        {
+          "type": "text",
+          "id": "fallback_asset",
+          "label": "Fallback asset filename",
+          "info": "Theme asset used only when Card image is empty (e.g. lame-beauty-love-01-sebamed.png)"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Image alt text"
+        },
+        {
+          "type": "image_picker",
+          "id": "brand_logo",
+          "label": "Brand logo",
+          "info": "Optional. Replaceable in the theme editor for each card."
+        },
+        {
+          "type": "text",
+          "id": "brand_text",
+          "label": "Brand name",
+          "info": "Shown in the top-left badge when no logo is uploaded. Matching brand names become slides in one card."
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text"
+        },
+        {
+          "type": "color",
+          "id": "badge_color",
+          "label": "Badge color",
+          "default": "#8b6b5a"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle"
+        },
+        {
+          "type": "select",
+          "id": "category",
+          "label": "Category",
+          "info": "Used when the section is set to show only one category, such as baby care above Gentle Baby Care.",
+          "options": [
+            { "value": "", "label": "None" },
+            { "value": "baby-mom", "label": "Baby care" },
+            { "value": "skin-care", "label": "Skin care" },
+            { "value": "hair-care", "label": "Hair care" },
+            { "value": "bath-body", "label": "Bath & body" },
+            { "value": "fragrance", "label": "Fragrance" },
+            { "value": "lipcare", "label": "Lip care" },
+            { "value": "nails", "label": "Nails" },
+            { "value": "intimate-care", "label": "Intimate care" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Click destination"
+        },
+        {
+          "type": "select",
+          "id": "link_type",
+          "label": "Link type",
+          "info": "Choose product-wise, brand-wise (shop filter), a collection page, or a custom URL.",
+          "options": [
+            { "value": "product", "label": "Product page" },
+            { "value": "brand", "label": "Brand on shop / collection" },
+            { "value": "collection", "label": "Collection page" },
+            { "value": "custom", "label": "Custom URL" }
+          ],
+          "default": "brand"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product",
+          "info": "Used when Link type is Product page."
+        },
+        {
+          "type": "select",
+          "id": "link_brand",
+          "label": "Brand / vendor",
+          "info": "Opens the shop page with this brand filter ticked. Leave as “Use brand name above” to use the Brand name field.",
+          "options": [
+            { "value": "", "label": "Use brand name above" },
+            { "value": "Cetaphil", "label": "Cetaphil" },
+            { "value": "DR.RASHEL", "label": "DR.RASHEL" },
+            { "value": "Dot & Key", "label": "Dot & Key" },
+            { "value": "Dove", "label": "Dove" },
+            { "value": "Faces Canada", "label": "Faces Canada" },
+            { "value": "Fair & Lovely", "label": "Fair & Lovely" },
+            { "value": "Femisafe", "label": "Femisafe" },
+            { "value": "Hamam", "label": "Hamam" },
+            { "value": "Himalaya", "label": "Himalaya" },
+            { "value": "Indulekha", "label": "Indulekha" },
+            { "value": "Jovees Herbal", "label": "Jovees Herbal" },
+            { "value": "Korean", "label": "Korean" },
+            { "value": "Lakme", "label": "Lakme" },
+            { "value": "Lifebuoy", "label": "Lifebuoy" },
+            { "value": "Lotus", "label": "Lotus" },
+            { "value": "Lux", "label": "Lux" },
+            { "value": "Mamaearth", "label": "Mamaearth" },
+            { "value": "NIVEA", "label": "NIVEA" },
+            { "value": "NIVEA MEN", "label": "NIVEA MEN" },
+            { "value": "Nykaa", "label": "Nykaa" },
+            { "value": "Pears", "label": "Pears" },
+            { "value": "Plum", "label": "Plum" },
+            { "value": "Ponds", "label": "Ponds" },
+            { "value": "SCALPE PRO", "label": "SCALPE PRO" },
+            { "value": "SebaMed", "label": "SebaMed" },
+            { "value": "Sirona", "label": "Sirona" },
+            { "value": "TRESemmé", "label": "TRESemmé" },
+            { "value": "Blossom Kochhar", "label": "Blossom Kochhar" },
+            { "value": "Bombay Shaving Company", "label": "Bombay Shaving Company" },
+            { "value": "Beauty People", "label": "Beauty People" },
+            { "value": "other", "label": "Other brand (type below)" }
+          ],
+          "default": "",
+          "visible_if": "{{ block.settings.link_type == 'brand' }}"
+        },
+        {
+          "type": "text",
+          "id": "link_brand_other",
+          "label": "Other brand name",
+          "info": "Used when Brand / vendor is Other, or to override. Type it exactly as it appears in the Brand filter.",
+          "visible_if": "{{ block.settings.link_type == 'brand' }}"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Used when Link type is Collection page."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Fallback / custom URL",
+          "info": "Required when Link type is Custom URL. Also used if the product, brand, or collection above is empty."
         }
       ]
     }
