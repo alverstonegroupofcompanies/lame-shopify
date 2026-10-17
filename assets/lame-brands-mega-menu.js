@@ -309,16 +309,48 @@
 
     // Shopify Theme Editor live inspector integration
     function handleThemeEditorBlockSelect(e) {
-      const blockId = e.detail?.blockId;
+      const blockId = e.detail?.blockId || '';
       if (!blockId) return;
+
+      // Always pin and open menu when a brand block or header-menu is selected in Theme Editor
+      isPinnedOpen = true;
+      openMenu();
 
       if (parentListItem) {
         parentListItem.classList.add('is-editor-open');
+        parentListItem.classList.add('is-open');
+        parentListItem.setAttribute('data-open', 'true');
       }
+      if (submenu) {
+        submenu.setAttribute('data-active', '');
+      }
+
+      brandCards.forEach((c) => c.classList.remove('is-editor-selected'));
+      textItems.forEach((item) => item.classList.remove('is-editor-selected'));
+
+      const cleanBlockId = blockId.replace(/^shopify-block-/, '');
+      const slugFromId = cleanBlockId.replace(/^brand_/, '').replace(/_/g, '-');
 
       const targetCard = Array.from(brandCards).find((c) => {
         const attr = c.getAttribute('data-shopify-editor-block') || '';
-        return attr.includes(blockId) || c.id?.includes(blockId);
+        const cardSlug = c.getAttribute('data-brand-slug') || '';
+        return (
+          attr.includes(blockId) ||
+          attr.includes(cleanBlockId) ||
+          c.id?.includes(blockId) ||
+          (slugFromId && cardSlug === slugFromId)
+        );
+      });
+
+      const targetTextItem = Array.from(textItems).find((item) => {
+        const attr = item.getAttribute('data-shopify-editor-block') || '';
+        const itemSlug = item.getAttribute('data-brand-slug') || '';
+        return (
+          attr.includes(blockId) ||
+          attr.includes(cleanBlockId) ||
+          item.id?.includes(blockId) ||
+          (slugFromId && itemSlug === slugFromId)
+        );
       });
 
       if (targetCard) {
@@ -329,21 +361,36 @@
           if (targetTabBtn) targetTabBtn.click();
         }
 
+        if (searchInput && searchInput.value) {
+          searchInput.value = '';
+          applyFilter();
+        }
+
         targetCard.classList.remove('is-hidden');
         targetCard.classList.add('is-editor-selected');
         targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
+
+      if (targetTextItem) {
+        targetTextItem.style.display = '';
+        targetTextItem.classList.add('is-editor-selected');
+        targetTextItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }
 
     function handleThemeEditorBlockDeselect() {
-      if (parentListItem) {
-        parentListItem.classList.remove('is-editor-open');
-      }
       brandCards.forEach((c) => c.classList.remove('is-editor-selected'));
+      textItems.forEach((item) => item.classList.remove('is-editor-selected'));
     }
 
     document.addEventListener('shopify:block:select', handleThemeEditorBlockSelect);
     document.addEventListener('shopify:block:deselect', handleThemeEditorBlockDeselect);
+    document.addEventListener('shopify:section:select', (e) => {
+      const sectionId = e.detail?.sectionId;
+      if (sectionId && (sectionId.includes('header') || sectionId.includes('menu'))) {
+        openMenu();
+      }
+    });
 
     // Initial filter
     applyFilter();

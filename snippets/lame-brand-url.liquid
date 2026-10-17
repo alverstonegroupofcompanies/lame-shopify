@@ -1,0 +1,105 @@
+{%- doc -%}
+  Resolves the exact vendor URL for a brand in Lamstone.
+  Checks for explicit custom link, existing collection by slug,
+  explicit vendor setting, matching shop.vendors (handling accents and case),
+  and falls back to standard /collections/all?filter.p.vendor=...&brand=...
+
+  @param {string} brand_title
+  @param {string} brand_slug
+  @param {string} [custom_url]
+  @param {string} [explicit_vendor]
+{%- enddoc -%}
+{%- liquid
+  assign out_url = custom_url | default: '' | strip
+
+  if out_url == blank
+    assign b_title = brand_title | default: 'Brand' | strip
+    assign b_slug = brand_slug | default: '' | strip
+    if b_slug == blank
+      assign b_slug = b_title | handleize
+    endif
+
+    # 1. If an actual collection exists for this brand handle with products, use it directly
+    if collections[b_slug] != blank and collections[b_slug].products_count > 0
+      assign out_url = collections[b_slug].url
+    endif
+
+    # 2. Resolve the exact product vendor name
+    if out_url == blank
+      assign resolved_vendor = explicit_vendor | default: '' | strip
+
+      if resolved_vendor == blank
+        assign b_down = b_title | downcase
+        assign b_clean = b_title | remove: "'" | remove: '’' | remove: '·' | remove: '.' | remove: '-' | downcase
+
+        # Known store vendor map for precision
+        if b_clean contains 'pond'
+          assign resolved_vendor = 'Ponds'
+        elsif b_clean contains 'lakme'
+          assign resolved_vendor = 'Lakme'
+        elsif b_clean contains 'jovees'
+          assign resolved_vendor = 'Jovees Herbal'
+        elsif b_clean contains 'sebamed'
+          assign resolved_vendor = 'SebaMed'
+        elsif b_clean contains 'femisafe'
+          assign resolved_vendor = 'Femisafe'
+        elsif b_clean contains 'dove'
+          assign resolved_vendor = 'Dove'
+        elsif b_clean contains 'pears'
+          assign resolved_vendor = 'Pears'
+        elsif b_clean contains 'cetaphil'
+          assign resolved_vendor = 'Cetaphil'
+        elsif b_clean contains 'rashel'
+          assign resolved_vendor = 'DR.RASHEL'
+        elsif b_clean contains 'faces'
+          assign resolved_vendor = 'Faces Canada'
+        elsif b_clean contains 'fair' and b_clean contains 'lovely'
+          assign resolved_vendor = 'Fair & Lovely'
+        elsif b_clean contains 'hamam'
+          assign resolved_vendor = 'Hamam'
+        elsif b_clean contains 'himalaya'
+          assign resolved_vendor = 'Himalaya'
+        elsif b_clean contains 'indulekha'
+          assign resolved_vendor = 'Indulekha'
+        elsif b_clean contains 'lifebuoy'
+          assign resolved_vendor = 'Lifebuoy'
+        elsif b_clean contains 'lotus'
+          assign resolved_vendor = 'Lotus'
+        elsif b_clean contains 'lux'
+          assign resolved_vendor = 'Lux'
+        elsif b_clean contains 'mamaearth'
+          assign resolved_vendor = 'Mamaearth'
+        elsif b_clean contains 'lamstone'
+          assign resolved_vendor = 'Lamstone Healthcare'
+        else
+          # Dynamic scan of store vendors
+          for v in shop.vendors
+            assign v_down = v | downcase
+            assign v_clean = v | remove: "'" | remove: '’' | remove: '·' | remove: '.' | remove: '-' | downcase
+            if v == b_title or v_down == b_down or v_clean == b_clean
+              assign resolved_vendor = v
+              break
+            elsif b_down contains v_down or v_down contains b_down
+              assign resolved_vendor = v
+              break
+            endif
+          endfor
+        endif
+      endif
+
+      if resolved_vendor == blank
+        assign resolved_vendor = b_title
+      endif
+
+      # Check if collection exists by vendor handle (e.g. collections['ponds'] or collections['sebamed'])
+      assign v_slug = resolved_vendor | handleize
+      if collections[v_slug] != blank and collections[v_slug].products_count > 0
+        assign out_url = collections[v_slug].url
+      else
+        assign vendor_enc = resolved_vendor | url_encode
+        assign out_url = routes.all_products_collection_url | append: '?filter.p.vendor=' | append: vendor_enc | append: '&brand=' | append: b_slug
+      endif
+    endif
+  endif
+-%}
+{{- out_url -}}

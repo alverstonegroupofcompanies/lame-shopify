@@ -94,15 +94,16 @@
                       {%- liquid
                         assign brand_title = child_block.settings.title | default: child_block.settings.brand_name | default: 'Brand' | strip
                         assign brand_slug = brand_title | handleize
-                        assign brand_url = child_block.settings.brand_url
-                        if brand_url == blank
-                          assign brand_title_enc = brand_title | url_encode
-                          assign brand_url = routes.all_products_collection_url | append: '?filter.p.vendor=' | append: brand_title_enc
-                          if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
-                            assign brand_url = collections[brand_slug].url
-                          endif
-                        endif
                       -%}
+                      {%- capture brand_url -%}
+                        {% render 'lame-brand-url',
+                          brand_title: brand_title,
+                          brand_slug: brand_slug,
+                          custom_url: child_block.settings.brand_url,
+                          explicit_vendor: child_block.settings.vendor
+                        %}
+                      {%- endcapture -%}
+                      {%- assign brand_url = brand_url | strip -%}
                       <li class="menu-drawer__list-item lame-drawer-nav__item" {{ child_block.shopify_attributes }}>
                         <a
                           href="{{ brand_url }}"
@@ -120,11 +121,10 @@
                     {%- assign d_parts = d_brand | split: '|' -%}
                     {%- assign d_name = d_parts[0] -%}
                     {%- assign d_slug = d_parts[1] -%}
-                    {%- assign d_encoded = d_name | url_encode -%}
-                    {%- assign d_url = routes.all_products_collection_url | append: '?filter.p.vendor=' | append: d_encoded -%}
-                    {%- if collections[d_slug] != blank and collections[d_slug].products_count > 0 -%}
-                      {%- assign d_url = collections[d_slug].url -%}
-                    {%- endif -%}
+                    {%- capture d_url -%}
+                      {% render 'lame-brand-url', brand_title: d_name, brand_slug: d_slug %}
+                    {%- endcapture -%}
+                    {%- assign d_url = d_url | strip -%}
                     <li class="menu-drawer__list-item lame-drawer-nav__item">
                       <a
                         href="{{ d_url }}"

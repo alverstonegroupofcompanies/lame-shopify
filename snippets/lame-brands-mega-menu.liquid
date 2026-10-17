@@ -120,14 +120,10 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
                     assign brand_letter = brand_title | slice: 0, 1 | upcase
                     assign brand_tabs = child_block.settings.tab | default: 'popular'
 
-                    assign brand_url = child_block.settings.brand_url
-                    if brand_url == blank
-                      assign brand_title_enc = brand_title | url_encode
-                      assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
-                      if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
-                        assign brand_url = collections[brand_slug].url
-                      endif
-                    endif
+                    capture brand_url
+                      render 'lame-brand-url', brand_title: brand_title, brand_slug: brand_slug, custom_url: child_block.settings.brand_url, explicit_vendor: child_block.settings.vendor
+                    endcapture
+                    assign brand_url = brand_url | strip
                   -%}
                   <li
                     class="lame-brands-mega__text-item"
@@ -155,11 +151,10 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
                   assign brand_tabs = parts[2] | strip
                   assign brand_letter = parts[3] | strip | upcase
 
-                  assign brand_title_enc = brand_title | url_encode
-                  assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
-                  if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
-                    assign brand_url = collections[brand_slug].url
-                  endif
+                  capture brand_url
+                    render 'lame-brand-url', brand_title: brand_title, brand_slug: brand_slug
+                  endcapture
+                  assign brand_url = brand_url | strip
                 -%}
                 <li
                   class="lame-brands-mega__text-item"
@@ -216,11 +211,10 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
               -%}
               {%- unless already_present -%}
                 {%- liquid
-                  assign vendor_enc = vendor_name_clean | url_encode
-                  assign vendor_url = all_products_url | append: '?filter.p.vendor=' | append: vendor_enc
-                  if collections[vendor_slug] != blank and collections[vendor_slug].products_count > 0
-                    assign vendor_url = collections[vendor_slug].url
-                  endif
+                  capture vendor_url
+                    render 'lame-brand-url', brand_title: vendor_name_clean, brand_slug: vendor_slug, explicit_vendor: vendor_name_clean
+                  endcapture
+                  assign vendor_url = vendor_url | strip
                 -%}
                 <li
                   class="lame-brands-mega__text-item lame-brands-mega__text-item--extra"
@@ -303,14 +297,10 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
                 assign brand_letter = brand_title | slice: 0, 1 | upcase
                 assign brand_tabs = child_block.settings.tab | default: 'popular'
 
-                assign brand_url = child_block.settings.brand_url
-                if brand_url == blank
-                  assign brand_title_enc = brand_title | url_encode
-                  assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
-                  if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
-                    assign brand_url = collections[brand_slug].url
-                  endif
-                endif
+                capture brand_url
+                  render 'lame-brand-url', brand_title: brand_title, brand_slug: brand_slug, custom_url: child_block.settings.brand_url, explicit_vendor: child_block.settings.vendor
+                endcapture
+                assign brand_url = brand_url | strip
               -%}
               <a
                 href="{{ brand_url }}"
@@ -346,11 +336,10 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
               assign brand_tabs = parts[2] | strip
               assign brand_letter = parts[3] | strip | upcase
 
-              assign brand_title_enc = brand_title | url_encode
-              assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
-              if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
-                assign brand_url = collections[brand_slug].url
-              endif
+              capture brand_url
+                render 'lame-brand-url', brand_title: brand_title, brand_slug: brand_slug
+              endcapture
+              assign brand_url = brand_url | strip
             -%}
             <a
               href="{{ brand_url }}"
@@ -410,13 +399,10 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
             endif
           -%}
           {%- unless already_present -%}
-            {%- liquid
-              assign vendor_enc = vendor_name_clean | url_encode
-              assign vendor_url = all_products_url | append: '?filter.p.vendor=' | append: vendor_enc
-              if collections[vendor_slug] != blank and collections[vendor_slug].products_count > 0
-                assign vendor_url = collections[vendor_slug].url
-              endif
-            -%}
+            capture vendor_url
+              render 'lame-brand-url', brand_title: vendor_name_clean, brand_slug: vendor_slug, explicit_vendor: vendor_name_clean
+            endcapture
+            assign vendor_url = vendor_url | strip
             <a
               href="{{ vendor_url }}"
               class="lame-brands-mega__card lame-brands-mega__card--extra"
