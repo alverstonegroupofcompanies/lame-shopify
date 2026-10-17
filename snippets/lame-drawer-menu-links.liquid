@@ -92,7 +92,10 @@
                     {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_sidebar != false -%}
                       {%- assign has_drawer_custom_brands = true -%}
                       {%- liquid
-                        assign brand_title = child_block.settings.title | default: child_block.settings.brand_name | default: 'Brand' | strip
+                        capture brand_title
+                          render 'lame-brand-vendor-title', title: child_block.settings.title, brand_name: child_block.settings.brand_name, vendor: child_block.settings.vendor
+                        endcapture
+                        assign brand_title = brand_title | strip
                         assign brand_slug = brand_title | handleize
                       -%}
                       {%- capture brand_url -%}

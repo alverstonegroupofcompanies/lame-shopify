@@ -1,0 +1,73 @@
+{%- doc -%}
+  Returns the correct product vendor name for a brand.
+  Prioritizes explicit vendor setting, then maps known store variations (Lakmé -> Lakme, POND'S -> Ponds, etc.),
+  then scans shop.vendors, and falls back to display title.
+  @param {string} [title]
+  @param {string} [brand_name]
+  @param {string} [vendor]
+{%- enddoc -%}
+{%- liquid
+  assign out_title = vendor | default: '' | strip
+
+  if out_title == blank
+    assign raw = title | default: brand_name | default: 'Brand' | strip
+    assign b_clean = raw | remove: "'" | remove: '’' | remove: '·' | remove: '.' | remove: '-' | downcase
+
+    if b_clean contains 'pond'
+      assign out_title = 'Ponds'
+    elsif b_clean contains 'lakme'
+      assign out_title = 'Lakme'
+    elsif b_clean contains 'jovees'
+      assign out_title = 'Jovees Herbal'
+    elsif b_clean contains 'sebamed'
+      assign out_title = 'SebaMed'
+    elsif b_clean contains 'femisafe'
+      assign out_title = 'Femisafe'
+    elsif b_clean contains 'dove'
+      assign out_title = 'Dove'
+    elsif b_clean contains 'pears'
+      assign out_title = 'Pears'
+    elsif b_clean contains 'cetaphil'
+      assign out_title = 'Cetaphil'
+    elsif b_clean contains 'rashel'
+      assign out_title = 'DR.RASHEL'
+    elsif b_clean contains 'faces'
+      assign out_title = 'Faces Canada'
+    elsif b_clean contains 'fair' and b_clean contains 'lovely'
+      assign out_title = 'Fair & Lovely'
+    elsif b_clean contains 'hamam'
+      assign out_title = 'Hamam'
+    elsif b_clean contains 'himalaya'
+      assign out_title = 'Himalaya'
+    elsif b_clean contains 'indulekha'
+      assign out_title = 'Indulekha'
+    elsif b_clean contains 'lifebuoy'
+      assign out_title = 'Lifebuoy'
+    elsif b_clean contains 'lotus'
+      assign out_title = 'Lotus'
+    elsif b_clean contains 'lux'
+      assign out_title = 'Lux'
+    elsif b_clean contains 'mamaearth'
+      assign out_title = 'Mamaearth'
+    elsif b_clean contains 'lamstone'
+      assign out_title = 'Lamstone Healthcare'
+    else
+      for v in shop.vendors
+        assign v_down = v | downcase
+        assign v_clean = v | remove: "'" | remove: '’' | remove: '·' | remove: '.' | remove: '-' | downcase
+        if v == raw or v_down == b_clean or v_clean == b_clean
+          assign out_title = v
+          break
+        elsif b_clean contains v_clean or v_clean contains b_clean
+          assign out_title = v
+          break
+        endif
+      endfor
+    endif
+
+    if out_title == blank
+      assign out_title = raw
+    endif
+  endif
+-%}
+{{- out_title -}}
