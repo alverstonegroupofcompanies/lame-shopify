@@ -241,21 +241,21 @@
 
                   <footer class="lame-home-reviews__byline">
                     <div class="lame-home-reviews__author-wrap">
-                      <span class="lame-home-reviews__avatar" aria-hidden="true">{{ author_initials }}</span>
                       <div class="lame-home-reviews__author-meta">
                         <cite>{{ author_name | escape }}</cite>
-                        {%- if block.settings.product != blank -%}
-                          <a class="lame-home-reviews__product-link" href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
-                        {%- elsif block.settings.detail != blank -%}
-                          <span class="lame-home-reviews__detail">{{ block.settings.detail | escape }}</span>
-                        {%- endif -%}
+                        <div class="lame-home-reviews__author-sub">
+                          <span class="lame-home-reviews__verified-tag" title="Verified Customer">
+                            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>
+                            <span>Verified Buyer</span>
+                          </span>
+                          {%- if block.settings.product != blank -%}
+                            <a class="lame-home-reviews__product-link" href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
+                          {%- elsif block.settings.detail != blank -%}
+                            <span class="lame-home-reviews__detail">{{ block.settings.detail | escape }}</span>
+                          {%- endif -%}
+                        </div>
                       </div>
                     </div>
-
-                    <span class="lame-home-reviews__verified-tag" title="Verified Customer">
-                      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg>
-                      <span>Verified Buyer</span>
-                    </span>
                   </footer>
                 </article>
               {%- endif -%}
@@ -577,12 +577,6 @@
       const authorWrap = document.createElement('div');
       authorWrap.className = 'lame-home-reviews__author-wrap';
 
-      const avatar = document.createElement('span');
-      avatar.className = 'lame-home-reviews__avatar';
-      avatar.setAttribute('aria-hidden', 'true');
-      avatar.textContent = getAuthorInitials(author);
-      authorWrap.append(avatar);
-
       const authorMeta = document.createElement('div');
       authorMeta.className = 'lame-home-reviews__author-meta';
 
@@ -590,29 +584,33 @@
       cite.textContent = author || 'Verified Customer';
       authorMeta.append(cite);
 
-      if (detail) {
-        if (href && href.indexOf('/products/') === 0) {
-          const link = document.createElement('a');
-          link.className = 'lame-home-reviews__product-link';
-          link.href = href;
-          link.textContent = detail;
-          authorMeta.append(link);
-        } else {
-          const span = document.createElement('span');
-          span.className = 'lame-home-reviews__detail';
-          span.textContent = detail;
-          authorMeta.append(span);
-        }
-      }
-      authorWrap.append(authorMeta);
-      footer.append(authorWrap);
+      const authorSub = document.createElement('div');
+      authorSub.className = 'lame-home-reviews__author-sub';
 
       const verified = document.createElement('span');
       verified.className = 'lame-home-reviews__verified-tag';
       verified.title = 'Verified Customer';
       verified.innerHTML =
         '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg><span>Verified Buyer</span>';
-      footer.append(verified);
+      authorSub.append(verified);
+
+      if (detail) {
+        if (href && href.indexOf('/products/') === 0) {
+          const link = document.createElement('a');
+          link.className = 'lame-home-reviews__product-link';
+          link.href = href;
+          link.textContent = detail;
+          authorSub.append(link);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'lame-home-reviews__detail';
+          span.textContent = detail;
+          authorSub.append(span);
+        }
+      }
+      authorMeta.append(authorSub);
+      authorWrap.append(authorMeta);
+      footer.append(authorWrap);
 
       if (isOwner(author)) {
         const edit = document.createElement('button');
@@ -1217,9 +1215,9 @@
     flex: 0 0 100%;
     flex-direction: column;
     justify-content: space-between;
-    height: 255px;
-    min-height: 255px;
-    max-height: 255px;
+    height: 265px;
+    min-height: 265px;
+    max-height: 265px;
     margin: 0;
     padding: 1.35rem 1.25rem 1.15rem;
     position: relative;
@@ -1365,50 +1363,40 @@
     position: relative;
     z-index: 1;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.35rem 0.5rem;
     margin-top: auto;
-    padding-top: 0.85rem;
+    padding-top: 0.75rem;
     border-top: 1px solid rgba(45, 74, 34, 0.08);
     flex: 0 0 auto;
-    height: 46px;
-    min-height: 46px;
+    min-height: 50px;
+    height: auto;
     box-sizing: border-box;
   }
 
   .lame-home-reviews__author-wrap {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0;
     min-width: 0;
     flex: 1 1 auto;
+    width: 100%;
   }
 
   .lame-home-reviews__avatar {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #2d4a22 0%, #3e682e 100%);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-    box-shadow: 0 3px 8px rgba(45, 74, 34, 0.18);
-    border: 1.5px solid #ffffff;
+    display: none !important;
   }
 
   .lame-home-reviews__author-meta {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: flex-start;
     min-width: 0;
-    height: 34px;
+    flex: 1 1 auto;
+    gap: 0.2rem;
     line-height: 1.25;
   }
 
@@ -1418,10 +1406,19 @@
     font-size: 0.88rem;
     line-height: 1.25;
     color: #1a2c16;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
     display: block;
+    width: 100%;
+  }
+
+  .lame-home-reviews__author-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    min-width: 0;
+    width: 100%;
   }
 
   .lame-home-reviews__detail,
@@ -1432,9 +1429,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: block;
+    display: inline-block;
     line-height: 1.2;
-    margin-top: 2px;
+    margin-top: 0;
   }
 
   .lame-home-reviews__product-link:hover {
@@ -1446,7 +1443,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0.45rem;
     border-radius: 999px;
     background: rgba(45, 74, 34, 0.06);
     color: #2d4a22;
@@ -1456,13 +1453,19 @@
     border: 1px solid rgba(45, 74, 34, 0.12);
     white-space: nowrap;
     flex-shrink: 0;
-    height: 22px;
+    height: 20px;
     box-sizing: border-box;
   }
 
   .lame-home-reviews__verified-tag svg {
-    width: 11px;
-    height: 11px;
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Fallback in case verified-tag is a direct child of byline */
+  .lame-home-reviews__byline > .lame-home-reviews__verified-tag {
+    margin-left: 0;
+    margin-top: 0;
   }
 
   @media screen and (min-width: 750px) {
@@ -1510,9 +1513,9 @@
 
     .lame-home-reviews__card {
       flex-basis: calc(85% - 0.5rem);
-      height: 240px;
-      min-height: 240px;
-      max-height: 240px;
+      height: 255px;
+      min-height: 255px;
+      max-height: 255px;
       padding: 1.25rem 1.15rem 1rem;
     }
 
