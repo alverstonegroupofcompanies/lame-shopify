@@ -1,5 +1,5 @@
 {%- doc -%}
-  Profile overview hero card with avatar, member badge, email, and optional decor image.
+  Profile overview hero card with avatar, member badge, email, quick stats, and optional decor image.
 
   @param {object} section - Section settings (header_decor_image)
   @param {string} avatar_letter - Avatar initial
@@ -26,41 +26,66 @@
   {% endif %}
 
   <div class="lame-acct-card__inner lame-acct-hero">
-    <div class="lame-acct-hero__avatar-wrap">
-      <span class="lame-acct-hero__avatar" aria-hidden="true">{{ avatar_letter }}</span>
-      <button
-        type="button"
-        class="lame-acct-hero__avatar-edit"
-        data-edit-toggle
-        aria-expanded="false"
-        aria-controls="AccountEditForm"
-        aria-label="{{ 'customer.addresses.edit' | t }}"
-      >
-        {% render 'icon-edit', class: 'lame-acct-hero__avatar-edit-icon' %}
-      </button>
-    </div>
-
-    <div class="lame-acct-hero__content">
-      <h1 id="ProfileOverviewHeading" class="visually-hidden">{{ 'content.account_profile' | t }}</h1>
-      <div class="lame-acct-hero__name-row">
-        <p class="lame-acct-hero__name">{{ customer.name }}</p>
-        <span class="lame-acct-hero__badge">{{ 'lame_customer.member_since' | t: date: member_since }}</span>
-      </div>
-      <div class="lame-acct-hero__email-row">
-        <span class="lame-acct-hero__email">{{ customer.email }}</span>
+    <div class="lame-acct-hero__primary">
+      <div class="lame-acct-hero__avatar-wrap">
+        <span class="lame-acct-hero__avatar" aria-hidden="true">{{ avatar_letter }}</span>
         <button
           type="button"
-          class="lame-acct-hero__text-edit"
+          class="lame-acct-hero__avatar-edit"
           data-edit-toggle
           aria-expanded="false"
           aria-controls="AccountEditForm"
+          aria-label="{{ 'customer.addresses.edit' | t }}"
+          title="{{ 'customer.addresses.edit' | t }}"
         >
-          {{ 'customer.addresses.edit' | t }}
+          {% render 'icon-edit', class: 'lame-acct-hero__avatar-edit-icon' %}
         </button>
       </div>
-      {% if customer.phone != blank %}
-        <p class="lame-acct-hero__phone">{{ customer.phone }}</p>
-      {% endif %}
+
+      <div class="lame-acct-hero__content">
+        <h1 id="ProfileOverviewHeading" class="visually-hidden">{{ 'content.account_profile' | t }}</h1>
+        <span class="lame-acct-hero__eyebrow">Welcome back</span>
+        <div class="lame-acct-hero__name-row">
+          <span class="lame-acct-hero__name">{{ customer.name }}</span>
+          <span class="lame-acct-hero__badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            {{ 'lame_customer.member_since' | t: date: member_since }}
+          </span>
+        </div>
+        <div class="lame-acct-hero__meta-row">
+          <span class="lame-acct-hero__meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <span>{{ customer.email }}</span>
+          </span>
+          {% if customer.phone != blank %}
+            <span class="lame-acct-hero__meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>{{ customer.phone }}</span>
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="lame-acct-hero__stats">
+      <div class="lame-acct-hero__stat-pill">
+        <span class="lame-acct-hero__stat-num">{{ customer.orders_count }}</span>
+        <span class="lame-acct-hero__stat-label">{{ 'customer.orders.title' | t }}</span>
+      </div>
+      <div class="lame-acct-hero__stat-pill">
+        <span class="lame-acct-hero__stat-num">{{ customer.addresses.size }}</span>
+        <span class="lame-acct-hero__stat-label">{{ 'customer.addresses.title' | t }}</span>
+      </div>
+      <button
+        type="button"
+        class="lame-acct-btn lame-acct-btn--outline lame-acct-hero__edit-btn"
+        data-edit-toggle
+        aria-expanded="false"
+        aria-controls="AccountEditForm"
+      >
+        {% render 'icon-edit', class: 'lame-acct-btn-icon' %}
+        <span>{{ 'customer.addresses.edit' | t }}</span>
+      </button>
     </div>
   </div>
 </section>

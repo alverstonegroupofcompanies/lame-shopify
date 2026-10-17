@@ -1,0 +1,270 @@
+{%- comment -%}
+  Renders authentic high-definition vector logos or image assets for the Brands Mega Menu.
+  @param {string} brand - Brand key or slug (e.g., 'dove', 'maybelline', 'fenty-beauty')
+  @param {string} [brand_title] - Display title for accessibility
+  @param {image} [image] - Optional custom merchant image override
+{%- endcomment -%}
+{%- liquid
+  assign brand_key = brand | default: '' | downcase | strip | replace: ' ', '-' | replace: "'", '' | replace: '’', '' | replace: '.', '' | replace: '·', ''
+  assign brand_label = brand_title | default: brand | escape
+-%}
+
+{%- if image != blank -%}
+  {{
+    image
+    | image_url: width: 360
+    | image_tag:
+      class: 'lame-brands-mega__logo-img',
+      loading: 'lazy',
+      widths: '120, 180, 240, 360',
+      sizes: '160px',
+      alt: brand_label
+  }}
+{%- else -%}
+  {%- case brand_key -%}
+    {%- when 'dove' -%}
+      <img
+        src="{{ 'brand-logo-dove.png' | asset_url }}"
+        alt="Dove"
+        class="lame-brands-mega__logo-img"
+        loading="lazy"
+        width="110"
+        height="46"
+      >
+
+    {%- when 'ponds', 'pond-s', 'ponds-skin-institute' -%}
+      <img
+        src="{{ 'brand-logo-ponds.png' | asset_url }}"
+        alt="POND'S Skin Institute"
+        class="lame-brands-mega__logo-img"
+        loading="lazy"
+        width="120"
+        height="46"
+      >
+
+    {%- when 'pears' -%}
+      <img
+        src="{{ 'brand-logo-pears.png' | asset_url }}"
+        alt="Pears"
+        class="lame-brands-mega__logo-img"
+        loading="lazy"
+        width="105"
+        height="46"
+      >
+
+    {%- when 'femisafe', 'femi-safe' -%}
+      <img
+        src="{{ 'brand-logo-femisafe.png' | asset_url }}"
+        alt="FemiSafe"
+        class="lame-brands-mega__logo-img"
+        loading="lazy"
+        width="115"
+        height="46"
+      >
+
+    {%- when 'jovees', 'jovees-herbal' -%}
+      <img
+        src="{{ 'brand-logo-jovees.png' | asset_url }}"
+        alt="JOVEES HERBAL"
+        class="lame-brands-mega__logo-img"
+        loading="lazy"
+        width="110"
+        height="46"
+      >
+
+    {%- when 'sebamed' -%}
+      <img
+        src="{{ 'brand-logo-sebamed.png' | asset_url }}"
+        alt="sebamed"
+        class="lame-brands-mega__logo-img"
+        loading="lazy"
+        width="120"
+        height="46"
+      >
+
+    {%- when 'fenty-beauty', 'fenty' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Fenty Beauty">
+        <text x="80" y="24" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="20" letter-spacing="2" fill="#111">FB</text>
+        <text x="80" y="38" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="8" letter-spacing="3.5" fill="#111">FENTY BEAUTY</text>
+        <text x="80" y="47" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="500" font-size="5.5" letter-spacing="2.5" fill="#555">BY RIHANNA</text>
+      </svg>
+
+    {%- when 'nykaa-cosmetics', 'nykaa' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Nykaa Cosmetics">
+        <text x="80" y="30" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-style="italic" font-size="28" letter-spacing="1.5" fill="#111">NYKAA</text>
+        <text x="80" y="45" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="9" letter-spacing="2" fill="#222">Cosmetics</text>
+      </svg>
+
+    {%- when 'dot-key', 'dot-and-key' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Dot & Key">
+        <text x="80" y="34" text-anchor="middle" font-family="'Georgia', serif" font-weight="700" font-size="22" letter-spacing="1" fill="#111">DOT &amp; KEY</text>
+      </svg>
+
+    {%- when 'kay-beauty' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Kay Beauty">
+        <text x="80" y="30" text-anchor="middle" font-family="'Brush Script MT', 'Bickham Script Pro', cursive, serif" font-size="30" font-weight="700" fill="#111">Kay</text>
+        <text x="80" y="44" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="8.5" letter-spacing="2" fill="#333">beauty</text>
+      </svg>
+
+    {%- when 'maybelline-new-york', 'maybelline' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Maybelline New York">
+        <text x="80" y="29" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="16" letter-spacing="2" fill="#111">MAYBELLINE</text>
+        <text x="80" y="42" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="7.5" letter-spacing="3" fill="#333">NEW YORK</text>
+      </svg>
+
+    {%- when 'lakme' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lakmé">
+        <text x="80" y="35" text-anchor="middle" font-family="'Century Gothic', 'Tw Cen MT', Arial, sans-serif" font-weight="700" font-size="24" letter-spacing="5" fill="#111">LAKMÉ</text>
+      </svg>
+
+    {%- when 'loreal-professionnel-paris', 'loreal-professionnel' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="L'Oréal Professionnel Paris">
+        <text x="80" y="24" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="900" font-size="17" letter-spacing="2" fill="#111">L'ORÉAL</text>
+        <text x="80" y="37" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="7.5" letter-spacing="2" fill="#111">PROFESSIONNEL</text>
+        <text x="80" y="47" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="6.5" letter-spacing="3" fill="#444">PARIS</text>
+      </svg>
+
+    {%- when 'mac', 'm-a-c' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="M.A.C">
+        <text x="80" y="36" text-anchor="middle" font-family="'Arial Rounded MT Bold', 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="27" letter-spacing="4" fill="#111">M · A · C</text>
+      </svg>
+
+    {%- when 'plum' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Plum">
+        <text x="80" y="36" text-anchor="middle" font-family="'Century Gothic', 'Trebuchet MS', sans-serif" font-weight="800" font-size="28" letter-spacing="2" fill="#4a2559">plōm</text>
+      </svg>
+
+    {%- when 'cetaphil' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Cetaphil">
+        <rect x="24" y="10" width="112" height="32" rx="16" fill="#0080a5"/>
+        <path d="M116 14C126 18 130 26 128 34C122 34 116 30 116 14Z" fill="#78be20"/>
+        <text x="76" y="32" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="16" letter-spacing="0.5" fill="#fff">Cetaphil</text>
+      </svg>
+
+    {%- when 'pyunkang-yul' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Pyunkang Yul">
+        <text x="80" y="34" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-weight="600" font-size="19" letter-spacing="0.8" fill="#111">Pyunkang Yul</text>
+      </svg>
+
+    {%- when 'loreal-paris', 'loreal' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="L'Oréal Paris">
+        <text x="80" y="28" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="900" font-size="19" letter-spacing="2" fill="#111">L'ORÉAL</text>
+        <text x="80" y="42" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="8.5" letter-spacing="3" fill="#222">PARIS</text>
+      </svg>
+
+    {%- when 'elf', 'e-l-f' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="e.l.f.">
+        <text x="80" y="38" text-anchor="middle" font-family="'Century Gothic', 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="34" letter-spacing="3" fill="#111">e.l.f.</text>
+      </svg>
+
+    {%- when 'the-ordinary' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="The Ordinary">
+        <text x="80" y="33" text-anchor="middle" font-family="'Times New Roman', 'Baskerville', serif" font-weight="700" font-size="18" letter-spacing="0.5" fill="#111">The Ordinary.</text>
+      </svg>
+
+    {%- when 'charlotte-tilbury' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Charlotte Tilbury">
+        <text x="80" y="34" text-anchor="middle" font-family="'Times New Roman', 'Didot', serif" font-weight="700" font-size="17" letter-spacing="1" fill="#111">CharlotteTilbury</text>
+      </svg>
+
+    {%- when 'laneige' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Laneige">
+        <text x="80" y="35" text-anchor="middle" font-family="'Century Gothic', 'Tw Cen MT', Arial, sans-serif" font-weight="600" font-size="21" letter-spacing="5" fill="#111">LANEIGE</text>
+      </svg>
+
+    {%- when 'beauty-of-joseon' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Beauty of Joseon">
+        <rect x="74" y="6" width="12" height="15" fill="#111"/>
+        <text x="80" y="17" text-anchor="middle" font-family="'Times New Roman', serif" font-weight="700" font-size="9" fill="#fff">조선</text>
+        <text x="80" y="37" text-anchor="middle" font-family="'Times New Roman', serif" font-weight="700" font-size="9" letter-spacing="2.5" fill="#111">BEAUTY OF JOSEON</text>
+      </svg>
+
+    {%- when 'innisfree' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Innisfree">
+        <text x="80" y="35" text-anchor="middle" font-family="'Times New Roman', 'Georgia', serif" font-weight="800" font-size="22" letter-spacing="1" fill="#003e29">innisfree</text>
+      </svg>
+
+    {%- when 'yves-saint-laurent', 'ysl' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Yves Saint Laurent">
+        <text x="80" y="34" text-anchor="middle" font-family="'Times New Roman', 'Didot', serif" font-weight="700" font-size="13" letter-spacing="2" fill="#111">YVES SAINT LAURENT</text>
+      </svg>
+
+    {%- when 'kerastase-paris', 'kerastase' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Kérastase Paris">
+        <text x="80" y="29" text-anchor="middle" font-family="'Times New Roman', serif" font-weight="800" font-size="17" letter-spacing="2" fill="#111">KÉRASTASE</text>
+        <text x="80" y="42" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="7" letter-spacing="3.5" fill="#444">PARIS</text>
+      </svg>
+
+    {%- when 'love-beauty-planet', 'love-beauty-and-planet' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Love Beauty & Planet">
+        <path d="M46 26 C46 22 50 20 53 23 C56 20 60 22 60 26 C60 30 53 35 53 35 C53 35 46 30 46 26 Z" fill="#e80071"/>
+        <text x="96" y="30" text-anchor="middle" font-family="'Courier New', monospace" font-weight="800" font-size="11" letter-spacing="0.5" fill="#333">beauty &amp; planet</text>
+      </svg>
+
+    {%- when 'bath-body-works', 'bath-and-body-works' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Bath & Body Works">
+        <text x="80" y="34" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="700" font-size="13" letter-spacing="1" fill="#111">Bath&amp;Body Works</text>
+      </svg>
+
+    {%- when 'victorias-secret' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Victoria's Secret">
+        <text x="80" y="34" text-anchor="middle" font-family="'Times New Roman', serif" font-weight="700" font-size="13.5" letter-spacing="2.5" fill="#111">VICTORIA'S SECRET</text>
+      </svg>
+
+    {%- when 'neutrogena' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Neutrogena">
+        <text x="80" y="35" text-anchor="middle" font-family="'Times New Roman', serif" font-weight="800" font-size="21" letter-spacing="0.5" fill="#111">Neutrogena<tspan font-size="10" dy="-7">®</tspan></text>
+      </svg>
+
+    {%- when 'cerave' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="CeraVe">
+        <rect x="25" y="12" width="110" height="28" rx="6" fill="#003865"/>
+        <text x="80" y="32" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="18" letter-spacing="1" fill="#fff">CeraVe</text>
+      </svg>
+
+    {%- when 'estee-lauder' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Estée Lauder">
+        <text x="80" y="34" text-anchor="middle" font-family="'Times New Roman', 'Didot', serif" font-weight="700" font-size="16" letter-spacing="2.5" fill="#111">ESTĒE LAUDER</text>
+      </svg>
+
+    {%- when 'biotique' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Biotique">
+        <text x="80" y="28" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="800" font-size="18" letter-spacing="2" fill="#0b5e28">BIOTIQUE</text>
+        <text x="80" y="42" text-anchor="middle" font-family="'Georgia', serif" font-style="italic" font-size="7.5" fill="#444">Advanced Ayurveda</text>
+      </svg>
+
+    {%- when 'huda-beauty' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Huda Beauty">
+        <text x="80" y="34" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="17" letter-spacing="3" fill="#111">HUDABEAUTY</text>
+      </svg>
+
+    {%- when 'kama-ayurveda' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Kama Ayurveda">
+        <text x="80" y="34" text-anchor="middle" font-family="'Georgia', serif" font-weight="700" font-size="15" letter-spacing="2" fill="#693b11">KAMA AYURVEDA</text>
+      </svg>
+
+    {%- when 'the-face-shop' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="The Face Shop">
+        <text x="80" y="34" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="800" font-size="16" letter-spacing="2" fill="#2d4a22">THE FACE SHOP</text>
+      </svg>
+
+    {%- when 'the-body-shop' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="The Body Shop">
+        <circle cx="80" cy="26" r="20" stroke="#004236" stroke-width="2.5" fill="none"/>
+        <text x="80" y="24" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="800" font-size="6.5" letter-spacing="1" fill="#004236">THE BODY</text>
+        <text x="80" y="32" text-anchor="middle" font-family="'Century Gothic', Arial, sans-serif" font-weight="800" font-size="6.5" letter-spacing="1" fill="#004236">SHOP</text>
+      </svg>
+
+    {%- when 'lamstone', 'lamstone-healthcare', 'lame' -%}
+      <svg class="lame-brands-mega__logo-svg" viewBox="0 0 160 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Lamstone Healthcare">
+        <path d="M80 6L90 18H70L80 6Z" fill="#c1971f"/>
+        <text x="80" y="32" text-anchor="middle" font-family="'Times New Roman', serif" font-weight="700" font-size="15" letter-spacing="2" fill="#1a472a">LAMSTONE</text>
+        <text x="80" y="44" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="600" font-size="7" letter-spacing="3" fill="#c1971f">HEALTHCARE</text>
+      </svg>
+
+    {%- else -%}
+      <div class="lame-brands-mega__logo-fallback">
+        <span class="lame-brands-mega__logo-fallback-text">{{ brand_label }}</span>
+      </div>
+  {%- endcase -%}
+{%- endif -%}

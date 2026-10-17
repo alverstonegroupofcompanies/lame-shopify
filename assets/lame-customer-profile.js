@@ -131,23 +131,49 @@ class LameCustomerProfile {
   }
 
   _setupSidebarNav() {
-    this.root.querySelectorAll('[data-profile-nav]').forEach((link) => {
+    const navLinks = this.root.querySelectorAll('[data-profile-nav]');
+    navLinks.forEach((link) => {
       link.addEventListener('click', (event) => {
         const href = link.getAttribute('href');
-        if (!href?.startsWith('#')) return;
-        const target = document.getElementById(href.slice(1));
+        let hash = link.hash;
+        if (!hash && href && href.includes('#')) {
+          hash = href.slice(href.indexOf('#'));
+        }
+        if (!hash || !hash.startsWith('#')) return;
+        const target = document.getElementById(hash.slice(1));
         if (!target) return;
         event.preventDefault();
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        this.root.querySelectorAll('[data-profile-nav]').forEach((item) => {
+        navLinks.forEach((item) => {
           item.classList.remove('is-active');
         });
         link.classList.add('is-active');
         if (history.replaceState) {
-          history.replaceState(null, '', href);
+          history.replaceState(null, '', hash);
         }
       });
     });
+
+    if ('IntersectionObserver' in window) {
+      const panels = this.root.querySelectorAll('.lame-profile__panel[id]');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.id;
+              navLinks.forEach((link) => {
+                const linkHash = link.hash ? link.hash.replace('#', '') : '';
+                const href = link.getAttribute('href') || '';
+                const matches = linkHash === id || href.endsWith('#' + id);
+                link.classList.toggle('is-active', matches);
+              });
+            }
+          });
+        },
+        { rootMargin: '-15% 0px -60% 0px' }
+      );
+      panels.forEach((p) => observer.observe(p));
+    }
   }
 
   _openAddAddressFromHash() {

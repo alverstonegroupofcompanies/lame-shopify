@@ -1,0 +1,459 @@
+{%- doc -%}
+  Nykaa-inspired luxury Brands Mega Menu.
+  Showcases top beauty brands, brand logos, live client-side search, alphabetical A-Z index,
+  and category tabs (Popular, Luxe, Exclusive, New Launches).
+  Every brand link and logo card directs to its vendor/collection page.
+  Fully editable via Shopify Theme Editor under Header -> Header Menu blocks.
+
+  @param {object} parent_link - Brands/Home link from main menu
+  @param {object} section - Header section
+  @param {object} [block_settings] - Header menu block settings
+  @param {object} [menu_block] - Header menu theme block (for child brand blocks)
+{%- enddoc -%}
+
+{%- capture default_brands_data -%}
+Fenty Beauty|fenty-beauty|popular,luxe,new|F
+Nykaa Cosmetics|nykaa-cosmetics|popular,exclusive|N
+Dot & Key|dot-key|popular,exclusive,new|D
+Kay Beauty|kay-beauty|popular,exclusive|K
+Maybelline New York|maybelline-new-york|popular|M
+Lakmé|lakme|popular|L
+L'Oréal Professionnel Paris|loreal-professionnel-paris|popular,luxe|L
+M·A·C|mac|popular,luxe|M
+Plum|plum|popular,new|P
+Cetaphil|cetaphil|popular|C
+Pyunkang Yul|pyunkang-yul|luxe,new|P
+L'Oréal Paris|loreal-paris|popular|L
+e.l.f.|elf|popular|E
+The Ordinary|the-ordinary|popular,new|T
+Charlotte Tilbury|charlotte-tilbury|luxe|C
+Laneige|laneige|luxe,popular|L
+Beauty of Joseon|beauty-of-joseon|luxe,new|B
+Innisfree|innisfree|popular|I
+Yves Saint Laurent|yves-saint-laurent|luxe|Y
+Kérastase Paris|kerastase-paris|luxe|K
+Dove|dove|popular|D
+Love Beauty & Planet|love-beauty-planet|popular,new|L
+Bath & Body Works|bath-body-works|luxe,popular|B
+Victoria's Secret|victorias-secret|luxe|V
+Neutrogena|neutrogena|popular|N
+CeraVe|cerave|popular,new|C
+Estée Lauder|estee-lauder|luxe|E
+POND'S|ponds|popular,exclusive|P
+Pears|pears|popular|P
+FemiSafe|femisafe|popular,exclusive|F
+JOVEES Herbal|jovees|popular,exclusive|J
+Sebamed|sebamed|popular,exclusive|S
+Biotique|biotique|popular|B
+Huda Beauty|huda-beauty|luxe|H
+Kama Ayurveda|kama-ayurveda|luxe|K
+The Face Shop|the-face-shop|popular|T
+The Body Shop|the-body-shop|popular|T
+Lamstone Healthcare|lamstone|popular,exclusive|L
+{%- endcapture -%}
+
+{%- liquid
+  assign all_products_url = routes.all_products_collection_url
+  assign default_brands_list = default_brands_data | strip | newline_to_br | split: '<br />'
+
+  # Check if custom Brand blocks are configured in Shopify Theme Editor
+  assign has_custom_brands = false
+  if menu_block and menu_block.blocks.size > 0
+    for child_block in menu_block.blocks
+      if child_block.type == '_header-mega-brand'
+        assign has_custom_brands = true
+        break
+      endif
+    endfor
+  endif
+-%}
+
+{{ 'lame-brands-mega-menu.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="mega-menu section section--full-width-margin section--{{ section.settings.section_width }} lame-brands-mega"
+  id="LameBrandsMegaMenu"
+  data-brands-mega
+>
+  <div class="lame-brands-mega__container">
+    <!-- Left Sidebar: Search, TOP BRANDS List, and A-Z Index -->
+    <aside class="lame-brands-mega__sidebar" aria-label="Brands navigation and search">
+      <!-- Search Input -->
+      <div class="lame-brands-mega__search-box">
+        <span class="lame-brands-mega__search-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="8.5" cy="8.5" r="5.5"/>
+            <line x1="12.8" y1="12.8" x2="17.5" y2="17.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <input
+          type="text"
+          class="lame-brands-mega__search-input"
+          placeholder="Search Brands"
+          aria-label="Search Brands"
+          data-brand-search-input
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button
+          type="button"
+          class="lame-brands-mega__search-clear"
+          data-brand-search-clear
+          aria-label="Clear brand search"
+          style="display: none;"
+        >
+          &times;
+        </button>
+      </div>
+
+      <!-- Top Brands List and Vertical A-Z Index -->
+      <div class="lame-brands-mega__list-columns">
+        <div class="lame-brands-mega__list-scroll" data-brand-list-scroll>
+          <p class="lame-brands-mega__sidebar-title">TOP BRANDS</p>
+          <ul class="lame-brands-mega__text-list list-unstyled" role="list" data-brand-text-list>
+            {%- if has_custom_brands -%}
+              {%- for child_block in menu_block.blocks -%}
+                {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_sidebar != false -%}
+                  {%- liquid
+                    assign brand_title = child_block.settings.brand_name | default: 'Brand' | strip
+                    assign brand_slug = brand_title | handleize
+                    assign brand_letter = brand_title | slice: 0, 1 | upcase
+                    assign brand_tabs = child_block.settings.tab | default: 'popular'
+
+                    assign brand_url = child_block.settings.brand_url
+                    if brand_url == blank
+                      assign brand_title_enc = brand_title | url_encode
+                      assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
+                      if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
+                        assign brand_url = collections[brand_slug].url
+                      endif
+                    endif
+                  -%}
+                  <li
+                    class="lame-brands-mega__text-item"
+                    data-brand-item
+                    data-brand-name="{{ brand_title | downcase }}"
+                    data-brand-slug="{{ brand_slug }}"
+                    data-brand-letter="{{ brand_letter }}"
+                    data-brand-tabs="{{ brand_tabs }}"
+                    {{ child_block.shopify_attributes }}
+                  >
+                    <a href="{{ brand_url }}" class="lame-brands-mega__text-link">
+                      <span class="lame-brands-mega__text-title">{{ brand_title }}</span>
+                    </a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- else -%}
+              {%- for brand_line in default_brands_list -%}
+                {%- assign line_clean = brand_line | strip -%}
+                {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+                {%- liquid
+                  assign parts = line_clean | split: '|'
+                  assign brand_title = parts[0] | strip
+                  assign brand_slug = parts[1] | strip
+                  assign brand_tabs = parts[2] | strip
+                  assign brand_letter = parts[3] | strip | upcase
+
+                  assign brand_title_enc = brand_title | url_encode
+                  assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
+                  if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
+                    assign brand_url = collections[brand_slug].url
+                  endif
+                -%}
+                <li
+                  class="lame-brands-mega__text-item"
+                  data-brand-item
+                  data-brand-name="{{ brand_title | downcase }}"
+                  data-brand-slug="{{ brand_slug }}"
+                  data-brand-letter="{{ brand_letter }}"
+                  data-brand-tabs="{{ brand_tabs }}"
+                >
+                  <a href="{{ brand_url }}" class="lame-brands-mega__text-link">
+                    <span class="lame-brands-mega__text-title">{{ brand_title }}</span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            {%- endif -%}
+
+            {%- comment -%} Dynamically append any store vendors from Shopify not in the brand list {%- endcomment -%}
+            {%- for vendor_name in shop.vendors -%}
+              {%- liquid
+                assign vendor_name_clean = vendor_name | strip
+                if vendor_name_clean == blank
+                  continue
+                endif
+                assign vendor_slug = vendor_name_clean | handleize
+                assign vendor_first_letter = vendor_name_clean | slice: 0, 1 | upcase
+                assign vendor_down = vendor_name_clean | downcase
+
+                assign already_present = false
+                if has_custom_brands
+                  for child_block in menu_block.blocks
+                    if child_block.type == '_header-mega-brand'
+                      assign cb_name = child_block.settings.brand_name | strip | downcase
+                      if cb_name == vendor_down or cb_name == vendor_slug
+                        assign already_present = true
+                        break
+                      endif
+                    endif
+                  endfor
+                else
+                  for brand_line in default_brands_list
+                    assign line_c = brand_line | strip
+                    if line_c == blank
+                      continue
+                    endif
+                    assign parts = line_c | split: '|'
+                    assign b_title = parts[0] | strip | downcase
+                    assign b_slug = parts[1] | strip | downcase
+                    if b_title == vendor_down or b_slug == vendor_slug
+                      assign already_present = true
+                      break
+                    endif
+                  endfor
+                endif
+              -%}
+              {%- unless already_present -%}
+                {%- liquid
+                  assign vendor_enc = vendor_name_clean | url_encode
+                  assign vendor_url = all_products_url | append: '?filter.p.vendor=' | append: vendor_enc
+                  if collections[vendor_slug] != blank and collections[vendor_slug].products_count > 0
+                    assign vendor_url = collections[vendor_slug].url
+                  endif
+                -%}
+                <li
+                  class="lame-brands-mega__text-item lame-brands-mega__text-item--extra"
+                  data-brand-item
+                  data-brand-name="{{ vendor_name_clean | downcase }}"
+                  data-brand-slug="{{ vendor_slug }}"
+                  data-brand-letter="{{ vendor_first_letter }}"
+                  data-brand-tabs="popular"
+                >
+                  <a href="{{ vendor_url }}" class="lame-brands-mega__text-link">
+                    <span class="lame-brands-mega__text-title">{{ vendor_name_clean }}</span>
+                  </a>
+                </li>
+              {%- endunless -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        <!-- Vertical A-Z index on right edge of left column -->
+        <nav class="lame-brands-mega__az-strip" aria-label="Alphabetical quick jump" data-brand-az-strip>
+          <button type="button" class="lame-brands-mega__az-btn is-active" data-letter="all" title="All brands">#</button>
+          {%- assign alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ',' -%}
+          {%- for letter in alphabet -%}
+            <button type="button" class="lame-brands-mega__az-btn" data-letter="{{ letter }}">{{ letter }}</button>
+          {%- endfor -%}
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Right Main Area: Category Tabs & Brand Logo Grid -->
+    <main class="lame-brands-mega__main" aria-label="Brand logos">
+      <!-- Tabs Bar -->
+      <div class="lame-brands-mega__tabs" role="tablist" aria-label="Brand category filters">
+        <button
+          type="button"
+          role="tab"
+          class="lame-brands-mega__tab is-active"
+          data-brand-tab="popular"
+          aria-selected="true"
+        >
+          POPULAR
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="lame-brands-mega__tab"
+          data-brand-tab="luxe"
+          aria-selected="false"
+        >
+          LUXE
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="lame-brands-mega__tab"
+          data-brand-tab="exclusive"
+          aria-selected="false"
+        >
+          ONLY AT LAMSTONE
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="lame-brands-mega__tab"
+          data-brand-tab="new"
+          aria-selected="false"
+        >
+          NEW LAUNCHES
+        </button>
+      </div>
+
+      <!-- Brands Logo Grid -->
+      <div class="lame-brands-mega__grid" data-brand-grid role="region" aria-live="polite">
+        {%- if has_custom_brands -%}
+          {%- for child_block in menu_block.blocks -%}
+            {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_grid != false -%}
+              {%- liquid
+                assign brand_title = child_block.settings.brand_name | default: 'Brand' | strip
+                assign brand_slug = brand_title | handleize
+                assign brand_letter = brand_title | slice: 0, 1 | upcase
+                assign brand_tabs = child_block.settings.tab | default: 'popular'
+
+                assign brand_url = child_block.settings.brand_url
+                if brand_url == blank
+                  assign brand_title_enc = brand_title | url_encode
+                  assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
+                  if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
+                    assign brand_url = collections[brand_slug].url
+                  endif
+                endif
+              -%}
+              <a
+                href="{{ brand_url }}"
+                class="lame-brands-mega__card"
+                data-brand-card
+                data-brand-name="{{ brand_title | downcase }}"
+                data-brand-slug="{{ brand_slug }}"
+                data-brand-letter="{{ brand_letter }}"
+                data-brand-tabs="{{ brand_tabs }}"
+                aria-label="{{ brand_title }}"
+                title="{{ brand_title }}"
+                {{ child_block.shopify_attributes }}
+              >
+                <div class="lame-brands-mega__logo-wrap">
+                  {% render 'lame-brand-mega-logos',
+                    brand: brand_slug,
+                    brand_title: brand_title,
+                    image: child_block.settings.logo_image
+                  %}
+                </div>
+                <span class="lame-brands-mega__card-label">{{ brand_title }}</span>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          {%- for brand_line in default_brands_list -%}
+            {%- assign line_clean = brand_line | strip -%}
+            {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+            {%- liquid
+              assign parts = line_clean | split: '|'
+              assign brand_title = parts[0] | strip
+              assign brand_slug = parts[1] | strip
+              assign brand_tabs = parts[2] | strip
+              assign brand_letter = parts[3] | strip | upcase
+
+              assign brand_title_enc = brand_title | url_encode
+              assign brand_url = all_products_url | append: '?filter.p.vendor=' | append: brand_title_enc
+              if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
+                assign brand_url = collections[brand_slug].url
+              endif
+            -%}
+            <a
+              href="{{ brand_url }}"
+              class="lame-brands-mega__card"
+              data-brand-card
+              data-brand-name="{{ brand_title | downcase }}"
+              data-brand-slug="{{ brand_slug }}"
+              data-brand-letter="{{ brand_letter }}"
+              data-brand-tabs="{{ brand_tabs }}"
+              aria-label="{{ brand_title }}"
+              title="{{ brand_title }}"
+            >
+              <div class="lame-brands-mega__logo-wrap">
+                {% render 'lame-brand-mega-logos', brand: brand_slug, brand_title: brand_title %}
+              </div>
+              <span class="lame-brands-mega__card-label">{{ brand_title }}</span>
+            </a>
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- comment -%} Additional store vendors in grid {%- endcomment -%}
+        {%- for vendor_name in shop.vendors -%}
+          {%- liquid
+            assign vendor_name_clean = vendor_name | strip
+            if vendor_name_clean == blank
+              continue
+            endif
+            assign vendor_slug = vendor_name_clean | handleize
+            assign vendor_first_letter = vendor_name_clean | slice: 0, 1 | upcase
+            assign vendor_down = vendor_name_clean | downcase
+
+            assign already_present = false
+            if has_custom_brands
+              for child_block in menu_block.blocks
+                if child_block.type == '_header-mega-brand'
+                  assign cb_name = child_block.settings.brand_name | strip | downcase
+                  if cb_name == vendor_down or cb_name == vendor_slug
+                    assign already_present = true
+                    break
+                  endif
+                endif
+              endfor
+            else
+              for brand_line in default_brands_list
+                assign line_c = brand_line | strip
+                if line_c == blank
+                  continue
+                endif
+                assign parts = line_c | split: '|'
+                assign b_title = parts[0] | strip | downcase
+                assign b_slug = parts[1] | strip | downcase
+                if b_title == vendor_down or b_slug == vendor_slug
+                  assign already_present = true
+                  break
+                endif
+              endfor
+            endif
+          -%}
+          {%- unless already_present -%}
+            {%- liquid
+              assign vendor_enc = vendor_name_clean | url_encode
+              assign vendor_url = all_products_url | append: '?filter.p.vendor=' | append: vendor_enc
+              if collections[vendor_slug] != blank and collections[vendor_slug].products_count > 0
+                assign vendor_url = collections[vendor_slug].url
+              endif
+            -%}
+            <a
+              href="{{ vendor_url }}"
+              class="lame-brands-mega__card lame-brands-mega__card--extra"
+              data-brand-card
+              data-brand-name="{{ vendor_name_clean | downcase }}"
+              data-brand-slug="{{ vendor_slug }}"
+              data-brand-letter="{{ vendor_first_letter }}"
+              data-brand-tabs="popular"
+              aria-label="{{ vendor_name_clean }}"
+              title="{{ vendor_name_clean }}"
+            >
+              <div class="lame-brands-mega__logo-wrap">
+                {% render 'lame-brand-mega-logos', brand: vendor_slug, brand_title: vendor_name_clean %}
+              </div>
+              <span class="lame-brands-mega__card-label">{{ vendor_name_clean }}</span>
+            </a>
+          {%- endunless -%}
+        {%- endfor -%}
+      </div>
+
+      <!-- No Results State -->
+      <div class="lame-brands-mega__empty" data-brand-empty style="display: none;">
+        <p class="lame-brands-mega__empty-text">No brands found matching your search.</p>
+        <button type="button" class="lame-brands-mega__empty-btn" data-brand-reset-btn>Show All Brands</button>
+      </div>
+
+      <!-- Bottom Explore Footer -->
+      <div class="lame-brands-mega__footer">
+        <a href="{{ all_products_url }}" class="lame-brands-mega__view-all">
+          <span>View All Brands &amp; Collections</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="{{ 'lame-brands-mega-menu.js' | asset_url }}" defer="defer"></script>

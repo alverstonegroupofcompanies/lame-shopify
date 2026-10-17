@@ -45,13 +45,22 @@
                 if menu_link_title_down == 'our products' or menu_link_title_down == 'shop'
                   assign menu_link_title = 'Beauty'
                 endif
+                assign is_brands_link = false
+                if menu_link_title_down == 'home' or menu_link_title_down == 'homepage' or menu_link_title_down == 'brand' or menu_link_title_down == 'brands'
+                  assign menu_link_title = 'Brands'
+                  assign is_brands_link = true
+                endif
+                assign menu_link_url = link.url
+                if is_brands_link and link.url == '/'
+                  assign menu_link_url = routes.all_products_collection_url
+                endif
               %}
               <li>
                 <a
-                  href="{{ link.url }}"
+                  href="{{ menu_link_url }}"
                   id="MenuItem-{{ link.handle }}"
-                  class="menu-list__item"
-                  {% if link.current %}
+                  class="menu-list__item{% if is_brands_link %} menu-list__item--brands{% endif %}"
+                  {% if link.current and is_brands_link == false %}
                     aria-current="page"
                   {% endif %}
                 >
@@ -97,31 +106,48 @@
           if menu_link_title_down == 'our products' or menu_link_title_down == 'shop'
             assign menu_link_title = 'Beauty'
           endif
+
+          assign is_brands_menu = false
+          if menu_link_title_down == 'home' or menu_link_title_down == 'homepage' or menu_link_title_down == 'brand' or menu_link_title_down == 'brands'
+            assign is_brands_menu = true
+            assign menu_link_title = 'Brands'
+          endif
+
+          assign menu_item_url = link.url
+          if is_brands_menu and link.url == '/'
+            assign menu_item_url = routes.all_products_collection_url
+          endif
+
           assign use_shop_mega_menu = false
           if menu_link_title_down == 'shop' or menu_link_title_down == 'our products'
             if link.links != blank
               assign use_shop_mega_menu = true
             endif
           endif
+
+          assign has_submenu = false
+          if link.links != blank or is_brands_menu
+            assign has_submenu = true
+          endif
         %}
         <li
           role="presentation"
-          class="menu-list__list-item"
+          class="menu-list__list-item{% if is_brands_menu %} menu-list__list-item--brands{% endif %}"
           on:focus="/activate"
           on:blur="/deactivate"
           on:pointerenter="/activate"
           on:pointerleave="/deactivate"
         >
           <a
-            href="{{ link.url }}"
+            href="{{ menu_item_url }}"
             data-skip-node-update="true"
-            class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}"
-            {%- if link.links != blank -%}
+            class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}{% if is_brands_menu %} menu-list__link--brands{% endif %}"
+            {%- if has_submenu -%}
               aria-controls="submenu-{{ forloop.index }}"
               aria-haspopup="true"
               aria-expanded="false"
             {%- endif -%}
-            {% if link.current %}
+            {% if link.current and is_brands_menu == false %}
               aria-current="page"
             {% endif %}
             ref="menuitem"
@@ -130,18 +156,26 @@
               link: link,
               section: section,
               menu_block: block,
-              menu_link_title: menu_link_title
+              menu_link_title: menu_link_title,
+              is_brands_link: is_brands_menu
             %}
           </a>
-          {%- if link.links != blank -%}
-            <div class="menu-list__submenu{{ color_scheme_classes }}" ref="submenu[]">
+          {%- if has_submenu -%}
+            <div class="menu-list__submenu{{ color_scheme_classes }}{% if is_brands_menu %} menu-list__submenu--brands{% endif %}" ref="submenu[]">
               <div
                 id="submenu-{{ forloop.index }}"
-                class="menu-list__submenu-inner"
+                class="menu-list__submenu-inner{% if is_brands_menu %} menu-list__submenu-inner--brands{% endif %}"
                 style="{% render 'submenu-font-styles', settings: block_settings %}"
               >
                 {% assign list_id = 'MegaMenuList-' | append: forloop.index %}
-                {% if use_shop_mega_menu %}
+                {% if is_brands_menu %}
+                  {% render 'lame-brands-mega-menu',
+                    parent_link: link,
+                    section: section,
+                    block_settings: block_settings,
+                    menu_block: block
+                  %}
+                {% elsif use_shop_mega_menu %}
                   {% render 'lame-shop-mega-menu',
                     parent_link: link,
                     section: section,
@@ -1120,6 +1154,9 @@
   "blocks": [
     {
       "type": "_header-menu-link"
+    },
+    {
+      "type": "_header-mega-brand"
     }
   ]
 }

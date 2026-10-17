@@ -41,9 +41,9 @@
   <div class="lame-acct-page spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {% unless customer %}
       <div class="lame-profile__guest lame-acct-card">
-        <span class="lame-profile__empty-icon" aria-hidden="true">
-          {% render 'lame-account-icon', size: 36, class: '' %}
-        </span>
+        <div class="lame-profile__guest-icon-wrap" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.8 3.1-6.5 7-6.5s7 2.7 7 6.5" stroke-linecap="round"/></svg>
+        </div>
         <h1 class="lame-profile__page-title">
           {% if section.settings.heading != blank %}
             {{ section.settings.heading }}
@@ -51,10 +51,12 @@
             {{ 'content.account_profile' | t }}
           {% endif %}
         </h1>
-        <p>{{ 'lame_customer.login_required' | t }}</p>
-        <a href="{{ lame_login_url }}" class="button lame-profile__btn-primary">
-          {{ 'customer.log_in' | t }}
-        </a>
+        <p class="lame-profile__guest-desc">{{ 'lame_customer.login_required' | t }}</p>
+        <div class="lame-profile__guest-actions">
+          <a href="{{ lame_login_url }}" class="button lame-profile__btn-primary">
+            {{ 'customer.log_in' | t }}
+          </a>
+        </div>
         <p class="lame-profile__hint">
           {{ 'lame_customer.create_account_html' | t: link: lame_register_url }}
         </p>
@@ -72,17 +74,318 @@
         <div class="lame-acct-main">
           {% render 'lame-profile-overview-card', section: section, avatar_letter: avatar_letter %}
 
-          <section id="addresses" class="lame-acct-card lame-profile__panel" aria-labelledby="ProfileAddressesHeading" data-customer-addresses>
+          <section id="account-settings" class="lame-acct-card lame-profile__panel" aria-labelledby="ProfileAccountHeading">
             <div class="lame-acct-card__head">
-              <h2 id="ProfileAddressesHeading" class="lame-acct-card__title">{{ 'customer.addresses.title' | t }}</h2>
+              <div class="lame-acct-card__head-title-wrap">
+                <h2 id="ProfileAccountHeading" class="lame-acct-card__title">{{ 'lame_customer.account_info' | t }}</h2>
+              </div>
               <button
                 type="button"
                 class="lame-acct-btn lame-acct-btn--outline"
+                data-edit-toggle
+                aria-expanded="false"
+                aria-controls="AccountEditForm"
+              >
+                {% render 'icon-edit', class: 'lame-acct-btn-icon' %}
+                <span>{{ 'customer.addresses.edit' | t }}</span>
+              </button>
+            </div>
+
+            <div class="lame-acct-card__body">
+              <div class="lame-profile__card-view" data-profile-view="account">
+                <div class="lame-profile__info-grid">
+                  <div class="lame-profile__info-item">
+                    <span class="lame-profile__info-label">{{ 'lame_customer.name' | t }}</span>
+                    <span class="lame-profile__info-value">{{ customer.name }}</span>
+                  </div>
+                  <div class="lame-profile__info-item">
+                    <span class="lame-profile__info-label">{{ 'customer.login_page.email' | t }}</span>
+                    <span class="lame-profile__info-value">{{ customer.email }}</span>
+                  </div>
+                  <div class="lame-profile__info-item">
+                    <span class="lame-profile__info-label">{{ 'customer.addresses.phone' | t }}</span>
+                    <span class="lame-profile__info-value">
+                      {% if customer.phone != blank %}
+                        {{ customer.phone }}
+                      {% else %}
+                        <span class="lame-profile__info-empty">Not provided</span>
+                      {% endif %}
+                    </span>
+                  </div>
+                  <div class="lame-profile__info-item">
+                    <span class="lame-profile__info-label">{{ 'lame_customer.member_since' | t: date: '' | replace: 'since', '' | strip | default: 'Member Since' }}</span>
+                    <span class="lame-profile__info-value">{{ customer.created_at | date: '%B %Y' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div id="AccountEditForm" class="lame-profile__card-edit" data-profile-edit="account" hidden>
+                {%- form 'customer', class: 'lame-profile__form' -%}
+                  {%- if form.errors -%}
+                    <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus>
+                      {{ form.errors | default_errors }}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if form.posted_successfully? -%}
+                    <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
+                      {{ 'lame_customer.profile_saved' | t }}
+                    </div>
+                  {%- endif -%}
+
+                  <div class="lame-profile__field-row">
+                    <div class="lame-profile__field">
+                      <label for="ProfileFirstName">{{ 'customer.addresses.first_name' | t }}</label>
+                      <input
+                        type="text"
+                        id="ProfileFirstName"
+                        name="customer[first_name]"
+                        value="{{ customer.first_name }}"
+                        autocomplete="given-name"
+                        class="lame-profile__input"
+                      >
+                    </div>
+                    <div class="lame-profile__field">
+                      <label for="ProfileLastName">{{ 'customer.addresses.last_name' | t }}</label>
+                      <input
+                        type="text"
+                        id="ProfileLastName"
+                        name="customer[last_name]"
+                        value="{{ customer.last_name }}"
+                        autocomplete="family-name"
+                        class="lame-profile__input"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="lame-profile__field-row">
+                    <div class="lame-profile__field">
+                      <label for="ProfileEmail">{{ 'customer.login_page.email' | t }}</label>
+                      <input
+                        type="email"
+                        id="ProfileEmail"
+                        name="customer[email]"
+                        value="{{ customer.email }}"
+                        autocomplete="email"
+                        class="lame-profile__input"
+                      >
+                    </div>
+                    <div class="lame-profile__field">
+                      <label for="ProfilePhone">{{ 'customer.addresses.phone' | t }}</label>
+                      <input
+                        type="tel"
+                        id="ProfilePhone"
+                        name="customer[phone]"
+                        value="{{ customer.phone }}"
+                        autocomplete="tel"
+                        class="lame-profile__input"
+                      >
+                    </div>
+                  </div>
+
+                  <div class="lame-profile__form-actions">
+                    <button type="submit" class="button lame-profile__btn-primary">
+                      {{ 'lame_customer.save_profile' | t }}
+                    </button>
+                    <button type="button" class="button button-secondary" data-edit-cancel aria-controls="AccountEditForm">
+                      {{ 'customer.addresses.cancel' | t }}
+                    </button>
+                  </div>
+                {%- endform -%}
+              </div>
+
+              {% if section.settings.show_bank %}
+                {% liquid
+                  assign bank_holder = customer.metafields.lame.account_holder.value | default: customer.metafields.lame.account_holder
+                  assign bank_name = customer.metafields.lame.bank_name.value | default: customer.metafields.lame.bank_name
+                  assign bank_account = customer.metafields.lame.account_number.value | default: customer.metafields.lame.account_number
+                  assign bank_routing = customer.metafields.lame.routing_number.value | default: customer.metafields.lame.routing_number
+                  assign bank_iban = customer.metafields.lame.iban.value | default: customer.metafields.lame.iban
+                  assign has_saved_bank = false
+                  if bank_holder != blank or bank_name != blank or bank_account != blank or bank_iban != blank
+                    assign has_saved_bank = true
+                  endif
+                %}
+
+                <div class="lame-acct-bank" id="bank-details">
+                  <div class="lame-acct-card__head lame-acct-card__head--sub">
+                    <h3 id="ProfileBankHeading" class="lame-acct-card__subtitle">{{ 'lame_customer.tab_bank' | t }}</h3>
+                    <button
+                      type="button"
+                      class="lame-acct-text-btn"
+                      data-edit-toggle
+                      aria-expanded="false"
+                      aria-controls="BankEditForm"
+                    >
+                      {% if has_saved_bank %}
+                        {{ 'customer.addresses.edit' | t }}
+                      {% else %}
+                        {{ 'lame_customer.add' | t }}
+                      {% endif %}
+                    </button>
+                  </div>
+
+                  <div class="lame-profile__card-view" data-profile-view="bank">
+                    {% if has_saved_bank %}
+                      <dl class="lame-profile__bank-summary">
+                        {% if bank_holder != blank %}
+                          <div>
+                            <dt>{{ 'lame_customer.bank_holder' | t }}</dt>
+                            <dd>{{ bank_holder }}</dd>
+                          </div>
+                        {% endif %}
+                        {% if bank_name != blank %}
+                          <div>
+                            <dt>{{ 'lame_customer.bank_name' | t }}</dt>
+                            <dd>{{ bank_name }}</dd>
+                          </div>
+                        {% endif %}
+                        {% if bank_account != blank %}
+                          <div>
+                            <dt>{{ 'lame_customer.bank_account' | t }}</dt>
+                            <dd>
+                              {%- if bank_account.size > 8 -%}
+                                {{ bank_account | slice: 0, 4 }}••••{{ bank_account | slice: -4, 4 }}
+                              {%- else -%}
+                                ••••
+                              {%- endif -%}
+                            </dd>
+                          </div>
+                        {% endif %}
+                        {% if bank_routing != blank %}
+                          <div>
+                            <dt>{{ 'lame_customer.bank_routing' | t }}</dt>
+                            <dd>{{ bank_routing }}</dd>
+                          </div>
+                        {% endif %}
+                        {% if bank_iban != blank %}
+                          <div>
+                            <dt>{{ 'lame_customer.bank_iban' | t }}</dt>
+                            <dd>
+                              {%- if bank_iban.size > 8 -%}
+                                {{ bank_iban | slice: 0, 4 }}••••{{ bank_iban | slice: -4, 4 }}
+                              {%- else -%}
+                                ••••
+                              {%- endif -%}
+                            </dd>
+                          </div>
+                        {% endif %}
+                      </dl>
+                    {% else %}
+                      <p class="lame-profile__empty">{{ 'lame_customer.bank_empty' | t }}</p>
+                    {% endif %}
+                  </div>
+
+                  <div id="BankEditForm" class="lame-profile__card-edit" data-profile-edit="bank" hidden>
+                    <p class="lame-profile__card-desc">{{ 'lame_customer.bank_help' | t }}</p>
+
+                    {%- assign bank_form_id = 'BankForm-' | append: section.id -%}
+                    {%- form 'contact', id: bank_form_id, class: 'lame-profile__form lame-profile__form--bank' -%}
+                      <input type="hidden" name="contact[id]" value="{{ bank_form_id }}">
+                      <input type="hidden" name="contact[email]" value="{{ customer.email }}">
+                      <input type="hidden" name="contact[name]" value="{{ customer.name }}">
+                      <textarea name="contact[body]" data-bank-body hidden></textarea>
+
+                      {%- if form.posted_successfully? and form.id == bank_form_id -%}
+                        <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
+                          {{ 'lame_customer.bank_saved' | t }}
+                        </div>
+                      {%- endif -%}
+
+                      {%- if form.errors and form.id == bank_form_id -%}
+                        <div class="lame-profile__message lame-profile__message--error">
+                          {{ form.errors | default_errors }}
+                        </div>
+                      {%- endif -%}
+
+                      <div class="lame-profile__field">
+                        <label for="BankHolder">{{ 'lame_customer.bank_holder' | t }}</label>
+                        <input
+                          type="text"
+                          id="BankHolder"
+                          class="lame-profile__input"
+                          data-bank-field="Account holder"
+                          value="{{ bank_holder }}"
+                          autocomplete="name"
+                        >
+                      </div>
+                      <div class="lame-profile__field">
+                        <label for="BankName">{{ 'lame_customer.bank_name' | t }}</label>
+                        <input
+                          type="text"
+                          id="BankName"
+                          class="lame-profile__input"
+                          data-bank-field="Bank name"
+                          value="{{ bank_name }}"
+                          autocomplete="organization"
+                        >
+                      </div>
+                      <div class="lame-profile__field-row">
+                        <div class="lame-profile__field">
+                          <label for="BankAccount">{{ 'lame_customer.bank_account' | t }}</label>
+                          <input
+                            type="text"
+                            id="BankAccount"
+                            class="lame-profile__input"
+                            data-bank-field="Account number"
+                            inputmode="numeric"
+                            autocomplete="off"
+                          >
+                        </div>
+                        <div class="lame-profile__field">
+                          <label for="BankRouting">{{ 'lame_customer.bank_routing' | t }}</label>
+                          <input
+                            type="text"
+                            id="BankRouting"
+                            class="lame-profile__input"
+                            data-bank-field="Routing / sort code"
+                            value="{{ bank_routing }}"
+                            autocomplete="off"
+                          >
+                        </div>
+                      </div>
+                      <div class="lame-profile__field">
+                        <label for="BankIban">{{ 'lame_customer.bank_iban' | t }}</label>
+                        <input
+                          type="text"
+                          id="BankIban"
+                          class="lame-profile__input"
+                          data-bank-field="IBAN"
+                          value="{{ bank_iban }}"
+                          autocomplete="off"
+                        >
+                      </div>
+
+                      <div class="lame-profile__form-actions">
+                        <button type="submit" class="button lame-profile__btn-primary">
+                          {{ 'lame_customer.save_bank' | t }}
+                        </button>
+                        <button type="button" class="button button-secondary" data-edit-cancel aria-controls="BankEditForm">
+                          {{ 'customer.addresses.cancel' | t }}
+                        </button>
+                      </div>
+                    {%- endform -%}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </section>
+
+          <section id="addresses" class="lame-acct-card lame-profile__panel" aria-labelledby="ProfileAddressesHeading" data-customer-addresses>
+            <div class="lame-acct-card__head">
+              <div class="lame-acct-card__head-title-wrap">
+                <h2 id="ProfileAddressesHeading" class="lame-acct-card__title">{{ 'customer.addresses.title' | t }}</h2>
+                <span class="lame-acct-card__count-badge">{{ customer.addresses.size }}</span>
+              </div>
+              <button
+                type="button"
+                class="lame-acct-btn lame-acct-btn--primary"
                 data-toggle-address
                 aria-expanded="false"
                 aria-controls="AddressNewForm"
               >
-                {{ 'lame_customer.add_new_address' | t }}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="margin-right: 0.35rem;"><path d="M12 5v14M5 12h14"/></svg>
+                <span>{{ 'lame_customer.add_new_address' | t }}</span>
               </button>
             </div>
 
@@ -101,12 +404,17 @@
               {% if customer.addresses.size > 0 %}
                 <ul class="lame-acct-address-list" role="list">
                   {%- for address in customer.addresses -%}
-                    <li class="lame-acct-address">
+                    <li class="lame-acct-address{% if address == customer.default_address %} lame-acct-address--default{% endif %}">
                       <div class="lame-acct-address__top">
                         {% if address == customer.default_address %}
-                          <p class="lame-acct-address__label">{{ 'lame_customer.default_address' | t }}</p>
+                          <span class="lame-acct-address__badge lame-acct-address__badge--default">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            {{ 'lame_customer.default_address' | t }}
+                          </span>
                         {% else %}
-                          <p class="lame-acct-address__label">{{ 'lame_customer.address' | t }} {{ forloop.index }}</p>
+                          <span class="lame-acct-address__badge">
+                            {{ 'lame_customer.address' | t }} {{ forloop.index }}
+                          </span>
                         {% endif %}
                         <div class="lame-acct-address__actions">
                           <button
@@ -147,7 +455,9 @@
                   {%- endfor -%}
                 </ul>
               {% else %}
-                <p class="lame-acct-empty">{{ 'lame_customer.no_addresses' | t }}</p>
+                <div class="lame-acct-empty-box">
+                  <p class="lame-acct-empty">{{ 'lame_customer.no_addresses' | t }}</p>
+                </div>
               {% endif %}
             </div>
           </section>
@@ -160,282 +470,6 @@
           {% if section.settings.show_wishlist %}
             {% render 'lame-customer-wishlist-panel' %}
           {% endif %}
-
-          <section id="account-settings" class="lame-acct-card lame-profile__panel" aria-labelledby="ProfileAccountHeading">
-            <div class="lame-acct-card__head">
-              <h2 id="ProfileAccountHeading" class="lame-acct-card__title">{{ 'lame_customer.account_info' | t }}</h2>
-            </div>
-
-            <div class="lame-acct-card__body">
-              <div class="lame-profile__card-view" data-profile-view="account">
-                <div class="lame-profile__info-grid">
-                  <div class="lame-profile__info-item">
-                    <span class="lame-profile__info-label">{{ 'lame_customer.name' | t }}</span>
-                    <span class="lame-profile__info-value">{{ customer.name }}</span>
-                  </div>
-                  <div class="lame-profile__info-item">
-                    <span class="lame-profile__info-label">{{ 'customer.login_page.email' | t }}</span>
-                    <span class="lame-profile__info-value">{{ customer.email }}</span>
-                  </div>
-                  {% if customer.phone != blank %}
-                    <div class="lame-profile__info-item">
-                      <span class="lame-profile__info-label">{{ 'customer.addresses.phone' | t }}</span>
-                      <span class="lame-profile__info-value">{{ customer.phone }}</span>
-                    </div>
-                  {% endif %}
-                </div>
-              </div>
-
-          <div id="AccountEditForm" class="lame-profile__card-edit" data-profile-edit="account" hidden>
-            {%- form 'customer', class: 'lame-profile__form' -%}
-              {%- if form.errors -%}
-                <div class="lame-profile__message lame-profile__message--error" tabindex="-1" autofocus>
-                  {{ form.errors | default_errors }}
-                </div>
-              {%- endif -%}
-
-              {%- if form.posted_successfully? -%}
-                <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
-                  {{ 'lame_customer.profile_saved' | t }}
-                </div>
-              {%- endif -%}
-
-              <div class="lame-profile__field-row">
-                <div class="lame-profile__field">
-                  <label for="ProfileFirstName">{{ 'customer.addresses.first_name' | t }}</label>
-                  <input
-                    type="text"
-                    id="ProfileFirstName"
-                    name="customer[first_name]"
-                    value="{{ customer.first_name }}"
-                    autocomplete="given-name"
-                    class="lame-profile__input"
-                  >
-                </div>
-                <div class="lame-profile__field">
-                  <label for="ProfileLastName">{{ 'customer.addresses.last_name' | t }}</label>
-                  <input
-                    type="text"
-                    id="ProfileLastName"
-                    name="customer[last_name]"
-                    value="{{ customer.last_name }}"
-                    autocomplete="family-name"
-                    class="lame-profile__input"
-                  >
-                </div>
-              </div>
-
-              <div class="lame-profile__field">
-                <label for="ProfileEmail">{{ 'customer.login_page.email' | t }}</label>
-                <input
-                  type="email"
-                  id="ProfileEmail"
-                  name="customer[email]"
-                  value="{{ customer.email }}"
-                  autocomplete="email"
-                  class="lame-profile__input"
-                >
-              </div>
-
-              <div class="lame-profile__field">
-                <label for="ProfilePhone">{{ 'customer.addresses.phone' | t }}</label>
-                <input
-                  type="tel"
-                  id="ProfilePhone"
-                  name="customer[phone]"
-                  value="{{ customer.phone }}"
-                  autocomplete="tel"
-                  class="lame-profile__input"
-                >
-              </div>
-
-              <div class="lame-profile__form-actions">
-                <button type="submit" class="button lame-profile__btn-primary">
-                  {{ 'lame_customer.save_profile' | t }}
-                </button>
-                <button type="button" class="button button-secondary" data-edit-cancel aria-controls="AccountEditForm">
-                  {{ 'customer.addresses.cancel' | t }}
-                </button>
-              </div>
-            {%- endform -%}
-          </div>
-
-          {% if section.settings.show_bank %}
-          {% liquid
-            assign bank_holder = customer.metafields.lame.account_holder.value | default: customer.metafields.lame.account_holder
-            assign bank_name = customer.metafields.lame.bank_name.value | default: customer.metafields.lame.bank_name
-            assign bank_account = customer.metafields.lame.account_number.value | default: customer.metafields.lame.account_number
-            assign bank_routing = customer.metafields.lame.routing_number.value | default: customer.metafields.lame.routing_number
-            assign bank_iban = customer.metafields.lame.iban.value | default: customer.metafields.lame.iban
-            assign has_saved_bank = false
-            if bank_holder != blank or bank_name != blank or bank_account != blank or bank_iban != blank
-              assign has_saved_bank = true
-            endif
-          %}
-
-            <div class="lame-acct-bank" id="bank-details">
-              <div class="lame-acct-card__head lame-acct-card__head--sub">
-                <h3 id="ProfileBankHeading" class="lame-acct-card__subtitle">{{ 'lame_customer.tab_bank' | t }}</h3>
-                <button
-                  type="button"
-                  class="lame-acct-text-btn"
-                  data-edit-toggle
-                  aria-expanded="false"
-                  aria-controls="BankEditForm"
-                >
-                {% if has_saved_bank %}
-                  {{ 'customer.addresses.edit' | t }}
-                {% else %}
-                  {{ 'lame_customer.add' | t }}
-                {% endif %}
-                </button>
-              </div>
-
-            <div class="lame-profile__card-view" data-profile-view="bank">
-              {% if has_saved_bank %}
-                <dl class="lame-profile__bank-summary">
-                  {% if bank_holder != blank %}
-                    <div>
-                      <dt>{{ 'lame_customer.bank_holder' | t }}</dt>
-                      <dd>{{ bank_holder }}</dd>
-                    </div>
-                  {% endif %}
-                  {% if bank_name != blank %}
-                    <div>
-                      <dt>{{ 'lame_customer.bank_name' | t }}</dt>
-                      <dd>{{ bank_name }}</dd>
-                    </div>
-                  {% endif %}
-                  {% if bank_account != blank %}
-                    <div>
-                      <dt>{{ 'lame_customer.bank_account' | t }}</dt>
-                      <dd>
-                        {%- if bank_account.size > 8 -%}
-                          {{ bank_account | slice: 0, 4 }}••••{{ bank_account | slice: -4, 4 }}
-                        {%- else -%}
-                          ••••
-                        {%- endif -%}
-                      </dd>
-                    </div>
-                  {% endif %}
-                  {% if bank_routing != blank %}
-                    <div>
-                      <dt>{{ 'lame_customer.bank_routing' | t }}</dt>
-                      <dd>{{ bank_routing }}</dd>
-                    </div>
-                  {% endif %}
-                  {% if bank_iban != blank %}
-                    <div>
-                      <dt>{{ 'lame_customer.bank_iban' | t }}</dt>
-                      <dd>
-                        {%- if bank_iban.size > 8 -%}
-                          {{ bank_iban | slice: 0, 4 }}••••{{ bank_iban | slice: -4, 4 }}
-                        {%- else -%}
-                          ••••
-                        {%- endif -%}
-                      </dd>
-                    </div>
-                  {% endif %}
-                </dl>
-              {% else %}
-                <p class="lame-profile__empty">{{ 'lame_customer.bank_empty' | t }}</p>
-              {% endif %}
-            </div>
-
-            <div id="BankEditForm" class="lame-profile__card-edit" data-profile-edit="bank" hidden>
-              <p class="lame-profile__card-desc">{{ 'lame_customer.bank_help' | t }}</p>
-
-              {%- assign bank_form_id = 'BankForm-' | append: section.id -%}
-              {%- form 'contact', id: bank_form_id, class: 'lame-profile__form lame-profile__form--bank' -%}
-                <input type="hidden" name="contact[id]" value="{{ bank_form_id }}">
-                <input type="hidden" name="contact[email]" value="{{ customer.email }}">
-                <input type="hidden" name="contact[name]" value="{{ customer.name }}">
-                <textarea name="contact[body]" data-bank-body hidden></textarea>
-
-                {%- if form.posted_successfully? and form.id == bank_form_id -%}
-                  <div class="lame-profile__message lame-profile__message--success" tabindex="-1" autofocus>
-                    {{ 'lame_customer.bank_saved' | t }}
-                  </div>
-                {%- endif -%}
-
-                {%- if form.errors and form.id == bank_form_id -%}
-                  <div class="lame-profile__message lame-profile__message--error">
-                    {{ form.errors | default_errors }}
-                  </div>
-                {%- endif -%}
-
-                <div class="lame-profile__field">
-                  <label for="BankHolder">{{ 'lame_customer.bank_holder' | t }}</label>
-                  <input
-                    type="text"
-                    id="BankHolder"
-                    class="lame-profile__input"
-                    data-bank-field="Account holder"
-                    value="{{ bank_holder }}"
-                    autocomplete="name"
-                  >
-                </div>
-                <div class="lame-profile__field">
-                  <label for="BankName">{{ 'lame_customer.bank_name' | t }}</label>
-                  <input
-                    type="text"
-                    id="BankName"
-                    class="lame-profile__input"
-                    data-bank-field="Bank name"
-                    value="{{ bank_name }}"
-                    autocomplete="organization"
-                  >
-                </div>
-                <div class="lame-profile__field-row">
-                  <div class="lame-profile__field">
-                    <label for="BankAccount">{{ 'lame_customer.bank_account' | t }}</label>
-                    <input
-                      type="text"
-                      id="BankAccount"
-                      class="lame-profile__input"
-                      data-bank-field="Account number"
-                      inputmode="numeric"
-                      autocomplete="off"
-                    >
-                  </div>
-                  <div class="lame-profile__field">
-                    <label for="BankRouting">{{ 'lame_customer.bank_routing' | t }}</label>
-                    <input
-                      type="text"
-                      id="BankRouting"
-                      class="lame-profile__input"
-                      data-bank-field="Routing / sort code"
-                      value="{{ bank_routing }}"
-                      autocomplete="off"
-                    >
-                  </div>
-                </div>
-                <div class="lame-profile__field">
-                  <label for="BankIban">{{ 'lame_customer.bank_iban' | t }}</label>
-                  <input
-                    type="text"
-                    id="BankIban"
-                    class="lame-profile__input"
-                    data-bank-field="IBAN"
-                    value="{{ bank_iban }}"
-                    autocomplete="off"
-                  >
-                </div>
-
-                <div class="lame-profile__form-actions">
-                  <button type="submit" class="button lame-profile__btn-primary">
-                    {{ 'lame_customer.save_bank' | t }}
-                  </button>
-                  <button type="button" class="button button-secondary" data-edit-cancel aria-controls="BankEditForm">
-                    {{ 'customer.addresses.cancel' | t }}
-                  </button>
-                </div>
-              {%- endform -%}
-            </div>
-            </div>
-          {% endif %}
-            </div>
-          </section>
         </div>
       </div>
 
