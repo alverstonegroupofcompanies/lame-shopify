@@ -38,7 +38,7 @@
           on:click="#HeaderMenuDrawer/open/submenu"
         >
           {% render 'lame-drawer-nav-icon', handle: link.handle %}
-          <span class="menu-drawer__menu-item-text wrap-text"{% if is_brands_link %} style="color: #fc2779; font-weight: 700;"{% endif %}>{{ menu_link_title | escape }}</span>
+          <span class="menu-drawer__menu-item-text wrap-text"{% if is_brands_link %} style="color: #1a472a; font-weight: 700;"{% endif %}>{{ menu_link_title | escape }}</span>
           <span class="lame-drawer-nav__trail">
             <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
               {{- 'icon-caret.svg' | inline_asset_content -}}
@@ -80,30 +80,61 @@
                   <a
                     href="{{ routes.all_products_collection_url }}"
                     class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
-                    style="font-weight: 700; color: #fc2779;"
+                    style="font-weight: 700; color: #1a472a;"
                   >
                     {% render 'lame-drawer-nav-icon', handle: 'brands' %}
                     <span class="menu-drawer__menu-item-text wrap-text">Explore All Brands &rarr;</span>
                   </a>
                 </li>
-                {%- assign drawer_brands = "Maybelline New York|maybelline-new-york,Lakmé|lakme,M·A·C|mac,L'Oréal Paris|loreal-paris,Dove|dove,POND'S|ponds,Cetaphil|cetaphil,Dot & Key|dot-key,The Ordinary|the-ordinary,Plum|plum,Laneige|laneige,Beauty of Joseon|beauty-of-joseon,Fenty Beauty|fenty-beauty,CeraVe|cerave,Estée Lauder|estee-lauder,Pears|pears,FemiSafe|femisafe,JOVEES Herbal|jovees,Sebamed|sebamed,Biotique|biotique,Innisfree|innisfree,Lamstone Healthcare|lamstone" | split: ',' -%}
-                {%- for d_brand in drawer_brands -%}
-                  {%- assign d_parts = d_brand | split: '|' -%}
-                  {%- assign d_name = d_parts[0] -%}
-                  {%- assign d_encoded = d_name | url_encode -%}
-                  {%- assign d_url = routes.all_products_collection_url | append: '?filter.p.vendor=' | append: d_encoded -%}
-                  {%- if collections[d_slug] != blank and collections[d_slug].products_count > 0 -%}
-                    {%- assign d_url = collections[d_slug].url -%}
-                  {%- endif -%}
-                  <li class="menu-drawer__list-item lame-drawer-nav__item">
-                    <a
-                      href="{{ d_url }}"
-                      class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
-                    >
-                      <span class="menu-drawer__menu-item-text wrap-text">{{ d_name }}</span>
-                    </a>
-                  </li>
-                {%- endfor -%}
+                {%- assign has_drawer_custom_brands = false -%}
+                {%- if menu_block and menu_block.blocks.size > 0 -%}
+                  {%- for child_block in menu_block.blocks -%}
+                    {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_sidebar != false -%}
+                      {%- assign has_drawer_custom_brands = true -%}
+                      {%- liquid
+                        assign brand_title = child_block.settings.brand_name | default: 'Brand' | strip
+                        assign brand_slug = brand_title | handleize
+                        assign brand_url = child_block.settings.brand_url
+                        if brand_url == blank
+                          assign brand_title_enc = brand_title | url_encode
+                          assign brand_url = routes.all_products_collection_url | append: '?filter.p.vendor=' | append: brand_title_enc
+                          if collections[brand_slug] != blank and collections[brand_slug].products_count > 0
+                            assign brand_url = collections[brand_slug].url
+                          endif
+                        endif
+                      -%}
+                      <li class="menu-drawer__list-item lame-drawer-nav__item" {{ child_block.shopify_attributes }}>
+                        <a
+                          href="{{ brand_url }}"
+                          class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
+                        >
+                          <span class="menu-drawer__menu-item-text wrap-text">{{ brand_title }}</span>
+                        </a>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+                {%- unless has_drawer_custom_brands -%}
+                  {%- assign drawer_brands = "Maybelline New York|maybelline-new-york,Lakmé|lakme,M·A·C|mac,L'Oréal Paris|loreal-paris,Dove|dove,POND'S|ponds,Cetaphil|cetaphil,Dot & Key|dot-key,The Ordinary|the-ordinary,Plum|plum,Laneige|laneige,Beauty of Joseon|beauty-of-joseon,Fenty Beauty|fenty-beauty,CeraVe|cerave,Estée Lauder|estee-lauder,Pears|pears,FemiSafe|femisafe,JOVEES Herbal|jovees,Sebamed|sebamed,Biotique|biotique,Innisfree|innisfree,Lamstone Healthcare|lamstone" | split: ',' -%}
+                  {%- for d_brand in drawer_brands -%}
+                    {%- assign d_parts = d_brand | split: '|' -%}
+                    {%- assign d_name = d_parts[0] -%}
+                    {%- assign d_slug = d_parts[1] -%}
+                    {%- assign d_encoded = d_name | url_encode -%}
+                    {%- assign d_url = routes.all_products_collection_url | append: '?filter.p.vendor=' | append: d_encoded -%}
+                    {%- if collections[d_slug] != blank and collections[d_slug].products_count > 0 -%}
+                      {%- assign d_url = collections[d_slug].url -%}
+                    {%- endif -%}
+                    <li class="menu-drawer__list-item lame-drawer-nav__item">
+                      <a
+                        href="{{ d_url }}"
+                        class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
+                      >
+                        <span class="menu-drawer__menu-item-text wrap-text">{{ d_name }}</span>
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                {%- endunless -%}
               </ul>
             {%- else -%}
               <ul class="menu-drawer__menu menu-drawer__menu--childlist lame-drawer-nav__submenu-list" role="list">
@@ -136,7 +167,7 @@
         {% endif %}
       >
         {% render 'lame-drawer-nav-icon', handle: link.handle %}
-        <span class="menu-drawer__menu-item-text wrap-text"{% if is_brands_link %} style="color: #fc2779; font-weight: 700;"{% endif %}>{{ menu_link_title | escape }}</span>
+        <span class="menu-drawer__menu-item-text wrap-text"{% if is_brands_link %} style="color: #1a472a; font-weight: 700;"{% endif %}>{{ menu_link_title | escape }}</span>
       </a>
     {%- endif -%}
   </li>

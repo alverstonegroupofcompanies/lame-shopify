@@ -46,11 +46,11 @@
       // 2. Filter Right Grid Brand Cards
       brandCards.forEach((card) => {
         const name = (card.dataset.brandName || '').toLowerCase();
-        const tabsAttr = (card.dataset.brandTabs || '').toLowerCase();
+        const tabsAttr = (card.dataset.brandTabs || 'popular').toLowerCase();
         const letter = (card.dataset.brandLetter || '').toUpperCase();
 
         let matchesSearch = !query || name.includes(query);
-        let matchesTab = currentTab === 'popular' || tabsAttr.includes(currentTab);
+        let matchesTab = tabsAttr.includes(currentTab) || tabsAttr.includes('all');
         let matchesLetter = currentLetter === 'all' || letter === currentLetter;
 
         // When a search query is active, search overrides tab/letter filter
@@ -180,6 +180,47 @@
         applyFilter();
       });
     }
+
+    // Shopify Theme Editor live inspector integration
+    function handleThemeEditorBlockSelect(e) {
+      const blockId = e.detail?.blockId;
+      if (!blockId) return;
+
+      const parentMenuItem = root.closest('.menu-list__list-item--brands');
+      if (parentMenuItem) {
+        parentMenuItem.classList.add('is-editor-open');
+      }
+
+      // Check if the selected block matches one of our brand cards
+      const targetCard = Array.from(brandCards).find((c) => {
+        const attr = c.getAttribute('data-shopify-editor-block') || '';
+        return attr.includes(blockId) || c.id?.includes(blockId);
+      });
+
+      if (targetCard) {
+        const bTabs = (targetCard.dataset.brandTabs || 'popular').toLowerCase();
+        if (!bTabs.includes(currentTab) && !bTabs.includes('all')) {
+          const firstTab = bTabs.split(',')[0].trim();
+          const targetTabBtn = root.querySelector(`[data-brand-tab="${firstTab}"]`);
+          if (targetTabBtn) targetTabBtn.click();
+        }
+
+        targetCard.classList.remove('is-hidden');
+        targetCard.classList.add('is-editor-selected');
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function handleThemeEditorBlockDeselect() {
+      const parentMenuItem = root.closest('.menu-list__list-item--brands');
+      if (parentMenuItem) {
+        parentMenuItem.classList.remove('is-editor-open');
+      }
+      brandCards.forEach((c) => c.classList.remove('is-editor-selected'));
+    }
+
+    document.addEventListener('shopify:block:select', handleThemeEditorBlockSelect);
+    document.addEventListener('shopify:block:deselect', handleThemeEditorBlockDeselect);
 
     // Initial filter
     applyFilter();
