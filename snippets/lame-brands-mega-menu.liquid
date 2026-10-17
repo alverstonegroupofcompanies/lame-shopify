@@ -115,7 +115,7 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
               {%- for child_block in menu_block.blocks -%}
                 {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_sidebar != false -%}
                   {%- liquid
-                    assign brand_title = child_block.settings.brand_name | default: 'Brand' | strip
+                    assign brand_title = child_block.settings.title | default: child_block.settings.brand_name | default: 'Brand' | strip
                     assign brand_slug = brand_title | handleize
                     assign brand_letter = brand_title | slice: 0, 1 | upcase
                     assign brand_tabs = child_block.settings.tab | default: 'popular'
@@ -191,7 +191,7 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
                 if has_custom_brands
                   for child_block in menu_block.blocks
                     if child_block.type == '_header-mega-brand'
-                      assign cb_name = child_block.settings.brand_name | strip | downcase
+                      assign cb_name = child_block.settings.title | default: child_block.settings.brand_name | strip | downcase
                       if cb_name == vendor_down or cb_name == vendor_slug
                         assign already_present = true
                         break
@@ -298,7 +298,7 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
           {%- for child_block in menu_block.blocks -%}
             {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_grid != false -%}
               {%- liquid
-                assign brand_title = child_block.settings.brand_name | default: 'Brand' | strip
+                assign brand_title = child_block.settings.title | default: child_block.settings.brand_name | default: 'Brand' | strip
                 assign brand_slug = brand_title | handleize
                 assign brand_letter = brand_title | slice: 0, 1 | upcase
                 assign brand_tabs = child_block.settings.tab | default: 'popular'
@@ -386,7 +386,7 @@ Lamstone Healthcare|lamstone|popular,exclusive|L
             if has_custom_brands
               for child_block in menu_block.blocks
                 if child_block.type == '_header-mega-brand'
-                  assign cb_name = child_block.settings.brand_name | strip | downcase
+                  assign cb_name = child_block.settings.title | default: child_block.settings.brand_name | strip | downcase
                   if cb_name == vendor_down or cb_name == vendor_slug
                     assign already_present = true
                     break
