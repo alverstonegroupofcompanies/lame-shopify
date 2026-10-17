@@ -1,7 +1,8 @@
 /**
  * Interactive controller for the Lamé Brands Mega Menu.
  * Handles instant search filtering, category tab switching,
- * alphabetical A-Z jump/filter, and empty state management.
+ * alphabetical A-Z jump/filter, empty state management,
+ * and reliable hover/click persistence (no disappearing on mouse drag).
  */
 
 (function () {
@@ -10,6 +11,11 @@
   function initBrandsMegaMenu(root) {
     if (!root || root.dataset.brandsMegaInitialized === 'true') return;
     root.dataset.brandsMegaInitialized = 'true';
+
+    const parentListItem = root.closest('.menu-list__list-item--brands');
+    const submenu = root.closest('.menu-list__submenu--brands');
+    const brandsLink = parentListItem?.querySelector('.menu-list__link--brands');
+    const headerComp = root.closest('header-component') || document.querySelector('header-component');
 
     const searchInput = root.querySelector('[data-brand-search-input]');
     const searchClear = root.querySelector('[data-brand-search-clear]');
@@ -23,7 +29,128 @@
 
     let currentTab = 'popular';
     let currentLetter = 'all';
+    let closeTimer = null;
+    let isPinnedOpen = false;
 
+    /* ----------------------------------------------------
+       Robust Open / Close / Pin Management
+       ---------------------------------------------------- */
+    function openMenu() {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      if (parentListItem) {
+        parentListItem.classList.add('is-open');
+        parentListItem.setAttribute('data-open', 'true');
+      }
+      if (brandsLink) {
+        brandsLink.setAttribute('aria-expanded', 'true');
+      }
+      if (submenu) {
+        submenu.setAttribute('data-active', '');
+      }
+      if (headerComp) {
+        const h = root.offsetHeight || 560;
+        headerComp.style.setProperty('--submenu-height', `${h}px`);
+        const headerTopHeight = headerComp.offsetHeight || 70;
+        headerComp.style.setProperty('--full-open-header-height', `${h + headerTopHeight}px`);
+      }
+    }
+
+    function scheduleClose(delay = 350) {
+      if (isPinnedOpen) return;
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => {
+        if (!isPinnedOpen) {
+          if (parentListItem) {
+            parentListItem.classList.remove('is-open');
+            parentListItem.removeAttribute('data-open');
+          }
+          if (brandsLink) {
+            brandsLink.setAttribute('aria-expanded', 'false');
+          }
+          if (submenu) {
+            submenu.removeAttribute('data-active');
+          }
+        }
+      }, delay);
+    }
+
+    function closeImmediate() {
+      isPinnedOpen = false;
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      if (parentListItem) {
+        parentListItem.classList.remove('is-open');
+        parentListItem.removeAttribute('data-open');
+      }
+      if (brandsLink) {
+        brandsLink.setAttribute('aria-expanded', 'false');
+      }
+      if (submenu) {
+        submenu.removeAttribute('data-active');
+      }
+    }
+
+    // Toggle on click of "Brands" link so shoppers can pin it open
+    if (brandsLink) {
+      brandsLink.addEventListener('click', (e) => {
+        if (parentListItem?.classList.contains('is-open') && isPinnedOpen) {
+          closeImmediate();
+        } else {
+          e.preventDefault();
+          e.stopPropagation();
+          isPinnedOpen = true;
+          openMenu();
+        }
+      });
+    }
+
+    // Hover intent on parent list item and submenu
+    const hoverElements = [parentListItem, submenu].filter(Boolean);
+    hoverElements.forEach((el) => {
+      el.addEventListener('pointerenter', () => {
+        openMenu();
+      });
+      el.addEventListener('mouseenter', () => {
+        openMenu();
+      });
+      el.addEventListener('pointerleave', (e) => {
+        const to = e.relatedTarget;
+        if (to && (parentListItem?.contains(to) || root.contains(to))) {
+          return;
+        }
+        scheduleClose(350);
+      });
+      el.addEventListener('mouseleave', (e) => {
+        const to = e.relatedTarget;
+        if (to && (parentListItem?.contains(to) || root.contains(to))) {
+          return;
+        }
+        scheduleClose(350);
+      });
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (!parentListItem?.contains(e.target) && !root.contains(e.target)) {
+        closeImmediate();
+      }
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeImmediate();
+      }
+    });
+
+    /* ----------------------------------------------------
+       Filtering & Tab Logic
+       ---------------------------------------------------- */
     function applyFilter() {
       const query = (searchInput?.value || '').trim().toLowerCase();
       let visibleCardCount = 0;
@@ -53,7 +180,6 @@
         let matchesTab = tabsAttr.includes(currentTab) || tabsAttr.includes('all');
         let matchesLetter = currentLetter === 'all' || letter === currentLetter;
 
-        // When a search query is active, search overrides tab/letter filter
         let show = false;
         if (query) {
           show = matchesSearch;
@@ -186,12 +312,10 @@
       const blockId = e.detail?.blockId;
       if (!blockId) return;
 
-      const parentMenuItem = root.closest('.menu-list__list-item--brands');
-      if (parentMenuItem) {
-        parentMenuItem.classList.add('is-editor-open');
+      if (parentListItem) {
+        parentListItem.classList.add('is-editor-open');
       }
 
-      // Check if the selected block matches one of our brand cards
       const targetCard = Array.from(brandCards).find((c) => {
         const attr = c.getAttribute('data-shopify-editor-block') || '';
         return attr.includes(blockId) || c.id?.includes(blockId);
@@ -212,9 +336,8 @@
     }
 
     function handleThemeEditorBlockDeselect() {
-      const parentMenuItem = root.closest('.menu-list__list-item--brands');
-      if (parentMenuItem) {
-        parentMenuItem.classList.remove('is-editor-open');
+      if (parentListItem) {
+        parentListItem.classList.remove('is-editor-open');
       }
       brandCards.forEach((c) => c.classList.remove('is-editor-selected'));
     }
@@ -236,7 +359,6 @@
     setup();
   }
 
-  // Handle Shopify theme editor section reload & dynamic hydration
   document.addEventListener('shopify:section:load', setup);
   window.addEventListener('load', setup);
 })();
