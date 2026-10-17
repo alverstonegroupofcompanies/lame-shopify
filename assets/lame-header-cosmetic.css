@@ -2197,6 +2197,20 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
 #header-component.header--cosmetic-luxury .menu-list__submenu--brands {
   background: transparent !important;
   padding-block: 0 !important;
+  clip-path: none !important;
+  top: 100% !important;
+}
+
+#header-component.header--cosmetic-luxury .menu-list__submenu--brands::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 99;
 }
 
 #header-component.header--cosmetic-luxury .menu-list__submenu-inner--brands {
@@ -2206,13 +2220,20 @@ body > .menu-drawer.menu-drawer--luxury .lame-drawer-profile {
   padding: 0 clamp(8px, 2vw, 24px) !important;
   display: flex !important;
   justify-content: center !important;
+  transform: none !important;
 }
 
 #header-component .menu-list__list-item--brands:hover > .menu-list__submenu--brands,
-#header-component .menu-list__list-item--brands:focus-within > .menu-list__submenu--brands {
+#header-component .menu-list__list-item--brands:focus-within > .menu-list__submenu--brands,
+#header-component .menu-list__list-item--brands.is-open > .menu-list__submenu--brands,
+#header-component .menu-list__list-item--brands[data-open="true"] > .menu-list__submenu--brands,
+#header-component .menu-list__submenu--brands:hover,
+#header-component .menu-list__submenu--brands[data-active] {
   visibility: visible !important;
   opacity: 1 !important;
   --submenu-content-opacity: 1 !important;
+  pointer-events: auto !important;
+  display: block !important;
 }
 
 /* Shop mega menu — 3-column layout (Shop nav only) */

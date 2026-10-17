@@ -475,6 +475,21 @@
 .menu-list__submenu--brands {
   background-color: transparent !important;
   padding-block: 0 !important;
+  clip-path: none !important;
+  top: 100% !important;
+}
+
+/* Invisible hover bridge to eliminate any gap between navbar link and mega menu */
+.menu-list__submenu--brands::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 99;
 }
 
 .menu-list__submenu-inner--brands {
@@ -483,14 +498,22 @@
   padding: 0 !important;
   display: flex !important;
   justify-content: center !important;
+  transform: none !important;
 }
 
-/* Shopify Theme Editor live inspection states */
-.menu-list__list-item--brands.is-editor-open > .menu-list__submenu--brands {
+/* Open, hover, focus, and pinned states */
+.menu-list__list-item--brands:hover > .menu-list__submenu--brands,
+.menu-list__list-item--brands:focus-within > .menu-list__submenu--brands,
+.menu-list__list-item--brands.is-open > .menu-list__submenu--brands,
+.menu-list__list-item--brands[data-open="true"] > .menu-list__submenu--brands,
+.menu-list__list-item--brands.is-editor-open > .menu-list__submenu--brands,
+.menu-list__submenu--brands:hover,
+.menu-list__submenu--brands[data-active] {
   visibility: visible !important;
   opacity: 1 !important;
   --submenu-content-opacity: 1 !important;
   pointer-events: auto !important;
+  display: block !important;
 }
 
 .lame-brands-mega__card.is-editor-selected {
