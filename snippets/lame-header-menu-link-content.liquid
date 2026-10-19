@@ -42,6 +42,17 @@
     assign display_title = custom_label
   endif
 
+  assign words = display_title | split: ' '
+  assign title_parts = ''
+  for word in words
+    assign word_down = word | downcase
+    assign w_first = word_down | slice: 0, 1 | upcase
+    assign w_rest = word_down | slice: 1, word_down.size
+    assign w_cap = w_first | append: w_rest
+    assign title_parts = title_parts | append: w_cap | append: ' '
+  endfor
+  assign display_title = title_parts | strip
+
   assign show_menu_labels = true
   if section and section.settings.menu_show_labels == false
     assign show_menu_labels = false

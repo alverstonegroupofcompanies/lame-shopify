@@ -1,15 +1,18 @@
 {% stylesheet %}
   .lame-product-carousel {
-    --lame-carousel-accent: #7b2cbf;
-    --lame-carousel-discount: #0a9f4f;
-    --lame-carousel-gap: 12px;
-    --lame-carousel-arrow-bg: rgb(244 248 245);
-    --lame-carousel-arrow-border: rgb(42 58 48 / 0.18);
-    --lame-carousel-arrow-color: rgb(72 104 82);
-    --lame-carousel-arrow-shadow: 0 4px 14px rgb(26 42 36 / 0.1);
-    --lame-carousel-arrow-bg-hover: rgb(42 58 48);
-    --lame-carousel-arrow-color-hover: rgb(232 242 236);
-    --lame-carousel-arrow-border-hover: rgb(42 58 48);
+    --lame-carousel-accent: #ff5722;
+    --lame-carousel-discount: #16a34a;
+    --lame-carousel-gap: 14px;
+    --lame-carousel-arrow-bg: #ffffff;
+    --lame-carousel-arrow-border: rgba(0, 0, 0, 0.12);
+    --lame-carousel-arrow-color: #1e293b;
+    --lame-carousel-arrow-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    --lame-carousel-arrow-bg-hover: #ff5722;
+    --lame-carousel-arrow-color-hover: #ffffff;
+    --lame-carousel-arrow-border-hover: #ff5722;
+    position: relative;
+    width: 100%;
+    margin-inline: auto;
   }
 
   .lame-product-carousel .lame-section-heading {
@@ -18,12 +21,13 @@
 
   .lame-product-carousel__viewport {
     position: relative;
+    width: 100%;
   }
 
   .lame-product-carousel__track {
     list-style: none;
     margin: 0;
-    padding: 0 2.25rem 0 0;
+    padding: 0.5rem 0.5rem 1rem;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: calc((100% - var(--lame-carousel-gap)) / 2);
@@ -33,6 +37,7 @@
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .lame-product-carousel__track::-webkit-scrollbar {
@@ -41,22 +46,23 @@
 
   .lame-product-carousel__item {
     min-width: 0;
+    height: 100%;
     scroll-snap-align: start;
   }
 
   .lame-product-carousel__arrow {
     position: absolute;
-    top: 38%;
+    top: 50%;
     transform: translateY(-50%);
-    z-index: 3;
-    width: 2.25rem;
-    height: 2.25rem;
+    z-index: 4;
+    width: 2.5rem;
+    height: 2.5rem;
     padding: 0;
     border-radius: 50%;
-    border: 1px solid var(--lame-carousel-arrow-border, rgb(42 58 48 / 0.18));
-    background: var(--lame-carousel-arrow-bg, rgb(244 248 245));
-    color: var(--lame-carousel-arrow-color, rgb(72 104 82));
-    box-shadow: var(--lame-carousel-arrow-shadow, 0 4px 14px rgb(26 42 36 / 0.1));
+    border: 1px solid var(--lame-carousel-arrow-border, rgba(0, 0, 0, 0.12));
+    background: var(--lame-carousel-arrow-bg, #ffffff);
+    color: var(--lame-carousel-arrow-color, #1e293b);
+    box-shadow: var(--lame-carousel-arrow-shadow, 0 4px 14px rgba(0, 0, 0, 0.12));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -66,15 +72,16 @@
       border-color 0.22s ease,
       color 0.22s ease,
       box-shadow 0.22s ease,
-      transform 0.22s ease;
+      transform 0.22s ease,
+      opacity 0.2s ease;
   }
 
   .lame-product-carousel__arrow:hover:not(:disabled):not([hidden]) {
-    background: var(--lame-carousel-arrow-bg-hover, rgb(42 58 48));
-    border-color: var(--lame-carousel-arrow-border-hover, rgb(42 58 48));
-    color: var(--lame-carousel-arrow-color-hover, rgb(232 242 236));
-    box-shadow: 0 6px 18px rgb(26 42 36 / 0.16);
-    transform: translateY(-50%) scale(1.04);
+    background: var(--lame-carousel-arrow-bg-hover, #ff5722);
+    border-color: var(--lame-carousel-arrow-border-hover, #ff5722);
+    color: var(--lame-carousel-arrow-color-hover, #ffffff);
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.35);
+    transform: translateY(-50%) scale(1.08);
   }
 
   .lame-product-carousel__arrow:disabled,
@@ -84,41 +91,59 @@
   }
 
   .lame-product-carousel__arrow--prev {
-    left: -0.35rem;
-    display: none;
+    left: 0.25rem;
   }
 
   .lame-product-carousel__arrow--next {
-    right: 0;
+    right: 0.25rem;
   }
 
   .lame-product-carousel__arrow .svg-wrapper,
   .lame-product-carousel__arrow .svg-wrapper svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.1rem;
+    height: 1.1rem;
     display: block;
     color: inherit;
     stroke: currentColor;
     fill: none;
   }
 
+  /* Card Container */
   .lame-carousel-card {
     display: flex;
     flex-direction: column;
     height: 100%;
     min-width: 0;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 0.85rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-sizing: border-box;
+  }
+
+  .lame-carousel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    border-color: rgba(255, 87, 34, 0.35);
   }
 
   .lame-carousel-card__media {
     position: relative;
     aspect-ratio: 1 / 1;
-    background: #f8f8f8;
-    border-radius: 2px;
+    background: #fafafa;
+    border-radius: 8px;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .lame-carousel-card__media-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
   }
@@ -128,83 +153,150 @@
     height: 100%;
     object-fit: contain;
     object-position: center;
+    padding: 0.5rem;
+    transition: transform 0.35s ease;
+  }
+
+  .lame-carousel-card:hover .lame-carousel-card__image {
+    transform: scale(1.05);
   }
 
   .lame-carousel-card__offer {
     position: absolute;
-    left: 0.35rem;
-    bottom: 0.35rem;
-    max-width: calc(100% - 0.7rem);
-    padding: 0.25rem 0.5rem;
+    left: 0.45rem;
+    top: 0.45rem;
+    bottom: auto;
+    padding: 0.2rem 0.5rem;
     font-size: 0.6875rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.2;
-    color: var(--lame-carousel-accent);
-    background: #fff;
-    border: 1px solid var(--lame-carousel-accent);
-    border-radius: 999px;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    background: #ff5722;
+    border-radius: 4px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    box-shadow: 0 2px 6px rgba(255, 87, 34, 0.3);
+    z-index: 2;
+  }
+
+  .lame-carousel-card__content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 0.65rem;
+  }
+
+  .lame-carousel-card__brand {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ff5722;
+    margin-bottom: 0.2rem;
+    display: block;
+    line-height: 1.2;
   }
 
   .lame-carousel-card__title {
-    margin: 0.5rem 0 0.35rem;
+    margin: 0 0 0.25rem;
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.35;
-    color: rgb(var(--brand-ink));
+    color: #1e293b;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 2.7em;
+    min-height: 2.35rem;
   }
 
   .lame-carousel-card__title a {
     color: inherit;
     text-decoration: none;
+    transition: color 0.2s ease;
   }
 
   .lame-carousel-card__title a:hover {
-    color: var(--lame-carousel-accent);
+    color: #ff5722;
+  }
+
+  .lame-carousel-card__subtitle {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.3;
+    margin: 0 0 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .lame-carousel-card__rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    line-height: 1;
+    margin-bottom: 0.45rem;
+  }
+
+  .lame-carousel-card__stars {
+    color: #f59e0b;
+    letter-spacing: -1px;
+    font-size: 0.78rem;
+  }
+
+  .lame-carousel-card__rating-score {
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .lame-carousel-card__reviews-count {
+    color: #94a3b8;
   }
 
   .lame-carousel-card__price-row {
-    margin: 0 0 0.55rem;
+    margin: auto 0 0.65rem;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.25rem 0.4rem;
+    gap: 0.35rem 0.45rem;
     font-size: 0.8125rem;
     line-height: 1.3;
   }
 
   .lame-carousel-card__price-current {
+    font-size: 0.95rem;
     font-weight: 700;
-    color: rgb(var(--brand-ink));
+    color: #0f172a;
   }
 
   .lame-carousel-card__price-compare {
-    color: rgb(0 0 0 / 0.65);
+    color: #94a3b8;
     font-size: 0.75rem;
   }
 
   .lame-carousel-card__price-off {
     font-weight: 700;
-    color: var(--lame-carousel-discount);
-    font-size: 0.75rem;
+    color: #16a34a;
+    background: #f0fdf4;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.72rem;
   }
 
   .lame-carousel-card__atc-form {
-    margin-top: auto;
     position: relative;
+    width: 100%;
   }
 
   .lame-carousel-card__atc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    padding: 0.5rem 0.65rem;
-    font-size: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
     color: #ffffff;
@@ -212,9 +304,11 @@
     border: 1.5px solid #ff5722;
     border-radius: 6px;
     cursor: pointer;
+    text-decoration: none;
     box-shadow: 0 2px 8px rgba(255, 87, 34, 0.22);
     transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
   }
 
   .lame-carousel-card__atc:hover:not(:disabled) {
@@ -247,7 +341,8 @@
     left: 0;
     right: 0;
     top: calc(100% + 0.25rem);
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
     text-align: center;
     opacity: 0;
     pointer-events: none;
@@ -259,7 +354,7 @@
   }
 
   .lame-carousel-card__atc-status.is-success {
-    color: var(--lame-carousel-discount);
+    color: #16a34a;
   }
 
   .lame-carousel-card__atc-status.is-error {
@@ -267,24 +362,39 @@
   }
 
   .lame-product-carousel__view-all {
-    margin: 1rem 0 0;
+    margin: 1.25rem 0 0;
     text-align: center;
     font-size: 0.875rem;
   }
 
   .lame-product-carousel__view-all a {
-    color: rgb(0 0 0 / 0.78);
+    color: #ff5722;
+    font-weight: 600;
     text-decoration: underline;
-    text-underline-offset: 2px;
+    text-underline-offset: 3px;
+    transition: color 0.2s ease;
+  }
+
+  .lame-product-carousel__view-all a:hover {
+    color: #e64a19;
   }
 
   @media screen and (min-width: 750px) {
     .lame-product-carousel {
-      --lame-carousel-gap: 14px;
+      --lame-carousel-gap: 16px;
     }
 
     .lame-product-carousel__track {
       grid-auto-columns: calc((100% - var(--lame-carousel-gap) * 2) / 3);
+      padding: 0.75rem 1rem 1.25rem;
+    }
+
+    .lame-product-carousel__arrow--prev {
+      left: 0.5rem;
+    }
+
+    .lame-product-carousel__arrow--next {
+      right: 0.5rem;
     }
   }
 
@@ -295,7 +405,7 @@
 
     .lame-product-carousel__track {
       grid-auto-columns: calc((100% - var(--lame-carousel-gap) * 4) / 5);
-      padding-right: 2.5rem;
+      padding: 0.75rem 1.5rem 1.25rem;
     }
 
     .lame-carousel-card__title {
@@ -307,7 +417,15 @@
     }
 
     .lame-carousel-card__atc {
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .lame-product-carousel__arrow--prev {
+      left: 0.75rem;
+    }
+
+    .lame-product-carousel__arrow--next {
+      right: 0.75rem;
     }
   }
 {% endstylesheet %}

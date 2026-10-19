@@ -21,6 +21,18 @@
     if is_brands_link and link.url == '/'
       assign drawer_link_url = routes.all_products_collection_url
     endif
+
+    assign words = menu_link_title | split: ' '
+    assign title_parts = ''
+    for word in words
+      assign word_down = word | downcase
+      assign w_first = word_down | slice: 0, 1 | upcase
+      assign w_rest = word_down | slice: 1, word_down.size
+      assign w_cap = w_first | append: w_rest
+      assign title_parts = title_parts | append: w_cap | append: ' '
+    endfor
+    assign menu_link_title = title_parts | strip
+
     assign animation_index = animation_index | plus: 1
   -%}
   <li
@@ -151,7 +163,18 @@
                       {% endif %}
                     >
                       {% render 'lame-drawer-nav-icon', handle: childlink.handle %}
-                      <span class="menu-drawer__menu-item-text wrap-text">{{ childlink.title | escape }}</span>
+                      {%- liquid
+                        assign child_words = childlink.title | split: ' '
+                        assign child_parts = ''
+                        for cw in child_words
+                          assign cw_down = cw | downcase
+                          assign cw_first = cw_down | slice: 0, 1 | upcase
+                          assign cw_rest = cw_down | slice: 1, cw_down.size
+                          assign child_parts = child_parts | append: cw_first | append: cw_rest | append: ' '
+                        endfor
+                        assign child_title = child_parts | strip
+                      -%}
+                      <span class="menu-drawer__menu-item-text wrap-text">{{ child_title | escape }}</span>
                     </a>
                   </li>
                 {%- endfor -%}

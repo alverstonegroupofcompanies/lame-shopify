@@ -4,10 +4,20 @@
     assign bestseller_collection = collections.all
   endif
 
-  assign view_all_url = bestseller_collection.url
-  if bestseller_collection == blank
+  assign view_all_url = section.settings.view_all_link
+  if view_all_url == blank
+    assign view_all_url = bestseller_collection.url
+  endif
+  if view_all_url == blank
     assign view_all_url = routes.all_products_collection_url
   endif
+
+  assign brand_filter_str = section.settings.brand_filter | default: 'SebaMed, Vaseline' | downcase
+  assign brand_filters = brand_filter_str | split: ','
+  assign products_limit = section.settings.products_to_show | default: 8
+
+  assign matching_products_count = 0
+  assign block_cards_count = section.blocks.size
 %}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
@@ -62,38 +72,207 @@
       </button>
 
       <ul class="lame-product-carousel__track" role="list" data-product-carousel-track>
-        {% for product in bestseller_collection.products limit: section.settings.products_to_show %}
-          <li class="lame-product-carousel__item">
-            {% render 'lame-carousel-product-card',
-              product: product,
-              show_offer_badge: section.settings.show_offer_badge,
-              offer_badge_text: section.settings.offer_badge_text,
-              add_to_cart_label: section.settings.add_to_cart_label,
-              sold_out_label: section.settings.sold_out_label
-            %}
-          </li>
-        {% else %}
-          {% for i in (1..section.settings.products_to_show) %}
-            <li class="lame-product-carousel__item">
-              <article class="lame-carousel-card">
-                <div class="lame-carousel-card__media">
-                  {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-carousel-card__image placeholder-svg' }}
-                </div>
-                <h3 class="lame-carousel-card__title">{{ section.settings.placeholder_title }}</h3>
-                <p class="lame-carousel-card__price-row">
-                  <span class="lame-carousel-card__price-current">{{ section.settings.placeholder_price }}</span>
-                </p>
-                <button type="button" class="lame-carousel-card__atc" disabled>{{ section.settings.add_to_cart_label }}</button>
-              </article>
+        {%- if block_cards_count > 0 -%}
+          {%- for block in section.blocks limit: products_limit -%}
+            <li class="lame-product-carousel__item" {{ block.shopify_attributes }}>
+              {%- if block.settings.product != blank -%}
+                {% render 'lame-carousel-product-card',
+                  product: block.settings.product,
+                  custom_subtitle: block.settings.subtitle,
+                  show_offer_badge: section.settings.show_offer_badge,
+                  offer_badge_text: block.settings.badge_text,
+                  add_to_cart_label: section.settings.add_to_cart_label,
+                  sold_out_label: section.settings.sold_out_label
+                %}
+              {%- else -%}
+                {% render 'lame-carousel-product-card',
+                  custom_brand: block.settings.brand,
+                  custom_title: block.settings.title,
+                  custom_subtitle: block.settings.subtitle,
+                  custom_image: block.settings.image,
+                  custom_fallback_asset: block.settings.fallback_asset,
+                  custom_price: block.settings.price,
+                  custom_compare_price: block.settings.compare_at_price,
+                  custom_badge: block.settings.badge_text,
+                  custom_rating: block.settings.rating,
+                  custom_reviews: block.settings.reviews_count,
+                  custom_link: block.settings.link,
+                  show_offer_badge: section.settings.show_offer_badge,
+                  offer_badge_text: section.settings.offer_badge_text,
+                  add_to_cart_label: section.settings.add_to_cart_label,
+                  sold_out_label: section.settings.sold_out_label
+                %}
+              {%- endif -%}
             </li>
-          {% endfor %}
-        {% endfor %}
+          {%- endfor -%}
+
+        {%- else -%}
+          {%- comment -%}
+            Filter and sort live collection products by brand (Sebamed / Vaseline) and price descending
+          {%- endcomment -%}
+          {%- liquid
+            assign candidate_products = bestseller_collection.products
+            if section.settings.sort_by == 'price_desc'
+              assign candidate_products = candidate_products | sort: 'price' | reverse
+            elsif section.settings.sort_by == 'price_asc'
+              assign candidate_products = candidate_products | sort: 'price'
+            endif
+          -%}
+
+          {%- for product in candidate_products -%}
+            {%- if matching_products_count >= products_limit -%}{%- break -%}{%- endif -%}
+            {%- assign p_vendor = product.vendor | downcase | strip -%}
+            {%- assign p_title = product.title | downcase -%}
+            {%- assign matches_brand = false -%}
+
+            {%- for brand_token in brand_filters -%}
+              {%- assign b_clean = brand_token | strip -%}
+              {%- if b_clean != blank -%}
+                {%- if p_vendor contains b_clean or p_title contains b_clean -%}
+                  {%- assign matches_brand = true -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if matches_brand -%}
+              <li class="lame-product-carousel__item">
+                {% render 'lame-carousel-product-card',
+                  product: product,
+                  show_offer_badge: section.settings.show_offer_badge,
+                  offer_badge_text: section.settings.offer_badge_text,
+                  add_to_cart_label: section.settings.add_to_cart_label,
+                  sold_out_label: section.settings.sold_out_label
+                %}
+              </li>
+              {%- assign matching_products_count = matching_products_count | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- comment -%}
+            If collection has fewer matching products, provide curated Sebamed & Vaseline high-price bestsellers
+          {%- endcomment -%}
+          {%- if matching_products_count == 0 -%}
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Sebamed',
+                custom_title: 'Sebamed Liquid Face & Body Wash 1000ml with Pump',
+                custom_subtitle: 'Soap-Free Sensitive Skin Care · pH 5.5',
+                custom_fallback_asset: 'lame-sebamed-body-wash.jpg',
+                custom_price: '₹1,435',
+                custom_compare_price: '₹1,690',
+                custom_badge: '15% OFF',
+                custom_rating: '4.9',
+                custom_reviews: '340',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Sebamed',
+                custom_title: 'Sebamed Anti-Dry Hydrating Body Lotion 400ml',
+                custom_subtitle: 'Phytosterols & Shea Butter · pH 5.5',
+                custom_fallback_asset: 'lame-sebamed-anti-dry.jpg',
+                custom_price: '₹1,360',
+                custom_compare_price: '₹1,600',
+                custom_badge: '15% OFF',
+                custom_rating: '4.8',
+                custom_reviews: '210',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Vaseline',
+                custom_title: 'Vaseline Gluta-Hya Flawless Glow Serum Burst UV Lotion 330ml',
+                custom_subtitle: '10x Hyaluron & Pro-Retinol Glow',
+                custom_fallback_asset: 'lame-vaseline-gluta-hya.jpg',
+                custom_price: '₹959',
+                custom_compare_price: '₹1,199',
+                custom_badge: '20% OFF',
+                custom_rating: '4.9',
+                custom_reviews: '580',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Sebamed',
+                custom_title: 'Baby Sebamed Gentle Wash 400ml',
+                custom_subtitle: 'Tear-Free Gentle Cleanser for Delicate Skin',
+                custom_fallback_asset: 'lame-beauty-love-01-sebamed.png',
+                custom_price: '₹975',
+                custom_compare_price: '₹1,150',
+                custom_badge: '15% OFF',
+                custom_rating: '4.9',
+                custom_reviews: '420',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Vaseline',
+                custom_title: 'Vaseline Healthy Bright Daily Sunscreen SPF 50+ PA++++ 400ml',
+                custom_subtitle: 'Triple Sun Protection · Non-Sticky',
+                custom_fallback_asset: 'lame-vaseline-sunscreen.jpg',
+                custom_price: '₹799',
+                custom_compare_price: '₹999',
+                custom_badge: '20% OFF',
+                custom_rating: '4.8',
+                custom_reviews: '310',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Vaseline',
+                custom_title: 'Vaseline Intensive Care Cocoa Glow Nourishing Body Lotion 400ml',
+                custom_subtitle: 'Pure Cocoa Butter & Ultra-Hydrating Micro-Droplets',
+                custom_fallback_asset: 'lame-vaseline-cocoa.jpg',
+                custom_price: '₹540',
+                custom_compare_price: '₹675',
+                custom_badge: '20% OFF',
+                custom_rating: '4.8',
+                custom_reviews: '890',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+            <li class="lame-product-carousel__item">
+              {% render 'lame-carousel-product-card',
+                custom_brand: 'Sebamed',
+                custom_title: 'Sebamed Clear Face Care Gel 50ml',
+                custom_subtitle: 'Hyaluronic Acid & Panthenol · Acne Care',
+                custom_fallback_asset: 'lame-sebamed-clear-face.jpg',
+                custom_price: '₹493',
+                custom_compare_price: '₹580',
+                custom_badge: '15% OFF',
+                custom_rating: '4.7',
+                custom_reviews: '260',
+                custom_link: '',
+                show_offer_badge: section.settings.show_offer_badge,
+                add_to_cart_label: section.settings.add_to_cart_label
+              %}
+            </li>
+          {%- endif -%}
+        {%- endif -%}
       </ul>
     </div>
 
     {% if section.settings.view_all_label != blank %}
       <p class="lame-product-carousel__view-all">
-        <a href="{{ view_all_url }}">{{ section.settings.view_all_label }}</a>
+        <a href="{{ view_all_url }}">{{ section.settings.view_all_label }} &rarr;</a>
       </p>
     {% endif %}
   </div>
@@ -113,7 +292,7 @@
 
     const updateArrows = () => {
       const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
-      const hasOverflow = maxScroll > 1;
+      const hasOverflow = maxScroll > 2;
       prev.hidden = !hasOverflow;
       next.hidden = !hasOverflow;
       if (!hasOverflow) {
@@ -121,15 +300,15 @@
         next.disabled = true;
         return;
       }
-      prev.disabled = track.scrollLeft <= 1;
-      next.disabled = track.scrollLeft >= maxScroll - 1;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= maxScroll - 2;
     };
 
     const scrollByCard = (direction) => {
       const card = track.querySelector('.lame-product-carousel__item');
       if (!card) return;
       const styles = getComputedStyle(track);
-      const gap = parseFloat(styles.columnGap || styles.gap || '0');
+      const gap = parseFloat(styles.columnGap || styles.gap || '14');
       track.scrollBy({ left: direction * (card.clientWidth + gap), behavior: 'smooth' });
     };
 
@@ -137,8 +316,9 @@
     next.addEventListener('click', () => scrollByCard(1));
     track.addEventListener('scroll', updateArrows, { passive: true });
     window.addEventListener('resize', updateArrows);
-    setTimeout(updateArrows, 0);
+    setTimeout(updateArrows, 150);
 
+    // Live Shopify product form submit
     section.querySelectorAll('[data-lame-carousel-atc]').forEach((form) => {
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -164,7 +344,7 @@
           status.textContent = text;
           status.classList.remove('is-success', 'is-error', 'is-visible');
           status.classList.add(className, 'is-visible');
-          window.setTimeout(() => status.classList.remove('is-visible'), 1800);
+          window.setTimeout(() => status.classList.remove('is-visible'), 2200);
         };
 
         try {
@@ -191,12 +371,25 @@
               },
             })
           );
-          showStatus('Added to cart', 'is-success');
+          showStatus('Added to cart ✓', 'is-success');
         } catch (error) {
           console.error(error);
           showStatus('Could not add', 'is-error');
         } finally {
           if (button && !button.hasAttribute('data-sold-out')) button.disabled = false;
+        }
+      });
+    });
+
+    // Curated card button feedback
+    section.querySelectorAll('[data-curated-atc]').forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        const wrap = btn.closest('.lame-carousel-card__atc-form');
+        const status = wrap?.querySelector('.lame-carousel-card__atc-status');
+        if (status) {
+          status.textContent = 'Opening product details...';
+          status.classList.remove('is-error');
+          status.classList.add('is-success', 'is-visible');
         }
       });
     });
@@ -210,52 +403,68 @@
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index", "collection"] },
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "The Best Sellers" },
+    { "type": "text", "id": "heading", "label": "Heading" },
     { "type": "text", "id": "subheading", "label": "Subheading" },
-    { "type": "text", "id": "view_all_label", "label": "View all label" },
+    {
+      "type": "text",
+      "id": "brand_filter",
+      "label": "Filter by brand / vendor",
+      "default": "SebaMed, Vaseline",
+      "info": "Comma-separated list of brand names (e.g. SebaMed, Vaseline)."
+    },
+    {
+      "type": "select",
+      "id": "sort_by",
+      "label": "Sort products by",
+      "options": [
+        { "value": "price_desc", "label": "Price: High to low (High price first)" },
+        { "value": "price_asc", "label": "Price: Low to high" },
+        { "value": "default", "label": "Collection default order" }
+      ],
+      "default": "price_desc"
+    },
     { "type": "collection", "id": "collection", "label": "Collection" },
     {
       "type": "range",
       "id": "products_to_show",
       "label": "Products to show",
       "min": 2,
-      "max": 12,
+      "max": 16,
       "step": 1,
       "default": 8
     },
+    { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View All Best Sellers" },
+    { "type": "url", "id": "view_all_link", "label": "View all link" },
     { "type": "checkbox", "id": "show_offer_badge", "label": "Show offer badge on image", "default": true },
     {
       "type": "text",
       "id": "offer_badge_text",
-      "label": "Offer badge text (all cards)",
-      "info": "Leave blank to show discount % when on sale"
+      "label": "Offer badge text override",
+      "info": "Leave blank to show item discount %"
     },
     { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to Cart" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold Out" },
     { "type": "text", "id": "prev_label", "label": "Previous arrow label", "default": "Previous products" },
     { "type": "text", "id": "next_label", "label": "Next arrow label", "default": "Next products" },
-    { "type": "text", "id": "placeholder_title", "label": "Placeholder title", "default": "Product title" },
-    { "type": "text", "id": "placeholder_price", "label": "Placeholder price", "default": "$0.00" },
-    { "type": "color", "id": "accent_color", "label": "Accent color (buttons & badges)", "default": "#7b2cbf" },
-    { "type": "color", "id": "discount_color", "label": "Discount text color", "default": "#0a9f4f" },
+    { "type": "color", "id": "accent_color", "label": "Accent color (buttons & badges)", "default": "#ff5722" },
+    { "type": "color", "id": "discount_color", "label": "Discount text color", "default": "#16a34a" },
     {
       "type": "color",
       "id": "carousel_arrow_background",
       "label": "Carousel arrow background",
-      "default": "#f4f8f5"
+      "default": "#ffffff"
     },
     {
       "type": "color",
       "id": "carousel_arrow_border",
       "label": "Carousel arrow border",
-      "default": "#d6e4da"
+      "default": "rgba(0, 0, 0, 0.12)"
     },
     {
       "type": "text",
       "id": "carousel_arrow_shadow",
       "label": "Carousel arrow shadow (CSS)",
-      "default": "0 4px 14px rgb(26 42 36 / 0.1)",
-      "info": "Optional box-shadow value for arrows."
+      "default": "0 4px 14px rgba(0, 0, 0, 0.12)"
     },
     {
       "type": "select",
@@ -265,7 +474,7 @@
         { "value": "page-width", "label": "Page width" },
         { "value": "full-width", "label": "Full width" }
       ],
-      "default": "page-width"
+      "default": "full-width"
     },
     {
       "type": "color_scheme",
@@ -281,7 +490,7 @@
       "max": 80,
       "step": 4,
       "unit": "px",
-      "default": 32
+      "default": 12
     },
     {
       "type": "range",
@@ -294,6 +503,35 @@
       "default": 32
     }
   ],
-  "presets": [{ "name": "Best sellers", "category": "Products" }]
+  "blocks": [
+    {
+      "type": "product_card",
+      "name": "Custom Product Card",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Shopify product (optional)" },
+        { "type": "text", "id": "brand", "label": "Brand name", "default": "Sebamed" },
+        { "type": "text", "id": "title", "label": "Product title", "default": "Sebamed Liquid Face & Body Wash 1000ml" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle / feature", "default": "pH 5.5 Sensitive Skin Formula" },
+        { "type": "image_picker", "id": "image", "label": "Product image" },
+        { "type": "text", "id": "fallback_asset", "label": "Asset filename (e.g. lame-sebamed-body-wash.jpg)", "default": "lame-sebamed-body-wash.jpg" },
+        { "type": "text", "id": "price", "label": "Current price", "default": "₹1,435" },
+        { "type": "text", "id": "compare_at_price", "label": "MRP / Compare price", "default": "₹1,690" },
+        { "type": "text", "id": "badge_text", "label": "Badge text", "default": "15% OFF" },
+        { "type": "text", "id": "rating", "label": "Rating (e.g. 4.9)", "default": "4.9" },
+        { "type": "text", "id": "reviews_count", "label": "Reviews count", "default": "340" },
+        { "type": "url", "id": "link", "label": "Product / Brand link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best sellers",
+      "category": "Products",
+      "settings": {
+        "brand_filter": "SebaMed, Vaseline",
+        "sort_by": "price_desc"
+      }
+    }
+  ]
 }
 {% endschema %}

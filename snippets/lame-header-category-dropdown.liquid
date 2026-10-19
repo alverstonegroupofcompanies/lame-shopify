@@ -16,7 +16,7 @@
   comment
     icon_key|label|collection handle (blank uses icon_key)|fallback url
   endcomment
-  assign category_rows = 'all|Products|all|/collections/all,skin-care|Skin Care|skin-care|/collections/skin-care,make-up|Make-up|make-up|/collections/make-up,hair-care|Hair care|frontpage|/collections/frontpage,bath-body|Bath & Body|bath-body|/collections/bath-body,fragrance|Fragrance|fragrance|/collections/fragrance,baby-mom|Mom & baby|baby-mom|/collections/baby-mom,wellness|Wellness|wellness|/collections/wellness,feminine|Feminine Hygiene||/search?q=feminine&type=product,combos|Combos||/search?q=combo&type=product,top-deals|Top Deals||/collections/all?sort_by=best-selling,shop-more|Shop More|our-products|/collections/our-products' | split: ','
+  assign category_rows = 'all|Products|all|/collections/all,skin-care|Skin Care|skin-care|/collections/skin-care,make-up|Make-up|make-up|/collections/make-up,hair-care|Hair Care|frontpage|/collections/frontpage,bath-body|Bath & Body|bath-body|/collections/bath-body,fragrance|Fragrance|fragrance|/collections/fragrance,baby-mom|Mom & Baby|baby-mom|/collections/baby-mom,wellness|Wellness|wellness|/collections/wellness,feminine|Feminine Hygiene||/search?q=feminine&type=product,combos|Combos||/search?q=combo&type=product,top-deals|Top Deals||/collections/all?sort_by=best-selling,shop-more|Shop More|our-products|/collections/our-products' | split: ','
 -%}
 
 <div class="lame-header-shop-category" data-lame-category-dropdown>
@@ -28,7 +28,18 @@
     aria-controls="LameHeaderCategoryPanel"
     data-lame-category-trigger
   >
-    <span class="lame-header-shop-category-btn__text">{{ category_label }}</span>
+    {%- liquid
+      assign cat_words = category_label | split: ' '
+      assign cat_label_clean = ''
+      for cw in cat_words
+        assign cw_down = cw | downcase
+        assign cw_first = cw_down | slice: 0, 1 | upcase
+        assign cw_rest = cw_down | slice: 1, cw_down.size
+        assign cat_label_clean = cat_label_clean | append: cw_first | append: cw_rest | append: ' '
+      endfor
+      assign cat_label_clean = cat_label_clean | strip
+    -%}
+    <span class="lame-header-shop-category-btn__text">{{ cat_label_clean }}</span>
     <span class="lame-header-shop-category-btn__caret" aria-hidden="true">▾</span>
   </button>
 
@@ -62,7 +73,18 @@
             <span class="lame-header-shop-category-panel__icon" aria-hidden="true">
               {% render 'lame-op-category-icon', handle: icon_key %}
             </span>
-            <span class="lame-header-shop-category-panel__label">{{ item_label | escape }}</span>
+            {%- liquid
+              assign item_words = item_label | split: ' '
+              assign item_clean = ''
+              for iw in item_words
+                assign iw_down = iw | downcase
+                assign iw_first = iw_down | slice: 0, 1 | upcase
+                assign iw_rest = iw_down | slice: 1, iw_down.size
+                assign item_clean = item_clean | append: iw_first | append: iw_rest | append: ' '
+              endfor
+              assign item_clean = item_clean | strip
+            -%}
+            <span class="lame-header-shop-category-panel__label">{{ item_clean | escape }}</span>
           </a>
         </li>
       {%- endfor -%}
