@@ -24,8 +24,18 @@
 
 {%- liquid
   assign lame_brand_name = shop.name | default: 'My Lamstone'
-  assign lame_home_seo_title = settings.social_og_title | default: page_title | default: shop.name
-  assign lame_home_seo_description = settings.social_og_description | default: page_description | default: shop.description | default: shop.name
+  assign navaratri_default_title = 'Navaratri Sale is Live Now | MyLamstone - Up to 40% Off Beauty & Cosmetics'
+  assign navaratri_default_desc = 'Celebrate Navaratri with exclusive festive offers! Enjoy up to 40% OFF authentic skincare, luxury cosmetics & beauty essentials at MyLamstone. Free gift on ₹499+ and fast delivery.'
+
+  assign lame_home_seo_title = settings.social_og_title
+  if lame_home_seo_title == blank or lame_home_seo_title contains 'Premium Cosmetics & Beauty Essentials in Kerala' or lame_home_seo_title == shop.name
+    assign lame_home_seo_title = navaratri_default_title
+  endif
+
+  assign lame_home_seo_description = settings.social_og_description
+  if lame_home_seo_description == blank or lame_home_seo_description contains 'Discover My Lamstone — luxury skincare' or lame_home_seo_description == shop.description
+    assign lame_home_seo_description = navaratri_default_desc
+  endif
 
   assign og_title = page_title | default: shop.name
   assign og_url = canonical_url | default: request.origin
