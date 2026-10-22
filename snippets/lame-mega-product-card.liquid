@@ -1,0 +1,58 @@
+{%- doc -%}
+  Compact Luxury Product Card for Brands Mega Menu showcase.
+  @param {object} product - Shopify product object
+  @param {string} [tag] - Optional badge tag (e.g. 'Signature Luxe', 'Bestseller')
+{%- enddoc -%}
+
+{%- if product != blank -%}
+  {%- liquid
+    assign variant = product.selected_or_first_available_variant
+    assign price_formatted = variant.price | money
+    assign compare_formatted = ''
+    if variant.compare_at_price > variant.price
+      assign compare_formatted = variant.compare_at_price | money
+    endif
+  -%}
+  <a
+    href="{{ product.url }}"
+    class="lame-brands-mega__prod-card"
+    aria-label="{{ product.title | escape }}"
+    title="{{ product.title | escape }}"
+  >
+    <div class="lame-brands-mega__prod-media">
+      {%- if tag != blank -%}
+        <span class="lame-brands-mega__prod-tag">{{ tag }}</span>
+      {%- endif -%}
+      {%- if product.featured_image != blank -%}
+        {{
+          product.featured_image
+          | image_url: width: 440
+          | image_tag:
+            class: 'lame-brands-mega__prod-img',
+            loading: 'lazy',
+            widths: '180, 240, 360, 440',
+            sizes: '200px',
+            alt: product.title
+        }}
+      {%- else -%}
+        <div class="lame-brands-mega__prod-noimg">Lamé</div>
+      {%- endif -%}
+    </div>
+    <div class="lame-brands-mega__prod-info">
+      <span class="lame-brands-mega__prod-vendor">Lamé • Paris</span>
+      <h4 class="lame-brands-mega__prod-title">{{ product.title }}</h4>
+      <div class="lame-brands-mega__prod-price-row">
+        <span class="lame-brands-mega__prod-price">{{ price_formatted }}</span>
+        {%- if compare_formatted != blank -%}
+          <s class="lame-brands-mega__prod-compare">{{ compare_formatted }}</s>
+        {%- endif -%}
+      </div>
+      <span class="lame-brands-mega__prod-btn">
+        <span>View Product</span>
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M2.5 7h9M8 3.5l3.5 3.5-3.5 3.5"/>
+        </svg>
+      </span>
+    </div>
+  </a>
+{%- endif -%}

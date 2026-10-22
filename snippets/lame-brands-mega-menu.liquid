@@ -12,29 +12,72 @@
 {%- enddoc -%}
 
 {%- capture default_brands_data -%}
+Annina|annina|popular|A
+Aroma Magic|aroma-magic|popular,new|A
+Bath & Body|bath-body|popular,luxe|B
+Bioderma|bioderma|popular,luxe|B
+Biotique|biotique|popular,new|B
+Bombay Shaving Company|bombay-shaving-company|popular,new|B
+BP Color Pop|bp-color-pop|popular,exclusive|B
+Cetaphil|cetaphil|popular,luxe,exclusive,new|C
+Character|character|popular,exclusive|C
+Dot & Key|dot-key|popular,new|D
 Dove|dove|popular,luxe,exclusive,new|D
-Ponds|ponds|popular,luxe,exclusive,new|P
-Pears|pears|popular,luxe,exclusive,new|P
+Dr. Althea|dr-althea|popular,luxe|D
+DR.RASHEL|dr-rashel|popular,new|D
+E18|e18|popular,exclusive|E
+Faces Canada|faces-canada|popular,luxe|F
+Fair & Lovely|fair-lovely|popular|F
 Femisafe|femisafe|popular,luxe,exclusive,new|F
+Fixderma|fixderma|popular,new|F
+Garnier|garnier|popular|G
+Glam|glam|popular,exclusive|G
+Hair Color|hair-color|popular,exclusive|H
+Hamam|hamam|popular|H
+Himalaya|himalaya|popular|H
+Indulekha|indulekha|popular|I
+Jedal|jedal|popular,exclusive|J
 Jovees Herbal|jovees-herbal|popular,luxe,exclusive,new|J
-SebaMed|sebamed|popular,luxe,exclusive,new|S
+Kama|kama|popular,luxe|K
+Kay Beauty|kay-beauty|popular,luxe|K
+KC Kozicare|kc-kozicare|popular,exclusive|K
+Korean|korean|popular,luxe|K
+L.A. Girl|l-a-girl|popular,luxe|L
+L'Oréal|l-oreal|popular,luxe|L
+Lakme|lakme|popular|L
+Lame|lame|popular,exclusive,luxe,new|L
+Lifebouy|lifebouy|popular|L
+Lotus|lotus|popular|L
+Lux|lux|popular|L
+LYN|lyn|popular,exclusive|L
+Mamaearth|mamaearth|popular|M
+Maybelline|maybelline|popular,luxe|M
+Minimalist|minimalist|popular,new|M
+NIVEA|nivea|popular|N
 Nykaa|nykaa|popular,luxe,exclusive,new|N
+Pears|pears|popular,luxe,exclusive,new|P
+Pilgrim|pilgrim|popular,new|P
+Plum|plum|popular,new|P
+Ponds|ponds|popular,luxe,exclusive,new|P
+Purple|purple|popular,exclusive|P
+RECODE|recode|popular,new|R
+Revolution|revolution|popular,luxe|R
+ScalpPro|scalppro|popular,exclusive|S
+SebaMed|sebamed|popular,luxe,exclusive,new|S
+Sirona|sirona|popular,new|S
+Streax|streax|popular|S
+Swiss Beauty|swiss-beauty|popular,luxe|S
+The Body Shop.|the-body-shop|popular,luxe|T
+The Face Shop|the-face-shop|popular,luxe|T
+Tresemme|tresemme|popular|T
+UROPARIS|uroparis|popular,luxe|U
+Vaseline|vaseline|popular|V
+VWash|vwash|popular,exclusive|V
 {%- endcapture -%}
 
 {%- liquid
   assign all_products_url = routes.all_products_collection_url
   assign default_brands_list = default_brands_data | strip | newline_to_br | split: '<br />'
-
-  # Check if custom Brand blocks are configured in Shopify Theme Editor
-  assign has_custom_brands = false
-  if menu_block and menu_block.blocks.size > 0
-    for child_block in menu_block.blocks
-      if child_block.type == '_header-mega-brand'
-        assign has_custom_brands = true
-        break
-      endif
-    endfor
-  endif
 -%}
 
 {{ 'lame-brands-mega-menu.css' | asset_url | stylesheet_tag }}
@@ -184,8 +227,10 @@ Nykaa|nykaa|popular,luxe,exclusive,new|N
           class="lame-brands-mega__tab"
           data-brand-tab="exclusive"
           aria-selected="false"
+          data-collection-url="{{ all_products_url }}?filter.p.vendor=Lame"
+          title="Only at MyLamstone — Click to view Lamé Products"
         >
-          Only at Lamstone
+          Only at MyLamstone
         </button>
         <button
           type="button"
@@ -276,7 +321,71 @@ Nykaa|nykaa|popular,luxe,exclusive,new|N
         {%- endif -%}
       </div>
 
-      <!-- No Results State -->
+      <!-- Exclusive Lamé Products Showcase (Shown directly on click of "Only at MyLamstone") -->
+      <div class="lame-brands-mega__lame-showcase" data-lame-showcase style="display: none;">
+        <div class="lame-brands-mega__lame-banner">
+          <div class="lame-brands-mega__lame-banner-info">
+            <span class="lame-brands-mega__lame-banner-badge">House of Lamé • Private Blend</span>
+            <h3 class="lame-brands-mega__lame-banner-title">Only at MyLamstone Signature Collection</h3>
+            <p class="lame-brands-mega__lame-banner-sub">Exclusive French Haute Parfumerie &amp; luxury formulations crafted exclusively for MyLamstone.</p>
+          </div>
+          <a
+            href="{{ all_products_url }}?filter.p.vendor=Lame"
+            class="lame-brands-mega__lame-banner-btn"
+          >
+            <span>View All Lamé Products</span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="lame-brands-mega__lame-grid">
+          {%- assign lame_p1 = all_products['lame-barqat-eau-de-parfum-100ml'] -%}
+          {%- assign lame_p2 = all_products['lame-blue-mirage-eau-de-parfum-100ml'] -%}
+          {%- assign lame_p3 = all_products['lame-mayscent-eau-de-parfum-100ml'] -%}
+
+          {%- if lame_p1 != blank -%}
+            {% render 'lame-mega-product-card', product: lame_p1, tag: 'Signature Luxe' %}
+          {%- endif -%}
+
+          {%- if lame_p2 != blank -%}
+            {% render 'lame-mega-product-card', product: lame_p2, tag: 'Bestseller' %}
+          {%- endif -%}
+
+          {%- if lame_p3 != blank -%}
+            {% render 'lame-mega-product-card', product: lame_p3, tag: 'Daily Ritual' %}
+          {%- endif -%}
+
+          <!-- Feature Brand Collection Card -->
+          <a
+            href="{{ all_products_url }}?filter.p.vendor=Lame"
+            class="lame-brands-mega__lame-feature-card"
+            title="Explore The House of Lamé"
+          >
+            <div class="lame-brands-mega__lame-feature-inner">
+              <div class="lame-brands-mega__lame-feature-logo-wrap">
+                <img
+                  src="{{ 'venture-lame.png' | asset_url }}"
+                  alt="Lamé"
+                  class="lame-brands-mega__lame-feature-logo"
+                  loading="lazy"
+                  width="130"
+                  height="46"
+                >
+              </div>
+              <h4 class="lame-brands-mega__lame-feature-heading">The House of Lamé</h4>
+              <p class="lame-brands-mega__lame-feature-desc">Discover our signature luxury fragrances and exclusive artisanal formulations.</p>
+              <span class="lame-brands-mega__lame-feature-link">
+                <span>Shop Full Catalog</span>
+                <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M2.5 7h9M8 3.5l3.5 3.5-3.5 3.5"/>
+                </svg>
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
       <div class="lame-brands-mega__empty" data-brand-empty style="display: none;">
         <p class="lame-brands-mega__empty-text">No brands found matching your search.</p>
         <button type="button" class="lame-brands-mega__empty-btn" data-brand-reset-btn>Show All Brands</button>

@@ -30,10 +30,10 @@
     let currentTab = 'popular';
     let currentLetter = 'all';
     let closeTimer = null;
-    let isPinnedOpen = false;
 
     /* ----------------------------------------------------
-       Robust Open / Close / Pin Management
+       Robust Open / Close Management
+       Disappears promptly when mouse pointer leaves the box
        ---------------------------------------------------- */
     function openMenu() {
       if (closeTimer) {
@@ -49,36 +49,21 @@
       }
       if (submenu) {
         submenu.setAttribute('data-active', '');
+        submenu.style.removeProperty('display');
+        submenu.style.removeProperty('visibility');
+        submenu.style.removeProperty('opacity');
+        submenu.style.removeProperty('pointer-events');
       }
       if (headerComp) {
         const h = root.offsetHeight || 560;
         headerComp.style.setProperty('--submenu-height', `${h}px`);
         const headerTopHeight = headerComp.offsetHeight || 70;
         headerComp.style.setProperty('--full-open-header-height', `${h + headerTopHeight}px`);
+        headerComp.style.setProperty('--submenu-opacity', '1');
       }
     }
 
-    function scheduleClose(delay = 350) {
-      if (isPinnedOpen) return;
-      if (closeTimer) clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => {
-        if (!isPinnedOpen) {
-          if (parentListItem) {
-            parentListItem.classList.remove('is-open');
-            parentListItem.removeAttribute('data-open');
-          }
-          if (brandsLink) {
-            brandsLink.setAttribute('aria-expanded', 'false');
-          }
-          if (submenu) {
-            submenu.removeAttribute('data-active');
-          }
-        }
-      }, delay);
-    }
-
     function closeImmediate() {
-      isPinnedOpen = false;
       if (closeTimer) {
         clearTimeout(closeTimer);
         closeTimer = null;
@@ -92,47 +77,84 @@
       }
       if (submenu) {
         submenu.removeAttribute('data-active');
+        submenu.style.setProperty('visibility', 'hidden', 'important');
+        submenu.style.setProperty('opacity', '0', 'important');
+        submenu.style.setProperty('pointer-events', 'none', 'important');
+      }
+      if (headerComp) {
+        headerComp.style.setProperty('--submenu-height', '0px');
+        headerComp.style.setProperty('--submenu-opacity', '0');
+        const headerTopHeight = headerComp.offsetHeight || 70;
+        headerComp.style.setProperty('--full-open-header-height', `${headerTopHeight}px`);
+      }
+      // Release focus from inside the menu so :focus-within does not hold it open
+      if (root.contains(document.activeElement)) {
+        document.activeElement.blur();
       }
     }
 
-    // Toggle on click of "Brands" link so shoppers can pin it open
+    function scheduleClose(delay = 100) {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => {
+        closeImmediate();
+      }, delay);
+    }
+
+    // Toggle on click of "Brands" link without locking it pinned
     if (brandsLink) {
       brandsLink.addEventListener('click', (e) => {
-        if (parentListItem?.classList.contains('is-open') && isPinnedOpen) {
+        if (parentListItem?.classList.contains('is-open')) {
           closeImmediate();
         } else {
-          e.preventDefault();
-          e.stopPropagation();
-          isPinnedOpen = true;
           openMenu();
         }
       });
     }
 
     // Hover intent on parent list item and submenu
-    const hoverElements = [parentListItem, submenu].filter(Boolean);
+    const hoverElements = [parentListItem, submenu, root].filter(Boolean);
+    function handleEnter() {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      openMenu();
+    }
+
+    function handleLeave(e) {
+      const to = e.relatedTarget;
+      if (to && (parentListItem?.contains(to) || root.contains(to) || submenu?.contains(to))) {
+        return;
+      }
+      scheduleClose(80);
+    }
+
     hoverElements.forEach((el) => {
-      el.addEventListener('pointerenter', () => {
-        openMenu();
-      });
-      el.addEventListener('mouseenter', () => {
-        openMenu();
-      });
-      el.addEventListener('pointerleave', (e) => {
-        const to = e.relatedTarget;
-        if (to && (parentListItem?.contains(to) || root.contains(to))) {
-          return;
-        }
-        scheduleClose(350);
-      });
-      el.addEventListener('mouseleave', (e) => {
-        const to = e.relatedTarget;
-        if (to && (parentListItem?.contains(to) || root.contains(to))) {
-          return;
-        }
-        scheduleClose(350);
-      });
+      el.addEventListener('pointerenter', handleEnter);
+      el.addEventListener('mouseenter', handleEnter);
+      el.addEventListener('pointerleave', handleLeave);
+      el.addEventListener('mouseleave', handleLeave);
     });
+
+    // Global pointer tracker: as soon as pointer moves outside the box, disappear
+    document.addEventListener('pointermove', (e) => {
+      const isOpen = parentListItem?.classList.contains('is-open') || submenu?.hasAttribute('data-active');
+      if (!isOpen) return;
+
+      const target = e.target;
+      if (target && (parentListItem?.contains(target) || root.contains(target) || submenu?.contains(target))) {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        return;
+      }
+
+      // Pointer is outside the box! Close immediately
+      if (!closeTimer) {
+        scheduleClose(60);
+      }
+    }, { passive: true });
 
     // Close on click outside
     document.addEventListener('click', (e) => {
@@ -154,6 +176,21 @@
     function applyFilter() {
       const query = (searchInput?.value || '').trim().toLowerCase();
       let visibleCardCount = 0;
+      const lameShowcase = root.querySelector('[data-lame-showcase]');
+      const brandGrid = root.querySelector('[data-brand-grid]');
+
+      // When "Only at MyLamstone" tab is active without search query, show Lamé products directly!
+      const isOnlyLameMode = currentTab === 'exclusive' && !query && currentLetter === 'all';
+
+      if (isOnlyLameMode) {
+        if (lameShowcase) lameShowcase.style.display = 'flex';
+        if (brandGrid) brandGrid.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
+        visibleCardCount = 3;
+      } else {
+        if (lameShowcase) lameShowcase.style.display = 'none';
+        if (brandGrid) brandGrid.style.display = 'grid';
+      }
 
       // 1. Filter Left Sidebar Text Items
       textItems.forEach((item) => {
@@ -170,36 +207,38 @@
         }
       });
 
-      // 2. Filter Right Grid Brand Cards
-      brandCards.forEach((card) => {
-        const name = (card.dataset.brandName || '').toLowerCase();
-        const tabsAttr = (card.dataset.brandTabs || 'popular').toLowerCase();
-        const letter = (card.dataset.brandLetter || '').toUpperCase();
+      // 2. Filter Right Grid Brand Cards (when not in Lamé exclusive products mode)
+      if (!isOnlyLameMode) {
+        brandCards.forEach((card) => {
+          const name = (card.dataset.brandName || '').toLowerCase();
+          const tabsAttr = (card.dataset.brandTabs || 'popular').toLowerCase();
+          const letter = (card.dataset.brandLetter || '').toUpperCase();
 
-        let matchesSearch = !query || name.includes(query);
-        let matchesTab = tabsAttr.includes(currentTab) || tabsAttr.includes('all');
-        let matchesLetter = currentLetter === 'all' || letter === currentLetter;
+          let matchesSearch = !query || name.includes(query);
+          let matchesTab = tabsAttr.includes(currentTab) || tabsAttr.includes('all');
+          let matchesLetter = currentLetter === 'all' || letter === currentLetter;
 
-        let show = false;
-        if (query) {
-          show = matchesSearch;
-        } else if (currentLetter !== 'all') {
-          show = matchesLetter;
-        } else {
-          show = matchesTab;
+          let show = false;
+          if (query) {
+            show = matchesSearch;
+          } else if (currentLetter !== 'all') {
+            show = matchesLetter;
+          } else {
+            show = matchesTab;
+          }
+
+          if (show) {
+            card.classList.remove('is-hidden');
+            visibleCardCount++;
+          } else {
+            card.classList.add('is-hidden');
+          }
+        });
+
+        // 3. Update Empty State
+        if (emptyState) {
+          emptyState.style.display = visibleCardCount === 0 ? 'block' : 'none';
         }
-
-        if (show) {
-          card.classList.remove('is-hidden');
-          visibleCardCount++;
-        } else {
-          card.classList.add('is-hidden');
-        }
-      });
-
-      // 3. Update Empty State
-      if (emptyState) {
-        emptyState.style.display = visibleCardCount === 0 ? 'block' : 'none';
       }
 
       // 4. Update Clear Button Visibility
@@ -235,7 +274,16 @@
 
     // Tab Buttons Listener
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
+      tab.addEventListener('click', (e) => {
+        const isAlreadyActive = tab.classList.contains('is-active');
+        const tabKey = tab.dataset.brandTab || 'popular';
+
+        // If clicking 'Only at MyLamstone' when already active, navigate directly to Lamé collection
+        if (isAlreadyActive && tabKey === 'exclusive' && tab.dataset.collectionUrl) {
+          window.location.href = tab.dataset.collectionUrl;
+          return;
+        }
+
         tabs.forEach((t) => {
           t.classList.remove('is-active');
           t.setAttribute('aria-selected', 'false');
@@ -243,7 +291,7 @@
         tab.classList.add('is-active');
         tab.setAttribute('aria-selected', 'true');
 
-        currentTab = tab.dataset.brandTab || 'popular';
+        currentTab = tabKey;
         currentLetter = 'all';
 
         // Reset active AZ button
