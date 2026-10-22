@@ -53,7 +53,7 @@
 
 <article class="lame-cat-card lame-cat-card--{{ collection_handle }}">
   <div class="lame-cat-card__media">
-    <a href="{{ product.url }}" class="lame-cat-card__media-link">
+    <a href="{{ product.url }}" class="lame-cat-card__media-link" aria-label="{{ product.title | escape }}">
       {% if product.featured_media %}
         {{
           product.featured_media
@@ -85,6 +85,11 @@
       {% endif %}
     </div>
 
+    {% if show_wishlist %}
+      <div class="lame-cat-card__wish">
+        {% render 'lame-category-wishlist-btn', product: product %}
+      </div>
+    {% endif %}
   </div>
 
   <div class="lame-cat-card__body">
@@ -101,9 +106,6 @@
     <div class="lame-cat-card__price">
       {% render 'price', product_resource: product, show_sale_price_first: true %}
     </div>
-    <p class="lame-cat-card__stock{% unless variant.available %} lame-cat-card__stock--out{% endunless %}">
-      {% if variant.available %}In stock{% else %}Out of stock{% endif %}
-    </p>
 
     <div class="lame-cat-card__actions">
       <div class="lame-cat-card__action-row">
@@ -120,9 +122,6 @@
               {%- capture lame_bogo_qty -%}{% render 'lame-bogo-add-qty', product: product %}{%- endcapture -%}
               <input type="hidden" name="quantity" value="{{ lame_bogo_qty | strip }}">
               <button type="submit" name="add" class="lame-cat-card__btn" aria-label="{{ 'actions.add_to_cart' | t | escape }}">
-                <span class="lame-cat-card__btn-icon" aria-hidden="true">
-                  {{- 'icon-add-to-cart.svg' | inline_asset_content -}}
-                </span>
                 <span class="lame-cat-card__btn-label">{{ 'actions.add_to_cart' | t }}</span>
               </button>
             {%- endform -%}
@@ -131,10 +130,6 @@
           <button type="button" class="lame-cat-card__btn lame-cat-card__btn--outline" disabled>
             {{ 'products.product.sold_out' | t }}
           </button>
-        {% endif %}
-
-        {% if show_wishlist %}
-          {% render 'lame-category-wishlist-btn', product: product %}
         {% endif %}
       </div>
     </div>

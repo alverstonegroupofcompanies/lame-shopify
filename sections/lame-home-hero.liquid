@@ -164,14 +164,14 @@
       {%- endif -%}
     </div>
 
-    {%- unless section.settings.show_navaratri_ticker == false -%}
-      {%- assign navaratri_text = section.settings.navaratri_ticker_text | default: 'NAVARATRI SALE IS LIVE NOW' -%}
+    {%- if section.settings.show_navaratri_ticker == true and section.settings.navaratri_ticker_text != blank -%}
+      {%- assign navaratri_text = section.settings.navaratri_ticker_text -%}
       {%- assign navaratri_link = section.settings.navaratri_ticker_link | default: '/collections/all' -%}
       <div
         class="lame-navaratri-ticker"
         role="region"
-        aria-label="Navaratri Sale Announcement"
-        style="--lame-navaratri-bg: {{ section.settings.navaratri_ticker_bg | default: '#f37021' }}; --lame-navaratri-color: {{ section.settings.navaratri_ticker_text_color | default: '#ffffff' }};"
+        aria-label="Promotion Announcement"
+        style="--lame-navaratri-bg: {{ section.settings.navaratri_ticker_bg | default: '#1a472a' }}; --lame-navaratri-color: {{ section.settings.navaratri_ticker_text_color | default: '#ffffff' }};"
       >
         <a href="{{ navaratri_link }}" class="lame-navaratri-ticker__inner" title="{{ navaratri_text | escape }}">
           <div class="lame-navaratri-ticker__track">
@@ -194,7 +194,7 @@
           </div>
         </a>
       </div>
-    {%- endunless -%}
+    {%- endif -%}
   </section>
   <script src="{{ 'lame-home-hero-mobile.js' | asset_url }}" type="module" defer></script>
 {%- endif -%}
@@ -1223,19 +1223,19 @@
     },
     {
       "type": "header",
-      "content": "Navaratri sale ticker strip"
+      "content": "Promotional sale ticker strip"
     },
     {
       "type": "checkbox",
       "id": "show_navaratri_ticker",
       "label": "Show ticker strip under banner",
-      "default": true
+      "default": false
     },
     {
       "type": "text",
       "id": "navaratri_ticker_text",
       "label": "Ticker text",
-      "default": "NAVARATRI SALE IS LIVE NOW"
+      "default": "DIWALI GRAND SALE COMING SOON"
     },
     {
       "type": "url",
@@ -1246,7 +1246,7 @@
       "type": "color",
       "id": "navaratri_ticker_bg",
       "label": "Strip background color",
-      "default": "#f37021"
+      "default": "#1a472a"
     },
     {
       "type": "color",
