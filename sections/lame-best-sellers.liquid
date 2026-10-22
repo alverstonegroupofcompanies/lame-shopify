@@ -1,10 +1,15 @@
 {% liquid
-  assign bestseller_collection = collections[section.settings.collection]
-  if bestseller_collection == blank or bestseller_collection.products_count == 0
-    if collections['our-products'] != blank and collections['our-products'].products_count > 0
+  assign col_handle = section.settings.collection
+  if col_handle == blank or col_handle == 'all'
+    assign col_handle = 'our-products'
+  endif
+
+  assign bestseller_collection = collections[col_handle]
+  if bestseller_collection == blank or bestseller_collection.products.size == 0
+    if collections['our-products'] != blank and collections['our-products'].products.size > 0
       assign bestseller_collection = collections['our-products']
-    else
-      assign bestseller_collection = collections.all
+    elsif collections['all'] != blank and collections['all'].products.size > 0
+      assign bestseller_collection = collections['all']
     endif
   endif
 
@@ -109,9 +114,9 @@
     {% endfor %}
   {% endif %}
 
-  {%- comment -%} 4. Draw additional products from collections.all if pool is small {%- endcomment -%}
-  {% if pool_count < pool_limit and bestseller_collection.handle != 'all' and collections.all.products.size > 0 %}
-    {% for product in collections.all.products %}
+  {%- comment -%} 4. Fill from our-products collection if pool is small {%- endcomment -%}
+  {% if pool_count < pool_limit and collections['our-products'] != blank and collections['our-products'].products.size > 0 %}
+    {% for product in collections['our-products'].products %}
       {% if pool_count >= pool_limit %}{% break %}{% endif %}
       {% assign p_token = '||' | append: product.id | append: '||' %}
       {% if seen_ids contains p_token %}{% continue %}{% endif %}
@@ -139,10 +144,11 @@
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    {% if section.settings.heading != blank or section.settings.subheading != blank %}
+    {% assign heading_text = section.settings.heading | default: 'Best Sellers' %}
+    {% if heading_text != blank or section.settings.subheading != blank %}
       <header class="lame-flash-deal__header" data-lame-reveal>
         {% render 'lame-section-heading',
-          title: section.settings.heading,
+          title: heading_text,
           subtitle: section.settings.subheading,
           alignment: 'center',
           size: 'large'
@@ -216,6 +222,15 @@
 </section>
 
 <style>
+  .lame-best-sellers [data-lame-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+  .lame-best-sellers .lame-flash-deal__carousel {
+    max-width: var(--page-width, 1200px);
+    margin-inline: auto;
+  }
   .lame-best-sellers__view-all {
     margin: 1.5rem 0 0;
     text-align: center;
@@ -242,6 +257,9 @@
     if (!section) return;
 
     const track = section.querySelector('[data-flash-track]');
+    const viewport = section.querySelector('[data-flash-viewport]');
+    const prevBtn = section.querySelector('[data-flash-prev]');
+    const nextBtn = section.querySelector('[data-flash-next]');
     if (!track) return;
 
     const shouldRandomize = {{ section.settings.randomize_on_refresh | default: true }};
@@ -275,6 +293,41 @@
 
     if (shouldRandomize) {
       shuffleProducts();
+    }
+
+    // Reveal elements with IntersectionObserver + instant failsafe
+    const revealNodes = section.querySelectorAll('[data-lame-reveal]');
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.05 }
+      );
+      revealNodes.forEach((node) => observer.observe(node));
+    } else {
+      revealNodes.forEach((node) => node.classList.add('is-visible'));
+    }
+    setTimeout(() => {
+      revealNodes.forEach((node) => node.classList.add('is-visible'));
+    }, 300);
+
+    // Carousel arrow navigation
+    if (viewport && prevBtn && nextBtn) {
+      const getScrollAmount = () => {
+        const card = track.querySelector('.lame-flash-deal__item');
+        return card ? card.offsetWidth + 16 : 240;
+      };
+      prevBtn.addEventListener('click', () => {
+        viewport.scrollBy({ left: -getScrollAmount() * 2, behavior: 'smooth' });
+      });
+      nextBtn.addEventListener('click', () => {
+        viewport.scrollBy({ left: getScrollAmount() * 2, behavior: 'smooth' });
+      });
     }
 
     // Ajax add to cart handler (matches lame-flash-deal & lame-new-products)
@@ -422,7 +475,9 @@
       "name": "Best sellers",
       "category": "Products",
       "settings": {
-        "collection": "all",
+        "heading": "Best Sellers",
+        "subheading": "Top-rated skincare, beauty & wellness favorites from our collection",
+        "collection": "our-products",
         "products_to_show": 8,
         "randomize_on_refresh": true
       }
