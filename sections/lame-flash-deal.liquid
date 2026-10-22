@@ -110,6 +110,10 @@
   if heading_lower contains 'glow up' or section.id contains 'row_skin_care'
     assign is_glow_up_daily = true
   endif
+
+  if is_glow_up_daily
+    assign title_mobile_full_width = true
+  endif
 -%}
 
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
@@ -152,7 +156,13 @@
         <h2 class="lame-flash-deal__title-image{% unless show_heading_mobile %} lame-title-image--hide-mobile{% endunless %}{% if title_full_width %} lame-title-image--full-width{% endif %}{% if title_mobile_full_width %} lame-title-image--mobile-full-width{% endif %}">
           <picture class="lame-flash-deal__title-picture">
             {%- if heading_image_mobile != blank -%}
-              <source media="(max-width: 749px)" srcset="{{ heading_image_mobile | image_url: width: 900 }}">
+              <source
+                media="(max-width: 749px)"
+                srcset="{{ heading_image_mobile | image_url: width: 600 }} 600w, {{ heading_image_mobile | image_url: width: 900 }} 900w, {{ heading_image_mobile | image_url: width: 1200 }} 1200w, {{ heading_image_mobile | image_url: width: 1600 }} 1600w"
+                sizes="100vw"
+                width="{{ heading_image_mobile.width }}"
+                height="{{ heading_image_mobile.height }}"
+              >
             {%- endif -%}
             {%- if heading_image != blank -%}
               {{
@@ -168,11 +178,11 @@
             {%- elsif heading_image_mobile != blank -%}
               {{
                 heading_image_mobile
-                | image_url: width: 900
+                | image_url: width: 1200
                 | image_tag:
                   class: 'lame-flash-deal__title-img',
                   loading: 'lazy',
-                  widths: '600,900',
+                  widths: '600,900,1200,1600',
                   sizes: '100vw',
                   alt: heading_alt
               }}

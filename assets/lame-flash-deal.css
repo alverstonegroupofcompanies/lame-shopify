@@ -82,13 +82,15 @@
   aspect-ratio: var(--lame-flash-banner-ratio, 1920 / 237);
 }
 
-/* Glow Up Daily banner: exactly 1920x237 proportion */
-.lame-flash-deal--glow-up-daily .lame-flash-deal__title-image,
-.lame-flash-deal--glow-up-daily .lame-flash-deal__title-img,
-.lame-flash-deal--glow-up-daily .lame-flash-deal__title-picture {
-  aspect-ratio: 1920 / 237 !important;
-  max-width: 1920px !important;
-  width: 100% !important;
+@media screen and (min-width: 750px) {
+  /* Glow Up Daily banner: exactly 1920x237 proportion on desktop */
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__title-image,
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__title-img,
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__title-picture {
+    aspect-ratio: 1920 / 237 !important;
+    max-width: 1920px !important;
+    width: 100% !important;
+  }
 }
 
 /* Full-width Title Banner Override: 0 margins, 0 padding, 0 border-radius, true 100% edge-to-edge */
@@ -177,12 +179,34 @@
   .lame-flash-deal__title-img {
     aspect-ratio: auto;
     height: auto;
-    object-fit: contain;
+    object-fit: cover;
   }
 
-  /* Mobile Full-width Bleed: 0 padding, 0 margin, 0 radius */
+  /* Mobile Full-width Bleed: 0 padding, 0 margin, 0 radius, true edge-to-edge */
   .shopify-section:has(.lame-flash-deal--title-mobile-full-width),
-  .shopify-section:has(.lame-title-image--mobile-full-width) {
+  .shopify-section:has(.lame-title-image--mobile-full-width),
+  .shopify-section:has(.lame-flash-deal--glow-up-daily),
+  .lame-flash-deal.lame-flash-deal--title-mobile-full-width,
+  .lame-flash-deal.lame-flash-deal--glow-up-daily,
+  .lame-flash-deal:has(.lame-title-image--mobile-full-width) {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
+  }
+
+  .shopify-section:has(.lame-flash-deal--title-mobile-full-width) > .section,
+  .shopify-section:has(.lame-flash-deal--glow-up-daily) > .section,
+  .shopify-section:has(.lame-title-image--mobile-full-width) > .section {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
+  }
+
+  .lame-flash-deal--title-mobile-full-width > .lame-flash-deal__wrap,
+  .lame-flash-deal--glow-up-daily > .lame-flash-deal__wrap,
+  .lame-flash-deal:has(.lame-title-image--mobile-full-width) > .lame-flash-deal__wrap {
     width: 100% !important;
     max-width: 100% !important;
     padding-inline: 0 !important;
@@ -190,6 +214,7 @@
   }
 
   .lame-flash-deal--title-mobile-full-width .lame-flash-deal__header,
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__header,
   .lame-flash-deal:has(.lame-title-image--mobile-full-width) .lame-flash-deal__header,
   .lame-flash-deal__header--mobile-full-width {
     width: 100% !important;
@@ -199,6 +224,7 @@
   }
 
   .lame-flash-deal--title-mobile-full-width .lame-new-products__header-row,
+  .lame-flash-deal--glow-up-daily .lame-new-products__header-row,
   .lame-flash-deal:has(.lame-title-image--mobile-full-width) .lame-new-products__header-row {
     width: 100% !important;
     max-width: 100% !important;
@@ -207,6 +233,7 @@
   }
 
   .lame-flash-deal--title-mobile-full-width .lame-flash-deal__title-image,
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__title-image,
   .lame-flash-deal:has(.lame-title-image--mobile-full-width) .lame-flash-deal__title-image,
   .lame-flash-deal__title-image.lame-title-image--mobile-full-width {
     width: 100% !important;
@@ -214,28 +241,52 @@
     padding-inline: 0 !important;
     margin-inline: 0 !important;
     border-radius: 0 !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+
+  .lame-flash-deal--title-mobile-full-width .lame-flash-deal__title-picture,
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__title-picture,
+  .lame-flash-deal:has(.lame-title-image--mobile-full-width) .lame-flash-deal__title-picture {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+    line-height: 0 !important;
   }
 
   .lame-flash-deal--title-mobile-full-width .lame-flash-deal__title-img,
+  .lame-flash-deal--glow-up-daily .lame-flash-deal__title-img,
   .lame-flash-deal:has(.lame-title-image--mobile-full-width) .lame-flash-deal__title-img,
   .lame-flash-deal__title-image.lame-title-image--mobile-full-width .lame-flash-deal__title-img {
+    display: block !important;
     border-radius: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: cover !important;
   }
 
   /* Mobile Boxed: Keep side gap & rounded corners */
-  .lame-flash-deal:not(.lame-flash-deal--title-mobile-full-width):not(:has(.lame-title-image--mobile-full-width)) .lame-flash-deal__header {
+  .lame-flash-deal:not(.lame-flash-deal--title-mobile-full-width):not(:has(.lame-title-image--mobile-full-width)):not(.lame-flash-deal--glow-up-daily) .lame-flash-deal__header {
     padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
     box-sizing: border-box !important;
   }
 
-  .lame-flash-deal:not(.lame-flash-deal--title-mobile-full-width):not(:has(.lame-title-image--mobile-full-width)) .lame-flash-deal__title-image {
+  .lame-flash-deal:not(.lame-flash-deal--title-mobile-full-width):not(:has(.lame-title-image--mobile-full-width)):not(.lame-flash-deal--glow-up-daily) .lame-flash-deal__title-image {
     border-radius: clamp(6px, 1.2vw, 12px) !important;
     overflow: hidden !important;
   }
 
-  .lame-flash-deal:not(.lame-flash-deal--title-mobile-full-width):not(:has(.lame-title-image--mobile-full-width)) .lame-flash-deal__title-img {
+  .lame-flash-deal:not(.lame-flash-deal--title-mobile-full-width):not(:has(.lame-title-image--mobile-full-width)):not(.lame-flash-deal--glow-up-daily) .lame-flash-deal__title-img {
     border-radius: clamp(6px, 1.2vw, 12px) !important;
   }
 }
@@ -837,6 +888,16 @@
   max-width: min(100%, var(--page-width, 1200px));
   margin-inline: auto;
   box-sizing: border-box;
+}
+
+@media screen and (max-width: 749px) {
+  .template-index .lame-flash-deal.lame-flash-deal--title-mobile-full-width .lame-flash-deal__header,
+  .template-index .lame-flash-deal.lame-flash-deal--glow-up-daily .lame-flash-deal__header,
+  .template-index .lame-flash-deal:has(.lame-title-image--mobile-full-width) .lame-flash-deal__header {
+    padding-inline: 0 !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+  }
 }
 
 .template-index .lame-flash-deal.section--page-width .lame-flash-deal__carousel,
