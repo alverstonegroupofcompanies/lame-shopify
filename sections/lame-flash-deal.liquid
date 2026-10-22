@@ -104,14 +104,20 @@
   elsif section.settings.heading_image_mobile_full_width == nil and title_full_width
     assign title_mobile_full_width = true
   endif
+
+  assign is_glow_up_daily = false
+  assign heading_lower = section.settings.heading | default: '' | downcase
+  if heading_lower contains 'glow up' or section.id contains 'row_skin_care'
+    assign is_glow_up_daily = true
+  endif
 -%}
 
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if is_glow_up_daily %} lame-flash-deal--glow-up-daily{% endif %}{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};"
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -151,12 +157,12 @@
             {%- if heading_image != blank -%}
               {{
                 heading_image
-                | image_url: width: 1600
+                | image_url: width: 1920
                 | image_tag:
                   class: 'lame-flash-deal__title-img',
                   loading: 'lazy',
-                  widths: '600,900,1200,1600',
-                  sizes: '(min-width: 1200px) 1200px, 100vw',
+                  widths: '600,900,1200,1600,1920,2400',
+                  sizes: '(min-width: 1200px) 1920px, 100vw',
                   alt: heading_alt
               }}
             {%- elsif heading_image_mobile != blank -%}
