@@ -1,8 +1,16 @@
 {%- doc -%}
   Carousel product card — used by Best Sellers and other product carousels.
-  Supports both live Shopify product objects and curated/custom product card blocks.
+  Matches standard catalog product card design.
 {%- enddoc -%}
 
+{%- if product != blank -%}
+  {% render 'lame-flash-deal-card',
+    product: product,
+    badge_label: offer_badge_text,
+    add_to_cart_label: add_to_cart_label,
+    sold_out_label: sold_out_label
+  %}
+{%- else -%}
 {%- liquid
   assign is_custom = false
   if product == blank and custom_title != blank
@@ -196,3 +204,4 @@
     {%- endif -%}
   </div>
 </article>
+{%- endif -%}

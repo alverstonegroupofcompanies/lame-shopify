@@ -1,7 +1,11 @@
 {% liquid
   assign bestseller_collection = collections[section.settings.collection]
-  if bestseller_collection == blank
-    assign bestseller_collection = collections.all
+  if bestseller_collection == blank or bestseller_collection.products_count == 0
+    if collections['our-products'] != blank and collections['our-products'].products_count > 0
+      assign bestseller_collection = collections['our-products']
+    else
+      assign bestseller_collection = collections.all
+    endif
   endif
 
   assign view_all_url = section.settings.view_all_link
@@ -12,341 +16,274 @@
     assign view_all_url = routes.all_products_collection_url
   endif
 
-  assign brand_filter_str = section.settings.brand_filter | default: 'SebaMed, Vaseline' | downcase
-  assign brand_filters = brand_filter_str | split: ','
   assign products_limit = section.settings.products_to_show | default: 8
+  assign pool_limit = 32
 
-  assign matching_products_count = 0
-  assign block_cards_count = section.blocks.size
+  assign brand_filter_str = section.settings.brand_filter | downcase | strip
+  assign brand_filters = brand_filter_str | split: ','
+
+  assign candidate_products = bestseller_collection.products
+  if section.settings.sort_by == 'price_desc' and section.settings.randomize_on_refresh != true
+    assign candidate_products = candidate_products | sort: 'price' | reverse
+  elsif section.settings.sort_by == 'price_asc' and section.settings.randomize_on_refresh != true
+    assign candidate_products = candidate_products | sort: 'price'
+  endif
 %}
+
+{% capture pool_markup %}
+  {% assign pool_count = 0 %}
+  {% assign seen_ids = '||' %}
+
+  {%- comment -%} 1. Merchant-selected manual product blocks {%- endcomment -%}
+  {% for block in section.blocks %}
+    {% if block.settings.product != blank %}
+      {% assign p = block.settings.product %}
+      {% assign p_token = '||' | append: p.id | append: '||' %}
+      {% unless seen_ids contains p_token %}
+        {% assign seen_ids = seen_ids | append: p.id | append: '||' %}
+        <li class="lame-flash-deal__item" data-lame-reveal data-best-seller-item {{ block.shopify_attributes }}>
+          {% render 'lame-flash-deal-card',
+            product: p,
+            badge_label: section.settings.offer_badge_text,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label
+          %}
+        </li>
+        {% assign pool_count = pool_count | plus: 1 %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
+
+  {%- comment -%} 2. Real products from collection (with brand filter if configured) {%- endcomment -%}
+  {% for product in candidate_products %}
+    {% if pool_count >= pool_limit %}{% break %}{% endif %}
+    {% assign p_token = '||' | append: product.id | append: '||' %}
+    {% if seen_ids contains p_token %}{% continue %}{% endif %}
+
+    {% assign matches_brand = true %}
+    {% if brand_filter_str != blank %}
+      {% assign matches_brand = false %}
+      {% assign p_vendor = product.vendor | downcase | strip %}
+      {% assign p_title = product.title | downcase %}
+      {% for brand_token in brand_filters %}
+        {% assign b_clean = brand_token | strip %}
+        {% if b_clean != blank %}
+          {% if p_vendor contains b_clean or p_title contains b_clean %}
+            {% assign matches_brand = true %}
+            {% break %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if matches_brand %}
+      {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+      <li class="lame-flash-deal__item" data-lame-reveal data-best-seller-item>
+        {% render 'lame-flash-deal-card',
+          product: product,
+          badge_label: section.settings.offer_badge_text,
+          add_to_cart_label: section.settings.add_to_cart_label,
+          sold_out_label: section.settings.sold_out_label
+        %}
+      </li>
+      {% assign pool_count = pool_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+
+  {%- comment -%} 3. Fallback to all products from candidate collection if brand filter yielded no products {%- endcomment -%}
+  {% if pool_count == 0 and candidate_products.size > 0 %}
+    {% for product in candidate_products %}
+      {% if pool_count >= pool_limit %}{% break %}{% endif %}
+      {% assign p_token = '||' | append: product.id | append: '||' %}
+      {% if seen_ids contains p_token %}{% continue %}{% endif %}
+      {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+      <li class="lame-flash-deal__item" data-lame-reveal data-best-seller-item>
+        {% render 'lame-flash-deal-card',
+          product: product,
+          badge_label: section.settings.offer_badge_text,
+          add_to_cart_label: section.settings.add_to_cart_label,
+          sold_out_label: section.settings.sold_out_label
+        %}
+      </li>
+      {% assign pool_count = pool_count | plus: 1 %}
+    {% endfor %}
+  {% endif %}
+
+  {%- comment -%} 4. Draw additional products from collections.all if pool is small {%- endcomment -%}
+  {% if pool_count < pool_limit and bestseller_collection.handle != 'all' and collections.all.products.size > 0 %}
+    {% for product in collections.all.products %}
+      {% if pool_count >= pool_limit %}{% break %}{% endif %}
+      {% assign p_token = '||' | append: product.id | append: '||' %}
+      {% if seen_ids contains p_token %}{% continue %}{% endif %}
+      {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+      <li class="lame-flash-deal__item" data-lame-reveal data-best-seller-item>
+        {% render 'lame-flash-deal-card',
+          product: product,
+          badge_label: section.settings.offer_badge_text,
+          add_to_cart_label: section.settings.add_to_cart_label,
+          sold_out_label: section.settings.sold_out_label
+        %}
+      </li>
+      {% assign pool_count = pool_count | plus: 1 %}
+    {% endfor %}
+  {% endif %}
+{% endcapture %}
+
+{{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-best-sellers"
-  style="
-    --lame-carousel-arrow-bg: {{ section.settings.carousel_arrow_background }};
-    --lame-carousel-arrow-border: {{ section.settings.carousel_arrow_border }};
-    --lame-carousel-arrow-shadow: {{ section.settings.carousel_arrow_shadow }};
-  "
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-best-sellers"
+  data-flash-deal-carousel
+  style="--lame-flash-visible-count: {{ products_limit | at_least: 1 }};"
   {{ section.shopify_attributes }}
 >
-  <div
-    class="lame-product-carousel lame-best-sellers__carousel spacing-style"
-    style="
-      {% render 'spacing-padding', settings: section.settings %}
-      --lame-carousel-accent: {{ section.settings.accent_color }};
-      --lame-carousel-discount: {{ section.settings.discount_color }};
-    "
-  >
+  <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     {% if section.settings.heading != blank or section.settings.subheading != blank %}
-      {% render 'lame-section-heading',
-        title: section.settings.heading,
-        subtitle: section.settings.subheading,
-        alignment: 'center',
-        size: 'large'
-      %}
+      <header class="lame-flash-deal__header" data-lame-reveal>
+        {% render 'lame-section-heading',
+          title: section.settings.heading,
+          subtitle: section.settings.subheading,
+          alignment: 'center',
+          size: 'large'
+        %}
+      </header>
     {% endif %}
 
-    <div class="lame-product-carousel__viewport">
+    <div class="lame-flash-deal__carousel">
       <button
         type="button"
-        class="lame-product-carousel__arrow lame-product-carousel__arrow--prev flip-x"
-        data-carousel-prev
-        aria-label="{{ section.settings.prev_label }}"
-        hidden
+        class="lame-flash-deal__nav lame-flash-deal__nav--prev"
+        data-flash-prev
+        aria-label="{{ section.settings.prev_label | default: 'Previous products' }}"
       >
-        <span class="svg-wrapper icon-arrow">
-          {{- 'icon-arrow.svg' | inline_asset_content -}}
-        </span>
-      </button>
-      <button
-        type="button"
-        class="lame-product-carousel__arrow lame-product-carousel__arrow--next"
-        data-carousel-next
-        aria-label="{{ section.settings.next_label }}"
-        hidden
-      >
-        <span class="svg-wrapper icon-arrow">
-          {{- 'icon-arrow.svg' | inline_asset_content -}}
-        </span>
+        <span aria-hidden="true">&#8249;</span>
       </button>
 
-      <ul class="lame-product-carousel__track" role="list" data-product-carousel-track>
-        {%- if block_cards_count > 0 -%}
-          {%- for block in section.blocks limit: products_limit -%}
-            <li class="lame-product-carousel__item" {{ block.shopify_attributes }}>
-              {%- if block.settings.product != blank -%}
-                {% render 'lame-carousel-product-card',
-                  product: block.settings.product,
-                  custom_subtitle: block.settings.subtitle,
-                  show_offer_badge: section.settings.show_offer_badge,
-                  offer_badge_text: block.settings.badge_text,
-                  add_to_cart_label: section.settings.add_to_cart_label,
-                  sold_out_label: section.settings.sold_out_label
-                %}
-              {%- else -%}
-                {% render 'lame-carousel-product-card',
-                  custom_brand: block.settings.brand,
-                  custom_title: block.settings.title,
-                  custom_subtitle: block.settings.subtitle,
-                  custom_image: block.settings.image,
-                  custom_fallback_asset: block.settings.fallback_asset,
-                  custom_price: block.settings.price,
-                  custom_compare_price: block.settings.compare_at_price,
-                  custom_badge: block.settings.badge_text,
-                  custom_rating: block.settings.rating,
-                  custom_reviews: block.settings.reviews_count,
-                  custom_link: block.settings.link,
-                  show_offer_badge: section.settings.show_offer_badge,
-                  offer_badge_text: section.settings.offer_badge_text,
-                  add_to_cart_label: section.settings.add_to_cart_label,
-                  sold_out_label: section.settings.sold_out_label
-                %}
-              {%- endif -%}
-            </li>
-          {%- endfor -%}
-
-        {%- else -%}
-          {%- comment -%}
-            Filter and sort live collection products by brand (Sebamed / Vaseline) and price descending
-          {%- endcomment -%}
-          {%- liquid
-            assign candidate_products = bestseller_collection.products
-            if section.settings.sort_by == 'price_desc'
-              assign candidate_products = candidate_products | sort: 'price' | reverse
-            elsif section.settings.sort_by == 'price_asc'
-              assign candidate_products = candidate_products | sort: 'price'
-            endif
-          -%}
-
-          {%- for product in candidate_products -%}
-            {%- if matching_products_count >= products_limit -%}{%- break -%}{%- endif -%}
-            {%- assign p_vendor = product.vendor | downcase | strip -%}
-            {%- assign p_title = product.title | downcase -%}
-            {%- assign matches_brand = false -%}
-
-            {%- for brand_token in brand_filters -%}
-              {%- assign b_clean = brand_token | strip -%}
-              {%- if b_clean != blank -%}
-                {%- if p_vendor contains b_clean or p_title contains b_clean -%}
-                  {%- assign matches_brand = true -%}
-                  {%- break -%}
-                {%- endif -%}
-              {%- endif -%}
-            {%- endfor -%}
-
-            {%- if matches_brand -%}
-              <li class="lame-product-carousel__item">
-                {% render 'lame-carousel-product-card',
-                  product: product,
-                  show_offer_badge: section.settings.show_offer_badge,
-                  offer_badge_text: section.settings.offer_badge_text,
-                  add_to_cart_label: section.settings.add_to_cart_label,
-                  sold_out_label: section.settings.sold_out_label
-                %}
+      <div class="lame-flash-deal__viewport" data-flash-viewport>
+        <ul class="lame-flash-deal__track" role="list" data-flash-track>
+          {% if pool_count > 0 %}
+            {{ pool_markup }}
+          {% else %}
+            {%- comment -%} Catalog placeholder fallback if store has 0 products {%- endcomment -%}
+            {% for i in (1..products_limit) %}
+              <li class="lame-flash-deal__item" data-lame-reveal>
+                <article class="lame-flash-card">
+                  <div class="lame-flash-card__media">
+                    <span class="lame-flash-card__badge">BESTSELLER</span>
+                    <a href="#" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
+                      {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
+                    </a>
+                  </div>
+                  <div class="lame-flash-card__body">
+                    <h3 class="lame-flash-card__title">
+                      <a href="#">Featured Product</a>
+                    </h3>
+                    <div class="lame-flash-card__price-row">
+                      <span class="lame-flash-card__price">₹899</span>
+                    </div>
+                    <div class="lame-flash-card__actions">
+                      <button type="button" class="lame-flash-card__atc" disabled>
+                        {{ section.settings.add_to_cart_label | default: 'Add to cart' }}
+                      </button>
+                    </div>
+                  </div>
+                </article>
               </li>
-              {%- assign matching_products_count = matching_products_count | plus: 1 -%}
-            {%- endif -%}
-          {%- endfor -%}
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
 
-          {%- comment -%}
-            If collection has fewer matching products, provide curated Sebamed & Vaseline high-price bestsellers
-          {%- endcomment -%}
-          {%- if matching_products_count == 0 -%}
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Sebamed',
-                custom_title: 'Sebamed Liquid Face & Body Wash 1000ml with Pump',
-                custom_subtitle: 'Soap-Free Sensitive Skin Care · pH 5.5',
-                custom_fallback_asset: 'lame-sebamed-body-wash.jpg',
-                custom_price: '₹1,435',
-                custom_compare_price: '₹1,690',
-                custom_badge: '15% OFF',
-                custom_rating: '4.9',
-                custom_reviews: '340',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Sebamed',
-                custom_title: 'Sebamed Anti-Dry Hydrating Body Lotion 400ml',
-                custom_subtitle: 'Phytosterols & Shea Butter · pH 5.5',
-                custom_fallback_asset: 'lame-sebamed-anti-dry.jpg',
-                custom_price: '₹1,360',
-                custom_compare_price: '₹1,600',
-                custom_badge: '15% OFF',
-                custom_rating: '4.8',
-                custom_reviews: '210',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Vaseline',
-                custom_title: 'Vaseline Gluta-Hya Flawless Glow Serum Burst UV Lotion 330ml',
-                custom_subtitle: '10x Hyaluron & Pro-Retinol Glow',
-                custom_fallback_asset: 'lame-vaseline-gluta-hya.jpg',
-                custom_price: '₹959',
-                custom_compare_price: '₹1,199',
-                custom_badge: '20% OFF',
-                custom_rating: '4.9',
-                custom_reviews: '580',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Sebamed',
-                custom_title: 'Baby Sebamed Gentle Wash 400ml',
-                custom_subtitle: 'Tear-Free Gentle Cleanser for Delicate Skin',
-                custom_fallback_asset: 'lame-beauty-love-01-sebamed.png',
-                custom_price: '₹975',
-                custom_compare_price: '₹1,150',
-                custom_badge: '15% OFF',
-                custom_rating: '4.9',
-                custom_reviews: '420',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Vaseline',
-                custom_title: 'Vaseline Healthy Bright Daily Sunscreen SPF 50+ PA++++ 400ml',
-                custom_subtitle: 'Triple Sun Protection · Non-Sticky',
-                custom_fallback_asset: 'lame-vaseline-sunscreen.jpg',
-                custom_price: '₹799',
-                custom_compare_price: '₹999',
-                custom_badge: '20% OFF',
-                custom_rating: '4.8',
-                custom_reviews: '310',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Vaseline',
-                custom_title: 'Vaseline Intensive Care Cocoa Glow Nourishing Body Lotion 400ml',
-                custom_subtitle: 'Pure Cocoa Butter & Ultra-Hydrating Micro-Droplets',
-                custom_fallback_asset: 'lame-vaseline-cocoa.jpg',
-                custom_price: '₹540',
-                custom_compare_price: '₹675',
-                custom_badge: '20% OFF',
-                custom_rating: '4.8',
-                custom_reviews: '890',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-            <li class="lame-product-carousel__item">
-              {% render 'lame-carousel-product-card',
-                custom_brand: 'Sebamed',
-                custom_title: 'Sebamed Clear Face Care Gel 50ml',
-                custom_subtitle: 'Hyaluronic Acid & Panthenol · Acne Care',
-                custom_fallback_asset: 'lame-sebamed-clear-face.jpg',
-                custom_price: '₹493',
-                custom_compare_price: '₹580',
-                custom_badge: '15% OFF',
-                custom_rating: '4.7',
-                custom_reviews: '260',
-                custom_link: '',
-                show_offer_badge: section.settings.show_offer_badge,
-                add_to_cart_label: section.settings.add_to_cart_label
-              %}
-            </li>
-          {%- endif -%}
-        {%- endif -%}
-      </ul>
+      <button
+        type="button"
+        class="lame-flash-deal__nav lame-flash-deal__nav--next"
+        data-flash-next
+        aria-label="{{ section.settings.next_label | default: 'Next products' }}"
+      >
+        <span aria-hidden="true">&#8250;</span>
+      </button>
     </div>
 
-    {% if section.settings.view_all_label != blank %}
-      <p class="lame-product-carousel__view-all">
-        <a href="{{ view_all_url }}">{{ section.settings.view_all_label }} &rarr;</a>
+    {% if section.settings.view_all_label != blank and view_all_url != blank %}
+      <p class="lame-best-sellers__view-all">
+        <a href="{{ view_all_url }}" class="lame-best-sellers__view-all-link">
+          {{ section.settings.view_all_label }} &rarr;
+        </a>
       </p>
     {% endif %}
   </div>
 </section>
 
-{% render 'lame-product-carousel-styles' %}
+<style>
+  .lame-best-sellers__view-all {
+    margin: 1.5rem 0 0;
+    text-align: center;
+  }
+  .lame-best-sellers__view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--lame-flash-sale-accent, #ff5722);
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .lame-best-sellers__view-all-link:hover {
+    color: var(--lame-flash-sale-accent-dark, #e64a19);
+    transform: translateX(3px);
+  }
+</style>
 
 <script>
   (() => {
-    const section = document.getElementById('shopify-section-{{ section.id }}');
+    const section = document.getElementById('shopify-section-{{ section.id }}') || document.querySelector('.lame-best-sellers');
     if (!section) return;
 
-    const track = section.querySelector('[data-product-carousel-track]');
-    const prev = section.querySelector('[data-carousel-prev]');
-    const next = section.querySelector('[data-carousel-next]');
-    if (!track || !prev || !next) return;
+    const track = section.querySelector('[data-flash-track]');
+    if (!track) return;
 
-    const updateArrows = () => {
-      const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
-      const hasOverflow = maxScroll > 2;
-      prev.hidden = !hasOverflow;
-      next.hidden = !hasOverflow;
-      if (!hasOverflow) {
-        prev.disabled = true;
-        next.disabled = true;
-        return;
+    const shouldRandomize = {{ section.settings.randomize_on_refresh | default: true }};
+    const maxToShow = {{ products_limit | default: 8 }};
+
+    const shuffleProducts = () => {
+      const items = Array.from(track.querySelectorAll('[data-best-seller-item]'));
+      if (items.length <= 1) return;
+
+      // Fisher-Yates true random shuffle on every refresh / page load
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = items[i];
+        items[i] = items[j];
+        items[j] = temp;
       }
-      prev.disabled = track.scrollLeft <= 2;
-      next.disabled = track.scrollLeft >= maxScroll - 2;
+
+      const selected = items.slice(0, maxToShow);
+      const discarded = items.slice(maxToShow);
+
+      // Re-order selected items in the track
+      selected.forEach((item) => {
+        track.appendChild(item);
+      });
+
+      // Remove surplus items from track so carousel displays exactly maxToShow items
+      discarded.forEach((item) => {
+        item.remove();
+      });
     };
 
-    const scrollByCard = (direction) => {
-      const card = track.querySelector('.lame-product-carousel__item');
-      if (!card) return;
-      const styles = getComputedStyle(track);
-      const gap = parseFloat(styles.columnGap || styles.gap || '14');
-      track.scrollBy({ left: direction * (card.clientWidth + gap), behavior: 'smooth' });
-    };
+    if (shouldRandomize) {
+      shuffleProducts();
+    }
 
-    prev.addEventListener('click', () => scrollByCard(-1));
-    next.addEventListener('click', () => scrollByCard(1));
-    track.addEventListener('scroll', updateArrows, { passive: true });
-    window.addEventListener('resize', updateArrows);
-    setTimeout(updateArrows, 150);
-
-    // Live Shopify product form submit
-    section.querySelectorAll('[data-lame-carousel-atc]').forEach((form) => {
+    // Ajax add to cart handler (matches lame-flash-deal & lame-new-products)
+    section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const button = form.querySelector('button[type="submit"]');
-        const status = form.querySelector('.lame-carousel-card__atc-status');
         if (button?.disabled) return;
-
         const formData = new FormData(form);
-        const cartItemsComponents = document.querySelectorAll('cart-items-component');
-        const sectionIds = [];
-        cartItemsComponents.forEach((item) => {
-          if (item instanceof HTMLElement && item.dataset.sectionId) {
-            sectionIds.push(item.dataset.sectionId);
-          }
-        });
-        if (sectionIds.length) {
-          formData.append('sections', sectionIds.join(','));
-          formData.append('sections_url', window.location.pathname);
-        }
-
-        const showStatus = (text, className) => {
-          if (!(status instanceof HTMLElement)) return;
-          status.textContent = text;
-          status.classList.remove('is-success', 'is-error', 'is-visible');
-          status.classList.add(className, 'is-visible');
-          window.setTimeout(() => status.classList.remove('is-visible'), 2200);
-        };
-
         try {
           if (button) button.disabled = true;
           const response = await fetch('{{ routes.cart_add_url }}.js', {
@@ -355,41 +292,19 @@
             body: formData,
           });
           const data = await response.json();
-          if (!response.ok || data?.status) {
-            throw new Error(data?.message || 'Unable to add to cart');
-          }
-
+          if (!response.ok || data?.status) throw new Error(data?.message);
           const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
           const cartData = await cartResponse.json();
           document.dispatchEvent(
             new CustomEvent('cart:update', {
               bubbles: true,
-              detail: {
-                resource: cartData,
-                sourceId: '{{ section.id }}',
-                data: { source: 'lame-product-carousel', itemCount: 1, sections: data?.sections || {} },
-              },
+              detail: { resource: cartData, sourceId: '{{ section.id }}', data: { source: 'best-sellers-atc' } },
             })
           );
-          showStatus('Added to cart ✓', 'is-success');
         } catch (error) {
-          console.error(error);
-          showStatus('Could not add', 'is-error');
+          console.error('Add to cart failed', error);
         } finally {
-          if (button && !button.hasAttribute('data-sold-out')) button.disabled = false;
-        }
-      });
-    });
-
-    // Curated card button feedback
-    section.querySelectorAll('[data-curated-atc]').forEach((btn) => {
-      btn.addEventListener('click', (event) => {
-        const wrap = btn.closest('.lame-carousel-card__atc-form');
-        const status = wrap?.querySelector('.lame-carousel-card__atc-status');
-        if (status) {
-          status.textContent = 'Opening product details...';
-          status.classList.remove('is-error');
-          status.classList.add('is-success', 'is-visible');
+          if (button) button.disabled = false;
         }
       });
     });
@@ -406,24 +321,11 @@
     { "type": "text", "id": "heading", "label": "Heading" },
     { "type": "text", "id": "subheading", "label": "Subheading" },
     {
-      "type": "text",
-      "id": "brand_filter",
-      "label": "Filter by brand / vendor",
-      "default": "SebaMed, Vaseline",
-      "info": "Comma-separated list of brand names (e.g. SebaMed, Vaseline)."
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Select collection to draw best sellers from. Defaults to All Products."
     },
-    {
-      "type": "select",
-      "id": "sort_by",
-      "label": "Sort products by",
-      "options": [
-        { "value": "price_desc", "label": "Price: High to low (High price first)" },
-        { "value": "price_asc", "label": "Price: Low to high" },
-        { "value": "default", "label": "Collection default order" }
-      ],
-      "default": "price_desc"
-    },
-    { "type": "collection", "id": "collection", "label": "Collection" },
     {
       "type": "range",
       "id": "products_to_show",
@@ -433,39 +335,42 @@
       "step": 1,
       "default": 8
     },
-    { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View All Best Sellers" },
-    { "type": "url", "id": "view_all_link", "label": "View all link" },
-    { "type": "checkbox", "id": "show_offer_badge", "label": "Show offer badge on image", "default": true },
+    {
+      "type": "checkbox",
+      "id": "randomize_on_refresh",
+      "label": "Randomize products on each page refresh",
+      "default": true,
+      "info": "Picks and shuffles random products from the store on every refresh."
+    },
+    {
+      "type": "text",
+      "id": "brand_filter",
+      "label": "Filter by brand / vendor (optional)",
+      "info": "Optional comma-separated list of brand names. Leave blank to show all brands."
+    },
+    {
+      "type": "select",
+      "id": "sort_by",
+      "label": "Sort products by (when randomization is disabled)",
+      "options": [
+        { "value": "default", "label": "Collection default order" },
+        { "value": "price_desc", "label": "Price: High to low" },
+        { "value": "price_asc", "label": "Price: Low to high" }
+      ],
+      "default": "default"
+    },
     {
       "type": "text",
       "id": "offer_badge_text",
       "label": "Offer badge text override",
-      "info": "Leave blank to show item discount %"
+      "info": "Leave blank to automatically show item discount percentage."
     },
-    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to Cart" },
-    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold Out" },
+    { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View All Best Sellers" },
+    { "type": "url", "id": "view_all_link", "label": "View all link" },
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
     { "type": "text", "id": "prev_label", "label": "Previous arrow label", "default": "Previous products" },
     { "type": "text", "id": "next_label", "label": "Next arrow label", "default": "Next products" },
-    { "type": "color", "id": "accent_color", "label": "Accent color (buttons & badges)", "default": "#ff5722" },
-    { "type": "color", "id": "discount_color", "label": "Discount text color", "default": "#16a34a" },
-    {
-      "type": "color",
-      "id": "carousel_arrow_background",
-      "label": "Carousel arrow background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "carousel_arrow_border",
-      "label": "Carousel arrow border",
-      "default": "rgba(0, 0, 0, 0.12)"
-    },
-    {
-      "type": "text",
-      "id": "carousel_arrow_shadow",
-      "label": "Carousel arrow shadow (CSS)",
-      "default": "0 4px 14px rgba(0, 0, 0, 0.12)"
-    },
     {
       "type": "select",
       "id": "section_width",
@@ -490,7 +395,7 @@
       "max": 80,
       "step": 4,
       "unit": "px",
-      "default": 12
+      "default": 8
     },
     {
       "type": "range",
@@ -505,21 +410,10 @@
   ],
   "blocks": [
     {
-      "type": "product_card",
-      "name": "Custom Product Card",
+      "type": "product",
+      "name": "Featured Product",
       "settings": [
-        { "type": "product", "id": "product", "label": "Shopify product (optional)" },
-        { "type": "text", "id": "brand", "label": "Brand name", "default": "Sebamed" },
-        { "type": "text", "id": "title", "label": "Product title", "default": "Sebamed Liquid Face & Body Wash 1000ml" },
-        { "type": "text", "id": "subtitle", "label": "Subtitle / feature", "default": "pH 5.5 Sensitive Skin Formula" },
-        { "type": "image_picker", "id": "image", "label": "Product image" },
-        { "type": "text", "id": "fallback_asset", "label": "Asset filename (e.g. lame-sebamed-body-wash.jpg)", "default": "lame-sebamed-body-wash.jpg" },
-        { "type": "text", "id": "price", "label": "Current price", "default": "₹1,435" },
-        { "type": "text", "id": "compare_at_price", "label": "MRP / Compare price", "default": "₹1,690" },
-        { "type": "text", "id": "badge_text", "label": "Badge text", "default": "15% OFF" },
-        { "type": "text", "id": "rating", "label": "Rating (e.g. 4.9)", "default": "4.9" },
-        { "type": "text", "id": "reviews_count", "label": "Reviews count", "default": "340" },
-        { "type": "url", "id": "link", "label": "Product / Brand link" }
+        { "type": "product", "id": "product", "label": "Shopify product" }
       ]
     }
   ],
@@ -528,8 +422,9 @@
       "name": "Best sellers",
       "category": "Products",
       "settings": {
-        "brand_filter": "SebaMed, Vaseline",
-        "sort_by": "price_desc"
+        "collection": "all",
+        "products_to_show": 8,
+        "randomize_on_refresh": true
       }
     }
   ]
