@@ -1,0 +1,121 @@
+{%- doc -%}
+  Mobile and tablet navbar subnav:
+  Row 1: Top header row (Hamburger, Logo, Wishlist, Cart)
+  Separation: Single clean divider line
+  Row 2: Search bar at MIDDLE with orange border
+  Row 3: Swipable Category Icons row (full orange background + white inside)
+  Separation: Small clean line for separation to homepage
+  Rendered on screens <= 989px on the Home Page only.
+{%- enddoc -%}
+
+{%- if template.name == 'index' -%}
+<div class="lame-mobile-subnav mobile:block desktop:hidden" data-lame-mobile-subnav>
+  <!-- Row 2: Search Bar at MIDDLE -->
+  <div class="lame-mobile-search-row">
+    <button
+      type="button"
+      class="lame-mobile-search-pill button-unstyled"
+      on:click="#search-modal/showDialog"
+      aria-label="{{ 'content.search_input_label' | t }}"
+      aria-haspopup="dialog"
+      data-lame-mobile-search-trigger
+    >
+      <span class="lame-mobile-search-pill__icon" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </span>
+      <span class="lame-mobile-search-pill__placeholder">Explore our Beauty Collection</span>
+    </button>
+  </div>
+
+  <!-- Row 3: Swipable Category Icons Row -->
+  <nav class="lame-mobile-categories" aria-label="Shop categories">
+    <ul class="lame-mobile-categories__track" role="list">
+      {%- liquid
+        assign categories_data = 'all|All|/collections/all|mint|lame-icon-all.png|leaf,skin-care|Skincare|/collections/skin-care|sky|lame-icon-skin-care.png|skincare,make-up|Makeup|/collections/make-up|blush|lame-icon-makeup.png|makeup,hair-care|Hair|/collections/frontpage|lavender|lame-icon-hair-care.png|haircare,bath-body|Bath & Body|/collections/bath-body|lilac|lame-icon-bath-body.png|bath-body,fragrance|Fragrance|/collections/fragrance|champagne|lame-icon-fragrance.png|fragrance,baby-mom|Mom & Baby|/collections/baby-mom|butter||baby-care,wellness|Wellness|/collections/wellness|sage||wellness,feminine|Intimate|/search?q=feminine&type=product|rose|lame-icon-feminine.png|leaf,combos|Combos|/search?q=combo&type=product|peach|lame-icon-combos.png|combos,top-deals|Top Deals|/collections/all?sort_by=best-selling|coral|lame-icon-top-deals.png|top-deals,shop-more|Shop More|/collections/our-products|softgray|lame-icon-shop-more.png|all-products' | split: ','
+      -%}
+
+      {%- for cat_item in categories_data -%}
+        {%- liquid
+          assign cat_fields = cat_item | split: '|'
+          assign cat_handle = cat_fields[0]
+          assign cat_label = cat_fields[1]
+          assign cat_url = cat_fields[2]
+          assign cat_tone = cat_fields[3]
+          assign cat_png = cat_fields[4]
+          assign cat_svg = cat_fields[5]
+
+          assign is_active = false
+          if template.name == 'collection' and collection != blank and collection.handle == cat_handle
+            assign is_active = true
+          elsif template.name == 'collection' and collection != blank and cat_handle == 'hair-care' and collection.handle == 'frontpage'
+            assign is_active = true
+          elsif template.name == 'collection' and collection != blank and cat_handle == 'shop-more' and collection.handle == 'our-products'
+            assign is_active = true
+          elsif template.name == 'collection' and collection != blank and cat_handle == 'all' and collection.handle == 'all'
+            assign is_active = true
+          endif
+        -%}
+
+        <li class="lame-mobile-categories__item{% if is_active %} is-active{% endif %}">
+          <a
+            href="{{ cat_url }}"
+            class="lame-mobile-categories__card"
+            {% if is_active %}aria-current="page"{% endif %}
+          >
+            <div class="lame-mobile-categories__icon-tile">
+              {%- if cat_png != blank -%}
+                <span class="lame-cat-glyph lame-mobile-categories__glyph" style="--lame-cat-mask: url('{{ cat_png | asset_url }}');" aria-hidden="true"></span>
+              {%- else -%}
+                <span class="lame-mobile-categories__svg-wrap" aria-hidden="true">
+                  {% render 'lame-radiant-icons', icon: cat_svg %}
+                </span>
+              {%- endif -%}
+            </div>
+            <span class="lame-mobile-categories__label">{{ cat_label }}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+
+  <!-- Small clean line separation to homepage below the last section -->
+  <div class="lame-mobile-homepage-divider" aria-hidden="true"></div>
+</div>
+
+<script>
+  (function () {
+    function initMobileNav() {
+      var searchTrigger = document.querySelector('[data-lame-mobile-search-trigger]');
+      if (searchTrigger) {
+        searchTrigger.addEventListener('click', function (e) {
+          var modal = document.getElementById('search-modal');
+          if (modal && typeof modal.showDialog === 'function') {
+            modal.showDialog();
+          } else if (modal) {
+            var dialog = modal.querySelector('dialog');
+            if (dialog && typeof dialog.showModal === 'function') {
+              dialog.showModal();
+            }
+          }
+        });
+      }
+
+      var activeCat = document.querySelector('.lame-mobile-categories__item.is-active');
+      if (activeCat) {
+        try {
+          activeCat.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } catch (e) {}
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileNav);
+    } else {
+      initMobileNav();
+    }
+  })();
+</script>
+{%- endif -%}

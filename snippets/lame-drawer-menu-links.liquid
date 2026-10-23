@@ -9,18 +9,17 @@
   {%- liquid
     assign menu_link_title = link.title
     assign menu_link_title_down = link.title | downcase
+    
+    # Don't show brands inside side menu bar per user request
+    if menu_link_title_down == 'brand' or menu_link_title_down == 'brands'
+      continue
+    endif
+
     if menu_link_title_down == 'our products' or menu_link_title_down == 'shop'
       assign menu_link_title = 'Beauty'
     endif
-    assign is_brands_link = false
-    if menu_link_title_down == 'home' or menu_link_title_down == 'homepage' or menu_link_title_down == 'brand' or menu_link_title_down == 'brands'
-      assign menu_link_title = 'Brands'
-      assign is_brands_link = true
-    endif
+
     assign drawer_link_url = link.url
-    if is_brands_link and link.url == '/'
-      assign drawer_link_url = routes.all_products_collection_url
-    endif
 
     assign words = menu_link_title | split: ' '
     assign title_parts = ''
@@ -36,10 +35,10 @@
     assign animation_index = animation_index | plus: 1
   -%}
   <li
-    class="menu-drawer__list-item lame-drawer-nav__item{% if is_brands_link %} lame-drawer-nav__item--brands{% endif %}"
+    class="menu-drawer__list-item lame-drawer-nav__item"
     style="--menu-drawer-animation-index: {{ animation_index }};"
   >
-    {%- if link.links != blank or is_brands_link -%}
+    {%- if link.links != blank -%}
       <details
         id="Details-menu-drawer-menu-item-{{ forloop.index }}"
         class="menu-drawer__menu-container"
@@ -50,7 +49,7 @@
           on:click="#HeaderMenuDrawer/open/submenu"
         >
           {% render 'lame-drawer-nav-icon', handle: link.handle %}
-          <span class="menu-drawer__menu-item-text wrap-text"{% if is_brands_link %} style="color: #1a472a; font-weight: 700;"{% endif %}>{{ menu_link_title | escape }}</span>
+          <span class="menu-drawer__menu-item-text wrap-text">{{ menu_link_title | escape }}</span>
           <span class="lame-drawer-nav__trail">
             <span class="svg-wrapper icon-caret icon-caret--forward lame-drawer-nav__chevron" aria-hidden="true">
               {{- 'icon-caret.svg' | inline_asset_content -}}
@@ -86,100 +85,33 @@
                 </span>
               </button>
             </div>
-            {%- if is_brands_link -%}
-              <ul class="menu-drawer__menu menu-drawer__menu--childlist lame-drawer-nav__submenu-list" role="list">
+            <ul class="menu-drawer__menu menu-drawer__menu--childlist lame-drawer-nav__submenu-list" role="list">
+              {%- for childlink in link.links -%}
                 <li class="menu-drawer__list-item lame-drawer-nav__item">
                   <a
-                    href="{{ routes.all_products_collection_url }}"
-                    class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
-                    style="font-weight: 700; color: #1a472a;"
+                    href="{{ childlink.url }}"
+                    class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset{% if childlink.current %} menu-drawer__menu-item--active{% endif %}"
+                    {% if childlink.current %}
+                      aria-current="page"
+                    {% endif %}
                   >
-                    {% render 'lame-drawer-nav-icon', handle: 'brands' %}
-                    <span class="menu-drawer__menu-item-text wrap-text">Explore All Brands &rarr;</span>
+                    {% render 'lame-drawer-nav-icon', handle: childlink.handle %}
+                    {%- liquid
+                      assign child_words = childlink.title | split: ' '
+                      assign child_parts = ''
+                      for cw in child_words
+                        assign cw_down = cw | downcase
+                        assign cw_first = cw_down | slice: 0, 1 | upcase
+                        assign cw_rest = cw_down | slice: 1, cw_down.size
+                        assign child_parts = child_parts | append: cw_first | append: cw_rest | append: ' '
+                      endfor
+                      assign child_title = child_parts | strip
+                    -%}
+                    <span class="menu-drawer__menu-item-text wrap-text">{{ child_title | escape }}</span>
                   </a>
                 </li>
-                {%- assign has_drawer_custom_brands = false -%}
-                {%- if menu_block and menu_block.blocks.size > 0 -%}
-                  {%- for child_block in menu_block.blocks -%}
-                    {%- if child_block.type == '_header-mega-brand' and child_block.settings.show_in_sidebar != false -%}
-                      {%- assign has_drawer_custom_brands = true -%}
-                      {%- liquid
-                        capture brand_title
-                          render 'lame-brand-vendor-title', title: child_block.settings.title, brand_name: child_block.settings.brand_name, vendor: child_block.settings.vendor
-                        endcapture
-                        assign brand_title = brand_title | strip
-                        assign brand_slug = brand_title | handleize
-                      -%}
-                      {%- capture brand_url -%}
-                        {% render 'lame-brand-url',
-                          brand_title: brand_title,
-                          brand_slug: brand_slug,
-                          custom_url: child_block.settings.brand_url,
-                          explicit_vendor: child_block.settings.vendor
-                        %}
-                      {%- endcapture -%}
-                      {%- assign brand_url = brand_url | strip -%}
-                      <li class="menu-drawer__list-item lame-drawer-nav__item" {{ child_block.shopify_attributes }}>
-                        <a
-                          href="{{ brand_url }}"
-                          class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
-                        >
-                          <span class="menu-drawer__menu-item-text wrap-text">{{ brand_title }}</span>
-                        </a>
-                      </li>
-                    {%- endif -%}
-                  {%- endfor -%}
-                {%- endif -%}
-                {%- unless has_drawer_custom_brands -%}
-                  {%- assign drawer_brands = "Dove|dove,Ponds|ponds,Pears|pears,Femisafe|femisafe,Jovees Herbal|jovees-herbal,SebaMed|sebamed,Nykaa|nykaa" | split: ',' -%}
-                  {%- for d_brand in drawer_brands -%}
-                    {%- assign d_parts = d_brand | split: '|' -%}
-                    {%- assign d_name = d_parts[0] -%}
-                    {%- assign d_slug = d_parts[1] -%}
-                    {%- capture d_url -%}
-                      {% render 'lame-brand-url', brand_title: d_name, brand_slug: d_slug %}
-                    {%- endcapture -%}
-                    {%- assign d_url = d_url | strip -%}
-                    <li class="menu-drawer__list-item lame-drawer-nav__item">
-                      <a
-                        href="{{ d_url }}"
-                        class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset"
-                      >
-                        <span class="menu-drawer__menu-item-text wrap-text">{{ d_name }}</span>
-                      </a>
-                    </li>
-                  {%- endfor -%}
-                {%- endunless -%}
-              </ul>
-            {%- else -%}
-              <ul class="menu-drawer__menu menu-drawer__menu--childlist lame-drawer-nav__submenu-list" role="list">
-                {%- for childlink in link.links -%}
-                  <li class="menu-drawer__list-item lame-drawer-nav__item">
-                    <a
-                      href="{{ childlink.url }}"
-                      class="menu-drawer__menu-item menu-drawer__menu-item--child lame-drawer-nav__row lame-drawer-nav__row--sub focus-inset{% if childlink.current %} menu-drawer__menu-item--active{% endif %}"
-                      {% if childlink.current %}
-                        aria-current="page"
-                      {% endif %}
-                    >
-                      {% render 'lame-drawer-nav-icon', handle: childlink.handle %}
-                      {%- liquid
-                        assign child_words = childlink.title | split: ' '
-                        assign child_parts = ''
-                        for cw in child_words
-                          assign cw_down = cw | downcase
-                          assign cw_first = cw_down | slice: 0, 1 | upcase
-                          assign cw_rest = cw_down | slice: 1, cw_down.size
-                          assign child_parts = child_parts | append: cw_first | append: cw_rest | append: ' '
-                        endfor
-                        assign child_title = child_parts | strip
-                      -%}
-                      <span class="menu-drawer__menu-item-text wrap-text">{{ child_title | escape }}</span>
-                    </a>
-                  </li>
-                {%- endfor -%}
-              </ul>
-            {%- endif -%}
+              {%- endfor -%}
+            </ul>
           </div>
         </div>
       </details>
@@ -187,13 +119,13 @@
       <a
         id="HeaderDrawer-{{ link.handle }}"
         href="{{ drawer_link_url }}"
-        class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset{% if link.current and is_brands_link == false %} menu-drawer__menu-item--active{% endif %}"
-        {% if link.current and is_brands_link == false %}
+        class="menu-drawer__menu-item menu-drawer__menu-item--mainlist lame-drawer-nav__row focus-inset{% if link.current %} menu-drawer__menu-item--active{% endif %}"
+        {% if link.current %}
           aria-current="page"
         {% endif %}
       >
         {% render 'lame-drawer-nav-icon', handle: link.handle %}
-        <span class="menu-drawer__menu-item-text wrap-text"{% if is_brands_link %} style="color: #1a472a; font-weight: 700;"{% endif %}>{{ menu_link_title | escape }}</span>
+        <span class="menu-drawer__menu-item-text wrap-text">{{ menu_link_title | escape }}</span>
       </a>
     {%- endif -%}
   </li>
