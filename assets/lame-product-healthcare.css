@@ -303,45 +303,45 @@
   display: none !important;
 }
 
-/* Desktop: vertical thumb column on the LEFT + one large image */
+/* Desktop: vertical thumb column on the LEFT + one large image — Strictly height-bound */
 @media screen and (min-width: 750px) {
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-component:has(slideshow-controls[thumbnails]),
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-component:has(slideshow-controls[pagination-position='left']) {
     display: grid !important;
     grid-template-columns: var(--hc-thumb) minmax(0, 1fr) !important;
-    grid-template-rows: auto !important;
+    grid-template-rows: 1fr !important;
     grid-template-areas: none !important;
     gap: 0.85rem !important;
-    align-items: start !important;
+    align-items: stretch !important;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails],
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] {
     grid-column: 1 !important;
-    grid-row: 1 / -1 !important;
+    grid-row: 1 !important;
     order: 0 !important;
     width: var(--hc-thumb) !important;
-    max-width: var(--hc-thumb);
-    height: auto !important;
+    max-width: var(--hc-thumb) !important;
+    height: 100% !important;
     min-height: 0 !important;
-    max-height: none !important;
+    max-height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
-    align-self: start !important;
+    align-self: stretch !important;
+    overflow: hidden !important;
     --thumbnail-width: var(--hc-thumb);
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] .slideshow-controls__thumbnails-container,
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[pagination-position='left'] .slideshow-controls__thumbnails-container {
-    overflow: visible !important;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
-    max-height: none !important;
-    width: 100%;
-    position: static;
+    overflow: hidden !important;
+    max-height: 100% !important;
+    height: 100% !important;
+    width: 100% !important;
+    position: static !important;
     scrollbar-width: none !important;
-    -ms-overflow-style: none;
+    -ms-overflow-style: none !important;
   }
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] .slideshow-controls__thumbnails-container::-webkit-scrollbar,
@@ -356,14 +356,76 @@
     display: flex !important;
     flex-direction: column !important;
     flex-wrap: nowrap !important;
-    justify-content: flex-start !important;
+    justify-content: space-between !important;
     align-items: stretch !important;
-    gap: 0.55rem !important;
+    gap: 0.45rem !important;
     width: 100% !important;
     min-width: 0 !important;
-    max-width: 100%;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
     padding: 0 !important;
+    box-sizing: border-box !important;
   }
+
+  /* Thumbnail buttons: never exceed main image height (fit exactly up to 4 items) */
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] button {
+    width: 100% !important;
+    max-width: var(--hc-thumb) !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    max-height: calc((100% - 3 * 0.45rem) / 4) !important;
+    flex: 0 1 calc((100% - 3 * 0.45rem) / 4) !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    position: relative !important;
+  }
+
+  /* Hide thumbnails beyond 4 so column never goes below main image */
+  .lame-product-healthcare-wrap .media-gallery--carousel slideshow-controls[thumbnails] .slideshow-controls__thumbnail--overflow {
+    display: none !important;
+  }
+
+  /* +N More Overlay on 4th thumbnail */
+  .lame-product-healthcare-wrap .lame-thumbnail-more-overlay,
+  .lame-thumbnail-more-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(20, 63, 46, 0.76) !important;
+  background: linear-gradient(135deg, rgba(20, 63, 46, 0.82) 0%, rgba(12, 38, 27, 0.9) 100%) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: inherit !important;
+  padding: 2px !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  z-index: 4 !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  transition: background 0.2s ease, transform 0.15s ease !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.lame-product-healthcare-wrap .lame-thumbnail-more-overlay:hover,
+.lame-thumbnail-more-overlay:hover {
+  background: rgba(20, 63, 46, 0.92) !important;
+}
+
+.lame-product-healthcare-wrap .lame-thumbnail-more-text,
+.lame-thumbnail-more-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  line-height: 1.15 !important;
+  text-align: center !important;
+  letter-spacing: -0.01em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  white-space: nowrap !important;
+}
 
   .lame-product-healthcare-wrap .media-gallery--carousel slideshow-container {
     grid-column: 2 !important;

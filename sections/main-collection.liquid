@@ -169,27 +169,29 @@
         %}
         {% if lame_our_products_op_cards %}
         <div class="lame-op-page__content{% if lame_has_promo_images %} lame-op-page__content--has-promo{% endif %}">
-          {% render 'lame-our-products-page-head',
-            collection: collection,
-            heading: section.settings.our_products_heading,
-            subtitle: section.settings.our_products_subtitle
-          %}
-          {% liquid
-            assign lame_filters_block = section.blocks['filters']
-            assign lame_enable_sorting = false
-            assign lame_enable_grid_density = false
-            if lame_filters_block != blank
-              assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
-              assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
-            endif
-          %}
-          {% render 'lame-our-products-toolbar',
-            collection: collection,
-            paginate: paginate,
-            section: section,
-            enable_sorting: lame_enable_sorting,
-            enable_grid_density: lame_enable_grid_density
-          %}
+          {% if section.settings.show_our_products_header %}
+            {% render 'lame-our-products-page-head',
+              collection: collection,
+              heading: section.settings.our_products_heading,
+              subtitle: section.settings.our_products_subtitle
+            %}
+            {% liquid
+              assign lame_filters_block = section.blocks['filters']
+              assign lame_enable_sorting = false
+              assign lame_enable_grid_density = false
+              if lame_filters_block != blank
+                assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
+                assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
+              endif
+            %}
+            {% render 'lame-our-products-toolbar',
+              collection: collection,
+              paginate: paginate,
+              section: section,
+              enable_sorting: lame_enable_sorting,
+              enable_grid_density: lame_enable_grid_density
+            %}
+          {% endif %}
           {% if lame_has_promo_images %}
             {% render 'lame-our-products-promo-images', section: section %}
           {% endif %}
@@ -209,7 +211,7 @@
         {% endif %}
           {% liquid
             assign show_inline_header = false
-            if lame_cosmetic_collection and section.settings.our_products_heading != blank and lame_our_products_op_cards == false
+            if section.settings.show_our_products_header and lame_cosmetic_collection and section.settings.our_products_heading != blank and lame_our_products_op_cards == false
               assign show_inline_header = true
               if template.suffix == 'our-products'
                 assign show_inline_header = false
@@ -262,7 +264,7 @@
 
           {% if lame_category_shop_page %}
             {% render 'lame-category-price-sort', collection: collection, paginate: paginate %}
-          {% elsif lame_cosmetic_collection and lame_our_products_op_cards == false %}
+          {% elsif lame_cosmetic_collection and lame_our_products_op_cards == false and section.settings.show_our_products_header %}
             {% liquid
               assign lame_filters_block = section.blocks['filters']
               assign lame_enable_sorting = false
@@ -681,6 +683,13 @@
       "label": "Use Our Products healthcare layout on this collection",
       "default": false,
       "info": "Also turns on automatically for the our-products theme template or handles listed in Theme settings → LAMÉ wishlist."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_our_products_header",
+      "label": "Show 'Our Products' page heading and count toolbar",
+      "default": false,
+      "info": "When disabled, hides the top title and product count above the filters."
     },
     {
       "type": "text",

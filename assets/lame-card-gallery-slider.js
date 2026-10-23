@@ -6,6 +6,16 @@
   if (window.LameCardGallerySliderInit) return;
   window.LameCardGallerySliderInit = true;
 
+  // Do not run on homepage
+  if (
+    document.body.classList.contains('template-index') ||
+    window.location.pathname === '/' ||
+    window.location.pathname === '' ||
+    window.location.pathname === '/index'
+  ) {
+    return;
+  }
+
   const DEFAULT_INTERVAL = 5000; // 5 seconds
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 

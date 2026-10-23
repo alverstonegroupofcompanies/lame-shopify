@@ -1,6 +1,7 @@
 {%- doc -%}
   Our Products mini banner carousel — full-width image slides.
   Shown on all / our-products / products collection handles.
+  Supports responsive desktop and mobile editable banner images.
 {%- enddoc -%}
 
 {%- liquid
@@ -16,7 +17,7 @@
   assign slide_blocks = section.blocks | where: 'type', 'slide'
   assign slide_count = 0
   for block in slide_blocks
-    if block.settings.image != blank
+    if block.settings.image != blank or block.settings.image_mobile != blank
       assign slide_count = slide_count | plus: 1
     endif
   endfor
@@ -43,6 +44,22 @@
     endfor
   endif
 
+  assign banner_ratio_mobile = banner_ratio
+  assign ratio_mobile_set = false
+  if use_legacy
+    if section.settings.image_mobile != blank and section.settings.image_mobile.aspect_ratio != blank
+      assign banner_ratio_mobile = section.settings.image_mobile.aspect_ratio
+      assign ratio_mobile_set = true
+    endif
+  else
+    for block in slide_blocks
+      if ratio_mobile_set == false and block.settings.image_mobile != blank and block.settings.image_mobile.aspect_ratio != blank
+        assign banner_ratio_mobile = block.settings.image_mobile.aspect_ratio
+        assign ratio_mobile_set = true
+      endif
+    endfor
+  endif
+
   assign autoplay_ms = section.settings.autoplay_speed | default: 5 | times: 1000
   if section.settings.autoplay == false
     assign autoplay_ms = 0
@@ -54,8 +71,8 @@
   <script src="{{ 'lame-op-mini-banner.js' | asset_url }}" defer></script>
 
   <lame-op-mini-banner
-    class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }} lame-op-mini-banner--image-only{% if slide_count > 1 %} lame-op-mini-banner--carousel{% endif %}"
-    style="--lame-op-mini-bg-setting: {{ section.settings.bg_color }}; --lame-op-mini-ratio: {{ banner_ratio }};"
+    class="lame-op-mini-banner lame-op-mini-banner--{{ section.settings.height }} lame-op-mini-banner--image-only{% if slide_count > 1 %} lame-op-mini-banner--carousel{% endif %}{% if ratio_mobile_set %} lame-op-mini-banner--has-mobile-ratio{% endif %}"
+    style="--lame-op-mini-bg-setting: {{ section.settings.bg_color }}; --lame-op-mini-ratio: {{ banner_ratio }}; --lame-op-mini-ratio-mobile: {{ banner_ratio_mobile }};"
     data-autoplay="{{ autoplay_ms }}"
     aria-roledescription="carousel"
     aria-label="{{ section.settings.image_alt | default: 'Our Products' | escape }}"
@@ -67,21 +84,38 @@
           {%- liquid
             assign image_alt = section.settings.image_alt | default: 'Our Products'
             assign banner_image = section.settings.image
+            assign banner_image_mobile = section.settings.image_mobile
           -%}
           <div class="lame-op-mini-banner__slide is-active" data-lame-op-banner-slide aria-hidden="false">
             <div class="lame-op-mini-banner__surface">
-              {% if banner_image != blank %}
-                {{
-                  banner_image
-                  | image_url: width: 2400
-                  | image_tag:
-                    class: 'lame-op-mini-banner__image',
-                    loading: 'eager',
-                    fetchpriority: 'high',
-                    widths: '750,1100,1500,2000,2400',
-                    sizes: '100vw',
-                    alt: image_alt
-                }}
+              {% if banner_image != blank or banner_image_mobile != blank %}
+                <picture class="lame-op-mini-banner__picture">
+                  {% if banner_image_mobile != blank %}
+                    <source
+                      media="(max-width: 749px)"
+                      srcset="
+                        {{ banner_image_mobile | image_url: width: 375 }} 375w,
+                        {{ banner_image_mobile | image_url: width: 550 }} 550w,
+                        {{ banner_image_mobile | image_url: width: 750 }} 750w,
+                        {{ banner_image_mobile | image_url: width: 1000 }} 1000w,
+                        {{ banner_image_mobile | image_url: width: 1200 }} 1200w
+                      "
+                      sizes="100vw"
+                    >
+                  {% endif %}
+                  {% assign fallback_desktop_image = banner_image | default: banner_image_mobile %}
+                  {{
+                    fallback_desktop_image
+                    | image_url: width: 2400
+                    | image_tag:
+                      class: 'lame-op-mini-banner__image',
+                      loading: 'eager',
+                      fetchpriority: 'high',
+                      widths: '750,1100,1500,2000,2400',
+                      sizes: '100vw',
+                      alt: image_alt
+                  }}
+                </picture>
               {% else %}
                 <img
                   class="lame-op-mini-banner__image"
@@ -98,10 +132,11 @@
         {%- else -%}
           {%- assign slide_index = 0 -%}
           {%- for block in slide_blocks -%}
-            {%- if block.settings.image == blank -%}{% continue %}{%- endif -%}
+            {%- if block.settings.image == blank and block.settings.image_mobile == blank -%}{% continue %}{%- endif -%}
             {%- liquid
               assign image_alt = block.settings.image_alt | default: section.settings.image_alt | default: 'Our Products'
               assign slide_link = block.settings.link
+              assign slide_desktop_img = block.settings.image | default: block.settings.image_mobile
             -%}
             <div
               class="lame-op-mini-banner__slide{% if slide_index == 0 %} is-active{% endif %}"
@@ -113,30 +148,45 @@
                 <a class="lame-op-mini-banner__link" href="{{ slide_link }}" aria-label="{{ image_alt | escape }}">
               {%- endif -%}
               <div class="lame-op-mini-banner__surface">
-                {%- if slide_index == 0 -%}
-                  {{
-                    block.settings.image
-                    | image_url: width: 2400
-                    | image_tag:
-                      class: 'lame-op-mini-banner__image',
-                      loading: 'eager',
-                      fetchpriority: 'high',
-                      widths: '750,1100,1500,2000,2400',
-                      sizes: '100vw',
-                      alt: image_alt
-                  }}
-                {%- else -%}
-                  {{
-                    block.settings.image
-                    | image_url: width: 2400
-                    | image_tag:
-                      class: 'lame-op-mini-banner__image',
-                      loading: 'lazy',
-                      widths: '750,1100,1500,2000,2400',
-                      sizes: '100vw',
-                      alt: image_alt
-                  }}
-                {%- endif -%}
+                <picture class="lame-op-mini-banner__picture">
+                  {%- if block.settings.image_mobile != blank -%}
+                    <source
+                      media="(max-width: 749px)"
+                      srcset="
+                        {{ block.settings.image_mobile | image_url: width: 375 }} 375w,
+                        {{ block.settings.image_mobile | image_url: width: 550 }} 550w,
+                        {{ block.settings.image_mobile | image_url: width: 750 }} 750w,
+                        {{ block.settings.image_mobile | image_url: width: 1000 }} 1000w,
+                        {{ block.settings.image_mobile | image_url: width: 1200 }} 1200w
+                      "
+                      sizes="100vw"
+                    >
+                  {%- endif -%}
+                  {%- if slide_index == 0 -%}
+                    {{
+                      slide_desktop_img
+                      | image_url: width: 2400
+                      | image_tag:
+                        class: 'lame-op-mini-banner__image',
+                        loading: 'eager',
+                        fetchpriority: 'high',
+                        widths: '750,1100,1500,2000,2400',
+                        sizes: '100vw',
+                        alt: image_alt
+                    }}
+                  {%- else -%}
+                    {{
+                      slide_desktop_img
+                      | image_url: width: 2400
+                      | image_tag:
+                        class: 'lame-op-mini-banner__image',
+                        loading: 'lazy',
+                        widths: '750,1100,1500,2000,2400',
+                        sizes: '100vw',
+                        alt: image_alt
+                    }}
+                  {%- endif -%}
+                </picture>
               </div>
               {%- if slide_link != blank -%}
                 </a>
@@ -194,13 +244,19 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Add banner images as slides below. Drag to reorder. If no slides have images, the fallback image is used."
+      "content": "Add banner images as slides below. You can specify different images for Desktop and Mobile. Drag slides to reorder."
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Fallback banner image",
+      "label": "Fallback desktop banner image",
       "info": "Used only when no slide images are added."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Fallback mobile banner image",
+      "info": "Used on mobile (< 750px) when no slide images are added."
     },
     {
       "type": "text",
@@ -251,7 +307,13 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Image"
+          "label": "Desktop image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Mobile image (under 750px)",
+          "info": "Optional. Pick a different banner image specifically for mobile view. If blank, desktop image is used."
         },
         {
           "type": "text",

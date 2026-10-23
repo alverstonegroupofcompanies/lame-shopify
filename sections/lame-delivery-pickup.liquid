@@ -1,0 +1,885 @@
+{{ 'lame-delivery-pickup.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  # Live counts for stats
+  assign live_products = shop.products_count | default: 0
+  assign live_orders_placed = 150
+
+  if shop.metafields.custom.orders_placed.value != blank
+    assign live_orders_placed = shop.metafields.custom.orders_placed.value | times: 1
+  elsif shop.metafields.custom.orders_count.value != blank
+    assign live_orders_placed = shop.metafields.custom.orders_count.value | times: 1
+  elsif shop.metafields.custom.orders_fulfilled.value != blank
+    assign live_orders_placed = shop.metafields.custom.orders_fulfilled.value | times: 1
+  endif
+
+  # Stat 1 calculation
+  assign stat_1_val = section.settings.delivery_stat_1_number | default: '150'
+  if stat_1_val == 'auto' or stat_1_val == ''
+    assign stat_1_num = live_orders_placed
+  else
+    assign stat_1_num = stat_1_val | times: 1
+    if stat_1_num == 0 and stat_1_val != blank
+      assign stat_1_num = stat_1_val
+    endif
+  endif
+
+  # Stat 2 calculation
+  assign stat_2_num = live_products
+  if section.settings.delivery_stat_2_number != blank
+    assign stat_2_num = section.settings.delivery_stat_2_number | times: 1
+    if stat_2_num == 0
+      assign stat_2_num = section.settings.delivery_stat_2_number
+    endif
+  endif
+
+  # Pickup heading highlighting
+  assign pickup_heading = section.settings.pickup_heading | default: 'Pick up at our shop within 1 hr after placing order'
+  assign pickup_heading_html = pickup_heading | escape
+  assign pickup_heading_html = pickup_heading_html | replace: '1 hour', '<span class="lame-editorial-highlight">1 hour</span>'
+  assign pickup_heading_html = pickup_heading_html | replace: '1hour', '<span class="lame-editorial-highlight">1 hour</span>'
+  assign pickup_heading_html = pickup_heading_html | replace: '1 hr', '<span class="lame-editorial-highlight">1 hr</span>'
+  assign pickup_heading_html = pickup_heading_html | replace: '1hr', '<span class="lame-editorial-highlight">1 hr</span>'
+
+  assign layout_style = section.settings.layout_style | default: 'banner_and_split'
+-%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<section
+  class="section section--{{ section.settings.section_width | default: 'page-width' }} color-{{ section.settings.color_scheme }} lame-delivery-pickup spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
+  data-lame-delivery-pickup
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-delivery-pickup__wrap">
+    {%- if section.settings.show_section_header -%}
+      <div class="lame-delivery-pickup__header">
+        {%- if section.settings.section_eyebrow != blank -%}
+          <div class="lame-delivery-pickup__header-eyebrow">
+            <span class="lame-delivery-pickup__header-eyebrow-dot" aria-hidden="true"></span>
+            <span>{{ section.settings.section_eyebrow | escape }}</span>
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.section_heading != blank -%}
+          <h2 class="lame-delivery-pickup__header-title">{{ section.settings.section_heading | escape }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.section_subtitle != blank -%}
+          <p class="lame-delivery-pickup__header-subtitle">{{ section.settings.section_subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if layout_style == 'banner_and_split' -%}
+      {%- comment -%} ========================================================
+          MODE 1: TOP BANNER (DELIVERY) + BOTTOM SPLIT ROW (PICKUP)
+          Exact match to the user's reference screenshot
+          ======================================================== {%- endcomment -%}
+
+      {%- if section.settings.delivery_enabled -%}
+        <article class="lame-editorial-banner">
+          <div class="lame-editorial-banner__media">
+            {%- if section.settings.delivery_image != blank -%}
+              {{
+                section.settings.delivery_image
+                | image_url: width: 1800
+                | image_tag:
+                  class: 'lame-editorial-banner__image',
+                  loading: 'lazy',
+                  widths: '600,900,1200,1500,1800',
+                  sizes: '100vw',
+                  alt: section.settings.delivery_heading
+              }}
+            {%- else -%}
+              <img
+                class="lame-editorial-banner__image"
+                src="{{ 'lame-store-stats-delivery.png' | asset_url }}"
+                alt="MyLamstone delivery"
+                width="1600"
+                height="800"
+                loading="lazy"
+              >
+            {%- endif -%}
+            <div class="lame-editorial-banner__overlay"></div>
+          </div>
+
+          <div class="lame-editorial-banner__content">
+            <div class="lame-editorial-banner__left">
+              <h2 class="lame-editorial-banner__title">{{ section.settings.delivery_heading | escape }}</h2>
+            </div>
+            <div class="lame-editorial-banner__right">
+              {%- if section.settings.delivery_description != blank -%}
+                <div class="lame-editorial-banner__desc rte">
+                  {{ section.settings.delivery_description }}
+                </div>
+              {%- endif -%}
+
+              <div class="lame-editorial-banner__stats">
+                <div class="lame-editorial-banner__stat">
+                  <span class="lame-editorial-banner__stat-num">
+                    <span data-lame-stat-number data-target="{{ stat_1_num }}">0</span>{{ section.settings.delivery_stat_1_suffix | default: '+' }}
+                  </span>
+                  <span class="lame-editorial-banner__stat-label">{{ section.settings.delivery_stat_1_label | default: 'Orders fulfilled' }}</span>
+                </div>
+                <div class="lame-editorial-banner__stat">
+                  <span class="lame-editorial-banner__stat-num">
+                    <span data-lame-stat-number data-target="{{ stat_2_num }}">0</span>{{ section.settings.delivery_stat_2_suffix | default: '+' }}
+                  </span>
+                  <span class="lame-editorial-banner__stat-label">{{ section.settings.delivery_stat_2_label | default: 'Products' }}</span>
+                </div>
+              </div>
+
+              {%- if section.settings.delivery_button_label != blank -%}
+                <a
+                  class="lame-editorial-link lame-editorial-link--light"
+                  href="{{ section.settings.delivery_button_link | default: routes.all_products_collection_url }}"
+                >
+                  <span>{{ section.settings.delivery_button_label | escape }}</span>
+                  <span class="lame-editorial-link-arrow" aria-hidden="true">→</span>
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        </article>
+      {%- endif -%}
+
+      {%- if section.settings.pickup_enabled -%}
+        <article class="lame-editorial-row lame-editorial-row--pickup">
+          <div class="lame-editorial-row__media-col">
+            <div class="lame-editorial-media">
+              <div
+                class="lame-editorial-media__offset-block"
+                style="background-color: {{ section.settings.offset_accent_color | default: '#ede7de' }};"
+              ></div>
+              <div class="lame-editorial-media__frame">
+                {%- if section.settings.pickup_image != blank -%}
+                  {{
+                    section.settings.pickup_image
+                    | image_url: width: 1200
+                    | image_tag:
+                      class: 'lame-editorial-media__image',
+                      loading: 'lazy',
+                      widths: '400,600,800,1000,1200',
+                      sizes: '(min-width: 990px) 45vw, 100vw',
+                      alt: section.settings.pickup_heading
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'lame-editorial-media__image placeholder-svg' }}
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+          <div class="lame-editorial-row__text-col">
+            <div class="lame-editorial-contour" aria-hidden="true">
+              <svg viewBox="0 0 600 600" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 80,-40 A 520,520 0 0,0 620,500" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.14"/>
+                <path d="M 180,-40 A 420,420 0 0,0 620,400" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" opacity="0.10"/>
+                <path d="M 280,-40 A 320,320 0 0,0 620,300" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" opacity="0.08"/>
+                <path d="M 380,-40 A 220,220 0 0,0 620,200" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" opacity="0.06"/>
+              </svg>
+            </div>
+
+            <div class="lame-editorial-content">
+              {%- if section.settings.pickup_tag != blank -%}
+                <p class="lame-editorial-eyebrow">
+                  <span class="lame-editorial-eyebrow-dot" aria-hidden="true"></span>
+                  <span>{{ section.settings.pickup_tag | escape }}</span>
+                </p>
+              {%- endif -%}
+
+              <h3 class="lame-editorial-heading">{{ pickup_heading_html }}</h3>
+
+              {%- if section.settings.pickup_description != blank -%}
+                <div class="lame-editorial-desc rte">
+                  {{ section.settings.pickup_description }}
+                </div>
+              {%- endif -%}
+
+              <ul class="lame-editorial-pills" role="list">
+                {%- if section.settings.pickup_chip_1 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{{ section.settings.pickup_chip_1 | escape }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if section.settings.pickup_chip_2 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>{{ section.settings.pickup_chip_2 | escape }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if section.settings.pickup_chip_3 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>{{ section.settings.pickup_chip_3 | escape }}</span>
+                  </li>
+                {%- endif -%}
+              </ul>
+
+              {%- if section.settings.pickup_button_label != blank -%}
+                <div class="lame-editorial-actions">
+                  <a
+                    class="lame-editorial-link"
+                    href="{{ section.settings.pickup_button_link | default: routes.root_url }}"
+                  >
+                    <span>{{ section.settings.pickup_button_label | escape }}</span>
+                    <span class="lame-editorial-link-arrow" aria-hidden="true">→</span>
+                  </a>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </article>
+      {%- endif -%}
+
+    {%- elsif layout_style == 'split_rows' -%}
+      {%- comment -%} ========================================================
+          MODE 2: TWO ALTERNATING SPLIT ROWS (BOTH WITH OFFSET SAND FRAME)
+          ======================================================== {%- endcomment -%}
+
+      {%- if section.settings.delivery_enabled -%}
+        <article class="lame-editorial-row lame-editorial-row--delivery">
+          <div class="lame-editorial-row__media-col">
+            <div class="lame-editorial-media">
+              <div
+                class="lame-editorial-media__offset-block"
+                style="background-color: {{ section.settings.offset_accent_color | default: '#ede7de' }};"
+              ></div>
+              <div class="lame-editorial-media__frame">
+                {%- if section.settings.delivery_image != blank -%}
+                  {{
+                    section.settings.delivery_image
+                    | image_url: width: 1200
+                    | image_tag:
+                      class: 'lame-editorial-media__image',
+                      loading: 'lazy',
+                      widths: '400,600,800,1000,1200',
+                      sizes: '(min-width: 990px) 45vw, 100vw',
+                      alt: section.settings.delivery_heading
+                  }}
+                {%- else -%}
+                  <img
+                    class="lame-editorial-media__image"
+                    src="{{ 'lame-store-stats-delivery.png' | asset_url }}"
+                    alt="MyLamstone delivery"
+                    width="800"
+                    height="450"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+          <div class="lame-editorial-row__text-col">
+            <div class="lame-editorial-contour" aria-hidden="true">
+              <svg viewBox="0 0 600 600" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 80,-40 A 520,520 0 0,0 620,500" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.14"/>
+                <path d="M 180,-40 A 420,420 0 0,0 620,400" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" opacity="0.10"/>
+                <path d="M 280,-40 A 320,320 0 0,0 620,300" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" opacity="0.08"/>
+              </svg>
+            </div>
+
+            <div class="lame-editorial-content">
+              {%- if section.settings.delivery_tag != blank -%}
+                <p class="lame-editorial-eyebrow">
+                  <span class="lame-editorial-eyebrow-dot" aria-hidden="true"></span>
+                  <span>{{ section.settings.delivery_tag | escape }}</span>
+                </p>
+              {%- endif -%}
+
+              <h3 class="lame-editorial-heading">{{ section.settings.delivery_heading | escape }}</h3>
+
+              {%- if section.settings.delivery_description != blank -%}
+                <div class="lame-editorial-desc rte">
+                  {{ section.settings.delivery_description }}
+                </div>
+              {%- endif -%}
+
+              <div class="lame-editorial-stats">
+                <div class="lame-editorial-stat">
+                  <span class="lame-editorial-stat-num">
+                    <span data-lame-stat-number data-target="{{ stat_1_num }}">0</span><span class="lame-editorial-stat-suffix">{{ section.settings.delivery_stat_1_suffix | default: '+' }}</span>
+                  </span>
+                  <span class="lame-editorial-stat-label">{{ section.settings.delivery_stat_1_label | default: 'Orders fulfilled' }}</span>
+                </div>
+                <div class="lame-editorial-stat">
+                  <span class="lame-editorial-stat-num">
+                    <span data-lame-stat-number data-target="{{ stat_2_num }}">0</span><span class="lame-editorial-stat-suffix">{{ section.settings.delivery_stat_2_suffix | default: '+' }}</span>
+                  </span>
+                  <span class="lame-editorial-stat-label">{{ section.settings.delivery_stat_2_label | default: 'Products' }}</span>
+                </div>
+              </div>
+
+              {%- if section.settings.delivery_button_label != blank -%}
+                <div class="lame-editorial-actions">
+                  <a
+                    class="lame-editorial-link"
+                    href="{{ section.settings.delivery_button_link | default: routes.all_products_collection_url }}"
+                  >
+                    <span>{{ section.settings.delivery_button_label | escape }}</span>
+                    <span class="lame-editorial-link-arrow" aria-hidden="true">→</span>
+                  </a>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </article>
+      {%- endif -%}
+
+      {%- if section.settings.pickup_enabled -%}
+        <article class="lame-editorial-row lame-editorial-row--pickup lame-editorial-row--reverse">
+          <div class="lame-editorial-row__media-col">
+            <div class="lame-editorial-media">
+              <div
+                class="lame-editorial-media__offset-block"
+                style="background-color: {{ section.settings.offset_accent_color | default: '#ede7de' }};"
+              ></div>
+              <div class="lame-editorial-media__frame">
+                {%- if section.settings.pickup_image != blank -%}
+                  {{
+                    section.settings.pickup_image
+                    | image_url: width: 1200
+                    | image_tag:
+                      class: 'lame-editorial-media__image',
+                      loading: 'lazy',
+                      widths: '400,600,800,1000,1200',
+                      sizes: '(min-width: 990px) 45vw, 100vw',
+                      alt: section.settings.pickup_heading
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'lame-editorial-media__image placeholder-svg' }}
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+          <div class="lame-editorial-row__text-col">
+            <div class="lame-editorial-contour" aria-hidden="true">
+              <svg viewBox="0 0 600 600" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 80,-40 A 520,520 0 0,0 620,500" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.14"/>
+                <path d="M 180,-40 A 420,420 0 0,0 620,400" stroke="currentColor" stroke-width="1.0" stroke-linecap="round" opacity="0.10"/>
+                <path d="M 280,-40 A 320,320 0 0,0 620,300" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" opacity="0.08"/>
+              </svg>
+            </div>
+
+            <div class="lame-editorial-content">
+              {%- if section.settings.pickup_tag != blank -%}
+                <p class="lame-editorial-eyebrow">
+                  <span class="lame-editorial-eyebrow-dot" aria-hidden="true"></span>
+                  <span>{{ section.settings.pickup_tag | escape }}</span>
+                </p>
+              {%- endif -%}
+
+              <h3 class="lame-editorial-heading">{{ pickup_heading_html }}</h3>
+
+              {%- if section.settings.pickup_description != blank -%}
+                <div class="lame-editorial-desc rte">
+                  {{ section.settings.pickup_description }}
+                </div>
+              {%- endif -%}
+
+              <ul class="lame-editorial-pills" role="list">
+                {%- if section.settings.pickup_chip_1 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{{ section.settings.pickup_chip_1 | escape }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if section.settings.pickup_chip_2 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>{{ section.settings.pickup_chip_2 | escape }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if section.settings.pickup_chip_3 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>{{ section.settings.pickup_chip_3 | escape }}</span>
+                  </li>
+                {%- endif -%}
+              </ul>
+
+              {%- if section.settings.pickup_button_label != blank -%}
+                <div class="lame-editorial-actions">
+                  <a
+                    class="lame-editorial-link"
+                    href="{{ section.settings.pickup_button_link | default: routes.root_url }}"
+                  >
+                    <span>{{ section.settings.pickup_button_label | escape }}</span>
+                    <span class="lame-editorial-link-arrow" aria-hidden="true">→</span>
+                  </a>
+                </div>
+              {%- endif -%}
+            </div>
+          </div>
+        </article>
+      {%- endif -%}
+
+    {%- else -%}
+      {%- comment -%} ========================================================
+          MODE 3: EDITORIAL DUAL CARDS (SIDE-BY-SIDE)
+          ======================================================== {%- endcomment -%}
+
+      <div class="lame-editorial-grid">
+        {%- if section.settings.pickup_enabled -%}
+          <article class="lame-editorial-card lame-editorial-card--pickup">
+            <div class="lame-editorial-media">
+              <div
+                class="lame-editorial-media__offset-block"
+                style="background-color: {{ section.settings.offset_accent_color | default: '#ede7de' }};"
+              ></div>
+              <div class="lame-editorial-media__frame">
+                {%- if section.settings.pickup_image != blank -%}
+                  {{
+                    section.settings.pickup_image
+                    | image_url: width: 1000
+                    | image_tag:
+                      class: 'lame-editorial-media__image',
+                      loading: 'lazy',
+                      widths: '400,600,800,1000',
+                      sizes: '(min-width: 990px) 45vw, 100vw',
+                      alt: section.settings.pickup_heading
+                  }}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag: 'lame-editorial-media__image placeholder-svg' }}
+                {%- endif -%}
+              </div>
+            </div>
+
+            <div class="lame-editorial-content">
+              {%- if section.settings.pickup_tag != blank -%}
+                <p class="lame-editorial-eyebrow">
+                  <span class="lame-editorial-eyebrow-dot" aria-hidden="true"></span>
+                  <span>{{ section.settings.pickup_tag | escape }}</span>
+                </p>
+              {%- endif -%}
+
+              <h3 class="lame-editorial-heading">{{ pickup_heading_html }}</h3>
+
+              {%- if section.settings.pickup_description != blank -%}
+                <div class="lame-editorial-desc rte">
+                  {{ section.settings.pickup_description }}
+                </div>
+              {%- endif -%}
+
+              <ul class="lame-editorial-pills" role="list">
+                {%- if section.settings.pickup_chip_1 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{{ section.settings.pickup_chip_1 | escape }}</span>
+                  </li>
+                {%- endif -%}
+                {%- if section.settings.pickup_chip_2 != blank -%}
+                  <li class="lame-editorial-pill">
+                    <svg class="lame-editorial-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>{{ section.settings.pickup_chip_2 | escape }}</span>
+                  </li>
+                {%- endif -%}
+              </ul>
+
+              {%- if section.settings.pickup_button_label != blank -%}
+                <div class="lame-editorial-actions">
+                  <a
+                    class="lame-editorial-link"
+                    href="{{ section.settings.pickup_button_link | default: routes.root_url }}"
+                  >
+                    <span>{{ section.settings.pickup_button_label | escape }}</span>
+                    <span class="lame-editorial-link-arrow" aria-hidden="true">→</span>
+                  </a>
+                </div>
+              {%- endif -%}
+            </div>
+          </article>
+        {%- endif -%}
+
+        {%- if section.settings.delivery_enabled -%}
+          <article class="lame-editorial-card lame-editorial-card--delivery">
+            <div class="lame-editorial-media">
+              <div
+                class="lame-editorial-media__offset-block"
+                style="background-color: {{ section.settings.offset_accent_color | default: '#ede7de' }};"
+              ></div>
+              <div class="lame-editorial-media__frame">
+                {%- if section.settings.delivery_image != blank -%}
+                  {{
+                    section.settings.delivery_image
+                    | image_url: width: 1000
+                    | image_tag:
+                      class: 'lame-editorial-media__image',
+                      loading: 'lazy',
+                      widths: '400,600,800,1000',
+                      sizes: '(min-width: 990px) 45vw, 100vw',
+                      alt: section.settings.delivery_heading
+                  }}
+                {%- else -%}
+                  <img
+                    class="lame-editorial-media__image"
+                    src="{{ 'lame-store-stats-delivery.png' | asset_url }}"
+                    alt="MyLamstone delivery"
+                    width="800"
+                    height="450"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+              </div>
+            </div>
+
+            <div class="lame-editorial-content">
+              {%- if section.settings.delivery_tag != blank -%}
+                <p class="lame-editorial-eyebrow">
+                  <span class="lame-editorial-eyebrow-dot" aria-hidden="true"></span>
+                  <span>{{ section.settings.delivery_tag | escape }}</span>
+                </p>
+              {%- endif -%}
+
+              <h3 class="lame-editorial-heading">{{ section.settings.delivery_heading | escape }}</h3>
+
+              {%- if section.settings.delivery_description != blank -%}
+                <div class="lame-editorial-desc rte">
+                  {{ section.settings.delivery_description }}
+                </div>
+              {%- endif -%}
+
+              <div class="lame-editorial-stats">
+                <div class="lame-editorial-stat">
+                  <span class="lame-editorial-stat-num">
+                    <span data-lame-stat-number data-target="{{ stat_1_num }}">0</span><span class="lame-editorial-stat-suffix">{{ section.settings.delivery_stat_1_suffix | default: '+' }}</span>
+                  </span>
+                  <span class="lame-editorial-stat-label">{{ section.settings.delivery_stat_1_label | default: 'Orders fulfilled' }}</span>
+                </div>
+                <div class="lame-editorial-stat">
+                  <span class="lame-editorial-stat-num">
+                    <span data-lame-stat-number data-target="{{ stat_2_num }}">0</span><span class="lame-editorial-stat-suffix">{{ section.settings.delivery_stat_2_suffix | default: '+' }}</span>
+                  </span>
+                  <span class="lame-editorial-stat-label">{{ section.settings.delivery_stat_2_label | default: 'Products' }}</span>
+                </div>
+              </div>
+
+              {%- if section.settings.delivery_button_label != blank -%}
+                <div class="lame-editorial-actions">
+                  <a
+                    class="lame-editorial-link"
+                    href="{{ section.settings.delivery_button_link | default: routes.all_products_collection_url }}"
+                  >
+                    <span>{{ section.settings.delivery_button_label | escape }}</span>
+                    <span class="lame-editorial-link-arrow" aria-hidden="true">→</span>
+                  </a>
+                </div>
+              {%- endif -%}
+            </div>
+          </article>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  (function () {
+    const root = document.querySelector('[data-lame-delivery-pickup]');
+    if (!root) return;
+
+    const animateNumber = (el, target, duration = 1600) => {
+      const start = 0;
+      const startTime = performance.now();
+      const step = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (target - start) * easeOut);
+        el.textContent = current.toLocaleString();
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = target.toLocaleString();
+        }
+      };
+      requestAnimationFrame(step);
+    };
+
+    const statElements = root.querySelectorAll('[data-lame-stat-number]');
+    if (!statElements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            statElements.forEach((el) => {
+              const target = parseInt(el.getAttribute('data-target') || '0', 10);
+              if (!isNaN(target) && target > 0) {
+                animateNumber(el, target);
+              }
+            });
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(root);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Lame Delivery & Pickup",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Presentation & Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Layout presentation",
+      "options": [
+        {
+          "value": "banner_and_split",
+          "label": "Top Banner + Split Row (Like Reference)"
+        },
+        {
+          "value": "split_rows",
+          "label": "Two Alternating Split Rows"
+        },
+        {
+          "value": "grid_cards",
+          "label": "Editorial Dual Cards"
+        }
+      ],
+      "default": "banner_and_split"
+    },
+    {
+      "type": "color",
+      "id": "offset_accent_color",
+      "label": "Image offset frame color",
+      "default": "#ede7de"
+    },
+    {
+      "type": "header",
+      "content": "Section Header (Optional)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section_header",
+      "label": "Show section header",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "section_eyebrow",
+      "label": "Section eyebrow",
+      "default": "Shop Your Way"
+    },
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section heading",
+      "default": "Fast Pickup & Pan-India Faster Delivery"
+    },
+    {
+      "type": "text",
+      "id": "section_subtitle",
+      "label": "Section subtitle",
+      "default": "Collect in 1 hour at our store or get guaranteed express doorstep delivery across India."
+    },
+    {
+      "type": "header",
+      "content": "Card 1: Fast Pickup"
+    },
+    {
+      "type": "checkbox",
+      "id": "pickup_enabled",
+      "label": "Enable Fast Pickup Card",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "pickup_image",
+      "label": "Pickup image"
+    },
+    {
+      "type": "text",
+      "id": "pickup_tag",
+      "label": "Top eyebrow tag",
+      "default": "Store Pickup · Counter Collection"
+    },
+    {
+      "type": "text",
+      "id": "pickup_heading",
+      "label": "Heading",
+      "default": "Pick up at our shop within 1 hr after placing order"
+    },
+    {
+      "type": "richtext",
+      "id": "pickup_description",
+      "label": "Description",
+      "default": "<p>Order online and collect from our shop counter quickly. We'll notify you when your order is packed and ready.</p>"
+    },
+    {
+      "type": "text",
+      "id": "pickup_chip_1",
+      "label": "Feature highlight 1",
+      "default": "Ready in 1 hour"
+    },
+    {
+      "type": "text",
+      "id": "pickup_chip_2",
+      "label": "Feature highlight 2",
+      "default": "In-store pickup"
+    },
+    {
+      "type": "text",
+      "id": "pickup_chip_3",
+      "label": "Feature highlight 3",
+      "default": "Zero waiting line"
+    },
+    {
+      "type": "text",
+      "id": "pickup_button_label",
+      "label": "Button label",
+      "default": "Get directions"
+    },
+    {
+      "type": "url",
+      "id": "pickup_button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Card 2: Pan-India Delivery"
+    },
+    {
+      "type": "checkbox",
+      "id": "delivery_enabled",
+      "label": "Enable Delivery Card",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "delivery_image",
+      "label": "Delivery image"
+    },
+    {
+      "type": "text",
+      "id": "delivery_tag",
+      "label": "Top eyebrow tag",
+      "default": "Doorstep Delivery · 100% Genuine"
+    },
+    {
+      "type": "text",
+      "id": "delivery_heading",
+      "label": "Heading",
+      "default": "100% Genuine Products. Trusted Beauty Brands. Pan-India Faster Delivery."
+    },
+    {
+      "type": "richtext",
+      "id": "delivery_description",
+      "label": "Description",
+      "default": "<p>Safe, temperature-conscious doorstep delivery across all postal codes in India. Direct from authorized brands.</p>"
+    },
+    {
+      "type": "text",
+      "id": "delivery_stat_1_number",
+      "label": "Stat 1 number",
+      "default": "150"
+    },
+    {
+      "type": "text",
+      "id": "delivery_stat_1_suffix",
+      "label": "Stat 1 suffix",
+      "default": "+"
+    },
+    {
+      "type": "text",
+      "id": "delivery_stat_1_label",
+      "label": "Stat 1 label",
+      "default": "Orders fulfilled"
+    },
+    {
+      "type": "text",
+      "id": "delivery_stat_2_number",
+      "label": "Stat 2 number (leave blank for live store products)"
+    },
+    {
+      "type": "text",
+      "id": "delivery_stat_2_suffix",
+      "label": "Stat 2 suffix",
+      "default": "+"
+    },
+    {
+      "type": "text",
+      "id": "delivery_stat_2_label",
+      "label": "Stat 2 label",
+      "default": "Products"
+    },
+    {
+      "type": "text",
+      "id": "delivery_button_label",
+      "label": "Button label",
+      "default": "Shop all products"
+    },
+    {
+      "type": "url",
+      "id": "delivery_button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lame Delivery & Pickup"
+    }
+  ]
+}
+{% endschema %}

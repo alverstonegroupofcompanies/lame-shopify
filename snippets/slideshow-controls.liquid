@@ -106,15 +106,32 @@
           class="slideshow-controls__thumbnails-container"
         >
           <div class="slideshow-controls__thumbnails">
+            {%- liquid
+              assign total_thumbs = thumbnails.size
+              assign remaining_thumbs = total_thumbs | minus: 4
+            -%}
             {% for media in thumbnails %}
+              {%- liquid
+                assign is_extra_thumb = false
+                if forloop.index > 4
+                  assign is_extra_thumb = true
+                endif
+                assign is_fourth_thumb = false
+                if forloop.index == 4 and remaining_thumbs > 0
+                  assign is_fourth_thumb = true
+                endif
+              -%}
               <button
-                class="slideshow-control button button-unstyled slideshow-controls__thumbnail"
+                class="slideshow-control button button-unstyled slideshow-controls__thumbnail{% if is_extra_thumb %} slideshow-controls__thumbnail--overflow{% endif %}{% if is_fourth_thumb %} slideshow-controls__thumbnail--has-more{% endif %}"
                 aria-label="{{ 'accessibility.slide_status' | t: index: forloop.index, length: forloop.length }}"
                 on:click="/select/{{ forloop.index0 }}"
                 style="--aspect-ratio: {% if aspect_ratio == 'adapt' %}{{ media.preview_image.aspect_ratio | default: 1.0 }}{% else %}{{ aspect_ratio }}{% endif %};"
                 ref="thumbnails[]"
                 {% if forloop.first %}
                   aria-selected="true"
+                {% endif %}
+                {% if is_fourth_thumb %}
+                  data-lame-remaining="{{ remaining_thumbs }}"
                 {% endif %}
               >
                 {% liquid
@@ -129,6 +146,18 @@
                   | image_tag: loading: 'lazy', alt: media.alt, style: focal_point_style
                   | escape
                 }}
+
+                {% if is_fourth_thumb %}
+                  <span
+                    class="lame-thumbnail-more-overlay"
+                    {% if block_id != blank %}
+                      on:click="#zoom-dialog-{{ block_id }}/open/3"
+                    {% endif %}
+                    aria-label="View {{ remaining_thumbs }} more images"
+                  >
+                    <span class="lame-thumbnail-more-text">+{{ remaining_thumbs }} more</span>
+                  </span>
+                {% endif %}
 
                 {% if media.media_type == 'video' or media.media_type == 'external_video' %}
                   <span class="slideshow-controls__thumbnail-badge">
