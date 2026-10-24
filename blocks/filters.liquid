@@ -728,56 +728,6 @@
         minInput.dispatchEvent(new Event('input', { bubbles: true }));
       });
     }
-    if (!window.__lameOpMobileDropdowns) {
-      window.__lameOpMobileDropdowns = true;
-      var mq = window.matchMedia('(max-width: 989px)');
-
-      var openItems = function () {
-        var items = [];
-        document.querySelectorAll('.lame-op-page__sidebar .lame-brand-bar__panel:not([hidden])').forEach(function (panel) {
-          var toggle = document.querySelector('.lame-op-page__sidebar .lame-brand-bar__toggle');
-          if (toggle) items.push({ panel: panel, anchor: toggle, toggle: toggle });
-        });
-        document.querySelectorAll('.lame-op-page__sidebar .lame-op-filters-stack details.facets__panel[open]').forEach(function (details) {
-          var summary = details.querySelector('summary');
-          var panel = details.querySelector('.facets__panel-content');
-          if (summary && panel) items.push({ panel: panel, anchor: summary, details: details });
-        });
-        return items;
-      };
-
-      var positionDropdowns = function () {
-        if (!mq.matches) return;
-        openItems().forEach(function (item) {
-          var rect = item.anchor.getBoundingClientRect();
-          item.panel.style.setProperty('--lame-dd-top', Math.round(rect.bottom + 6) + 'px');
-        });
-      };
-
-      var schedule = function () {
-        window.requestAnimationFrame(positionDropdowns);
-      };
-
-      document.addEventListener('toggle', schedule, true);
-      document.addEventListener('click', function (event) {
-        if (!mq.matches) return;
-        var target = event.target;
-        if (!(target instanceof Element)) return;
-        if (target.closest('.lame-brand-bar__toggle')) {
-          schedule();
-          window.setTimeout(positionDropdowns, 60);
-          return;
-        }
-        if (target.closest('.lame-brand-bar__panel, .lame-op-filters-stack details.facets__panel')) return;
-        openItems().forEach(function (item) {
-          if (item.details) item.details.open = false;
-          else if (item.toggle && item.toggle.getAttribute('aria-expanded') === 'true') item.toggle.click();
-        });
-      });
-      window.addEventListener('scroll', positionDropdowns, { passive: true });
-      window.addEventListener('resize', positionDropdowns);
-      document.addEventListener('scroll', positionDropdowns, { passive: true, capture: true });
-    }
   </script>
 {% endif %}
 
