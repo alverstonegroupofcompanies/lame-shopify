@@ -42,12 +42,21 @@
   assign pickup_heading_html = pickup_heading_html | replace: '1hr', '<span class="lame-editorial-highlight">1 hr</span>'
 
   assign layout_style = section.settings.layout_style | default: 'banner_and_split'
+  assign is_full_width = false
+  if section.settings.section_width == 'full-width'
+    assign is_full_width = true
+  endif
+
+  assign mobile_full_width = true
+  if section.settings.mobile_full_width == false
+    assign mobile_full_width = false
+  endif
 -%}
 
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 
 <section
-  class="section section--{{ section.settings.section_width | default: 'page-width' }} color-{{ section.settings.color_scheme }} lame-delivery-pickup spacing-style"
+  class="section {% if is_full_width %}section--full-width{% else %}section--page-width{% endif %} color-{{ section.settings.color_scheme }} lame-delivery-pickup{% if mobile_full_width %} lame-delivery-pickup--mobile-full{% endif %} spacing-style"
   style="{% render 'spacing-style', settings: section.settings %}"
   data-lame-delivery-pickup
   {{ section.shopify_attributes }}
@@ -781,7 +790,7 @@
       "type": "richtext",
       "id": "delivery_description",
       "label": "Description",
-      "default": "<p>Safe, temperature-conscious doorstep delivery across all postal codes in India. Direct from authorized brands.</p>"
+      "default": "<p>Safe doorstep delivery across all postal codes in India. Direct from authorized brands.</p>"
     },
     {
       "type": "text",
@@ -848,6 +857,12 @@
         }
       ],
       "default": "page-width"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_full_width",
+      "label": "Mobile full edge-to-edge width",
+      "default": true
     },
     {
       "type": "color_scheme",
