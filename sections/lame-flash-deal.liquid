@@ -121,7 +121,7 @@
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if is_glow_up_daily %} lame-flash-deal--glow-up-daily{% endif %}{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}"
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}{% if section.settings.section_background_color != blank and section.settings.section_background_color.alpha > 0 %} background-color: {{ section.settings.section_background_color }};{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -604,6 +604,12 @@
       "id": "color_scheme",
       "label": "Color scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color",
+      "info": "Optional. Pick a color or enter a color code (e.g. #FFF1E6). Clear it for no background."
     },
     {
       "type": "range",
