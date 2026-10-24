@@ -1,0 +1,349 @@
+{%- liquid
+  assign section_bg = section.settings.background_color_code | default: section.settings.background_color
+  if section_bg == blank or section_bg == 'transparent' or section_bg == 'rgba(0,0,0,0)'
+    assign section_bg = ''
+  endif
+
+  assign container_bg = section.settings.container_background_code | default: section.settings.container_background
+  if container_bg == blank or container_bg == 'transparent' or container_bg == 'rgba(0,0,0,0)'
+    assign container_bg = ''
+  endif
+-%}
+
+{{ 'lame-diwali-posters.css' | asset_url | stylesheet_tag }}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<section
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-diwali-posters"
+  style="{% if section_bg != blank %}background-color: {{ section_bg }};{% endif %}"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-diwali-posters__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
+    {%- if section.settings.heading != blank or section.settings.eyebrow != blank or section.settings.subheading != blank -%}
+      <header class="lame-diwali-posters__header">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="lame-diwali-posters__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          {% render 'lame-section-heading',
+            title: section.settings.heading,
+            subtitle: section.settings.subheading,
+            alignment: 'center',
+            size: 'large'
+          %}
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div
+      class="lame-diwali-posters__container{% if container_bg != blank %} lame-diwali-posters__container--boxed{% endif %}"
+      style="{% if container_bg != blank %}background-color: {{ container_bg }};{% endif %}{% if section.settings.container_radius > 0 %}border-radius: {{ section.settings.container_radius }}px;{% endif %}"
+    >
+      <div
+        class="lame-diwali-posters__grid"
+        data-posters-grid
+        style="--poster-radius: {{ section.settings.card_radius | default: 16 }}px;"
+      >
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign poster_image = block.settings.image
+            assign fallback_asset = block.settings.fallback_asset | strip
+            assign poster_alt = block.settings.alt | default: block.settings.title | default: section.settings.heading | default: 'Diwali Sale'
+            assign poster_link = block.settings.link
+            assign poster_badge = block.settings.badge | strip
+            assign poster_title = block.settings.title | strip
+            assign poster_subtitle = block.settings.subtitle | strip
+            assign poster_cta = block.settings.button_label | strip
+          -%}
+
+          <article class="lame-diwali-poster-card" {{ block.shopify_attributes }}>
+            {%- if poster_link != blank -%}
+              <a
+                href="{{ poster_link }}"
+                class="lame-diwali-poster-card__link"
+                {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}
+                aria-label="{{ poster_alt | escape }}"
+              ></a>
+            {%- endif -%}
+
+            <div class="lame-diwali-poster-card__media">
+              {%- if poster_badge != blank -%}
+                <span class="lame-diwali-poster-card__badge">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  {{ poster_badge }}
+                </span>
+              {%- endif -%}
+
+              {%- if poster_image != blank -%}
+                {{
+                  poster_image
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'lame-diwali-poster-card__img',
+                    loading: 'lazy',
+                    widths: '360,540,720,900',
+                    sizes: '(min-width: 750px) 33vw, 80vw',
+                    alt: poster_alt
+                }}
+              {%- elsif fallback_asset != blank -%}
+                <img
+                  class="lame-diwali-poster-card__img"
+                  src="{{ fallback_asset | asset_url }}"
+                  alt="{{ poster_alt | escape }}"
+                  loading="lazy"
+                  width="896"
+                  height="1200"
+                >
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'lame-diwali-poster-card__img' }}
+              {%- endif -%}
+            </div>
+
+            {%- if poster_title != blank or poster_subtitle != blank or poster_cta != blank -%}
+              <div class="lame-diwali-poster-card__overlay">
+                {%- if poster_title != blank -%}
+                  <h3 class="lame-diwali-poster-card__title">{{ poster_title }}</h3>
+                {%- endif -%}
+                {%- if poster_subtitle != blank -%}
+                  <p class="lame-diwali-poster-card__subtitle">{{ poster_subtitle }}</p>
+                {%- endif -%}
+                {%- if poster_cta != blank -%}
+                  <span class="lame-diwali-poster-card__cta">{{ poster_cta }}</span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </article>
+        {%- endfor -%}
+      </div>
+
+      {%- if section.blocks.size > 1 -%}
+        <div class="lame-diwali-posters__dots" aria-hidden="true" data-posters-dots>
+          {%- for block in section.blocks -%}
+            <span class="lame-diwali-posters__dot{% if forloop.first %} is-active{% endif %}" data-index="{{ forloop.index0 }}"></span>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+
+    const grid = section.querySelector('[data-posters-grid]');
+    const dots = section.querySelectorAll('[data-posters-dots] .lame-diwali-posters__dot');
+    if (!grid || !dots.length) return;
+
+    const updateDots = () => {
+      const scrollLeft = grid.scrollLeft;
+      const cardWidth = grid.querySelector('.lame-diwali-poster-card')?.offsetWidth || 1;
+      const activeIdx = Math.round(scrollLeft / (cardWidth + 16));
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('is-active', idx === activeIdx);
+      });
+    };
+
+    grid.addEventListener('scroll', updateDots, { passive: true });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Diwali Sale Posters",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Festive Season Specials"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Happy Diwali Sale — Coming Soon"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Get ready for huge festive savings, exclusive bundle offers, and celebratory gifts."
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color"
+    },
+    {
+      "type": "text",
+      "id": "background_color_code",
+      "label": "Custom section background code (hex/rgb)",
+      "info": "Overrides the color picker if specified. E.g. #190933 or #ffffff"
+    },
+    {
+      "type": "color",
+      "id": "container_background",
+      "label": "Boxed container background"
+    },
+    {
+      "type": "text",
+      "id": "container_background_code",
+      "label": "Custom container background code (hex/rgb)",
+      "info": "E.g. #5a4b81 or rgba(90,75,129,0.15) for a framed backdrop"
+    },
+    {
+      "type": "range",
+      "id": "container_radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Container corner radius",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Poster card corner radius",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "poster",
+      "name": "Diwali Poster",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Poster image"
+        },
+        {
+          "type": "text",
+          "id": "fallback_asset",
+          "label": "Fallback asset filename",
+          "default": "diwali-poster-1.jpg",
+          "info": "Asset filename from theme assets (e.g. diwali-poster-1.jpg)"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Image alt text",
+          "default": "Happy Diwali Sale"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "Open link in new tab",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Badge text",
+          "default": "Coming Soon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Poster title (optional)"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Poster subtitle (optional)"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Diwali Sale Posters",
+      "blocks": [
+        {
+          "type": "poster",
+          "settings": {
+            "fallback_asset": "diwali-poster-1.jpg",
+            "badge": "Coming Soon",
+            "alt": "Happy Diwali Sale - Festive Offers"
+          }
+        },
+        {
+          "type": "poster",
+          "settings": {
+            "fallback_asset": "diwali-poster-2.jpg",
+            "badge": "Coming Soon",
+            "alt": "Happy Diwali Sale - Mega Discounts"
+          }
+        },
+        {
+          "type": "poster",
+          "settings": {
+            "fallback_asset": "diwali-poster-3.jpg",
+            "badge": "Coming Soon",
+            "alt": "Happy Diwali Sale - Special Gifts"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -114,14 +114,37 @@
   if is_glow_up_daily
     assign title_mobile_full_width = true
   endif
+
+  assign bg_color = section.settings.section_background_color_code | default: '' | strip
+  if bg_color == blank
+    assign bg_color = section.settings.section_background_color
+  endif
+  if bg_color == 'transparent' or bg_color == 'rgba(0,0,0,0)' or bg_color == blank
+    assign bg_color = ''
+  endif
+
+  assign below_banner_only = section.settings.background_below_banner_only
+  if below_banner_only == nil
+    assign below_banner_only = true
+  endif
+
+  assign content_bg = ''
+  assign whole_section_bg = ''
+  if bg_color != blank
+    if below_banner_only
+      assign content_bg = bg_color
+    else
+      assign whole_section_bg = bg_color
+    endif
+  endif
 -%}
 
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if is_glow_up_daily %} lame-flash-deal--glow-up-daily{% endif %}{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if is_glow_up_daily %} lame-flash-deal--glow-up-daily{% endif %}{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}{% if section.settings.section_background_color != blank and section.settings.section_background_color.alpha > 0 %} background-color: {{ section.settings.section_background_color }};{% endif %}"
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }};{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -249,64 +272,66 @@
     </header>
     {% endif %}
 
-    {%- assign card_blocks = section.blocks | where: 'type', 'card' -%}
-    {%- if card_blocks.size > 0 -%}
-      {{ 'lame-beauty-love.css' | asset_url | stylesheet_tag }}
-      <div
-        class="lame-flash-deal__spotlight lame-beauty-love lame-beauty-love--category"
-        data-beauty-sync
-        data-autoplay="5000"
-        data-fade="900"
-        style="--lame-bl-fade: 900ms;"
-      >
-        <div class="lame-beauty-love__wrap">
-          {% render 'lame-beauty-love-grid',
-            blocks: card_blocks,
-            open_new_tab: false,
-            products_url: routes.all_products_collection_url
-          %}
+    <div class="lame-flash-deal__body"{% if content_bg != blank %} style="background-color: {{ content_bg }};"{% endif %}>
+      {%- assign card_blocks = section.blocks | where: 'type', 'card' -%}
+      {%- if card_blocks.size > 0 -%}
+        {{ 'lame-beauty-love.css' | asset_url | stylesheet_tag }}
+        <div
+          class="lame-flash-deal__spotlight lame-beauty-love lame-beauty-love--category"
+          data-beauty-sync
+          data-autoplay="5000"
+          data-fade="900"
+          style="--lame-bl-fade: 900ms;"
+        >
+          <div class="lame-beauty-love__wrap">
+            {% render 'lame-beauty-love-grid',
+              blocks: card_blocks,
+              open_new_tab: false,
+              products_url: routes.all_products_collection_url
+            %}
+          </div>
         </div>
+        <script src="{{ 'lame-beauty-love.js' | asset_url }}" defer="defer"></script>
+      {%- endif -%}
+
+      <div class="lame-flash-deal__carousel">
+        <button
+          type="button"
+          class="lame-flash-deal__nav lame-flash-deal__nav--prev"
+          data-flash-prev
+          aria-label="{{ section.settings.prev_label }}"
+        >
+          <span aria-hidden="true">&#8249;</span>
+        </button>
+
+        <div class="lame-flash-deal__viewport" data-flash-viewport>
+          <ul class="lame-flash-deal__track" role="list" data-flash-track>
+            {% if products_shown > 0 %}
+              {{ deal_products_markup }}
+            {% elsif request.design_mode %}
+              <li class="lame-flash-deal__item" data-lame-reveal>
+                <article class="lame-flash-deal__empty lame-flash-deal__empty--editor">
+                  <p>{{ section.settings.empty_text }}</p>
+                </article>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <button
+          type="button"
+          class="lame-flash-deal__nav lame-flash-deal__nav--next"
+          data-flash-next
+          aria-label="{{ section.settings.next_label }}"
+        >
+          <span aria-hidden="true">&#8250;</span>
+        </button>
       </div>
-      <script src="{{ 'lame-beauty-love.js' | asset_url }}" defer="defer"></script>
-    {%- endif -%}
 
-    <div class="lame-flash-deal__carousel">
-      <button
-        type="button"
-        class="lame-flash-deal__nav lame-flash-deal__nav--prev"
-        data-flash-prev
-        aria-label="{{ section.settings.prev_label }}"
-      >
-        <span aria-hidden="true">&#8249;</span>
-      </button>
-
-      <div class="lame-flash-deal__viewport" data-flash-viewport>
-        <ul class="lame-flash-deal__track" role="list" data-flash-track>
-          {% if products_shown > 0 %}
-            {{ deal_products_markup }}
-          {% elsif request.design_mode %}
-            <li class="lame-flash-deal__item" data-lame-reveal>
-              <article class="lame-flash-deal__empty lame-flash-deal__empty--editor">
-                <p>{{ section.settings.empty_text }}</p>
-              </article>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
-
-      <button
-        type="button"
-        class="lame-flash-deal__nav lame-flash-deal__nav--next"
-        data-flash-next
-        aria-label="{{ section.settings.next_label }}"
-      >
-        <span aria-hidden="true">&#8250;</span>
-      </button>
+      {%- if section.settings.show_trust_bar -%}
+        {% render 'lame-flash-deal-trust-bar' %}
+      {%- endif -%}
     </div>
-
-    {%- if section.settings.show_trust_bar -%}
-      {% render 'lame-flash-deal-trust-bar' %}
-    {%- endif -%}
   </div>
 </section>
 
@@ -608,8 +633,21 @@
     {
       "type": "color",
       "id": "section_background_color",
-      "label": "Section background color",
-      "info": "Optional. Pick a color or enter a color code (e.g. #FFF1E6). Clear it for no background."
+      "label": "Background color",
+      "info": "Optional. Pick a color or enter a custom code below. Clear it for no background."
+    },
+    {
+      "type": "text",
+      "id": "section_background_color_code",
+      "label": "Custom background color code (hex/rgb)",
+      "info": "Overrides color picker if specified (e.g. #edf5fb or #e8f4fc). Leave empty for default."
+    },
+    {
+      "type": "checkbox",
+      "id": "background_below_banner_only",
+      "label": "Apply background only below title banner",
+      "default": true,
+      "info": "Keeps the title banner cleanly positioned on top and applies background only to the cards & carousel below."
     },
     {
       "type": "range",

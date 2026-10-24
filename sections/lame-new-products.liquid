@@ -211,14 +211,37 @@
   elsif section.settings.heading_image_mobile_full_width == nil and title_full_width
     assign title_mobile_full_width = true
   endif
+
+  assign bg_color = section.settings.section_background_color_code | default: '' | strip
+  if bg_color == blank
+    assign bg_color = section.settings.section_background_color
+  endif
+  if bg_color == 'transparent' or bg_color == 'rgba(0,0,0,0)' or bg_color == blank
+    assign bg_color = ''
+  endif
+
+  assign below_banner_only = section.settings.background_below_banner_only
+  if below_banner_only == nil
+    assign below_banner_only = true
+  endif
+
+  assign content_bg = ''
+  assign whole_section_bg = ''
+  if bg_color != blank
+    if below_banner_only
+      assign content_bg = bg_color
+    else
+      assign whole_section_bg = bg_color
+    endif
+  endif
 -%}
 
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-new-products{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-new-products{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_to_show }};"
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_to_show }};{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }};{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -292,60 +315,62 @@
       </div>
     </header>
 
-    <div class="lame-flash-deal__carousel">
-      <button
-        type="button"
-        class="lame-flash-deal__nav lame-flash-deal__nav--prev"
-        data-flash-prev
-        aria-label="{{ section.settings.prev_label }}"
-      >
-        <span aria-hidden="true">&#8249;</span>
-      </button>
+    <div class="lame-flash-deal__body"{% if content_bg != blank %} style="background-color: {{ content_bg }};"{% endif %}>
+      <div class="lame-flash-deal__carousel">
+        <button
+          type="button"
+          class="lame-flash-deal__nav lame-flash-deal__nav--prev"
+          data-flash-prev
+          aria-label="{{ section.settings.prev_label }}"
+        >
+          <span aria-hidden="true">&#8249;</span>
+        </button>
 
-      <div class="lame-flash-deal__viewport" data-flash-viewport>
-        <ul class="lame-flash-deal__track" role="list" data-flash-track>
-          {% if products_shown > 0 %}
-            {{ arrival_products_markup }}
-          {% else %}
-            {% for i in (1..products_to_show) %}
-              <li class="lame-flash-deal__item" data-lame-reveal>
-                <article class="lame-flash-card">
-                  <div class="lame-flash-card__media">
-                    <span class="lame-flash-card__badge">{{ section.settings.badge_label | default: 'NEW' }}</span>
-                    <a href="#" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
-                      {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
-                    </a>
-                  </div>
-                  <div class="lame-flash-card__body">
-                    <h3 class="lame-flash-card__title">
-                      <a href="#">{{ section.settings.placeholder_title }}</a>
-                    </h3>
-                    <div class="lame-flash-card__price-row">
-                      <span class="lame-flash-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</span>
+        <div class="lame-flash-deal__viewport" data-flash-viewport>
+          <ul class="lame-flash-deal__track" role="list" data-flash-track>
+            {% if products_shown > 0 %}
+              {{ arrival_products_markup }}
+            {% else %}
+              {% for i in (1..products_to_show) %}
+                <li class="lame-flash-deal__item" data-lame-reveal>
+                  <article class="lame-flash-card">
+                    <div class="lame-flash-card__media">
+                      <span class="lame-flash-card__badge">{{ section.settings.badge_label | default: 'NEW' }}</span>
+                      <a href="#" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
+                        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
+                      </a>
                     </div>
-                    <div class="lame-flash-card__actions">
-                      <form class="lame-flash-card__form">
-                        <button type="button" class="lame-flash-card__atc" disabled>
-                          {{ section.settings.add_to_cart_label }}
-                        </button>
-                      </form>
+                    <div class="lame-flash-card__body">
+                      <h3 class="lame-flash-card__title">
+                        <a href="#">{{ section.settings.placeholder_title }}</a>
+                      </h3>
+                      <div class="lame-flash-card__price-row">
+                        <span class="lame-flash-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</span>
+                      </div>
+                      <div class="lame-flash-card__actions">
+                        <form class="lame-flash-card__form">
+                          <button type="button" class="lame-flash-card__atc" disabled>
+                            {{ section.settings.add_to_cart_label }}
+                          </button>
+                        </form>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              </li>
-            {% endfor %}
-          {% endif %}
-        </ul>
+                  </article>
+                </li>
+              {% endfor %}
+            {% endif %}
+          </ul>
+        </div>
+
+        <button
+          type="button"
+          class="lame-flash-deal__nav lame-flash-deal__nav--next"
+          data-flash-next
+          aria-label="{{ section.settings.next_label }}"
+        >
+          <span aria-hidden="true">&#8250;</span>
+        </button>
       </div>
-
-      <button
-        type="button"
-        class="lame-flash-deal__nav lame-flash-deal__nav--next"
-        data-flash-next
-        aria-label="{{ section.settings.next_label }}"
-      >
-        <span aria-hidden="true">&#8250;</span>
-      </button>
     </div>
   </div>
 </section>
@@ -599,6 +624,25 @@
       "id": "color_scheme",
       "label": "Color scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Background color",
+      "info": "Optional. Pick a color or enter a custom code below. Clear it for no background."
+    },
+    {
+      "type": "text",
+      "id": "section_background_color_code",
+      "label": "Custom background color code (hex/rgb)",
+      "info": "Overrides color picker if specified (e.g. #fff8eb or #fef5e7). Leave empty for default."
+    },
+    {
+      "type": "checkbox",
+      "id": "background_below_banner_only",
+      "label": "Apply background only below title banner",
+      "default": true,
+      "info": "Keeps the title banner cleanly positioned on top and applies background only to the products below."
     },
     {
       "type": "range",
