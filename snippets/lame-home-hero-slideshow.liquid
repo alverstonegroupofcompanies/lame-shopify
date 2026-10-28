@@ -58,17 +58,30 @@
               {% endif %}
             >
           {%- endif -%}
-          {{
-            block.settings.image
-            | image_url: width: slide_max_width
-            | image_tag:
-              class: 'slide__image',
-              loading: slide_loading,
-              fetchpriority: slide_fetchpriority,
-              widths: slide_widths,
-              sizes: slide_sizes,
-              alt: block.settings.image.alt | default: accessibility_label | escape
-          }}
+          {%- assign image_src_down = block.settings.image.src | downcase -%}
+          {%- if image_src_down contains '.gif' -%}
+            <img
+              src="{{ block.settings.image | image_url }}"
+              class="slide__image"
+              loading="{{ slide_loading }}"
+              fetchpriority="{{ slide_fetchpriority }}"
+              width="{{ block.settings.image.width }}"
+              height="{{ block.settings.image.height }}"
+              alt="{{ block.settings.image.alt | default: accessibility_label | escape }}"
+            >
+          {%- else -%}
+            {{
+              block.settings.image
+              | image_url: width: slide_max_width
+              | image_tag:
+                class: 'slide__image',
+                loading: slide_loading,
+                fetchpriority: slide_fetchpriority,
+                widths: slide_widths,
+                sizes: slide_sizes,
+                alt: block.settings.image.alt | default: accessibility_label | escape
+            }}
+          {%- endif -%}
           {%- if block.settings.link != blank -%}
             </a>
           {%- endif -%}
