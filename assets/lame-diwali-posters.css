@@ -1,18 +1,142 @@
 /**
- * LAMÉ — Diwali Festive Sale Posters Section
+ * LAMÉ — Diwali Festive Sale Title Banner & Offer Cards Section
  */
 
+@property --diwali-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes lameDiwaliBorderRotate {
+  0% {
+    --diwali-border-angle: 0deg;
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    --diwali-border-angle: 360deg;
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes lameDiwaliGlowPulse {
+  0%, 100% {
+    box-shadow: 0 6px 20px -4px rgba(255, 143, 0, 0.35), 0 0 10px rgba(255, 193, 7, 0.25);
+  }
+  50% {
+    box-shadow: 0 8px 26px -4px rgba(255, 111, 0, 0.55), 0 0 16px rgba(255, 213, 79, 0.45);
+  }
+}
+
+.shopify-section:has(.lame-diwali-posters),
+.shopify-section:has(.lame-diwali-posters) .section,
+.lame-diwali-posters.section,
 .lame-diwali-posters {
+  display: block !important;
   position: relative;
-  width: 100%;
+  width: 100% !important;
+  max-width: none !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
   overflow-x: clip;
 }
 
-.shopify-section:has(.lame-diwali-posters) .section,
-.shopify-section:has(.lame-diwali-posters),
-.lame-diwali-posters.section {
-  padding-inline: 0 !important;
+.lame-diwali-posters.section > * {
+  grid-column: 1 / -1 !important;
 }
+
+/* ==========================================================================
+   Title Banner — True 100% Full-Width Edge-to-Edge (matches Trust Banner)
+   ========================================================================== */
+
+.lame-diwali-posters__header {
+  display: block !important;
+  grid-column: 1 / -1 !important;
+  position: relative;
+  z-index: 1;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center;
+  line-height: 0;
+}
+
+.lame-diwali-posters__header-text {
+  max-width: var(--page-width, 1200px);
+  margin-inline: auto;
+  padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem));
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  line-height: normal;
+}
+
+.lame-diwali-posters__eyebrow {
+  margin: 0 0 0.5rem;
+  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ff9800;
+}
+
+.lame-diwali-posters__title-banner {
+  display: block;
+  width: 100%;
+  max-width: var(--page-width, 1200px);
+  margin: 0 auto;
+  padding: 0;
+  line-height: 0;
+  overflow: hidden;
+  border-radius: clamp(6px, 1.2vw, 12px);
+  box-sizing: border-box;
+}
+
+.lame-diwali-posters__title-banner--full-width,
+.lame-diwali-posters--title-full-width .lame-diwali-posters__title-banner {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.lame-diwali-posters__title-link {
+  display: block;
+  width: 100%;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.lame-diwali-posters__title-picture {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0;
+}
+
+.lame-diwali-posters__title-img {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none;
+  border-radius: 0 !important;
+  box-shadow: none;
+  object-fit: contain;
+  object-position: center center;
+}
+
+/* ==========================================================================
+   Cards Container & Grid (4 Offer Cards)
+   ========================================================================== */
 
 .lame-diwali-posters__wrap {
   position: relative;
@@ -30,22 +154,6 @@
   padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem));
 }
 
-.lame-diwali-posters__header {
-  text-align: center;
-  margin-bottom: clamp(1.25rem, 2.5vw, 2rem);
-}
-
-.lame-diwali-posters__eyebrow {
-  margin: 0 0 0.5rem;
-  font-family: var(--lame-font-body, 'Jost', system-ui, sans-serif);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #ff9800;
-}
-
-/* Outer Boxed Frame (optional festive container backdrop) */
 .lame-diwali-posters__container {
   position: relative;
   width: 100%;
@@ -58,10 +166,9 @@
   box-shadow: 0 10px 30px -10px rgba(22, 10, 48, 0.12);
 }
 
-/* Posters Grid — 3 posters in a row */
 .lame-diwali-posters__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--poster-cols, 4), minmax(0, 1fr));
   gap: clamp(0.75rem, 1.4vw, 1.15rem);
   align-items: stretch;
   width: 100%;
@@ -71,24 +178,63 @@
   list-style: none;
 }
 
-/* Poster Card */
+/* ==========================================================================
+   Diwali Offer Card + Small Animated Festive Border
+   ========================================================================== */
+
 .lame-diwali-poster-card {
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: var(--poster-radius, 16px);
+  border-radius: var(--poster-radius, 14px);
   background: #1c0e35;
   box-shadow: 0 8px 24px -6px rgba(18, 6, 38, 0.28), 0 2px 6px -1px rgba(0, 0, 0, 0.12);
   transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s cubic-bezier(0.25, 1, 0.5, 1);
   text-decoration: none;
   color: inherit;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
+  box-sizing: border-box;
+}
+
+/* Animated Festive Golden Border around each Diwali Offer Card */
+.lame-diwali-poster-card--animated-border {
+  padding: var(--poster-border-width, 3px);
+  background: linear-gradient(
+    125deg,
+    #ffb300 0%,
+    #fff59d 18%,
+    #ff6d00 36%,
+    #e040fb 54%,
+    #ffd54f 72%,
+    #ff8f00 88%,
+    #ffb300 100%
+  );
+  background: conic-gradient(
+    from var(--diwali-border-angle, 0deg),
+    #ffb300 0deg,
+    #fff59d 55deg,
+    #ff6d00 120deg,
+    #d500f9 180deg,
+    #ff6d00 240deg,
+    #fff59d 305deg,
+    #ffb300 360deg
+  ),
+  linear-gradient(
+    125deg,
+    #ffb300 0%,
+    #fff59d 25%,
+    #ff6d00 50%,
+    #d500f9 75%,
+    #ffb300 100%
+  );
+  background-size: 250% 250%;
+  animation: lameDiwaliBorderRotate 3.5s linear infinite, lameDiwaliGlowPulse 3.5s ease-in-out infinite;
 }
 
 .lame-diwali-poster-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 36px -10px rgba(230, 81, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 36px -10px rgba(255, 143, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .lame-diwali-poster-card__link {
@@ -104,6 +250,18 @@
   height: 100%;
   overflow: hidden;
   background: #1a0b33;
+  border-radius: calc(var(--poster-radius, 14px) - var(--poster-border-width, 3px));
+}
+
+.lame-diwali-poster-card:not(.lame-diwali-poster-card--animated-border) .lame-diwali-poster-card__media {
+  border-radius: var(--poster-radius, 14px);
+}
+
+.lame-diwali-poster-card__picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 0;
 }
 
 .lame-diwali-poster-card__img {
@@ -116,14 +274,14 @@
 }
 
 .lame-diwali-poster-card:hover .lame-diwali-poster-card__img {
-  transform: scale(1.035);
+  transform: scale(1.03);
 }
 
 /* Optional Overlay Floating Badge */
 .lame-diwali-poster-card__badge {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 12px;
+  right: 12px;
   z-index: 3;
   display: inline-flex;
   align-items: center;
@@ -149,12 +307,14 @@
 /* Optional Bottom Caption / Action */
 .lame-diwali-poster-card__overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: var(--poster-border-width, 3px);
+  left: var(--poster-border-width, 3px);
+  right: var(--poster-border-width, 3px);
   z-index: 2;
-  padding: 2.5rem 1.25rem 1.25rem;
+  padding: 2rem 1rem 1rem;
   background: linear-gradient(to top, rgba(14, 5, 28, 0.88) 0%, rgba(14, 5, 28, 0.5) 60%, transparent 100%);
+  border-bottom-left-radius: calc(var(--poster-radius, 14px) - var(--poster-border-width, 3px));
+  border-bottom-right-radius: calc(var(--poster-radius, 14px) - var(--poster-border-width, 3px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -196,18 +356,13 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.lame-diwali-poster-card:hover .lame-diwali-poster-card__cta {
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(255, 179, 0, 0.6);
-}
-
-/* Dots indicator for mobile */
+/* Dots indicator for mobile carousel */
 .lame-diwali-posters__dots {
   display: none;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
 }
 
 .lame-diwali-posters__dot {
@@ -223,12 +378,36 @@
   background: #ff9800;
 }
 
-/* Mobile Responsive Styling — 3 in a row visible */
+/* ==========================================================================
+   Mobile Responsive Styling (up to 749px)
+   ========================================================================== */
+
 @media screen and (max-width: 749px) {
-  .shopify-section:has(.lame-diwali-posters) .section,
-  .shopify-section:has(.lame-diwali-posters),
-  .lame-diwali-posters.section {
-    padding-inline: 0 !important;
+  .lame-diwali-posters__title-banner--hide-mobile {
+    display: none !important;
+  }
+
+  /* Mobile Title Banner: 100% edge-to-edge full width & displays uploaded mobile banner at natural height */
+  .lame-diwali-posters__header,
+  .lame-diwali-posters__title-banner,
+  .lame-diwali-posters__title-banner--mobile-full-width,
+  .lame-diwali-posters--title-mobile-full-width .lame-diwali-posters__title-banner,
+  .lame-diwali-posters__title-picture,
+  .lame-diwali-posters__title-img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .lame-diwali-posters__title-banner:not(.lame-diwali-posters__title-banner--mobile-full-width) {
+    width: calc(100% - 2 * var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem))) !important;
+    margin-inline: auto !important;
+    border-radius: clamp(6px, 1.2vw, 12px) !important;
   }
 
   .lame-diwali-posters__wrap,
@@ -236,13 +415,8 @@
   .section--page-width .lame-diwali-posters__wrap {
     width: 100% !important;
     max-width: 100% !important;
-    padding-inline: clamp(0.4rem, 2vw, 0.85rem) !important;
+    padding-inline: clamp(0.5rem, 2.5vw, 0.9rem) !important;
     box-sizing: border-box !important;
-  }
-
-  .lame-diwali-posters__header {
-    padding-inline: 0.5rem;
-    margin-bottom: 0.75rem;
   }
 
   .lame-diwali-posters__container--boxed {
@@ -250,25 +424,67 @@
     border-radius: 12px;
   }
 
-  .lame-diwali-posters__grid {
+  /* Default mobile layout: 2x2 Grid so 4 Diwali offer cards are crisp & readable */
+  .lame-diwali-posters__grid,
+  .lame-diwali-posters__grid--mobile-grid-2 {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: clamp(0.35rem, 1.6vw, 0.65rem) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(0.5rem, 2.2vw, 0.75rem) !important;
     width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
   }
 
+  /* Optional mobile layout: 4 in 1 row */
+  .lame-diwali-posters__grid--mobile-grid-4 {
+    display: grid !important;
+    grid-template-columns: repeat(var(--poster-cols, 4), minmax(0, 1fr)) !important;
+    gap: clamp(0.3rem, 1.4vw, 0.5rem) !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Optional mobile layout: Swipeable Carousel */
+  .lame-diwali-posters__grid--mobile-carousel {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.65rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .lame-diwali-posters__grid--mobile-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
   .lame-diwali-poster-card {
     flex: none !important;
     width: 100% !important;
-    border-radius: clamp(6px, 1.8vw, 10px) !important;
-    aspect-ratio: 3 / 4 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+    border-radius: clamp(8px, 2.2vw, 12px) !important;
+    aspect-ratio: 4 / 5 !important;
+  }
+
+  .lame-diwali-poster-card--animated-border {
+    padding: clamp(2px, 0.6vw, 3px) !important;
+  }
+
+  .lame-diwali-poster-card__media {
+    border-radius: calc(clamp(8px, 2.2vw, 12px) - clamp(2px, 0.6vw, 3px)) !important;
+  }
+
+  .lame-diwali-posters__grid--mobile-carousel .lame-diwali-poster-card {
+    flex: 0 0 72vw !important;
+    width: 72vw !important;
+    scroll-snap-align: center;
   }
 
   .lame-diwali-posters__dots {
-    display: none !important;
+    display: flex !important;
   }
 }
