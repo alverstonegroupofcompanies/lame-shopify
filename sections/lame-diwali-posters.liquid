@@ -1,7 +1,10 @@
 {%- liquid
-  assign section_bg = section.settings.background_color_code | default: section.settings.background_color
+  assign section_bg = section.settings.background_color_code | strip
+  if section_bg == blank
+    assign section_bg = section.settings.background_color
+  endif
   if section_bg == blank or section_bg == 'transparent' or section_bg == 'rgba(0,0,0,0)'
-    assign section_bg = ''
+    assign section_bg = 'linear-gradient(180deg, #2b0354 0%, #3d0873 50%, #240246 100%)'
   endif
 
   assign container_bg = section.settings.container_background_code | default: section.settings.container_background
@@ -54,10 +57,10 @@
 
 {{ 'lame-diwali-posters.css' | asset_url | stylesheet_tag }}
 
-<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div class="section-background color-{{ section.settings.color_scheme }}" style="background: {{ section_bg }} !important;"></div>
 <section
   class="section section--full-width color-{{ section.settings.color_scheme }} lame-diwali-posters{% if title_full_width %} lame-diwali-posters--title-full-width{% endif %}{% if title_mobile_full_width %} lame-diwali-posters--title-mobile-full-width{% endif %}{% if animated_border %} lame-diwali-posters--animated{% endif %}"
-  style="{% if section_bg != blank %}background-color: {{ section_bg }};{% endif %} --poster-cols: {{ block_count }}; --poster-border-width: {{ border_width }}px;"
+  style="--diwali-section-bg: {{ section_bg }}; --poster-cols: {{ block_count }}; --poster-border-width: {{ border_width }}px;"
   {{ section.shopify_attributes }}
 >
   {%- if use_heading_image or section.settings.heading != blank or section.settings.eyebrow != blank or section.settings.subheading != blank -%}
@@ -137,169 +140,171 @@
     </header>
   {%- endif -%}
 
-  <div class="lame-diwali-posters__wrap force-full-width spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
-    <div
-      class="lame-diwali-posters__container{% if container_bg != blank %} lame-diwali-posters__container--boxed{% endif %}"
-      style="{% if container_bg != blank %}background-color: {{ container_bg }};{% endif %}{% if section.settings.container_radius > 0 %}border-radius: {{ section.settings.container_radius }}px;{% endif %}"
-    >
+  <div class="lame-diwali-posters__body force-full-width" style="background: {{ section_bg }};">
+    <div class="lame-diwali-posters__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
       <div
-        class="lame-diwali-posters__grid lame-diwali-posters__grid--mobile-{{ mobile_layout }}"
-        data-posters-grid
-        style="--poster-radius: {{ section.settings.card_radius | default: 14 }}px;"
+        class="lame-diwali-posters__container{% if container_bg != blank %} lame-diwali-posters__container--boxed{% endif %}"
+        style="{% if container_bg != blank %}background-color: {{ container_bg }};{% endif %}{% if section.settings.container_radius > 0 %}border-radius: {{ section.settings.container_radius }}px;{% endif %}"
       >
-        {%- for block in section.blocks -%}
-          {%- liquid
-            assign poster_image = block.settings.image
-            assign poster_image_mobile = block.settings.image_mobile
-            assign fallback_asset = block.settings.fallback_asset | strip
-            assign poster_alt = block.settings.alt | default: block.settings.title | default: section.settings.heading | default: 'Diwali Sale Offer'
-            assign poster_link = block.settings.link
-            assign poster_badge = block.settings.badge | strip
-            assign poster_title = block.settings.title | strip
-            assign poster_subtitle = block.settings.subtitle | strip
-            assign poster_cta = block.settings.button_label | strip
+        <div
+          class="lame-diwali-posters__grid lame-diwali-posters__grid--mobile-{{ mobile_layout }}"
+          data-posters-grid
+          style="--poster-radius: {{ section.settings.card_radius | default: 14 }}px;"
+        >
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign poster_image = block.settings.image
+              assign poster_image_mobile = block.settings.image_mobile
+              assign fallback_asset = block.settings.fallback_asset | strip
+              assign poster_alt = block.settings.alt | default: block.settings.title | default: section.settings.heading | default: 'Diwali Sale Offer'
+              assign poster_link = block.settings.link
+              assign poster_badge = block.settings.badge | strip
+              assign poster_title = block.settings.title | strip
+              assign poster_subtitle = block.settings.subtitle | strip
+              assign poster_cta = block.settings.button_label | strip
 
-            assign brand_name = block.settings.brand | strip
-            if block.settings.brand_other != blank
-              assign brand_name = block.settings.brand_other | strip
-            endif
-            if brand_name == 'other'
-              assign brand_name = block.settings.brand_other | strip
-            endif
-
-            assign discount_keys = ''
-            if block.settings.discount_0_10
-              assign discount_keys = discount_keys | append: '|0-10'
-            endif
-            if block.settings.discount_10_20
-              assign discount_keys = discount_keys | append: '|10-20'
-            endif
-            if block.settings.discount_20_30
-              assign discount_keys = discount_keys | append: '|20-30'
-            endif
-            if block.settings.discount_30_40
-              assign discount_keys = discount_keys | append: '|30-40'
-            endif
-            if block.settings.discount_40_50
-              assign discount_keys = discount_keys | append: '|40-50'
-            endif
-            if block.settings.discount_50_60
-              assign discount_keys = discount_keys | append: '|50-60'
-            endif
-
-            assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
-
-            if brand_name != blank or discount_param != blank
-              assign brand_slug = brand_name | handleize
-              assign brand_name_down = brand_name | downcase
-              if brand_name_down contains 'lamstone'
-                assign brand_slug = 'lamstone-healthcare'
+              assign brand_name = block.settings.brand | strip
+              if block.settings.brand_other != blank
+                assign brand_name = block.settings.brand_other | strip
+              endif
+              if brand_name == 'other'
+                assign brand_name = block.settings.brand_other | strip
               endif
 
-              assign query_string = ''
-              if brand_name != blank
-                assign query_string = 'brand=' | append: brand_slug
+              assign discount_keys = ''
+              if block.settings.discount_0_10
+                assign discount_keys = discount_keys | append: '|0-10'
               endif
-              if discount_param != blank
-                if query_string != blank
-                  assign query_string = query_string | append: '&'
+              if block.settings.discount_10_20
+                assign discount_keys = discount_keys | append: '|10-20'
+              endif
+              if block.settings.discount_20_30
+                assign discount_keys = discount_keys | append: '|20-30'
+              endif
+              if block.settings.discount_30_40
+                assign discount_keys = discount_keys | append: '|30-40'
+              endif
+              if block.settings.discount_40_50
+                assign discount_keys = discount_keys | append: '|40-50'
+              endif
+              if block.settings.discount_50_60
+                assign discount_keys = discount_keys | append: '|50-60'
+              endif
+
+              assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
+
+              if brand_name != blank or discount_param != blank
+                assign brand_slug = brand_name | handleize
+                assign brand_name_down = brand_name | downcase
+                if brand_name_down contains 'lamstone'
+                  assign brand_slug = 'lamstone-healthcare'
                 endif
-                assign query_string = query_string | append: 'discount=' | append: discount_param
+
+                assign query_string = ''
+                if brand_name != blank
+                  assign query_string = 'brand=' | append: brand_slug
+                endif
+                if discount_param != blank
+                  if query_string != blank
+                    assign query_string = query_string | append: '&'
+                  endif
+                  assign query_string = query_string | append: 'discount=' | append: discount_param
+                endif
+                assign poster_link = products_url | append: '?' | append: query_string
               endif
-              assign poster_link = products_url | append: '?' | append: query_string
-            endif
-          -%}
+            -%}
 
-          <article
-            class="lame-diwali-poster-card{% if animated_border %} lame-diwali-poster-card--animated-border{% endif %}"
-            {{ block.shopify_attributes }}
-          >
-            {%- if poster_link != blank -%}
-              <a
-                href="{{ poster_link }}"
-                class="lame-diwali-poster-card__link"
-                {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}
-                aria-label="{{ poster_alt | escape }}"
-              ></a>
-            {%- endif -%}
-
-            <div class="lame-diwali-poster-card__media">
-              {%- if poster_badge != blank -%}
-                <span class="lame-diwali-poster-card__badge">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  {{ poster_badge }}
-                </span>
+            <article
+              class="lame-diwali-poster-card{% if animated_border %} lame-diwali-poster-card--animated-border{% endif %}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if poster_link != blank -%}
+                <a
+                  href="{{ poster_link }}"
+                  class="lame-diwali-poster-card__link"
+                  {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}
+                  aria-label="{{ poster_alt | escape }}"
+                ></a>
               {%- endif -%}
 
-              <picture class="lame-diwali-poster-card__picture">
-                {%- if poster_image_mobile != blank -%}
-                  <source
-                    media="(max-width: 749px)"
-                    srcset="{{ poster_image_mobile | image_url: width: 550 }} 1x, {{ poster_image_mobile | image_url: width: 900 }} 2x"
-                  >
+              <div class="lame-diwali-poster-card__media">
+                {%- if poster_badge != blank -%}
+                  <span class="lame-diwali-poster-card__badge">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    {{ poster_badge }}
+                  </span>
                 {%- endif -%}
 
-                {%- if poster_image != blank -%}
-                  {{
-                    poster_image
-                    | image_url: width: 900
-                    | image_tag:
-                      class: 'lame-diwali-poster-card__img',
-                      loading: 'lazy',
-                      widths: '360,540,720,900',
-                      sizes: '(min-width: 750px) 25vw, 50vw',
-                      alt: poster_alt
-                  }}
-                {%- elsif fallback_asset != blank -%}
-                  <img
-                    class="lame-diwali-poster-card__img"
-                    src="{{ fallback_asset | asset_url }}"
-                    alt="{{ poster_alt | escape }}"
-                    loading="lazy"
-                    width="819"
-                    height="1024"
-                  >
-                {%- elsif poster_image_mobile != blank -%}
-                  {{
-                    poster_image_mobile
-                    | image_url: width: 900
-                    | image_tag:
-                      class: 'lame-diwali-poster-card__img',
-                      loading: 'lazy',
-                      widths: '360,540,720,900',
-                      sizes: '50vw',
-                      alt: poster_alt
-                  }}
-                {%- else -%}
-                  {{ 'image' | placeholder_svg_tag: 'lame-diwali-poster-card__img' }}
-                {%- endif -%}
-              </picture>
-            </div>
+                <picture class="lame-diwali-poster-card__picture">
+                  {%- if poster_image_mobile != blank -%}
+                    <source
+                      media="(max-width: 749px)"
+                      srcset="{{ poster_image_mobile | image_url: width: 550 }} 1x, {{ poster_image_mobile | image_url: width: 900 }} 2x"
+                    >
+                  {%- endif -%}
 
-            {%- if poster_title != blank or poster_subtitle != blank or poster_cta != blank -%}
-              <div class="lame-diwali-poster-card__overlay">
-                {%- if poster_title != blank -%}
-                  <h3 class="lame-diwali-poster-card__title">{{ poster_title }}</h3>
-                {%- endif -%}
-                {%- if poster_subtitle != blank -%}
-                  <p class="lame-diwali-poster-card__subtitle">{{ poster_subtitle }}</p>
-                {%- endif -%}
-                {%- if poster_cta != blank -%}
-                  <span class="lame-diwali-poster-card__cta">{{ poster_cta }}</span>
-                {%- endif -%}
+                  {%- if poster_image != blank -%}
+                    {{
+                      poster_image
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'lame-diwali-poster-card__img',
+                        loading: 'lazy',
+                        widths: '360,540,720,900',
+                        sizes: '(min-width: 750px) 25vw, 50vw',
+                        alt: poster_alt
+                    }}
+                  {%- elsif fallback_asset != blank -%}
+                    <img
+                      class="lame-diwali-poster-card__img"
+                      src="{{ fallback_asset | asset_url }}"
+                      alt="{{ poster_alt | escape }}"
+                      loading="lazy"
+                      width="819"
+                      height="1024"
+                    >
+                  {%- elsif poster_image_mobile != blank -%}
+                    {{
+                      poster_image_mobile
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'lame-diwali-poster-card__img',
+                        loading: 'lazy',
+                        widths: '360,540,720,900',
+                        sizes: '50vw',
+                        alt: poster_alt
+                    }}
+                  {%- else -%}
+                    {{ 'image' | placeholder_svg_tag: 'lame-diwali-poster-card__img' }}
+                  {%- endif -%}
+                </picture>
               </div>
-            {%- endif -%}
-          </article>
-        {%- endfor -%}
-      </div>
 
-      {%- if section.blocks.size > 1 and mobile_layout == 'carousel' -%}
-        <div class="lame-diwali-posters__dots" aria-hidden="true" data-posters-dots>
-          {%- for block in section.blocks -%}
-            <span class="lame-diwali-posters__dot{% if forloop.first %} is-active{% endif %}" data-index="{{ forloop.index0 }}"></span>
+              {%- if poster_title != blank or poster_subtitle != blank or poster_cta != blank -%}
+                <div class="lame-diwali-poster-card__overlay">
+                  {%- if poster_title != blank -%}
+                    <h3 class="lame-diwali-poster-card__title">{{ poster_title }}</h3>
+                  {%- endif -%}
+                  {%- if poster_subtitle != blank -%}
+                    <p class="lame-diwali-poster-card__subtitle">{{ poster_subtitle }}</p>
+                  {%- endif -%}
+                  {%- if poster_cta != blank -%}
+                    <span class="lame-diwali-poster-card__cta">{{ poster_cta }}</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </article>
           {%- endfor -%}
         </div>
-      {%- endif -%}
+
+        {%- if section.blocks.size > 1 and mobile_layout == 'carousel' -%}
+          <div class="lame-diwali-posters__dots" aria-hidden="true" data-posters-dots>
+            {%- for block in section.blocks -%}
+              <span class="lame-diwali-posters__dot{% if forloop.first %} is-active{% endif %}" data-index="{{ forloop.index0 }}"></span>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
     </div>
   </div>
 </section>
@@ -470,13 +475,15 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "Section background color"
+      "label": "Section background color",
+      "default": "#2b0354"
     },
     {
       "type": "text",
       "id": "background_color_code",
-      "label": "Custom section background code (hex/rgb)",
-      "info": "Overrides the color picker if specified. E.g. #190933 or #ffffff"
+      "label": "Custom section background code (hex/rgb/gradient)",
+      "default": "linear-gradient(180deg, #2b0354 0%, #3d0873 50%, #240246 100%)",
+      "info": "Overrides the color picker if specified. E.g. #2b0354 or a CSS gradient."
     },
     {
       "type": "color",
@@ -677,7 +684,9 @@
         "heading_image_mobile_full_width": true,
         "show_heading_image_mobile": true,
         "enable_animated_border": true,
-        "border_width": 3
+        "border_width": 3,
+        "background_color": "#2b0354",
+        "background_color_code": "linear-gradient(180deg, #2b0354 0%, #3d0873 50%, #240246 100%)"
       },
       "blocks": [
         {
