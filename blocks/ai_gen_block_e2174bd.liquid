@@ -5,38 +5,105 @@
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
 {% style %}
+  /* Break parent section and containers out to 100% full viewport width with zero padding/margins */
+  body.template-index .shopify-section:has(.ai-gif-banner-{{ ai_gen_id }}),
+  .shopify-section:has(.ai-gif-banner-{{ ai_gen_id }}) {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-inline: 0 !important;
+    padding: 0 !important;
+    padding-inline: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow-x: clip !important;
+  }
+
+  .shopify-section:has(.ai-gif-banner-{{ ai_gen_id }}) .section {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-block: 0 !important;
+    padding-inline: 0 !important;
+    min-height: 0 !important;
+    grid-template-columns: 100% !important;
+  }
+
+  .shopify-section:has(.ai-gif-banner-{{ ai_gen_id }}) :is(.custom-section-content, .section-content-wrapper, .section > *) {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-block: 0 !important;
+    padding-inline: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Remove blank space between GIF banner and Home hero banner below it */
+  body.template-index .content-for-layout > .shopify-section:has(.ai-gif-banner-{{ ai_gen_id }}) + .shopify-section {
+    margin-top: 0 !important;
+    margin-block-start: 0 !important;
+    padding-top: 0 !important;
+    padding-block-start: 0 !important;
+  }
+
+  /* GIF banner block container: full bleed edge to edge */
   .ai-gif-banner-{{ ai_gen_id }} {
     position: relative;
-    width: 100%;
-    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
   }
 
   .ai-gif-banner-container-{{ ai_gen_id }} {
     position: relative;
-    width: {{ block.settings.desktop_width_percent }}%;
-    max-width: 100%;
-    margin: 0 auto;
-    overflow: hidden;
-    border-radius: {{ block.settings.border_radius }}px;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
   }
 
   .ai-gif-banner-wrapper-{{ ai_gen_id }} {
     position: relative;
-    width: 100%;
-    height: {{ block.settings.banner_height }}px;
-    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
   }
 
+  /* Full-bleed responsive image/GIF */
   .ai-gif-banner-image-{{ ai_gen_id }} {
-    width: 100%;
-    height: 100%;
-    object-fit: {{ block.settings.image_fit }};
-    display: block;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
   }
 
   .ai-gif-banner-placeholder-{{ ai_gen_id }} {
     background-color: #f4f4f4;
     width: 100%;
+    min-height: 250px;
     height: 100%;
     display: flex;
     align-items: center;
@@ -117,7 +184,22 @@
 
   @media screen and (max-width: 749px) {
     .ai-gif-banner-wrapper-{{ ai_gen_id }} {
-      height: {{ block.settings.mobile_banner_height }}px;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .ai-gif-banner-image-{{ ai_gen_id }} {
+      width: 100% !important;
+      height: auto !important;
+      max-width: 100% !important;
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     .ai-gif-banner-heading-{{ ai_gen_id }} {
