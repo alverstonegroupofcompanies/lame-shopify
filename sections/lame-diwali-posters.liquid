@@ -157,75 +157,56 @@
               assign poster_image_mobile = block.settings.image_mobile
               assign fallback_asset = block.settings.fallback_asset | strip
               assign poster_alt = block.settings.alt | default: block.settings.title | default: section.settings.heading | default: 'Diwali Sale Offer'
-              assign poster_link = block.settings.link
               assign poster_badge = block.settings.badge | strip
               assign poster_title = block.settings.title | strip
               assign poster_subtitle = block.settings.subtitle | strip
               assign poster_cta = block.settings.button_label | strip
+              assign card_link = block.settings.card_link
 
-              assign brand_name = block.settings.brand | strip
-              if block.settings.brand_other != blank
-                assign brand_name = block.settings.brand_other | strip
+              assign raw_label = block.settings.alt
+              if raw_label == blank
+                assign raw_label = block.settings.title
               endif
-              if brand_name == 'other'
-                assign brand_name = block.settings.brand_other | strip
+              if raw_label == blank
+                assign raw_label = section.settings.heading
               endif
-
-              assign discount_keys = ''
-              if block.settings.discount_0_10
-                assign discount_keys = discount_keys | append: '|0-10'
-              endif
-              if block.settings.discount_10_20
-                assign discount_keys = discount_keys | append: '|10-20'
-              endif
-              if block.settings.discount_20_30
-                assign discount_keys = discount_keys | append: '|20-30'
-              endif
-              if block.settings.discount_30_40
-                assign discount_keys = discount_keys | append: '|30-40'
-              endif
-              if block.settings.discount_40_50
-                assign discount_keys = discount_keys | append: '|40-50'
-              endif
-              if block.settings.discount_50_60
-                assign discount_keys = discount_keys | append: '|50-60'
+              if raw_label == blank
+                assign raw_label = 'Diwali Sale Offer'
               endif
 
-              assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
+              assign card_aria_label = raw_label | strip
+              assign label_prefix = card_aria_label | slice: 0, 5 | downcase
 
-              if brand_name != blank or discount_param != blank
-                assign brand_slug = brand_name | handleize
-                assign brand_name_down = brand_name | downcase
-                if brand_name_down contains 'lamstone'
-                  assign brand_slug = 'lamstone-healthcare'
-                endif
-
-                assign query_string = ''
-                if brand_name != blank
-                  assign query_string = 'brand=' | append: brand_slug
-                endif
-                if discount_param != blank
-                  if query_string != blank
-                    assign query_string = query_string | append: '&'
-                  endif
-                  assign query_string = query_string | append: 'discount=' | append: discount_param
-                endif
-                assign poster_link = products_url | append: '?' | append: query_string
+              if label_prefix == 'shop '
+                assign card_aria_label = card_aria_label
+              elsif card_aria_label contains 'offer on '
+                assign category_name = card_aria_label | split: 'offer on ' | last | strip
+                assign card_aria_label = 'Shop ' | append: category_name | append: ' offers'
+              elsif card_aria_label contains 'Offer on '
+                assign category_name = card_aria_label | split: 'Offer on ' | last | strip
+                assign card_aria_label = 'Shop ' | append: category_name | append: ' offers'
+              elsif card_aria_label contains ' - '
+                assign category_name = card_aria_label | split: ' - ' | last | strip
+                assign card_aria_label = 'Shop ' | append: category_name
+              else
+                assign card_aria_label = 'Shop ' | append: card_aria_label
               endif
             -%}
 
-            <article
-              class="lame-diwali-poster-card{% if animated_border %} lame-diwali-poster-card--animated-border{% endif %}"
-              {{ block.shopify_attributes }}
-            >
-              {%- if poster_link != blank -%}
-                <a
-                  href="{{ poster_link }}"
-                  class="lame-diwali-poster-card__link"
-                  {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}
-                  aria-label="{{ poster_alt | escape }}"
-                ></a>
-              {%- endif -%}
+            {%- if card_link != blank -%}
+              <a
+                href="{{ block.settings.card_link }}"
+                class="lame-diwali-poster-card{% if animated_border %} lame-diwali-poster-card--animated-border{% endif %}"
+                {{ block.shopify_attributes }}
+                aria-label="{{ card_aria_label | escape }}"
+                {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}
+              >
+            {%- else -%}
+              <article
+                class="lame-diwali-poster-card{% if animated_border %} lame-diwali-poster-card--animated-border{% endif %}"
+                {{ block.shopify_attributes }}
+              >
+            {%- endif -%}
 
               <div class="lame-diwali-poster-card__media">
                 {%- if poster_badge != blank -%}
@@ -293,7 +274,12 @@
                   {%- endif -%}
                 </div>
               {%- endif -%}
-            </article>
+
+            {%- if card_link != blank -%}
+              </a>
+            {%- else -%}
+              </article>
+            {%- endif -%}
           {%- endfor -%}
         </div>
 
@@ -561,6 +547,11 @@
         {
           "type": "header",
           "content": "Link & Filter Settings"
+        },
+        {
+          "type": "url",
+          "id": "card_link",
+          "label": "Card link (collection or product)"
         },
         {
           "type": "url",
