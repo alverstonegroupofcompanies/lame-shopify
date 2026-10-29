@@ -107,8 +107,7 @@
     {{ section.shopify_attributes }}
   >
     <div
-      class="lame-home-hero__slideshow spacing-style disable-section-top-offset"
-      style="{% render 'spacing-padding', settings: section.settings %}"
+      class="lame-home-hero__slideshow disable-section-top-offset"
     >
       {%- if desktop_slide_count == 0 and mobile_slide_count == 0 and request.design_mode -%}
         <div class="lame-home-hero__placeholder">
@@ -307,83 +306,58 @@
   }
 
   .lame-home-hero {
-    --lame-hero-height: 56svh;
-    --lame-hero-height-desktop: 56svh;
-    --lame-hero-height-mobile: 220px;
-    /* Header + announcement take space above; banner fills configured height */
-    --lame-hero-height-offset: var(--header-group-height, 0px);
-    --lame-hero-display-height: auto;
-    --lame-hero-desktop-min: 600px;
-    --lame-hero-desktop-ratio: 2.4;
-    --lame-hero-mobile-ratio: 0.5625;
-    --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
-    /* Default to half-screen; full_screen / size modifiers override */
-    --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
-    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    width: 100%;
-    max-width: none;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow-x: hidden;
-    background: #fff;
+    background: transparent;
   }
 
   .lame-home-hero.section.section--full-width {
-    display: block;
-    width: 100%;
-    max-width: none;
-    padding: 0;
-    margin: 0;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .lame-home-hero.section.section--full-width > * {
-    width: 100%;
-    max-width: none;
-    margin-inline: 0;
-    padding-inline: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-inline: 0 !important;
+    padding: 0 !important;
+    padding-inline: 0 !important;
   }
 
   .shopify-section.hero-wrapper:has(.lame-home-hero) {
-    width: 100%;
-    max-width: 100%;
-    margin-inline: 0;
-    padding-inline: 0;
-  }
-
-  /* Transparent header overlays the banner — use full viewport for the frame */
-  body:has(.header[transparent])
-    .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child,
-  body:has(header-component[transparent])
-    .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child {
-    margin-top: 0;
-    width: 100%;
-    max-width: none;
-  }
-
-  body:has(.header[transparent])
-    .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child
-    .lame-home-hero--full_screen,
-  body:has(.header[transparent])
-    .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child
-    .lame-home-hero--mobile-full_screen,
-  body:has(header-component[transparent])
-    .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child
-    .lame-home-hero--full_screen,
-  body:has(header-component[transparent])
-    .content-for-layout
-    > .shopify-section:has(.lame-home-hero):first-child
-    .lame-home-hero--mobile-full_screen {
-    --lame-hero-height-offset: 0px;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    margin-inline: 0 !important;
+    padding: 0 !important;
+    padding-inline: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 
   .lame-home-hero__slideshow {
-    width: 100%;
-    max-width: none;
-    padding-inline: 0;
-    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    position: relative !important;
   }
 
   /* Default / tablet+desktop: horizontal desktop banners */
@@ -397,195 +371,191 @@
 
   .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
     display: block;
-    --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
   }
 
   .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--mobile {
     display: none;
   }
 
-  /* Full-width frame — viewport fill + cover (extend image to fill) */
+  /* Full-bleed edge-to-edge frame & slideshow components */
   .lame-home-hero__frame,
   .lame-home-hero__carousel slideshow-component,
   .lame-home-hero__carousel slideshow-container,
   .lame-home-hero__carousel slideshow-slides {
-    width: 100%;
-    min-width: 100%;
-    max-width: none;
-    height: var(--lame-hero-frame-max-height) !important;
-    min-height: var(--lame-hero-frame-min-height, var(--lame-hero-frame-max-height)) !important;
-    max-height: var(--lame-hero-frame-max-height) !important;
-    aspect-ratio: unset;
-  }
-
-  .lame-home-hero__carousel slideshow-slide {
-    width: 100%;
-    min-width: 100%;
-    height: 100% !important;
-    min-height: 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
     max-height: none !important;
-  }
-
-  .lame-home-hero__carousel slideshow-component {
-    --slide-min-height: 0 !important;
-    --slide-min-height-desktop: 0 !important;
-    --product-media-fit: cover;
+    aspect-ratio: auto !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .lame-home-hero__frame {
-    overflow: hidden;
-    line-height: 0;
-    background: #1a1a1a;
+    overflow: hidden !important;
+    line-height: 0 !important;
+    background: transparent !important;
   }
 
-  /* Full screen: remaining viewport under the header (fixed; does not grow on scroll) */
-  .lame-home-hero--full_screen,
-  .lame-home-hero--mobile-full_screen {
-    --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
-    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
+  .lame-home-hero__carousel slideshow-slides {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+    --slide-min-height: 0 !important;
+    --slide-min-height-desktop: 0 !important;
+    min-height: 0 !important;
   }
 
-  @supports not (height: 100svh) {
-    .lame-home-hero--full_screen,
-    .lame-home-hero--mobile-full_screen {
-      --lame-hero-frame-max-height: calc(100vh - var(--lame-hero-height-offset, 0px));
-    }
+  .lame-home-hero__carousel slideshow-slides::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
-  .lame-home-hero--small,
-  .lame-home-hero--medium,
-  .lame-home-hero--large,
-  .lame-home-hero--half {
-    --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
-    --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
+  .lame-home-hero__carousel slideshow-slide {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    position: relative !important;
+    display: block !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+    content-visibility: visible !important;
+    contain-intrinsic-size: unset !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
   }
 
-  .lame-home-hero--full_screen .lame-home-hero__frame,
-  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
-  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides,
-  .lame-home-hero--half .lame-home-hero__frame,
-  .lame-home-hero--half .lame-home-hero__carousel slideshow-component,
-  .lame-home-hero--half .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--half .lame-home-hero__carousel slideshow-slides,
-  .lame-home-hero--small .lame-home-hero__frame,
-  .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
-  .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--small .lame-home-hero__carousel slideshow-slides,
-  .lame-home-hero--medium .lame-home-hero__frame,
-  .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
-  .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides,
-  .lame-home-hero--large .lame-home-hero__frame,
-  .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
-  .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
-  .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
-    height: var(--lame-hero-frame-max-height) !important;
-    min-height: var(--lame-hero-frame-max-height) !important;
-    max-height: var(--lame-hero-frame-max-height) !important;
+  .lame-home-hero__carousel slideshow-slide > .slide__image-container,
+  .lame-home-hero__carousel .lame-home-hero__slide-link {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
   }
 
-  /* Phones only (under 600px): vertical mobile banners */
+  /* Edge-to-edge full-bleed image on every slide */
+  .lame-home-hero__carousel .slide__image,
+  .lame-home-hero__carousel .slide__image-container img,
+  .lame-home-hero__slide-link .slide__image,
+  .lame-home-hero__slide-link img {
+    width: 100% !important;
+    height: auto !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  /* Arrow controls kept inside banner */
+  .lame-home-hero__carousel slideshow-arrows {
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    pointer-events: none !important;
+    z-index: 5 !important;
+    padding-inline: 1rem !important;
+  }
+
+  .lame-home-hero__carousel slideshow-arrows .slideshow-control {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    z-index: 6 !important;
+  }
+
+  .lame-home-hero__carousel slideshow-arrows .slideshow-control--previous {
+    left: 1rem !important;
+    right: auto !important;
+  }
+
+  .lame-home-hero__carousel slideshow-arrows .slideshow-control--next {
+    right: 1rem !important;
+    left: auto !important;
+  }
+
+  /* Dots / controls kept inside banner */
+  .lame-home-hero slideshow-controls {
+    position: absolute !important;
+    bottom: 1rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    pointer-events: none !important;
+    z-index: 5 !important;
+  }
+
+  .lame-home-hero slideshow-controls * {
+    pointer-events: auto !important;
+  }
+
+  /* Phones (under 600px): vertical mobile banners */
   @media screen and (max-width: 599px) {
-    .lame-home-hero {
-      --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
-      --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
-    }
-
-    .shopify-section.hero-wrapper:has(.lame-home-hero) {
-      width: 100%;
-      max-width: 100%;
-      margin-inline: 0;
-      /* Solid header is in document flow — no offset padding (avoids white gap) */
-      padding-top: 0;
-      box-sizing: border-box;
-    }
-
-    body:has(.header[transparent])
-      .content-for-layout
-      > .shopify-section.hero-wrapper:has(.lame-home-hero):first-child,
-    body:has(header-component[transparent])
-      .content-for-layout
-      > .shopify-section.hero-wrapper:has(.lame-home-hero):first-child {
-      margin-top: 0;
-      padding-top: var(--lame-hero-height-offset);
-    }
-
-    body:has(.header[transparent])
-      .content-for-layout
-      > .shopify-section:has(.lame-home-hero):first-child
-      .lame-home-hero--full_screen,
-    body:has(.header[transparent])
-      .content-for-layout
-      > .shopify-section:has(.lame-home-hero):first-child
-      .lame-home-hero--mobile-full_screen,
-    body:has(header-component[transparent])
-      .content-for-layout
-      > .shopify-section:has(.lame-home-hero):first-child
-      .lame-home-hero--full_screen,
-    body:has(header-component[transparent])
-      .content-for-layout
-      > .shopify-section:has(.lame-home-hero):first-child
-      .lame-home-hero--mobile-full_screen {
-      --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
-    }
-
-    /* Non-transparent: banner starts immediately under navbar */
-    body:not(:has(.header[transparent])):not(:has(header-component[transparent]))
-      .content-for-layout
-      > .shopify-section.hero-wrapper:has(.lame-home-hero):first-child {
-      padding-top: 0 !important;
-      margin-top: 0 !important;
-    }
-
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop {
       display: none !important;
     }
 
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile {
       display: block !important;
-      --lame-hero-banner-ratio: var(--lame-hero-mobile-ratio);
     }
 
-    .lame-home-hero--mobile-small,
-    .lame-home-hero--mobile-medium,
-    .lame-home-hero--mobile-large,
-    .lame-home-hero--mobile-half {
-      --lame-hero-frame-max-height: var(--lame-hero-height-mobile);
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    .lame-home-hero--mobile-full_screen {
-      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    @supports not (height: 100svh) {
-      .lame-home-hero--mobile-full_screen {
-        --lame-hero-frame-max-height: calc(100vh - var(--lame-hero-height-offset, 0px));
-      }
-    }
-
-    /* Phone hero is a full-width square. Cover from the top of the artwork. */
+    .lame-home-hero,
+    .lame-home-hero__slideshow,
     .lame-home-hero__frame--mobile,
     .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
-      position: relative !important;
       width: 100% !important;
       max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
       height: auto !important;
       min-height: 0 !important;
       max-height: none !important;
-      aspect-ratio: 1 / 1 !important;
-      overflow: hidden;
-      background: #fff !important;
+      aspect-ratio: auto !important;
+      position: relative !important;
     }
 
     .lame-home-hero__carousel--mobile :is(slideshow-component, slideshow-container, slideshow-slides),
     .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop :is(slideshow-component, slideshow-container, slideshow-slides) {
-      position: absolute !important;
-      inset: 0 !important;
+      position: relative !important;
+      inset: auto !important;
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
       min-height: 0 !important;
       max-height: none !important;
       aspect-ratio: auto !important;
@@ -593,192 +563,31 @@
 
     .lame-home-hero__carousel--mobile slideshow-slide,
     .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slide {
-      width: 100%;
-      max-width: 100%;
-      height: 100% !important;
-      min-height: 100% !important;
-      max-height: 100% !important;
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
     }
 
     .lame-home-hero__carousel--mobile slideshow-slide > .slide__image-container,
     .lame-home-hero__carousel--mobile .lame-home-hero__slide-link {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Swipe: plain horizontal slide only — no smooth scroll, pop-in, or partial slides */
-    .lame-home-hero__carousel--mobile slideshow-slides,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slides {
-      scroll-behavior: auto !important;
-      scroll-snap-type: x mandatory;
-      scroll-snap-stop: always;
-      overscroll-behavior-x: contain;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .lame-home-hero__carousel--mobile slideshow-component:not([in-viewport]) slideshow-slides,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners)
-      .lame-home-hero__carousel--desktop
-      slideshow-component:not([in-viewport])
-      slideshow-slides {
-      overflow-x: scroll;
-    }
-
-    .lame-home-hero__carousel--mobile slideshow-slide,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-slide {
-      scroll-snap-align: start;
-      content-visibility: visible !important;
-      contain-intrinsic-size: unset !important;
-      view-timeline-name: none !important;
-    }
-
-    .lame-home-hero__carousel--mobile slideshow-component,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__carousel--desktop slideshow-component {
-      timeline-scope: none;
-    }
-
-    .lame-home-hero__carousel--mobile slideshow-component[transitioning],
-    .lame-home-hero__carousel--mobile slideshow-component[dragging],
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners)
-      .lame-home-hero__carousel--desktop
-      slideshow-component:is([transitioning], [dragging]) {
-      transition: none !important;
-      animation: none !important;
-    }
-
-    /* Fill edge-to-edge — vertical banners always span full viewport width */
-    .lame-home-hero__frame {
-      background: #1a1a1a;
-    }
-
-    .lame-home-hero,
-    .lame-home-hero__slideshow,
-    .lame-home-hero__frame--mobile,
-    .lame-home-hero:not(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
+      position: relative !important;
+      inset: auto !important;
       width: 100% !important;
-      max-width: none !important;
-      margin-inline: 0 !important;
-      padding-inline: 0 !important;
-    }
-
-    /* Cover the 60% frame edge to edge on every slide */
-    .lame-home-hero__carousel .slide__image,
-    .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero__slide-link img,
-    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image,
-    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero--fit-contain .lame-home-hero__slide-link img,
-    .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image,
-    .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero--fit-cover .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero--fit-cover .lame-home-hero__slide-link img {
-      object-fit: cover !important;
-      object-position: left top !important;
-      min-width: 100% !important;
-      min-height: 100% !important;
-      width: 100% !important;
-      height: 100% !important;
-      max-width: none !important;
+      height: auto !important;
+      min-height: 0 !important;
       max-height: none !important;
     }
-
-    .lame-home-hero--mobile-small,
-    .lame-home-hero--mobile-medium,
-    .lame-home-hero--mobile-large,
-    .lame-home-hero--mobile-half,
-    .lame-home-hero--mobile-full_screen,
-    .lame-home-hero--full_screen,
-    .lame-home-hero--small,
-    .lame-home-hero--medium,
-    .lame-home-hero--large,
-    .lame-home-hero--half {
-      --lame-hero-frame-max-height: 100%;
-      --lame-hero-frame-min-height: 0;
-    }
-
   }
 
-  /* Tablets + desktop (600px+): horizontal banners; height follows setting (half by default) */
+  /* Tablets + desktop (600px+): horizontal banners */
   @media screen and (min-width: 600px) {
-    .lame-home-hero {
-      --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
-      --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
-      --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    /* Full screen only when explicitly selected */
-    .lame-home-hero--full_screen {
-      --lame-hero-frame-max-height: calc(100svh - var(--lame-hero-height-offset, 0px));
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    @supports not (height: 100svh) {
-      .lame-home-hero--full_screen {
-        --lame-hero-frame-max-height: calc(100vh - var(--lame-hero-height-offset, 0px));
-      }
-    }
-
-    /* Half screen: shared height for every slide, tall enough to show the banner bottom */
-    .lame-home-hero--half {
-      --lame-hero-frame-max-height: min(
-        var(--lame-hero-height-desktop),
-        calc(100svh - var(--lame-hero-height-offset, 0px))
-      );
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    .lame-home-hero--small,
-    .lame-home-hero--medium,
-    .lame-home-hero--large {
-      --lame-hero-frame-max-height: var(--lame-hero-height-desktop);
-      --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-    }
-
-    /*
-      Tablet / small laptop: a viewport height is taller than a wide banner aspect,
-      so cover crops left/right. Size the frame to the banner ratio so
-      the full-width image stays visible like wide desktop.
-    */
-    @media screen and (max-width: 989px) {
-      .lame-home-hero--half,
-      .lame-home-hero--small,
-      .lame-home-hero--medium,
-      .lame-home-hero--large {
-        --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-desktop-ratio, 2.4), 0.75));
-        --lame-hero-frame-max-height: var(--lame-hero-natural-height);
-        --lame-hero-frame-min-height: var(--lame-hero-natural-height);
-      }
-
-      .lame-home-hero--full_screen {
-        --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-desktop-ratio, 2.4), 0.75));
-        --lame-hero-frame-max-height: min(
-          calc(100svh - var(--lame-hero-height-offset, 0px)),
-          var(--lame-hero-natural-height)
-        );
-        --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-      }
-    }
-
-    /* Transparent header overlays the banner — use full viewport only for full_screen */
-    body:has(.header[transparent]) .lame-home-hero--full_screen,
-    body:has(header-component[transparent]) .lame-home-hero--full_screen {
-      --lame-hero-height-offset: 0px;
-    }
-
-    .shopify-section.hero-wrapper:has(.lame-home-hero) {
-      width: 100%;
-      max-width: 100%;
-      margin-inline: 0;
-      padding-top: 0;
-    }
-
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--desktop,
     .lame-home-hero__frame--desktop {
       display: block !important;
-      --lame-hero-banner-ratio: var(--lame-hero-desktop-ratio);
     }
 
     .lame-home-hero--has-mobile-banners .lame-home-hero__frame--mobile,
@@ -786,291 +595,44 @@
       display: none !important;
     }
 
-    .lame-home-hero__frame {
-      background: #1a1a1a;
-    }
-
     .lame-home-hero__frame,
     .lame-home-hero__carousel slideshow-component,
     .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero__carousel slideshow-slides,
-    .lame-home-hero--full_screen .lame-home-hero__frame,
-    .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--full_screen .lame-home-hero__carousel slideshow-slides,
-    .lame-home-hero--half .lame-home-hero__frame,
-    .lame-home-hero--half .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero--half .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--half .lame-home-hero__carousel slideshow-slides,
-    .lame-home-hero--small .lame-home-hero__frame,
-    .lame-home-hero--small .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero--small .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--small .lame-home-hero__carousel slideshow-slides,
-    .lame-home-hero--medium .lame-home-hero__frame,
-    .lame-home-hero--medium .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero--medium .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--medium .lame-home-hero__carousel slideshow-slides,
-    .lame-home-hero--large .lame-home-hero__frame,
-    .lame-home-hero--large .lame-home-hero__carousel slideshow-component,
-    .lame-home-hero--large .lame-home-hero__carousel slideshow-container,
-    .lame-home-hero--large .lame-home-hero__carousel slideshow-slides {
+    .lame-home-hero__carousel slideshow-slides {
       width: 100% !important;
-      max-width: none !important;
-      height: var(--lame-hero-frame-max-height) !important;
-      min-height: var(--lame-hero-frame-max-height) !important;
-      max-height: var(--lame-hero-frame-max-height) !important;
-      aspect-ratio: unset !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      aspect-ratio: auto !important;
+      position: relative !important;
     }
 
     .lame-home-hero__carousel slideshow-slide {
+      flex: 0 0 100% !important;
       width: 100% !important;
       min-width: 100% !important;
-      height: 100% !important;
-      min-height: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
       max-height: none !important;
     }
 
     .lame-home-hero__carousel slideshow-slide > .slide__image-container,
     .lame-home-hero__carousel .lame-home-hero__slide-link {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Cover fills the frame; pin top so navbar never hides the banner top */
-    .lame-home-hero__carousel .slide__image,
-    .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero__slide-link img,
-    .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image,
-    .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero--fit-cover .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero--fit-cover .lame-home-hero__slide-link img {
-      object-fit: cover !important;
-      object-position: left top !important;
+      position: relative !important;
+      inset: auto !important;
       width: 100% !important;
-      height: 100% !important;
-      max-width: none !important;
-      max-height: none !important;
-      min-width: 100% !important;
-      min-height: 100% !important;
-    }
-
-    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image,
-    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero--fit-contain .lame-home-hero__slide-link img {
-      object-fit: contain !important;
-      object-position: center center !important;
-      width: 100% !important;
-      height: 100% !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
-      min-width: 0 !important;
+      height: auto !important;
       min-height: 0 !important;
-    }
-  }
-
-  .lame-home-hero__carousel slideshow-slide {
-    width: 100%;
-    flex: 0 0 100%;
-    height: 100% !important;
-    min-height: 100% !important;
-    position: relative;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
-
-  /* One full banner at a time — no peeking next slide */
-  .lame-home-hero__carousel slideshow-slides {
-    scroll-snap-type: x mandatory;
-    scroll-snap-stop: always;
-  }
-
-  .lame-home-hero__carousel slideshow-slide > .slide__image-container {
-    display: block;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    line-height: 0;
-  }
-
-  .lame-home-hero__carousel .lame-home-hero__slide-link,
-  .lame-home-hero__slide-link {
-    display: block;
-    width: 100%;
-    height: 100%;
-    line-height: 0;
-  }
-
-  /* Default image fill — mobile portrait uses cover; desktop overrides below with contain */
-  .lame-home-hero__carousel .slide__image,
-  .lame-home-hero__carousel .slide__image-container img,
-  .lame-home-hero__slide-link .slide__image,
-  .lame-home-hero__slide-link img {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: cover;
-    object-position: left top;
-    display: block;
-  }
-
-  .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image,
-  .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image-container img,
-  .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
-  .lame-home-hero--fit-contain .lame-home-hero__slide-link img {
-    object-fit: contain;
-    object-position: center center;
-    min-width: 0;
-    min-height: 0;
-  }
-
-  /* Re-assert desktop/tablet image fit (respects cover/contain setting) */
-  @media screen and (min-width: 600px) {
-    .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image,
-    .lame-home-hero--fit-cover .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero--fit-cover .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero--fit-cover .lame-home-hero__slide-link img {
-      object-fit: cover !important;
-      object-position: left top !important;
-      width: 100% !important;
-      height: 100% !important;
-      max-width: none !important;
       max-height: none !important;
-      min-width: 100% !important;
-      min-height: 100% !important;
-    }
-
-    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image,
-    .lame-home-hero--fit-contain .lame-home-hero__carousel .slide__image-container img,
-    .lame-home-hero--fit-contain .lame-home-hero__slide-link .slide__image,
-    .lame-home-hero--fit-contain .lame-home-hero__slide-link img {
-      object-fit: contain !important;
-      object-position: center center !important;
-      width: 100% !important;
-      height: 100% !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
-      min-width: 0 !important;
-      min-height: 0 !important;
-    }
-  }
-
-  .lame-home-hero__frame {
-    background: #1a1a1a;
-  }
-
-  /* Swipe / drag to change slides — no arrow controls */
-  .lame-home-hero__carousel slideshow-slides {
-    cursor: grab;
-  }
-
-  .lame-home-hero__carousel slideshow-component[dragging] slideshow-slides {
-    cursor: grabbing;
-  }
-
-  .lame-home-hero__carousel slideshow-arrows {
-    display: none !important;
-  }
-
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control,
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control.slideshow-control--shape-circle,
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control.slideshow-control--shape-square {
-    position: absolute;
-    top: auto;
-    bottom: var(--lame-hero-arrow-bottom-gap);
-    pointer-events: auto;
-    opacity: 1;
-    animation: none;
-    transform: none;
-    min-width: var(--lame-hero-arrow-size);
-    min-height: var(--lame-hero-arrow-size);
-    width: var(--lame-hero-arrow-size);
-    height: var(--lame-hero-arrow-size);
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    cursor: pointer;
-    background-color: rgb(45 74 34) !important;
-    color: #fff !important;
-    border: 1px solid rgb(45 74 34 / 0.35);
-    box-shadow: 0 4px 14px rgb(26 42 36 / 0.18);
-    transition:
-      box-shadow 0.2s ease,
-      transform 0.2s ease,
-      border-color 0.2s ease;
-  }
-
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control--previous {
-    left: var(--lame-hero-arrow-side-gap);
-  }
-
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control--next {
-    right: var(--lame-hero-arrow-side-gap);
-  }
-
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control:hover,
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control.slideshow-control--shape-circle:hover {
-    background-color: rgb(35 58 28) !important;
-    color: #fff !important;
-    border-color: rgb(35 58 28);
-    filter: none;
-    box-shadow: 0 6px 18px rgb(26 42 36 / 0.22);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .lame-home-hero__carousel slideshow-arrows .slideshow-control:hover,
-    .lame-home-hero__carousel slideshow-arrows .slideshow-control.slideshow-control--shape-circle:hover {
-      transform: scale(1.04);
-    }
-  }
-
-  @media (hover: none), (pointer: coarse) {
-    .lame-home-hero__carousel slideshow-arrows .slideshow-control,
-    .lame-home-hero__carousel slideshow-arrows .slideshow-control:hover,
-    .lame-home-hero__carousel slideshow-arrows .slideshow-control.slideshow-control--shape-circle:hover {
-      transform: none !important;
-      transition: none !important;
-    }
-
-    .lame-home-hero,
-    .lame-home-hero__frame,
-    .lame-home-hero__slideshow,
-    .lame-home-hero :is(slideshow-component, slideshow-container, slideshow-slides, slideshow-slide),
-    .lame-home-hero :is(.slide__image, .slide__image-container img) {
-      transform: none !important;
-      animation: none !important;
-    }
-  }
-
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control .svg-wrapper,
-  .lame-home-hero__carousel slideshow-arrows .slideshow-control .svg-wrapper svg {
-    width: var(--lame-hero-arrow-icon);
-    height: var(--lame-hero-arrow-icon);
-    display: block;
-    color: #fff;
-    stroke: currentColor;
-  }
-
-  @media screen and (max-width: 599px) {
-    .lame-home-hero__carousel slideshow-arrows,
-    .lame-home-hero__carousel slideshow-arrows[position='center'] {
-      --lame-hero-arrow-side-gap: 0.75rem;
-      --lame-hero-arrow-bottom-gap: 1.75rem;
-      --lame-hero-arrow-size: 2.5rem;
-      --lame-hero-arrow-icon: 1rem;
     }
   }
 
   .lame-home-hero__placeholder {
-    height: var(--lame-hero-display-height);
-    min-height: var(--lame-hero-display-height);
+    height: auto;
+    min-height: 200px;
     display: grid;
     place-items: center;
     padding: 2rem;

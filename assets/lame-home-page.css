@@ -27,7 +27,9 @@ body.template-index {
 
 body.template-index .shopify-section:has(.lame-home-hero),
 body.template-index .shopify-section:has(.lame-cosmetic-hero),
-body.template-index .shopify-section.hero-wrapper:has(.lame-home-hero) {
+body.template-index .shopify-section.hero-wrapper:has(.lame-home-hero),
+body.template-index .shopify-section:has([class*="ai-gif-banner"]),
+body.template-index .shopify-section:has([class*="gif-banner"]) {
   width: 100%;
   max-width: 100%;
   margin-inline: 0;
@@ -102,13 +104,111 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   display: none;
 }
 
+
+/* GIF banner block & parent section (Video section above Home hero banner) — full-bleed 100% viewport width */
+body.template-index .shopify-section:has([class*="ai-gif-banner"]),
+body.template-index .shopify-section:has([class*="gif-banner"]) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow-x: clip;
+}
+
+body.template-index .shopify-section:has([class*="ai-gif-banner"]) .section,
+body.template-index .shopify-section:has([class*="gif-banner"]) .section {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-block: 0 !important;
+  padding-inline: 0 !important;
+  min-height: 0 !important;
+  grid-template-columns: 100% !important;
+}
+
+body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is(.custom-section-content, .section-content-wrapper, .section > *),
+body.template-index .shopify-section:has([class*="gif-banner"]) :is(.custom-section-content, .section-content-wrapper, .section > *) {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-block: 0 !important;
+  padding-inline: 0 !important;
+  min-height: 0 !important;
+}
+
+body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is([class*="ai-gif-banner-container"], [class*="ai-gif-banner-wrapper"]),
+body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-gif-banner-container"], [class*="ai-gif-banner-wrapper"]) {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  display: block !important;
+}
+
+body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is([class*="ai-gif-banner-image"], img),
+body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-gif-banner-image"], img) {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* GIF banner starts flush after header when it is the first section */
+.template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]):first-child,
+.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]):first-child {
+  margin-top: 0 !important;
+  margin-block-start: 0 !important;
+  padding-top: 0 !important;
+  padding-block-start: 0 !important;
+  border-top: none !important;
+}
+
+/* Flush GIF banner with following section (Home hero banner) — eliminates blank space below */
+.template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]),
+.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) {
+  margin-bottom: 0 !important;
+  margin-block-end: 0 !important;
+  padding-bottom: 0 !important;
+  padding-block-end: 0 !important;
+}
+
+.template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]) + .shopify-section,
+.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) + .shopify-section,
+.template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]) + .shopify-section:has(.lame-home-hero),
+.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) + .shopify-section:has(.lame-home-hero) {
+  margin-top: 0 !important;
+  margin-block-start: 0 !important;
+  padding-top: 0 !important;
+  padding-block-start: 0 !important;
+}
+
 /* PC: minimum breathing room between sections below the hero */
 @media screen and (min-width: 990px) {
   .template-index {
     --lame-home-section-min-gap: clamp(2.25rem, 3.2vw, 3.5rem);
   }
 
-  .template-index .content-for-layout > .shopify-section:not(:has(.lame-home-hero)) + .shopify-section {
+  .template-index .content-for-layout > .shopify-section:not(:has(.lame-home-hero)):not(:has([class*="ai-gif-banner"])):not(:has([class*="gif-banner"])) + .shopify-section {
     margin-top: var(--lame-home-section-min-gap);
   }
 
@@ -121,47 +221,20 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   }
 }
 
-/* Hero fills width; height follows selected setting (half ≈ 56svh) */
-.template-index .shopify-section:has(.lame-home-hero--full_screen) .lame-home-hero,
-.template-index .shopify-section:has(.lame-home-hero--mobile-full_screen) .lame-home-hero {
-  --lame-hero-height-offset: max(var(--header-group-height, 0px), var(--header-height, 60px));
-  --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-banner-ratio), 0.75));
-  --lame-hero-frame-max-height: min(
-    calc(100svh - var(--lame-hero-height-offset, 0px)),
-    var(--lame-hero-natural-height)
-  );
-  --lame-hero-frame-min-height: var(--lame-hero-frame-max-height);
-}
-
-@supports not (height: 100svh) {
-  .template-index .shopify-section:has(.lame-home-hero--full_screen) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--mobile-full_screen) .lame-home-hero {
-    --lame-hero-frame-max-height: min(
-      calc(100vh - var(--lame-hero-height-offset, 0px)),
-      var(--lame-hero-natural-height)
-    );
-  }
-}
-
+/* Hero fills width: full bleed edge to edge */
 .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
-  width: 100%;
-  height: 100%;
-  min-width: 100%;
-  min-height: 100%;
-  max-width: none;
+  width: 100% !important;
+  height: auto !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: block !important;
   object-fit: cover !important;
-  /* Pin to top so the banner top stays visible under the navbar (crop bottom if needed) */
-  object-position: left top !important;
-}
-
-/* Contain only when Image fit = contain */
-@media screen and (min-width: 600px) {
-  .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
-    object-fit: contain !important;
-    object-position: center center !important;
-    min-width: 0;
-    min-height: 0;
-  }
+  object-position: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
 }
 
 .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img) {
@@ -170,14 +243,15 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 
 /* Hero → Shop by Category: clear breathing room (no overlap pull-up) */
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) {
-  margin-bottom: 0;
-  padding-bottom: 0;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
   position: relative;
   z-index: auto;
 }
 
 .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section {
-  margin-top: clamp(1.5rem, 3.5vw, 2.75rem);
+  margin-top: 0 !important;
+  margin-block-start: 0 !important;
   z-index: auto;
 }
 
@@ -201,14 +275,16 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 }
 
 @media screen and (min-width: 600px) {
-  .template-index .shopify-section:has(.lame-home-hero--fit-cover) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+  .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+    width: 100% !important;
+    height: auto !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: block !important;
     object-fit: cover !important;
-    object-position: left top !important;
-  }
-
-  .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
-    object-fit: contain !important;
-    object-position: center center !important;
+    object-position: center !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero--has-mobile-banners) .lame-home-hero__frame--desktop {
@@ -221,10 +297,13 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
 
   .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) {
     z-index: auto;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) + .shopify-section {
-    margin-top: clamp(1.75rem, 3vw, 2.75rem);
+    margin-top: 0 !important;
+    margin-block-start: 0 !important;
     z-index: auto;
   }
 
@@ -237,36 +316,55 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   }
 }
 
-/* Tablet: lock hero height to banner aspect so full-width image is visible (no side crop) */
+/* Tablet: full-bleed edge-to-edge natural height */
 @media screen and (min-width: 600px) and (max-width: 989px) {
-  .template-index .shopify-section:has(.lame-home-hero--half) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--small) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--medium) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero--large) .lame-home-hero {
-    --lame-hero-natural-height: calc(100vw / max(var(--lame-hero-desktop-ratio, 2.4), 0.75));
-    --lame-hero-frame-max-height: var(--lame-hero-natural-height);
-    --lame-hero-frame-min-height: var(--lame-hero-natural-height);
-  }
-
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame,
   .template-index .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container, slideshow-slides) {
-    height: var(--lame-hero-frame-max-height) !important;
-    min-height: var(--lame-hero-frame-max-height) !important;
-    max-height: var(--lame-hero-frame-max-height) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     width: 100% !important;
-    max-width: none !important;
+    max-width: 100% !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: block !important;
     object-fit: cover !important;
-    object-position: left top !important;
+    object-position: center !important;
   }
 }
 
 /* Phones + small tablets: banner scrolls with the page — no sticky/hover/stack effects */
 @media screen and (max-width: 599px) {
+
+  /* Responsive GIF banner on mobile */
+  body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is([class*="ai-gif-banner-wrapper"], [class*="ai-gif-banner-container"]),
+  body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-gif-banner-wrapper"], [class*="ai-gif-banner-container"]) {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is([class*="ai-gif-banner-image"], img),
+  body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-gif-banner-image"], img) {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero {
     --lame-hero-frame-max-height: 100%;
     --lame-hero-frame-min-height: 0;
@@ -328,20 +426,20 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame {
     position: relative !important;
     width: 100% !important;
-    max-width: none !important;
+    max-width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    aspect-ratio: 1 / 1 !important;
+    aspect-ratio: auto !important;
     overflow: hidden;
-    background: #fff !important;
+    background: transparent !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame :is(slideshow-component, slideshow-container, slideshow-slides) {
-    position: absolute !important;
-    inset: 0 !important;
+    position: relative !important;
+    inset: auto !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
     aspect-ratio: auto !important;
@@ -356,28 +454,36 @@ body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-componen
     scroll-behavior: auto !important;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x pan-y;
+    --slide-min-height: 0 !important;
+    --slide-min-height-desktop: 0 !important;
+    min-height: 0 !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) slideshow-slide,
   .template-index .shopify-section:has(.lame-home-hero) .slide__image-container,
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slide-link {
-    height: 100% !important;
-    min-height: 100% !important;
-    max-height: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    position: relative !important;
   }
 
-  /* Full-bleed cover inside the 60% frame — start at the top so the top of the artwork stays visible */
+  /* Full-bleed edge to edge on mobile */
   .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img),
   .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img),
   .template-index .shopify-section:has(.lame-home-hero--fit-cover) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     min-width: 100% !important;
-    min-height: 100% !important;
-    max-width: none !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
     max-height: none !important;
+    display: block !important;
     object-fit: cover !important;
-    object-position: left top !important;
+    object-position: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) :is(.lame-home-hero__carousel--mobile, .lame-home-hero__carousel--desktop) slideshow-slides {
