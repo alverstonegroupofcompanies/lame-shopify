@@ -43,15 +43,12 @@
   endif
   assign border_width = section.settings.border_width | default: 3
 
-  assign products_url = routes.all_products_collection_url
-  if collections['our-products'] != blank and collections['our-products'].url != blank
-    assign products_url = collections['our-products'].url
+  assign products_url = '/collections/all'
+  if routes.all_products_collection_url != blank
+    assign products_url = routes.all_products_collection_url
   endif
   if section.settings.products_collection != blank and section.settings.products_collection.url != blank
     assign products_url = section.settings.products_collection.url
-  endif
-  if products_url == blank
-    assign products_url = '/collections/our-products'
   endif
 
   assign block_count = section.blocks.size | at_least: 1 | at_most: 4
@@ -166,12 +163,13 @@
               assign poster_subtitle = block.settings.subtitle | strip
               assign poster_cta = block.settings.button_label | strip
 
+              assign brand_other = block.settings.brand_other | strip
               assign brand_name = block.settings.brand | strip
-              if block.settings.brand_other != blank
-                assign brand_name = block.settings.brand_other | strip
-              endif
               if brand_name == 'other'
-                assign brand_name = block.settings.brand_other | strip
+                assign brand_name = ''
+              endif
+              if brand_other != blank
+                assign brand_name = brand_other
               endif
 
               assign discount_keys = ''
@@ -196,24 +194,22 @@
 
               assign discount_param = discount_keys | remove_first: '|' | replace: '|', ','
 
-              if brand_name != blank or discount_param != blank
-                assign brand_slug = brand_name | handleize
-                assign brand_name_down = brand_name | downcase
-                if brand_name_down contains 'lamstone'
-                  assign brand_slug = 'lamstone-healthcare'
-                endif
+              assign brand_slug = ''
+              if brand_name != blank
+                capture brand_slug_capture
+                  render 'lame-vendor-slug', vendor: brand_name
+                endcapture
+                assign brand_slug = brand_slug_capture | strip
+              endif
 
-                assign query_string = ''
-                if brand_name != blank
-                  assign query_string = 'brand=' | append: brand_slug
-                endif
-                if discount_param != blank
-                  if query_string != blank
-                    assign query_string = query_string | append: '&'
-                  endif
-                  assign query_string = query_string | append: 'discount=' | append: discount_param
-                endif
-                assign poster_link = products_url | append: '?' | append: query_string
+              if brand_name != blank and discount_param != blank
+                assign poster_link = products_url | append: '?brand=' | append: brand_slug | append: '&discount=' | append: discount_param
+              elsif brand_name != blank
+                assign poster_link = products_url | append: '?brand=' | append: brand_slug
+              elsif discount_param != blank
+                assign poster_link = products_url | append: '?discount=' | append: discount_param
+              else
+                assign poster_link = block.settings.link
               endif
 
               assign raw_label = block.settings.alt

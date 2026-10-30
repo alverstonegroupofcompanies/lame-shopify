@@ -221,9 +221,13 @@ function getDomSlugs(root) {
   /** @type {Set<string>} */
   const slugs = new Set();
 
-  root.querySelectorAll('[data-brand-slug]').forEach((element) => {
-    const slug = normalizeSlug(element.getAttribute('data-brand-slug'));
-    if (slug) slugs.add(slug);
+  root.querySelectorAll('[data-brand-slug], [data-vendor], [data-brand]').forEach((element) => {
+    const s1 = toBrandSlug(element.getAttribute('data-brand-slug'));
+    const s2 = toBrandSlug(element.getAttribute('data-vendor'));
+    const s3 = toBrandSlug(element.getAttribute('data-brand'));
+    if (s1) slugs.add(s1);
+    if (s2) slugs.add(s2);
+    if (s3) slugs.add(s3);
   });
 
   return slugs;
@@ -238,7 +242,7 @@ function syncFromUrl(url = new URL(window.location.href)) {
     ? new Set(
         brandParam
           .split(',')
-          .map((part) => toBrandSlug(part) || normalizeSlug(part))
+          .map((part) => toBrandSlug(part))
           .filter(Boolean)
       )
     : new Set();
@@ -248,10 +252,17 @@ function syncFromUrl(url = new URL(window.location.href)) {
     const labelSlug = toBrandSlug(
       input.getAttribute('data-brand-label') || input.getAttribute('data-label')
     );
-    const compact = (slug || labelSlug).replace(/-/g, '');
-    input.checked = [...slugs].some((part) => {
-      const compactPart = part.replace(/-/g, '');
-      return part === slug || part === labelSlug || (compact && compactPart === compact);
+    const candidates = [slug, labelSlug].filter(Boolean);
+
+    input.checked = [...slugs].some((activePart) => {
+      const activeNorm = toBrandSlug(activePart);
+      return candidates.some((cand) => {
+        if (cand === activeNorm) return true;
+        const compactCand = cand.replace(/-/g, '');
+        const compactActive = activeNorm.replace(/-/g, '');
+        if (compactCand && compactCand === compactActive) return true;
+        return cand.includes(activeNorm) || activeNorm.includes(cand);
+      });
     });
   }
 
@@ -263,10 +274,87 @@ function syncFromUrl(url = new URL(window.location.href)) {
  * @returns {string}
  */
 function toBrandSlug(value) {
-  return normalizeName(value)
+  if (!value) return '';
+  return String(value)
+    .trim()
+    .toLowerCase()
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * @param {HTMLElement} item
+ * @param {Set<string>} activeSlugs
+ * @returns {boolean}
+ */
+function cardMatchesBrand(item, activeSlugs) {
+  if (!activeSlugs || activeSlugs.size === 0) return true;
+
+  const itemSlug = toBrandSlug(item.getAttribute('data-brand-slug'));
+  const itemVendor = toBrandSlug(item.getAttribute('data-vendor'));
+  const itemBrand = toBrandSlug(item.getAttribute('data-brand'));
+
+  const candidates = [itemSlug, itemVendor, itemBrand].filter(Boolean);
+  if (!candidates.length) return false;
+
+  for (const active of activeSlugs) {
+    const activeNorm = toBrandSlug(active);
+    if (!activeNorm) continue;
+
+    for (const cand of candidates) {
+      if (cand === activeNorm) return true;
+
+      const compactCand = cand.replace(/-/g, '');
+      const compactActive = activeNorm.replace(/-/g, '');
+      if (compactCand && compactCand === compactActive) return true;
+
+      if (cand.includes(activeNorm) || activeNorm.includes(cand)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * @param {HTMLElement} section
+ * @param {Set<string>} activeSlugs
+ * @returns {boolean}
+ */
+function sectionMatchesBrand(section, activeSlugs) {
+  if (!activeSlugs || activeSlugs.size === 0) return true;
+
+  const sectionSlug = toBrandSlug(section.getAttribute('data-brand-slug'));
+  const sectionBrand = toBrandSlug(section.getAttribute('data-brand'));
+  const candidates = [sectionSlug, sectionBrand].filter(Boolean);
+
+  for (const active of activeSlugs) {
+    const activeNorm = toBrandSlug(active);
+    if (!activeNorm) continue;
+
+    for (const cand of candidates) {
+      if (cand === activeNorm) return true;
+
+      const compactCand = cand.replace(/-/g, '');
+      const compactActive = activeNorm.replace(/-/g, '');
+      if (compactCand && compactCand === compactActive) return true;
+
+      if (cand.includes(activeNorm) || activeNorm.includes(cand)) {
+        return true;
+      }
+    }
+  }
+
+  const items = section.querySelectorAll(
+    'li[data-vendor], li[data-brand-slug], .lame-category-shop__item'
+  );
+  for (const item of items) {
+    if (cardMatchesBrand(item, activeSlugs)) return true;
+  }
+
+  return false;
 }
 
 /**
@@ -304,6 +392,7 @@ function syncFromVendorUrl(url = new URL(window.location.href)) {
 function syncBrandParamsToUrl(baseUrl = new URL(window.location.href)) {
   const slugs = [...getSelectedSlugs()];
   const url = new URL(baseUrl.toString());
+  const existingBrand = url.searchParams.get(BRAND_PARAM);
 
   url.searchParams.delete(BRAND_PARAM);
   url.searchParams.delete(VENDOR_PARAM);
@@ -312,6 +401,8 @@ function syncBrandParamsToUrl(baseUrl = new URL(window.location.href)) {
 
   if (slugs.length) {
     url.searchParams.set(BRAND_PARAM, slugs.join(','));
+  } else if (existingBrand) {
+    url.searchParams.set(BRAND_PARAM, existingBrand);
   }
 
   for (const label of getSelectedVendorLabels()) {
@@ -439,7 +530,13 @@ function diagnoseBrandFilter(root, selected, visibleCount, hasFilter) {
 
   const domSlugs = getDomSlugs(root);
   const selectedArray = [...selected];
-  const missingFromDom = selectedArray.filter((slug) => !domSlugs.has(slug));
+  const missingFromDom = selectedArray.filter((slug) => {
+    const norm = toBrandSlug(slug);
+    for (const ds of domSlugs) {
+      if (ds === norm || ds.includes(norm) || norm.includes(ds)) return false;
+    }
+    return true;
+  });
   const vendorParams = new URL(window.location.href).searchParams.getAll(VENDOR_PARAM);
 
   emptyState.hidden = false;
@@ -672,11 +769,10 @@ export function applyBrandFilter() {
   const root = getCollectionRoot();
   const selected = getSelectedSlugs();
   const url = new URL(window.location.href);
+  const brandParam = url.searchParams.get(BRAND_PARAM);
   const urlSlugs = new Set(
     [
-      ...(url.searchParams.get(BRAND_PARAM) || '')
-        .split(',')
-        .map((part) => normalizeSlug(part) || toBrandSlug(part)),
+      ...(brandParam ? brandParam.split(',').map((part) => toBrandSlug(part)) : []),
       ...url.searchParams.getAll(VENDOR_PARAM).map((vendor) => toBrandSlug(vendor)),
     ].filter(Boolean)
   );
@@ -689,23 +785,21 @@ export function applyBrandFilter() {
   }
 
   const items = root.querySelectorAll(
-    '.lame-collection-products-column li[data-brand-slug], .lame-collection-products-column .lame-category-shop__item[data-brand-slug]'
+    '.lame-collection-products-column li[data-brand-slug], .lame-collection-products-column li[data-vendor], .lame-collection-products-column .lame-category-shop__item'
   );
-  const sections = root.querySelectorAll('.lame-collection-brand-section[data-brand-slug]');
+  const sections = root.querySelectorAll('.lame-collection-brand-section');
   const productsColumn = root.querySelector('.lame-collection-products-column');
 
   let visibleCount = 0;
 
   for (const item of items) {
-    const slug = normalizeSlug(item.getAttribute('data-brand-slug'));
-    const show = !hasFilter || active.has(slug);
+    const show = !hasFilter || cardMatchesBrand(item, active);
     item.classList.toggle(HIDDEN_CLASS, !show);
     if (show) visibleCount += 1;
   }
 
   for (const section of sections) {
-    const slug = normalizeSlug(section.getAttribute('data-brand-slug'));
-    const show = !hasFilter || active.has(slug);
+    const show = !hasFilter || sectionMatchesBrand(section, active);
     section.classList.toggle(HIDDEN_CLASS, !show);
     if (show) visibleCount += 1;
   }
@@ -871,14 +965,7 @@ function handleMorphComplete() {
  * @returns {boolean}
  */
 function readPersistedRangesFromDiscountFilter() {
-  try {
-    const raw = sessionStorage.getItem(`lame-discount-filter:${window.location.pathname}`);
-    if (!raw) return false;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0;
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 const BRAND_BAR_OPEN_KEY = 'lame-brand-bar-open';

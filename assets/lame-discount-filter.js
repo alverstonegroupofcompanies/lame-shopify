@@ -26,9 +26,8 @@ let clientPagingActive = false;
  * @returns {boolean}
  */
 function isDiscountFilterActive() {
-  if (getSelectedRules().length > 0) return true;
-  if (new URL(window.location.href).searchParams.get(DISCOUNT_PARAM)) return true;
-  return readPersistedRanges().length > 0;
+  const url = new URL(window.location.href);
+  return Boolean(url.searchParams.get(DISCOUNT_PARAM));
 }
 
 /**
@@ -135,10 +134,14 @@ function getSelectedRangeKeys() {
  * @returns {boolean}
  */
 function matchesDiscount(percent, rules) {
-  if (!rules.length) return true;
-  if (!(percent > 0)) return false;
-
-  return rules.some((rule) => percent > rule.min && percent <= rule.max);
+  if (!rules || !rules.length) return true;
+  const safePercent = Number.isFinite(percent) ? percent : 0;
+  return rules.some((rule) => {
+    if (rule.min === 0) {
+      return safePercent >= 0 && safePercent <= rule.max;
+    }
+    return safePercent > rule.min && safePercent <= rule.max;
+  });
 }
 
 /**
@@ -146,7 +149,8 @@ function matchesDiscount(percent, rules) {
  * @returns {string}
  */
 function toBrandSlug(value) {
-  return (value || '')
+  if (!value) return '';
+  return String(value)
     .trim()
     .toLowerCase()
     .replace(/&/g, 'and')
@@ -192,14 +196,29 @@ function getActiveBrandSlugs() {
  * @param {Set<string>} brandSlugs
  * @returns {boolean}
  */
-function matchesBrand(slug, brandSlugs) {
-  if (!brandSlugs.size) return true;
-  const normalized = toBrandSlug(slug);
-  if (normalized && brandSlugs.has(normalized)) return true;
+function matchesBrand(candidate, brandSlugs) {
+  if (!brandSlugs || brandSlugs.size === 0) return true;
+  const candidates = Array.isArray(candidate)
+    ? candidate.map(toBrandSlug).filter(Boolean)
+    : [toBrandSlug(candidate)].filter(Boolean);
 
-  const compact = normalized.replace(/-/g, '');
+  if (!candidates.length) return false;
+
   for (const active of brandSlugs) {
-    if (active.replace(/-/g, '') === compact) return true;
+    const activeNorm = toBrandSlug(active);
+    if (!activeNorm) continue;
+
+    for (const cand of candidates) {
+      if (cand === activeNorm) return true;
+
+      const compactCand = cand.replace(/-/g, '');
+      const compactActive = activeNorm.replace(/-/g, '');
+      if (compactCand && compactCand === compactActive) return true;
+
+      if (cand.includes(activeNorm) || activeNorm.includes(cand)) {
+        return true;
+      }
+    }
   }
 
   return false;
@@ -230,6 +249,8 @@ function persistRanges(keys) {
  * @returns {string[]}
  */
 function readPersistedRanges() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.get(DISCOUNT_PARAM)) return [];
   try {
     const raw = sessionStorage.getItem(storageKey());
     if (!raw) return [];
@@ -318,7 +339,7 @@ function restoreDiscountSelection() {
         .split(',')
         .map((part) => part.trim())
         .filter((key) => Boolean(parseRangeKey(key)))
-    : readPersistedRanges();
+    : [];
 
   const keySet = new Set(keys);
 
@@ -326,8 +347,10 @@ function restoreDiscountSelection() {
     input.checked = keySet.has(getRangeKey(input));
   }
 
-  if (keys.length && !fromUrl) {
-    syncDiscountParamsToUrl(url);
+  if (keys.length) {
+    persistRanges(keys);
+  } else {
+    persistRanges([]);
   }
 
   updateActiveCount();
@@ -394,17 +417,21 @@ function getSectionId() {
  * @returns {{ html: string, percent: number, brand: string, id: string }[]}
  */
 function extractCards(source) {
-  /** @type {Map<string, { html: string, percent: number, brand: string, id: string }>} */
+  /** @type {Map<string, { html: string, percent: number, brand: string, vendor: string, brandAttr: string, id: string }>} */
   const cards = new Map();
 
   for (const item of source.querySelectorAll(CARD_SELECTOR)) {
     if (!(item instanceof HTMLElement)) continue;
     const id = item.getAttribute('data-product-id') || item.id || item.outerHTML.slice(0, 80);
     if (cards.has(id)) continue;
+    const rawPercent = item.getAttribute('data-discount-percent');
+    const percent = rawPercent !== null && rawPercent !== '' ? Number(rawPercent) : 0;
     cards.set(id, {
       html: item.outerHTML,
-      percent: Number(item.getAttribute('data-discount-percent') || 0),
+      percent: Number.isFinite(percent) ? percent : 0,
       brand: cardBrandSlug(item),
+      vendor: toBrandSlug(item.getAttribute('data-vendor')),
+      brandAttr: toBrandSlug(item.getAttribute('data-brand')),
       id,
     });
   }
@@ -413,15 +440,21 @@ function extractCards(source) {
 }
 
 /**
- * @param {{ percent: number, brand: string }[]} items
+ * @param {{ percent: number, brand: string, vendor?: string, brandAttr?: string }[]} items
  * @param {{ min: number, max: number }[]} rules
  * @returns {{ percent: number, brand: string }[]}
  */
 function filterCatalogItems(items, rules) {
   const brandSlugs = getActiveBrandSlugs();
-  return items.filter(
-    (item) => matchesBrand(item.brand, brandSlugs) && matchesDiscount(item.percent, rules)
-  );
+  const url = new URL(window.location.href);
+  const hasDiscountParam = Boolean(url.searchParams.get(DISCOUNT_PARAM));
+  const hasRules = hasDiscountParam && Boolean(rules && rules.length);
+
+  return items.filter((item) => {
+    const brandOk = matchesBrand([item.brand, item.vendor, item.brandAttr], brandSlugs);
+    const discountOk = !hasRules || matchesDiscount(item.percent, rules);
+    return brandOk && discountOk;
+  });
 }
 
 /**
@@ -777,7 +810,10 @@ function updateEmptyState(root, visibleCount, hasFilter) {
   const emptyState = ensureEmptyState(root);
   if (!emptyState) return;
 
-  if (!hasFilter || visibleCount > 0) {
+  const url = new URL(window.location.href);
+  const discountParamActive = Boolean(url.searchParams.get(DISCOUNT_PARAM)) && hasFilter;
+
+  if (!discountParamActive || visibleCount > 0) {
     emptyState.hidden = true;
     emptyState.removeAttribute('data-brand-filter-error');
     emptyState.classList.remove('lame-brand-filter-empty--error', 'lame-brand-filter-empty--loading');
@@ -795,8 +831,10 @@ function updateEmptyState(root, visibleCount, hasFilter) {
 
 function applyLocalHideOnly() {
   const root = getCollectionRoot();
-  const rules = getSelectedRules();
-  const hasFilter = rules.length > 0;
+  const url = new URL(window.location.href);
+  const hasDiscountParam = Boolean(url.searchParams.get(DISCOUNT_PARAM));
+  const rules = hasDiscountParam ? getSelectedRules() : [];
+  const hasFilter = hasDiscountParam && rules.length > 0;
   if (!root) {
     updateActiveCount();
     return;
@@ -807,12 +845,17 @@ function applyLocalHideOnly() {
   let visibleCount = 0;
 
   for (const item of items) {
-    const percent = Number(item.getAttribute('data-discount-percent') || 0);
-    const brand = cardBrandSlug(item);
-    const brandOk = matchesBrand(brand, brandSlugs);
+    const rawPercent = item.getAttribute('data-discount-percent');
+    const percent = rawPercent !== null && rawPercent !== '' ? Number(rawPercent) : 0;
+    const candidates = [
+      cardBrandSlug(item),
+      toBrandSlug(item.getAttribute('data-vendor')),
+      toBrandSlug(item.getAttribute('data-brand')),
+    ];
+    const brandOk = matchesBrand(candidates, brandSlugs);
     const discountOk = !hasFilter || matchesDiscount(percent, rules);
     const show = brandOk && discountOk;
-    item.classList.toggle(HIDDEN_CLASS, !show);
+    item.classList.toggle(HIDDEN_CLASS, !discountOk);
     if (show && !item.classList.contains(BRAND_HIDDEN_CLASS)) {
       visibleCount += 1;
     }
@@ -856,6 +899,19 @@ async function restoreServerCollection() {
 }
 
 export async function applyDiscountFilter() {
+  const url = new URL(window.location.href);
+  const hasDiscountParam = Boolean(url.searchParams.get(DISCOUNT_PARAM));
+
+  if (!hasDiscountParam) {
+    restoreDiscountSelection();
+    if (clientPagingActive) {
+      await restoreServerCollection();
+      return;
+    }
+    applyLocalHideOnly();
+    return;
+  }
+
   restoreDiscountSelection();
 
   const rules = getSelectedRules();
@@ -940,6 +996,22 @@ export async function clearDiscountFilter() {
 }
 
 function initDiscountFilter() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.get(DISCOUNT_PARAM)) {
+    restoreDiscountSelection();
+    const root = getCollectionRoot();
+    if (root) {
+      for (const item of root.querySelectorAll('.' + HIDDEN_CLASS)) {
+        item.classList.remove(HIDDEN_CLASS);
+      }
+      for (const section of root.querySelectorAll('.lame-collection-brand-section.' + HIDDEN_CLASS)) {
+        section.classList.remove(HIDDEN_CLASS);
+      }
+      updateEmptyState(root, 1, false);
+    }
+    return;
+  }
+
   restoreDiscountSelection();
   if (getSelectedRules().length) {
     setToolbarCountLoading();
@@ -1021,24 +1093,33 @@ document.addEventListener(CLEAR_EVENT, () => {
   clearDiscountFilter();
 });
 document.addEventListener(MORPH_EVENT, () => {
+  const url = new URL(window.location.href);
+  const hasDiscountParam = Boolean(url.searchParams.get(DISCOUNT_PARAM));
+
+  if (!hasDiscountParam) {
+    restoreDiscountSelection();
+    clientPagingActive = false;
+    const root = getCollectionRoot();
+    if (root) {
+      for (const item of root.querySelectorAll('.' + HIDDEN_CLASS)) {
+        item.classList.remove(HIDDEN_CLASS);
+      }
+      for (const section of root.querySelectorAll('.lame-collection-brand-section.' + HIDDEN_CLASS)) {
+        section.classList.remove(HIDDEN_CLASS);
+      }
+      updateEmptyState(root, 1, false);
+    }
+    return;
+  }
+
   restoreDiscountSelection();
   syncDiscountParamsToUrl();
 
-  if (isDiscountFilterActive()) {
-    if (!getSelectedRules().length) {
-      const keys = readPersistedRanges();
-      for (const input of getAllDiscountInputs()) {
-        input.checked = keys.includes(getRangeKey(input));
-      }
-      syncDiscountParamsToUrl();
-    }
-
-    if (getSelectedRules().length || readPersistedRanges().length) {
-      catalog = null;
-      clientPagingActive = false;
-      applyDiscountFilter();
-      return;
-    }
+  if (getSelectedRules().length) {
+    catalog = null;
+    clientPagingActive = false;
+    applyDiscountFilter();
+    return;
   }
 
   clientPagingActive = false;
