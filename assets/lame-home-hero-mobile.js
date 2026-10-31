@@ -57,6 +57,18 @@ function enableMobileHeroLoop(scroller) {
 
       const dx = touch.clientX - origin.x;
       const dy = touch.clientY - origin.y;
+
+      if (Math.abs(dx) >= 10 && Math.abs(dx) > Math.abs(dy)) {
+        const cancelClick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        };
+        scroller.addEventListener('click', cancelClick, { capture: true, once: true });
+        setTimeout(() => {
+          scroller.removeEventListener('click', cancelClick, { capture: true });
+        }, 300);
+      }
+
       if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
 
       const maxScroll = Math.max(0, scroller.scrollWidth - scroller.clientWidth);

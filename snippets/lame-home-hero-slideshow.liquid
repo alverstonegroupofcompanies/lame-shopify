@@ -47,6 +47,8 @@
           assign slide_sizes = '100%'
           assign slide_max_width = 3840
         endif
+
+        assign slide_alt = block.settings.image.alt | default: accessibility_label | default: 'Slide' | escape
       -%}
       {%- capture slide_children -%}
         <div class="slide__image-container">
@@ -54,8 +56,10 @@
             <a
               href="{{ block.settings.link }}"
               class="lame-home-hero__slide-link"
+              aria-label="{{ slide_alt }}"
+              draggable="false"
               {% if block.settings.open_in_new_tab %}
-                target="_blank" rel="noopener"
+                target="_blank" rel="noopener noreferrer"
               {% endif %}
             >
           {%- endif -%}
@@ -68,7 +72,8 @@
               fetchpriority: slide_fetchpriority,
               widths: slide_widths,
               sizes: slide_sizes,
-              alt: block.settings.image.alt | default: accessibility_label | escape
+              alt: slide_alt,
+              draggable: 'false'
           }}
           {%- if block.settings.link != blank -%}
             </a>
