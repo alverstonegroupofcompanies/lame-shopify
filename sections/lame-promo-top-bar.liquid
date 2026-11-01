@@ -1,11 +1,19 @@
+{%- capture promo_content -%}
+  {% content_for 'blocks' %}
+{%- endcapture -%}
+
 {%- liquid
-  assign promo_count = 0
-  for block in section.blocks
-    assign line = block.settings.text | strip_html | strip
-    if line != blank
-      assign promo_count = promo_count | plus: 1
-    endif
-  endfor
+  assign promo_blocks_html = promo_content | strip
+  assign rendered_caption_count = promo_content | split: 'lame-promo-top-bar__caption' | size | minus: 1
+  if rendered_caption_count > 0
+    assign promo_count = rendered_caption_count
+  elsif promo_blocks_html != blank
+    assign promo_count = 1
+  elsif section.blocks.size > 0
+    assign promo_count = section.blocks.size
+  else
+    assign promo_count = 0
+  endif
 
   assign promo_n = promo_count
   if promo_n < 1
@@ -40,7 +48,7 @@
         {%- if promo_count == 0 and request.design_mode -%}
           <p class="lame-promo-top-bar__placeholder">Add one or more promo lines in the sidebar. Multiple lines fade in and out in rotation.</p>
         {%- else -%}
-          {% content_for 'blocks' %}
+          {{ promo_content }}
         {%- endif -%}
       </div>
     </div>
