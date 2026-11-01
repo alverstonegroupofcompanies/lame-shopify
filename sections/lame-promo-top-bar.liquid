@@ -18,41 +18,50 @@
   else
     assign promo_count = 0
   endif
-
-  assign promo_n = promo_count
-  if promo_n < 1
-    assign promo_n = 1
-  endif
 -%}
 
 {%- if promo_count > 0 or request.design_mode -%}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <aside
-    class="lame-promo-top-bar spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} {% if promo_count < 2 %}lame-promo-top-bar--single{% endif %}"
-    style="
-      {% render 'spacing-padding', settings: section.settings %}
-      --promo-slide-sec: {{ section.settings.slide_seconds }};
-      --promo-dur: calc({{ promo_n }} * {{ section.settings.slide_seconds }} * 1s);
-      --promo-n: {{ promo_n }};
-    "
-    data-promo-count="{{ promo_n }}"
+    class="lame-promo-top-bar spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
+    style="{% render 'spacing-padding', settings: section.settings %}"
+    aria-label="{{ section.settings.accessibility_label | escape }}"
   >
     <div class="lame-promo-top-bar__inner">
       {%- if section.settings.show_badge and section.settings.badge_text != blank -%}
-        <span class="lame-promo-top-bar__badge" aria-hidden="true">{{ section.settings.badge_text }}</span>
+        <div class="lame-promo-top-bar__badge-wrap">
+          <span class="lame-promo-top-bar__badge" aria-hidden="true">{{ section.settings.badge_text }}</span>
+        </div>
       {%- endif -%}
 
       <div
-        class="lame-promo-top-bar__rotator"
-        id="LamePromoRotator-{{ section.id }}"
-        data-promo-n="{% if promo_count < 1 %}1{% else %}{{ promo_count }}{% endif %}"
+        class="lame-promo-top-bar__ticker"
+        id="LamePromoTicker-{{ section.id }}"
         role="region"
         aria-label="{{ section.settings.accessibility_label | escape }}"
       >
         {%- if promo_count == 0 and request.design_mode -%}
-          <p class="lame-promo-top-bar__placeholder">Add one or more promo lines in the sidebar. Multiple lines fade in and out in rotation.</p>
+          <p class="lame-promo-top-bar__placeholder">Add one or more promo lines in the sidebar to scroll continuously.</p>
         {%- else -%}
-          {{ promo_content }}
+          <div class="lame-promo-top-bar__ticker-track">
+            <div class="lame-promo-top-bar__ticker-group">
+              <div class="lame-promo-top-bar__ticker-items">
+                {{ promo_content }}
+              </div>
+              {%- for i in (1..5) -%}
+                <div class="lame-promo-top-bar__ticker-items lame-promo-top-bar__ticker-items--dup" aria-hidden="true">
+                  {{ promo_content | replace: 'id="', 'data-dup-id="' }}
+                </div>
+              {%- endfor -%}
+            </div>
+            <div class="lame-promo-top-bar__ticker-group lame-promo-top-bar__ticker-group--clone" aria-hidden="true">
+              {%- for i in (1..6) -%}
+                <div class="lame-promo-top-bar__ticker-items lame-promo-top-bar__ticker-items--dup">
+                  {{ promo_content | replace: 'id="', 'data-dup-id="' }}
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
         {%- endif -%}
       </div>
     </div>
@@ -67,17 +76,28 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     position: relative;
     color: #ffffff !important;
+    overflow: hidden;
+    width: 100%;
+    background: var(--lame-purple-gradient, linear-gradient(90deg, #6b0f46 0%, #4a0730 100%)) !important;
   }
 
   .lame-promo-top-bar__inner {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: clamp(0.5rem, 1.5vw, 0.75rem);
-    flex-wrap: wrap;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    width: 100%;
     max-width: 100%;
-    margin-inline: auto;
-    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lame-promo-top-bar__badge-wrap {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+    padding-inline-end: clamp(0.6rem, 1.5vw, 1rem);
   }
 
   .lame-promo-top-bar__badge {
@@ -93,6 +113,7 @@
     line-height: 1;
     box-shadow: 0 1px 0 rgb(0 0 0 / 0.12);
     animation: lame-promo-badge-pop 2.8s ease-in-out infinite;
+    white-space: nowrap;
   }
 
   @keyframes lame-promo-badge-pop {
@@ -108,24 +129,60 @@
     }
   }
 
-  .lame-promo-top-bar__rotator {
+  .lame-promo-top-bar__ticker {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
     position: relative;
-    min-height: 1.35em;
-    flex: 0 1 auto;
-    display: inline-grid;
-    grid-template: [stack] auto / [stack] minmax(0, 1fr);
+    display: flex;
     align-items: center;
-    justify-items: center;
-    max-width: 100%;
-    --promo-dur: calc(var(--promo-n, 1) * var(--promo-slide-sec, 5) * 1s);
+    mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
   }
 
-  .lame-promo-top-bar__rotator > * {
-    grid-area: stack;
+  .lame-promo-top-bar__ticker-track {
     display: flex;
-    justify-content: center;
     align-items: center;
-    width: 100%;
+    width: max-content;
+    white-space: nowrap;
+    will-change: transform;
+    animation: lame-promo-ticker 20s linear infinite;
+  }
+
+  /* Pause scrolling on hover or focus */
+  .lame-promo-top-bar:hover .lame-promo-top-bar__ticker-track,
+  .lame-promo-top-bar:focus-within .lame-promo-top-bar__ticker-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes lame-promo-ticker {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .lame-promo-top-bar__ticker-group {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .lame-promo-top-bar__ticker-items {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .lame-promo-top-bar__ticker-items > * {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .lame-promo-top-bar__placeholder {
@@ -133,14 +190,24 @@
     font-size: 0.8125rem;
     color: #ffffff;
     opacity: 0.85;
-    text-align: center;
+    white-space: nowrap;
   }
 
   .lame-promo-top-bar__caption {
     margin: 0;
     width: auto;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
     color: #ffffff !important;
+    white-space: nowrap;
+  }
+
+  .lame-promo-top-bar__caption::after {
+    content: "•";
+    margin-inline: clamp(0.75rem, 2vw, 1.25rem);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
+    display: inline-block;
   }
 
   .lame-promo-top-bar__caption-link {
@@ -148,7 +215,7 @@
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    white-space: nowrap;
   }
 
   .lame-promo-top-bar__caption-link:hover,
@@ -164,7 +231,7 @@
     letter-spacing: 0.04em;
     line-height: 1.35;
     color: #ffffff !important;
-    text-align: center;
+    white-space: nowrap;
   }
 
   .lame-promo-top-bar__caption-text :first-child {
@@ -172,139 +239,40 @@
     color: #ffffff !important;
   }
 
-  /* Single promo line: ALWAYS visible in white, centred next to badge, NO fading or animation */
-  .lame-promo-top-bar--single .lame-promo-top-bar__caption,
-  .lame-promo-top-bar[data-promo-count='1'] .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='1'] .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator:has(> :only-child) .lame-promo-top-bar__caption {
-    opacity: 1 !important;
-    animation: none !important;
-    transform: none !important;
-    visibility: visible !important;
+  .lame-promo-top-bar__caption-text strong,
+  .lame-promo-top-bar__caption-text b {
+    color: #ffffff !important;
+    font-weight: 700;
   }
 
-  /* Rotating multi-line captions: ONLY active when there are 2 or more lines */
-  .lame-promo-top-bar:not(.lame-promo-top-bar--single):not([data-promo-count='1']) .lame-promo-top-bar__caption {
-    opacity: 0;
-    animation: lame-promo-fade-cycle var(--promo-dur) cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-
-  @keyframes lame-promo-fade-cycle {
-    0% {
-      opacity: 0;
-      transform: translateY(0.5rem) scale(0.97);
-    }
-    5% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    28% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    36% {
-      opacity: 0;
-      transform: translateY(-0.45rem) scale(0.97);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-0.45rem) scale(0.97);
-    }
-  }
-
-  /* Staggered delays for 2–6 rotating captions (handles direct children or shopify-block wrapper) */
-  .lame-promo-top-bar__rotator[data-promo-n='2'] > :nth-child(2) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='2'] > .lame-promo-top-bar__caption:nth-child(2) {
-    animation-delay: calc(var(--promo-dur) * -1 / 2);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='3'] > :nth-child(2) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='3'] > .lame-promo-top-bar__caption:nth-child(2) {
-    animation-delay: calc(var(--promo-dur) * -1 / 3);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='3'] > :nth-child(3) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='3'] > .lame-promo-top-bar__caption:nth-child(3) {
-    animation-delay: calc(var(--promo-dur) * -2 / 3);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='4'] > :nth-child(2) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='4'] > .lame-promo-top-bar__caption:nth-child(2) {
-    animation-delay: calc(var(--promo-dur) * -1 / 4);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='4'] > :nth-child(3) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='4'] > .lame-promo-top-bar__caption:nth-child(3) {
-    animation-delay: calc(var(--promo-dur) * -2 / 4);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='4'] > :nth-child(4) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='4'] > .lame-promo-top-bar__caption:nth-child(4) {
-    animation-delay: calc(var(--promo-dur) * -3 / 4);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > :nth-child(2) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(2) {
-    animation-delay: calc(var(--promo-dur) * -1 / 5);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > :nth-child(3) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(3) {
-    animation-delay: calc(var(--promo-dur) * -2 / 5);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > :nth-child(4) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(4) {
-    animation-delay: calc(var(--promo-dur) * -3 / 5);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > :nth-child(5) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='5'] > .lame-promo-top-bar__caption:nth-child(5) {
-    animation-delay: calc(var(--promo-dur) * -4 / 5);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > :nth-child(2) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(2) {
-    animation-delay: calc(var(--promo-dur) * -1 / 6);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > :nth-child(3) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(3) {
-    animation-delay: calc(var(--promo-dur) * -2 / 6);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > :nth-child(4) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(4) {
-    animation-delay: calc(var(--promo-dur) * -3 / 6);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > :nth-child(5) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(5) {
-    animation-delay: calc(var(--promo-dur) * -4 / 6);
-  }
-
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > :nth-child(6) .lame-promo-top-bar__caption,
-  .lame-promo-top-bar__rotator[data-promo-n='6'] > .lame-promo-top-bar__caption:nth-child(6) {
-    animation-delay: calc(var(--promo-dur) * -5 / 6);
-  }
-
+  /* Reduced motion: show text without scrolling */
   @media (prefers-reduced-motion: reduce) {
     .lame-promo-top-bar__badge {
-      animation: none;
+      animation: none !important;
     }
 
-    .lame-promo-top-bar__caption {
-      animation: none;
-      opacity: 1 !important;
-      transform: none;
+    .lame-promo-top-bar__ticker {
+      mask-image: none !important;
+      -webkit-mask-image: none !important;
     }
 
-    .lame-promo-top-bar__rotator > *:not(:first-of-type) {
+    .lame-promo-top-bar__ticker-track {
+      animation: none !important;
+      transform: none !important;
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .lame-promo-top-bar__ticker-group--clone,
+    .lame-promo-top-bar__ticker-items--dup {
+      display: none !important;
+    }
+
+    .lame-promo-top-bar__ticker-items:only-child .lame-promo-top-bar__caption:only-child::after {
       display: none;
     }
   }
 {% endstylesheet %}
-
 {% schema %}
 {
   "name": "Super deal top bar",
