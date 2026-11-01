@@ -1,0 +1,1090 @@
+{%- liquid
+  assign title = section.settings.title | default: 'MyLamstone Elite Pro Membership'
+  assign tagline = section.settings.tagline | default: 'Shop More. Save More. Feel Special.'
+  assign price = section.settings.price | default: '₹199'
+  assign duration = section.settings.duration | default: '6 months'
+  assign membership_product = section.settings.membership_product
+
+  assign join_url = '/collections/all'
+  if membership_product != blank
+    assign join_url = membership_product.url
+  elsif section.settings.custom_button_link != blank
+    assign join_url = section.settings.custom_button_link
+  endif
+
+  assign is_elite_member = false
+  if customer and customer.tags contains 'elite-pro'
+    assign is_elite_member = true
+  endif
+-%}
+
+<div class="elite-pro-section" data-section-id="{{ section.id }}">
+  <div class="elite-pro-container">
+
+    {%- comment -%} LOGGED-IN ELITE PRO MEMBER BADGE {%- endcomment -%}
+    {%- if is_elite_member -%}
+      <aside class="elite-pro-member-banner" role="status" aria-label="Membership status">
+        <div class="elite-pro-member-banner__content">
+          <span class="elite-pro-member-banner__crown" aria-hidden="true">👑</span>
+          <div class="elite-pro-member-banner__text">
+            <span class="elite-pro-member-banner__badge">You are an Elite Pro member</span>
+            <p class="elite-pro-member-banner__subtext">Welcome back{% if customer.first_name %}, {{ customer.first_name }}{% endif %}! Your exclusive VIP benefits and reward points are active.</p>
+          </div>
+        </div>
+      </aside>
+    {%- endif -%}
+
+    {%- comment -%} 1. HERO SECTION {%- endcomment -%}
+    <header class="elite-pro-hero">
+      <div class="elite-pro-hero__pill">
+        <span class="elite-pro-hero__sparkle" aria-hidden="true">✦</span>
+        <span>MyLamstone Exclusive Program</span>
+        <span class="elite-pro-hero__sparkle" aria-hidden="true">✦</span>
+      </div>
+
+      <h1 class="elite-pro-hero__title">{{ title }}</h1>
+      <p class="elite-pro-hero__tagline">{{ tagline }}</p>
+
+      <div class="elite-pro-hero__price-bar">
+        <div class="elite-pro-hero__price-info">
+          <span class="elite-pro-hero__price-label">Special Access Pass</span>
+          <span class="elite-pro-hero__price-value">Join for {{ price }} / {{ duration }}</span>
+        </div>
+        <a href="{{ join_url }}" class="elite-pro-btn elite-pro-btn--hero">
+          {{ section.settings.button_label | default: 'Join Elite Pro' }}
+          <svg class="elite-pro-btn__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true" width="18" height="18">
+            <path d="M4.167 10h11.666m-5-5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </header>
+
+    {%- comment -%} 2. BENEFITS LIST {%- endcomment -%}
+    <section class="elite-pro-block elite-pro-benefits" aria-labelledby="benefits-heading">
+      <div class="elite-pro-section-head">
+        <h2 id="benefits-heading" class="elite-pro-heading">Member Benefits</h2>
+        <p class="elite-pro-subheading">Privileges curated exclusively to elevate your beauty & wellness shopping experience.</p>
+      </div>
+
+      <div class="elite-pro-grid elite-pro-grid--3">
+        <article class="elite-pro-card elite-pro-card--benefit">
+          <div class="elite-pro-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 12 20 22 4 22 4 12"></polyline>
+              <rect x="2" y="7" width="20" height="5"></rect>
+              <line x1="12" y1="22" x2="12" y2="7"></line>
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+            </svg>
+          </div>
+          <h3 class="elite-pro-card__title">Free Gifts on Orders Above ₹899</h3>
+          <p class="elite-pro-card__desc">Delight in complimentary luxury beauty miniatures and gifts on eligible orders.</p>
+        </article>
+
+        <article class="elite-pro-card elite-pro-card--benefit">
+          <div class="elite-pro-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3 class="elite-pro-card__title">Refer & Reward</h3>
+          <p class="elite-pro-card__desc">Invite friends and earn exciting reward points when they place their first order.</p>
+        </article>
+
+        <article class="elite-pro-card elite-pro-card--benefit">
+          <div class="elite-pro-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+          </div>
+          <h3 class="elite-pro-card__title">Welcome Gift</h3>
+          <p class="elite-pro-card__desc">A special welcome treat credited right upon your Elite Pro membership activation.</p>
+        </article>
+
+        <article class="elite-pro-card elite-pro-card--benefit">
+          <div class="elite-pro-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M6 12h.01M18 12h.01"></path>
+            </svg>
+          </div>
+          <h3 class="elite-pro-card__title">Easy Cash on Delivery</h3>
+          <p class="elite-pro-card__desc">Seamless, reliable cash on delivery with zero hassle and priority verification.</p>
+        </article>
+
+        <article class="elite-pro-card elite-pro-card--benefit">
+          <div class="elite-pro-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <h3 class="elite-pro-card__title">Member-Only Offers</h3>
+          <p class="elite-pro-card__desc">Unlock hidden price drops, extra combo savings, and VIP-exclusive promotions.</p>
+        </article>
+
+        <article class="elite-pro-card elite-pro-card--benefit">
+          <div class="elite-pro-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"></path>
+              <path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"></path>
+              <path d="M2 21h20"></path>
+              <line x1="12" y1="7" x2="12" y2="11"></line>
+              <path d="M12 4a1.5 1.5 0 0 0-1.5 1.5c0 1 1.5 2.5 1.5 2.5s1.5-1.5 1.5-2.5A1.5 1.5 0 0 0 12 4z"></path>
+            </svg>
+          </div>
+          <h3 class="elite-pro-card__title">Birthday Treat</h3>
+          <p class="elite-pro-card__desc">Celebrate your special day with exclusive bonus points and personalized beauty surprises.</p>
+        </article>
+      </div>
+    </section>
+
+    {%- comment -%} 3. SHOP. EARN. REDEEM. (3 STEPS) {%- endcomment -%}
+    <section class="elite-pro-block elite-pro-steps" aria-labelledby="steps-heading">
+      <div class="elite-pro-section-head">
+        <h2 id="steps-heading" class="elite-pro-heading">Shop. Earn. Redeem.</h2>
+        <p class="elite-pro-subheading">Turn every shopping ritual into valuable points you can redeem anytime.</p>
+      </div>
+
+      <div class="elite-pro-steps-grid">
+        <article class="elite-pro-step-card">
+          <div class="elite-pro-step-card__number" aria-hidden="true">1</div>
+          <div class="elite-pro-step-card__body">
+            <h3 class="elite-pro-step-card__title">Shop your favourite products</h3>
+            <p class="elite-pro-step-card__desc">Browse authentic skincare, cosmetics, haircare, and combos from top brands on MyLamstone.</p>
+          </div>
+        </article>
+
+        <div class="elite-pro-step-arrow" aria-hidden="true">➔</div>
+
+        <article class="elite-pro-step-card">
+          <div class="elite-pro-step-card__number" aria-hidden="true">2</div>
+          <div class="elite-pro-step-card__body">
+            <h3 class="elite-pro-step-card__title">Earn reward points on every eligible purchase</h3>
+            <p class="elite-pro-step-card__desc">Points are automatically credited to your membership balance with every completed order.</p>
+          </div>
+        </article>
+
+        <div class="elite-pro-step-arrow" aria-hidden="true">➔</div>
+
+        <article class="elite-pro-step-card">
+          <div class="elite-pro-step-card__number" aria-hidden="true">3</div>
+          <div class="elite-pro-step-card__body">
+            <h3 class="elite-pro-step-card__title">Redeem points for exciting rewards</h3>
+            <p class="elite-pro-step-card__desc">Use your points during checkout for instant discounts, free full-size products, and VIP gifts.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    {%- comment -%} 4. REWARD POINTS EXAMPLES (EDITABLE BLOCKS) {%- endcomment -%}
+    <section class="elite-pro-block elite-pro-points-examples" aria-labelledby="rewards-heading">
+      <div class="elite-pro-section-head">
+        <h2 id="rewards-heading" class="elite-pro-heading">How Points Add Up</h2>
+        <p class="elite-pro-subheading">The more you shop, the faster you unlock luxury perks and cashback savings.</p>
+      </div>
+
+      <div class="elite-pro-points-grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'reward_tier' -%}
+            <article class="elite-pro-points-card" {{ block.shopify_attributes }}>
+              <div class="elite-pro-points-card__badge" aria-hidden="true">Reward Tier</div>
+              <div class="elite-pro-points-card__spend">
+                <span class="elite-pro-points-card__label">Spend</span>
+                <span class="elite-pro-points-card__amount">{{ block.settings.spend_amount }}</span>
+              </div>
+              <div class="elite-pro-points-card__divider" aria-hidden="true">＝</div>
+              <div class="elite-pro-points-card__reward">
+                <span class="elite-pro-points-card__label">You Earn</span>
+                <span class="elite-pro-points-card__pts">{{ block.settings.points_earned }}</span>
+              </div>
+              {%- if block.settings.perk_note != blank -%}
+                <p class="elite-pro-points-card__note">{{ block.settings.perk_note }}</p>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </section>
+
+    {%- comment -%} 5. REFER & REWARD BOX {%- endcomment -%}
+    <section class="elite-pro-block elite-pro-refer-box" aria-labelledby="refer-heading">
+      <div class="elite-pro-refer-box__inner">
+        <div class="elite-pro-refer-box__content">
+          <span class="elite-pro-refer-box__tag">Share the Glamour</span>
+          <h2 id="refer-heading" class="elite-pro-refer-box__title">Refer & Reward</h2>
+          <p class="elite-pro-refer-box__desc">
+            Introduce friends to MyLamstone. When they join Elite Pro or place their first order, they receive a special welcome gift and you earn bonus reward points instantly!
+          </p>
+        </div>
+        <div class="elite-pro-refer-box__action">
+          <a href="{{ section.settings.refer_link | default: '/account' }}" class="elite-pro-btn elite-pro-btn--refer">
+            {{ section.settings.refer_button_label | default: 'Refer Now' }}
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} 6. MORE PERKS LIST {%- endcomment -%}
+    <section class="elite-pro-block elite-pro-more-perks" aria-labelledby="perks-heading">
+      <div class="elite-pro-section-head">
+        <h2 id="perks-heading" class="elite-pro-heading">More Perks You'll Love</h2>
+        <p class="elite-pro-subheading">Elevated service touches reserved exclusively for our Elite Pro community.</p>
+      </div>
+
+      <div class="elite-pro-perks-list">
+        <div class="elite-pro-perk-item">
+          <div class="elite-pro-perk-item__check" aria-hidden="true">✓</div>
+          <div class="elite-pro-perk-item__content">
+            <h3 class="elite-pro-perk-item__title">Exclusive Member Offers</h3>
+            <p class="elite-pro-perk-item__desc">Special bundle pricing and members-only savings on top Korean, herbal, and luxury beauty brands.</p>
+          </div>
+        </div>
+
+        <div class="elite-pro-perk-item">
+          <div class="elite-pro-perk-item__check" aria-hidden="true">✓</div>
+          <div class="elite-pro-perk-item__content">
+            <h3 class="elite-pro-perk-item__title">Free Gifts & Surprise Treats</h3>
+            <p class="elite-pro-perk-item__desc">Complimentary beauty samples, deluxe trials, and curated festive gift boxes with your purchases.</p>
+          </div>
+        </div>
+
+        <div class="elite-pro-perk-item">
+          <div class="elite-pro-perk-item__check" aria-hidden="true">✓</div>
+          <div class="elite-pro-perk-item__content">
+            <h3 class="elite-pro-perk-item__title">Early Access to Sales</h3>
+            <p class="elite-pro-perk-item__desc">Get 24-hour advance access to mega sales, seasonal events, and trending product restocks.</p>
+          </div>
+        </div>
+
+        <div class="elite-pro-perk-item">
+          <div class="elite-pro-perk-item__check" aria-hidden="true">✓</div>
+          <div class="elite-pro-perk-item__content">
+            <h3 class="elite-pro-perk-item__title">Birthday Privilege</h3>
+            <p class="elite-pro-perk-item__desc">Special celebratory discounts and a personalized gift hamper during your birthday month.</p>
+          </div>
+        </div>
+
+        <div class="elite-pro-perk-item">
+          <div class="elite-pro-perk-item__check" aria-hidden="true">✓</div>
+          <div class="elite-pro-perk-item__content">
+            <h3 class="elite-pro-perk-item__title">Priority Support</h3>
+            <p class="elite-pro-perk-item__desc">Dedicated beauty concierge and express order assistance via WhatsApp and email.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} 7. FINAL BOX: JOIN TODAY {%- endcomment -%}
+    <section class="elite-pro-final-box" aria-labelledby="final-heading">
+      <div class="elite-pro-final-box__inner">
+        <span class="elite-pro-final-box__badge" aria-hidden="true">Limited Time Offer</span>
+        <h2 id="final-heading" class="elite-pro-final-box__title">{{ section.settings.final_heading | default: 'Join MyLamstone Elite Pro Today!' }}</h2>
+        <p class="elite-pro-final-box__desc">
+          Enjoy {{ duration }} of uninterrupted beauty privileges, extra reward savings, and free gifts for only {{ price }}.
+        </p>
+        <div class="elite-pro-final-box__action">
+          <a href="{{ join_url }}" class="elite-pro-btn elite-pro-btn--final">
+            {{ section.settings.final_button_label | default: 'Become a Member' }}
+          </a>
+        </div>
+        <p class="elite-pro-final-box__guarantee">Instant Activation • 100% Authentic Beauty Guaranteed</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<style>
+  :root {
+    --elite-maroon: #6b0f46;
+    --elite-maroon-dark: #4d0a32;
+    --elite-maroon-light: #871358;
+    --elite-gold: #c9a24b;
+    --elite-gold-light: #e5c777;
+    --elite-gold-dark: #a68132;
+    --elite-pink-soft: #fdf4f7;
+    --elite-pink-medium: #fae8ee;
+    --elite-pink-border: #f0d5df;
+    --elite-text-dark: #2c1a24;
+    --elite-text-muted: #6b5561;
+    --elite-white: #ffffff;
+    --elite-radius-lg: 22px;
+    --elite-radius-md: 16px;
+    --elite-radius-sm: 10px;
+    --elite-shadow-sm: 0 4px 14px rgba(107, 15, 70, 0.05);
+    --elite-shadow-md: 0 8px 24px rgba(107, 15, 70, 0.09);
+    --elite-shadow-lg: 0 16px 36px rgba(107, 15, 70, 0.16);
+  }
+
+  .elite-pro-section {
+    background: linear-gradient(180deg, var(--elite-pink-soft) 0%, #ffffff 40%, var(--elite-pink-soft) 100%);
+    color: var(--elite-text-dark);
+    font-family: var(--font-body-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    padding: 3rem 1.25rem 5rem;
+    line-height: 1.5;
+  }
+
+  .elite-pro-container {
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+
+  /* Member Badge */
+  .elite-pro-member-banner {
+    background: linear-gradient(135deg, var(--elite-maroon) 0%, var(--elite-maroon-dark) 100%);
+    color: var(--elite-white);
+    padding: 1.25rem 1.75rem;
+    border-radius: var(--elite-radius-md);
+    border: 2px solid var(--elite-gold);
+    box-shadow: var(--elite-shadow-md);
+  }
+
+  .elite-pro-member-banner__content {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .elite-pro-member-banner__crown {
+    font-size: 2.25rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  .elite-pro-member-banner__badge {
+    display: inline-block;
+    background: var(--elite-gold);
+    color: var(--elite-maroon-dark);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    margin-bottom: 0.35rem;
+  }
+
+  .elite-pro-member-banner__subtext {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--elite-pink-soft);
+  }
+
+  /* Hero */
+  .elite-pro-hero {
+    text-align: center;
+    padding: 2.5rem 1.5rem 2rem;
+    background: radial-gradient(circle at 50% 30%, var(--elite-pink-medium) 0%, transparent 70%);
+  }
+
+  .elite-pro-hero__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--elite-white);
+    color: var(--elite-maroon);
+    border: 1px solid var(--elite-pink-border);
+    padding: 0.45rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: var(--elite-shadow-sm);
+    margin-bottom: 1.25rem;
+  }
+
+  .elite-pro-hero__sparkle {
+    color: var(--elite-gold);
+    font-size: 0.95rem;
+  }
+
+  .elite-pro-hero__title {
+    font-family: var(--font-heading-family, inherit);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 800;
+    color: var(--elite-maroon);
+    line-height: 1.15;
+    margin: 0 0 0.85rem;
+    letter-spacing: -0.02em;
+  }
+
+  .elite-pro-hero__tagline {
+    font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+    color: var(--elite-gold-dark);
+    font-weight: 600;
+    margin: 0 auto 2rem;
+    max-width: 650px;
+  }
+
+  .elite-pro-hero__price-bar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.75rem;
+    background: var(--elite-white);
+    border: 2px solid var(--elite-gold);
+    border-radius: 999px;
+    padding: 0.65rem 0.85rem 0.65rem 1.75rem;
+    box-shadow: var(--elite-shadow-md);
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .elite-pro-hero__price-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .elite-pro-hero__price-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--elite-text-muted);
+    font-weight: 700;
+  }
+
+  .elite-pro-hero__price-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--elite-maroon);
+  }
+
+  /* Buttons */
+  .elite-pro-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--elite-maroon) 0%, var(--elite-maroon-dark) 100%);
+    color: var(--elite-white) !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 0.75rem 1.6rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: 1px solid var(--elite-gold);
+    box-shadow: 0 4px 12px rgba(107, 15, 70, 0.25);
+    cursor: pointer;
+  }
+
+  .elite-pro-btn:hover,
+  .elite-pro-btn:focus-visible {
+    background: linear-gradient(135deg, var(--elite-maroon-light) 0%, var(--elite-maroon) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(107, 15, 70, 0.35);
+  }
+
+  .elite-pro-btn--final {
+    background: linear-gradient(135deg, var(--elite-gold) 0%, var(--elite-gold-dark) 100%);
+    color: var(--elite-maroon-dark) !important;
+    border-color: #ffffff;
+    font-size: 1.1rem;
+    padding: 0.9rem 2.25rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .elite-pro-btn--final:hover,
+  .elite-pro-btn--final:focus-visible {
+    background: linear-gradient(135deg, var(--elite-gold-light) 0%, var(--elite-gold) 100%);
+    transform: translateY(-2px);
+  }
+
+  .elite-pro-btn--refer {
+    background: var(--elite-gold);
+    color: var(--elite-maroon-dark) !important;
+    border-color: transparent;
+  }
+
+  .elite-pro-btn--refer:hover,
+  .elite-pro-btn--refer:focus-visible {
+    background: var(--elite-gold-light);
+  }
+
+  /* Headings */
+  .elite-pro-section-head {
+    text-align: center;
+    margin-bottom: 2.25rem;
+  }
+
+  .elite-pro-heading {
+    font-family: var(--font-heading-family, inherit);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--elite-maroon);
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+  }
+
+  .elite-pro-subheading {
+    font-size: 1rem;
+    color: var(--elite-text-muted);
+    margin: 0 auto;
+    max-width: 580px;
+  }
+
+  /* Grid layouts */
+  .elite-pro-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .elite-pro-grid--3 {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  /* Benefit Cards */
+  .elite-pro-card {
+    background: var(--elite-white);
+    border: 1px solid var(--elite-pink-border);
+    border-radius: var(--elite-radius-md);
+    padding: 1.75rem 1.5rem;
+    box-shadow: var(--elite-shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .elite-pro-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--elite-shadow-md);
+    border-color: var(--elite-gold);
+  }
+
+  .elite-pro-card__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--elite-pink-medium) 0%, var(--elite-pink-soft) 100%);
+    color: var(--elite-maroon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.15rem;
+    border: 1px solid var(--elite-pink-border);
+  }
+
+  .elite-pro-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--elite-maroon);
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+  }
+
+  .elite-pro-card__desc {
+    font-size: 0.92rem;
+    color: var(--elite-text-muted);
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  /* Steps 1-2-3 */
+  .elite-pro-steps-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .elite-pro-step-card {
+    flex: 1 1 260px;
+    background: var(--elite-white);
+    border: 1px solid var(--elite-pink-border);
+    border-radius: var(--elite-radius-md);
+    padding: 1.75rem 1.5rem;
+    box-shadow: var(--elite-shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .elite-pro-step-card__number {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--elite-maroon) 0%, var(--elite-maroon-dark) 100%);
+    color: var(--elite-gold);
+    font-weight: 800;
+    font-size: 1.3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 3px 8px rgba(107, 15, 70, 0.25);
+  }
+
+  .elite-pro-step-card__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--elite-maroon);
+    margin: 0 0 0.5rem;
+  }
+
+  .elite-pro-step-card__desc {
+    font-size: 0.9rem;
+    color: var(--elite-text-muted);
+    margin: 0;
+  }
+
+  .elite-pro-step-arrow {
+    color: var(--elite-gold);
+    font-size: 1.5rem;
+    font-weight: 800;
+    display: none;
+  }
+
+  @media screen and (min-width: 900px) {
+    .elite-pro-step-arrow {
+      display: block;
+    }
+  }
+
+  /* Reward Points Cards */
+  .elite-pro-points-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .elite-pro-points-card {
+    background: var(--elite-white);
+    border: 2px solid var(--elite-pink-border);
+    border-radius: var(--elite-radius-lg);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    box-shadow: var(--elite-shadow-sm);
+    position: relative;
+    transition: all 0.25s ease;
+  }
+
+  .elite-pro-points-card:hover {
+    border-color: var(--elite-gold);
+    transform: translateY(-4px);
+    box-shadow: var(--elite-shadow-md);
+  }
+
+  .elite-pro-points-card__badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--elite-maroon);
+    color: var(--elite-gold-light);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.85rem;
+    border-radius: 999px;
+  }
+
+  .elite-pro-points-card__spend,
+  .elite-pro-points-card__reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .elite-pro-points-card__label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--elite-text-muted);
+    font-weight: 700;
+  }
+
+  .elite-pro-points-card__amount {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--elite-maroon);
+  }
+
+  .elite-pro-points-card__divider {
+    color: var(--elite-gold);
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin: 0.5rem 0;
+  }
+
+  .elite-pro-points-card__pts {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--elite-gold-dark);
+  }
+
+  .elite-pro-points-card__note {
+    margin: 1rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--elite-pink-border);
+    font-size: 0.82rem;
+    color: var(--elite-text-muted);
+  }
+
+  /* Refer Box */
+  .elite-pro-refer-box {
+    background: linear-gradient(135deg, var(--elite-maroon) 0%, var(--elite-maroon-dark) 100%);
+    color: var(--elite-white);
+    border-radius: var(--elite-radius-lg);
+    padding: 2.75rem 2rem;
+    box-shadow: var(--elite-shadow-lg);
+    border: 2px solid var(--elite-gold);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .elite-pro-refer-box::before {
+    content: "✦";
+    position: absolute;
+    top: -20px;
+    right: 20px;
+    font-size: 12rem;
+    color: rgba(201, 162, 75, 0.08);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .elite-pro-refer-box__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .elite-pro-refer-box__content {
+    flex: 1 1 500px;
+  }
+
+  .elite-pro-refer-box__tag {
+    display: inline-block;
+    background: rgba(201, 162, 75, 0.2);
+    color: var(--elite-gold-light);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(201, 162, 75, 0.4);
+  }
+
+  .elite-pro-refer-box__title {
+    font-family: var(--font-heading-family, inherit);
+    font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+    color: var(--elite-white);
+    margin: 0 0 0.75rem;
+    font-weight: 800;
+  }
+
+  .elite-pro-refer-box__desc {
+    color: var(--elite-pink-soft);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .elite-pro-refer-box__action {
+    flex-shrink: 0;
+  }
+
+  /* More Perks List */
+  .elite-pro-perks-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .elite-pro-perk-item {
+    background: var(--elite-white);
+    border: 1px solid var(--elite-pink-border);
+    border-radius: var(--elite-radius-md);
+    padding: 1.35rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: var(--elite-shadow-sm);
+  }
+
+  .elite-pro-perk-item__check {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--elite-pink-medium);
+    color: var(--elite-maroon);
+    font-weight: 900;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid var(--elite-gold);
+  }
+
+  .elite-pro-perk-item__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--elite-maroon);
+    margin: 0 0 0.25rem;
+  }
+
+  .elite-pro-perk-item__desc {
+    font-size: 0.88rem;
+    color: var(--elite-text-muted);
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  /* Final Box */
+  .elite-pro-final-box {
+    background: linear-gradient(135deg, var(--elite-maroon-dark) 0%, var(--elite-maroon) 50%, var(--elite-maroon-dark) 100%);
+    color: var(--elite-white);
+    border-radius: var(--elite-radius-lg);
+    padding: 3.5rem 2rem;
+    text-align: center;
+    box-shadow: var(--elite-shadow-lg);
+    border: 2px solid var(--elite-gold);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .elite-pro-final-box__badge {
+    display: inline-block;
+    background: var(--elite-gold);
+    color: var(--elite-maroon-dark);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+  }
+
+  .elite-pro-final-box__title {
+    font-family: var(--font-heading-family, inherit);
+    font-size: clamp(2rem, 3.8vw, 2.8rem);
+    color: var(--elite-white);
+    font-weight: 800;
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .elite-pro-final-box__desc {
+    font-size: 1.1rem;
+    color: var(--elite-pink-soft);
+    max-width: 620px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+  }
+
+  .elite-pro-final-box__action {
+    margin-bottom: 1.25rem;
+  }
+
+  .elite-pro-final-box__guarantee {
+    font-size: 0.82rem;
+    color: var(--elite-gold-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* Responsive Adjustments */
+  @media screen and (max-width: 768px) {
+    .elite-pro-section {
+      padding: 2rem 1rem 3.5rem;
+    }
+    .elite-pro-container {
+      gap: 2.5rem;
+    }
+    .elite-pro-hero__price-bar {
+      border-radius: var(--elite-radius-md);
+      flex-direction: column;
+      align-items: stretch;
+      padding: 1.25rem;
+      gap: 1rem;
+    }
+    .elite-pro-hero__price-info {
+      text-align: center;
+    }
+    .elite-pro-refer-box {
+      padding: 2rem 1.5rem;
+    }
+    .elite-pro-refer-box__inner {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+    .elite-pro-refer-box__action {
+      width: 100%;
+    }
+    .elite-pro-btn--refer {
+      width: 100%;
+    }
+    .elite-pro-final-box {
+      padding: 2.5rem 1.5rem;
+    }
+    .elite-pro-perks-list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Elite Pro Membership",
+  "tag": "section",
+  "class": "elite-pro-membership-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Hero Title",
+      "default": "MyLamstone Elite Pro Membership"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Hero Tagline",
+      "default": "Shop More. Save More. Feel Special."
+    },
+    {
+      "type": "text",
+      "id": "price",
+      "label": "Membership Price",
+      "default": "₹199"
+    },
+    {
+      "type": "text",
+      "id": "duration",
+      "label": "Membership Duration",
+      "default": "6 months"
+    },
+    {
+      "type": "product",
+      "id": "membership_product",
+      "label": "Membership Product",
+      "info": "Select the Elite Pro membership pass product"
+    },
+    {
+      "type": "url",
+      "id": "custom_button_link",
+      "label": "Fallback Link (if no product chosen)"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Hero Button Label",
+      "default": "Join Elite Pro"
+    },
+    {
+      "type": "header",
+      "content": "Refer & Reward"
+    },
+    {
+      "type": "text",
+      "id": "refer_button_label",
+      "label": "Refer Button Label",
+      "default": "Refer Now"
+    },
+    {
+      "type": "url",
+      "id": "refer_link",
+      "label": "Refer Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Final CTA Box"
+    },
+    {
+      "type": "text",
+      "id": "final_heading",
+      "label": "Final Box Heading",
+      "default": "Join MyLamstone Elite Pro Today!"
+    },
+    {
+      "type": "text",
+      "id": "final_button_label",
+      "label": "Final Button Label",
+      "default": "Become a Member"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "reward_tier",
+      "name": "Reward Points Tier",
+      "settings": [
+        {
+          "type": "text",
+          "id": "spend_amount",
+          "label": "Spend Amount",
+          "default": "₹500"
+        },
+        {
+          "type": "text",
+          "id": "points_earned",
+          "label": "Points Earned",
+          "default": "10 points"
+        },
+        {
+          "type": "text",
+          "id": "perk_note",
+          "label": "Optional Note / Value",
+          "default": "Redeemable on next order"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Elite Pro Membership",
+      "blocks": [
+        {
+          "type": "reward_tier",
+          "settings": {
+            "spend_amount": "₹500",
+            "points_earned": "10 points",
+            "perk_note": "Redeemable on next order"
+          }
+        },
+        {
+          "type": "reward_tier",
+          "settings": {
+            "spend_amount": "₹1,000",
+            "points_earned": "25 points",
+            "perk_note": "Extra 5 bonus reward points"
+          }
+        },
+        {
+          "type": "reward_tier",
+          "settings": {
+            "spend_amount": "₹2,000",
+            "points_earned": "60 points",
+            "perk_note": "Maximum VIP reward tier"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
