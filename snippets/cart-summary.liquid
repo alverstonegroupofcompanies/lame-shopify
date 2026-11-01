@@ -5,64 +5,173 @@
   @param {string} [section_id] - The section ID for cart discount component.
 {%- enddoc -%}
 
-{%- if template.name == 'cart' -%}
-  <h2 class="lame-cart-summary-heading">{{ 'lame_cart.order_summary' | t }}</h2>
-  <div class="lame-cart-summary-lines">
-    <div class="lame-cart-summary-line">
-      <span>{{ 'content.cart_subtotal' | t }}</span>
-      <span class="lame-cart-summary-line__value">{{ cart.items_subtotal_price | money }}</span>
-    </div>
-    <div class="lame-cart-summary-line">
-      <span>{{ 'content.discount' | t }}</span>
-      {%- if settings.show_add_discount_code -%}
-        <a href="#cart-discount-disclosure" class="lame-cart-summary-line__link">{{ 'lame_cart.apply_coupon' | t }}</a>
-      {%- else -%}
-        <span class="lame-cart-summary-line__value">—</span>
-      {%- endif -%}
-    </div>
-    <div class="lame-cart-summary-line">
-      <span>{{ 'lame_cart.shipping_label' | t }}</span>
-      <span class="lame-cart-summary-line__value">{{ 'lame_cart.shipping_at_checkout' | t }}</span>
-    </div>
-    <div class="lame-cart-summary-line">
-      <span>{{ 'lame_cart.delivery_eta_label' | t }}</span>
-      <span class="lame-cart-summary-line__value">{% render 'lame-delivery-eta', variant: 'inline' %}</span>
-    </div>
-  </div>
-{%- endif -%}
+{%- liquid
+  assign is_elite_pro = false
+  if customer and customer.tags contains 'elite-pro'
+    assign is_elite_pro = true
+  endif
 
-<div class="cart-totals">
-  {% # We need to keep this node in place to allow morphing to work properly # %}
-  <div class="cart-totals__original-container cart-primary-typography">
-    {%- if cart.cart_level_discount_applications.size > 0 -%}
-      <span class="cart-totals__item cart-totals__original">
-        <span class="cart-totals__original-label">{{ 'content.cart_subtotal' | t }}</span>
-        <span
-          class="cart-totals__original-value cart-secondary-typography"
-          data-testid="cart-subtotal-value"
-        >
-          {{- cart.items_subtotal_price | money -}}
+  assign total_mrp = 0
+  assign has_membership_product = false
+  assign has_free_gift = false
+
+  for item in cart.items
+    if item.product.handle == 'elite-pro-6-months'
+      assign has_membership_product = true
+    endif
+
+    assign item_title_downcase = item.product.title | downcase
+    assign item_handle_downcase = item.product.handle | downcase
+    assign item_tags_downcase = item.product.tags | join: ',' | downcase
+    if item.final_price == 0 or item.original_price == 0
+      assign has_free_gift = true
+    elsif item_title_downcase contains 'free gift' or item_handle_downcase contains 'free-gift'
+      assign has_free_gift = true
+    elsif item_tags_downcase contains 'free gift' or item_tags_downcase contains 'free-gift' or item_tags_downcase contains 'gift'
+      assign has_free_gift = true
+    else
+      for property in item.properties
+        assign prop_key = property.first | downcase
+        assign prop_val = property.last | downcase
+        if prop_key contains 'gift' or prop_val contains 'gift'
+          assign has_free_gift = true
+          break
+        endif
+      endfor
+    endif
+
+    assign item_unit_mrp = item.original_price
+    if item.variant.compare_at_price and item.variant.compare_at_price > item.original_price
+      assign item_unit_mrp = item.variant.compare_at_price
+    endif
+    assign item_line_mrp = item_unit_mrp | times: item.quantity
+    assign total_mrp = total_mrp | plus: item_line_mrp
+  endfor
+
+  assign saving_on_mrp = total_mrp | minus: cart.items_subtotal_price
+  if saving_on_mrp < 0
+    assign saving_on_mrp = 0
+  endif
+
+  assign total_order_saving = total_mrp | minus: cart.total_price
+  if total_order_saving < 0
+    assign total_order_saving = 0
+  endif
+
+  if settings.currency_code_enabled_cart_total
+    assign total_price = cart.total_price | money_with_currency
+  else
+    assign total_price = cart.total_price | money
+  endif
+-%}
+
+<div class="lame-price-summary">
+  {%- if is_elite_pro -%}
+    <div class="elite-pro-benefits-box">
+      <div class="elite-pro-benefits-box__header">
+        <svg class="elite-pro-benefits-box__icon" width="18" height="18" viewBox="0 0 24 24" fill="#c9a24b" stroke="#c9a24b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+        </svg>
+        <span class="elite-pro-benefits-box__title">Elite Pro Benefits Received</span>
+      </div>
+      <ul class="elite-pro-benefits-box__list">
+        <li class="elite-pro-benefits-box__item">
+          <svg class="elite-pro-benefits-box__check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>You're saving {{ total_order_saving | money }} on this order</span>
+        </li>
+        {%- if has_free_gift -%}
+          <li class="elite-pro-benefits-box__item">
+            <svg class="elite-pro-benefits-box__check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>You've got a free gift added to your cart</span>
+          </li>
+        {%- endif -%}
+      </ul>
+    </div>
+  {%- endif -%}
+
+  {%- if has_membership_product -%}
+    <div class="cart-membership-notice">
+      <svg class="cart-membership-notice__icon" width="16" height="16" viewBox="0 0 24 24" fill="#c9a24b" stroke="#c9a24b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+      </svg>
+      <span>Membership added. You become an Elite Pro member after payment.</span>
+    </div>
+  {%- endif -%}
+
+  <div class="lame-price-summary__card">
+    <h2 class="lame-price-summary__title lame-cart-summary-heading">Order Summary</h2>
+    <div class="lame-price-summary__lines lame-cart-summary-lines">
+      <div class="lame-price-summary__line lame-cart-summary-line">
+        <span class="lame-price-summary__line-label">Total MRP</span>
+        <span class="lame-price-summary__line-value lame-cart-summary-line__value">{{ total_mrp | money }}</span>
+      </div>
+
+      <div class="lame-price-summary__line lame-cart-summary-line lame-price-summary__line--savings">
+        <span class="lame-price-summary__line-label">Saving on MRP</span>
+        <span class="lame-price-summary__line-value lame-cart-summary-line__value lame-price-summary__savings-value">
+          {%- if saving_on_mrp > 0 -%}
+            - {{ saving_on_mrp | money }}
+          {%- else -%}
+            {{ 0 | money }}
+          {%- endif -%}
         </span>
-      </span>
-      <ul
-        class="cart-discounts"
-        role="list"
-        aria-label="{{ 'content.discounts' | t }}"
-      >
+      </div>
+
+      <div class="lame-price-summary__line lame-cart-summary-line">
+        <span class="lame-price-summary__line-label">Subtotal</span>
+        <span class="lame-price-summary__line-value lame-cart-summary-line__value">{{ cart.items_subtotal_price | money }}</span>
+      </div>
+
+      {%- if cart.cart_level_discount_applications.size > 0 -%}
         {%- for discount in cart.cart_level_discount_applications -%}
-          <li class="cart-discounts__item">
-            <span class="cart-discounts__label">
+          <div class="lame-price-summary__line lame-cart-summary-line lame-price-summary__line--savings">
+            <span class="lame-price-summary__line-label cart-discounts__label">
               {{- 'icon-discount.svg' | inline_asset_content -}}
               {{ discount.title | escape }}
             </span>
-            <span class="cart-discounts__value cart-secondary-typography"
-              >-{{ discount.total_allocated_amount | money -}}
+            <span class="lame-price-summary__line-value lame-cart-summary-line__value lame-price-summary__savings-value">
+              - {{ discount.total_allocated_amount | money }}
             </span>
-          </li>
+          </div>
         {%- endfor -%}
-      </ul>
-    {%- endif -%}
+      {%- endif -%}
+
+      <div class="lame-price-summary__line lame-cart-summary-line">
+        <span class="lame-price-summary__line-label">Shipping</span>
+        <span class="lame-price-summary__line-value lame-cart-summary-line__value">
+          {%- if is_elite_pro -%}
+            <span class="lame-price-summary__shipping-free">FREE</span>
+          {%- else -%}
+            Calculated at checkout
+          {%- endif -%}
+        </span>
+      </div>
+
+      <div class="cart-totals__item cart-totals__total lame-price-summary__line lame-cart-summary-line lame-price-summary__line--total" role="status">
+        <span class="cart-totals__total-label lame-price-summary__line-label lame-price-summary__total-label cart-primary-typography">Order Total</span>
+        <span class="lame-price-summary__total-value-wrap">
+          <text-component
+            ref="cartTotal"
+            value="{{ total_price | strip_html }}"
+            class="cart-totals__total-value lame-price-summary__line-value lame-price-summary__total-value cart-secondary-typography"
+            data-testid="cart-total-value"
+            data-cart-subtotal
+          >
+            {{ total_price }}
+          </text-component>
+        </span>
+      </div>
+    </div>
   </div>
+</div>
+
+<div class="cart-totals">
+  {% # We need to keep this node in place to allow morphing to work properly # %}
+  <div class="cart-totals__original-container cart-primary-typography"></div>
 
   {% if settings.show_cart_note or settings.show_add_discount_code %}
     <div class="cart-actions">
@@ -245,37 +354,9 @@
     </div>
   {% endif %}
 
-  {%- liquid
-    if settings.currency_code_enabled_cart_total
-      assign total_price = cart.total_price | money_with_currency
-    else
-      assign total_price = cart.total_price | money
-    endif
-  -%}
+
 
   <div class="cart-totals__container{% if settings.show_installments %} cart-totals__container--has-installments{% endif %}">
-    <span
-      class="cart-totals__item cart-totals__total"
-      role="status"
-    >
-      <span class="cart-totals__total-label cart-primary-typography">
-        {%- if template.name == 'cart' -%}
-          {{ 'lame_cart.estimated_total' | t }}
-        {%- else -%}
-          {{ 'content.cart_estimated_total' | t }}
-        {%- endif -%}
-      </span>
-      <text-component
-        ref="cartTotal"
-        value="{{ total_price | strip_html }}"
-        class="cart-totals__total-value cart-secondary-typography"
-        {% comment %} Used by payment_terms web component {% endcomment %}
-        data-testid="cart-total-value"
-        data-cart-subtotal
-      >
-        {{ total_price }}
-      </text-component>
-    </span>
     {% if settings.show_installments %}
       <span class="cart-totals__item cart-totals__installments">
         {% form 'cart', cart %}
@@ -370,6 +451,164 @@
 </div>
 
 {% stylesheet %}
+  .lame-price-summary {
+    width: 100%;
+    margin-block-end: var(--gap-md, 1rem);
+  }
+
+  .lame-price-summary__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #6b0f46;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.01em;
+    width: 100%;
+    text-align: left;
+  }
+
+  .lame-price-summary__card {
+    background: var(--color-card-background, #ffffff);
+    border: 1px solid rgba(107, 15, 70, 0.16);
+    border-radius: 12px;
+    padding: 1rem 1.125rem;
+    box-shadow: 0 2px 8px rgba(107, 15, 70, 0.04);
+    width: 100%;
+  }
+
+  .lame-price-summary__lines {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .lame-price-summary__line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+
+  .lame-price-summary__line-label {
+    color: #4b5563;
+    font-weight: 400;
+  }
+
+  .lame-price-summary__line-value {
+    color: #111827;
+    font-weight: 600;
+  }
+
+  .lame-price-summary__savings-value {
+    color: #15803d !important;
+    font-weight: 600 !important;
+  }
+
+  .lame-price-summary__shipping-free {
+    color: #15803d !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+  }
+
+  .lame-price-summary__line--total {
+    margin-top: 0.375rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed rgba(107, 15, 70, 0.25);
+  }
+
+  .lame-price-summary__total-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #6b0f46 !important;
+  }
+
+  .lame-price-summary__total-value-wrap .cart-totals__total-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #6b0f46 !important;
+  }
+
+  /* Elite Pro Benefits Received Green Box */
+  .elite-pro-benefits-box {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.875rem;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.08);
+    width: 100%;
+  }
+
+  .elite-pro-benefits-box__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.825rem;
+    font-weight: 700;
+    color: #15803d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  .elite-pro-benefits-box__icon {
+    color: #c9a24b;
+    flex-shrink: 0;
+  }
+
+  .elite-pro-benefits-box__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .elite-pro-benefits-box__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.825rem;
+    line-height: 1.4;
+    color: #166534;
+    font-weight: 500;
+  }
+
+  .elite-pro-benefits-box__check {
+    color: #16a34a;
+    flex-shrink: 0;
+  }
+
+  /* Membership Notice */
+  .cart-membership-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fdf4f7;
+    border: 1px solid rgba(107, 15, 70, 0.2);
+    border-left: 3.5px solid #6b0f46;
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    margin-bottom: 0.875rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #6b0f46;
+    font-weight: 500;
+    width: 100%;
+  }
+
+  .cart-membership-notice__icon {
+    color: #c9a24b;
+    flex-shrink: 0;
+  }
+
+  .cart-totals {
+    border-block-start: none !important;
+    padding-block-start: 0 !important;
+  }
   .cart-actions {
     display: flex;
     flex-direction: column;
