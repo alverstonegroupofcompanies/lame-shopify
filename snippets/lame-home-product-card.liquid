@@ -96,7 +96,19 @@
         {%- endif -%}
       </div>
 
-      {% if show_add_to_cart and selected_variant %}
+      {%- liquid
+        assign is_elite_pro = false
+        assign p_handle_down = product.handle | downcase
+        assign p_title_down = product.title | downcase
+        if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+          assign is_elite_pro = true
+        endif
+      -%}
+      {% if is_elite_pro %}
+        <a href="{{ product.url }}" class="lame-home-product-card__atc" style="text-decoration: none; justify-content: center;">
+          <span>Choose birthday month</span>
+        </a>
+      {% elsif show_add_to_cart and selected_variant %}
         <form
           method="post"
           action="{{ routes.cart_add_url }}"
@@ -189,7 +201,11 @@
       {% render 'price', product_resource: product, show_sale_price_first: true %}
     </p>
 
-    {% if show_add_to_cart and selected_variant %}
+    {% if is_elite_pro %}
+      <a href="{{ product.url }}" class="lame-home-product-card__atc" style="text-decoration: none; justify-content: center;">
+        <span>Choose birthday month</span>
+      </a>
+    {% elsif show_add_to_cart and selected_variant %}
       <form
         method="post"
         action="{{ routes.cart_add_url }}"

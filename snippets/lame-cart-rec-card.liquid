@@ -53,7 +53,23 @@
     <p class="lame-cart-rec-card__price">
       {% render 'price', product_resource: product, show_sale_price_first: true %}
     </p>
-    {% if selected_variant %}
+    {%- liquid
+      assign is_elite_pro = false
+      assign p_handle_down = product.handle | downcase
+      assign p_title_down = product.title | downcase
+      if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+        assign is_elite_pro = true
+      endif
+    -%}
+    {% if is_elite_pro %}
+      <a
+        href="{{ product.url }}"
+        class="lame-cart-rec-card__atc"
+        style="text-decoration: none; justify-content: center; display: flex; align-items: center;"
+      >
+        Choose birthday month
+      </a>
+    {% elsif selected_variant %}
       <form method="post" action="{{ routes.cart_add_url }}" class="lame-cart-rec-card__form" data-lame-home-atc>
         <input type="hidden" name="id" value="{{ selected_variant.id }}">
         {%- capture lame_bogo_qty -%}{% render 'lame-bogo-add-qty', product: product %}{%- endcapture -%}

@@ -109,7 +109,23 @@
 
     <div class="lame-cat-card__actions">
       <div class="lame-cat-card__action-row">
-        {% if variant.available %}
+        {%- liquid
+          assign is_elite_pro = false
+          assign p_handle_down = product.handle | downcase
+          assign p_title_down = product.title | downcase
+          if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+            assign is_elite_pro = true
+          endif
+        -%}
+        {%- if is_elite_pro -%}
+          <a
+            href="{{ product.url }}"
+            class="lame-cat-card__btn"
+            style="text-decoration: none; justify-content: center;"
+          >
+            <span class="lame-cat-card__btn-label">Choose birthday month</span>
+          </a>
+        {%- elsif variant.available -%}
           {%- assign cat_form_id = 'CategoryCard-Form-' | append: product.id -%}
           <product-form-component
             data-section-id="{{ section.id }}"

@@ -6,10 +6,11 @@
   assign membership_product = section.settings.membership_product
 
   assign join_url = '/products/elite-pro-6-months'
-  if membership_product != blank
+  if membership_product != blank and membership_product.url != blank
     assign join_url = membership_product.url
-  elsif section.settings.custom_button_link != blank
-    assign join_url = section.settings.custom_button_link
+  endif
+  if join_url contains 'cart' or join_url contains 'checkout'
+    assign join_url = '/products/elite-pro-6-months'
   endif
 
   assign is_elite_member = false

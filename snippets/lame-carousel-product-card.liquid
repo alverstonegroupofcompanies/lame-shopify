@@ -163,7 +163,25 @@
       {%- endif -%}
     </p>
 
-    {%- if is_custom -%}
+    {%- liquid
+      assign is_elite_pro = false
+      assign p_handle_down = product.handle | downcase
+      assign p_title_down = product.title | downcase
+      if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+        assign is_elite_pro = true
+      endif
+    -%}
+    {%- if is_elite_pro -%}
+      <div class="lame-carousel-card__atc-form">
+        <a
+          href="{{ product.url }}"
+          class="lame-carousel-card__atc"
+          style="text-decoration: none; justify-content: center; display: flex; align-items: center; width: 100%;"
+        >
+          Choose birthday month
+        </a>
+      </div>
+    {%- elsif is_custom -%}
       <div class="lame-carousel-card__atc-form">
         <a
           href="{{ card_url }}"

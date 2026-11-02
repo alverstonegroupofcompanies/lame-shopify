@@ -14,10 +14,15 @@
   assign total_mrp = 0
   assign has_membership_product = false
   assign has_free_gift = false
+  assign elite_pro_missing_birthday = false
 
   for item in cart.items
     if item.product.handle == 'elite-pro-6-months'
       assign has_membership_product = true
+      assign bday_check = item.properties['Birthday month'] | strip
+      if bday_check == blank
+        assign elite_pro_missing_birthday = true
+      endif
     endif
 
     assign item_title_downcase = item.product.title | downcase
@@ -408,7 +413,7 @@
       id="checkout"
       class="cart__checkout-button button"
       name="checkout"
-      {% if cart == empty %}
+      {% if cart == empty or elite_pro_missing_birthday %}
         disabled
       {% endif %}
       form="cart-form"
@@ -431,13 +436,16 @@
         type="submit"
         class="cart__secondary-button"
         name="checkout"
+        {% if elite_pro_missing_birthday %}
+          disabled
+        {% endif %}
         form="cart-form"
       >
         {{ 'lame_cart.buy_now' | t }}
       </button>
     {%- endif -%}
 
-    {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons %}
+    {% if additional_checkout_buttons and settings.show_accelerated_checkout_buttons and elite_pro_missing_birthday == false %}
       <div
         class="
           additional-checkout-buttons

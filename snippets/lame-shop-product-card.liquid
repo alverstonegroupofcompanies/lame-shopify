@@ -132,7 +132,19 @@
     </div>
 
     <div class="lame-catlog-card__actions">
-      {% if can_quick_add %}
+      {%- liquid
+        assign is_elite_pro = false
+        assign p_handle_down = product.handle | downcase
+        assign p_title_down = product.title | downcase
+        if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+          assign is_elite_pro = true
+        endif
+      -%}
+      {% if is_elite_pro %}
+        <a href="{{ product.url }}" class="lame-catlog-card__atc" style="text-decoration: none; justify-content: center; width: 100%;">
+          <span>Choose birthday month</span>
+        </a>
+      {% elsif can_quick_add %}
         <product-form-component
           class="lame-catlog-card__form-wrap"
           data-section-id="{{ section.id }}"

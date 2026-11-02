@@ -26,8 +26,30 @@
   if product.variants_count == 1 or product.options.size == 1 and product.selected_variant
     assign quick_add_button = 'add'
   endif
+
+  assign is_elite_pro = false
+  assign p_handle_down = product.handle | downcase
+  assign p_title_down = product.title | downcase
+  if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+    assign is_elite_pro = true
+  endif
 %}
 
+{%- if is_elite_pro -%}
+  <div class="quick-add color-{{ color_scheme }}">
+    <a
+      href="{{ product.url }}"
+      class="button quick-add__button add-to-cart-button"
+      style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; width: auto; white-space: nowrap;"
+    >
+      <span class="add-to-cart-text">
+        <span class="add-to-cart-text__content">
+          <span>Choose birthday month</span>
+        </span>
+      </span>
+    </a>
+  </div>
+{%- else -%}
 <quick-add-component
   class="quick-add color-{{ color_scheme }} "
   ref="quickAdd"
@@ -114,5 +136,6 @@
     {%- endform -%}
   </product-form-component>
 </quick-add-component>
+{%- endif -%}
 
 {% render 'quick-add-styles' %}
