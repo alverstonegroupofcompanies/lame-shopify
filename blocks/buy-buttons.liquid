@@ -391,12 +391,14 @@
             </div>
           {%- endif -%}
 
-          {% content_for 'block',
-            type: 'accelerated-checkout',
-            id: 'accelerated-checkout',
-            can_add_to_cart: can_add_to_cart,
-            form_obj: form
-          %}
+          {%- unless is_elite_pro -%}
+            {% content_for 'block',
+              type: 'accelerated-checkout',
+              id: 'accelerated-checkout',
+              can_add_to_cart: can_add_to_cart,
+              form_obj: form
+            %}
+          {%- endunless -%}
         </div>
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           </span>
