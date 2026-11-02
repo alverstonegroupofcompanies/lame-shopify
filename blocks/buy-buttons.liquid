@@ -78,6 +78,139 @@
           {%- render 'gift-card-recipient-form', product: product, form: form, section: section, block: block -%}
           <span class="buy-buttons-block__bar">
         {%- endif -%}
+
+        {%- liquid
+          assign is_elite_pro = false
+          assign p_handle_down = product.handle | downcase
+          assign p_title_down = product.title | downcase
+          if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+            assign is_elite_pro = true
+          endif
+        -%}
+
+        {%- if is_elite_pro -%}
+          <div class="elite-pro-birthday-field">
+            <label
+              for="EliteProBirthdayMonth-{{ section.id }}-{{ product.id }}"
+              class="elite-pro-birthday-field__label"
+            >
+              Birthday month <span class="elite-pro-birthday-field__required" aria-hidden="true">*</span>
+            </label>
+            <div class="elite-pro-birthday-field__select-wrapper">
+              <select
+                id="EliteProBirthdayMonth-{{ section.id }}-{{ product.id }}"
+                name="properties[Birthday month]"
+                required
+                class="elite-pro-birthday-field__select"
+              >
+                <option value="">Select your birthday month</option>
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+              </select>
+              <span class="elite-pro-birthday-field__arrow" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </span>
+            </div>
+            <p class="elite-pro-birthday-field__note">
+              We use this only to send your birthday gift.
+            </p>
+          </div>
+
+          <style>
+            .elite-pro-birthday-field {
+              width: 100%;
+              margin-block-end: clamp(1rem, 1.8vw, 1.25rem);
+            }
+
+            .elite-pro-birthday-field__label {
+              display: block;
+              font-size: clamp(0.8125rem, 1.2vw, 0.875rem);
+              font-weight: 600;
+              color: var(--color-foreground, #111827);
+              margin-block-end: 0.4rem;
+              letter-spacing: 0.01em;
+            }
+
+            .elite-pro-birthday-field__required {
+              color: #e11d48;
+              margin-left: 0.2rem;
+            }
+
+            .elite-pro-birthday-field__select-wrapper {
+              position: relative;
+              width: 100%;
+            }
+
+            .elite-pro-birthday-field__select {
+              width: 100%;
+              height: 48px;
+              padding: 0 2.5rem 0 1rem;
+              font-size: clamp(0.875rem, 1.2vw, 0.9375rem);
+              font-family: inherit;
+              color: var(--color-foreground, #111827);
+              background-color: var(--color-background, #ffffff);
+              border: 1px solid rgb(var(--color-foreground-rgb, 17 24 39) / 0.2);
+              border-radius: var(--style-border-radius-inputs, 8px);
+              appearance: none;
+              -webkit-appearance: none;
+              cursor: pointer;
+              line-height: normal;
+              transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .elite-pro-birthday-field__select:hover {
+              border-color: rgb(var(--color-foreground-rgb, 17 24 39) / 0.4);
+            }
+
+            .elite-pro-birthday-field__select:focus,
+            .elite-pro-birthday-field__select:focus-visible {
+              outline: none;
+              border-color: #6b0f46;
+              box-shadow: 0 0 0 3px rgba(107, 15, 70, 0.15);
+            }
+
+            .elite-pro-birthday-field__select:invalid,
+            .elite-pro-birthday-field__select option[value=""] {
+              color: rgb(var(--color-foreground-rgb, 17 24 39) / 0.6);
+            }
+
+            .elite-pro-birthday-field__select option {
+              color: var(--color-foreground, #111827);
+              background-color: var(--color-background, #ffffff);
+            }
+
+            .elite-pro-birthday-field__arrow {
+              position: absolute;
+              right: 1rem;
+              top: 50%;
+              transform: translateY(-50%);
+              pointer-events: none;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: rgb(var(--color-foreground-rgb, 17 24 39) / 0.6);
+            }
+
+            .elite-pro-birthday-field__note {
+              margin: 0.45rem 0 0;
+              font-size: clamp(0.75rem, 1.1vw, 0.8125rem);
+              color: rgb(var(--color-foreground-rgb, 17 24 39) / 0.65);
+              line-height: 1.4;
+            }
+          </style>
+        {%- endif -%}
         <div
           class="product-form-buttons spacing-style{% if block_settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block_settings %}"
