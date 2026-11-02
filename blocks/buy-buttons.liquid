@@ -41,6 +41,27 @@
   if lame_our_products_active_capture contains 'true'
     assign lame_our_products_active = true
   endif
+
+  assign is_elite_pro = false
+  if product != blank
+    assign p_handle_down = product.handle | downcase
+    assign p_title_down = product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+      assign is_elite_pro = true
+    endif
+  endif
+
+  assign elite_in_cart = false
+  if is_elite_pro
+    for item in cart.items
+      assign item_h = item.product.handle | downcase
+      assign item_t = item.product.title | downcase
+      if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
+        assign elite_in_cart = true
+        break
+      endif
+    endfor
+  endif
 %}
 
 <span
@@ -57,7 +78,7 @@
       data-product-id="{{ product.id }}"
       data-product-url="{{ product.url }}"
       on:submit="/handleSubmit"
-      data-quantity-default="{% if lame_bogo_qty > 1 %}{{ lame_bogo_qty }}{% elsif product.selected_or_first_available_variant.quantity_rule.min %}{{ product.selected_or_first_available_variant.quantity_rule.min }}{% else %}1{% endif %}"
+      data-quantity-default="{% if is_elite_pro %}1{% elsif lame_bogo_qty > 1 %}{{ lame_bogo_qty }}{% elsif product.selected_or_first_available_variant.quantity_rule.min %}{{ product.selected_or_first_available_variant.quantity_rule.min }}{% else %}1{% endif %}"
       data-quantity-error-max="{{ 'products.product.quantity_error_max' | t }}"
     >
       <div
@@ -79,14 +100,7 @@
           <span class="buy-buttons-block__bar">
         {%- endif -%}
 
-        {%- liquid
-          assign is_elite_pro = false
-          assign p_handle_down = product.handle | downcase
-          assign p_title_down = product.title | downcase
-          if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
-            assign is_elite_pro = true
-          endif
-        -%}
+
 
         {%- if is_elite_pro -%}
           <div class="elite-pro-birthday-field">
@@ -211,6 +225,15 @@
             }
           </style>
         {%- endif -%}
+        {%- if is_elite_pro -%}
+          <div
+            class="elite-pro-already-in-cart"
+            style="{% unless elite_in_cart %}display: none;{% endunless %} margin-block-end: 1rem; padding: 12px 16px; background: rgba(107, 15, 70, 0.08); border: 1px solid rgba(107, 15, 70, 0.25); border-radius: 8px; color: #6b0f46; font-size: 14px; font-weight: 600; text-align: center; line-height: 1.4;"
+            role="status"
+          >
+            Elite Pro is already in your cart
+          </div>
+        {%- endif -%}
         <div
           class="product-form-buttons spacing-style{% if block_settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block_settings %}"
@@ -250,7 +273,11 @@
             </div>
           {%- endif -%}
 
-          {% content_for 'block', type: 'quantity', id: 'quantity' %}
+          {%- if is_elite_pro -%}
+            <input type="hidden" name="quantity" value="1">
+          {%- else -%}
+            {% content_for 'block', type: 'quantity', id: 'quantity' %}
+          {%- endif -%}
 
           {%- if has_quantity_rules -%}
             <div
@@ -391,17 +418,165 @@
             </div>
           {%- endif -%}
 
-          {%- unless is_elite_pro -%}
-            {% content_for 'block',
-              type: 'accelerated-checkout',
-              id: 'accelerated-checkout',
-              can_add_to_cart: can_add_to_cart,
-              form_obj: form
-            %}
-          {%- endunless -%}
+          {%- if is_elite_pro -%}
+            <div class="elite-pro-buynow-guard" style="position:relative">
+              <button
+                type="button"
+                class="elite-pro-buynow-guard__overlay"
+                aria-label="Select your birthday month first"
+                style="position:absolute; inset:0; z-index:5; background:transparent; border:0; cursor:pointer; width:100%; height:100%;"
+              ></button>
+          {%- endif -%}
+
+          {% content_for 'block',
+            type: 'accelerated-checkout',
+            id: 'accelerated-checkout',
+            can_add_to_cart: can_add_to_cart,
+            form_obj: form
+          %}
+
+          {%- if is_elite_pro -%}
+            </div>
+            <p
+              class="elite-pro-buynow-msg"
+              style="margin: 6px 0 0; font-size: 12px; color: #dc2626; font-weight: 500; display: none;"
+            >
+              Please select your birthday month first
+            </p>
+          {%- endif -%}
         </div>
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           </span>
+        {%- endif -%}
+
+        {%- if is_elite_pro -%}
+          <script>
+            (function() {
+              function initEliteProGuard() {
+                var form = document.getElementById({{ product_form_id | json }});
+                if (!form) return;
+
+                var select = form.querySelector('select[name="properties[Birthday month]"]');
+                var overlay = form.querySelector('.elite-pro-buynow-guard__overlay');
+                var msg = form.querySelector('.elite-pro-buynow-msg');
+                var alreadyInCartBanner = form.querySelector('.elite-pro-already-in-cart');
+                var atcContainers = form.querySelectorAll('add-to-cart-component');
+                var atcButtons = form.querySelectorAll('button[name="add"], .add-to-cart-button');
+
+                var inCart = {{ elite_in_cart | json }};
+
+                function syncUI(cartHasElite) {
+                  if (typeof cartHasElite === 'boolean') {
+                    inCart = cartHasElite;
+                  }
+
+                  if (alreadyInCartBanner) {
+                    alreadyInCartBanner.style.display = inCart ? 'block' : 'none';
+                  }
+
+                  atcButtons.forEach(function(btn) {
+                    btn.disabled = inCart;
+                    if (inCart) {
+                      btn.setAttribute('aria-disabled', 'true');
+                    } else {
+                      btn.removeAttribute('aria-disabled');
+                    }
+                  });
+                  atcContainers.forEach(function(c) {
+                    if (inCart && typeof c.disable === 'function') c.disable();
+                    else if (!inCart && typeof c.enable === 'function') c.enable();
+                  });
+
+                  if (!overlay) return;
+
+                  if (inCart) {
+                    overlay.style.display = 'block';
+                    overlay.style.cursor = 'not-allowed';
+                    overlay.setAttribute('aria-label', 'Elite Pro is already in your cart');
+                    if (msg) msg.style.display = 'none';
+                  } else {
+                    overlay.style.cursor = 'pointer';
+                    overlay.setAttribute('aria-label', 'Select your birthday month first');
+                    var needsMonth = !select || select.value === '';
+                    overlay.style.display = needsMonth ? 'block' : 'none';
+                    if (msg) {
+                      msg.style.display = needsMonth ? 'block' : 'none';
+                    }
+                  }
+                }
+
+                if (select) {
+                  select.addEventListener('change', function() {
+                    syncUI();
+                  });
+                }
+
+                if (overlay) {
+                  overlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (inCart) return;
+
+                    if (select) {
+                      select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      select.focus();
+                      if (typeof select.reportValidity === 'function') {
+                        select.reportValidity();
+                      }
+                      if (msg) msg.style.display = 'block';
+                    }
+                  });
+                }
+
+                form.addEventListener('submit', function(e) {
+                  if (inCart) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                  }
+                }, true);
+
+                function checkCart() {
+                  fetch('/cart.js', { headers: { Accept: 'application/json' } })
+                    .then(function(res) { return res.json(); })
+                    .then(function(cart) {
+                      var found = false;
+                      if (cart && Array.isArray(cart.items)) {
+                        found = cart.items.some(function(item) {
+                          var h = (item.handle || '').toLowerCase();
+                          var t = (item.product_title || item.title || '').toLowerCase();
+                          return h === 'elite-pro-6-months' || t.indexOf('elite pro') !== -1;
+                        });
+                      }
+                      syncUI(found);
+                    })
+                    .catch(function(err) {
+                      console.error('Failed to check cart status for Elite Pro', err);
+                    });
+                }
+
+                syncUI(inCart);
+                checkCart();
+
+                document.addEventListener('cart:update', checkCart);
+                document.addEventListener('cart:add', checkCart);
+                if (window.ThemeEvents && window.ThemeEvents.cartUpdate) {
+                  document.addEventListener(window.ThemeEvents.cartUpdate, checkCart);
+                }
+
+                form.addEventListener('submit', function() {
+                  setTimeout(checkCart, 600);
+                  setTimeout(checkCart, 1500);
+                });
+              }
+
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initEliteProGuard);
+              } else {
+                initEliteProGuard();
+              }
+            })();
+          </script>
         {%- endif -%}
       {%- endform -%}
     </product-form-component>

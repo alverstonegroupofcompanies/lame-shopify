@@ -348,6 +348,17 @@
                           data-cart-quantity="1"
                         >
                       </div>
+                      {%- if item.quantity > 1 -%}
+                        <script>
+                          fetch('/cart/change.js', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                            body: JSON.stringify({ id: {{ item.key | json }}, quantity: 1 })
+                          }).then(function() {
+                            window.location.reload();
+                          });
+                        </script>
+                      {%- endif -%}
                     {%- else -%}
                       {% render 'quantity-selector',
                         product: item.product,
