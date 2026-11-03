@@ -8,8 +8,16 @@
 
 {%- liquid
   assign variant = product.selected_or_first_available_variant
+  assign is_elite_pro = false
+  if product != blank
+    assign p_handle_down = product.handle | downcase
+    assign p_title_down = product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+      assign is_elite_pro = true
+    endif
+  endif
   assign can_quick_add = false
-  if product.has_only_default_variant and variant.available
+  if product.has_only_default_variant and variant.available and is_elite_pro == false
     assign can_quick_add = true
   endif
   assign show_wishlist = show_wishlist | default: true

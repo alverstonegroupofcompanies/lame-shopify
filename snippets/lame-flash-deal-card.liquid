@@ -150,7 +150,22 @@
     </div>
 
     {%- if selected_variant -%}
+      {%- liquid
+        assign is_elite_pro = false
+        if product != blank
+          assign p_handle_down = product.handle | downcase
+          assign p_title_down = product.title | downcase
+          if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+            assign is_elite_pro = true
+          endif
+        endif
+      -%}
       <div class="lame-flash-card__actions">
+        {%- if is_elite_pro -%}
+          <a href="{{ product.url }}" class="lame-flash-card__atc" style="text-decoration: none;">
+            <span class="lame-flash-card__atc-label">{{ 'lame_category_shop.view_product' | t | default: 'View product' }}</span>
+          </a>
+        {%- else -%}
         <form method="post" action="{{ routes.cart_add_url }}" class="lame-flash-card__form" data-lame-home-atc>
           <input type="hidden" name="id" value="{{ selected_variant.id }}">
           {%- capture lame_bogo_qty -%}{% render 'lame-bogo-add-qty', product: product %}{%- endcapture -%}
@@ -168,6 +183,7 @@
             {%- endif -%}
           </button>
         </form>
+        {%- endif -%}
         {%- if render_wishlist -%}
           {% render 'lame-our-products-wishlist-btn', product: product %}
         {%- endif -%}
