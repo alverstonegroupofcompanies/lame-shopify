@@ -4,8 +4,7 @@
     .cart-drawer .cart-totals__tax-note,
     .cart-drawer .lame-cart-shipping-note,
     .cart-drawer [data-lame-delivery-eta],
-    .cart-drawer tr[data-elite-pro-item] [data-lame-delivery-eta],
-    .cart-drawer tr[data-platform-fee-item] [data-lame-delivery-eta] {
+    .cart-drawer tr[data-elite-pro-item] [data-lame-delivery-eta] {
       display: none !important;
     }
   </style>
@@ -25,21 +24,13 @@
 
   assign total_mrp = 0
   assign has_membership_product = false
-  assign has_platform_fee = false
   assign has_free_gift = false
-  assign platform_fee_amount = 700
 
   for item in cart.items
     assign item_h = item.product.handle | downcase
     assign item_t = item.product.title | downcase
     if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
       assign has_membership_product = true
-    endif
-
-    if item_h == 'platform-fee' or item.variant_id == 67905718648934
-      assign has_platform_fee = true
-      assign platform_fee_amount = item.final_line_price
-      continue
     endif
 
     assign item_title_downcase = item.product.title | downcase
@@ -70,21 +61,9 @@
     assign total_mrp = total_mrp | plus: item_line_mrp
   endfor
 
-  assign saving_on_mrp = 0
-  if has_membership_product
-    assign items_subtotal_without_fee = cart.items_subtotal_price
-    if has_platform_fee
-      assign items_subtotal_without_fee = items_subtotal_without_fee | minus: platform_fee_amount
-    endif
-    assign saving_on_mrp = total_mrp | minus: items_subtotal_without_fee
-    if saving_on_mrp < 0
-      assign saving_on_mrp = 0
-    endif
-  else
-    assign saving_on_mrp = total_mrp | minus: cart.items_subtotal_price
-    if saving_on_mrp < 0
-      assign saving_on_mrp = 0
-    endif
+  assign saving_on_mrp = total_mrp | minus: cart.items_subtotal_price
+  if saving_on_mrp < 0
+    assign saving_on_mrp = 0
   endif
 
   assign total_order_saving = total_mrp | minus: cart.total_price
@@ -93,9 +72,6 @@
   endif
 
   assign final_order_total = cart.total_price
-  if has_membership_product and has_platform_fee == false
-    assign final_order_total = final_order_total | plus: platform_fee_amount
-  endif
 
   if settings.currency_code_enabled_cart_total
     assign total_price = final_order_total | money_with_currency
@@ -159,13 +135,6 @@
           {%- endif -%}
         </span>
       </div>
-
-      {%- if has_membership_product or has_platform_fee -%}
-        <div class="lame-price-summary__line lame-cart-summary-line">
-          <span class="lame-price-summary__line-label">Platform fee</span>
-          <span class="lame-price-summary__line-value lame-cart-summary-line__value">{{ platform_fee_amount | money }}</span>
-        </div>
-      {%- endif -%}
 
       {%- unless has_membership_product -%}
         <div class="lame-price-summary__line lame-cart-summary-line">

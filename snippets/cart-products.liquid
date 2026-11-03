@@ -131,10 +131,6 @@
       {%- liquid
         assign item_h = item.product.handle | default: item.handle | downcase
         assign item_t = item.product.title | default: item.title | downcase
-        assign is_platform_fee = false
-        if item_h == 'platform-fee' or item.variant_id == 67905718648934 or item_t contains 'platform fee'
-          assign is_platform_fee = true
-        endif
         assign is_elite_line = false
         if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
           assign is_elite_line = true
@@ -142,7 +138,7 @@
       -%}
               <tr
                 role="row"
-                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"{% if is_elite_line %} data-elite-pro-item="true"{% endif %}{% if is_platform_fee %} data-platform-fee-item="true"{% endif %}
+                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"{% if is_elite_line %} data-elite-pro-item="true"{% endif %}
                 ref="cartItemRows[]"
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
@@ -210,7 +206,7 @@
                         <span>Membership added. You become an Elite Pro member after payment.</span>
                       </p>
                     {%- endif -%}
-                    {% if template.name == 'cart' and item.variant.available and is_platform_fee == false %}
+                    {% if template.name == 'cart' and item.variant.available %}
                       <span class="cart-items__in-stock">{{ 'lame_cart.in_stock' | t }}</span>
                     {% endif %}
                     {%- liquid
@@ -221,7 +217,7 @@
                         assign is_elite_line = true
                       endif
                     -%}
-                    {%- unless is_elite_line or is_platform_fee -%}
+                    {%- unless is_elite_line -%}
                       {% render 'lame-delivery-eta' %}
                     {%- endunless -%}
 
@@ -351,7 +347,7 @@
                       quantity: item.quantity
                     %}
 
-                    {%- if item.product.handle == 'elite-pro-6-months' or is_platform_fee -%}
+                    {%- if item.product.handle == 'elite-pro-6-months' -%}
                       <div class="cart-items__locked-qty-wrap" ref="quantitySelectors[]" style="display: inline-flex; align-items: center; justify-content: center;">
                         <span class="cart-items__locked-qty" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 38px; padding: 0 12px; background: rgba(107, 15, 70, 0.08); border: 1px solid rgba(107, 15, 70, 0.2); border-radius: 8px; font-size: 13px; font-weight: 600; color: #6b0f46;">
                           1
@@ -375,7 +371,7 @@
                       %}
                     {%- endif -%}
 
-                    {%- unless template.name == 'cart' or is_platform_fee -%}
+                    {%- unless template.name == 'cart' -%}
                       <button
                         class="button cart-items__remove"
                         type="button"
@@ -426,7 +422,7 @@
                   headers="productTotal"
                 >
                   <div class="cart-items__price-end">
-                    {%- if template.name == 'cart' and is_platform_fee == false -%}
+                    {%- if template.name == 'cart' -%}
                       {% assign can_remove = item.instructions.can_remove | default: true, allow_false: true %}
                       <button
                         class="button cart-items__remove"

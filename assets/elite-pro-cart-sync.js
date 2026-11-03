@@ -1,9 +1,7 @@
 /**
- * Elite Pro & Platform Fee Cart Synchronization
+ * Elite Pro Cart Synchronization
  * - Keeps Elite Pro quantity at 1 in the real cart (calls /cart/change.js)
- * - Auto-adds Platform Fee variant 67905718648934 (qty 1) with /cart/add.js when Elite Pro is in the cart
- * - Removes Platform Fee when Elite Pro is removed
- * - Ensures Platform Fee never exceeds qty 1
+ * - Removes any legacy Platform Fee line if present
  * - Refreshes cart drawer and totals
  */
 (function() {
@@ -78,87 +76,25 @@
           cartChanged = true;
         }
 
-        // 2. Add Platform Fee variant 67905718648934 (qty 1)
-        if (platformFeeItems.length === 0) {
-          let addRes = await fetch('/cart/add.js', {
+      }
+
+      // 2. Remove legacy Platform Fee if present (for visitors who already have it in their cart)
+      if (platformFeeItems.length > 0) {
+        for (let k = 0; k < platformFeeItems.length; k++) {
+          await fetch('/cart/change.js', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
               'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-              id: PLATFORM_FEE_VARIANT_ID,
-              quantity: 1
-            })
+            body: JSON.stringify({ id: platformFeeItems[k].key, quantity: 0 })
           });
-
-          if (!addRes.ok) {
-            addRes = await fetch('/cart/add.js', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: JSON.stringify({
-                items: [{
-                  id: PLATFORM_FEE_VARIANT_ID,
-                  quantity: 1
-                }]
-              })
-            });
-          }
-
-          if (addRes.ok) {
-            cartChanged = true;
-          }
-        } else {
-          // Ensure Platform Fee is never > 1
-          const totalFeeQty = platformFeeItems.reduce(function(sum, it) { return sum + it.quantity; }, 0);
-          if (totalFeeQty > 1 || platformFeeItems[0].quantity > 1 || platformFeeItems.length > 1) {
-            await fetch('/cart/change.js', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: JSON.stringify({ id: platformFeeItems[0].key, quantity: 1 })
-            });
-            for (let j = 1; j < platformFeeItems.length; j++) {
-              await fetch('/cart/change.js', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ id: platformFeeItems[j].key, quantity: 0 })
-              });
-            }
-            cartChanged = true;
-          }
         }
-      } else {
-        // 3. Remove Platform Fee when Elite Pro is removed
-        if (platformFeeItems.length > 0) {
-          for (let k = 0; k < platformFeeItems.length; k++) {
-            await fetch('/cart/change.js', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              body: JSON.stringify({ id: platformFeeItems[k].key, quantity: 0 })
-            });
-          }
-          cartChanged = true;
-        }
+        cartChanged = true;
       }
 
-      // 4. Refresh cart drawer & totals
+      // 3. Refresh cart drawer & totals
       if (cartChanged) {
         await refreshCartUI();
       }
