@@ -3,6 +3,7 @@
     need a gif banner her at top 
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+{% assign secondary_image = block.settings.second_banner_image | default: block.settings.banner_image_2 %}
 
 {% style %}
   /* Break parent section and containers out to 100% full viewport width with zero padding/margins */
@@ -84,6 +85,69 @@
     display: block !important;
   }
 
+  /* Alternating GIF / Banner slider */
+  .ai-gif-banner-slides-{{ ai_gen_id }} {
+    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .ai-gif-banner-slide-{{ ai_gen_id }} {
+    transition: opacity 0.8s ease-in-out;
+    will-change: opacity;
+  }
+
+  /* Slide 1 (GIF) remains in normal flow to keep exact responsive height on desktop and mobile */
+  .ai-gif-banner-slide-gif-{{ ai_gen_id }} {
+    position: relative;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .ai-gif-banner-slide-gif-{{ ai_gen_id }}.is-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Slide 2 (Banner) overlays at exactly the same height and width */
+  .ai-gif-banner-slide-banner-{{ ai_gen_id }} {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .ai-gif-banner-slide-banner-{{ ai_gen_id }}.is-active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-gif-banner-slide-{{ ai_gen_id }} {
+      transition: none !important;
+    }
+  }
+
   /* Full-bleed responsive image/GIF */
   .ai-gif-banner-image-{{ ai_gen_id }} {
     width: 100% !important;
@@ -139,6 +203,7 @@
     background-color: {{ block.settings.overlay_color }};
     opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};
     pointer-events: none;
+    z-index: 3;
   }
 
   .ai-gif-banner-content-{{ ai_gen_id }} {
@@ -147,7 +212,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    z-index: 2;
+    z-index: 4;
     width: 90%;
     max-width: 800px;
   }
@@ -220,15 +285,41 @@
 <div class="ai-gif-banner-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   <div class="ai-gif-banner-container-{{ ai_gen_id }}">
     <div class="ai-gif-banner-wrapper-{{ ai_gen_id }}">
-      {% if block.settings.banner_image %}
-        <img
-          src="{{ block.settings.banner_image | image_url: width: 2000 }}"
-          alt="{{ block.settings.banner_image.alt | escape }}"
-          loading="lazy"
-          width="{{ block.settings.banner_image.width }}"
-          height="{{ block.settings.banner_image.height }}"
-          class="ai-gif-banner-image-{{ ai_gen_id }}"
-        >
+      {% if block.settings.banner_image != blank %}
+        <div class="ai-gif-banner-slides-{{ ai_gen_id }}">
+          <img
+            src="{{ block.settings.banner_image | image_url: width: 2000 }}"
+            alt="{{ block.settings.banner_image.alt | default: 'GIF banner' | escape }}"
+            loading="eager"
+            fetchpriority="high"
+            width="{{ block.settings.banner_image.width }}"
+            height="{{ block.settings.banner_image.height }}"
+            class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+            data-src="{{ block.settings.banner_image | image_url: width: 2000 }}"
+          >
+          {% if secondary_image != blank %}
+            <img
+              src="{{ secondary_image | image_url: width: 2000 }}"
+              alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+              loading="eager"
+              width="{{ secondary_image.width | default: block.settings.banner_image.width }}"
+              height="{{ secondary_image.height | default: block.settings.banner_image.height }}"
+              class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-banner-{{ ai_gen_id }}"
+            >
+          {% endif %}
+        </div>
+      {% elsif secondary_image != blank %}
+        <div class="ai-gif-banner-slides-{{ ai_gen_id }}">
+          <img
+            src="{{ secondary_image | image_url: width: 2000 }}"
+            alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+            loading="eager"
+            fetchpriority="high"
+            width="{{ secondary_image.width }}"
+            height="{{ secondary_image.height }}"
+            class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+          >
+        </div>
       {% else %}
         <div class="ai-gif-banner-placeholder-{{ ai_gen_id }}">
           {{ 'hero-apparel-1' | placeholder_svg_tag }}
@@ -263,6 +354,79 @@
   </div>
 </div>
 
+{% if block.settings.banner_image != blank and secondary_image != blank %}
+  <script>
+    (function() {
+      function initBannerAlternator() {
+        var container = document.querySelector('.ai-gif-banner-{{ ai_gen_id }}');
+        if (!container) return;
+
+        var gifImg = container.querySelector('.ai-gif-banner-slide-gif-{{ ai_gen_id }}');
+        var bannerImg = container.querySelector('.ai-gif-banner-slide-banner-{{ ai_gen_id }}');
+
+        if (!gifImg || !bannerImg) return;
+
+        var showGif = true;
+
+        function restartGifElement(img) {
+          if (!img) return;
+          var rawSrc = img.dataset.src || img.getAttribute('src');
+          if (!img.dataset.src) {
+            img.dataset.src = rawSrc;
+          }
+          var base = img.dataset.src;
+          var clean = base.replace(/([?&])_t=\d+(&|$)/, function(m, p1, p2) {
+            return p2 ? p1 : '';
+          }).replace(/[?&]$/, '');
+          var sep = clean.indexOf('?') !== -1 ? '&' : '?';
+          img.src = clean + sep + '_t=' + Date.now();
+        }
+
+        function switchSlide() {
+          if (showGif) {
+            // Switch from GIF to Banner
+            showGif = false;
+            gifImg.classList.add('is-hidden');
+            bannerImg.classList.add('is-active');
+          } else {
+            // Switch from Banner back to GIF
+            showGif = true;
+            // Restart GIF from frame 0 right as it fades in
+            restartGifElement(gifImg);
+            gifImg.classList.remove('is-hidden');
+            bannerImg.classList.remove('is-active');
+          }
+        }
+
+        var intervalId = setInterval(switchSlide, 10000);
+
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            clearInterval(intervalId);
+          } else {
+            clearInterval(intervalId);
+            intervalId = setInterval(switchSlide, 10000);
+          }
+        });
+
+        if (window.Shopify && window.Shopify.designMode) {
+          document.addEventListener('shopify:section:unload', function(e) {
+            if (container && container.closest('#shopify-section-' + e.detail?.sectionId)) {
+              clearInterval(intervalId);
+            }
+          });
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBannerAlternator);
+      } else {
+        initBannerAlternator();
+      }
+    })();
+  </script>
+{% endif %}
+
 {% schema %}
 {
   "name": "GIF banner",
@@ -277,6 +441,12 @@
       "id": "banner_image",
       "label": "Banner image or GIF",
       "info": "Upload a GIF or static image"
+    },
+    {
+      "type": "image_picker",
+      "id": "second_banner_image",
+      "label": "Banner image",
+      "info": "Second image to alternate with the GIF every 10 seconds"
     },
     {
       "type": "select",
