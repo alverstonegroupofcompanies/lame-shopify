@@ -1,3 +1,15 @@
+{%- if has_membership_product -%}
+  <style>
+    .cart-drawer .lame-cart-summary-line:has(span:contains("Shipping")),
+    .cart-drawer .cart-totals__tax-note,
+    .cart-drawer .lame-cart-shipping-note,
+    .cart-drawer [data-lame-delivery-eta],
+    .cart-drawer tr[data-elite-pro-item] [data-lame-delivery-eta],
+    .cart-drawer tr[data-platform-fee-item] [data-lame-delivery-eta] {
+      display: none !important;
+    }
+  </style>
+{%- endif -%}
 {%- doc -%}
   Renders the cart summary totals.
 
@@ -400,9 +412,11 @@
         {% endform %}
       </span>
     {% endif %}
+    {%- unless has_membership_product -%}
     <div class="cart-totals__item cart-totals__tax-note cart-primary-typography">
       {% render 'tax-info', has_discounts_enabled: settings.show_add_discount_code %}
     </div>
+    {%- endunless -%}
   </div>
 </div>
 

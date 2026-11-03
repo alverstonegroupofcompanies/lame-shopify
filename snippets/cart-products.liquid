@@ -129,15 +129,20 @@
           <tbody role="rowgroup">
             {%- for item in cart.items -%}
       {%- liquid
+        assign item_h = item.product.handle | default: item.handle | downcase
+        assign item_t = item.product.title | default: item.title | downcase
         assign is_platform_fee = false
-        assign item_h = item.product.handle | downcase
-        if item_h == 'platform-fee' or item.variant_id == 67905718648934
+        if item_h == 'platform-fee' or item.variant_id == 67905718648934 or item_t contains 'platform fee'
           assign is_platform_fee = true
+        endif
+        assign is_elite_line = false
+        if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
+          assign is_elite_line = true
         endif
       -%}
               <tr
                 role="row"
-                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"
+                class="cart-items__table-row{% if item.parent_relationship.parent != null %} cart-items__nested-line{% endif %}{% unless item.unit_price_measurement %} cart-items__table-row--full-width-variants{% endunless %}"{% if is_elite_line %} data-elite-pro-item="true"{% endif %}{% if is_platform_fee %} data-platform-fee-item="true"{% endif %}
                 ref="cartItemRows[]"
                 data-parent-key="{{ item.parent_relationship.parent.key }}"
                 data-key="{{ item.key }}"
@@ -208,7 +213,15 @@
                     {% if template.name == 'cart' and item.variant.available and is_platform_fee == false %}
                       <span class="cart-items__in-stock">{{ 'lame_cart.in_stock' | t }}</span>
                     {% endif %}
-                    {%- unless item.product.handle == 'elite-pro-6-months' or is_platform_fee -%}
+                    {%- liquid
+                      assign item_h_check = item.product.handle | default: item.handle | downcase
+                      assign item_t_check = item.product.title | default: item.title | downcase
+                      assign is_elite_line = false
+                      if item_h_check == 'elite-pro-6-months' or item_t_check contains 'elite pro'
+                        assign is_elite_line = true
+                      endif
+                    -%}
+                    {%- unless is_elite_line or is_platform_fee -%}
                       {% render 'lame-delivery-eta' %}
                     {%- endunless -%}
 

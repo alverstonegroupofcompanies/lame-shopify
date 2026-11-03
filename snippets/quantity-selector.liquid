@@ -39,8 +39,20 @@
       assign min_quantity = lame_bogo_qty
     endif
   endif
+
+  assign is_elite_pro = false
+  if product != blank
+    assign p_handle_down = product.handle | downcase
+    assign p_title_down = product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+      assign is_elite_pro = true
+    endif
+  endif
 %}
 
+{%- if is_elite_pro and line_index == null -%}
+  <input type="hidden" name="quantity" value="1">
+{%- else -%}
 <div
   class="quantity-selector-wrapper"
   ref="quantitySelectorWrapper"
@@ -173,6 +185,7 @@
     {%- endif -%}
   {%- endif -%}
 </div>
+{%- endif -%}
 
 {% stylesheet %}
   .quantity-selector-wrapper {

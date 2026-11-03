@@ -9,9 +9,20 @@
   if compact
     assign trust_class = trust_class | append: ' lame-cart-trust--compact'
   endif
+
+  assign has_membership = false
+  for item in cart.items
+    assign item_h = item.product.handle | default: item.handle | downcase
+    assign item_t = item.product.title | default: item.title | downcase
+    if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
+      assign has_membership = true
+      break
+    endif
+  endfor
 -%}
 
 <ul class="{{ trust_class }}" role="list" aria-label="{{ 'lame_cart.trust_aria' | t }}">
+  {%- unless has_membership -%}
   <li class="lame-cart-trust__item">
     <span class="lame-cart-trust__icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -43,8 +54,10 @@
     <span class="lame-cart-trust__label">{{ 'lame_cart.trust_shipping_title' | t }}</span>
     <span class="lame-cart-trust__sub">{{ 'lame_cart.trust_shipping_sub' | t }}</span>
   </li>
+  {%- endunless -%}
 </ul>
 
+{%- unless has_membership -%}
 {%- if shop.shipping_policy.body != blank or shop.shipping_policy.url != blank -%}
   <p class="lame-cart-shipping-note">
     {%- if shop.shipping_policy.url != blank -%}
@@ -56,3 +69,4 @@
 {%- else -%}
   <p class="lame-cart-shipping-note">{{ 'lame_cart.shipping_note' | t }}</p>
 {%- endif -%}
+{%- endunless -%}
