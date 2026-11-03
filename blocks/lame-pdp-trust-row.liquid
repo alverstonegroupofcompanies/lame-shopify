@@ -1,3 +1,14 @@
+{% liquid
+  assign is_elite_pro = false
+  if closest.product != blank
+    assign p_handle_down = closest.product.handle | downcase
+    assign p_title_down = closest.product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+      assign is_elite_pro = true
+    endif
+  endif
+%}
+
 <div class="lame-pdp-trust-row" {{ block.shopify_attributes }}>
   {% for i in (1..3) %}
     {% liquid
@@ -19,8 +30,17 @@
           assign title = block.settings.title_3
           assign subtitle = block.settings.subtitle_3
       endcase
+
+      assign hide_for_elite = false
+      if is_elite_pro
+        if use_eta or title contains 'Shipping' or title contains 'shipping' or title contains 'Delivered' or title contains 'delivered'
+          assign hide_for_elite = true
+        elsif icon == 'returns' or title contains 'Return' or title contains 'return'
+          assign hide_for_elite = true
+        endif
+      endif
     %}
-    {% if use_eta or title != blank %}
+    {% if (use_eta or title != blank) and hide_for_elite == false %}
       <div class="lame-pdp-trust-row__item">
         <span class="lame-pdp-trust-row__icon" aria-hidden="true">
           {% case icon %}

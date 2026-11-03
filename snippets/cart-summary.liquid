@@ -13,11 +13,21 @@
 
   assign total_mrp = 0
   assign has_membership_product = false
+  assign has_platform_fee = false
   assign has_free_gift = false
+  assign platform_fee_amount = 700
 
   for item in cart.items
-    if item.product.handle == 'elite-pro-6-months'
+    assign item_h = item.product.handle | downcase
+    assign item_t = item.product.title | downcase
+    if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
       assign has_membership_product = true
+    endif
+
+    if item_h == 'platform-fee' or item.variant_id == 67905718648934
+      assign has_platform_fee = true
+      assign platform_fee_amount = item.final_line_price
+      continue
     endif
 
     assign item_title_downcase = item.product.title | downcase
@@ -48,9 +58,21 @@
     assign total_mrp = total_mrp | plus: item_line_mrp
   endfor
 
-  assign saving_on_mrp = total_mrp | minus: cart.items_subtotal_price
-  if saving_on_mrp < 0
-    assign saving_on_mrp = 0
+  assign saving_on_mrp = 0
+  if has_membership_product
+    assign items_subtotal_without_fee = cart.items_subtotal_price
+    if has_platform_fee
+      assign items_subtotal_without_fee = items_subtotal_without_fee | minus: platform_fee_amount
+    endif
+    assign saving_on_mrp = total_mrp | minus: items_subtotal_without_fee
+    if saving_on_mrp < 0
+      assign saving_on_mrp = 0
+    endif
+  else
+    assign saving_on_mrp = total_mrp | minus: cart.items_subtotal_price
+    if saving_on_mrp < 0
+      assign saving_on_mrp = 0
+    endif
   endif
 
   assign total_order_saving = total_mrp | minus: cart.total_price
@@ -58,10 +80,15 @@
     assign total_order_saving = 0
   endif
 
+  assign final_order_total = cart.total_price
+  if has_membership_product and has_platform_fee == false
+    assign final_order_total = final_order_total | plus: platform_fee_amount
+  endif
+
   if settings.currency_code_enabled_cart_total
-    assign total_price = cart.total_price | money_with_currency
+    assign total_price = final_order_total | money_with_currency
   else
-    assign total_price = cart.total_price | money
+    assign total_price = final_order_total | money
   endif
 -%}
 
@@ -121,35 +148,44 @@
         </span>
       </div>
 
-      <div class="lame-price-summary__line lame-cart-summary-line">
-        <span class="lame-price-summary__line-label">Subtotal</span>
-        <span class="lame-price-summary__line-value lame-cart-summary-line__value">{{ cart.items_subtotal_price | money }}</span>
-      </div>
-
-      {%- if cart.cart_level_discount_applications.size > 0 -%}
-        {%- for discount in cart.cart_level_discount_applications -%}
-          <div class="lame-price-summary__line lame-cart-summary-line lame-price-summary__line--savings">
-            <span class="lame-price-summary__line-label cart-discounts__label">
-              {{- 'icon-discount.svg' | inline_asset_content -}}
-              {{ discount.title | escape }}
-            </span>
-            <span class="lame-price-summary__line-value lame-cart-summary-line__value lame-price-summary__savings-value">
-              - {{ discount.total_allocated_amount | money }}
-            </span>
-          </div>
-        {%- endfor -%}
+      {%- if has_membership_product or has_platform_fee -%}
+        <div class="lame-price-summary__line lame-cart-summary-line">
+          <span class="lame-price-summary__line-label">Platform fee</span>
+          <span class="lame-price-summary__line-value lame-cart-summary-line__value">{{ platform_fee_amount | money }}</span>
+        </div>
       {%- endif -%}
 
-      <div class="lame-price-summary__line lame-cart-summary-line">
-        <span class="lame-price-summary__line-label">Shipping</span>
-        <span class="lame-price-summary__line-value lame-cart-summary-line__value">
-          {%- if is_elite_pro -%}
-            <span class="lame-price-summary__shipping-free">FREE</span>
-          {%- else -%}
-            Calculated at checkout
-          {%- endif -%}
-        </span>
-      </div>
+      {%- unless has_membership_product -%}
+        <div class="lame-price-summary__line lame-cart-summary-line">
+          <span class="lame-price-summary__line-label">Subtotal</span>
+          <span class="lame-price-summary__line-value lame-cart-summary-line__value">{{ cart.items_subtotal_price | money }}</span>
+        </div>
+
+        {%- if cart.cart_level_discount_applications.size > 0 -%}
+          {%- for discount in cart.cart_level_discount_applications -%}
+            <div class="lame-price-summary__line lame-cart-summary-line lame-price-summary__line--savings">
+              <span class="lame-price-summary__line-label cart-discounts__label">
+                {{- 'icon-discount.svg' | inline_asset_content -}}
+                {{ discount.title | escape }}
+              </span>
+              <span class="lame-price-summary__line-value lame-cart-summary-line__value lame-price-summary__savings-value">
+                - {{ discount.total_allocated_amount | money }}
+              </span>
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+
+        <div class="lame-price-summary__line lame-cart-summary-line">
+          <span class="lame-price-summary__line-label">Shipping</span>
+          <span class="lame-price-summary__line-value lame-cart-summary-line__value">
+            {%- if is_elite_pro -%}
+              <span class="lame-price-summary__shipping-free">FREE</span>
+            {%- else -%}
+              Calculated at checkout
+            {%- endif -%}
+          </span>
+        </div>
+      {%- endunless -%}
 
       <div class="cart-totals__item cart-totals__total lame-price-summary__line lame-cart-summary-line lame-price-summary__line--total" role="status">
         <span class="cart-totals__total-label lame-price-summary__line-label lame-price-summary__total-label cart-primary-typography">Order Total</span>

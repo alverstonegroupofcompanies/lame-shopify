@@ -41,6 +41,32 @@
   if lame_our_products_active_capture contains 'true'
     assign lame_our_products_active = true
   endif
+
+  assign is_elite_pro = false
+  if product != blank
+    assign p_handle_down = product.handle | downcase
+    assign p_title_down = product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+      assign is_elite_pro = true
+    endif
+  endif
+
+  assign elite_in_cart = false
+  if is_elite_pro
+    for item in cart.items
+      assign item_h = item.product.handle | downcase
+      assign item_t = item.product.title | downcase
+      if item_h == 'elite-pro-6-months' or item_t contains 'elite pro'
+        assign elite_in_cart = true
+        break
+      endif
+    endfor
+  endif
+
+  if is_elite_pro and elite_in_cart
+    assign can_add_to_cart = false
+    assign add_to_cart_text = 'Already in cart'
+  endif
 %}
 
 <span
@@ -57,7 +83,7 @@
       data-product-id="{{ product.id }}"
       data-product-url="{{ product.url }}"
       on:submit="/handleSubmit"
-      data-quantity-default="{% if lame_bogo_qty > 1 %}{{ lame_bogo_qty }}{% elsif product.selected_or_first_available_variant.quantity_rule.min %}{{ product.selected_or_first_available_variant.quantity_rule.min }}{% else %}1{% endif %}"
+      data-quantity-default="{% if is_elite_pro %}1{% elsif lame_bogo_qty > 1 %}{{ lame_bogo_qty }}{% elsif product.selected_or_first_available_variant.quantity_rule.min %}{{ product.selected_or_first_available_variant.quantity_rule.min }}{% else %}1{% endif %}"
       data-quantity-error-max="{{ 'products.product.quantity_error_max' | t }}"
     >
       <div
@@ -68,6 +94,9 @@
         ref="liveRegion"
       ></div>
       {%- form 'product', product, id: product_form_id, data-type: 'add-to-cart-form' -%}
+        {%- if is_elite_pro -%}
+          <input type="hidden" name="quantity" value="1">
+        {%- endif -%}
         <input
           type="hidden"
           name="id"
@@ -77,6 +106,111 @@
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           {%- render 'gift-card-recipient-form', product: product, form: form, section: section, block: block -%}
           <span class="buy-buttons-block__bar">
+        {%- endif -%}
+        {%- if is_elite_pro -%}
+          <div class="elite-pro-birthday-field">
+            <label
+              for="EliteProBirthday-{{ section.id }}-{{ product.id }}"
+              class="elite-pro-birthday-field__label"
+            >
+              Birthday <span class="elite-pro-birthday-field__required" aria-hidden="true">*</span>
+            </label>
+            <div class="elite-pro-birthday-field__input-wrapper">
+              <input
+                type="date"
+                id="EliteProBirthday-{{ section.id }}-{{ product.id }}"
+                name="properties[Birthday]"
+                required
+                max="{{ 'now' | date: '%Y-%m-%d' }}"
+                class="elite-pro-birthday-field__input"
+                {% if elite_in_cart %}disabled{% endif %}
+              >
+            </div>
+            <p class="elite-pro-birthday-field__note">
+              We use this only to send your birthday gift.
+            </p>
+          </div>
+
+          {%- if elite_in_cart -%}
+            <div class="elite-pro-in-cart-banner" role="status">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Elite Pro is already in your cart (maximum 1 membership per order).</span>
+            </div>
+          {%- endif -%}
+
+          <style>
+            .elite-pro-birthday-field {
+              width: 100%;
+              margin-block-end: clamp(1rem, 1.8vw, 1.25rem);
+            }
+            .elite-pro-birthday-field__label {
+              display: block;
+              font-size: clamp(0.8125rem, 1.2vw, 0.875rem);
+              font-weight: 600;
+              color: var(--color-foreground, #111827);
+              margin-block-end: 0.4rem;
+              letter-spacing: 0.01em;
+            }
+            .elite-pro-birthday-field__required {
+              color: #e11d48;
+              margin-left: 0.2rem;
+            }
+            .elite-pro-birthday-field__input-wrapper {
+              position: relative;
+              width: 100%;
+            }
+            .elite-pro-birthday-field__input {
+              width: 100%;
+              height: 48px;
+              padding: 0 1rem;
+              font-size: clamp(0.875rem, 1.2vw, 0.9375rem);
+              font-family: inherit;
+              color: var(--color-foreground, #111827);
+              background-color: var(--color-background, #ffffff);
+              border: 1px solid rgba(var(--color-foreground-rgb, 17, 24, 39), 0.2);
+              border-radius: var(--button-border-radius, 8px);
+              box-sizing: border-box;
+              outline: none;
+              transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .elite-pro-birthday-field__input:focus {
+              border-color: #6b0f46;
+              box-shadow: 0 0 0 1px #6b0f46;
+            }
+            .elite-pro-birthday-field__input:disabled {
+              background-color: rgba(var(--color-foreground-rgb, 17, 24, 39), 0.05);
+              cursor: not-allowed;
+              opacity: 0.7;
+            }
+            .elite-pro-birthday-field__note {
+              margin: 0.35rem 0 0;
+              font-size: 0.75rem;
+              color: rgba(var(--color-foreground-rgb, 17, 24, 39), 0.65);
+              line-height: 1.4;
+            }
+            .elite-pro-in-cart-banner {
+              width: 100%;
+              padding: 0.75rem 1rem;
+              margin-block-end: 1rem;
+              background: #fdf2f8;
+              border: 1px solid #f472b6;
+              border-radius: var(--button-border-radius, 8px);
+              color: #831843;
+              font-size: 0.875rem;
+              font-weight: 500;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+            }
+            .elite-pro-in-cart-banner svg {
+              flex-shrink: 0;
+              color: #db2777;
+            }
+          </style>
         {%- endif -%}
         <div
           class="product-form-buttons spacing-style{% if block_settings.stacking %} product-form-buttons--stacked{% endif %}"
@@ -117,7 +251,9 @@
             </div>
           {%- endif -%}
 
-          {% content_for 'block', type: 'quantity', id: 'quantity' %}
+          {%- unless is_elite_pro -%}
+            {% content_for 'block', type: 'quantity', id: 'quantity' %}
+          {%- endunless -%}
 
           {%- if has_quantity_rules -%}
             <div
@@ -258,15 +394,180 @@
             </div>
           {%- endif -%}
 
-          {% content_for 'block',
-            type: 'accelerated-checkout',
-            id: 'accelerated-checkout',
-            can_add_to_cart: can_add_to_cart,
-            form_obj: form
-          %}
+          {%- if is_elite_pro -%}
+            <div class="elite-pro-buynow-guard" style="position: relative; width: 100%;">
+              {% content_for 'block',
+                type: 'accelerated-checkout',
+                id: 'accelerated-checkout',
+                can_add_to_cart: true,
+                form_obj: form
+              %}
+              <button
+                type="button"
+                class="elite-pro-buynow-guard__overlay"
+                aria-label="Enter your birthday first"
+                style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; background: transparent; border: 0; cursor: pointer; display: block;"
+              ></button>
+            </div>
+            <p class="elite-pro-buynow-guard__msg" style="margin: 6px 0 0; font-size: 13px; color: #dc2626; display: none;">
+              Please enter your birthday above first.
+            </p>
+          {%- else -%}
+            {% content_for 'block',
+              type: 'accelerated-checkout',
+              id: 'accelerated-checkout',
+              can_add_to_cart: can_add_to_cart,
+              form_obj: form
+            %}
+          {%- endif -%}
         </div>
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           </span>
+        {%- endif -%}
+      {%- if is_elite_pro -%}
+          <script>
+            (function() {
+              function initEliteProGuard() {
+                var form = document.getElementById('{{ product_form_id }}');
+                if (!form) return;
+
+                var dateInput = form.querySelector('input[name="properties[Birthday]"]');
+                var overlay = form.querySelector('.elite-pro-buynow-guard__overlay');
+                var msg = form.querySelector('.elite-pro-buynow-guard__msg');
+                var atcBtn = form.querySelector('button[name="add"], .add-to-cart-button');
+                var inCart = {{ elite_in_cart | json }};
+
+                function setAtcText(text) {
+                  if (!atcBtn) return;
+                  var textSpan = atcBtn.querySelector('.add-to-cart-text__content span span') ||
+                                 atcBtn.querySelector('.add-to-cart-text__content') ||
+                                 atcBtn.querySelector('.add-to-cart-text');
+                  if (textSpan) {
+                    textSpan.textContent = text;
+                  }
+                }
+
+                function updateUI(cartHasElite) {
+                  if (typeof cartHasElite === 'boolean') {
+                    inCart = cartHasElite;
+                  }
+
+                  var banner = form.querySelector('.elite-pro-in-cart-banner');
+                  if (inCart) {
+                    if (dateInput) dateInput.disabled = true;
+                    if (atcBtn) {
+                      atcBtn.disabled = true;
+                      atcBtn.setAttribute('aria-disabled', 'true');
+                      setAtcText('Already in cart');
+                    }
+                    if (overlay) {
+                      overlay.style.display = 'block';
+                      overlay.style.cursor = 'not-allowed';
+                      overlay.setAttribute('aria-label', 'Already in cart');
+                    }
+                    if (msg) msg.style.display = 'none';
+                    if (banner) banner.style.display = 'flex';
+                  } else {
+                    if (dateInput) dateInput.disabled = false;
+                    if (banner) banner.style.display = 'none';
+                    var hasDate = Boolean(dateInput && dateInput.value.trim());
+                    if (!hasDate) {
+                      if (atcBtn) {
+                        atcBtn.disabled = true;
+                        atcBtn.setAttribute('aria-disabled', 'true');
+                        setAtcText('Add to cart');
+                      }
+                      if (overlay) {
+                        overlay.style.display = 'block';
+                        overlay.style.cursor = 'pointer';
+                        overlay.setAttribute('aria-label', 'Please enter your birthday first');
+                      }
+                    } else {
+                      if (atcBtn) {
+                        atcBtn.disabled = false;
+                        atcBtn.removeAttribute('aria-disabled');
+                        setAtcText('Add to cart');
+                      }
+                      if (overlay) {
+                        overlay.style.display = 'none';
+                      }
+                      if (msg) msg.style.display = 'none';
+                    }
+                  }
+                }
+
+                if (dateInput) {
+                  dateInput.addEventListener('input', function() { updateUI(); });
+                  dateInput.addEventListener('change', function() { updateUI(); });
+                }
+
+                if (overlay) {
+                  overlay.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (inCart) return;
+
+                    if (dateInput) {
+                      dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      dateInput.focus();
+                      if (typeof dateInput.reportValidity === 'function') {
+                        dateInput.reportValidity();
+                      }
+                    }
+                    if (msg) msg.style.display = 'block';
+                  });
+                }
+
+                form.addEventListener('submit', function(e) {
+                  if (inCart) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                  }
+                  if (!dateInput || !dateInput.value.trim()) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (dateInput && typeof dateInput.reportValidity === 'function') {
+                      dateInput.reportValidity();
+                    }
+                    if (msg) msg.style.display = 'block';
+                    return false;
+                  }
+                }, true);
+
+                function checkCartStatus() {
+                  fetch('/cart.js', { headers: { Accept: 'application/json' } })
+                    .then(function(res) { return res.json(); })
+                    .then(function(cart) {
+                      var found = false;
+                      if (cart && Array.isArray(cart.items)) {
+                        found = cart.items.some(function(item) {
+                          var h = (item.handle || '').toLowerCase();
+                          var t = (item.product_title || item.title || '').toLowerCase();
+                          return h === 'elite-pro-6-months' || t.indexOf('elite pro') !== -1;
+                        });
+                      }
+                      updateUI(found);
+                    })
+                    .catch(function(err) {
+                      console.error('Error checking cart for Elite Pro:', err);
+                    });
+                }
+
+                updateUI(inCart);
+                checkCartStatus();
+
+                document.addEventListener('cart:update', checkCartStatus);
+                document.addEventListener('cart:add', checkCartStatus);
+              }
+
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initEliteProGuard);
+              } else {
+                initEliteProGuard();
+              }
+            })();
+          </script>
         {%- endif -%}
       {%- endform -%}
     </product-form-component>
