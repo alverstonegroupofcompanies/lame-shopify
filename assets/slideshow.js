@@ -683,7 +683,10 @@ export class Slideshow extends Component {
       return;
     }
 
-    event.preventDefault();
+    const isInteractive = Boolean(event.target.closest('a, button, input, select, textarea'));
+    if (!isInteractive) {
+      event.preventDefault();
+    }
     // Store initial position but don't start handling yet
     const { axis } = this.#scroll;
     const startPosition = event[axis];
@@ -695,8 +698,7 @@ export class Slideshow extends Component {
     let velocity = 0;
     let moved = false;
     let distanceTravelled = 0;
-
-    this.#dragging = true;
+    const DRAG_THRESHOLD = 8;
 
     /**
      * Handles the 'pointermove' event to update the scroll position.
@@ -706,14 +708,23 @@ export class Slideshow extends Component {
       const current = event[axis];
       const initialDelta = startPosition - current;
 
-      if (!initialDelta) return;
+      if (!moved && Math.abs(initialDelta) < DRAG_THRESHOLD) {
+        return;
+      }
 
       if (!moved) {
         moved = true;
+        this.#dragging = true;
+        this.#scroll.snap = false;
         this.setPointerCapture(event.pointerId);
 
-        // Prevent clicks once the user starts dragging
-        document.addEventListener('click', preventDefault, { once: true, signal });
+        // Prevent clicks once the user starts dragging beyond threshold
+        const cancelClick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        };
+        window.addEventListener('click', cancelClick, { capture: true, once: true });
+        setTimeout(() => window.removeEventListener('click', cancelClick, { capture: true }), 400);
 
         const movingRight = initialDelta < 0;
         const movingLeft = initialDelta > 0;
@@ -754,9 +765,15 @@ export class Slideshow extends Component {
       const { current, slides } = this;
       const { scroller } = this.refs;
 
+      const wasMoved = moved;
       this.#dragging = false;
 
-      if (!slides?.length || !scroller) return;
+      if (this.hasPointerCapture?.(event.pointerId)) {
+        this.releasePointerCapture(event.pointerId);
+      }
+      this.removeAttribute('dragging');
+
+      if (!wasMoved || !slides?.length || !scroller) return;
 
       const direction = Math.sign(velocity);
       const next = this.#sync();
@@ -770,9 +787,6 @@ export class Slideshow extends Component {
       if (!newSlide) throw new Error(`Slide not found at index ${newIndex}`);
 
       this.#scroll.to(newSlide);
-
-      this.removeAttribute('dragging');
-      this.releasePointerCapture(event.pointerId);
 
       this.#centerSelectedThumbnail(newIndex);
 
@@ -797,8 +811,6 @@ export class Slideshow extends Component {
       this.#scroll.snap = true;
       this.resume();
     };
-
-    this.#scroll.snap = false;
 
     document.addEventListener('pointermove', onPointerMove, { signal });
     document.addEventListener('pointerup', onPointerUp, { signal });
