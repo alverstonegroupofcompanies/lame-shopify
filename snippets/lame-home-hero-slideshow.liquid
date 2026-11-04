@@ -52,12 +52,14 @@
       -%}
       {%- capture slide_children -%}
         <div class="slide__image-container">
-          {%- if block.settings.link != blank -%}
+          {%- assign slide_target_url = block.settings.link.url | default: block.settings.link -%}
+          {%- if slide_target_url != blank -%}
             <a
-              href="{{ block.settings.link }}"
+              href="{{ slide_target_url }}"
               class="lame-home-hero__slide-link"
               aria-label="{{ slide_alt }}"
               draggable="false"
+              data-hero-slide-link
               {% if block.settings.open_in_new_tab %}
                 target="_blank" rel="noopener noreferrer"
               {% endif %}
@@ -75,7 +77,7 @@
               alt: slide_alt,
               draggable: 'false'
           }}
-          {%- if block.settings.link != blank -%}
+          {%- if slide_target_url != blank -%}
             </a>
           {%- endif -%}
         </div>

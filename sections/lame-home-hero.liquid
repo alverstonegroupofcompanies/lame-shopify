@@ -195,6 +195,95 @@
       </div>
     {%- endif -%}
   </section>
+  <script>
+    (function () {
+      function initHeroSlideClicks() {
+        const heroSections = document.querySelectorAll('.lame-home-hero');
+        heroSections.forEach((hero) => {
+          if (hero.dataset.lameHeroClickBound === 'true') return;
+          hero.dataset.lameHeroClickBound = 'true';
+
+          let startPos = null;
+          let isDragging = false;
+          const DRAG_LIMIT = 8;
+
+          function getCoords(e) {
+            if (e.touches && e.touches.length) {
+              return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            if (e.changedTouches && e.changedTouches.length) {
+              return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+          }
+
+          function onStart(e) {
+            const link = e.target.closest('.lame-home-hero__slide-link');
+            if (!link) return;
+            const pt = getCoords(e);
+            startPos = { x: pt.x, y: pt.y };
+            isDragging = false;
+          }
+
+          function onMove(e) {
+            if (!startPos) return;
+            const pt = getCoords(e);
+            const dx = Math.abs(pt.x - startPos.x);
+            const dy = Math.abs(pt.y - startPos.y);
+            if (dx > DRAG_LIMIT || dy > DRAG_LIMIT) {
+              isDragging = true;
+            }
+          }
+
+          function onClick(e) {
+            const link = e.target.closest('.lame-home-hero__slide-link');
+            if (!link) return;
+
+            if (isDragging) {
+              e.preventDefault();
+              e.stopPropagation();
+              startPos = null;
+              isDragging = false;
+              return;
+            }
+
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            startPos = null;
+            isDragging = false;
+
+            if (link.target === '_blank') {
+              window.open(href, '_blank', 'noopener,noreferrer');
+            } else {
+              window.location.assign(href);
+            }
+          }
+
+          if (window.PointerEvent) {
+            hero.addEventListener('pointerdown', onStart, { capture: true, passive: true });
+            hero.addEventListener('pointermove', onMove, { capture: true, passive: true });
+          } else {
+            hero.addEventListener('mousedown', onStart, { capture: true, passive: true });
+            hero.addEventListener('mousemove', onMove, { capture: true, passive: true });
+            hero.addEventListener('touchstart', onStart, { capture: true, passive: true });
+            hero.addEventListener('touchmove', onMove, { capture: true, passive: true });
+          }
+
+          hero.addEventListener('click', onClick, { capture: true });
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHeroSlideClicks, { once: true });
+      } else {
+        initHeroSlideClicks();
+      }
+      document.addEventListener('shopify:section:load', initHeroSlideClicks);
+    })();
+  </script>
   <script src="{{ 'lame-home-hero-mobile.js' | asset_url }}" type="module" defer></script>
 {%- endif -%}
 
