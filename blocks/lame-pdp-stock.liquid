@@ -1,14 +1,36 @@
 {% liquid
-  assign is_elite_pro = false
-  if closest.product != blank
-    assign p_handle_down = closest.product.handle | downcase
-    assign p_title_down = closest.product.title | downcase
+  assign current_product = closest.product | default: product
+  assign current_variant = current_product.selected_or_first_available_variant
+
+  assign is_non_physical = false
+  if current_product != blank
+    if current_variant != blank and current_variant.requires_shipping == false
+      assign is_non_physical = true
+    elsif current_product.requires_shipping == false
+      assign is_non_physical = true
+    endif
+
+    for tag in current_product.tags
+      assign tag_down = tag | downcase
+      if tag_down == 'membership' or tag_down == 'digital' or tag_down contains 'non-physical' or tag_down contains 'no-shipping'
+        assign is_non_physical = true
+        break
+      endif
+    endfor
+
+    assign p_handle_down = current_product.handle | downcase
+    assign p_title_down = current_product.title | downcase
     if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
-      assign is_elite_pro = true
+      assign is_non_physical = true
+    endif
+
+    assign p_type_down = current_product.type | downcase
+    if p_type_down == 'membership' or p_type_down == 'digital' or p_type_down contains 'service'
+      assign is_non_physical = true
     endif
   endif
 
-  assign variant = closest.product.selected_or_first_available_variant
+  assign variant = current_variant
   assign in_stock = variant.available
 
   if variant.inventory_management == 'shopify' and variant.inventory_quantity <= 0 and variant.inventory_policy != 'continue'
@@ -16,7 +38,7 @@
   endif
 %}
 
-{%- unless is_elite_pro -%}
+{%- unless is_non_physical -%}
 <p
   class="lame-pdp-stock{% unless in_stock %} lame-pdp-stock--out{% endunless %}"
   {{ block.shopify_attributes }}

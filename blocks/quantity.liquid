@@ -1,8 +1,25 @@
 {% liquid
+  assign current_product = closest.product | default: product
+  assign current_variant = current_product.selected_or_first_available_variant
+
   assign is_elite_pro = false
-  if closest.product != blank
-    assign p_handle_down = closest.product.handle | downcase
-    assign p_title_down = closest.product.title | downcase
+  if current_product != blank
+    if current_variant != blank and current_variant.requires_shipping == false
+      assign is_elite_pro = true
+    elsif current_product.requires_shipping == false
+      assign is_elite_pro = true
+    endif
+
+    for tag in current_product.tags
+      assign tag_down = tag | downcase
+      if tag_down == 'membership' or tag_down == 'digital' or tag_down contains 'non-physical' or tag_down contains 'no-shipping'
+        assign is_elite_pro = true
+        break
+      endif
+    endfor
+
+    assign p_handle_down = current_product.handle | downcase
+    assign p_title_down = current_product.title | downcase
     if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
       assign is_elite_pro = true
     endif
@@ -12,7 +29,7 @@
 {%- if is_elite_pro -%}
   <input type="hidden" name="quantity" value="1">
 {%- else -%}
-  {% render 'quantity-selector', product: closest.product %}
+  {% render 'quantity-selector', product: current_product %}
 {%- endif -%}
 
 {% schema %}
