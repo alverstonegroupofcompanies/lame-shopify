@@ -1,5 +1,65 @@
 {{ 'lame-search-page.css' | asset_url | stylesheet_tag }}
 
+<style>
+  .lame-search-path {
+    width: 100%;
+    margin-block-end: 0.25rem;
+  }
+  .lame-search-path__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #8a9390;
+  }
+  .lame-search-path__item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .lame-search-path__item:not(:last-child)::after {
+    content: "/";
+    display: inline-block;
+    margin-inline-start: 8px;
+    color: #b0b8b4;
+    font-size: 0.72rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .lame-search-path__item a {
+    color: #5c6b62;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .lame-search-path__item a:hover {
+    color: #154230;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .lame-search-path__item--current,
+  .lame-search-path__item--current span {
+    color: #242b27;
+    font-weight: 600;
+  }
+  .lame-search-path__term {
+    display: inline-block;
+    vertical-align: bottom;
+    max-width: clamp(140px, 45vw, 320px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div class="section section--page-width color-{{ section.settings.color_scheme }} lame-search-header">
   <div
@@ -13,20 +73,18 @@
       <nav class="lame-search-path" aria-label="Breadcrumb">
         <ol class="lame-search-path__list">
           <li class="lame-search-path__item">
-            <a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t }}</a>
+            <a href="{{ routes.root_url }}">{{ 'lame_product.breadcrumb_home' | t | default: 'Home' }}</a>
           </li>
-          <li class="lame-search-path__sep" aria-hidden="true">/</li>
           {%- if search.performed and search.terms != blank -%}
             <li class="lame-search-path__item">
-              <a href="{{ routes.search_url }}">{{ 'content.search' | t }}</a>
+              <a href="{{ routes.search_url }}">{{ 'content.search' | t | default: 'Search' }}</a>
             </li>
-            <li class="lame-search-path__sep" aria-hidden="true">/</li>
             <li class="lame-search-path__item lame-search-path__item--current" aria-current="page">
-              <span>{{ search.terms | escape }}</span>
+              <span class="lame-search-path__term" title="{{ search.terms | escape }}">{{ search.terms | escape }}</span>
             </li>
           {%- else -%}
             <li class="lame-search-path__item lame-search-path__item--current" aria-current="page">
-              <span>{{ 'content.search' | t }}</span>
+              <span class="lame-search-path__term">{{ 'content.search' | t | default: 'Search' }}</span>
             </li>
           {%- endif -%}
         </ol>
