@@ -19,7 +19,7 @@
   class="search-page-input__parent"
 >
   <search-page-input-component
-    style="{% render 'size-style', settings: block_settings %}{% render 'spacing-style', settings: block_settings %}"
+    style="{% render 'size-style', settings: block_settings %}{% render 'spacing-style', settings: block_settings %} --size-style-width: 640px; max-width: 640px; width: 100%; margin-inline: auto;"
     {{ block.shopify_attributes }}
   >
     <label
@@ -93,7 +93,10 @@
   .search-page-input__parent {
     display: flex;
     flex-direction: column;
-    align-items: var(--horizontal-alignment);
+    align-items: var(--horizontal-alignment, center);
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
   }
 
   .search-results__no-results {
@@ -105,7 +108,8 @@
     width: 100%;
     display: flex;
     top: 0;
-    max-width: var(--size-style-width);
+    max-width: 640px;
+    margin-inline: auto;
     align-items: center;
     background-color: var(--color-background);
     margin: var(--margin-2xl) 0 var(--margin-md);
@@ -227,7 +231,7 @@
       "max": 100,
       "step": 1,
       "unit": "%",
-      "default": 50,
+      "default": 100,
       "visible_if": "{{ block.settings.width == \"custom\" }}"
     },
     {
