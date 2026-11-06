@@ -71,8 +71,13 @@
       assign is_shipping_item = true
     endif
 
+    assign is_returns_item = false
+    if icon == 'returns' or title contains 'Return' or title contains 'return'
+      assign is_returns_item = true
+    endif
+
     assign hide_item = false
-    if is_non_physical and is_shipping_item
+    if is_non_physical and (is_shipping_item or is_returns_item)
       assign hide_item = true
     endif
 
@@ -114,13 +119,18 @@
         assign is_shipping_item = true
       endif
 
+      assign is_returns_item = false
+      if icon == 'returns' or title contains 'Return' or title contains 'return'
+        assign is_returns_item = true
+      endif
+
       assign hide_item = false
-      if is_non_physical and is_shipping_item
+      if is_non_physical and (is_shipping_item or is_returns_item)
         assign hide_item = true
       endif
     %}
     {% if (use_eta or title != blank) and hide_item == false %}
-      <div class="lame-pdp-trust-row__item">
+      <div class="lame-pdp-trust-row__item lame-pdp-trust-row__item--{{ icon }}" data-trust-icon="{{ icon }}">
         <span class="lame-pdp-trust-row__icon" aria-hidden="true">
           {% case icon %}
             {% when 'shipping' %}
