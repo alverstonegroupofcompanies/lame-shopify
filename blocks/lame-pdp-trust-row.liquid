@@ -1,5 +1,8 @@
 {% liquid
-  assign current_product = closest.product | default: product
+  assign current_product = product
+  if current_product == blank and closest.product != blank
+    assign current_product = closest.product
+  endif
   assign current_variant = current_product.selected_or_first_available_variant
 
   assign is_non_physical = false
@@ -11,7 +14,17 @@
       assign is_non_physical = true
     endif
 
-    # 2. Product tags indicating digital/membership
+    # 2. Product handle or title
+    assign p_handle_down = current_product.handle | downcase
+    assign p_title_down = current_product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_handle_down contains 'elite-pro' or p_handle_down contains 'platform-fee'
+      assign is_non_physical = true
+    endif
+    if p_title_down contains 'elite pro' or p_title_down contains 'platform fee'
+      assign is_non_physical = true
+    endif
+
+    # 3. Product tags indicating digital/membership
     for tag in current_product.tags
       assign tag_down = tag | downcase
       if tag_down == 'membership' or tag_down == 'digital' or tag_down contains 'non-physical' or tag_down contains 'no-shipping'
@@ -20,18 +33,16 @@
       endif
     endfor
 
-    # 3. Product handle or title
-    assign p_handle_down = current_product.handle | downcase
-    assign p_title_down = current_product.title | downcase
-    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
-      assign is_non_physical = true
-    endif
-
     # 4. Product type
     assign p_type_down = current_product.type | downcase
     if p_type_down == 'membership' or p_type_down == 'digital' or p_type_down contains 'service'
       assign is_non_physical = true
     endif
+  endif
+
+  # Fallback for request path
+  if request.path contains 'elite-pro-6-months'
+    assign is_non_physical = true
   endif
 
   # Calculate how many items will be visible to balance the grid
@@ -70,31 +81,6 @@
 %}
 
 {% if visible_count > 0 %}
-  <style>
-    .lame-pdp-trust-row {
-      grid-template-columns: repeat(var(--trust-cols, 3), minmax(0, 1fr));
-    }
-    .lame-pdp-trust-row--cols-2,
-    .lame-pdp-trust-row[data-visible-count="2"] {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: 1.25rem !important;
-    }
-    .lame-pdp-trust-row--cols-1,
-    .lame-pdp-trust-row[data-visible-count="1"] {
-      grid-template-columns: minmax(0, 1fr) !important;
-    }
-    @media screen and (max-width: 600px) {
-      .lame-pdp-trust-row,
-      .lame-pdp-trust-row--cols-2,
-      .lame-pdp-trust-row--cols-1,
-      .lame-pdp-trust-row[data-visible-count="2"],
-      .lame-pdp-trust-row[data-visible-count="1"] {
-        grid-template-columns: 1fr !important;
-        gap: 0.85rem !important;
-      }
-    }
-  </style>
-
   <div
     class="lame-pdp-trust-row lame-pdp-trust-row--cols-{{ visible_count }}"
     style="--trust-cols: {{ visible_count }};"
