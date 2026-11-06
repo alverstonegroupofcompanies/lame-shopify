@@ -1,4 +1,3 @@
-<!-- LAME-PDP-TRUST-ROW-VERSION-TEST-12345 -->
 {% liquid
   assign current_product = product
   if current_product == blank and closest.product != blank
@@ -8,24 +7,26 @@
 
   assign is_non_physical = false
   if current_product != blank
-    # 1. Variant or product requires_shipping is false
+    # 1. Preferred rule: variant or product requires_shipping is false
     if current_variant != blank and current_variant.requires_shipping == false
       assign is_non_physical = true
     elsif current_product.requires_shipping == false
       assign is_non_physical = true
     endif
 
-    # 2. Product handle or title
+    # 2. Handle check fallback: elite-pro-6-months or platform fee
     assign p_handle_down = current_product.handle | downcase
-    assign p_title_down = current_product.title | downcase
     if p_handle_down == 'elite-pro-6-months' or p_handle_down contains 'elite-pro' or p_handle_down contains 'platform-fee'
       assign is_non_physical = true
     endif
+
+    # 3. Title check fallback
+    assign p_title_down = current_product.title | downcase
     if p_title_down contains 'elite pro' or p_title_down contains 'platform fee'
       assign is_non_physical = true
     endif
 
-    # 3. Product tags indicating digital/membership
+    # 4. Product tags indicating digital/membership
     for tag in current_product.tags
       assign tag_down = tag | downcase
       if tag_down == 'membership' or tag_down == 'digital' or tag_down contains 'non-physical' or tag_down contains 'no-shipping'
@@ -34,7 +35,7 @@
       endif
     endfor
 
-    # 4. Product type
+    # 5. Product type
     assign p_type_down = current_product.type | downcase
     if p_type_down == 'membership' or p_type_down == 'digital' or p_type_down contains 'service'
       assign is_non_physical = true
@@ -81,73 +82,71 @@
   endfor
 %}
 
-{% if visible_count > 0 %}
-  <div
-    class="lame-pdp-trust-row lame-pdp-trust-row--cols-{{ visible_count }}"
-    style="--trust-cols: {{ visible_count }};"
-    data-visible-count="{{ visible_count }}"
-    {{ block.shopify_attributes }}
-  >
-    {% for i in (1..3) %}
-      {% liquid
-        assign use_eta = false
-        case i
-          when 1
-            assign icon = block.settings.icon_1
-            assign title = block.settings.title_1
-            assign subtitle = block.settings.subtitle_1
-            if block.settings.use_delivery_eta_1
-              assign use_eta = true
-            endif
-          when 2
-            assign icon = block.settings.icon_2
-            assign title = block.settings.title_2
-            assign subtitle = block.settings.subtitle_2
-          when 3
-            assign icon = block.settings.icon_3
-            assign title = block.settings.title_3
-            assign subtitle = block.settings.subtitle_3
-        endcase
+<div
+  class="lame-pdp-trust-row lame-pdp-trust-row--cols-{{ visible_count }}"
+  style="--trust-cols: {{ visible_count }};"
+  data-visible-count="{{ visible_count }}"
+  {{ block.shopify_attributes }}
+>
+  {% for i in (1..3) %}
+    {% liquid
+      assign use_eta = false
+      case i
+        when 1
+          assign icon = block.settings.icon_1
+          assign title = block.settings.title_1
+          assign subtitle = block.settings.subtitle_1
+          if block.settings.use_delivery_eta_1
+            assign use_eta = true
+          endif
+        when 2
+          assign icon = block.settings.icon_2
+          assign title = block.settings.title_2
+          assign subtitle = block.settings.subtitle_2
+        when 3
+          assign icon = block.settings.icon_3
+          assign title = block.settings.title_3
+          assign subtitle = block.settings.subtitle_3
+      endcase
 
-        assign is_shipping_item = false
-        if use_eta or icon == 'shipping' or title contains 'Shipping' or title contains 'shipping' or title contains 'Delivered' or title contains 'delivered' or title contains 'Delivery' or title contains 'delivery'
-          assign is_shipping_item = true
-        endif
+      assign is_shipping_item = false
+      if use_eta or icon == 'shipping' or title contains 'Shipping' or title contains 'shipping' or title contains 'Delivered' or title contains 'delivered' or title contains 'Delivery' or title contains 'delivery'
+        assign is_shipping_item = true
+      endif
 
-        assign hide_item = false
-        if is_non_physical and is_shipping_item
-          assign hide_item = true
-        endif
-      %}
-      {% if (use_eta or title != blank) and hide_item == false %}
-        <div class="lame-pdp-trust-row__item">
-          <span class="lame-pdp-trust-row__icon" aria-hidden="true">
-            {% case icon %}
-              {% when 'shipping' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.35"/><path d="M14 10h4l3 3v2h-7v-5Z" stroke="currentColor" stroke-width="1.35"/><circle cx="7" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/><circle cx="17" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/></svg>
-              {% when 'secure' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.35"/><path d="M9 12.5 11 15l5-5.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
-              {% when 'returns' %}
-                <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12a4 4 0 0 1 0 8H9" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><path d="M9 12 6 9l3-3" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              {% else %}
-                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.35"/></svg>
-            {% endcase %}
-          </span>
-          <span class="lame-pdp-trust-row__copy">
-            {% if use_eta %}
-              {% render 'lame-delivery-eta', variant: 'trust' %}
+      assign hide_item = false
+      if is_non_physical and is_shipping_item
+        assign hide_item = true
+      endif
+    %}
+    {% if (use_eta or title != blank) and hide_item == false %}
+      <div class="lame-pdp-trust-row__item">
+        <span class="lame-pdp-trust-row__icon" aria-hidden="true">
+          {% case icon %}
+            {% when 'shipping' %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h11v8H3V7Z" stroke="currentColor" stroke-width="1.35"/><path d="M14 10h4l3 3v2h-7v-5Z" stroke="currentColor" stroke-width="1.35"/><circle cx="7" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/><circle cx="17" cy="17" r="1.75" stroke="currentColor" stroke-width="1.35"/></svg>
+            {% when 'secure' %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-3Z" stroke="currentColor" stroke-width="1.35"/><path d="M9 12.5 11 15l5-5.5" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/></svg>
+            {% when 'returns' %}
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 8h12a4 4 0 0 1 0 8H9" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><path d="M9 12 6 9l3-3" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
             {% else %}
-              <strong>{{ title | escape }}</strong>
-              {% if subtitle != blank %}
-                <span>{{ subtitle | escape }}</span>
-              {% endif %}
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.35"/></svg>
+          {% endcase %}
+        </span>
+        <span class="lame-pdp-trust-row__copy">
+          {% if use_eta %}
+            {% render 'lame-delivery-eta', variant: 'trust' %}
+          {% else %}
+            <strong>{{ title | escape }}</strong>
+            {% if subtitle != blank %}
+              <span>{{ subtitle | escape }}</span>
             {% endif %}
-          </span>
-        </div>
-      {% endif %}
-    {% endfor %}
-  </div>
-{% endif %}
+          {% endif %}
+        </span>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
 
 {% schema %}
 {
