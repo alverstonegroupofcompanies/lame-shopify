@@ -1,4 +1,63 @@
-<!-- TEST-SYNC-112233 -->
+{% liquid
+  assign current_product = closest.product | default: product
+  assign current_variant = current_product.selected_or_first_available_variant
+
+  assign is_non_physical = false
+  if current_product != blank
+    if current_variant != blank and current_variant.requires_shipping == false
+      assign is_non_physical = true
+    elsif current_product.requires_shipping == false
+      assign is_non_physical = true
+    endif
+
+    assign p_handle_down = current_product.handle | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_handle_down contains 'elite-pro' or p_handle_down contains 'platform-fee'
+      assign is_non_physical = true
+    endif
+
+    assign p_title_down = current_product.title | downcase
+    if p_title_down contains 'elite pro' or p_title_down contains 'platform fee'
+      assign is_non_physical = true
+    endif
+
+    for tag in current_product.tags
+      assign tag_down = tag | downcase
+      if tag_down == 'membership' or tag_down == 'digital' or tag_down contains 'non-physical' or tag_down contains 'no-shipping'
+        assign is_non_physical = true
+        break
+      endif
+    endfor
+
+    assign p_type_down = current_product.type | downcase
+    if p_type_down == 'membership' or p_type_down == 'digital' or p_type_down contains 'service'
+      assign is_non_physical = true
+    endif
+  endif
+
+  if request.path contains 'elite-pro-6-months'
+    assign is_non_physical = true
+  endif
+%}
+
+{% if is_non_physical %}
+  <style>
+    .lame-pdp-trust-row > .lame-pdp-trust-row__item:first-child,
+    .lame-pdp-trust-row .lame-pdp-trust-row__item:has([data-lame-delivery-eta]),
+    .lame-pdp-trust-row .lame-pdp-trust-row__item:has(.lame-delivery-eta) {
+      display: none !important;
+    }
+    .lame-pdp-trust-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 1.25rem !important;
+    }
+    @media screen and (max-width: 600px) {
+      .lame-pdp-trust-row {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+      }
+    }
+  </style>
+{% endif %}
 {{ 'lame-product-healthcare.css' | asset_url | stylesheet_tag }}
 
 <script type="application/ld+json">

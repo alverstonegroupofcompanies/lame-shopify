@@ -12,9 +12,49 @@
   assign end_ts = start_ts | plus: day_seconds
   assign end_label = end_ts | date: '%d %b'
   assign eta_variant = variant | default: 'line'
+
+  assign current_product = closest.product | default: product
+  assign current_variant = current_product.selected_or_first_available_variant
+  assign is_non_physical = false
+  if current_product != blank
+    if current_variant != blank and current_variant.requires_shipping == false
+      assign is_non_physical = true
+    elsif current_product.requires_shipping == false
+      assign is_non_physical = true
+    endif
+    assign p_h = current_product.handle | downcase
+    if p_h == 'elite-pro-6-months' or p_h contains 'elite-pro' or p_h contains 'platform-fee'
+      assign is_non_physical = true
+    endif
+    for tag in current_product.tags
+      assign tag_down = tag | downcase
+      if tag_down == 'membership' or tag_down == 'digital' or tag_down contains 'non-physical'
+        assign is_non_physical = true
+        break
+      endif
+    endfor
+  endif
+  if request.path contains 'elite-pro-6-months'
+    assign is_non_physical = true
+  endif
 -%}
 
-{%- if eta_variant == 'trust' -%}
+{%- if is_non_physical and eta_variant == 'trust' -%}
+  <script>
+    (function(){
+      var el = document.currentScript;
+      if (el) {
+        var item = el.closest('.lame-pdp-trust-row__item');
+        if (item) item.style.display = 'none';
+        var row = el.closest('.lame-pdp-trust-row');
+        if (row) {
+          row.style.setProperty('grid-template-columns', 'repeat(2, minmax(0, 1fr))', 'important');
+          row.style.setProperty('gap', '1.25rem', 'important');
+        }
+      }
+    })();
+  </script>
+{%- elsif eta_variant == 'trust' -%}
   <span
     class="lame-delivery-eta lame-delivery-eta--trust"
     data-lame-delivery-eta
