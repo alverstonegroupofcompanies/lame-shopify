@@ -17,6 +17,11 @@
     assign product = collections.all.products.first
   endif
 
+  assign show_dynamic_checkout = block_settings.show_dynamic_checkout | default: false
+  if closest.buy_buttons.settings.show_dynamic_checkout == false or show_dynamic_checkout == false
+    assign show_dynamic_checkout = false
+  endif
+
   assign lame_checkout_login_required = false
   if shop.customer_accounts_enabled and customer == blank
     assign lame_checkout_login_required = true
@@ -24,7 +29,7 @@
 %}
 
 {% capture accelerated_checkout_button %}
-  {% if product != blank and form_obj != blank %}
+  {% if show_dynamic_checkout and product != blank and form_obj != blank %}
     {{ form_obj | payment_button }}
   {% endif %}
 {% endcapture %}

@@ -404,6 +404,12 @@
       render 'lame-customer-auth-url', type: 'register', return_url: routes.cart_url
     endcapture
   endif
+
+  assign customer_phone = customer.phone | default: customer.default_address.phone
+  assign lame_cart_phone_check = cart.attributes['Phone']
+  if lame_cart_phone_check == blank and customer_phone != blank
+    assign lame_cart_phone_check = customer_phone
+  endif
 -%}
 
 <div class="cart__ctas">
@@ -422,13 +428,21 @@
       {{ 'lame_customer.create_account_html' | t: link: lame_checkout_register_url }}
     </p>
   {%- else -%}
+    {%- unless cart.empty? -%}
+      {% render 'lame-cart-phone', section_id: section_id %}
+    {%- endunless -%}
+
     <button
       type="submit"
       id="checkout"
       class="cart__checkout-button button"
       name="checkout"
-      {% if cart == empty %}
+      {% if cart == empty or lame_cart_phone_check == blank %}
         disabled
+        aria-disabled="true"
+      {% endif %}
+      {% if cart == empty %}
+        data-cart-empty="true"
       {% endif %}
       form="cart-form"
     >
@@ -450,6 +464,13 @@
         type="submit"
         class="cart__secondary-button"
         name="checkout"
+        {% if cart == empty or lame_cart_phone_check == blank %}
+          disabled
+          aria-disabled="true"
+        {% endif %}
+        {% if cart == empty %}
+          data-cart-empty="true"
+        {% endif %}
         form="cart-form"
       >
         {{ 'lame_cart.buy_now' | t }}
