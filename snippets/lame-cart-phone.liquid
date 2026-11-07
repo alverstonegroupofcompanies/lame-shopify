@@ -143,7 +143,9 @@
     window.__LAME_CART_PHONE_INITIALIZED__ = true;
 
     const STORAGE_KEY = 'lame_cart_phone';
-    let isSaving = false;
+    let currentSavePromise = null;
+    let pendingPhoneVal = null;
+    let pendingResolvers = [];
     let lastSavedPhone = null;
 
     /**
@@ -221,11 +223,16 @@
       });
     }
 
-    function setErrorState(show) {
+    function setErrorState(show, customMessage) {
       const errors = getErrors();
       const inputs = getInputs();
       errors.forEach(function(err) {
-        err.style.display = show ? 'block' : 'none';
+        if (show) {
+          err.textContent = customMessage || 'Enter a valid 10-digit mobile number';
+          err.style.display = 'block';
+        } else {
+          err.style.display = 'none';
+        }
       });
       inputs.forEach(function(inp) {
         if (show) {
@@ -238,33 +245,94 @@
       });
     }
 
-    async function savePhoneAttribute(phoneVal) {
-      if (!phoneVal || isSaving) return;
-      if (phoneVal === lastSavedPhone) return;
-      isSaving = true;
-      try {
-        await fetch('/cart/update.js', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: JSON.stringify({
-            attributes: {
-              'Phone': phoneVal
-            }
-          })
-        });
-        lastSavedPhone = phoneVal;
-        try {
-          sessionStorage.setItem(STORAGE_KEY, phoneVal);
-        } catch (e) {}
-      } catch (err) {
-        console.warn('[Cart Phone] Failed to save phone attribute:', err);
-      } finally {
-        isSaving = false;
+    /**
+     * Saves the phone number to cart.attributes['Phone'] via /cart/update.js.
+     * Returns a Promise that resolves true only when /cart/update.js responds with response.ok.
+     * If a save is already in progress, waits for it and saves the latest value instead of returning early.
+     * Only sets lastSavedPhone after a successful response.
+     * On failure, shows an error and keeps checkout blocked.
+     * @param {string} phoneVal
+     * @returns {Promise<boolean>}
+     */
+    function savePhoneAttribute(phoneVal) {
+      if (!phoneVal) {
+        return Promise.resolve(false);
       }
+
+      if (phoneVal === lastSavedPhone && !currentSavePromise) {
+        return Promise.resolve(true);
+      }
+
+      if (currentSavePromise) {
+        pendingPhoneVal = phoneVal;
+        return new Promise(function(resolve) {
+          pendingResolvers.push(resolve);
+        });
+      }
+
+      return executeSave(phoneVal);
+    }
+
+    async function executeSave(phoneVal) {
+      currentSavePromise = (async function() {
+        let success = false;
+        try {
+          const response = await fetch('/cart/update.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              attributes: {
+                'Phone': phoneVal
+              }
+            })
+          });
+
+          if (response.ok) {
+            lastSavedPhone = phoneVal;
+            try {
+              sessionStorage.setItem(STORAGE_KEY, phoneVal);
+            } catch (e) {}
+            success = true;
+          } else {
+            success = false;
+            setErrorState(true, 'Could not save your number, please try again');
+            setCheckoutButtonsState(false);
+          }
+        } catch (err) {
+          console.warn('[Cart Phone] Failed to save phone attribute:', err);
+          success = false;
+          setErrorState(true, 'Could not save your number, please try again');
+          setCheckoutButtonsState(false);
+        }
+        return success;
+      })();
+
+      const result = await currentSavePromise;
+      currentSavePromise = null;
+
+      if (pendingPhoneVal !== null) {
+        const nextVal = pendingPhoneVal;
+        pendingPhoneVal = null;
+        const resolvers = pendingResolvers;
+        pendingResolvers = [];
+
+        let nextResult = false;
+        if (nextVal === lastSavedPhone) {
+          nextResult = true;
+        } else {
+          nextResult = await executeSave(nextVal);
+        }
+        resolvers.forEach(function(resolve) {
+          resolve(nextResult);
+        });
+        return nextResult;
+      }
+
+      return result;
     }
 
     function syncState(sourceInput) {
@@ -352,7 +420,7 @@
           savePhoneAttribute(res.clean);
           syncState(e.target);
         } else {
-          setErrorState(true);
+          setErrorState(true, 'Enter a valid 10-digit mobile number');
           setCheckoutButtonsState(false);
         }
       }
@@ -370,7 +438,7 @@
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        setErrorState(true);
+        setErrorState(true, 'Enter a valid 10-digit mobile number');
         setCheckoutButtonsState(false);
         const inputs = getInputs();
         if (inputs.length > 0) {
@@ -385,7 +453,41 @@
       e.stopImmediatePropagation();
 
       checkoutBtn.setAttribute('disabled', 'disabled');
-      await savePhoneAttribute(res.clean);
+      checkoutBtn.setAttribute('aria-disabled', 'true');
+
+      const savedOk = await savePhoneAttribute(res.clean);
+      if (!savedOk) {
+        setErrorState(true, 'Could not save your number, please try again');
+        setCheckoutButtonsState(false);
+        checkoutBtn.removeAttribute('disabled');
+        checkoutBtn.removeAttribute('aria-disabled');
+        return false;
+      }
+
+      // Re-fetch /cart.js and confirm attributes.Phone equals entered number
+      try {
+        const verifyRes = await fetch('/cart.js', {
+          method: 'GET',
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        if (!verifyRes.ok) throw new Error('Cart verify failed');
+        const cartData = await verifyRes.json();
+        const confirmedPhone = cartData && cartData.attributes && cartData.attributes['Phone'];
+        if (confirmedPhone !== res.clean) {
+          throw new Error('Phone attribute mismatch');
+        }
+      } catch (verifyErr) {
+        console.warn('[Cart Phone] Verification failed:', verifyErr);
+        setErrorState(true, 'Could not save your number, please try again');
+        setCheckoutButtonsState(false);
+        checkoutBtn.removeAttribute('disabled');
+        checkoutBtn.removeAttribute('aria-disabled');
+        return false;
+      }
 
       const form = checkoutBtn.form || document.getElementById('cart-form');
       if (form) {
@@ -413,19 +515,66 @@
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            setErrorState(true);
+            setErrorState(true, 'Enter a valid 10-digit mobile number');
             setCheckoutButtonsState(false);
             const inputs = getInputs();
             if (inputs.length > 0) {
               inputs[0].focus();
             }
             return false;
-          } else if (isPhoneInput) {
+          } else if (isPhoneInput || e.target.closest('button[name="checkout"]')) {
             e.preventDefault();
-            e.target.value = res.clean;
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            if (isPhoneInput) {
+              e.target.value = res.clean;
+            }
             setErrorState(false);
-            await savePhoneAttribute(res.clean);
-            window.location.href = '/checkout';
+            setCheckoutButtonsState(false);
+
+            const savedOk = await savePhoneAttribute(res.clean);
+            if (!savedOk) {
+              setErrorState(true, 'Could not save your number, please try again');
+              setCheckoutButtonsState(false);
+              return false;
+            }
+
+            // Re-fetch /cart.js and confirm attributes.Phone equals entered number
+            try {
+              const verifyRes = await fetch('/cart.js', {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                  'Accept': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest'
+                }
+              });
+              if (!verifyRes.ok) throw new Error('Cart verify failed');
+              const cartData = await verifyRes.json();
+              const confirmedPhone = cartData && cartData.attributes && cartData.attributes['Phone'];
+              if (confirmedPhone !== res.clean) {
+                throw new Error('Phone attribute mismatch');
+              }
+            } catch (verifyErr) {
+              console.warn('[Cart Phone] Verification failed:', verifyErr);
+              setErrorState(true, 'Could not save your number, please try again');
+              setCheckoutButtonsState(false);
+              return false;
+            }
+
+            const form = document.getElementById('cart-form');
+            if (form) {
+              if (!form.querySelector('input[name="checkout"]')) {
+                const hiddenSubmit = document.createElement('input');
+                hiddenSubmit.type = 'hidden';
+                hiddenSubmit.name = 'checkout';
+                hiddenSubmit.value = 'Checkout';
+                form.appendChild(hiddenSubmit);
+              }
+              form.submit();
+            } else {
+              window.location.href = '/checkout';
+            }
           }
         }
       }
