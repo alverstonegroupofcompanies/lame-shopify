@@ -289,7 +289,11 @@
         {% if eager_loading %}
           {% paginate collection_object.products by max_featured_products %}
             {% for item in collection_object.products %}
-              <li class="mega-menu__content-list-item {% if forloop.index > max_featured_products_tablet %} mega-menu__content-list-item--hidden-tablet{% endif %}">
+              {% assign hidden_tablet_class = '' %}
+              {% if forloop.index > max_featured_products_tablet %}
+                {% assign hidden_tablet_class = ' mega-menu__content-list-item--hidden-tablet' %}
+              {% endif %}
+              <li class="mega-menu__content-list-item{{ hidden_tablet_class }}">
                 {% render 'resource-card',
                   resource: item,
                   resource_type: 'product',
@@ -330,7 +334,11 @@
           {% else %}
             {% assign collection_object = collections[handle] %}
           {% endif %}
-          <li class="mega-menu__content-list-item{% if forloop.index > max_featured_collections_tablet %} mega-menu__content-list-item--hidden-tablet{% endif %}">
+          {% assign hidden_tablet_class = '' %}
+          {% if forloop.index > max_featured_collections_tablet %}
+            {% assign hidden_tablet_class = ' mega-menu__content-list-item--hidden-tablet' %}
+          {% endif %}
+          <li class="mega-menu__content-list-item{{ hidden_tablet_class }}">
             {% render 'resource-card',
               resource: collection_object,
               resource_type: 'collection',
