@@ -277,6 +277,16 @@
       currentSavePromise = (async function() {
         let success = false;
         try {
+          const noteTextarea = document.querySelector('textarea[name="note"]#cart-note') || document.querySelector('textarea[name="note"]');
+          const updatePayload = {
+            attributes: {
+              'Phone': phoneVal
+            }
+          };
+          if (noteTextarea && typeof noteTextarea.value === 'string') {
+            updatePayload.note = noteTextarea.value;
+          }
+
           const response = await fetch('/cart/update.js', {
             method: 'POST',
             headers: {
@@ -284,11 +294,7 @@
               'Accept': 'application/json',
               'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-              attributes: {
-                'Phone': phoneVal
-              }
-            })
+            body: JSON.stringify(updatePayload)
           });
 
           if (response.ok) {
@@ -489,19 +495,9 @@
         return false;
       }
 
-      const form = checkoutBtn.form || document.getElementById('cart-form');
-      if (form) {
-        if (!form.querySelector('input[name="checkout"]')) {
-          const hiddenSubmit = document.createElement('input');
-          hiddenSubmit.type = 'hidden';
-          hiddenSubmit.name = 'checkout';
-          hiddenSubmit.value = 'Checkout';
-          form.appendChild(hiddenSubmit);
-        }
-        form.submit();
-      } else {
-        window.location.href = '/checkout';
-      }
+      // Navigate to checkout with prefill parameter while preserving cart session
+      const checkoutUrl = '/checkout?checkout[shipping_address][phone]=' + encodeURIComponent('+91' + res.clean);
+      window.location.href = checkoutUrl;
     }, true);
 
     document.addEventListener('keydown', async function(e) {
@@ -562,19 +558,9 @@
               return false;
             }
 
-            const form = document.getElementById('cart-form');
-            if (form) {
-              if (!form.querySelector('input[name="checkout"]')) {
-                const hiddenSubmit = document.createElement('input');
-                hiddenSubmit.type = 'hidden';
-                hiddenSubmit.name = 'checkout';
-                hiddenSubmit.value = 'Checkout';
-                form.appendChild(hiddenSubmit);
-              }
-              form.submit();
-            } else {
-              window.location.href = '/checkout';
-            }
+            // Navigate to checkout with prefill parameter while preserving cart session
+            const checkoutUrl = '/checkout?checkout[shipping_address][phone]=' + encodeURIComponent('+91' + res.clean);
+            window.location.href = checkoutUrl;
           }
         }
       }
