@@ -429,7 +429,565 @@
     </p>
   {%- else -%}
     {%- unless cart.empty? -%}
-      {% render 'lame-cart-phone', section_id: section_id %}
+      {%- liquid
+        assign phone_uid = section_id | default: 'cart'
+        assign phone_input_id = 'CartPhoneInput-' | append: phone_uid
+        assign phone_error_id = 'CartPhoneError-' | append: phone_uid
+      -%}
+
+      <div class="cart-phone" data-cart-phone-wrapper>
+        <label for="{{ phone_input_id }}" class="cart-phone__label cart-primary-typography">
+          <span>Mobile number</span>
+          <span class="cart-phone__required" aria-hidden="true">*</span>
+        </label>
+        <div class="cart-phone__field">
+          <input
+            type="tel"
+            inputmode="numeric"
+            id="{{ phone_input_id }}"
+            class="cart-phone__input"
+            name="attributes[Phone]"
+            form="cart-form"
+            value="{{ lame_cart_phone_check | escape }}"
+            placeholder="10-digit mobile number"
+            autocomplete="tel"
+            maxlength="16"
+            required
+            aria-required="true"
+            aria-invalid="false"
+            aria-describedby="{{ phone_error_id }}"
+            data-cart-phone-input
+          >
+        </div>
+        <p
+          id="{{ phone_error_id }}"
+          class="cart-phone__error"
+          role="alert"
+          style="display: none;"
+          data-cart-phone-error
+        >
+          Enter a valid 10-digit mobile number
+        </p>
+      </div>
+
+      <style>
+        .cart-phone {
+          width: 100%;
+          margin-block: 0 0.625rem;
+          box-sizing: border-box;
+          text-align: left;
+        }
+
+        .cart-phone__label {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--lame-cart-ink, #141414);
+          margin-bottom: 0.375rem;
+          letter-spacing: 0.01em;
+        }
+
+        .cart-phone__required {
+          color: #dc2626;
+          font-size: 0.875rem;
+          line-height: 1;
+        }
+
+        .cart-phone__field {
+          position: relative;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        .cart-phone__input {
+          width: 100%;
+          height: 2.75rem;
+          padding: 0 0.875rem;
+          background: #ffffff;
+          border: 1px solid rgb(var(--brand-gold, 212 175 55) / 0.38);
+          border-radius: var(--lame-cart-radius, 12px);
+          font-family: var(--lame-font-body, var(--font-body--family, sans-serif));
+          font-size: 0.9375rem;
+          color: var(--lame-cart-ink, #141414);
+          box-sizing: border-box;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .cart-phone__input::placeholder {
+          color: rgb(var(--color-foreground-rgb, 20 20 20) / 0.45);
+          font-size: 0.875rem;
+        }
+
+        .cart-phone__input:focus {
+          outline: none;
+          border-color: var(--lame-cart-gold-strong, #c1971f);
+          box-shadow: 0 0 0 3px rgb(212 175 55 / 0.18);
+        }
+
+        .cart-phone__input.has-error,
+        .cart-phone__input[aria-invalid="true"] {
+          border-color: #dc2626;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+        }
+
+        .cart-phone__error {
+          color: #dc2626;
+          font-size: 0.75rem;
+          font-weight: 500;
+          margin: 0.35rem 0 0 0;
+          line-height: 1.35;
+          text-align: left;
+        }
+
+        .cart__checkout-button[disabled],
+        .cart__checkout-button[aria-disabled="true"],
+        .cart__secondary-button[disabled],
+        .cart__secondary-button[aria-disabled="true"] {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+      </style>
+
+      <script>
+        (function() {
+          if (window.__LAME_CART_PHONE_INITIALIZED__) {
+            if (window.lameCartPhoneSync) {
+              window.lameCartPhoneSync();
+            }
+            return;
+          }
+          window.__LAME_CART_PHONE_INITIALIZED__ = true;
+
+          const STORAGE_KEY = 'lame_cart_phone';
+          let currentSavePromise = null;
+          let pendingPhoneVal = null;
+          let pendingResolvers = [];
+          let lastSavedPhone = null;
+
+          function validateIndianMobile(val) {
+            if (!val) return { valid: false, clean: '' };
+            const str = String(val).trim();
+            let digits = str.replace(/[\s\-\(\)]/g, '');
+            if (digits.startsWith('+91')) {
+              digits = digits.slice(3);
+            } else if (digits.startsWith('+')) {
+              return { valid: false, clean: '' };
+            } else if (digits.startsWith('0') && digits.length === 11) {
+              digits = digits.slice(1);
+            } else if (digits.startsWith('91') && digits.length === 12) {
+              digits = digits.slice(2);
+            }
+            const isValid = /^[6-9]\d{9}$/.test(digits);
+            return { valid: isValid, clean: isValid ? digits : '' };
+          }
+
+          function getInputs() {
+            return Array.from(document.querySelectorAll('[data-cart-phone-input]'));
+          }
+
+          function getErrors() {
+            return Array.from(document.querySelectorAll('[data-cart-phone-error]'));
+          }
+
+          function getCheckoutButtons() {
+            return Array.from(document.querySelectorAll('#checkout, .cart__checkout-button, .cart__secondary-button, button[name="checkout"]'));
+          }
+
+          function getActivePhoneValue() {
+            const inputs = getInputs();
+            for (let i = 0; i < inputs.length; i++) {
+              if (inputs[i].value && inputs[i].value.trim()) {
+                return inputs[i].value.trim();
+              }
+            }
+            try {
+              const stored = sessionStorage.getItem(STORAGE_KEY);
+              if (stored) return stored;
+            } catch (e) {}
+            return '';
+          }
+
+          function setCheckoutButtonsState(isValid) {
+            const buttons = getCheckoutButtons();
+            buttons.forEach(function(btn) {
+              const isCartEmpty = btn.hasAttribute('data-cart-empty') || (btn.form && btn.form.hasAttribute('data-cart-empty'));
+              if (isValid && !isCartEmpty) {
+                btn.removeAttribute('disabled');
+                btn.setAttribute('aria-disabled', 'false');
+              } else {
+                btn.setAttribute('disabled', 'disabled');
+                btn.setAttribute('aria-disabled', 'true');
+              }
+            });
+
+            const additionalCta = document.querySelectorAll('.additional-checkout-buttons');
+            additionalCta.forEach(function(el) {
+              if (isValid) {
+                el.style.pointerEvents = '';
+                el.style.opacity = '';
+              } else {
+                el.style.pointerEvents = 'none';
+                el.style.opacity = '0.5';
+              }
+            });
+          }
+
+          function setErrorState(show, customMessage) {
+            const errors = getErrors();
+            const inputs = getInputs();
+            errors.forEach(function(err) {
+              if (show) {
+                err.textContent = customMessage || 'Enter a valid 10-digit mobile number';
+                err.style.display = 'block';
+              } else {
+                err.style.display = 'none';
+              }
+            });
+            inputs.forEach(function(inp) {
+              if (show) {
+                inp.classList.add('has-error');
+                inp.setAttribute('aria-invalid', 'true');
+              } else {
+                inp.classList.remove('has-error');
+                inp.setAttribute('aria-invalid', 'false');
+              }
+            });
+          }
+
+          function savePhoneAttribute(phoneVal) {
+            if (!phoneVal) {
+              return Promise.resolve(false);
+            }
+
+            if (phoneVal === lastSavedPhone && !currentSavePromise) {
+              return Promise.resolve(true);
+            }
+
+            if (currentSavePromise) {
+              pendingPhoneVal = phoneVal;
+              return new Promise(function(resolve) {
+                pendingResolvers.push(resolve);
+              });
+            }
+
+            return executeSave(phoneVal);
+          }
+
+          async function executeSave(phoneVal) {
+            currentSavePromise = (async function() {
+              let success = false;
+              try {
+                const response = await fetch('/cart/update.js', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify({
+                    attributes: {
+                      'Phone': phoneVal
+                    }
+                  })
+                });
+
+                if (response.ok) {
+                  lastSavedPhone = phoneVal;
+                  try {
+                    sessionStorage.setItem(STORAGE_KEY, phoneVal);
+                  } catch (e) {}
+                  success = true;
+                } else {
+                  success = false;
+                  setErrorState(true, 'Could not save your number, please try again');
+                  setCheckoutButtonsState(false);
+                }
+              } catch (err) {
+                console.warn('[Cart Phone] Failed to save phone attribute:', err);
+                success = false;
+                setErrorState(true, 'Could not save your number, please try again');
+                setCheckoutButtonsState(false);
+              }
+              return success;
+            })();
+
+            const result = await currentSavePromise;
+            currentSavePromise = null;
+
+            if (pendingPhoneVal !== null) {
+              const nextVal = pendingPhoneVal;
+              pendingPhoneVal = null;
+              const resolvers = pendingResolvers;
+              pendingResolvers = [];
+
+              let nextResult = false;
+              if (nextVal === lastSavedPhone) {
+                nextResult = true;
+              } else {
+                nextResult = await executeSave(nextVal);
+              }
+              resolvers.forEach(function(resolve) {
+                resolve(nextResult);
+              });
+              return nextResult;
+            }
+
+            return result;
+          }
+
+          function syncState(sourceInput) {
+            const activeVal = sourceInput ? sourceInput.value : getActivePhoneValue();
+            const res = validateIndianMobile(activeVal);
+
+            const inputs = getInputs();
+            inputs.forEach(function(inp) {
+              if (inp !== sourceInput) {
+                if (res.clean && inp.value !== res.clean) {
+                  inp.value = res.clean;
+                } else if (!res.clean && inp.value !== activeVal) {
+                  inp.value = activeVal;
+                }
+              }
+            });
+
+            if (res.valid) {
+              setErrorState(false);
+              setCheckoutButtonsState(true);
+              try {
+                sessionStorage.setItem(STORAGE_KEY, res.clean);
+              } catch (e) {}
+            } else {
+              setCheckoutButtonsState(false);
+            }
+          }
+
+          function restoreAndCheck() {
+            let stored = '';
+            try {
+              stored = sessionStorage.getItem(STORAGE_KEY) || '';
+            } catch (e) {}
+
+            const inputs = getInputs();
+            inputs.forEach(function(inp) {
+              if (!inp.value && stored) {
+                inp.value = stored;
+              }
+              const val = inp.value;
+              const res = validateIndianMobile(val);
+              if (res.valid && res.clean && inp.value !== res.clean) {
+                inp.value = res.clean;
+              }
+            });
+
+            const activeVal = getActivePhoneValue();
+            const res = validateIndianMobile(activeVal);
+            if (res.valid) {
+              setErrorState(false);
+              setCheckoutButtonsState(true);
+              if (res.clean !== lastSavedPhone) {
+                savePhoneAttribute(res.clean);
+              }
+            } else {
+              setCheckoutButtonsState(false);
+            }
+          }
+
+          window.lameCartPhoneSync = restoreAndCheck;
+
+          document.addEventListener('input', function(e) {
+            if (e.target && e.target.matches('[data-cart-phone-input]')) {
+              const res = validateIndianMobile(e.target.value);
+              if (res.valid) {
+                setErrorState(false);
+                setCheckoutButtonsState(true);
+                try {
+                  sessionStorage.setItem(STORAGE_KEY, res.clean);
+                } catch (err) {}
+              } else {
+                setCheckoutButtonsState(false);
+              }
+              syncState(e.target);
+            }
+          });
+
+          document.addEventListener('focusout', function(e) {
+            if (e.target && e.target.matches('[data-cart-phone-input]')) {
+              const res = validateIndianMobile(e.target.value);
+              if (res.valid) {
+                e.target.value = res.clean;
+                setErrorState(false);
+                setCheckoutButtonsState(true);
+                savePhoneAttribute(res.clean);
+                syncState(e.target);
+              } else {
+                setErrorState(true, 'Enter a valid 10-digit mobile number');
+                setCheckoutButtonsState(false);
+              }
+            }
+          });
+
+          document.addEventListener('click', async function(e) {
+            const checkoutBtn = e.target.closest('#checkout, .cart__checkout-button, .cart__secondary-button, button[name="checkout"]');
+            if (!checkoutBtn) return;
+            if (checkoutBtn.tagName === 'A') return;
+
+            const activeVal = getActivePhoneValue();
+            const res = validateIndianMobile(activeVal);
+
+            if (!res.valid) {
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              setErrorState(true, 'Enter a valid 10-digit mobile number');
+              setCheckoutButtonsState(false);
+              const inputs = getInputs();
+              if (inputs.length > 0) {
+                inputs[0].focus();
+                inputs[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+              return false;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            checkoutBtn.setAttribute('disabled', 'disabled');
+            checkoutBtn.setAttribute('aria-disabled', 'true');
+
+            const savedOk = await savePhoneAttribute(res.clean);
+            if (!savedOk) {
+              setErrorState(true, 'Could not save your number, please try again');
+              setCheckoutButtonsState(false);
+              checkoutBtn.removeAttribute('disabled');
+              checkoutBtn.removeAttribute('aria-disabled');
+              return false;
+            }
+
+            try {
+              const verifyRes = await fetch('/cart.js', {
+                method: 'GET',
+                cache: 'no-store',
+                headers: {
+                  'Accept': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest'
+                }
+              });
+              if (!verifyRes.ok) throw new Error('Cart verify failed');
+              const cartData = await verifyRes.json();
+              const confirmedPhone = cartData && cartData.attributes && cartData.attributes['Phone'];
+              if (confirmedPhone !== res.clean) {
+                throw new Error('Phone attribute mismatch');
+              }
+            } catch (verifyErr) {
+              console.warn('[Cart Phone] Verification failed:', verifyErr);
+              setErrorState(true, 'Could not save your number, please try again');
+              setCheckoutButtonsState(false);
+              checkoutBtn.removeAttribute('disabled');
+              checkoutBtn.removeAttribute('aria-disabled');
+              return false;
+            }
+
+            const form = checkoutBtn.form || document.getElementById('cart-form');
+            if (form) {
+              if (!form.querySelector('input[name="checkout"]')) {
+                const hiddenSubmit = document.createElement('input');
+                hiddenSubmit.type = 'hidden';
+                hiddenSubmit.name = 'checkout';
+                hiddenSubmit.value = 'Checkout';
+                form.appendChild(hiddenSubmit);
+              }
+              form.submit();
+            } else {
+              window.location.href = '/checkout';
+            }
+          }, true);
+
+          document.addEventListener('keydown', async function(e) {
+            if (e.key === 'Enter') {
+              const isPhoneInput = e.target && e.target.matches('[data-cart-phone-input]');
+              const isCartForm = e.target && e.target.closest('#cart-form, .cart-drawer, .cart-page');
+              if (isPhoneInput || isCartForm) {
+                const activeVal = getActivePhoneValue();
+                const res = validateIndianMobile(activeVal);
+                if (!res.valid) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                  setErrorState(true, 'Enter a valid 10-digit mobile number');
+                  setCheckoutButtonsState(false);
+                  const inputs = getInputs();
+                  if (inputs.length > 0) {
+                    inputs[0].focus();
+                  }
+                  return false;
+                } else if (isPhoneInput || e.target.closest('button[name="checkout"]')) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                  if (isPhoneInput) {
+                    e.target.value = res.clean;
+                  }
+                  setErrorState(false);
+                  setCheckoutButtonsState(false);
+
+                  const savedOk = await savePhoneAttribute(res.clean);
+                  if (!savedOk) {
+                    setErrorState(true, 'Could not save your number, please try again');
+                    setCheckoutButtonsState(false);
+                    return false;
+                  }
+
+                  try {
+                    const verifyRes = await fetch('/cart.js', {
+                      method: 'GET',
+                      cache: 'no-store',
+                      headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                      }
+                    });
+                    if (!verifyRes.ok) throw new Error('Cart verify failed');
+                    const cartData = await verifyRes.json();
+                    const confirmedPhone = cartData && cartData.attributes && cartData.attributes['Phone'];
+                    if (confirmedPhone !== res.clean) {
+                      throw new Error('Phone attribute mismatch');
+                    }
+                  } catch (verifyErr) {
+                    console.warn('[Cart Phone] Verification failed:', verifyErr);
+                    setErrorState(true, 'Could not save your number, please try again');
+                    setCheckoutButtonsState(false);
+                    return false;
+                  }
+
+                  const form = document.getElementById('cart-form');
+                  if (form) {
+                    if (!form.querySelector('input[name="checkout"]')) {
+                      const hiddenSubmit = document.createElement('input');
+                      hiddenSubmit.type = 'hidden';
+                      hiddenSubmit.name = 'checkout';
+                      hiddenSubmit.value = 'Checkout';
+                      form.appendChild(hiddenSubmit);
+                    }
+                    form.submit();
+                  } else {
+                    window.location.href = '/checkout';
+                  }
+                }
+              }
+            }
+          }, true);
+
+          document.addEventListener('DOMContentLoaded', restoreAndCheck);
+          document.addEventListener('cart:update', function() { setTimeout(restoreAndCheck, 50); });
+          document.addEventListener('cart:add', function() { setTimeout(restoreAndCheck, 50); });
+          document.addEventListener('dialog:open', function() { setTimeout(restoreAndCheck, 20); });
+
+          restoreAndCheck();
+        })();
+      </script>
     {%- endunless -%}
 
     <button
