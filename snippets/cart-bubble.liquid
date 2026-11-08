@@ -5,11 +5,18 @@
   count will be displayed as "99+".
 {%- enddoc -%}
 
+{% liquid
+  assign item_count = cart.item_count
+  assign maintain_ratio = false
+  if item_count <= 99
+    assign maintain_ratio = true
+  endif
+%}
+
 <div
   ref="cartBubble"
   class="cart-bubble{% if cart == empty %} visually-hidden{% endif %}"
-  {% assign item_count = cart.item_count %}
-  {% if item_count <= 99 %}
+  {% if maintain_ratio %}
     data-maintain-ratio
   {% endif %}
 >

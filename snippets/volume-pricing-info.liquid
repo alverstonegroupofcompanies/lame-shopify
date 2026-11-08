@@ -94,9 +94,13 @@
           <div class="volume-pricing-info__table">
             {%- assign min_qty = variant.quantity_rule.min | default: 1 -%}
             {%- assign first_break = variant.quantity_price_breaks.first.minimum_quantity -%}
+            {%- assign is_first_break_active = false -%}
+            {%- if current_quantity >= min_qty and current_quantity < first_break -%}
+              {%- assign is_first_break_active = true -%}
+            {%- endif -%}
 
             <div
-              class="volume-pricing-info__row{% if current_quantity >= min_qty and current_quantity < first_break %} volume-pricing-info__row--active{% endif %}"
+              class="volume-pricing-info__row{% if is_first_break_active %} volume-pricing-info__row--active{% endif %}"
               data-quantity="{{ min_qty }}"
             >
               <span class="volume-pricing-info__quantity">{{ min_qty }}+</span>
