@@ -406,35 +406,14 @@
             </div>
           {%- endif -%}
 
-          {%- assign show_dynamic_checkout = block_settings.show_dynamic_checkout | default: false -%}
-          {%- if show_dynamic_checkout -%}
-            {%- if is_elite_pro -%}
-              <div class="elite-pro-buynow-guard" style="position: relative; width: 100%;">
-                {% content_for 'block',
-                  type: 'accelerated-checkout',
-                  id: 'accelerated-checkout',
-                  can_add_to_cart: true,
-                  form_obj: form
-                %}
-                <button
-                  type="button"
-                  class="elite-pro-buynow-guard__overlay"
-                  aria-label="Enter your birthday first"
-                  style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 10; background: transparent; border: 0; cursor: pointer; display: block;"
-                ></button>
-              </div>
-              <p class="elite-pro-buynow-guard__msg" style="margin: 6px 0 0; font-size: 13px; font-weight: 600; color: #dc2626; display: none;">
-                Please enter your birthday first.
-              </p>
-            {%- else -%}
-              {% content_for 'block',
-                type: 'accelerated-checkout',
-                id: 'accelerated-checkout',
-                can_add_to_cart: can_add_to_cart,
-                form_obj: form
-              %}
-            {%- endif -%}
-          {%- endif -%}
+          {%- unless is_elite_pro -%}
+            {% content_for 'block',
+              type: 'accelerated-checkout',
+              id: 'accelerated-checkout',
+              can_add_to_cart: can_add_to_cart,
+              form_obj: form
+            %}
+          {%- endunless -%}
         </div>
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           </span>
@@ -792,12 +771,6 @@
     {
       "type": "paragraph",
       "content": "t:content.resource_reference_product"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_dynamic_checkout",
-      "label": "Show dynamic checkout buttons",
-      "default": false
     },
     {
       "type": "checkbox",

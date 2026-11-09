@@ -17,9 +17,13 @@
     assign product = collections.all.products.first
   endif
 
-  assign show_dynamic_checkout = block_settings.show_dynamic_checkout | default: false
-  if closest.buy_buttons.settings.show_dynamic_checkout == false or show_dynamic_checkout == false
-    assign show_dynamic_checkout = false
+  assign is_elite_pro = false
+  if product != blank
+    assign p_handle_down = product.handle | downcase
+    assign p_title_down = product.title | downcase
+    if p_handle_down == 'elite-pro-6-months' or p_title_down contains 'elite pro'
+      assign is_elite_pro = true
+    endif
   endif
 
   assign lame_checkout_login_required = false
@@ -29,7 +33,7 @@
 %}
 
 {% capture accelerated_checkout_button %}
-  {% if show_dynamic_checkout and product != blank and form_obj != blank %}
+  {% if is_elite_pro == false and product != blank and form_obj != blank %}
     {{ form_obj | payment_button }}
   {% endif %}
 {% endcapture %}
