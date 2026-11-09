@@ -1,0 +1,157 @@
+{%- if template.name == 'product' and is_elite_pro != true and product != blank -%}
+  {%- render 'lame-cart-phone', helpers_only: true -%}
+  {%- liquid
+    assign customer_phone = customer.phone | default: customer.default_address.phone
+    assign initial_phone = cart.attributes['Phone'] | default: customer_phone
+    assign phone_uid = section_id | append: '-' | append: block_id | append: '-' | append: product.id
+    assign phone_input_id = 'LamePdpPhoneInput-' | append: phone_uid
+    assign phone_error_id = 'LamePdpPhoneError-' | append: phone_uid
+  -%}
+  <div class="cart-phone lame-pdp-phone" data-lame-pdp-phone-wrapper data-product-id="{{ product.id }}" data-lame-locked="true"{% unless can_add_to_cart %} hidden{% endunless %}>
+    <label for="{{ phone_input_id }}" class="cart-phone__label"><span>Mobile number</span><span class="cart-phone__required" aria-hidden="true">*</span></label>
+    <div class="cart-phone__field">
+      <input type="tel" inputmode="numeric" id="{{ phone_input_id }}" class="cart-phone__input" form="LamePdpPhoneForm-{{ phone_uid }}" value="{{ initial_phone | escape }}" placeholder="10-digit mobile number" autocomplete="tel" enterkeyhint="done" maxlength="16" required aria-describedby="{{ phone_error_id }}" data-lame-pdp-phone-input>
+    </div>
+    <p id="{{ phone_error_id }}" class="cart-phone__error" role="alert" style="display: none;" data-lame-pdp-phone-error>Enter a valid 10-digit mobile number</p>
+    <input type="hidden" name="properties[Phone]" value="" disabled data-lame-pdp-phone-property>
+  </div>
+  <style>
+    .lame-pdp-phone { margin-block: 0.25rem 0.75rem; }
+    .lame-pdp-phone[hidden], form:not(:has(.accelerated-checkout-block:not([hidden]))) .lame-pdp-phone { display: none !important; }
+    .lame-pdp-phone .cart-phone__input { font-size: max(1rem, 0.9375rem); }
+    .lame-pdp-phone .cart-phone__input:focus-visible { outline: 2px solid var(--lame-cart-gold-strong, #c1971f); outline-offset: 2px; }
+    form:has([data-lame-pdp-phone-wrapper][data-lame-locked='true']) .accelerated-checkout-block { position: relative; }
+    form:has([data-lame-pdp-phone-wrapper][data-lame-locked='true']) .accelerated-checkout-block > :not(.lame-buynow-guard__overlay) { opacity: 0.55; pointer-events: none; }
+    .accelerated-checkout-block button.lame-buynow-guard__overlay { display: none; position: absolute; inset: 0; z-index: 10; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: var(--hc-radius, var(--style-border-radius-buttons-primary, 10px)); background: transparent; cursor: not-allowed; appearance: none; }
+    form:has([data-lame-pdp-phone-wrapper][data-lame-locked='true']) .accelerated-checkout-block button.lame-buynow-guard__overlay { display: block; }
+    .accelerated-checkout-block button.lame-buynow-guard__overlay:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }
+  </style>
+  <script>
+    (function () {
+      var H = window.lamePhoneHelpers;
+      if (!H || window.__LAME_PDP_PHONE_INIT__) { window.lamePdpPhoneSync && window.lamePdpPhoneSync(); return; }
+      window.__LAME_PDP_PHONE_INIT__ = true;
+      var validate = H.validateIndianMobile, KEY = H.STORAGE_KEY, typed = new Map(), observed = new WeakSet(), timer = null, fetched = false;
+      var wraps = function () { return Array.from(document.querySelectorAll('[data-lame-pdp-phone-wrapper]')); };
+      var pidOf = function (w) { return w.getAttribute('data-product-id') || '0'; };
+      var getSess = function () { try { return sessionStorage.getItem(KEY) || ''; } catch (e) { return ''; } };
+      var setSess = function (v) { try { v ? sessionStorage.setItem(KEY, v) : sessionStorage.removeItem(KEY); } catch (e) {} };
+      function persist(clean) {
+        if (!clean) return;
+        H.savePhoneAttribute(clean).then(function (ok) {
+          if (!ok) return;
+          document.querySelectorAll('[data-cart-phone-input]').forEach(function (ci) { if (ci.value !== clean) ci.value = clean; });
+          window.lameCartPhoneSync && window.lameCartPhoneSync();
+        });
+      }
+      function scope(w) {
+        var box = w.closest('product-form-component') || w.closest('form') || document;
+        return { w: w, inp: w.querySelector('[data-lame-pdp-phone-input]'), err: w.querySelector('[data-lame-pdp-phone-error]'), prop: w.querySelector('[data-lame-pdp-phone-property]'), accel: box.querySelector('.accelerated-checkout-block') };
+      }
+      function setErr(s, show) {
+        s.err.style.display = show ? 'block' : 'none';
+        s.inp.classList.toggle('has-error', show);
+        show ? s.inp.setAttribute('aria-invalid', 'true') : s.inp.removeAttribute('aria-invalid');
+      }
+      function setLock(s, locked) {
+        var next = locked ? 'true' : 'false';
+        if (s.w.getAttribute('data-lame-locked') !== next) s.w.setAttribute('data-lame-locked', next);
+        if (!s.accel) return;
+        var ov = s.accel.querySelector('.lame-buynow-guard__overlay');
+        if (!ov) {
+          ov = document.createElement('button'); ov.type = 'button'; ov.className = 'lame-buynow-guard__overlay';
+          ov.setAttribute('aria-label', 'Enter a valid 10-digit mobile number to unlock Buy it now');
+          s.accel.appendChild(ov);
+        }
+        Array.from(s.accel.children).forEach(function (ch) { if (ch !== ov) locked ? ch.setAttribute('inert', '') : ch.removeAttribute('inert'); });
+        s.accel.querySelectorAll('button:not(.lame-buynow-guard__overlay)').forEach(function (b) {
+          if (locked && !b.disabled) { b.setAttribute('data-lame-phone-disabled', '1'); b.disabled = true; }
+          else if (!locked && b.hasAttribute('data-lame-phone-disabled')) { b.disabled = false; b.removeAttribute('data-lame-phone-disabled'); }
+        });
+      }
+      function sync(w, o) {
+        o = o || {}; var s = scope(w), pid = pidOf(w); if (!s.inp) return;
+        if (s.accel && !observed.has(s.accel)) { observed.add(s.accel); new MutationObserver(function () { syncAll(); }).observe(s.accel, { attributes: true, attributeFilter: ['hidden'] }); }
+        var hide = !(s.accel && !s.accel.hasAttribute('hidden')); if (Boolean(w.hidden) !== hide) w.hidden = hide;
+        if (!o.fromInput) {
+          var mem = typed.get(pid);
+          if (typeof mem === 'string' && s.inp.value !== mem) s.inp.value = mem;
+          else if (!s.inp.value && mem !== '') { var st = getSess(); if (st) s.inp.value = st; }
+        }
+        var r = validate(s.inp.value);
+        if (r.valid) {
+          if (o.norm) s.inp.value = r.clean;
+          typed.set(pid, o.norm ? r.clean : s.inp.value); s.prop.value = r.clean; s.prop.disabled = false;
+          setLock(s, false); setErr(s, false); setSess(r.clean); clearTimeout(timer);
+          if (o.saveNow) persist(r.clean); else if (o.debounce) timer = setTimeout(function () { persist(r.clean); }, 300);
+        } else {
+          s.prop.value = ''; s.prop.disabled = true; setLock(s, true);
+          if (o.showErr) setErr(s, true); else if (o.clearErr) setErr(s, false);
+        }
+      }
+      function syncAll(o) { wraps().forEach(function (w) { sync(w, o); }); }
+      function fillEmpty(clean) { setSess(clean); wraps().forEach(function (w) { var i = w.querySelector('[data-lame-pdp-phone-input]'); if (i && !i.value && typed.get(pidOf(w)) !== '') { i.value = clean; sync(w, { norm: true }); } }); }
+      function blockAttempt(w) { var s = scope(w); sync(w, { showErr: true }); if (s.inp) { s.inp.focus(); try { s.inp.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {} } }
+      function wrapFor(el) { var b = el.closest('product-form-component') || el.closest('form'); return (b && b.querySelector('[data-lame-pdp-phone-wrapper]')) || wraps()[0] || null; }
+      document.addEventListener('input', function (e) {
+        if (!e.target || !e.target.matches) return;
+        if (e.target.matches('[data-lame-pdp-phone-input]')) {
+          var w = e.target.closest('[data-lame-pdp-phone-wrapper]'); if (!w) return;
+          typed.set(pidOf(w), e.target.value); if (!e.target.value.trim()) setSess('');
+          sync(w, { fromInput: true, clearErr: true, debounce: true });
+        } else if (e.target.matches('[data-cart-phone-input]')) {
+          var r = validate(e.target.value), val = r.valid ? r.clean : e.target.value;
+          wraps().forEach(function (w) { var i = w.querySelector('[data-lame-pdp-phone-input]'); if (i) { i.value = val; typed.set(pidOf(w), val); sync(w, { fromInput: true, clearErr: true }); } });
+        }
+      });
+      document.addEventListener('focusout', function (e) {
+        if (!e.target || !e.target.matches || !e.target.matches('[data-lame-pdp-phone-input]')) return;
+        var w = e.target.closest('[data-lame-pdp-phone-wrapper]'), r = w && validate(e.target.value);
+        if (w) sync(w, { fromInput: true, norm: r.valid, showErr: !r.valid, saveNow: r.valid });
+      }, true);
+      ['pointerdown', 'mousedown', 'touchstart', 'click'].forEach(function (evt) {
+        window.addEventListener(evt, function (e) {
+          var acc = e.target && e.target.closest && e.target.closest('.accelerated-checkout-block');
+          if (!acc) {
+            var atc = evt === 'click' && e.target && e.target.closest && e.target.closest('button[name="add"], .add-to-cart-button');
+            var w0 = atc && wrapFor(atc), i0 = w0 && w0.querySelector('[data-lame-pdp-phone-input]'), r0 = i0 && validate(i0.value);
+            if (r0 && r0.valid) persist(r0.clean); return;
+          }
+          var w = wrapFor(acc), s = w && scope(w), r = s && s.inp && validate(s.inp.value); if (!s || !s.inp) return;
+          if (!r.valid) {
+            if (evt === 'click' || !e.target.closest('.lame-buynow-guard__overlay')) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if (evt === 'click') blockAttempt(w); }
+            return false;
+          }
+          s.prop.value = r.clean; s.prop.disabled = false; if (evt === 'click') { s.inp.value = r.clean; persist(r.clean); }
+        }, true);
+      });
+      window.addEventListener('keydown', function (e) {
+        if (e.isComposing || e.key !== 'Enter' || !e.target || !e.target.matches) return;
+        if (e.target.matches('[data-lame-pdp-phone-input]')) {
+          var w = e.target.closest('[data-lame-pdp-phone-wrapper]'); if (!w) return;
+          e.preventDefault(); e.stopPropagation();
+          var r = validate(e.target.value); r.valid ? sync(w, { fromInput: true, norm: true, saveNow: true }) : blockAttempt(w);
+        } else if (e.target.closest('.accelerated-checkout-block')) {
+          var w2 = wrapFor(e.target), s2 = w2 && scope(w2), r2 = s2 && s2.inp && validate(s2.inp.value);
+          if (s2 && s2.inp && !r2.valid) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); blockAttempt(w2); return false; }
+          if (s2 && r2 && r2.valid) { s2.prop.value = r2.clean; s2.prop.disabled = false; persist(r2.clean); }
+        }
+      }, true);
+      document.addEventListener('variant:update', function () { setTimeout(function () { syncAll(); }, 20); });
+      document.addEventListener('cart:update', function (e) {
+        var r = validate(e.detail && e.detail.resource && e.detail.resource.attributes && e.detail.resource.attributes.Phone);
+        r.valid ? fillEmpty(r.clean) : setTimeout(function () { syncAll(); }, 30);
+      });
+      window.addEventListener('pageshow', function () { syncAll({ norm: true }); });
+      function boot() {
+        syncAll({ norm: true, saveNow: true }); if (fetched) return; fetched = true;
+        if (wraps().some(function (w) { var i = w.querySelector('[data-lame-pdp-phone-input]'); return i && !i.value && typed.get(pidOf(w)) !== ''; })) {
+          fetch('/cart.js', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (c) { var r = c && c.attributes && validate(c.attributes.Phone); if (r && r.valid) fillEmpty(r.clean); }).catch(function () {});
+        }
+      }
+      window.lamePdpPhoneSync = function () { syncAll({ norm: true }); };
+      document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot) : boot();
+      window.addEventListener('load', function () { syncAll(); });
+    })();
+  </script>
+{%- endif -%}

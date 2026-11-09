@@ -17,6 +17,7 @@
   assign phone_error_id = 'CartPhoneError-' | append: phone_uid
 -%}
 
+{%- unless helpers_only -%}
 <div class="cart-phone" data-cart-phone-wrapper>
   <label for="{{ phone_input_id }}" class="cart-phone__label cart-primary-typography">
     <span>Mobile number</span>
@@ -51,6 +52,7 @@
     Enter a valid 10-digit mobile number
   </p>
 </div>
+{%- endunless -%}
 
 <style>
   .cart-phone {
@@ -134,6 +136,7 @@
 
 <script>
   (function() {
+    {%- unless helpers_only -%}
     if (window.__LAME_CART_PHONE_INITIALIZED__) {
       if (window.lameCartPhoneSync) {
         window.lameCartPhoneSync();
@@ -141,6 +144,7 @@
       return;
     }
     window.__LAME_CART_PHONE_INITIALIZED__ = true;
+    {%- endunless -%}
 
     const STORAGE_KEY = 'lame_cart_phone';
     let currentSavePromise = null;
@@ -340,6 +344,13 @@
 
       return result;
     }
+
+    window.lamePhoneHelpers = window.lamePhoneHelpers || {
+      STORAGE_KEY: STORAGE_KEY,
+      validateIndianMobile: validateIndianMobile,
+      savePhoneAttribute: savePhoneAttribute
+    };
+    {%- if helpers_only -%}return;{%- endif -%}
 
     function syncState(sourceInput) {
       const activeVal = sourceInput ? sourceInput.value : getActivePhoneValue();
