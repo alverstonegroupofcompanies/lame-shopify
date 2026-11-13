@@ -211,6 +211,26 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
     margin-inline: auto !important;
     padding-inline: 24px !important;
     box-sizing: border-box !important;
+    position: relative !important;
+  }
+
+  /* Thin divider under the navbar — aligned to the 1280px content width (logo → bag) */
+  #header-component.header--cosmetic-luxury .header__row--top,
+  #header-component.header--cosmetic-luxury[data-sticky-state='active'] .header__row--top {
+    border-bottom: 0 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header__row--top .header__columns::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    left: 24px !important;
+    right: 24px !important;
+    bottom: 0 !important;
+    height: 1px !important;
+    background: rgba(15, 81, 50, 0.14) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
   }
 
   #header-component.header--cosmetic-luxury .header__column--left,
@@ -381,8 +401,7 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
   /* Active link: a 2px orange underline directly below the text (not floating above it) */
   #header-component.header--cosmetic-luxury .header__column--center .menu-list__link.menu-list__link--active,
   #header-component.header--cosmetic-luxury .header__column--center .menu-list__link[aria-current='page'],
-  #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands,
-  #header-component.header--cosmetic-luxury .header__column--center .menu-list__link.menu-list__item--brands {
+  .template-index #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands {
     color: #0F5132 !important;
     font-weight: 700 !important;
     border-bottom: 2px solid #FF6B2C !important;
@@ -390,8 +409,7 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
 
   #header-component.header--cosmetic-luxury .header__column--center .menu-list__link.menu-list__link--active .menu-list__link-title,
   #header-component.header--cosmetic-luxury .header__column--center .menu-list__link[aria-current='page'] .menu-list__link-title,
-  #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands .menu-list__link-title,
-  #header-component.header--cosmetic-luxury .header__column--center .menu-list__link.menu-list__item--brands .menu-list__link-title {
+  .template-index #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands .menu-list__link-title {
     color: #0F5132 !important;
     font-weight: 700 !important;
     text-shadow: none !important;
@@ -400,8 +418,8 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
   /* When active link is hovered: text turns orange with smooth 200ms transition */
   #header-component.header--cosmetic-luxury .header__column--center .menu-list__link.menu-list__link--active:hover,
   #header-component.header--cosmetic-luxury .header__column--center .menu-list__link.menu-list__link--active:hover .menu-list__link-title,
-  #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands:hover,
-  #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands:hover .menu-list__link-title {
+  .template-index #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands:hover,
+  .template-index #header-component.header--cosmetic-luxury .header__column--center .menu-list__link--brands:hover .menu-list__link-title {
     color: #FF6B2C !important;
     border-bottom: 2px solid #FF6B2C !important;
     text-shadow: none !important;
@@ -422,7 +440,8 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
   }
 
   /* 1. Search */
-  #header-component.header--cosmetic-luxury .header__column--right search-button.search-action {
+  #header-component.header--cosmetic-luxury .header__column--right search-button.search-action,
+  #header-component.header--cosmetic-luxury .header__column--right .search-action {
     order: 1 !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -433,19 +452,25 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
   }
 
   /* 2. Wishlist */
-  #header-component.header--cosmetic-luxury .header-actions__wishlist {
+  #header-component.header--cosmetic-luxury .header-actions__wishlist,
+  #header-component.header--cosmetic-luxury .lame-header-wishlist-btn {
     order: 2 !important;
   }
 
   /* 3. Profile (User) */
-  #header-component.header--cosmetic-luxury .header-actions__account-slot {
+  #header-component.header--cosmetic-luxury .header-actions__account-slot,
+  #header-component.header--cosmetic-luxury .lame-account,
+  #header-component.header--cosmetic-luxury .account-button,
+  #header-component.header--cosmetic-luxury .lame-account__trigger {
     order: 3 !important;
     display: inline-flex !important;
     align-items: center !important;
   }
 
   /* 4. Basket (Shopping Bag) */
-  #header-component.header--cosmetic-luxury .header-actions__cart {
+  #header-component.header--cosmetic-luxury .header-actions__cart,
+  #header-component.header--cosmetic-luxury .lame-header-cart-btn,
+  #header-component.header--cosmetic-luxury cart-icon {
     order: 4 !important;
   }
 
@@ -541,16 +566,18 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
 }
 
 @media screen and (min-width: 750px) {
-  #header-component.header--cosmetic-luxury header-actions {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 16px !important;
-    height: 44px !important;
+  #header-component.header--cosmetic-luxury header-actions,
+  #header-component.header--cosmetic-luxury .header__column--right header-actions {
+    display: contents !important;
+  }
+
+  #header-component.header--cosmetic-luxury .header-actions__account-slot {
+    display: contents !important;
   }
 
   #header-component.header--cosmetic-luxury header-actions > :is(.lame-account, .header-actions__slot, .header-actions__action, .account-button),
   #header-component.header--cosmetic-luxury header-actions .header-actions__action,
+  #header-component.header--cosmetic-luxury header-actions .lame-account,
   #header-component.header--cosmetic-luxury header-actions .lame-account__trigger,
   #header-component.header--cosmetic-luxury header-actions .header-actions__cart,
   #header-component.header--cosmetic-luxury header-actions .header-actions__wishlist,

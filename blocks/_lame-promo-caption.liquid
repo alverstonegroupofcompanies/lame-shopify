@@ -6,6 +6,18 @@
     {%- assign has_why_join = true -%}
   {%- endif -%}
   {%- assign clean_text = raw_text | remove: '👑 ' | remove: '✨ ' | remove: '🎁 ' | remove: 'Why Join Elite?' | remove: 'Why Join Elite —' | remove: 'Why Join Elite:' | remove: 'Why Join Elite -' | remove: 'Why join elite?' | remove: 'why join elite?' | strip -%}
+  {%- assign mobile_clean = block.settings.mobile_text | strip_html | strip -%}
+  {%- if mobile_clean == blank -%}
+    {%- assign mobile_clean = clean_text
+      | replace: 'extra cashback', 'cashback'
+      | replace: 'VIP beauty perks', 'VIP perks'
+      | replace: 'exclusive member-only savings', 'member perks'
+      | replace: 'Free luxury beauty kit, surprise gifts & VIP early access', 'Free luxury kit & early access'
+      | replace: 'Join for ₹199', '₹199'
+      | replace: 'Join for Rs 199', '₹199'
+      | strip
+    -%}
+  {%- endif -%}
   <div
     class="lame-promo-top-bar__slide"
     {{ block.shopify_attributes }}
@@ -13,18 +25,28 @@
     {%- if block.settings.link != blank -%}
       <a class="lame-promo-top-bar__link" href="{{ block.settings.link }}">
         {%- if has_why_join -%}
-          <span class="lame-topbar-pill">Why Join Elite?</span>
-          <span class="lame-promo-top-bar__text">{{ clean_text }}</span>
+          <span class="lame-topbar-pill">
+            <span class="lame-topbar-pill__desktop">Why Join Elite?</span>
+            <span class="lame-topbar-pill__mobile">Elite</span>
+          </span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ clean_text }}</span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean }}</span>
         {%- else -%}
-          <span class="lame-promo-top-bar__text">{{ raw_text }}</span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ raw_text }}</span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean | default: raw_text }}</span>
         {%- endif -%}
       </a>
     {%- else -%}
       {%- if has_why_join -%}
-        <span class="lame-topbar-pill">Why Join Elite?</span>
-        <span class="lame-promo-top-bar__text">{{ clean_text }}</span>
+        <span class="lame-topbar-pill">
+          <span class="lame-topbar-pill__desktop">Why Join Elite?</span>
+          <span class="lame-topbar-pill__mobile">Elite</span>
+        </span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ clean_text }}</span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean }}</span>
       {%- else -%}
-        <span class="lame-promo-top-bar__text">{{ raw_text }}</span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ raw_text }}</span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean | default: raw_text }}</span>
       {%- endif -%}
     {%- endif -%}
   </div>
@@ -39,6 +61,11 @@
       "id": "text",
       "label": "Caption",
       "default": "Free shipping on orders over $50"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "mobile_text",
+      "label": "Mobile caption (short version)"
     },
     {
       "type": "url",

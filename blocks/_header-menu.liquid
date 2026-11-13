@@ -141,13 +141,13 @@
           <a
             href="{{ menu_item_url }}"
             data-skip-node-update="true"
-            class="menu-list__link{% if link.active %} menu-list__link--active{% endif %}{% if is_brands_menu %} menu-list__link--brands{% endif %}"
+            class="menu-list__link{% if link.active or is_brands_menu and template.name == 'index' %} menu-list__link--active{% endif %}{% if is_brands_menu %} menu-list__link--brands{% endif %}"
             {% if has_submenu %}
               aria-controls="submenu-{{ forloop.index }}"
               aria-haspopup="true"
               aria-expanded="false"
             {% endif %}
-            {% if link.current and is_brands_menu == false %}
+            {% if link.current or is_brands_menu and template.name == 'index' %}
               aria-current="page"
             {% endif %}
             ref="menuitem"
