@@ -1,281 +1,451 @@
-{%- capture promo_content -%}
-  {% content_for 'blocks' %}
-{%- endcapture -%}
-
 {%- liquid
-  assign promo_blocks_html = promo_content | strip
-  assign rendered_caption_count = promo_content | split: 'lame-promo-top-bar__caption"' | size | minus: 1
-  if rendered_caption_count < 1
-    assign rendered_caption_count = promo_content | split: 'class="lame-promo-top-bar__caption' | size | minus: 1
-  endif
-
-  if rendered_caption_count > 0
-    assign promo_count = rendered_caption_count
-  elsif section.blocks.size > 0
-    assign promo_count = section.blocks.size
-  elsif promo_blocks_html != blank
-    assign promo_count = 1
-  else
-    assign promo_count = 0
+  assign slide_interval = section.settings.slide_seconds | default: 5
+  assign bg_color = section.settings.bg_color | default: 'rgba(255, 107, 44, 0.08)'
+  assign text_color = section.settings.text_color | default: '#8A2E00'
+  assign has_custom_blocks = false
+  if section.blocks.size > 0
+    assign has_custom_blocks = true
   endif
 -%}
 
-{%- if promo_count > 0 or request.design_mode -%}
-  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-  <aside
-    class="lame-promo-top-bar spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }}"
-    style="{% render 'spacing-padding', settings: section.settings %}"
-    aria-label="{{ section.settings.accessibility_label | escape }}"
-  >
-    <div class="lame-promo-top-bar__inner">
-      {%- if section.settings.show_badge and section.settings.badge_text != blank -%}
-        <div class="lame-promo-top-bar__badge-wrap">
-          <span class="lame-promo-top-bar__badge" aria-hidden="true">{{ section.settings.badge_text }}</span>
+<aside
+  class="lame-promo-top-bar"
+  id="LamePromoTopBar-{{ section.id }}"
+  role="region"
+  aria-label="{{ section.settings.accessibility_label | default: 'Offers and Elite Pro announcements' | escape }}"
+  style="--topbar-bg: {{ bg_color }}; --topbar-text: {{ text_color }};"
+>
+  <div class="lame-promo-top-bar__inner">
+    <button
+      type="button"
+      class="lame-topbar-arrow lame-topbar-arrow--prev"
+      data-topbar-prev
+      aria-label="Previous announcement"
+    >
+      <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="10 3 5 8 10 13"></polyline>
+      </svg>
+    </button>
+
+    <div
+      class="lame-promo-top-bar__track"
+      data-topbar-track
+      data-interval="{{ slide_interval }}"
+    >
+      {%- capture promo_content -%}
+        {% content_for 'blocks' %}
+      {%- endcapture -%}
+      {%- if promo_content != blank and promo_content contains 'lame-promo-top-bar__slide' -%}
+        {{ promo_content }}
+      {%- else -%}
+        <div class="lame-promo-top-bar__slide is-active" data-slide-index="0">
+          <a class="lame-promo-top-bar__link" href="/pages/elite-pro">
+            <span class="lame-topbar-pill">Why Join Elite?</span>
+            <span class="lame-promo-top-bar__text">
+              Free shipping, 10% extra cashback & VIP beauty perks <strong class="lame-promo-top-bar__cta-highlight">(Join for ₹199)</strong>
+            </span>
+          </a>
+        </div>
+        <div class="lame-promo-top-bar__slide" data-slide-index="1">
+          <a class="lame-promo-top-bar__link" href="/pages/elite-pro">
+            <span class="lame-topbar-pill">Why Join Elite?</span>
+            <span class="lame-promo-top-bar__text">
+              Flat 15% off weekend deals & exclusive member-only savings <strong class="lame-promo-top-bar__cta-highlight">(Join Now)</strong>
+            </span>
+          </a>
+        </div>
+        <div class="lame-promo-top-bar__slide" data-slide-index="2">
+          <a class="lame-promo-top-bar__link" href="/pages/elite-pro">
+            <span class="lame-topbar-pill">Why Join Elite?</span>
+            <span class="lame-promo-top-bar__text">
+              Free luxury beauty kit, surprise gifts & VIP early access <strong class="lame-promo-top-bar__cta-highlight">(Learn More)</strong>
+            </span>
+          </a>
         </div>
       {%- endif -%}
-
-      <div
-        class="lame-promo-top-bar__ticker"
-        id="LamePromoTicker-{{ section.id }}"
-        role="region"
-        aria-label="{{ section.settings.accessibility_label | escape }}"
-      >
-        {%- if promo_count == 0 and request.design_mode -%}
-          <p class="lame-promo-top-bar__placeholder">Add one or more promo lines in the sidebar to scroll continuously.</p>
-        {%- else -%}
-          <div class="lame-promo-top-bar__ticker-track">
-            <div class="lame-promo-top-bar__ticker-group">
-              <div class="lame-promo-top-bar__ticker-items">
-                {{ promo_content }}
-              </div>
-              {%- for i in (1..5) -%}
-                <div class="lame-promo-top-bar__ticker-items lame-promo-top-bar__ticker-items--dup" aria-hidden="true">
-                  {{ promo_content | replace: 'id="', 'data-dup-id="' }}
-                </div>
-              {%- endfor -%}
-            </div>
-            <div class="lame-promo-top-bar__ticker-group lame-promo-top-bar__ticker-group--clone" aria-hidden="true">
-              {%- for i in (1..6) -%}
-                <div class="lame-promo-top-bar__ticker-items lame-promo-top-bar__ticker-items--dup">
-                  {{ promo_content | replace: 'id="', 'data-dup-id="' }}
-                </div>
-              {%- endfor -%}
-            </div>
-          </div>
-        {%- endif -%}
-      </div>
     </div>
-  </aside>
-{%- endif -%}
+
+    <button
+      type="button"
+      class="lame-topbar-arrow lame-topbar-arrow--next"
+      data-topbar-next
+      aria-label="Next announcement"
+    >
+      <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="6 3 11 8 6 13"></polyline>
+      </svg>
+    </button>
+  </div>
+</aside>
 
 {% stylesheet %}
   .lame-promo-top-bar {
-    --lame-promo-badge-bg: rgb(var(--brand-gold));
-    --lame-promo-badge-fg: #0a0a0c;
-    border-block-end: 1px solid rgb(var(--color-border-rgb) / 0.35);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    position: relative;
-    color: #ffffff !important;
-    overflow: hidden;
+    background-color: var(--topbar-bg, #FFF6F0) !important;
+    background: linear-gradient(90deg, #FFF9F5 0%, #FFF0E6 50%, #FFF9F5 100%) !important;
+    border-bottom: 1px solid rgba(255, 107, 44, 0.16) !important;
+    color: var(--topbar-text, #8A2E00) !important;
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
     width: 100%;
-    background: var(--lame-purple-gradient, linear-gradient(90deg, #6b0f46 0%, #4a0730 100%)) !important;
+    position: relative;
+    z-index: 25;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: block;
+    user-select: none;
   }
 
   .lame-promo-top-bar__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    width: 100%;
-    max-width: 100%;
+    justify-content: space-between;
     position: relative;
-    overflow: hidden;
+    gap: 16px;
+    box-sizing: border-box;
   }
 
-  .lame-promo-top-bar__badge-wrap {
-    flex-shrink: 0;
-    display: flex;
+  /* Compact 'Why Join Elite?' highlighted pill */
+  .lame-topbar-pill {
+    display: inline-flex;
     align-items: center;
-    z-index: 2;
-    padding-inline-end: clamp(0.6rem, 1.5vw, 1rem);
-  }
-
-  .lame-promo-top-bar__badge {
-    flex-shrink: 0;
-    font-size: 0.5625rem;
+    gap: 4px;
+    background: rgba(255, 107, 44, 0.12);
+    color: #9A380B;
     font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 0.28rem 0.55rem;
-    border-radius: 3px;
-    background: var(--lame-promo-badge-bg);
-    color: var(--lame-promo-badge-fg);
-    line-height: 1;
-    box-shadow: 0 1px 0 rgb(0 0 0 / 0.12);
-    animation: lame-promo-badge-pop 2.8s ease-in-out infinite;
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 107, 44, 0.25);
     white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1.3;
+    box-shadow: 0 1px 2px rgba(255, 107, 44, 0.05);
   }
 
-  @keyframes lame-promo-badge-pop {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-    12% {
-      transform: scale(1.06);
-    }
-    24% {
-      transform: scale(1);
-    }
+  /* Round subtle navigation buttons '<' and '>' */
+  .lame-topbar-arrow {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    border-radius: 50%;
+    background: #ffffff !important;
+    color: #8A2E00 !important;
+    border: 1px solid rgba(255, 107, 44, 0.22) !important;
+    box-shadow: 0 1px 3px rgba(138, 46, 0, 0.08), 0 0.5px 1px rgba(0, 0, 0, 0.04);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex-shrink: 0;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    outline: none;
+    z-index: 3;
+    line-height: 0;
   }
 
-  .lame-promo-top-bar__ticker {
-    flex: 1 1 0;
+  .lame-topbar-arrow svg {
+    display: block;
+    width: 10px;
+    height: 10px;
+    stroke: currentColor;
+    fill: none;
+  }
+
+  .lame-topbar-arrow:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px rgba(138, 46, 0, 0.18);
+    background: #FFF2EB !important;
+    border-color: rgba(255, 107, 44, 0.42) !important;
+    color: #642000 !important;
+  }
+
+  .lame-topbar-arrow:active {
+    transform: scale(0.95);
+  }
+
+  .lame-topbar-arrow:focus-visible {
+    outline: 2px solid #D9531E;
+    outline-offset: 2px;
+  }
+
+  /* Carousel Track and Slides */
+  .lame-promo-top-bar__track {
+    flex: 1 1 auto;
+    height: 100%;
     min-width: 0;
-    overflow: hidden;
     position: relative;
     display: flex;
     align-items: center;
-    mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+    justify-content: center;
+    overflow: hidden;
   }
 
-  .lame-promo-top-bar__ticker-track {
+  .lame-promo-top-bar__slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
-    width: max-content;
-    white-space: nowrap;
-    will-change: transform;
-    animation: lame-promo-ticker 20s linear infinite;
+    justify-content: center;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.35s ease;
   }
 
-  /* Pause scrolling on hover or focus */
-  .lame-promo-top-bar:hover .lame-promo-top-bar__ticker-track,
-  .lame-promo-top-bar:focus-within .lame-promo-top-bar__ticker-track {
-    animation-play-state: paused;
+  .lame-promo-top-bar__slide.is-active,
+  .lame-promo-top-bar__track:not([data-initialized='true']) > .lame-promo-top-bar__slide:first-child {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    position: relative;
   }
 
-  @keyframes lame-promo-ticker {
-    0% {
-      transform: translate3d(0, 0, 0);
-    }
-    100% {
-      transform: translate3d(-50%, 0, 0);
-    }
+  .lame-promo-top-bar__slide.is-prev {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px);
   }
 
-  .lame-promo-top-bar__ticker-group {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .lame-promo-top-bar__ticker-items {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .lame-promo-top-bar__ticker-items > * {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .lame-promo-top-bar__placeholder {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: #ffffff;
-    opacity: 0.85;
-    white-space: nowrap;
-  }
-
-  .lame-promo-top-bar__caption {
-    margin: 0;
-    width: auto;
-    display: inline-flex;
-    align-items: center;
-    color: #ffffff !important;
-    white-space: nowrap;
-  }
-
-  .lame-promo-top-bar__caption::after {
-    content: "•";
-    margin-inline: clamp(0.75rem, 2vw, 1.25rem);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85em;
-    display: inline-block;
-  }
-
-  .lame-promo-top-bar__caption-link {
-    color: #ffffff !important;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-
-  .lame-promo-top-bar__caption-link:hover,
-  .lame-promo-top-bar__caption-link:focus-visible {
-    color: #ffffff !important;
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
-  }
-
-  .lame-promo-top-bar__caption-text {
-    font-size: clamp(0.75rem, 1.35vw, 0.875rem);
+  .lame-promo-top-bar__link {
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: 13px;
     font-weight: 500;
-    letter-spacing: 0.04em;
-    line-height: 1.35;
-    color: #ffffff !important;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    line-height: 1.25;
+    transition: opacity 0.2s ease;
   }
 
-  .lame-promo-top-bar__caption-text :first-child {
-    margin: 0;
-    color: #ffffff !important;
+  .lame-promo-top-bar__link:hover {
+    opacity: 0.92;
+    text-decoration: none !important;
   }
 
-  .lame-promo-top-bar__caption-text strong,
-  .lame-promo-top-bar__caption-text b {
-    color: #ffffff !important;
+  .lame-promo-top-bar__text {
+    color: var(--topbar-text, #8A2E00) !important;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lame-promo-top-bar strong,
+  .lame-promo-top-bar b {
     font-weight: 700;
+    color: #732400 !important;
   }
 
-  /* Reduced motion: show text without scrolling */
+  .lame-promo-top-bar__cta-highlight {
+    font-weight: 700;
+    color: #D9531E !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Responsive styling for Tablet & Mobile */
+  @media screen and (max-width: 749px) {
+    .lame-promo-top-bar {
+      height: 35px;
+      min-height: 35px;
+      max-height: 35px;
+    }
+
+    .lame-promo-top-bar__inner {
+      padding: 0 8px;
+      gap: 6px;
+    }
+
+    .lame-topbar-arrow {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      min-height: 20px;
+    }
+
+    .lame-topbar-arrow svg {
+      width: 9px;
+      height: 9px;
+    }
+
+    .lame-promo-top-bar__link {
+      font-size: 11px;
+      gap: 5px;
+    }
+
+    .lame-topbar-pill {
+      font-size: 9.5px;
+      padding: 1px 6px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .lame-promo-top-bar__badge {
-      animation: none !important;
-    }
-
-    .lame-promo-top-bar__ticker {
-      mask-image: none !important;
-      -webkit-mask-image: none !important;
-    }
-
-    .lame-promo-top-bar__ticker-track {
-      animation: none !important;
+    .lame-promo-top-bar__slide {
+      transition: opacity 0.2s ease, visibility 0.2s ease !important;
       transform: none !important;
-      width: 100%;
-      overflow-x: auto;
-    }
-
-    .lame-promo-top-bar__ticker-group--clone,
-    .lame-promo-top-bar__ticker-items--dup {
-      display: none !important;
-    }
-
-    .lame-promo-top-bar__ticker-items:only-child .lame-promo-top-bar__caption:only-child::after {
-      display: none;
     }
   }
 {% endstylesheet %}
+
+<script>
+  (() => {
+    const initTopBar = () => {
+      const topBar = document.getElementById('LamePromoTopBar-{{ section.id }}');
+      if (!topBar || topBar.dataset.initialized) return;
+      topBar.dataset.initialized = 'true';
+
+      const track = topBar.querySelector('[data-topbar-track]');
+      const prevBtn = topBar.querySelector('[data-topbar-prev]');
+      const nextBtn = topBar.querySelector('[data-topbar-next]');
+      if (!track) return;
+
+      const slides = Array.from(track.querySelectorAll('.lame-promo-top-bar__slide'));
+      if (slides.length === 0) return;
+
+      slides.forEach((slide, idx) => {
+        slide.dataset.slideIndex = idx;
+        if (idx === 0) {
+          slide.classList.add('is-active');
+        } else {
+          slide.classList.remove('is-active', 'is-prev');
+        }
+      });
+
+      if (slides.length <= 1) {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        return;
+      }
+
+      let currentIndex = 0;
+      let timer = null;
+      const intervalSec = parseFloat(track.dataset.interval) || 5;
+
+      const showSlide = (nextIndex, direction = 1) => {
+        const total = slides.length;
+        const normalizedIndex = (nextIndex + total) % total;
+        if (normalizedIndex === currentIndex) return;
+
+        slides.forEach((slide, idx) => {
+          slide.classList.remove('is-active', 'is-prev');
+          if (idx === normalizedIndex) {
+            slide.classList.add('is-active');
+          } else if (idx === currentIndex) {
+            if (direction > 0) {
+              slide.classList.add('is-prev');
+            }
+          }
+        });
+
+        currentIndex = normalizedIndex;
+      };
+
+      const nextSlide = () => showSlide(currentIndex + 1, 1);
+      const prevSlide = () => showSlide(currentIndex - 1, -1);
+
+      const startAutoPlay = () => {
+        stopAutoPlay();
+        timer = setInterval(nextSlide, intervalSec * 1000);
+      };
+
+      const stopAutoPlay = () => {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      };
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          prevSlide();
+          startAutoPlay();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          nextSlide();
+          startAutoPlay();
+        });
+      }
+
+      topBar.addEventListener('mouseenter', stopAutoPlay);
+      topBar.addEventListener('mouseleave', startAutoPlay);
+
+      // Keyboard navigation
+      topBar.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+          prevSlide();
+          startAutoPlay();
+        } else if (e.key === 'ArrowRight') {
+          nextSlide();
+          startAutoPlay();
+        }
+      });
+
+      // Touch swipe support for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      track.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      track.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 35) {
+          if (diff > 0) {
+            prevSlide();
+          } else {
+            nextSlide();
+          }
+          startAutoPlay();
+        }
+      }, { passive: true });
+
+      startAutoPlay();
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTopBar);
+    } else {
+      initTopBar();
+    }
+  })();
+</script>
+
 {% schema %}
 {
-  "name": "Super deal top bar",
+  "name": "Elite Pro Top Bar",
   "tag": "section",
   "class": "lame-promo-top-bar-section",
   "max_blocks": 6,
@@ -291,120 +461,63 @@
     {
       "type": "range",
       "id": "slide_seconds",
-      "label": "Seconds per caption",
+      "label": "Slide interval (seconds)",
       "min": 3,
-      "max": 12,
+      "max": 10,
       "step": 1,
       "default": 5,
       "unit": "s"
     },
     {
-      "type": "checkbox",
-      "id": "show_badge",
-      "label": "Show deal badge",
-      "default": true
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "rgba(255, 107, 44, 0.08)"
     },
     {
-      "type": "text",
-      "id": "badge_text",
-      "label": "Badge text",
-      "default": "Super deal"
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#8A2E00"
     },
     {
       "type": "text",
       "id": "accessibility_label",
-      "label": "Region label (screen readers)",
-      "default": "Promotions and offers"
-    },
-    {
-      "type": "header",
-      "content": "Appearance"
-    },
-    {
-      "type": "select",
-      "id": "section_width",
-      "label": "Width",
-      "options": [
-        { "value": "page-width", "label": "Page" },
-        { "value": "full-width", "label": "Full width" }
-      ],
-      "default": "full-width"
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Color scheme",
-      "default": "scheme-golden"
-    },
-    {
-      "type": "header",
-      "content": "Padding"
-    },
-    {
-      "type": "range",
-      "id": "padding-block-start",
-      "label": "Top",
-      "min": 0,
-      "max": 36,
-      "step": 1,
-      "unit": "px",
-      "default": 10
-    },
-    {
-      "type": "range",
-      "id": "padding-block-end",
-      "label": "Bottom",
-      "min": 0,
-      "max": 36,
-      "step": 1,
-      "unit": "px",
-      "default": 10
-    },
-    {
-      "type": "range",
-      "id": "padding-inline-start",
-      "label": "Left",
-      "min": 0,
-      "max": 40,
-      "step": 1,
-      "unit": "px",
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "padding-inline-end",
-      "label": "Right",
-      "min": 0,
-      "max": 40,
-      "step": 1,
-      "unit": "px",
-      "default": 16
+      "label": "Bar label (screen readers)",
+      "default": "Offers and Elite Pro announcements"
     }
   ],
   "presets": [
     {
-      "name": "Super deal top bar",
+      "name": "Elite Pro Top Bar",
       "blocks": {
-        "deal_1": {
+        "slide_1": {
           "type": "_lame-promo-caption",
           "settings": {
-            "text": "<strong>20% off</strong> your first order — use code <strong>WELCOME20</strong>"
+            "text": "✨ Join Elite Pro — Flat 10% Extra Cashback + Free Shipping on All Orders! (Join Now)",
+            "link": "/pages/elite-pro"
           }
         },
-        "deal_2": {
+        "slide_2": {
           "type": "_lame-promo-caption",
           "settings": {
-            "text": "Free shipping on orders over <strong>$75</strong>"
+            "text": "👑 Exclusive Weekend Offer — Flat 15% off on All Products for Elite Pro Members (Till 15th Nov.)",
+            "link": "/pages/elite-pro"
           }
         },
-        "deal_3": {
+        "slide_3": {
           "type": "_lame-promo-caption",
           "settings": {
-            "text": "New arrivals weekly — <strong>shop the drop</strong>"
+            "text": "🎁 Elite Pro Membership for ₹199 — Get Free Luxury Beauty Kit + VIP Early Access!",
+            "link": "/pages/elite-pro"
           }
         }
       },
-      "block_order": ["deal_1", "deal_2", "deal_3"]
+      "block_order": [
+        "slide_1",
+        "slide_2",
+        "slide_3"
+      ]
     }
   ]
 }

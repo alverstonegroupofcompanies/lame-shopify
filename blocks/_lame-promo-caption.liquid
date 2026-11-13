@@ -1,15 +1,31 @@
-{%- assign line = block.settings.text | strip_html | strip -%}
+{%- assign raw_text = block.settings.text -%}
+{%- assign line = raw_text | strip_html | strip -%}
 {%- unless line == blank -%}
+  {%- assign has_why_join = false -%}
+  {%- if line contains 'Why Join Elite' or line contains 'Why join elite' or line contains 'why join elite' -%}
+    {%- assign has_why_join = true -%}
+  {%- endif -%}
+  {%- assign clean_text = raw_text | remove: '👑 ' | remove: '✨ ' | remove: '🎁 ' | remove: 'Why Join Elite?' | remove: 'Why Join Elite —' | remove: 'Why Join Elite:' | remove: 'Why Join Elite -' | remove: 'Why join elite?' | remove: 'why join elite?' | strip -%}
   <div
-    class="lame-promo-top-bar__caption"
+    class="lame-promo-top-bar__slide"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.link != blank -%}
-      <a class="lame-promo-top-bar__caption-link" href="{{ block.settings.link }}">
-        <span class="lame-promo-top-bar__caption-text">{{ block.settings.text }}</span>
+      <a class="lame-promo-top-bar__link" href="{{ block.settings.link }}">
+        {%- if has_why_join -%}
+          <span class="lame-topbar-pill">Why Join Elite?</span>
+          <span class="lame-promo-top-bar__text">{{ clean_text }}</span>
+        {%- else -%}
+          <span class="lame-promo-top-bar__text">{{ raw_text }}</span>
+        {%- endif -%}
       </a>
     {%- else -%}
-      <span class="lame-promo-top-bar__caption-text">{{ block.settings.text }}</span>
+      {%- if has_why_join -%}
+        <span class="lame-topbar-pill">Why Join Elite?</span>
+        <span class="lame-promo-top-bar__text">{{ clean_text }}</span>
+      {%- else -%}
+        <span class="lame-promo-top-bar__text">{{ raw_text }}</span>
+      {%- endif -%}
     {%- endif -%}
   </div>
 {%- endunless -%}

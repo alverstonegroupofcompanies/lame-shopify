@@ -37,15 +37,21 @@ body.template-index .shopify-section:has([class*="gif-banner"]) {
   overflow-x: clip;
 }
 
-body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero,
-body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
-body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame,
-body.template-index .shopify-section:has(.lame-home-hero) .slideshow-section,
-body.template-index .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container, slideshow-slides, slideshow-slide) {
+body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero {
   width: 100%;
-  max-width: none;
-  margin-inline: 0;
-  padding-inline: 0;
+  max-width: var(--page-width, 1200px);
+  margin-inline: auto;
+  padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem));
+  box-sizing: border-box;
+}
+
+body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
+body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  border-radius: clamp(10px, 1.5vw, 16px);
+  overflow: hidden;
 }
 
 /* Flush homepage sections by default — no white gutters between bands */
@@ -488,25 +494,29 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
     content-visibility: visible !important;
   }
 
-  /* Full-bleed hero locked to remaining viewport height */
+  /* Hero banner adapts to same fixed section width as other sections */
   .template-index .content-for-layout > .shopify-section:has(.lame-home-hero) {
     width: 100%;
     max-width: 100%;
     margin-inline: 0;
     padding-inline: 0;
-    overflow: hidden;
   }
 
-  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero,
-  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
-  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame,
-  .template-index .shopify-section:has(.lame-home-hero) .slideshow-section,
-  .template-index .shopify-section:has(.lame-home-hero) :is(slideshow-component, slideshow-container, slideshow-slides, slideshow-slide) {
+  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero {
     width: 100% !important;
-    max-width: none !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    border-radius: 0 !important;
+    max-width: var(--page-width, 1200px) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
+  }
+
+  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
+  .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: auto !important;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
+    overflow: hidden !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame {
@@ -517,7 +527,8 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
     min-height: 0 !important;
     max-height: none !important;
     aspect-ratio: auto !important;
-    overflow: hidden;
+    overflow: hidden !important;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
     background: transparent !important;
   }
 
@@ -552,9 +563,11 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
     min-height: 0 !important;
     max-height: none !important;
     position: relative !important;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
+    overflow: hidden !important;
   }
 
-  /* Full-bleed edge to edge on mobile */
+  /* Hero banner image adapts with rounded corners */
   .template-index .shopify-section:has(.lame-home-hero) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img),
   .template-index .shopify-section:has(.lame-home-hero--fit-contain) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img),
   .template-index .shopify-section:has(.lame-home-hero--fit-cover) :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
@@ -570,6 +583,7 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
   }
 
   .template-index .shopify-section:has(.lame-home-hero) :is(.lame-home-hero__carousel--mobile, .lame-home-hero__carousel--desktop) slideshow-slides {

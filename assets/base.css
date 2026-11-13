@@ -31,6 +31,8 @@ body.template-index {
   --surface-transition-timing: var(--ease-out-quad);
   --submenu-animation-speed: 360ms;
   --submenu-animation-easing: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --lame-title-banner-min-h: clamp(180px, 16vw, 220px);
+  --lame-title-banner-min-h-mobile: clamp(110px, 28vw, 145px);
 }
 
 html {
@@ -436,10 +438,19 @@ p:empty {
   grid-column: 1 / -1;
 }
 
-/* GIF banner full bleed across page */
+/* GIF banner adapts to standard section width */
 .section:has([class*="ai-gif-banner"]) > *,
 .section:has([class*="gif-banner"]) > * {
-  grid-column: 1 / -1 !important;
+  grid-column: 2 !important;
+  max-width: var(--page-width, 1200px) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+  box-sizing: border-box !important;
+}
+
+.section:has([class*="ai-gif-banner"]) img,
+.section:has([class*="gif-banner"]) img {
+  border-radius: clamp(10px, 1.5vw, 16px) !important;
 }
 
 @media screen and (max-width: 749px) {

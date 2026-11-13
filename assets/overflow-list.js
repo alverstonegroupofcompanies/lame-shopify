@@ -213,11 +213,12 @@ export class OverflowList extends DeclarativeShadowElement {
    * Reset the list to its initial state and disconnect the observers.
    */
   #reset() {
-    const { list } = this.#refs;
+    const { list, moreSlot } = this.#refs;
 
     this.#unobserveChanges();
     this.#moveItemsToDefaultSlot();
 
+    if (moreSlot) moreSlot.hidden = true;
     list.style.removeProperty('height');
     this.style.setProperty('--overflow-count', '0');
   }
@@ -257,6 +258,11 @@ export class OverflowList extends DeclarativeShadowElement {
    * @param {HTMLElement | null} [lastVisibleElement] Optional element to place in last visible position
    */
   #reflowItems = (listHeight = 0, lastVisibleElement = null) => {
+    if (this.getAttribute('disabled') === 'true' || this.hasAttribute('disabled')) {
+      this.#reset();
+      return;
+    }
+
     const { defaultSlot, overflowSlot, moreSlot, list, placeholder } = this.#refs;
 
     this.#unobserveChanges();

@@ -1,5 +1,3 @@
-
-
 {% liquid
   assign block_settings = block.settings
   assign use_inverse_logo = false
@@ -27,12 +25,11 @@
   Output all logo variants, use CSS to hide/show the appropriate one
   based on the .header[transparent] selector
 {% endcomment %}
-<a
+<div
   {% if template.name == 'index' and block_settings.hide_logo_on_home_page %}
     data-hidden-on-home-page
   {% endif %}
-  href="{{ routes.root_url }}"
-  class="size-style spacing-style header-logo"
+  class="size-style spacing-style header-logo header-logo--with-badge"
   style="
     {% render 'size-style', settings: block_settings %}
     {% render 'spacing-style', settings: block_settings %}
@@ -55,52 +52,95 @@
     endif
   %}
 
-  <span
-    class="header-logo__image-container header-logo__image-container--original"
-    data-testid="header-logo"
+  <a
+    href="{{ routes.root_url }}"
+    class="header-logo__link"
+    aria-label="{{ alt_text_fallback | escape }}"
   >
-    {%- comment -%} Prefer theme My Lamstone logo asset for white navbar {%- endcomment -%}
-    <img
-      class="header-logo__image"
-      src="{{ 'mylamstone-header-logo.png' | asset_url }}"
-      alt="{{ alt_text_fallback | escape }}"
-      width="320"
-      height="102"
-      loading="eager"
-      decoding="async"
-      style="{{ logo_style }}"
-    >
-  </span>
-
-  {% if use_inverse_logo %}
     <span
-      class="header-logo__image-container header-logo__image-container--inverse"
-      data-testid="header-logo-inverse"
+      class="header-logo__image-container header-logo__image-container--original"
+      data-testid="header-logo"
     >
-      {% render 'image',
-        image: inverse_logo,
-        class: 'header-logo__image',
-        height: settings.logo_height,
-        alt_text_fallback: alt_text_fallback,
-        text_fallback: shop.name,
-        style: inverse_logo_style
-      %}
+      {%- comment -%} Prefer theme My Lamstone logo asset for white navbar {%- endcomment -%}
+      <img
+        class="header-logo__image"
+        src="{{ 'mylamstone-header-logo.png' | asset_url }}"
+        alt="{{ alt_text_fallback | escape }}"
+        width="320"
+        height="102"
+        loading="eager"
+        decoding="async"
+        style="{{ logo_style }}"
+      >
     </span>
-  {% endif %}
-</a>
+
+    {% if use_inverse_logo %}
+      <span
+        class="header-logo__image-container header-logo__image-container--inverse"
+        data-testid="header-logo-inverse"
+      >
+        {% render 'image',
+          image: inverse_logo,
+          class: 'header-logo__image',
+          height: settings.logo_height,
+          alt_text_fallback: alt_text_fallback,
+          text_fallback: shop.name,
+          style: inverse_logo_style
+        %}
+      </span>
+    {% endif %}
+  </a>
+
+  {%- if block_settings.show_elite_badge != false -%}
+    {%- assign elite_link = block_settings.elite_badge_link | default: '/pages/elite-pro' -%}
+    {%- assign elite_pill_label = block_settings.elite_badge_pill_text | default: 'elite pro' -%}
+    <a
+      href="{{ elite_link }}"
+      class="header-elite-badge"
+      aria-label="Join Elite Pro Membership — Free shipping, 10% extra cashback & VIP perks"
+      title="Why Join Elite? Free shipping, 10% extra cashback & VIP perks"
+    >
+      <span class="header-elite-badge__content">
+        <span class="header-elite-badge__top">
+          <span class="header-elite-badge__join-text">Join</span>
+          <span class="header-elite-badge__sparkle" aria-hidden="true">
+            <svg class="header-elite-badge__star-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+              <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4L12 0Z"/>
+            </svg>
+            <span class="header-elite-badge__dot header-elite-badge__dot--1"></span>
+            <span class="header-elite-badge__dot header-elite-badge__dot--2"></span>
+          </span>
+        </span>
+        <span class="header-elite-badge__pill">
+          <span class="header-elite-badge__pill-shimmer" aria-hidden="true"></span>
+          <span class="header-elite-badge__pill-text">{{ elite_pill_label }}</span>
+          <span class="header-elite-badge__arrow-circle" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="8" r="7" stroke-width="1" opacity="0.85"/>
+              <path d="M6.5 5.2L9.5 8L6.5 10.8"/>
+            </svg>
+          </span>
+        </span>
+      </span>
+    </a>
+  {%- endif -%}
+</div>
 
 {% stylesheet %}
   .header-logo {
-    display: flex;
+    display: inline-flex;
     height: 100%;
     font-size: var(--font-size--md);
     font-family: var(--font-family);
     font-weight: var(--font-weight);
     font-style: var(--font-style);
     color: var(--color-foreground);
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    gap: 12px;
     text-decoration: none;
+    position: relative;
+    flex-shrink: 0;
 
     &[data-hidden-on-home-page] {
       display: none;
@@ -110,7 +150,7 @@
           [sticky='scroll-up'][data-scroll-direction='up']
         )
         & {
-        display: flex;
+        display: inline-flex;
       }
     }
 
@@ -125,6 +165,14 @@
     &:hover {
       text-decoration: none;
     }
+  }
+
+  .header-logo__link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 0;
+    flex-shrink: 0;
   }
 
   .header-logo__image {
@@ -145,6 +193,233 @@
   .header-logo__image-container--inverse {
     display: var(--header-logo-inverse-display, none);
   }
+
+  /* Purplle-Style Elite Badge near Logo */
+  .header-elite-badge {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .header-elite-badge:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  .header-elite-badge__content {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  /* Top Row: "Join" + Sparkles */
+  .header-elite-badge__top {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-inline: 2px 1px;
+    margin-bottom: 2px;
+    line-height: 1;
+  }
+
+  .header-elite-badge__join-text {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #1A1A1A;
+    letter-spacing: -0.01em;
+    font-family: inherit;
+    line-height: 1;
+  }
+
+  /* Sparkle cluster (4-point star + twinkle dots) */
+  .header-elite-badge__sparkle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: #FF6B2C;
+    margin-left: auto;
+    animation: eliteSparkleTwinkle 2.6s ease-in-out infinite;
+    transform-origin: center center;
+  }
+
+  .header-elite-badge__star-svg {
+    filter: drop-shadow(0 0 3px rgba(255, 107, 44, 0.6));
+  }
+
+  .header-elite-badge__dot {
+    position: absolute;
+    width: 2.5px;
+    height: 2.5px;
+    background: #FF8A3D;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .header-elite-badge__dot--1 {
+    top: -2px;
+    right: -3px;
+    animation: eliteDotBlink 2.6s ease-in-out infinite 0.4s;
+  }
+
+  .header-elite-badge__dot--2 {
+    bottom: -1px;
+    left: -4px;
+    animation: eliteDotBlink 2.6s ease-in-out infinite 1.1s;
+  }
+
+  /* Bottom Row: Orange Gradient Pill with "elite pro" + Circle Arrow */
+  .header-elite-badge__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: linear-gradient(135deg, #FF6B2C 0%, #FF8A3D 100%);
+    color: #ffffff;
+    padding: 0.22rem 0.52rem 0.22rem 0.56rem;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(255, 107, 44, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
+    line-height: 1;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    transition: box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .header-elite-badge__pill-text {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    text-transform: lowercase;
+    line-height: 1;
+  }
+
+  .header-elite-badge__arrow-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    line-height: 1;
+    animation: eliteArrowNudge 2.6s ease-in-out infinite;
+    transform-origin: center center;
+  }
+
+  /* Shimmer light sweep across pill every ~5 seconds */
+  .header-elite-badge__pill-shimmer {
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.55) 50%, transparent 100%);
+    transform: skewX(-20deg);
+    animation: elitePillShimmer 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Hover micro-interactions */
+  .header-elite-badge:hover .header-elite-badge__sparkle {
+    transform: scale(1.3) rotate(25deg);
+    color: #FF8A3D;
+    filter: drop-shadow(0 0 6px rgba(255, 138, 61, 0.95));
+  }
+
+  .header-elite-badge:hover .header-elite-badge__arrow-circle {
+    transform: translateX(1.5px);
+  }
+
+  .header-elite-badge:hover .header-elite-badge__pill {
+    box-shadow: 0 4px 14px rgba(255, 107, 44, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    background: linear-gradient(135deg, #FF7B3D 0%, #FF9B54 100%);
+  }
+
+  /* Keyframe Animations */
+  @keyframes eliteSparkleTwinkle {
+    0%, 100% {
+      transform: scale(0.9) rotate(0deg);
+      opacity: 0.85;
+      filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4));
+    }
+    50% {
+      transform: scale(1.2) rotate(16deg);
+      opacity: 1;
+      filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.9));
+    }
+  }
+
+  @keyframes eliteDotBlink {
+    0%, 100% {
+      opacity: 0.2;
+      transform: scale(0.6);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  @keyframes elitePillShimmer {
+    0%, 60% {
+      left: -120%;
+    }
+    100% {
+      left: 200%;
+    }
+  }
+
+  @keyframes eliteArrowNudge {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    45% {
+      transform: translateX(1.5px);
+    }
+  }
+
+  /* Mobile compact styling */
+  @media screen and (max-width: 749px) {
+    .header-logo {
+      gap: 0.45rem;
+    }
+    .header-elite-badge__join-text {
+      font-size: 0.5625rem;
+    }
+    .header-elite-badge__star-svg {
+      width: 11px;
+      height: 11px;
+    }
+    .header-elite-badge__pill {
+      padding: 0.16rem 0.42rem 0.16rem 0.45rem;
+      gap: 0.25rem;
+    }
+    .header-elite-badge__pill-text {
+      font-size: 0.625rem;
+    }
+    .header-elite-badge__arrow-circle svg {
+      width: 9.5px;
+      height: 9.5px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-elite-badge,
+    .header-elite-badge__sparkle,
+    .header-elite-badge__dot,
+    .header-elite-badge__arrow-circle,
+    .header-elite-badge__pill-shimmer {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -156,6 +431,27 @@
     {
       "type": "paragraph",
       "content": "t:content.edit_logo_in_theme_settings"
+    },
+    {
+      "type": "header",
+      "content": "Elite Pro Badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_elite_badge",
+      "label": "Show Elite Pro badge near logo",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "elite_badge_pill_text",
+      "label": "Pill text",
+      "default": "elite pro"
+    },
+    {
+      "type": "url",
+      "id": "elite_badge_link",
+      "label": "Pill link (optional)"
     },
     {
       "type": "header",

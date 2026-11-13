@@ -80,15 +80,39 @@
       });
 
       document.addEventListener('keydown', (event) => {
-        if (event.key !== 'Escape') return;
-        document.querySelectorAll('[data-lame-category-dropdown].is-open').forEach((root) => {
-          const trigger = root.querySelector('[data-lame-category-trigger]');
-          const panel = document.querySelector('[data-lame-category-panel]');
-          if (!trigger || !panel) return;
+        const openDropdown = document.querySelector('[data-lame-category-dropdown].is-open');
+        if (!openDropdown) return;
+        const trigger = openDropdown.querySelector('[data-lame-category-trigger]');
+        const panel = document.querySelector('[data-lame-category-panel]:not([hidden])');
+        if (!trigger || !panel) return;
+
+        if (event.key === 'Escape') {
           trigger.setAttribute('aria-expanded', 'false');
           panel.hidden = true;
-          root.classList.remove('is-open');
-        });
+          openDropdown.classList.remove('is-open');
+          trigger.focus();
+          return;
+        }
+
+        const links = Array.from(panel.querySelectorAll('a'));
+        if (!links.length) return;
+        const activeIndex = links.indexOf(document.activeElement);
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          const nextIndex = activeIndex < links.length - 1 ? activeIndex + 1 : 0;
+          links[nextIndex].focus();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          const prevIndex = activeIndex > 0 ? activeIndex - 1 : links.length - 1;
+          links[prevIndex].focus();
+        } else if (event.key === 'Home') {
+          event.preventDefault();
+          links[0].focus();
+        } else if (event.key === 'End') {
+          event.preventDefault();
+          links[links.length - 1].focus();
+        }
       });
     }
   };
