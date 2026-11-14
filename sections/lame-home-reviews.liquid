@@ -24,7 +24,7 @@
   style="{% render 'spacing-padding', settings: section.settings %}"
   {{ section.shopify_attributes }}
 >
-  <div class="lame-home-reviews__wrap" data-lame-reviews data-shop-domain="{{ shop.permanent_domain | escape }}">
+  <div class="lame-home-reviews__wrap" data-lame-reviews data-shop-domain="{{ shop.permanent_domain | escape }}" data-excluded-reviews="{{ section.settings.excluded_reviews | escape }}">
     <header class="lame-home-reviews__head">
       {%- if section.settings.eyebrow != blank -%}
         <div class="lame-home-reviews__badge-wrap">
@@ -350,6 +350,26 @@
     if (!root || !grid) return;
 
     const shopDomain = root.dataset.shopDomain || '';
+    const excludedList = (root.dataset.excludedReviews || '')
+      .split(/[\n,]+/)
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+
+    const isExcluded = (review) => {
+      if (!excludedList.length || !review) return false;
+      const author = (review.author || '').toLowerCase();
+      const title = (review.title || '').toLowerCase();
+      const body = (review.body || '').toLowerCase();
+      const id = String(review.id || '').toLowerCase();
+      return excludedList.some(
+        (target) =>
+          (target && author.includes(target)) ||
+          (target && title.includes(target)) ||
+          (target && body.includes(target)) ||
+          (target && id === target)
+      );
+    };
+
     const ownerName = (form?.dataset.customerName || '').trim().toLowerCase().replace(/\s+/g, ' ');
     const ownerId = form?.dataset.customerId || 'guest';
     const hideKey = 'lame-hidden-reviews:' + ownerId;
@@ -500,6 +520,7 @@
     const addCard = ({ id, rating, title, body, author, date, detail, href }, place) => {
       const original = (body || title || '').trim();
       if (!original) return;
+      if (isExcluded({ id, author, title, body: original })) return;
       const key = reviewKey({ id, body: original });
       if (hiddenReviews().has(key) || hiddenReviews().has('body:' + original.toLowerCase())) return;
       const saved = savedReview({ body: original }, key);
@@ -1965,6 +1986,12 @@
       "id": "color_scheme",
       "label": "Color scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "textarea",
+      "id": "excluded_reviews",
+      "label": "Hide specific reviews (all users)",
+      "info": "Comma or newline separated list of reviewer names, titles, or keywords to permanently exclude from the carousel for all visitors."
     },
     {
       "type": "range",

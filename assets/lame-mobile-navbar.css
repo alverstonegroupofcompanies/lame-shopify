@@ -32,6 +32,12 @@ body:not(.template-index) .lame-mobile-subnav {
     box-shadow: none !important;
   }
 
+  /* On homepage, suppress orange line on top row so subnav stays unified with top row */
+  body.template-index #header-component.header--cosmetic-luxury .header__row--top::after {
+    display: none !important;
+    content: none !important;
+  }
+
   #header-component.header--cosmetic-luxury .header__row--top {
     background: #ffffff !important;
     border-bottom: none !important;
@@ -49,9 +55,9 @@ body:not(.template-index) .lame-mobile-subnav {
     max-width: 100% !important;
   }
 
-  /* On non-homepage pages where subnav is hidden, give top row a clean separation border */
+  /* On non-homepage pages where subnav is hidden, the small orange strip on ::after is active */
   body:not(.template-index) #header-component.header--cosmetic-luxury .header__row--top {
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: none !important;
   }
 
   /* ── Row 1: Top Row Arrangement — Push top icons to edge (hamburger menu has minimal corner margin) ── */
@@ -339,10 +345,30 @@ body:not(.template-index) .lame-mobile-subnav {
   /* ── 4. Mobile Subnav Container (Home Page Only — Unified Single Section) ── */
   .lame-mobile-subnav {
     display: block !important;
+    position: relative !important;
     background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: none !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
     width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Small orange strip below mobile navbar (subnav bottom on homepage) */
+  .lame-mobile-subnav::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 2.5px !important;
+    background: #FF6B2C !important;
+    background: linear-gradient(90deg, #FF7F42 0%, #FF6B2C 35%, #FF6B2C 70%, #FF7F42 100%) !important;
+    box-shadow: 0 1px 3px rgba(255, 107, 44, 0.22) !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
     box-sizing: border-box !important;
   }
 
