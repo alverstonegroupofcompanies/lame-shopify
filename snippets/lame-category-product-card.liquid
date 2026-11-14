@@ -16,21 +16,31 @@
   assign show_wishlist = show_wishlist | default: true
 
   assign price_amount = variant.price
-  assign compare_at = variant.compare_at_price
-  capture lame_sale_raw
-    render 'lame-product-sale-data', product: product
-  endcapture
-  assign lame_sale_parts = lame_sale_raw | split: '|'
-  assign lame_discount_percent = lame_sale_parts[0] | strip | plus: 0
-  assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
-  assign lame_on_sale = lame_sale_parts[2] | strip | plus: 0
-  assign lame_sale_badge_label = lame_sale_parts[3] | strip
-  assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
-  if lame_on_sale == 1 and lame_effective_compare > 0
-    assign compare_at = lame_effective_compare
+  assign compare_at = variant.compare_at_price | default: 0
+
+  if product != blank
+    capture lame_sale_raw
+      render 'lame-product-sale-data', product: product
+    endcapture
+    assign lame_sale_parts = lame_sale_raw | split: '|'
+    assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+    assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
+    assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
+    if compare_at == 0 and lame_on_sale_flag == 1 and lame_effective_compare > 0
+      assign compare_at = lame_effective_compare
+    endif
+    if lame_on_sale_flag == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
+      assign price_amount = lame_sale_price
+    endif
   endif
-  if lame_on_sale == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
-    assign price_amount = lame_sale_price
+
+  assign has_discount = false
+  assign discount_percent = 0
+  if compare_at > price_amount and compare_at > 0
+    assign discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+    if discount_percent > 0
+      assign has_discount = true
+    endif
   endif
 
   assign card_label = product.vendor | strip
@@ -71,16 +81,15 @@
     </a>
 
     <div class="lame-cat-card__badges">
+      {% unless variant.available %}
+        <span class="lame-cat-card__badge lame-cat-card__badge--soldout">Sold out</span>
+      {% endunless %}
       {% if is_bogo %}
         <span class="lame-cat-card__badge lame-cat-card__badge--promo">Buy 1 Get 1 Free</span>
       {% endif %}
-      {% if lame_discount_percent > 0 %}
-        <span class="lame-cat-card__badge">
-          {%- if lame_sale_badge_label != blank -%}
-            {{ lame_sale_badge_label | escape }}
-          {%- else -%}
-            -{{ lame_discount_percent }}%
-          {%- endif -%}
+      {% if has_discount %}
+        <span class="lame-cat-card__badge lame-cat-card__badge--discount lame-discount-badge">
+          {{ discount_percent }}% OFF
         </span>
       {% endif %}
     </div>

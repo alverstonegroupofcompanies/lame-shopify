@@ -1,4 +1,4 @@
-﻿{% capture _lame_op_discard %}
+{% capture _lame_op_discard %}
   {% liquid
     assign lame_our_products_active = false
     if template.name == 'collection' and collection != blank
@@ -47,9 +47,23 @@
   endif
 
   assign card_has_badge = false
+  assign is_sold_out = false
+  assign is_on_sale = false
+  assign discount_percent = 0
   unless product == blank
-    if product.available == false or product.compare_at_price > product.price
+    assign variant = product.selected_or_first_available_variant | default: product.variants.first
+    assign card_price = variant.price
+    assign card_compare = variant.compare_at_price | default: 0
+    if product.available == false
+      assign is_sold_out = true
       assign card_has_badge = true
+    endif
+    if card_compare > card_price and card_compare > 0
+      assign discount_percent = card_compare | minus: card_price | times: 100.0 | divided_by: card_compare | round
+      if discount_percent > 0
+        assign is_on_sale = true
+        assign card_has_badge = true
+      endif
     endif
   endunless
 %}
@@ -58,26 +72,25 @@
   {% unless product == blank %}
     {% if card_has_badge %}
       <div
-        class="product-badges product-badges--{{ settings.badge_position }}"
+        class="product-badges product-badges--top-left"
         style="
-          --badge-border-radius: {{ settings.badge_corner_radius }}px;
-          --badge-font-family: var(--font-{{ settings.badge_font_family }}--family);
-          --badge-font-weight: var(--font-{{ settings.badge_font_family }}--weight);
-          --badge-text-transform: {{ settings.badge_text_transform }};
+          --badge-border-radius: 4px;
         "
       >
-        <div
-          class="
-            product-badges__badge product-badges__badge--rectangle
-            {% if product.available == false %} color-{{ settings.badge_sold_out_color_scheme }}{% else %} color-{{ settings.badge_sale_color_scheme }}{% endif %}
-          "
-        >
-          {%- if product.available == false -%}
-            {{ 'content.product_badge_sold_out' | t }}
-          {%- else -%}
-            {{ 'content.product_badge_sale' | t }}
-          {%- endif -%}
-        </div>
+        {% if is_sold_out %}
+          <div
+            class="product-badges__badge product-badges__badge--rectangle product-badges__badge--soldout color-{{ settings.badge_sold_out_color_scheme }}"
+          >
+            {{ 'content.product_badge_sold_out' | t | default: 'Sold out' }}
+          </div>
+        {% endif %}
+        {% if is_on_sale %}
+          <div
+            class="product-badges__badge product-badges__badge--rectangle product-badges__badge--discount"
+          >
+            {{ discount_percent }}% OFF
+          </div>
+        {% endif %}
       </div>
     {% endif %}
 

@@ -7,7 +7,7 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign variant = product.selected_or_first_available_variant
+  assign variant = product.selected_or_first_available_variant | default: product.variants.first
   assign is_elite_pro = false
   if product != blank
     assign p_handle_down = product.handle | downcase
@@ -23,21 +23,34 @@
   assign show_wishlist = show_wishlist | default: true
 
   assign price_amount = variant.price
-  assign compare_at = variant.compare_at_price
-  capture lame_sale_raw
-    render 'lame-product-sale-data', product: product
-  endcapture
-  assign lame_sale_parts = lame_sale_raw | split: '|'
-  assign lame_discount_percent = lame_sale_parts[0] | strip | plus: 0
-  assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
-  assign lame_on_sale = lame_sale_parts[2] | strip | plus: 0
-  assign lame_sale_badge_label = lame_sale_parts[3] | strip
-  assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
-  if lame_on_sale == 1 and lame_effective_compare > 0
-    assign compare_at = lame_effective_compare
+  assign compare_at = variant.compare_at_price | default: 0
+
+  if product != blank
+    capture lame_sale_raw
+      render 'lame-product-sale-data', product: product
+    endcapture
+    assign lame_sale_parts = lame_sale_raw | split: '|'
+    assign lame_effective_compare = lame_sale_parts[1] | strip | plus: 0
+    assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0
+    assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
+    if compare_at == 0 and lame_on_sale_flag == 1 and lame_effective_compare > 0
+      assign compare_at = lame_effective_compare
+    endif
+    if lame_on_sale_flag == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
+      assign price_amount = lame_sale_price
+    endif
   endif
-  if lame_on_sale == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
-    assign price_amount = lame_sale_price
+
+  assign has_discount = false
+  assign discount_percent = 0
+  assign savings_amount = 0
+
+  if compare_at > price_amount and compare_at > 0
+    assign discount_percent = compare_at | minus: price_amount | times: 100.0 | divided_by: compare_at | round
+    if discount_percent > 0
+      assign has_discount = true
+      assign savings_amount = compare_at | minus: price_amount
+    endif
   endif
 
   assign tags_down = product.tags | join: ',' | downcase
@@ -70,7 +83,7 @@
   assign variant_count = product.variants.size
   assign form_id = 'CatalogCard-Form-' | append: section.id | append: '-' | append: product.id
   assign show_sale_bar = false
-  if lame_on_sale == 1 and lame_discount_percent >= 15
+  if has_discount and discount_percent >= 15
     assign show_sale_bar = true
   endif
 -%}
@@ -80,13 +93,16 @@
     <div class="lame-catlog-card__tags">
       {% unless product.available %}
         <span class="lame-catlog-card__tag lame-catlog-card__tag--soldout">SOLD OUT</span>
+      {% endunless %}
+      {% if has_discount %}
+        <span class="lame-catlog-card__tag lame-discount-badge">{{ discount_percent }}% OFF</span>
       {% elsif is_bestseller %}
         <span class="lame-catlog-card__tag lame-catlog-card__tag--bestseller">BESTSELLER</span>
       {% elsif is_new %}
         <span class="lame-catlog-card__tag lame-catlog-card__tag--new">NEW</span>
       {% elsif is_featured %}
         <span class="lame-catlog-card__tag lame-catlog-card__tag--featured">FEATURED</span>
-      {% endunless %}
+      {% endif %}
     </div>
 
     {% if show_wishlist and settings.lame_enable_wishlist %}
@@ -119,21 +135,10 @@
     </h3>
 
     <div class="lame-catlog-card__price-row">
-      {% if lame_on_sale == 1 and compare_at > price_amount %}
+      {% if has_discount %}
+        <span class="lame-catlog-card__price lame-catlog-card__price--sale">{{ price_amount | money }}</span>
         <span class="lame-catlog-card__mrp">{{ compare_at | money }}</span>
-        <span class="lame-catlog-card__price">{{ price_amount | money }}</span>
-        {% if lame_sale_badge_label != blank %}
-          <span class="lame-catlog-card__off">{{ lame_sale_badge_label }}</span>
-        {% elsif lame_discount_percent > 0 %}
-          <span class="lame-catlog-card__off">{{ lame_discount_percent }}% Off</span>
-        {% endif %}
-      {% elsif lame_on_sale == 1 %}
-        <span class="lame-catlog-card__price">{{ price_amount | money }}</span>
-        {% if lame_sale_badge_label != blank %}
-          <span class="lame-catlog-card__off">{{ lame_sale_badge_label }}</span>
-        {% elsif lame_discount_percent > 0 %}
-          <span class="lame-catlog-card__off">{{ lame_discount_percent }}% Off</span>
-        {% endif %}
+        <span class="lame-catlog-card__save">You save {{ savings_amount | money }}</span>
       {% else %}
         <span class="lame-catlog-card__price">{{ price_amount | money }}</span>
       {% endif %}

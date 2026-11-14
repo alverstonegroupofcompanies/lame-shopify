@@ -6,7 +6,7 @@
 
 {%- if product != blank -%}
   {%- liquid
-    assign variant = product.selected_or_first_available_variant
+    assign variant = product.selected_or_first_available_variant | default: product.variants.first
     assign price_formatted = variant.price | money
     assign compare_formatted = ''
     if variant.compare_at_price > variant.price

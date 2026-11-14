@@ -11,7 +11,7 @@
 {%- enddoc -%}
 
 {%- liquid
-  assign selected_variant = product.selected_or_first_available_variant
+  assign selected_variant = product.selected_or_first_available_variant | default: product.variants.first
   assign compare_at = selected_variant.compare_at_price
   assign price = selected_variant.price
   assign on_sale = false
@@ -143,11 +143,11 @@
       <span class="lame-flash-card__price">{{ display_price }}</span>
       {%- if on_sale -%}
         <span class="lame-flash-card__compare">{{ display_compare }}</span>
-        {%- if discount_percent > 0 -%}
-          <span class="lame-flash-card__discount">{{ discount_percent }}% off</span>
-        {%- endif -%}
       {%- endif -%}
     </div>
+    {%- if on_sale and savings_amount > 0 -%}
+      <p class="lame-flash-card__save-line">You save {{ display_savings }}</p>
+    {%- endif -%}
 
     {%- if selected_variant -%}
       {%- liquid
