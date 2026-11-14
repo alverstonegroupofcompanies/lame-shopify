@@ -6,7 +6,7 @@
   assign add_to_cart_label = add_to_cart_label | default: 'Add to cart'
   assign sold_out_label = sold_out_label | default: 'Sold out'
 
-  assign selected_variant = product.selected_or_first_available_variant
+  assign selected_variant = product.selected_or_first_available_variant | default: product.variants.first
   assign compare_at = selected_variant.compare_at_price
   assign price = selected_variant.price
   capture lame_sale_raw
@@ -86,15 +86,15 @@
 
       <div class="lame-home-product-card__price-row">
         {%- if on_sale -%}
+          <span class="lame-home-product-card__price lame-home-product-card__price--sale">{{ display_price }}</span>
           <span class="lame-home-product-card__compare">{{ display_compare }}</span>
-          <span class="lame-home-product-card__price">{{ display_price }}</span>
-          {%- if discount_percent > 0 -%}
-            <span class="lame-home-product-card__off">{{ discount_percent }}% Off</span>
-          {%- endif -%}
         {%- else -%}
           <span class="lame-home-product-card__price">{{ display_price }}</span>
         {%- endif -%}
       </div>
+      {%- if on_sale and savings_amount > 0 -%}
+        <span class="lame-home-product-card__save-line">You save {{ display_savings }}</span>
+      {%- endif -%}
 
       {% if show_add_to_cart and selected_variant %}
         {%- liquid

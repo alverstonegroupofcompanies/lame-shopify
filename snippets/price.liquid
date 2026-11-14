@@ -10,7 +10,7 @@
 {%- liquid
   assign show_unit_price = show_unit_price | default: false
   assign show_sale_price_first = show_sale_price_first | default: false
-  assign selected_variant = product_resource.selected_or_first_available_variant
+  assign selected_variant = product_resource.selected_or_first_available_variant | default: product_resource.variants.first
   assign price = selected_variant.price
   assign compare_at_price = selected_variant.compare_at_price
 
@@ -38,11 +38,19 @@
       assign price = lame_sale_price
     endif
   endif
-  if show_compare_price and compare_at_price > 0
-    if lame_discount_percent == 0
-      assign lame_discount_percent = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+  if show_compare_price and compare_at_price > price and compare_at_price > 0
+    assign lame_discount_percent = compare_at_price | minus: price | times: 100.0 | divided_by: compare_at_price | round
+    if lame_discount_percent > 0
+      assign lame_savings_amount = compare_at_price | minus: price
+    else
+      assign show_compare_price = false
+      assign lame_discount_percent = 0
+      assign lame_savings_amount = 0
     endif
-    assign lame_savings_amount = compare_at_price | minus: price
+  else
+    assign show_compare_price = false
+    assign lame_discount_percent = 0
+    assign lame_savings_amount = 0
   endif
 
   if product_resource == blank
@@ -142,47 +150,23 @@
           <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
           <span class="price-item--regular compare-at-price">{{- compare_at_price -}}</span>
         </span>
-        {% liquid
-          assign lame_show_op_discount = false
-          if template.name == 'collection' and collection != blank
-            if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
-              assign lame_show_op_discount = true
-            endif
-          endif
-        %}
-        {% if lame_show_op_discount and lame_savings_amount > 0 %}
-          <span class="lame-op-discount-badge lame-op-save-badge">
-            <svg class="lame-op-save-badge__icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M20 12v8H4V12" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <path d="M12 3 20 7v5H4V7l8-4Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-            </svg>
-            You Save {{ lame_savings_display }}
+        {% if show_compare_price and lame_savings_amount > 0 %}
+          <span class="lame-card-save-amount lame-op-save-badge">
+            You save {{ lame_savings_display }}
           </span>
         {% endif %}
       {% else %}
         <span class="price-item__group">
-          <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
-          <span class="price-item--regular compare-at-price">{{- compare_at_price -}}</span>
-        </span>
-        <span class="price-item__group">
           <span class="visually-hidden">{{ 'content.price_sale' | t }}&nbsp;</span>
           <span class="price-item--sale price">{{ price | default: '&nbsp;' }}</span>
         </span>
-        {% liquid
-          assign lame_show_op_discount_else = false
-          if template.name == 'collection' and collection != blank
-            if template.suffix == 'our-products' or collection.handle == 'all' or collection.handle == 'our-products' or collection.handle == 'products'
-              assign lame_show_op_discount_else = true
-            endif
-          endif
-        %}
-        {% if lame_show_op_discount_else and lame_savings_amount > 0 %}
-          <span class="lame-op-discount-badge lame-op-save-badge">
-            <svg class="lame-op-save-badge__icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M20 12v8H4V12" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <path d="M12 3 20 7v5H4V7l8-4Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
-            </svg>
-            You Save {{ lame_savings_display }}
+        <span class="price-item__group">
+          <span class="visually-hidden">{{ 'content.price_regular' | t }}&nbsp;</span>
+          <span class="price-item--regular compare-at-price">{{- compare_at_price -}}</span>
+        </span>
+        {% if show_compare_price and lame_savings_amount > 0 %}
+          <span class="lame-card-save-amount lame-op-save-badge">
+            You save {{ lame_savings_display }}
           </span>
         {% endif %}
       {% endif %}
