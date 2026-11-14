@@ -55,8 +55,13 @@ body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__frame
 }
 
 /* Flush homepage sections by default — no white gutters between bands */
+.template-index,
 .template-index .content-for-layout {
-  row-gap: 0;
+  --content-section-row-gap: 0px !important;
+}
+
+.template-index .content-for-layout {
+  row-gap: 0 !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
@@ -225,6 +230,32 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
   .template-index .content-for-layout > .shopify-section:has(.lame-discount-tiles) + .shopify-section {
     margin-top: 1.25rem;
   }
+
+  /* When sections have background colors, eliminate margins so they touch seamlessly at the mid seam */
+  .template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg),
+  .template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg) + .shopify-section,
+  .template-index .content-for-layout > .shopify-section:has(.lame-new-products) + .shopify-section,
+  .template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-flash-deal--has-section-bg),
+  .template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-new-products) {
+    margin-top: 0 !important;
+    margin-block-start: 0 !important;
+  }
+}
+
+/* Sections with full background color: touch seamlessly at mid with 0px whitespace across all viewports */
+.template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg),
+.template-index .content-for-layout > .shopify-section:has(.lame-new-products.lame-flash-deal--has-section-bg) {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  margin-block: 0 !important;
+}
+
+.template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg) + .shopify-section,
+.template-index .content-for-layout > .shopify-section:has(.lame-new-products) + .shopify-section,
+.template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-flash-deal--has-section-bg),
+.template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-new-products) {
+  margin-top: 0 !important;
+  margin-block-start: 0 !important;
 }
 
 /* Hero fills width: full bleed edge to edge */
