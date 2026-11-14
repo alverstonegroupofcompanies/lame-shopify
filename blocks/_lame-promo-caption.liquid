@@ -1,15 +1,64 @@
-{%- assign line = block.settings.text | strip_html | strip -%}
+{%- assign raw_text = block.settings.text -%}
+{%- assign line = raw_text | strip_html | strip -%}
 {%- unless line == blank -%}
+  {%- assign has_why_elite = false -%}
+  {%- if line contains 'Why Choose Elite' or line contains 'Why choose elite' or line contains 'why choose elite' or line contains 'Why Join Elite' or line contains 'Why join elite' or line contains 'why join elite' -%}
+    {%- assign has_why_elite = true -%}
+  {%- endif -%}
+  {%- assign clean_text = raw_text 
+    | remove: '👑 ' 
+    | remove: '✨ ' 
+    | remove: '🎁 ' 
+    | remove: 'Why Choose Elite?' 
+    | remove: 'Why Choose Elite —' 
+    | remove: 'Why Choose Elite:' 
+    | remove: 'Why Choose Elite -' 
+    | remove: 'Why choose elite?' 
+    | remove: 'why choose elite?' 
+    | remove: 'Why Choose Elite'
+    | remove: 'Why Join Elite?' 
+    | remove: 'Why Join Elite —' 
+    | remove: 'Why Join Elite:' 
+    | remove: 'Why Join Elite -' 
+    | remove: 'Why join elite?' 
+    | remove: 'why join elite?' 
+    | remove: 'Why Join Elite'
+    | strip 
+  -%}
+  {%- assign mobile_clean = block.settings.mobile_text | strip_html | strip -%}
+  {%- if mobile_clean == blank -%}
+    {%- assign mobile_clean = clean_text -%}
+  {%- endif -%}
   <div
-    class="lame-promo-top-bar__caption"
+    class="lame-promo-top-bar__slide"
     {{ block.shopify_attributes }}
   >
     {%- if block.settings.link != blank -%}
-      <a class="lame-promo-top-bar__caption-link" href="{{ block.settings.link }}">
-        <span class="lame-promo-top-bar__caption-text">{{ block.settings.text }}</span>
+      <a class="lame-promo-top-bar__link" href="{{ block.settings.link }}">
+        {%- if has_why_elite -%}
+          <span class="lame-topbar-pill">
+            <span class="lame-topbar-pill__desktop">Why Choose Elite?</span>
+            <span class="lame-topbar-pill__mobile">Elite</span>
+          </span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ clean_text }}</span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean }}</span>
+        {%- else -%}
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ raw_text }}</span>
+          <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean | default: raw_text }}</span>
+        {%- endif -%}
       </a>
     {%- else -%}
-      <span class="lame-promo-top-bar__caption-text">{{ block.settings.text }}</span>
+      {%- if has_why_elite -%}
+        <span class="lame-topbar-pill">
+          <span class="lame-topbar-pill__desktop">Why Choose Elite?</span>
+          <span class="lame-topbar-pill__mobile">Elite</span>
+        </span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ clean_text }}</span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean }}</span>
+      {%- else -%}
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ raw_text }}</span>
+        <span class="lame-promo-top-bar__text lame-promo-top-bar__text--mobile">{{ mobile_clean | default: raw_text }}</span>
+      {%- endif -%}
     {%- endif -%}
   </div>
 {%- endunless -%}
@@ -23,6 +72,11 @@
       "id": "text",
       "label": "Caption",
       "default": "Free shipping on orders over $50"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "mobile_text",
+      "label": "Mobile caption (short version)"
     },
     {
       "type": "url",

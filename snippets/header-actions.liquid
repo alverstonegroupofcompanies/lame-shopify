@@ -236,7 +236,8 @@
     <button
       type="button"
       class="header-actions__action header-actions__slot header-actions__wishlist lame-header-wishlist-btn"
-      aria-label="{{ wishlist_label }}"
+      aria-label="{{ wishlist_label | default: 'Wishlist' }}"
+      title="{{ wishlist_label | default: 'Wishlist' }}"
       data-lame-wishlist-open
       {% if section %}
         data-shopify-editor-section="{{ section.id }}"
@@ -247,7 +248,7 @@
           icon_type: 'wishlist',
           custom_image: wishlist_icon_image,
           class: 'header-actions__icon-image',
-          size: 22
+          size: 24
         %}
         <span
           class="header-actions__wishlist-count header-actions__count-badge"
@@ -265,7 +266,8 @@
       class="header-actions__action header-actions__slot header-actions__cart lame-header-cart-btn{% if display_style == 'text' %} header-actions__text-style{% endif %}"
       on:click="#header-cart-drawer/open"
       aria-haspopup="dialog"
-      aria-label="{{ cart_label }}"
+      aria-label="{{ cart_label | default: 'Bag' }}"
+      title="{{ cart_label | default: 'Bag' }}"
       aria-describedby="cart-bubble-text"
       data-testid="cart-drawer-trigger"
       {% if section %}
@@ -278,7 +280,7 @@
           icon_type: 'cart',
           custom_image: cart_icon_image,
           class: 'header-actions__icon-image',
-          size: 22
+          size: 24
         %}
         <cart-icon
           class="header-actions__cart-icon{% if display_style == 'text' %} header-actions__cart-icon--text{% endif %}{% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}"
@@ -303,7 +305,8 @@
     <a
       href="{{ routes.cart_url }}"
       class="header-actions__action header-actions__slot action__cart header-actions__cart{% if display_style == 'text' %} header-actions__text-style{% endif %}"
-      aria-label="{{ cart_label }}"
+      aria-label="{{ cart_label | default: 'Bag' }}"
+      title="{{ cart_label | default: 'Bag' }}"
       aria-describedby="cart-bubble-text"
     >
       {{ cart_icon }}

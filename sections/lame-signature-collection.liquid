@@ -3286,9 +3286,9 @@
     width: 100%;
     height: 100%;
     background: 
-      linear-gradient(to right, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.65) 42%, rgba(0, 0, 0, 0.25) 75%, rgba(0, 0, 0, 0.6) 100%),
-      linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.2) 35%, transparent 60%),
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.75) 0%, transparent 28%);
+      linear-gradient(to right, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.52) 28%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.2) 76%, rgba(0, 0, 0, 0.65) 100%),
+      linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.22) 32%, transparent 55%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 25%);
     opacity: var(--lame-cinematic-overlay-opacity, 0.65);
     pointer-events: none;
   }
@@ -3296,11 +3296,16 @@
   /* Top Bar */
   .lame-signature__cinematic-topbar {
     position: relative;
-    z-index: 2;
-    display: flex;
+    z-index: 5;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
-    padding: clamp(1.25rem, 3.2vw, 2.25rem) clamp(1.5rem, 4.5vw, 4rem) 0;
+    padding: clamp(1.1rem, 2.6vw, 1.85rem) clamp(1.5rem, 4.5vw, 4rem) 0;
+    flex-shrink: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .lame-signature__cinematic-badge {
@@ -3369,24 +3374,31 @@
     display: none;
   }
 
-  /* Interactive Stage (Hero on left, Cards slider on right) */
+  /* Interactive Stage (Hero on left, Cards slider docked at bottom right) */
   .lame-signature__cinematic-stage {
     position: relative;
     z-index: 2;
-    display: grid;
-    grid-template-columns: minmax(320px, 1.05fr) minmax(340px, 1.45fr);
-    align-items: center;
-    gap: clamp(2rem, 5vw, 4.5rem);
-    padding: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 4.5vw, 4rem);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: clamp(1.5rem, 3vw, 3.5rem);
+    padding: clamp(1rem, 2vw, 2rem) clamp(1.5rem, 4.5vw, 4rem) clamp(1.8rem, 3.2vw, 3rem);
+    width: 100%;
+    box-sizing: border-box;
   }
 
   /* LEFT HERO STORY */
   .lame-signature__cinematic-hero {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    max-width: 580px;
+    justify-content: flex-end;
+    max-width: clamp(320px, 28vw, 480px);
     min-width: 0;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 0.5rem;
   }
 
   .lame-signature__cinematic-eyebrow-wrap {
@@ -3494,14 +3506,18 @@
     transform: translateY(-2px);
   }
 
-  /* RIGHT CARDS SLIDER */
+  /* RIGHT CARDS SLIDER (DOCKED AT BOTTOM RIGHT) */
   .lame-signature__cinematic-cards-wrapper {
     position: relative;
-    width: 100%;
+    width: auto;
+    max-width: clamp(420px, 48vw, 620px);
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 1.6rem;
+    gap: 1rem;
+    margin-left: auto;
+    align-self: flex-end;
+    flex-shrink: 0;
   }
 
   .lame-signature__cinematic-cards-viewport {
@@ -3511,7 +3527,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-behavior: smooth;
-    padding: 0.75rem 0.25rem;
+    padding: 0.5rem 0.25rem;
   }
 
   .lame-signature__cinematic-cards-viewport::-webkit-scrollbar {
@@ -3520,37 +3536,38 @@
 
   .lame-signature__cinematic-cards-track {
     display: flex;
-    gap: clamp(1rem, 1.8vw, 1.5rem);
+    gap: clamp(0.75rem, 1.1vw, 1.15rem);
     width: max-content;
     align-items: stretch;
+    justify-content: flex-end;
   }
 
   /* PREVIEW CARD */
   .lame-signature__cinematic-card {
     position: relative;
-    width: clamp(180px, 16vw, 240px);
-    aspect-ratio: 1 / 1.44;
-    border-radius: 20px;
+    width: clamp(135px, 10.5vw, 175px);
+    aspect-ratio: 1 / 1.38;
+    border-radius: 16px;
     overflow: hidden;
     cursor: pointer;
     background: #181c19;
     border: 1.5px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
     transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
     user-select: none;
     flex-shrink: 0;
   }
 
   .lame-signature__cinematic-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
     border-color: rgba(255, 255, 255, 0.45);
-    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.6);
   }
 
   .lame-signature__cinematic-card.is-active {
     border-color: #f37021;
-    box-shadow: 0 20px 48px rgba(243, 112, 33, 0.35), 0 0 0 2px rgba(243, 112, 33, 0.5);
-    transform: translateY(-4px);
+    box-shadow: 0 14px 36px rgba(243, 112, 33, 0.4), 0 0 0 2px rgba(243, 112, 33, 0.55);
+    transform: translateY(-3px);
   }
 
   .lame-signature__cinematic-card-media {
@@ -3583,15 +3600,15 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 1.25rem 1.15rem;
+    padding: 0.85rem 0.85rem;
     z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.2rem;
   }
 
   .lame-signature__cinematic-card-cat {
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.72);
@@ -3601,9 +3618,9 @@
   .lame-signature__cinematic-card-title {
     margin: 0;
     font-family: 'Bebas Neue', 'Oswald', sans-serif;
-    font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+    font-size: clamp(1.05rem, 1.4vw, 1.35rem);
     line-height: 1.05;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
     color: #ffffff;
   }
@@ -3612,22 +3629,22 @@
   .lame-signature__cinematic-nav-row {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    padding-inline: 0.5rem;
+    gap: 1.15rem;
+    padding-inline: 0.35rem;
   }
 
   .lame-signature__cinematic-nav-arrows {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.5rem;
   }
 
   .lame-signature__cinematic-nav-btn {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.28);
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: #ffffff;
@@ -3639,14 +3656,14 @@
   }
 
   .lame-signature__cinematic-nav-btn:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.6);
     transform: scale(1.06);
   }
 
   .lame-signature__cinematic-nav-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .lame-signature__cinematic-progress {
@@ -3663,7 +3680,7 @@
     left: 0;
     top: 0;
     height: 100%;
-    width: 16.6%;
+    width: 33.33%;
     background: #f37021;
     border-radius: 2px;
     box-shadow: 0 0 10px rgba(243, 112, 33, 0.6);
@@ -3672,11 +3689,11 @@
 
   .lame-signature__cinematic-counter {
     font-family: 'Bebas Neue', 'Oswald', sans-serif;
-    font-size: 2.1rem;
+    font-size: 1.6rem;
     line-height: 1;
     color: rgba(255, 255, 255, 0.9);
     letter-spacing: 0.05em;
-    min-width: 44px;
+    min-width: 36px;
     text-align: right;
   }
 
@@ -3742,15 +3759,17 @@
     .lame-signature__cinematic-hero {
       max-width: 100%;
       flex-shrink: 0;
+      margin-bottom: 0;
     }
 
     .lame-signature__cinematic-cards-wrapper {
       margin-top: auto;
       width: 100%;
+      max-width: 100%;
     }
 
     .lame-signature__cinematic-card {
-      width: 175px;
+      width: 140px;
     }
   }
 

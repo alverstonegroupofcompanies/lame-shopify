@@ -77,11 +77,18 @@
     endif
 
     assign hide_item = false
-    if is_non_physical and (is_shipping_item or is_returns_item)
-      assign hide_item = true
+    if is_non_physical
+      if is_shipping_item or is_returns_item
+        assign hide_item = true
+      endif
     endif
 
-    if (use_eta or title != blank) and hide_item == false
+    assign has_title = false
+    if use_eta or title != blank
+      assign has_title = true
+    endif
+
+    if has_title and hide_item == false
       assign visible_count = visible_count | plus: 1
     endif
   endfor
@@ -125,11 +132,18 @@
       endif
 
       assign hide_item = false
-      if is_non_physical and (is_shipping_item or is_returns_item)
-        assign hide_item = true
+      if is_non_physical
+        if is_shipping_item or is_returns_item
+          assign hide_item = true
+        endif
+      endif
+
+      assign has_title = false
+      if use_eta or title != blank
+        assign has_title = true
       endif
     %}
-    {% if (use_eta or title != blank) and hide_item == false %}
+    {% if has_title and hide_item == false %}
       <div class="lame-pdp-trust-row__item lame-pdp-trust-row__item--{{ icon }}" data-trust-icon="{{ icon }}">
         <span class="lame-pdp-trust-row__icon" aria-hidden="true">
           {% case icon %}

@@ -63,13 +63,13 @@
 
 .lame-diwali-posters__header {
   display: block !important;
-  grid-column: 1 / -1 !important;
   position: relative;
   z-index: 1;
   width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  max-width: var(--page-width, 1200px) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+  box-sizing: border-box !important;
   text-align: center;
   line-height: 0;
 }
@@ -96,26 +96,31 @@
   display: block;
   width: 100%;
   max-width: var(--page-width, 1200px);
+  min-height: var(--lame-title-banner-min-h, clamp(180px, 16vw, 220px)) !important;
   margin: 0 auto;
   padding: 0;
   line-height: 0;
   overflow: hidden;
   border-radius: clamp(6px, 1.2vw, 12px);
   box-sizing: border-box;
+  position: relative;
 }
 
 .lame-diwali-posters__title-banner--full-width,
 .lame-diwali-posters--title-full-width .lame-diwali-posters__title-banner {
   width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
+  max-width: var(--page-width, 1200px) !important;
+  min-height: var(--lame-title-banner-min-h, clamp(180px, 16vw, 220px)) !important;
+  margin-inline: auto !important;
+  border-radius: clamp(10px, 1.5vw, 16px) !important;
+  overflow: hidden !important;
 }
 
 .lame-diwali-posters__title-link {
   display: block;
   width: 100%;
+  height: 100%;
+  min-height: inherit;
   line-height: 0;
   text-decoration: none;
 }
@@ -124,6 +129,8 @@
   display: block;
   width: 100% !important;
   max-width: none !important;
+  height: 100% !important;
+  min-height: inherit !important;
   margin: 0 !important;
   padding: 0 !important;
   line-height: 0;
@@ -133,14 +140,23 @@
   display: block;
   width: 100% !important;
   max-width: none !important;
-  height: auto !important;
+  height: 100% !important;
+  min-height: inherit !important;
   margin: 0 !important;
   padding: 0 !important;
   border: none;
   border-radius: 0 !important;
   box-shadow: none;
-  object-fit: contain;
-  object-position: center center;
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .lame-diwali-posters__title-banner,
+  .lame-diwali-posters__title-banner--full-width,
+  .lame-diwali-posters--title-full-width .lame-diwali-posters__title-banner {
+    min-height: clamp(140px, 18vw, 175px) !important;
+  }
 }
 
 /* ==========================================================================
@@ -426,7 +442,7 @@ a.lame-diwali-poster-card:active {
     display: none !important;
   }
 
-  /* Mobile Title Banner: 100% edge-to-edge full width & displays uploaded mobile banner at natural height */
+  /* Mobile Title Banner: 100% edge-to-edge full width & displays uploaded mobile banner at consistent height */
   .lame-diwali-posters__header,
   .lame-diwali-posters__title-banner,
   .lame-diwali-posters__title-banner--mobile-full-width,
@@ -436,11 +452,12 @@ a.lame-diwali-poster-card:active {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    aspect-ratio: auto !important;
+    min-height: var(--lame-title-banner-min-h-mobile, clamp(110px, 28vw, 145px)) !important;
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 0 !important;
+    object-fit: cover !important;
+    object-position: center center !important;
   }
 
   .lame-diwali-posters__title-banner:not(.lame-diwali-posters__title-banner--mobile-full-width) {

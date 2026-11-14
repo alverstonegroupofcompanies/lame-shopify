@@ -8,8 +8,8 @@
    Margins: 18px safe side gutters (spacious, never cramped against edges)
    ============================================================ */
 
-/* Desktop safeguard: hide subnav on >= 990px */
-@media screen and (min-width: 990px) {
+/* Desktop safeguard: hide subnav on >= 750px */
+@media screen and (min-width: 750px) {
   .lame-mobile-subnav,
   .lame-mobile-bottom-bar {
     display: none !important;
@@ -21,7 +21,7 @@ body:not(.template-index) .lame-mobile-subnav {
   display: none !important;
 }
 
-@media screen and (max-width: 989px) {
+@media screen and (max-width: 749px) {
   /* ── Header Container & Top Row Styling ── */
   #header-component.header--cosmetic-luxury {
     background: #ffffff !important;
@@ -49,70 +49,92 @@ body:not(.template-index) .lame-mobile-subnav {
     max-width: 100% !important;
   }
 
-  /* On non-homepage pages where subnav is hidden, give top row a clean separation border */
+  /* No separation lines in navbar */
+  #header-component.header--cosmetic-luxury,
+  #header-component.header--cosmetic-luxury .header__row,
+  #header-component.header--cosmetic-luxury .header__row--top,
+  #header-component.header--cosmetic-luxury .header__columns,
   body:not(.template-index) #header-component.header--cosmetic-luxury .header__row--top {
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  /* ── Row 1: Top Row Arrangement — Push top icons to edge (hamburger menu has minimal 8px edge margin) ── */
+  /* ── Row 1: Top Row Arrangement — Push top icons to edge (hamburger menu has minimal corner margin) ── */
   #header-component.header--cosmetic-luxury .header__row--top .header__columns,
   #header-component.header--cosmetic-luxury[data-menu-style='drawer'] .header__row--top .header__columns {
     display: flex !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 12px !important;
-    padding: 8px 8px 4px 8px !important;
-    padding-left: 8px !important;
+    gap: 8px !important;
+    padding: 8px 8px 4px 6px !important;
+    padding-left: 6px !important;
     padding-right: 8px !important;
-    padding-inline: 8px !important;
+    padding-inline-start: 6px !important;
+    padding-inline-end: 8px !important;
     min-height: 52px !important;
     box-sizing: border-box !important;
   }
 
-  /* 1. Hamburger Menu Circular Button (Leftmost Position) */
+  /* 1. Hamburger Menu (Clean borderless leftmost button with small corner margin) */
   #header-component.header--cosmetic-luxury .header__drawer,
   #header-component.header--cosmetic-luxury[data-menu-style='drawer'] .header__drawer {
     order: 1 !important;
     display: inline-flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    width: 40px !important;
-    height: 40px !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+    height: 38px !important;
     margin: 0 !important;
-    flex: 0 0 40px !important;
+    margin-left: 0 !important;
+    flex: 0 0 auto !important;
+    padding: 0 !important;
   }
 
   #header-component.header--cosmetic-luxury .menu-drawer-container,
-  #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-    background: #ffffff !important;
-    border: 1.5px solid #e5e7eb !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+  #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu,
+  #header-component.header--cosmetic-luxury .header__icon--menu {
+    width: auto !important;
+    min-width: 30px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: #1f2937 !important;
-    padding: 0 !important;
+    color: #1a472a !important;
+    padding: 0 4px 0 2px !important;
     cursor: pointer !important;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
     outline: none !important;
     box-sizing: border-box !important;
+    transition: opacity 0.15s ease !important;
   }
 
-  #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu:active {
-    transform: scale(0.93) !important;
-    background: #f9fafb !important;
-    border-color: #f37021 !important;
+  #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu:hover,
+  #header-component.header--cosmetic-luxury .menu-drawer-container .header__icon--summary.header__icon--menu:active,
+  #header-component.header--cosmetic-luxury .header__icon--menu:hover,
+  #header-component.header--cosmetic-luxury .header__icon--menu:active {
+    transform: none !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    opacity: 0.75 !important;
   }
 
-  #header-component.header--cosmetic-luxury .menu-drawer-container .header-drawer-icon {
+  #header-component.header--cosmetic-luxury .menu-drawer-container .header-drawer-icon,
+  #header-component.header--cosmetic-luxury .header__icon--menu .header-drawer-icon--open,
+  #header-component.header--cosmetic-luxury .header__icon--menu svg {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 20px !important;
-    height: 16px !important;
+    width: 22px !important;
+    height: 18px !important;
+    color: #1a472a !important;
+    stroke: currentColor !important;
   }
 
   /* 2. Logo on Left (immediately after hamburger menu) */
@@ -126,7 +148,8 @@ body:not(.template-index) .lame-mobile-subnav {
     padding: 0 !important;
     flex: 0 1 auto !important;
     text-align: left !important;
-    max-width: clamp(120px, 46vw, 200px) !important;
+    max-width: clamp(150px, 62vw, 270px) !important;
+    gap: 0.45rem !important;
   }
 
   #header-component.header--cosmetic-luxury .header-logo a {
@@ -145,7 +168,7 @@ body:not(.template-index) .lame-mobile-subnav {
     display: block !important;
   }
 
-  /* ── 2b. Completely Suppress Extra/Empty Icons on Mobile & Tablet (<= 989px) ── */
+  /* ── 2b. Completely Suppress Extra/Empty Icons on Mobile (<= 749px) ── */
   .lame-hide-mobile-tablet,
   #header-component.header--cosmetic-luxury .lame-hide-mobile-tablet,
   #header-component.header--cosmetic-luxury .header-actions__account-slot,
@@ -158,12 +181,8 @@ body:not(.template-index) .lame-mobile-subnav {
   #header-component.header--cosmetic-luxury header-actions shopify-account,
   #header-component.header--cosmetic-luxury header-actions .header-actions__action-label,
   #header-component.header--cosmetic-luxury .header__row--top .header__column--center,
-  #header-component.header--cosmetic-luxury .header__row--top search-button,
-  #header-component.header--cosmetic-luxury .header__row--top .search-action,
-  #header-component.header--cosmetic-luxury .header__row--top .lame-header-search-icon,
   #header-component.header--cosmetic-luxury .header__row--top .lame-header-inline-search,
-  #header-component.header--cosmetic-luxury .header__row--top .lame-header-search-bar--trigger,
-  #header-component.header--cosmetic-luxury .lame-header-search-icon {
+  #header-component.header--cosmetic-luxury .header__row--top .lame-header-search-bar--trigger {
     display: none !important;
     visibility: hidden !important;
     width: 0 !important;
@@ -184,18 +203,75 @@ body:not(.template-index) .lame-mobile-subnav {
     left: -9999px !important;
   }
 
-  /* 3. Actions Cluster (Wishlist + Cart ONLY) pushed to far right */
-  #header-component.header--cosmetic-luxury header-actions {
+  /* 3. Search Icon before Wishlist */
+  #header-component.header--cosmetic-luxury .header__row--top search-button.search-action,
+  #header-component.header--cosmetic-luxury .header__row--top .search-action {
     order: 3 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
     margin-left: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    pointer-events: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #1a472a !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    pointer-events: auto !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: opacity 0.15s ease !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon:active {
+    opacity: 0.7 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+    color: #1a472a !important;
+    stroke: currentColor !important;
+  }
+
+  /* 4. Actions Cluster (Wishlist + Cart) pushed directly after Search */
+  #header-component.header--cosmetic-luxury header-actions {
+    order: 4 !important;
+    margin-left: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 10px !important;
+    gap: 8px !important;
     flex: 0 0 auto !important;
   }
 
-  /* Wishlist & Cart Circular Buttons: Neat 40px circles with subtle border */
+  /* Wishlist & Cart buttons: clean borderless icons (40px tap area) */
   #header-component.header--cosmetic-luxury .header-actions__wishlist,
   #header-component.header--cosmetic-luxury .lame-header-wishlist-btn,
   #header-component.header--cosmetic-luxury .header-actions__cart,
@@ -206,9 +282,9 @@ body:not(.template-index) .lame-mobile-subnav {
     width: 40px !important;
     height: 40px !important;
     border-radius: 50% !important;
-    background: #ffffff !important;
-    border: 1.5px solid #e5e7eb !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -216,7 +292,7 @@ body:not(.template-index) .lame-mobile-subnav {
     padding: 0 !important;
     position: relative !important;
     cursor: pointer !important;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
+    transition: transform 0.15s ease, background 0.15s ease !important;
     outline: none !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
@@ -228,8 +304,8 @@ body:not(.template-index) .lame-mobile-subnav {
   #header-component.header--cosmetic-luxury header-actions a.action__cart:active,
   #header-component.header--cosmetic-luxury header-actions a.header-actions__cart:active {
     transform: scale(0.93) !important;
-    background: #f9fafb !important;
-    border-color: #f37021 !important;
+    background: #E8F5EC !important;
+    border: none !important;
   }
 
   #header-component.header--cosmetic-luxury .lame-header-wishlist-btn .svg-wrapper,
@@ -257,50 +333,100 @@ body:not(.template-index) .lame-mobile-subnav {
     display: block !important;
   }
 
-  /* ── 3b. Completely Hide Count Badges: Display clean icons neatly without numbers ── */
+  /* ── 3b. Count Badges: Nice orange circle with white number ── */
   #header-component.header--cosmetic-luxury .header-actions__wishlist-count,
-  #header-component.header--cosmetic-luxury .cart-bubble,
-  #header-component.header--cosmetic-luxury .cart-bubble__background,
+  #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble,
+  #header-component.header--cosmetic-luxury cart-icon .cart-bubble {
+    position: absolute !important;
+    top: -4px !important;
+    right: -6px !important;
+    min-width: 17px !important;
+    width: auto !important;
+    height: 17px !important;
+    border-radius: 999px !important;
+    background: #FF6B2C !important;
+    background-color: #FF6B2C !important;
+    border: 2px solid #ffffff !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 3px !important;
+    box-sizing: border-box !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18) !important;
+    line-height: 1 !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .cart-bubble__background {
+    display: none !important;
+  }
+
   #header-component.header--cosmetic-luxury .cart-bubble__text,
-  #header-component.header--cosmetic-luxury .cart-bubble__text-count,
-  #header-component.header--cosmetic-luxury [data-wishlist-count],
-  #header-component.header--cosmetic-luxury .header-actions__cart-badge {
+  #header-component.header--cosmetic-luxury .cart-bubble__text-count {
+    color: #ffffff !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Hide badge when count is 0 or empty */
+  #header-component.header--cosmetic-luxury .header-actions__wishlist-count[hidden],
+  #header-component.header--cosmetic-luxury .header-actions__wishlist-count:empty,
+  #header-component.header--cosmetic-luxury .header-actions__wishlist-count:is([hidden], [data-count='0'], [data-wishlist-count='0']),
+  #header-component.header--cosmetic-luxury .cart-bubble:is([data-count='0']),
+  #header-component.header--cosmetic-luxury .cart-bubble--empty,
+  #header-component.header--cosmetic-luxury .cart-bubble:empty,
+  #header-component.header--cosmetic-luxury .cart-bubble[data-count='0'],
+  #header-component.header--cosmetic-luxury .cart-bubble:has(.cart-bubble__text-count:empty) {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
-    pointer-events: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
   }
 
-  /* ── 4. Mobile Subnav Container (Home Page Only — Unified Single Section) ── */
+  /* ── 4. Mobile Subnav Container (Home Page Only — Clean borderless seamless layout) ── */
   .lame-mobile-subnav {
     display: block !important;
     background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
 
   /* Unified Single Section: no internal dividing lines */
-  .lame-mobile-single-divider {
+  .lame-mobile-single-divider,
+  .lame-mobile-homepage-divider {
     display: none !important;
   }
 
-  /* ── Row 2: Search Bar at MIDDLE with Clean Orange Border ── */
-  .lame-mobile-search-row {
-    padding: 6px 14px 10px 14px !important;
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-    padding-inline: 14px !important;
-    width: 100% !important;
+  /* ── Search bar row removed on mobile (search icon placed neatly before wishlist) ── */
+  .lame-mobile-search-row,
+  .lame-mobile-search-pill {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
     box-sizing: border-box !important;
   }
 

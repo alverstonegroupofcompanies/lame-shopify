@@ -101,7 +101,7 @@
 {%- if show_section -%}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--full-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }} lame-home-hero--fit-{{ image_fit }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
+    class="section section--page-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }} lame-home-hero--fit-{{ image_fit }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
     data-testid="hero-slideshow"
     style="--lame-hero-height: {{ lame_hero_h }}; --lame-hero-height-desktop: {{ lame_hero_h_desktop }}; --lame-hero-height-mobile: {{ lame_hero_h_mobile }}; --lame-hero-desktop-ratio: {{ desktop_banner_ratio }}; --lame-hero-mobile-ratio: {{ mobile_banner_ratio }};"
     {{ section.shopify_attributes }}
@@ -395,58 +395,69 @@
   }
 
   .lame-home-hero {
+    display: block !important;
     width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
+    max-width: var(--page-width, 1200px) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-x: hidden;
+    overflow: visible;
     background: transparent;
   }
 
+  .lame-home-hero.section.section--page-width,
   .lame-home-hero.section.section--full-width {
     display: block !important;
     width: 100% !important;
-    max-width: 100% !important;
-    min-width: 100% !important;
+    max-width: var(--page-width, 1200px) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
   }
 
-  .lame-home-hero.section.section--full-width > * {
+  .lame-home-hero.section > * {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
-    margin-inline: 0 !important;
-    padding: 0 !important;
-    padding-inline: 0 !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
   }
 
+  .shopify-section:has(.lame-home-hero),
   .shopify-section.hero-wrapper:has(.lame-home-hero) {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    margin-inline: 0 !important;
     padding: 0 !important;
-    padding-inline: 0 !important;
     height: auto !important;
     min-height: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .lame-home-hero__slideshow {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     height: auto !important;
     min-height: 0 !important;
     position: relative !important;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
+    overflow: hidden !important;
+  }
+
+  .lame-home-hero__frame {
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
+    overflow: hidden !important;
+  }
+
+  .lame-home-hero :is(.slide__image, .slide__image-container img, .lame-home-hero__slide-link img) {
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
   }
 
   /* Default / tablet+desktop: horizontal desktop banners */
