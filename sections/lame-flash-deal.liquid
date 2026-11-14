@@ -125,7 +125,7 @@
 
   assign below_banner_only = section.settings.background_below_banner_only
   if below_banner_only == nil
-    assign below_banner_only = true
+    assign below_banner_only = false
   endif
 
   assign content_bg = ''
@@ -142,9 +142,9 @@
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
-  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if is_glow_up_daily %} lame-flash-deal--glow-up-daily{% endif %}{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}"
+  class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal{% if is_glow_up_daily %} lame-flash-deal--glow-up-daily{% endif %}{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}{% if whole_section_bg != blank %} lame-flash-deal--has-section-bg{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }};{% endif %}"
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_limit }};{% if is_glow_up_daily %} --lame-flash-banner-ratio: 1920 / 237;{% endif %}{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }} !important; --lame-flash-bg: {{ whole_section_bg }};{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -646,8 +646,8 @@
       "type": "checkbox",
       "id": "background_below_banner_only",
       "label": "Apply background only below title banner",
-      "default": true,
-      "info": "Keeps the title banner cleanly positioned on top and applies background only to the cards & carousel below."
+      "default": false,
+      "info": "When enabled, background applies only below banner. When disabled, background blends continuously from the banner through the product cards."
     },
     {
       "type": "range",
