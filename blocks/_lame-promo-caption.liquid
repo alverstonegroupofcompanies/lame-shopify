@@ -1,22 +1,33 @@
 {%- assign raw_text = block.settings.text -%}
 {%- assign line = raw_text | strip_html | strip -%}
 {%- unless line == blank -%}
-  {%- assign has_why_join = false -%}
-  {%- if line contains 'Why Join Elite' or line contains 'Why join elite' or line contains 'why join elite' -%}
-    {%- assign has_why_join = true -%}
+  {%- assign has_why_elite = false -%}
+  {%- if line contains 'Why Choose Elite' or line contains 'Why choose elite' or line contains 'why choose elite' or line contains 'Why Join Elite' or line contains 'Why join elite' or line contains 'why join elite' -%}
+    {%- assign has_why_elite = true -%}
   {%- endif -%}
-  {%- assign clean_text = raw_text | remove: '👑 ' | remove: '✨ ' | remove: '🎁 ' | remove: 'Why Join Elite?' | remove: 'Why Join Elite —' | remove: 'Why Join Elite:' | remove: 'Why Join Elite -' | remove: 'Why join elite?' | remove: 'why join elite?' | strip -%}
+  {%- assign clean_text = raw_text 
+    | remove: '👑 ' 
+    | remove: '✨ ' 
+    | remove: '🎁 ' 
+    | remove: 'Why Choose Elite?' 
+    | remove: 'Why Choose Elite —' 
+    | remove: 'Why Choose Elite:' 
+    | remove: 'Why Choose Elite -' 
+    | remove: 'Why choose elite?' 
+    | remove: 'why choose elite?' 
+    | remove: 'Why Choose Elite'
+    | remove: 'Why Join Elite?' 
+    | remove: 'Why Join Elite —' 
+    | remove: 'Why Join Elite:' 
+    | remove: 'Why Join Elite -' 
+    | remove: 'Why join elite?' 
+    | remove: 'why join elite?' 
+    | remove: 'Why Join Elite'
+    | strip 
+  -%}
   {%- assign mobile_clean = block.settings.mobile_text | strip_html | strip -%}
   {%- if mobile_clean == blank -%}
-    {%- assign mobile_clean = clean_text
-      | replace: 'extra cashback', 'cashback'
-      | replace: 'VIP beauty perks', 'VIP perks'
-      | replace: 'exclusive member-only savings', 'member perks'
-      | replace: 'Free luxury beauty kit, surprise gifts & VIP early access', 'Free luxury kit & early access'
-      | replace: 'Join for ₹199', '₹199'
-      | replace: 'Join for Rs 199', '₹199'
-      | strip
-    -%}
+    {%- assign mobile_clean = clean_text -%}
   {%- endif -%}
   <div
     class="lame-promo-top-bar__slide"
@@ -24,9 +35,9 @@
   >
     {%- if block.settings.link != blank -%}
       <a class="lame-promo-top-bar__link" href="{{ block.settings.link }}">
-        {%- if has_why_join -%}
+        {%- if has_why_elite -%}
           <span class="lame-topbar-pill">
-            <span class="lame-topbar-pill__desktop">Why Join Elite?</span>
+            <span class="lame-topbar-pill__desktop">Why Choose Elite?</span>
             <span class="lame-topbar-pill__mobile">Elite</span>
           </span>
           <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ clean_text }}</span>
@@ -37,9 +48,9 @@
         {%- endif -%}
       </a>
     {%- else -%}
-      {%- if has_why_join -%}
+      {%- if has_why_elite -%}
         <span class="lame-topbar-pill">
-          <span class="lame-topbar-pill__desktop">Why Join Elite?</span>
+          <span class="lame-topbar-pill__desktop">Why Choose Elite?</span>
           <span class="lame-topbar-pill__mobile">Elite</span>
         </span>
         <span class="lame-promo-top-bar__text lame-promo-top-bar__text--desktop">{{ clean_text }}</span>

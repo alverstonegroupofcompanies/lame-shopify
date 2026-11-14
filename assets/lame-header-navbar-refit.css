@@ -666,50 +666,85 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
   }
 }
 
-/* Cart / wishlist orange badges — small orange circle, white bold 11px number, 2px white outline */
+/* Cart / wishlist orange badges — nice orange circle, white bold number, 2px white outline */
 #header-component.header--cosmetic-luxury header-actions .header-actions__cart,
-#header-component.header--cosmetic-luxury header-actions .header-actions__wishlist {
+#header-component.header--cosmetic-luxury header-actions .header-actions__wishlist,
+#header-component.header--cosmetic-luxury .header-actions__wishlist,
+#header-component.header--cosmetic-luxury .header-actions__cart {
   overflow: visible !important;
 }
 
+#header-component.header--cosmetic-luxury .header-actions__cart-icon,
+#header-component.header--cosmetic-luxury cart-icon {
+  overflow: visible !important;
+}
+
+/* Eliminate internal background span of Dawn's cart-bubble to permanently prevent double-borders / white overlay */
+#header-component.header--cosmetic-luxury .cart-bubble__background,
+#header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__background,
+#header-component.header--cosmetic-luxury cart-icon .cart-bubble__background {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Both wishlist and cart badge: perfect vibrant orange circle with bold white number */
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble,
 #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble,
-#header-component.header--cosmetic-luxury .header-actions__wishlist-count {
+#header-component.header--cosmetic-luxury cart-icon .cart-bubble,
+#header-component.header--cosmetic-luxury .cart-bubble,
+#header-component.header--cosmetic-luxury .header-actions__wishlist-count,
+#header-component.header--cosmetic-luxury header-actions .header-actions__wishlist-count {
   position: absolute !important;
   top: -5px !important;
   right: -7px !important;
-  min-width: 17px !important;
-  height: 17px !important;
+  min-width: 18px !important;
+  width: auto !important;
+  height: 18px !important;
   border-radius: 999px !important;
   background: #FF6B2C !important;
+  background-color: #FF6B2C !important;
   border: 2px solid #ffffff !important;
   color: #ffffff !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0 3px !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
   z-index: 5 !important;
   pointer-events: none !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.18) !important;
   line-height: 1 !important;
+  font-family: var(--font-body--family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  aspect-ratio: auto !important;
+  mask: none !important;
+  -webkit-mask: none !important;
 }
 
-#header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__background,
-#header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon .cart-bubble__background,
-#header-component.header--cosmetic-luxury cart-icon .cart-bubble {
-  background: #FF6B2C !important;
-  border: 2px solid #ffffff !important;
-  border-radius: 999px !important;
-  color: #ffffff !important;
-}
-
+/* Text numbers inside the badge: bold white, perfectly centered */
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__text,
 #header-component.header--cosmetic-luxury .header-actions__cart-icon .cart-bubble__text-count,
+#header-component.header--cosmetic-luxury cart-icon .cart-bubble__text,
+#header-component.header--cosmetic-luxury cart-icon .cart-bubble__text-count,
+#header-component.header--cosmetic-luxury .cart-bubble__text,
+#header-component.header--cosmetic-luxury .cart-bubble__text-count,
 #header-component.header--cosmetic-luxury .header-actions__wishlist-count {
   color: #ffffff !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
 }
 
 /* Hide count badge when count is 0 or empty */
@@ -720,12 +755,17 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
 #header-component.header--cosmetic-luxury .header-actions__wishlist-count[hidden],
 #header-component.header--cosmetic-luxury .header-actions__wishlist-count:empty,
 #header-component.header--cosmetic-luxury .header-actions__wishlist-count:is([hidden], [data-count='0'], [data-wishlist-count='0']),
-#header-component.header--cosmetic-luxury .cart-bubble:has(.cart-bubble__text-count:empty) {
+#header-component.header--cosmetic-luxury .cart-bubble:has(.cart-bubble__text-count:empty),
+#header-component.header--cosmetic-luxury cart-icon:has(.cart-bubble__text-count:empty) .cart-bubble {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
+/* Never mask the shopping bag SVG */
 #header-component.header--cosmetic-luxury header-actions .header-actions__cart-icon.header-actions__cart-icon--has-cart svg,
-#header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper > svg {
+#header-component.header--cosmetic-luxury header-actions .header-actions__cart .svg-wrapper > svg,
+#header-component.header--cosmetic-luxury .header-actions__cart .svg-wrapper > svg {
   mask: none !important;
   -webkit-mask: none !important;
 }
@@ -1183,14 +1223,57 @@ body:has(#header-component.header--cosmetic-luxury .lame-header-announce)
     flex-shrink: 0 !important;
   }
 
-  /* Hide count badges on mobile & tablet: neat clean icons only */
+  /* Mobile & Tablet count badges: nice orange circle with white number */
   #header-component.header--cosmetic-luxury .header-actions__wishlist-count,
   #header-component.header--cosmetic-luxury .cart-bubble,
-  #header-component.header--cosmetic-luxury .cart-bubble__background,
+  #header-component.header--cosmetic-luxury cart-icon .cart-bubble {
+    position: absolute !important;
+    top: -4px !important;
+    right: -6px !important;
+    min-width: 17px !important;
+    width: auto !important;
+    height: 17px !important;
+    border-radius: 999px !important;
+    background: #FF6B2C !important;
+    background-color: #FF6B2C !important;
+    border: 2px solid #ffffff !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 3px !important;
+    box-sizing: border-box !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18) !important;
+    line-height: 1 !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .cart-bubble__background {
+    display: none !important;
+  }
+
   #header-component.header--cosmetic-luxury .cart-bubble__text,
-  #header-component.header--cosmetic-luxury .cart-bubble__text-count,
-  #header-component.header--cosmetic-luxury [data-wishlist-count],
-  #header-component.header--cosmetic-luxury .header-actions__cart-badge {
+  #header-component.header--cosmetic-luxury .cart-bubble__text-count {
+    color: #ffffff !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #header-component.header--cosmetic-luxury .cart-bubble:is([data-count='0']),
+  #header-component.header--cosmetic-luxury .cart-bubble--empty,
+  #header-component.header--cosmetic-luxury .cart-bubble:empty,
+  #header-component.header--cosmetic-luxury .cart-bubble[data-count='0'],
+  #header-component.header--cosmetic-luxury .header-actions__wishlist-count[hidden],
+  #header-component.header--cosmetic-luxury .header-actions__wishlist-count:empty,
+  #header-component.header--cosmetic-luxury .header-actions__wishlist-count:is([hidden], [data-count='0'], [data-wishlist-count='0']),
+  #header-component.header--cosmetic-luxury .cart-bubble:has(.cart-bubble__text-count:empty) {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
