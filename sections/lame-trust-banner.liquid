@@ -34,11 +34,33 @@
   elsif section.settings.mobile_full_width == nil and is_full_width
     assign mobile_full_width = true
   endif
+
+  assign whole_section_bg = section.settings.section_background_color_code | default: section.settings.section_background_color
+  if whole_section_bg == 'transparent' or whole_section_bg == 'rgba(0,0,0,0)' or whole_section_bg == blank
+    assign whole_section_bg = ''
+  endif
 -%}
 
+{%- if whole_section_bg != blank -%}
+  <style>
+    #shopify-section-{{ section.id }} {
+      background-color: {{ whole_section_bg }} !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      margin-block: 0 !important;
+    }
+    #shopify-section-{{ section.id }} .section-background {
+      background-color: {{ whole_section_bg }} !important;
+    }
+    #shopify-section-{{ section.id }} .lame-trust-banner {
+      background-color: {{ whole_section_bg }} !important;
+    }
+  </style>
+{%- endif -%}
+
 <section
-  class="section {% if is_full_width %}section--full-width lame-trust-banner--bleed{% else %}section--page-width lame-trust-banner--boxed{% endif %} lame-trust-banner{% unless show_desktop %} lame-trust-banner--hide-desktop{% endunless %}{% unless show_mobile %} lame-trust-banner--hide-mobile{% endunless %}{% if mobile_full_width %} lame-trust-banner--mobile-bleed{% else %} lame-trust-banner--mobile-boxed{% endif %}"
-  style="{% render 'spacing-padding', settings: section.settings %}"
+  class="section {% if is_full_width %}section--full-width lame-trust-banner--bleed{% else %}section--page-width lame-trust-banner--boxed{% endif %} lame-trust-banner{% unless show_desktop %} lame-trust-banner--hide-desktop{% endunless %}{% unless show_mobile %} lame-trust-banner--hide-mobile{% endunless %}{% if mobile_full_width %} lame-trust-banner--mobile-bleed{% else %} lame-trust-banner--mobile-boxed{% endif %}{% if whole_section_bg != blank %} lame-trust-banner--has-section-bg{% endif %}"
+  style="{% render 'spacing-padding', settings: section.settings %}{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }} !important; --lame-trust-bg: {{ whole_section_bg }};{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-trust-banner__wrap">
@@ -105,6 +127,13 @@
 </section>
 
 {% stylesheet %}
+  .shopify-section:has(.lame-trust-banner) {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: 0 !important;
+    margin-inline: 0 !important;
+  }
+
   .shopify-section:has(.lame-trust-banner--bleed) {
     width: 100% !important;
     max-width: none !important;
@@ -113,20 +142,38 @@
   }
 
   .lame-trust-banner {
-    width: 100%;
-    margin: 0;
-    padding: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-inline: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  .lame-trust-banner--has-section-bg,
+  .shopify-section:has(.lame-trust-banner--has-section-bg) .lame-trust-banner,
+  .shopify-section:has(.lame-trust-banner--has-section-bg) {
+    background-color: var(--lame-trust-bg, transparent) !important;
+  }
+
+  .template-index .shopify-section:has(.lame-trust-banner--has-section-bg) {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    margin-block: 0 !important;
   }
 
   .lame-trust-banner--bleed {
-    width: 100%;
+    width: 100% !important;
     max-width: none !important;
     padding-inline: 0 !important;
     margin-inline: 0 !important;
   }
 
-  .lame-trust-banner--boxed {
-    max-width: var(--page-width, 1200px) !important;
+  /* Boxed banner: EXACT same width, margins, and padding as other product sections */
+  .lame-trust-banner--boxed .lame-trust-banner__wrap,
+  .lame-trust-banner:not(.lame-trust-banner--bleed) .lame-trust-banner__wrap {
+    width: 100% !important;
+    max-width: min(100%, var(--page-width, 1200px)) !important;
     margin-inline: auto !important;
     padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
     box-sizing: border-box !important;
@@ -134,18 +181,19 @@
 
   .lame-trust-banner__wrap {
     width: 100%;
-    max-width: none;
-    margin: 0;
+    margin-inline: auto;
     padding: 0;
     line-height: 0;
     overflow: hidden;
-    min-height: var(--lame-title-banner-min-h, clamp(180px, 16vw, 220px)) !important;
     position: relative;
+    box-sizing: border-box;
   }
 
-  .lame-trust-banner--boxed .lame-trust-banner__wrap,
-  .lame-trust-banner__wrap {
+  .lame-trust-banner--boxed .lame-trust-banner__image,
+  .lame-trust-banner:not(.lame-trust-banner--bleed) .lame-trust-banner__image {
     border-radius: clamp(10px, 1.5vw, 16px) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
   }
 
   .lame-trust-banner__link {
@@ -169,12 +217,9 @@
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: 100% !important;
-    min-height: inherit !important;
-    margin: 0 !important;
+    height: auto !important;
+    margin: 0 auto !important;
     border: none !important;
-    border-radius: 0;
-    box-shadow: none !important;
     object-fit: cover !important;
     object-position: center center !important;
   }
@@ -184,8 +229,9 @@
     width: 100% !important;
     max-width: none !important;
     margin-inline: 0 !important;
-    padding: 0 !important;
+    padding-inline: 0 !important;
     border-radius: 0 !important;
+    box-shadow: none !important;
   }
 
   @media screen and (min-width: 990px) {
@@ -195,18 +241,6 @@
       margin-inline: 0 !important;
       padding-inline: 0 !important;
       border-radius: 0 !important;
-    }
-  }
-
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    .lame-trust-banner__wrap {
-      min-height: clamp(140px, 18vw, 175px) !important;
-    }
-
-    .lame-trust-banner__image {
-      min-height: inherit !important;
-      object-fit: cover !important;
-      object-position: center center !important;
     }
   }
 
@@ -230,7 +264,6 @@
     .lame-trust-banner--mobile-bleed .lame-trust-banner__image {
       width: 100% !important;
       max-width: 100% !important;
-      min-height: var(--lame-title-banner-min-h-mobile, clamp(110px, 28vw, 145px)) !important;
       margin-inline: 0 !important;
       padding-inline: 0 !important;
       border-radius: 0 !important;
@@ -239,26 +272,16 @@
     }
 
     /* Mobile gap & rounded corners: matches New Arrivals and Glow Up Daily */
-    .lame-trust-banner:not(.lame-trust-banner--mobile-bleed),
-    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed),
-    .lame-trust-banner--mobile-boxed {
+    .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
+    .lame-trust-banner--mobile-boxed .lame-trust-banner__wrap {
       padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
       box-sizing: border-box !important;
     }
 
-    .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
-    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
-    .lame-trust-banner--mobile-boxed .lame-trust-banner__wrap {
-      border-radius: clamp(6px, 1.2vw, 12px) !important;
-      overflow: hidden !important;
-      min-height: var(--lame-title-banner-min-h-mobile, clamp(110px, 28vw, 145px)) !important;
-    }
-
     .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
-    .lame-trust-banner--bleed:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
     .lame-trust-banner--mobile-boxed .lame-trust-banner__image {
       border-radius: clamp(6px, 1.2vw, 12px) !important;
-      min-height: inherit !important;
+      overflow: hidden !important;
       object-fit: cover !important;
       object-position: center center !important;
     }
@@ -341,6 +364,22 @@
         { "value": "page-width", "label": "Page width (boxed)" }
       ],
       "default": "full-width"
+    },
+    {
+      "type": "header",
+      "content": "Section Background"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color",
+      "info": "Optional. Full-width background color across the entire section (e.g. #fae6f0 to match other homepage pastel sections)."
+    },
+    {
+      "type": "text",
+      "id": "section_background_color_code",
+      "label": "Section background color hex code",
+      "info": "Optional custom hex code (e.g. #fae6f0)."
     },
     {
       "type": "header",
