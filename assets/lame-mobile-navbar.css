@@ -49,9 +49,16 @@ body:not(.template-index) .lame-mobile-subnav {
     max-width: 100% !important;
   }
 
-  /* On non-homepage pages where subnav is hidden, give top row a clean separation border */
+  /* No separation lines in navbar */
+  #header-component.header--cosmetic-luxury,
+  #header-component.header--cosmetic-luxury .header__row,
+  #header-component.header--cosmetic-luxury .header__row--top,
+  #header-component.header--cosmetic-luxury .header__columns,
   body:not(.template-index) #header-component.header--cosmetic-luxury .header__row--top {
-    border-bottom: 1px solid #e5e7eb !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* ── Row 1: Top Row Arrangement — Push top icons to edge (hamburger menu has minimal corner margin) ── */
@@ -174,12 +181,8 @@ body:not(.template-index) .lame-mobile-subnav {
   #header-component.header--cosmetic-luxury header-actions shopify-account,
   #header-component.header--cosmetic-luxury header-actions .header-actions__action-label,
   #header-component.header--cosmetic-luxury .header__row--top .header__column--center,
-  #header-component.header--cosmetic-luxury .header__row--top search-button,
-  #header-component.header--cosmetic-luxury .header__row--top .search-action,
-  #header-component.header--cosmetic-luxury .header__row--top .lame-header-search-icon,
   #header-component.header--cosmetic-luxury .header__row--top .lame-header-inline-search,
-  #header-component.header--cosmetic-luxury .header__row--top .lame-header-search-bar--trigger,
-  #header-component.header--cosmetic-luxury .lame-header-search-icon {
+  #header-component.header--cosmetic-luxury .header__row--top .lame-header-search-bar--trigger {
     display: none !important;
     visibility: hidden !important;
     width: 0 !important;
@@ -200,14 +203,71 @@ body:not(.template-index) .lame-mobile-subnav {
     left: -9999px !important;
   }
 
-  /* 3. Actions Cluster (Wishlist + Cart ONLY) pushed to far right */
-  #header-component.header--cosmetic-luxury header-actions {
+  /* 3. Search Icon before Wishlist */
+  #header-component.header--cosmetic-luxury .header__row--top search-button.search-action,
+  #header-component.header--cosmetic-luxury .header__row--top .search-action {
     order: 3 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
     margin-left: auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    pointer-events: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #1a472a !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    pointer-events: auto !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: opacity 0.15s ease !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon:active {
+    opacity: 0.7 !important;
+  }
+
+  #header-component.header--cosmetic-luxury .lame-header-search-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+    color: #1a472a !important;
+    stroke: currentColor !important;
+  }
+
+  /* 4. Actions Cluster (Wishlist + Cart) pushed directly after Search */
+  #header-component.header--cosmetic-luxury header-actions {
+    order: 4 !important;
+    margin-left: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
-    gap: 10px !important;
+    gap: 8px !important;
     flex: 0 0 auto !important;
   }
 
@@ -336,28 +396,37 @@ body:not(.template-index) .lame-mobile-subnav {
     opacity: 0 !important;
   }
 
-  /* ── 4. Mobile Subnav Container (Home Page Only — Unified Single Section) ── */
+  /* ── 4. Mobile Subnav Container (Home Page Only — Clean borderless seamless layout) ── */
   .lame-mobile-subnav {
     display: block !important;
     background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
 
   /* Unified Single Section: no internal dividing lines */
-  .lame-mobile-single-divider {
+  .lame-mobile-single-divider,
+  .lame-mobile-homepage-divider {
     display: none !important;
   }
 
-  /* ── Row 2: Search Bar at MIDDLE with Clean Orange Border ── */
-  .lame-mobile-search-row {
-    padding: 6px 14px 10px 14px !important;
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-    padding-inline: 14px !important;
-    width: 100% !important;
+  /* ── Search bar row removed on mobile (search icon placed neatly before wishlist) ── */
+  .lame-mobile-search-row,
+  .lame-mobile-search-pill {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
     box-sizing: border-box !important;
   }
 
