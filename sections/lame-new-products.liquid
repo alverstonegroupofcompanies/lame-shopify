@@ -240,29 +240,24 @@
 {%- if whole_section_bg != blank -%}
   <style>
     #shopify-section-{{ section.id }} {
-      background-color: transparent !important;
+      background-color: {{ whole_section_bg }} !important;
       margin-top: 0 !important;
       margin-bottom: 0 !important;
       margin-block: 0 !important;
     }
     #shopify-section-{{ section.id }} .section-background {
-      background-color: transparent !important;
+      background-color: {{ whole_section_bg }} !important;
     }
-    {%- if section.settings.section_width == 'full-width' -%}
-      #shopify-section-{{ section.id }} {
-        background-color: {{ whole_section_bg }} !important;
-      }
-    {%- endif -%}
   </style>
 {%- endif -%}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-new-products{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}{% if whole_section_bg != blank %} lame-flash-deal--has-section-bg{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_to_show }};{% if whole_section_bg != blank %}{% if section.settings.section_width == 'full-width' %} background-color: {{ whole_section_bg }} !important;{% endif %} --lame-flash-bg: {{ whole_section_bg }};{% endif %}"
+  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_to_show }};{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }} !important; --lame-flash-bg: {{ whole_section_bg }};{% endif %}"
   {{ section.shopify_attributes }}
 >
-  <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}{% if whole_section_bg != blank and section.settings.section_width != 'full-width' %} background-color: {{ whole_section_bg }} !important;{% endif %}">
+  <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
     <header class="lame-flash-deal__header lame-new-products__header{% if title_full_width %} lame-flash-deal__header--full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal__header--mobile-full-width{% endif %}" data-lame-reveal>
       <div class="lame-new-products__header-row">
         {%- liquid
