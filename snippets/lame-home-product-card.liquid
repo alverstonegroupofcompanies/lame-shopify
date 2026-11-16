@@ -19,14 +19,14 @@
   assign lame_sale_badge_label = lame_sale_parts[3] | strip
   assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
   assign on_sale = false
-  if lame_on_sale_flag == 1
-    assign on_sale = true
-  endif
-  if on_sale and lame_effective_compare > 0
+  if lame_on_sale_flag == 1 and lame_effective_compare > 0
     assign compare_at = lame_effective_compare
   endif
-  if on_sale and lame_sale_price > 0 and lame_sale_price < compare_at
+  if lame_on_sale_flag == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
     assign price = lame_sale_price
+  endif
+  if compare_at > price and compare_at > 0
+    assign on_sale = true
   endif
 
   assign show_badge = false
@@ -85,14 +85,14 @@
       </h3>
 
       <div class="lame-home-product-card__price-row">
-        {%- if on_sale -%}
+        {%- if on_sale and compare_at > price and compare_at > 0 -%}
           <span class="lame-home-product-card__price lame-home-product-card__price--sale">{{ display_price }}</span>
           <span class="lame-home-product-card__compare">{{ display_compare }}</span>
         {%- else -%}
           <span class="lame-home-product-card__price">{{ display_price }}</span>
         {%- endif -%}
       </div>
-      {%- if on_sale and savings_amount > 0 -%}
+      {%- if on_sale and savings_amount > 0 and compare_at > price -%}
         <span class="lame-home-product-card__save-line">You save {{ display_savings }}</span>
       {%- endif -%}
 

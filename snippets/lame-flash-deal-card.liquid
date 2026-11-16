@@ -29,7 +29,7 @@
   assign lame_sale_badge_label = lame_sale_parts[3] | strip
   assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
 
-  if compare_at > price
+  if compare_at > price and compare_at > 0
     assign on_sale = true
     if discount_percent == 0
       assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
@@ -41,19 +41,24 @@
     endif
     assign savings_amount = compare_at | minus: price
   elsif lame_on_sale_flag == 1
-    assign on_sale = true
-    if lame_sale_badge_label != blank
-      assign card_badge = lame_sale_badge_label
-    elsif discount_percent > 0
-      assign card_badge = discount_percent | append: '% OFF'
-    endif
     if lame_effective_compare > 0
       assign compare_at = lame_effective_compare
     endif
     if lame_sale_price > 0 and lame_sale_price < compare_at
       assign price = lame_sale_price
     endif
-    assign savings_amount = compare_at | minus: price
+    if compare_at > price and compare_at > 0
+      assign on_sale = true
+      if discount_percent == 0
+        assign discount_percent = compare_at | minus: price | times: 100 | divided_by: compare_at
+      endif
+      if lame_sale_badge_label != blank
+        assign card_badge = lame_sale_badge_label
+      elsif discount_percent > 0
+        assign card_badge = discount_percent | append: '% OFF'
+      endif
+      assign savings_amount = compare_at | minus: price
+    endif
   elsif badge_label != blank
     assign card_badge = badge_label
   endif
@@ -141,11 +146,11 @@
 
     <div class="lame-flash-card__price-row">
       <span class="lame-flash-card__price">{{ display_price }}</span>
-      {%- if on_sale -%}
+      {%- if on_sale and compare_at > price and compare_at > 0 -%}
         <span class="lame-flash-card__compare">{{ display_compare }}</span>
       {%- endif -%}
     </div>
-    {%- if on_sale and savings_amount > 0 -%}
+    {%- if on_sale and savings_amount > 0 and compare_at > price -%}
       <p class="lame-flash-card__save-line">You save {{ display_savings }}</p>
     {%- endif -%}
 

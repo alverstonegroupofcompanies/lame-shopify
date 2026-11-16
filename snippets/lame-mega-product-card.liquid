@@ -9,7 +9,7 @@
     assign variant = product.selected_or_first_available_variant | default: product.variants.first
     assign price_formatted = variant.price | money
     assign compare_formatted = ''
-    if variant.compare_at_price > variant.price
+    if variant.compare_at_price > variant.price and variant.compare_at_price > 0
       assign compare_formatted = variant.compare_at_price | money
     endif
   -%}
@@ -43,7 +43,7 @@
       <h4 class="lame-brands-mega__prod-title">{{ product.title }}</h4>
       <div class="lame-brands-mega__prod-price-row">
         <span class="lame-brands-mega__prod-price">{{ price_formatted }}</span>
-        {%- if compare_formatted != blank -%}
+        {%- if compare_formatted != blank and variant.compare_at_price > variant.price and variant.compare_at_price > 0 -%}
           <s class="lame-brands-mega__prod-compare">{{ compare_formatted }}</s>
         {%- endif -%}
       </div>

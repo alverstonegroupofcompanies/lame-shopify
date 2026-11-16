@@ -67,14 +67,14 @@
     assign lame_sale_badge_label = lame_sale_parts[3] | strip
     assign lame_sale_price = lame_sale_parts[4] | strip | plus: 0
     assign on_sale = false
-    if lame_on_sale_flag == 1
-      assign on_sale = true
-    endif
-    if on_sale and lame_effective_compare > 0
+    if lame_on_sale_flag == 1 and lame_effective_compare > 0
       assign compare_at = lame_effective_compare
     endif
-    if on_sale and lame_sale_price > 0 and lame_sale_price < compare_at
+    if lame_on_sale_flag == 1 and lame_sale_price > 0 and lame_sale_price < compare_at
       assign price_amount = lame_sale_price
+    endif
+    if compare_at > price_amount and compare_at > 0
+      assign on_sale = true
     endif
 
     assign card_title = product.title
@@ -82,13 +82,15 @@
     assign card_subtitle = ''
     assign card_url = product.url
     assign card_price = price_amount | money
-    if on_sale
+    if on_sale and compare_at > price_amount and compare_at > 0
       assign card_compare = compare_at | money
       if lame_sale_badge_label != blank
         assign card_badge = lame_sale_badge_label
       elsif discount_percent > 0
         assign card_badge = discount_percent | append: '% OFF'
       endif
+    else
+      assign card_compare = ''
     endif
     assign card_rating = '4.8'
     assign card_reviews = '120+'
@@ -155,7 +157,7 @@
 
     <p class="lame-carousel-card__price-row">
       <span class="lame-carousel-card__price-current">{{ card_price }}</span>
-      {%- if card_compare != blank -%}
+      {%- if card_compare != blank and compare_at > price_amount and compare_at > 0 -%}
         <span class="lame-carousel-card__price-compare"><s>{{ card_compare }}</s></span>
       {%- endif -%}
     </p>
