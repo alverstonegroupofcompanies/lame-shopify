@@ -3,7 +3,51 @@
     need a gif banner her at top 
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+{% assign first_image = block.settings.banner_image %}
+{% assign first_link = block.settings.banner_link %}
 {% assign secondary_image = block.settings.second_banner_image | default: block.settings.banner_image_2 %}
+{% assign second_link = block.settings.second_banner_link %}
+{% assign third_image = block.settings.third_banner_image | default: block.settings.banner_image_3 %}
+{% assign third_link = block.settings.third_banner_link | default: block.settings.banner_link_3 | default: '/products/elite-pro-6-months' %}
+{% assign show_third_banner = block.settings.enable_third_banner %}
+{% if show_third_banner == nil %}
+  {% assign show_third_banner = true %}
+{% endif %}
+{% assign third_img_src = '' %}
+{% if show_third_banner %}
+  {% if third_image != blank %}
+    {% assign third_img_src = third_image | image_url: width: 2000 %}
+  {% else %}
+    {% assign third_img_src = 'lame-elite-pro-banner.jpg' | asset_url %}
+  {% endif %}
+{% endif %}
+
+{% assign fourth_image = block.settings.fourth_banner_image | default: block.settings.banner_image_4 %}
+{% assign fourth_link = block.settings.fourth_banner_link | default: block.settings.banner_link_4 %}
+{% assign show_fourth_banner = block.settings.enable_fourth_banner %}
+{% if show_fourth_banner == nil %}
+  {% assign show_fourth_banner = true %}
+{% endif %}
+{% assign fourth_img_src = '' %}
+{% if show_fourth_banner and fourth_image != blank %}
+  {% assign fourth_img_src = fourth_image | image_url: width: 2000 %}
+{% endif %}
+
+{% assign slide_count = 0 %}
+{% if first_image != blank %}
+  {% assign slide_count = slide_count | plus: 1 %}
+{% endif %}
+{% if secondary_image != blank %}
+  {% assign slide_count = slide_count | plus: 1 %}
+{% endif %}
+{% if third_img_src != blank %}
+  {% assign slide_count = slide_count | plus: 1 %}
+{% endif %}
+{% if fourth_img_src != blank %}
+  {% assign slide_count = slide_count | plus: 1 %}
+{% endif %}
+
+{% assign slide_interval_s = block.settings.slide_duration | default: 10 %}
 
 {% style %}
   /* Break parent section and containers out to 100% full viewport width with zero padding/margins */
@@ -102,6 +146,20 @@
   }
 
   /* Slide 1 (GIF) remains in normal flow to keep exact responsive height on desktop and mobile */
+  .ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }} {
+    display: block !important;
+    width: 100% !important;
+    position: relative !important;
+    text-decoration: none !important;
+    transition: opacity 0.8s ease-in-out;
+    will-change: opacity;
+  }
+
+  .ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }}.is-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
   .ai-gif-banner-slide-gif-{{ ai_gen_id }} {
     position: relative;
     width: 100% !important;
@@ -113,6 +171,7 @@
     object-position: center !important;
     opacity: 1;
     z-index: 1;
+    transition: opacity 0.8s ease-in-out;
   }
 
   .ai-gif-banner-slide-gif-{{ ai_gen_id }}.is-hidden {
@@ -120,8 +179,10 @@
     pointer-events: none !important;
   }
 
-  /* Slide 2 (Banner) overlays at exactly the same height and width */
-  .ai-gif-banner-slide-banner-{{ ai_gen_id }} {
+  /* Subsequent slides (Banner 2, Banner 3 / Elite Pro, Banner 4) overlay at exactly the same height and width */
+  .ai-gif-banner-slide-banner-{{ ai_gen_id }},
+  .ai-gif-banner-slide-third-{{ ai_gen_id }},
+  .ai-gif-banner-slide-fourth-{{ ai_gen_id }} {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -132,18 +193,43 @@
     display: block !important;
     object-fit: cover !important;
     object-position: center !important;
-    opacity: 0;
-    z-index: 2;
-    pointer-events: none;
+    opacity: 0 !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: opacity 0.8s ease-in-out;
+    will-change: opacity;
   }
 
-  .ai-gif-banner-slide-banner-{{ ai_gen_id }}.is-active {
+  .ai-gif-banner-slide-banner-{{ ai_gen_id }} img,
+  .ai-gif-banner-slide-third-{{ ai_gen_id }} img,
+  .ai-gif-banner-slide-fourth-{{ ai_gen_id }} img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border: none !important;
+  }
+
+  .ai-gif-banner-slide-banner-{{ ai_gen_id }}.is-active,
+  .ai-gif-banner-slide-third-{{ ai_gen_id }}.is-active,
+  .ai-gif-banner-slide-fourth-{{ ai_gen_id }}.is-active {
     opacity: 1 !important;
     pointer-events: auto !important;
+    z-index: 3 !important;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ai-gif-banner-slide-{{ ai_gen_id }} {
+    .ai-gif-banner-slide-{{ ai_gen_id }},
+    .ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }},
+    .ai-gif-banner-slide-gif-{{ ai_gen_id }},
+    .ai-gif-banner-slide-banner-{{ ai_gen_id }},
+    .ai-gif-banner-slide-third-{{ ai_gen_id }},
+    .ai-gif-banner-slide-fourth-{{ ai_gen_id }} {
       transition: none !important;
     }
   }
@@ -285,40 +371,165 @@
 <div class="ai-gif-banner-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   <div class="ai-gif-banner-container-{{ ai_gen_id }}">
     <div class="ai-gif-banner-wrapper-{{ ai_gen_id }}">
-      {% if block.settings.banner_image != blank %}
+      {% if first_image != blank %}
         <div class="ai-gif-banner-slides-{{ ai_gen_id }}">
-          <img
-            src="{{ block.settings.banner_image | image_url: width: 2000 }}"
-            alt="{{ block.settings.banner_image.alt | default: 'GIF banner' | escape }}"
-            loading="eager"
-            fetchpriority="high"
-            width="{{ block.settings.banner_image.width }}"
-            height="{{ block.settings.banner_image.height }}"
-            class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
-            data-src="{{ block.settings.banner_image | image_url: width: 2000 }}"
-          >
-          {% if secondary_image != blank %}
+          {% if first_link != blank %}
+            <a href="{{ first_link }}" class="ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }}">
+              <img
+                src="{{ first_image | image_url: width: 2000 }}"
+                alt="{{ first_image.alt | default: 'GIF banner' | escape }}"
+                loading="eager"
+                fetchpriority="high"
+                width="{{ first_image.width }}"
+                height="{{ first_image.height }}"
+                class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+                data-src="{{ first_image | image_url: width: 2000 }}"
+              >
+            </a>
+          {% else %}
             <img
-              src="{{ secondary_image | image_url: width: 2000 }}"
-              alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+              src="{{ first_image | image_url: width: 2000 }}"
+              alt="{{ first_image.alt | default: 'GIF banner' | escape }}"
               loading="eager"
-              width="{{ secondary_image.width | default: block.settings.banner_image.width }}"
-              height="{{ secondary_image.height | default: block.settings.banner_image.height }}"
-              class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-banner-{{ ai_gen_id }}"
+              fetchpriority="high"
+              width="{{ first_image.width }}"
+              height="{{ first_image.height }}"
+              class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+              data-src="{{ first_image | image_url: width: 2000 }}"
             >
+          {% endif %}
+
+          {% if secondary_image != blank %}
+            {% if second_link != blank %}
+              <a href="{{ second_link }}" class="ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-banner-{{ ai_gen_id }}">
+                <img
+                  src="{{ secondary_image | image_url: width: 2000 }}"
+                  alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+                  loading="eager"
+                  width="{{ secondary_image.width | default: first_image.width }}"
+                  height="{{ secondary_image.height | default: first_image.height }}"
+                  class="ai-gif-banner-image-{{ ai_gen_id }}"
+                >
+              </a>
+            {% else %}
+              <img
+                src="{{ secondary_image | image_url: width: 2000 }}"
+                alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+                loading="eager"
+                width="{{ secondary_image.width | default: first_image.width }}"
+                height="{{ secondary_image.height | default: first_image.height }}"
+                class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-banner-{{ ai_gen_id }}"
+              >
+            {% endif %}
+          {% endif %}
+
+          {% if third_img_src != blank %}
+            {% if third_link != blank %}
+              <a
+                href="{{ third_link }}"
+                class="ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-third-{{ ai_gen_id }}"
+                aria-label="MyLamstone Elite Pro Membership"
+              >
+                <img
+                  src="{{ third_img_src }}"
+                  alt="{{ third_image.alt | default: 'MyLamstone Elite Pro Membership' | escape }}"
+                  loading="eager"
+                  width="{{ third_image.width | default: 2000 }}"
+                  height="{{ third_image.height | default: 500 }}"
+                  class="ai-gif-banner-image-{{ ai_gen_id }}"
+                >
+              </a>
+            {% else %}
+              <img
+                src="{{ third_img_src }}"
+                alt="{{ third_image.alt | default: 'MyLamstone Elite Pro Membership' | escape }}"
+                loading="eager"
+                width="{{ third_image.width | default: 2000 }}"
+                height="{{ third_image.height | default: 500 }}"
+                class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-third-{{ ai_gen_id }}"
+              >
+            {% endif %}
+          {% endif %}
+
+          {% if fourth_img_src != blank %}
+            {% if fourth_link != blank %}
+              <a
+                href="{{ fourth_link }}"
+                class="ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-fourth-{{ ai_gen_id }}"
+                aria-label="Banner image 4"
+              >
+                <img
+                  src="{{ fourth_img_src }}"
+                  alt="{{ fourth_image.alt | default: 'Banner image 4' | escape }}"
+                  loading="eager"
+                  width="{{ fourth_image.width | default: 2000 }}"
+                  height="{{ fourth_image.height | default: 500 }}"
+                  class="ai-gif-banner-image-{{ ai_gen_id }}"
+                >
+              </a>
+            {% else %}
+              <img
+                src="{{ fourth_img_src }}"
+                alt="{{ fourth_image.alt | default: 'Banner image 4' | escape }}"
+                loading="eager"
+                width="{{ fourth_image.width | default: 2000 }}"
+                height="{{ fourth_image.height | default: 500 }}"
+                class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-fourth-{{ ai_gen_id }}"
+              >
+            {% endif %}
           {% endif %}
         </div>
       {% elsif secondary_image != blank %}
         <div class="ai-gif-banner-slides-{{ ai_gen_id }}">
-          <img
-            src="{{ secondary_image | image_url: width: 2000 }}"
-            alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
-            loading="eager"
-            fetchpriority="high"
-            width="{{ secondary_image.width }}"
-            height="{{ secondary_image.height }}"
-            class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
-          >
+          {% if second_link != blank %}
+            <a href="{{ second_link }}" class="ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }}">
+              <img
+                src="{{ secondary_image | image_url: width: 2000 }}"
+                alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+                loading="eager"
+                fetchpriority="high"
+                width="{{ secondary_image.width }}"
+                height="{{ secondary_image.height }}"
+                class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+              >
+            </a>
+          {% else %}
+            <img
+              src="{{ secondary_image | image_url: width: 2000 }}"
+              alt="{{ secondary_image.alt | default: 'Banner image' | escape }}"
+              loading="eager"
+              fetchpriority="high"
+              width="{{ secondary_image.width }}"
+              height="{{ secondary_image.height }}"
+              class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+            >
+          {% endif %}
+        </div>
+      {% elsif third_img_src != blank %}
+        <div class="ai-gif-banner-slides-{{ ai_gen_id }}">
+          {% if third_link != blank %}
+            <a href="{{ third_link }}" class="ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }}" aria-label="MyLamstone Elite Pro Membership">
+              <img
+                src="{{ third_img_src }}"
+                alt="{{ third_image.alt | default: 'MyLamstone Elite Pro Membership' | escape }}"
+                loading="eager"
+                fetchpriority="high"
+                width="{{ third_image.width | default: 2000 }}"
+                height="{{ third_image.height | default: 500 }}"
+                class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+              >
+            </a>
+          {% else %}
+            <img
+              src="{{ third_img_src }}"
+              alt="{{ third_image.alt | default: 'MyLamstone Elite Pro Membership' | escape }}"
+              loading="eager"
+              fetchpriority="high"
+              width="{{ third_image.width | default: 2000 }}"
+              height="{{ third_image.height | default: 500 }}"
+              class="ai-gif-banner-image-{{ ai_gen_id }} ai-gif-banner-slide-{{ ai_gen_id }} ai-gif-banner-slide-gif-{{ ai_gen_id }}"
+            >
+          {% endif %}
         </div>
       {% else %}
         <div class="ai-gif-banner-placeholder-{{ ai_gen_id }}">
@@ -354,19 +565,25 @@
   </div>
 </div>
 
-{% if block.settings.banner_image != blank and secondary_image != blank %}
+{% if slide_count > 1 %}
   <script>
     (function() {
       function initBannerAlternator() {
         var container = document.querySelector('.ai-gif-banner-{{ ai_gen_id }}');
         if (!container) return;
 
-        var gifImg = container.querySelector('.ai-gif-banner-slide-gif-{{ ai_gen_id }}');
-        var bannerImg = container.querySelector('.ai-gif-banner-slide-banner-{{ ai_gen_id }}');
+        if (container.__bannerInterval) {
+          clearInterval(container.__bannerInterval);
+          container.__bannerInterval = null;
+        }
 
-        if (!gifImg || !bannerImg) return;
+        var gifSlide = container.querySelector('.ai-gif-banner-slide-gif-wrap-{{ ai_gen_id }}') || container.querySelector('.ai-gif-banner-slide-gif-{{ ai_gen_id }}');
+        var gifImg = container.querySelector('img.ai-gif-banner-slide-gif-{{ ai_gen_id }}') || container.querySelector('.ai-gif-banner-slide-gif-{{ ai_gen_id }}');
+        var bannerSlide = container.querySelector('.ai-gif-banner-slide-banner-{{ ai_gen_id }}');
+        var thirdSlide = container.querySelector('.ai-gif-banner-slide-third-{{ ai_gen_id }}');
+        var fourthSlide = container.querySelector('.ai-gif-banner-slide-fourth-{{ ai_gen_id }}');
 
-        var showGif = true;
+        var slides = [];
 
         function restartGifElement(img) {
           if (!img) return;
@@ -382,37 +599,93 @@
           img.src = clean + sep + '_t=' + Date.now();
         }
 
-        function switchSlide() {
-          if (showGif) {
-            // Switch from GIF to Banner
-            showGif = false;
-            gifImg.classList.add('is-hidden');
-            bannerImg.classList.add('is-active');
-          } else {
-            // Switch from Banner back to GIF
-            showGif = true;
-            // Restart GIF from frame 0 right as it fades in
-            restartGifElement(gifImg);
-            gifImg.classList.remove('is-hidden');
-            bannerImg.classList.remove('is-active');
-          }
+        if (gifSlide) {
+          slides.push({
+            type: 'gif',
+            el: gifSlide,
+            show: function() {
+              restartGifElement(gifImg);
+              gifSlide.classList.remove('is-hidden');
+            },
+            hide: function() {
+              gifSlide.classList.add('is-hidden');
+            }
+          });
         }
 
-        var intervalId = setInterval(switchSlide, 10000);
+        if (bannerSlide) {
+          slides.push({
+            type: 'banner',
+            el: bannerSlide,
+            show: function() {
+              bannerSlide.classList.add('is-active');
+            },
+            hide: function() {
+              bannerSlide.classList.remove('is-active');
+            }
+          });
+        }
+
+        if (thirdSlide) {
+          slides.push({
+            type: 'third',
+            el: thirdSlide,
+            show: function() {
+              thirdSlide.classList.add('is-active');
+            },
+            hide: function() {
+              thirdSlide.classList.remove('is-active');
+            }
+          });
+        }
+
+        if (fourthSlide) {
+          slides.push({
+            type: 'fourth',
+            el: fourthSlide,
+            show: function() {
+              fourthSlide.classList.add('is-active');
+            },
+            hide: function() {
+              fourthSlide.classList.remove('is-active');
+            }
+          });
+        }
+
+        if (slides.length <= 1) return;
+
+        var currentIndex = 0;
+        var intervalDuration = {{ slide_interval_s }} * 1000;
+
+        function switchSlide() {
+          var prevIndex = currentIndex;
+          currentIndex = (currentIndex + 1) % slides.length;
+
+          slides[prevIndex].hide();
+          slides[currentIndex].show();
+        }
+
+        container.__bannerInterval = setInterval(switchSlide, intervalDuration);
 
         document.addEventListener('visibilitychange', function() {
           if (document.hidden) {
-            clearInterval(intervalId);
+            if (container.__bannerInterval) {
+              clearInterval(container.__bannerInterval);
+              container.__bannerInterval = null;
+            }
           } else {
-            clearInterval(intervalId);
-            intervalId = setInterval(switchSlide, 10000);
+            if (container.__bannerInterval) clearInterval(container.__bannerInterval);
+            container.__bannerInterval = setInterval(switchSlide, intervalDuration);
           }
         });
 
         if (window.Shopify && window.Shopify.designMode) {
           document.addEventListener('shopify:section:unload', function(e) {
             if (container && container.closest('#shopify-section-' + e.detail?.sectionId)) {
-              clearInterval(intervalId);
+              if (container.__bannerInterval) {
+                clearInterval(container.__bannerInterval);
+                container.__bannerInterval = null;
+              }
             }
           });
         }
@@ -443,10 +716,68 @@
       "info": "Upload a GIF or static image"
     },
     {
+      "type": "url",
+      "id": "banner_link",
+      "label": "First banner link",
+      "info": "Optional link when clicking the first banner"
+    },
+    {
       "type": "image_picker",
       "id": "second_banner_image",
       "label": "Banner image",
-      "info": "Second image to alternate with the GIF every 10 seconds"
+      "info": "Second image to alternate with the GIF"
+    },
+    {
+      "type": "url",
+      "id": "second_banner_link",
+      "label": "Second banner link",
+      "info": "Optional link when clicking the second banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "third_banner_image",
+      "label": "Third banner image",
+      "info": "Third image (e.g. Elite Pro Membership) to cycle after the second banner"
+    },
+    {
+      "type": "url",
+      "id": "third_banner_link",
+      "label": "Third banner link",
+      "default": "/products/elite-pro-6-months"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_third_banner",
+      "label": "Enable third banner",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "fourth_banner_image",
+      "label": "Fourth banner image",
+      "info": "Optional fourth image to add to the banner rotation"
+    },
+    {
+      "type": "url",
+      "id": "fourth_banner_link",
+      "label": "Fourth banner link",
+      "info": "Optional link when clicking the fourth banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_fourth_banner",
+      "label": "Enable fourth banner",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "slide_duration",
+      "label": "Slide transition interval",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "unit": "s",
+      "default": 10
     },
     {
       "type": "select",
