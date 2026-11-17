@@ -237,19 +237,120 @@
 -%}
 
 {{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
-{%- if whole_section_bg != blank -%}
-  <style>
-    #shopify-section-{{ section.id }} {
+<style>
+  #shopify-section-{{ section.id }} {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    {%- if whole_section_bg != blank -%}
       background-color: {{ whole_section_bg }} !important;
       margin-top: 0 !important;
       margin-bottom: 0 !important;
       margin-block: 0 !important;
-    }
+    {%- endif -%}
+  }
+  {%- if whole_section_bg != blank -%}
     #shopify-section-{{ section.id }} .section-background {
       background-color: {{ whole_section_bg }} !important;
     }
-  </style>
-{%- endif -%}
+  {%- endif -%}
+
+  /* Align width and layout identically with Exclusive Offers and Home Offer Banners */
+  #shopify-section-{{ section.id }} .lame-new-products.section {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    display: block !important;
+  }
+  #shopify-section-{{ section.id }} .lame-flash-deal__wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+  }
+  #shopify-section-{{ section.id }} .lame-flash-deal__header {
+    width: 100% !important;
+    max-width: min(100%, var(--page-width, 1200px)) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
+  }
+  #shopify-section-{{ section.id }} .lame-new-products__header-row,
+  #shopify-section-{{ section.id }} .lame-flash-deal__title-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  #shopify-section-{{ section.id }} .lame-flash-deal__carousel {
+    max-width: min(100%, var(--page-width, 1200px)) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Desktop height and aspect ratio: match Exclusive Offers banner identically */
+  @media screen and (min-width: 750px) {
+    #shopify-section-{{ section.id }} .lame-flash-deal__title-image,
+    #shopify-section-{{ section.id }} .lame-flash-deal__title-picture,
+    #shopify-section-{{ section.id }} .lame-flash-deal__title-img {
+      aspect-ratio: 1920 / 238 !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      border-radius: clamp(10px, 1.5vw, 16px) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+      overflow: hidden !important;
+    }
+  }
+
+  /* Mobile: remove white space after banner, match Exclusive Offers width/height, normal tight gap to cards */
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .lame-flash-deal__wrap {
+      padding-block-start: 8px !important;
+      padding-top: 8px !important;
+    }
+    #shopify-section-{{ section.id }} .lame-flash-deal__header {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-inline: auto !important;
+      margin-bottom: 0.65rem !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      padding-inline: var(--lame-flash-edge, clamp(0.75rem, 2vw, 1.25rem)) !important;
+    }
+    #shopify-section-{{ section.id }} .lame-flash-deal__title-image,
+    #shopify-section-{{ section.id }} .lame-flash-deal__title-picture,
+    #shopify-section-{{ section.id }} .lame-flash-deal__title-img {
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      aspect-ratio: 1024 / 216 !important;
+      border-radius: clamp(6px, 1.2vw, 12px) !important;
+      overflow: hidden !important;
+      object-fit: cover !important;
+      object-position: center center !important;
+      line-height: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    #shopify-section-{{ section.id }} .lame-flash-deal__track {
+      padding-top: 0 !important;
+    }
+    #shopify-section-{{ section.id }} .lame-flash-deal__carousel {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      padding-inline: var(--lame-flash-mobile-gutter, 0.55rem) !important;
+    }
+  }
+</style>
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-new-products{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}{% if whole_section_bg != blank %} lame-flash-deal--has-section-bg{% endif %}"
