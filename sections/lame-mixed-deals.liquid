@@ -1,0 +1,534 @@
+{% liquid
+  assign col_handle = section.settings.collection | default: 'all'
+  assign target_collection = collections[col_handle]
+  if target_collection == blank or target_collection.products.size == 0
+    assign target_collection = collections['all']
+  endif
+  if target_collection == blank or target_collection.products.size == 0
+    assign target_collection = collections['our-products']
+  endif
+
+  assign pool_limit = section.settings.pool_limit | default: 36
+  assign initial_limit = section.settings.initial_products_to_show | default: 8
+  assign pool_count = 0
+  assign seen_ids = '||'
+%}
+
+{% capture pool_markup %}
+  {%- comment -%} 1. Primary collection pass for discounted products {%- endcomment -%}
+  {% if target_collection != blank and target_collection.products.size > 0 %}
+    {% for product in target_collection.products %}
+      {% if pool_count >= pool_limit %}{% break %}{% endif %}
+      {% assign p_token = '||' | append: product.id | append: '||' %}
+      {% if seen_ids contains p_token %}{% continue %}{% endif %}
+
+      {% capture lame_sale_raw %}
+        {% render 'lame-product-sale-data', product: product %}
+      {% endcapture %}
+      {% assign lame_sale_parts = lame_sale_raw | split: '|' %}
+      {% assign discount_percent = lame_sale_parts[0] | strip | plus: 0 %}
+      {% assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0 %}
+
+      {% assign is_deal = false %}
+      {% if product.compare_at_price > product.price %}
+        {% assign is_deal = true %}
+      {% elsif lame_on_sale_flag == 1 %}
+        {% assign is_deal = true %}
+      {% endif %}
+
+      {% if is_deal %}
+        {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+        <li
+          class="lame-mixed-deals__item{% if pool_count >= initial_limit %} is-hidden{% endif %}"
+          data-mixed-deal-item
+          data-product-id="{{ product.id }}"
+          data-product-handle="{{ product.handle | downcase }}"
+          data-product-vendor="{{ product.vendor | downcase | escape }}"
+          data-product-type="{{ product.type | downcase | escape }}"
+          data-product-tags="{{ product.tags | join: ',' | downcase | escape }}"
+          data-product-title="{{ product.title | downcase | escape }}"
+          data-discount="{{ discount_percent }}"
+          {% if pool_count >= initial_limit %}style="display: none;"{% endif %}
+        >
+          {% render 'lame-flash-deal-card',
+            product: product,
+            add_to_cart_label: section.settings.add_to_cart_label,
+            sold_out_label: section.settings.sold_out_label,
+            save_label_prefix: 'You save',
+            show_wishlist: false
+          %}
+        </li>
+        {% assign pool_count = pool_count | plus: 1 %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {%- comment -%} 2. Supplement from multi-category collections for rich variety {%- endcomment -%}
+  {% if pool_count < pool_limit %}
+    {% assign extra_cats = 'skin-care,bath-body,fragrance,baby-mom,our-products' | split: ',' %}
+    {% for cat in extra_cats %}
+      {% if pool_count >= pool_limit %}{% break %}{% endif %}
+      {% if collections[cat] != blank and collections[cat].products.size > 0 %}
+        {% for product in collections[cat].products %}
+          {% if pool_count >= pool_limit %}{% break %}{% endif %}
+          {% assign p_token = '||' | append: product.id | append: '||' %}
+          {% if seen_ids contains p_token %}{% continue %}{% endif %}
+
+          {% capture lame_sale_raw %}
+            {% render 'lame-product-sale-data', product: product %}
+          {% endcapture %}
+          {% assign lame_sale_parts = lame_sale_raw | split: '|' %}
+          {% assign discount_percent = lame_sale_parts[0] | strip | plus: 0 %}
+          {% assign lame_on_sale_flag = lame_sale_parts[2] | strip | plus: 0 %}
+
+          {% assign is_deal = false %}
+          {% if product.compare_at_price > product.price %}
+            {% assign is_deal = true %}
+          {% elsif lame_on_sale_flag == 1 %}
+            {% assign is_deal = true %}
+          {% endif %}
+
+          {% if is_deal %}
+            {% assign seen_ids = seen_ids | append: product.id | append: '||' %}
+            <li
+              class="lame-mixed-deals__item{% if pool_count >= initial_limit %} is-hidden{% endif %}"
+              data-mixed-deal-item
+              data-product-id="{{ product.id }}"
+              data-product-handle="{{ product.handle | downcase }}"
+              data-product-vendor="{{ product.vendor | downcase | escape }}"
+              data-product-type="{{ product.type | downcase | escape }}"
+              data-product-tags="{{ product.tags | join: ',' | downcase | escape }}"
+              data-product-title="{{ product.title | downcase | escape }}"
+              data-discount="{{ discount_percent }}"
+              {% if pool_count >= initial_limit %}style="display: none;"{% endif %}
+            >
+              {% render 'lame-flash-deal-card',
+                product: product,
+                add_to_cart_label: section.settings.add_to_cart_label,
+                sold_out_label: section.settings.sold_out_label,
+                save_label_prefix: 'You save',
+                show_wishlist: false
+              %}
+            </li>
+            {% assign pool_count = pool_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {%- comment -%} 3. Fallback in Theme Editor / Design Mode if 0 discounted products found {%- endcomment -%}
+  {% if pool_count == 0 and request.design_mode %}
+    {% if target_collection.products.size > 0 %}
+      {% for product in target_collection.products limit: 8 %}
+        <li class="lame-mixed-deals__item" data-mixed-deal-item>
+          {% render 'lame-flash-deal-card',
+            product: product,
+            badge_label: '15% OFF',
+            add_to_cart_label: 'Add to cart',
+            save_label_prefix: 'You save',
+            show_wishlist: false
+          %}
+        </li>
+        {% assign pool_count = pool_count | plus: 1 %}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+{% endcapture %}
+
+{{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
+{{ 'lame-mixed-deals.css' | asset_url | stylesheet_tag }}
+
+{% if pool_count > 0 or request.design_mode %}
+<section
+  id="shopify-section-{{ section.id }}"
+  class="section lame-mixed-deals color-{{ section.settings.color_scheme }}"
+  data-mixed-deals-section
+  style="padding-top: {{ section.settings.padding-block-start }}px; padding-bottom: {{ section.settings.padding-block-end }}px;"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-mixed-deals__wrap">
+    {% if section.settings.heading != blank or section.settings.eyebrow != blank or section.settings.subheading != blank %}
+      <header class="lame-mixed-deals__header">
+        {% if section.settings.eyebrow != blank %}
+          <div class="lame-mixed-deals__pill">
+            <span>{{ section.settings.eyebrow | escape }}</span>
+          </div>
+        {% endif %}
+        {% if section.settings.heading != blank %}
+          <h2 class="lame-mixed-deals__title">{{ section.settings.heading | escape }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="lame-mixed-deals__subtitle">{{ section.settings.subheading | escape }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    <ul class="lame-mixed-deals__grid" role="list" data-mixed-deals-grid>
+      {{ pool_markup }}
+    </ul>
+
+    <div class="lame-mixed-deals__footer" data-mixed-deals-footer>
+      <div class="lame-mixed-deals__counter" data-mixed-deals-count>
+        Showing {{ initial_limit | at_most: pool_count }} of {{ pool_count }} deals
+      </div>
+      <button
+        type="button"
+        class="lame-mixed-deals__show-more"
+        data-mixed-deals-show-more
+        aria-label="{{ section.settings.show_more_label | default: 'Show More Deals' }}"
+        {% if pool_count <= initial_limit %}disabled style="display: none;"{% endif %}
+      >
+        <span data-btn-text>{{ section.settings.show_more_label | default: 'Show More Deals' }}</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+
+    const grid = section.querySelector('[data-mixed-deals-grid]');
+    const showMoreBtn = section.querySelector('[data-mixed-deals-show-more]');
+    const countDisplay = section.querySelector('[data-mixed-deals-count]');
+    if (!grid) return;
+
+    // 1. Record search queries for continuous personalization
+    const recordSearch = (term) => {
+      if (!term || typeof term !== 'string') return;
+      const clean = term.trim().toLowerCase();
+      if (clean.length < 2) return;
+      try {
+        const raw = localStorage.getItem('lame:search_history');
+        let list = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(list)) list = [];
+        list = [clean, ...list.filter((item) => item !== clean)].slice(0, 10);
+        localStorage.setItem('lame:search_history', JSON.stringify(list));
+      } catch (e) {}
+    };
+
+    const urlQ = new URLSearchParams(window.location.search).get('q');
+    if (urlQ) recordSearch(urlQ);
+
+    document.addEventListener('submit', (e) => {
+      const form = e.target;
+      if (form && (form.action?.includes('/search') || form.querySelector('input[name="q"]'))) {
+        const qInput = form.querySelector('input[name="q"]');
+        if (qInput && qInput.value) recordSearch(qInput.value);
+      }
+    });
+
+    document.addEventListener('input', (e) => {
+      const target = e.target;
+      if (target && target.matches && (target.matches('input[name="q"]') || target.matches('[ref="searchInput"]'))) {
+        if (target.value && target.value.trim().length >= 3) {
+          recordSearch(target.value);
+        }
+      }
+    }, { passive: true });
+
+    // 2. Read personalization signals
+    const enablePersonalization = {{ section.settings.enable_personalization | default: true }};
+    const enableRandomize = {{ section.settings.randomize_on_refresh | default: true }};
+
+    let wishlist = [];
+    try {
+      const rawWishlist = localStorage.getItem('lame:wishlist:v1');
+      if (rawWishlist) wishlist = JSON.parse(rawWishlist);
+    } catch (e) {}
+    const wishlistHandles = new Set(wishlist.map((w) => (w.handle || '').toLowerCase()).filter(Boolean));
+    const wishlistIds = new Set(wishlist.map((w) => String(w.id)).filter(Boolean));
+    const wishlistTitles = wishlist.map((w) => (w.title || '').toLowerCase()).filter(Boolean);
+
+    let viewedProductIds = [];
+    try {
+      const rawViewed = localStorage.getItem('viewedProducts');
+      if (rawViewed) viewedProductIds = JSON.parse(rawViewed);
+    } catch (e) {}
+    const viewedIdsSet = new Set(viewedProductIds.map(String));
+
+    let searchQueries = [];
+    try {
+      const rawSearch = localStorage.getItem('lame:search_history');
+      if (rawSearch) searchQueries = JSON.parse(rawSearch);
+    } catch (e) {}
+
+    // 3. Extract items and score them (Personalization + Shuffle)
+    const items = Array.from(grid.querySelectorAll('[data-mixed-deal-item]'));
+    if (items.length === 0) return;
+
+    let processedItems = items.map((el) => {
+      const pid = String(el.dataset.productId || '');
+      const handle = (el.dataset.productHandle || '').toLowerCase();
+      const vendor = (el.dataset.productVendor || '').toLowerCase();
+      const type = (el.dataset.productType || '').toLowerCase();
+      const tags = (el.dataset.productTags || '').toLowerCase();
+      const title = (el.dataset.productTitle || '').toLowerCase();
+      const discount = parseFloat(el.dataset.discount || '0');
+
+      let score = enableRandomize ? Math.random() * 10 : 0;
+
+      if (enablePersonalization) {
+        // Likings / Wishlist boost:
+        if (wishlistIds.has(pid) || wishlistHandles.has(handle)) {
+          score += 40;
+        } else if (vendor && wishlistTitles.some((t) => t.includes(vendor))) {
+          score += 18;
+        }
+
+        // Viewed products boost:
+        if (viewedIdsSet.has(pid)) {
+          score += 30;
+        }
+
+        // Search history boost:
+        if (searchQueries.length > 0) {
+          for (const query of searchQueries) {
+            if (!query) continue;
+            const qTokens = query.split(/\s+/).filter((t) => t.length > 1);
+            for (const token of qTokens) {
+              if (title.includes(token)) score += 22;
+              if (vendor.includes(token)) score += 20;
+              if (type.includes(token)) score += 15;
+              if (tags.includes(token)) score += 12;
+            }
+          }
+        }
+
+        // Discount depth slight incentive:
+        if (discount >= 30) score += 2;
+      }
+
+      return { el, score };
+    });
+
+    if (enableRandomize || enablePersonalization) {
+      processedItems.sort((a, b) => b.score - a.score);
+      processedItems.forEach(({ el }) => grid.appendChild(el));
+    }
+
+    // 4. "Show More" Progressive Expansion
+    const initialCount = parseInt('{{ initial_limit }}', 10) || 8;
+    const stepCount = parseInt('{{ section.settings.step_products_to_show | default: 8 }}', 10) || 8;
+    let currentlyVisible = Math.min(initialCount, items.length);
+    const totalCount = items.length;
+
+    const updateVisibility = () => {
+      processedItems.forEach(({ el }, index) => {
+        if (index < currentlyVisible) {
+          el.classList.remove('is-hidden');
+          el.style.display = '';
+        } else {
+          el.classList.add('is-hidden');
+          el.style.display = 'none';
+        }
+      });
+
+      if (countDisplay) {
+        countDisplay.textContent = `Showing ${Math.min(currentlyVisible, totalCount)} of ${totalCount} deals`;
+      }
+
+      if (showMoreBtn) {
+        if (currentlyVisible >= totalCount) {
+          showMoreBtn.classList.add('is-all-loaded');
+          showMoreBtn.setAttribute('disabled', 'true');
+          const textSpan = showMoreBtn.querySelector('[data-btn-text]');
+          if (textSpan) textSpan.textContent = 'All deals viewed';
+        } else {
+          showMoreBtn.classList.remove('is-all-loaded');
+          showMoreBtn.removeAttribute('disabled');
+          const remaining = totalCount - currentlyVisible;
+          const nextStep = Math.min(stepCount, remaining);
+          const textSpan = showMoreBtn.querySelector('[data-btn-text]');
+          if (textSpan) textSpan.textContent = `Show More Deals (+${nextStep})`;
+        }
+      }
+    };
+
+    updateVisibility();
+
+    if (showMoreBtn) {
+      showMoreBtn.addEventListener('click', () => {
+        const prevVisible = currentlyVisible;
+        currentlyVisible = Math.min(currentlyVisible + stepCount, totalCount);
+        updateVisibility();
+
+        const newlyRevealed = processedItems.slice(prevVisible, currentlyVisible).map(({ el }) => el);
+        newlyRevealed.forEach((el) => {
+          el.classList.add('is-fade-in');
+        });
+      });
+    }
+
+    // 5. Ajax add to cart handler
+    section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        if (button?.disabled) return;
+        const formData = new FormData(form);
+        try {
+          if (button) button.disabled = true;
+          const response = await fetch('{{ routes.cart_add_url }}.js', {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formData,
+          });
+          const data = await response.json();
+          if (!response.ok || data?.status) throw new Error(data?.message);
+          const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
+          const cartData = await cartResponse.json();
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: { resource: cartData, sourceId: '{{ section.id }}', data: { source: 'mixed-deals-atc' } },
+            })
+          );
+        } catch (error) {
+          console.error('Add to cart failed', error);
+        } finally {
+          if (button) button.disabled = false;
+        }
+      });
+    });
+  })();
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Mixed Discount Deals",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": { "templates": ["index", "collection"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow badge",
+      "default": "Handpicked Discounts"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Mixed Deals For You"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Curated savings tailored to your searches, likes & daily essentials"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Collection to pull deals from. Defaults to All Products."
+    },
+    {
+      "type": "range",
+      "id": "initial_products_to_show",
+      "label": "Initial products to show",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "step_products_to_show",
+      "label": "Products to load on 'Show More'",
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "pool_limit",
+      "label": "Total discount pool size",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "default": 36
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_personalization",
+      "label": "Enable personalization (wishlist, searches, viewed)",
+      "default": true,
+      "info": "Prioritizes products based on user's searches, viewed items, and wishlist."
+    },
+    {
+      "type": "checkbox",
+      "id": "randomize_on_refresh",
+      "label": "Randomize products on each visit",
+      "default": true,
+      "info": "Shuffles deals to keep the discovery experience fresh."
+    },
+    {
+      "type": "text",
+      "id": "show_more_label",
+      "label": "Show more button label",
+      "default": "Show More Deals"
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_label",
+      "label": "Add to cart label",
+      "default": "Add to cart"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_label",
+      "label": "Sold out label",
+      "default": "Sold out"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Mixed Discount Deals",
+      "category": "Products",
+      "settings": {
+        "eyebrow": "Handpicked Discounts",
+        "heading": "Mixed Deals For You",
+        "subheading": "Curated savings tailored to your searches, likes & daily essentials",
+        "initial_products_to_show": 8,
+        "step_products_to_show": 8,
+        "pool_limit": 36,
+        "enable_personalization": true,
+        "randomize_on_refresh": true
+      }
+    }
+  ]
+}
+{% endschema %}
