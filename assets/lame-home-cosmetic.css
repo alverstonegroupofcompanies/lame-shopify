@@ -1437,56 +1437,117 @@ body.template-index [data-lame-reveal][data-lame-delay='3'] { transition-delay: 
 body.template-index [data-lame-reveal][data-lame-delay='4'] { transition-delay: 0.24s; }
 
 /* Centered store rail — white gutters, one product row per section */
+/* Centered store rail — white gutters, one product row per section */
 @media screen and (min-width: 990px) {
   body.template-index.page-width-wide {
     --wide-page-width: var(--lame-home-rail);
     --page-content-width: var(--lame-home-rail);
     --page-width: calc(var(--lame-home-rail) + (var(--page-margin) * 2));
   }
+}
 
-  body.template-index .shopify-section:has(.lame-trust-banner),
-  body.template-index .lame-trust-banner,
-  body.template-index .lame-trust-banner.section--full-width {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    display: block !important;
-    box-sizing: border-box !important;
-  }
+/* ═══════════════════════════════════════════════════════════════════
+   UNIFIED HOMEPAGE SECTION CONTAINER WIDTH & MARGIN HARMONIZATION
+   Guarantees ALL homepage sections share the exact same width,
+   outer margins, inner padding, and left/right alignment.
+   ═══════════════════════════════════════════════════════════════════ */
 
-  body.template-index .lame-trust-banner--has-section-bg,
-  body.template-index .shopify-section:has(.lame-trust-banner--has-section-bg) .lame-trust-banner,
-  body.template-index .shopify-section:has(.lame-trust-banner--has-section-bg) {
-    background-color: var(--lame-trust-bg, transparent) !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    margin-block: 0 !important;
-  }
+/* 1. All homepage outer section containers — 100% full width, no grid insets */
+body.template-index .content-for-layout > .shopify-section,
+body.template-index .content-for-layout > .shopify-section > .section,
+body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero,
+body.template-index .shopify-section:has(.lame-beauty-love) .lame-beauty-love,
+body.template-index .shopify-section:has(.lame-diwali-posters) .lame-diwali-posters,
+body.template-index .shopify-section:has(.lame-trust-banner) .lame-trust-banner,
+body.template-index .shopify-section:has(.lame-new-products) .lame-new-products,
+body.template-index .shopify-section:has(.lame-flash-deal) .lame-flash-deal,
+body.template-index .shopify-section:has(.lame-best-sellers) .lame-best-sellers,
+body.template-index .shopify-section:has(.lame-promo-slideshow-section) .lame-promo-slideshow-section,
+body.template-index .shopify-section:has(.lame-home-offer-banners) .lame-home-offer-banners,
+body.template-index .shopify-section:has(.lame-signature) .lame-signature,
+body.template-index .shopify-section:has(.lame-delivery-pickup) .lame-delivery-pickup,
+body.template-index .shopify-section:has(.lame-home-youtube) .lame-home-youtube,
+body.template-index .shopify-section:has(.lame-home-video-spotlight) .lame-home-video-spotlight,
+body.template-index .shopify-section:has(.lame-home-reviews) .lame-home-reviews,
+body.template-index .shopify-section:has(.lame-beauty-tips-banner) .lame-beauty-tips-banner,
+body.template-index .shopify-section:has(.lame-three-image-row) .lame-three-image-row,
+body.template-index .shopify-section:has([class*="ai-gif-banner"]) .section,
+body.template-index .shopify-section:has([class*="gif-banner"]) .section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
 
-  body.template-index .lame-trust-banner:not(.lame-trust-banner--bleed) > .lame-trust-banner__wrap,
-  body.template-index .lame-trust-banner--boxed > .lame-trust-banner__wrap,
-  body.template-index .lame-trust-banner > .lame-trust-banner__wrap {
+body.template-index .lame-trust-banner--has-section-bg,
+body.template-index .shopify-section:has(.lame-trust-banner--has-section-bg) .lame-trust-banner,
+body.template-index .shopify-section:has(.lame-trust-banner--has-section-bg) {
+  background-color: var(--lame-trust-bg, transparent) !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  margin-block: 0 !important;
+}
+
+body.template-index .lame-trust-banner__link,
+body.template-index .lame-trust-banner__picture {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  line-height: 0 !important;
+}
+
+body.template-index .lame-new-products .lame-flash-deal__wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.template-index .lame-new-products .lame-new-products__header-row,
+body.template-index .lame-new-products .lame-flash-deal__title-image {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* 2. All homepage inner containers — identical max-width, centering, and desktop padding */
+@media screen and (min-width: 750px) {
+  body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
+  body.template-index .lame-beauty-love__wrap,
+  body.template-index .lame-diwali-posters__header,
+  body.template-index .lame-diwali-posters__wrap,
+  body.template-index .lame-trust-banner > .lame-trust-banner__wrap,
+  body.template-index .lame-new-products .lame-flash-deal__header,
+  body.template-index .lame-new-products .lame-flash-deal__carousel,
+  body.template-index .lame-flash-deal .lame-flash-deal__header,
+  body.template-index .lame-flash-deal .lame-flash-deal__carousel,
+  body.template-index .lame-promo-slideshow__wrapper,
+  body.template-index .lame-home-offer-banners__wrap,
+  body.template-index .lame-signature .lame-signature__wrap,
+  body.template-index .lame-signature--showcase .lame-signature__wrap,
+  body.template-index .lame-delivery-pickup__wrap,
+  body.template-index .lame-home-youtube__wrap,
+  body.template-index .lame-home-video-spotlight__wrap,
+  body.template-index .lame-home-reviews__wrap,
+  body.template-index .lame-beauty-tips-banner__wrap,
+  body.template-index .lame-three-image-row__wrap,
+  body.template-index .shopify-section:has([class*="ai-gif-banner"]) > .section > *,
+  body.template-index .shopify-section:has([class*="gif-banner"]) > .section > * {
     width: 100% !important;
     max-width: min(100%, var(--page-width, 1200px)) !important;
     margin-inline: auto !important;
     padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
-    position: relative !important;
   }
 
   body.template-index .lame-trust-banner.lame-trust-banner--bleed > .lame-trust-banner__wrap {
     max-width: none !important;
     padding-inline: 0 !important;
-  }
-
-  body.template-index .lame-trust-banner__link,
-  body.template-index .lame-trust-banner__picture {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    line-height: 0 !important;
   }
 
   body.template-index .lame-trust-banner:not(.lame-trust-banner--bleed) .lame-trust-banner__image,
@@ -1502,193 +1563,116 @@ body.template-index [data-lame-reveal][data-lame-delay='4'] { transition-delay: 
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
   }
 
-  /* Ensure New Arrivals aligns identically with Exclusive Offers and Home Offer Banners */
-  body.template-index .shopify-section:has(.lame-new-products),
-  body.template-index .lame-new-products,
-  body.template-index .lame-new-products.section {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    display: block !important;
-    box-sizing: border-box !important;
-  }
-
-  body.template-index .lame-new-products .lame-flash-deal__wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  body.template-index .lame-new-products .lame-flash-deal__header {
-    width: 100% !important;
-    max-width: min(100%, var(--page-width, 1200px)) !important;
-    margin-inline: auto !important;
-    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
-    box-sizing: border-box !important;
-  }
-
-  body.template-index .lame-new-products .lame-new-products__header-row,
-  body.template-index .lame-new-products .lame-flash-deal__title-image {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-inline: auto !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  body.template-index .lame-new-products .lame-flash-deal__carousel {
-    max-width: min(100%, var(--page-width, 1200px)) !important;
-    margin-inline: auto !important;
-    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
-    box-sizing: border-box !important;
-  }
-
   /* Synchronize height & aspect ratio between Exclusive Offers and New Arrivals */
-  @media screen and (min-width: 750px) {
-    body.template-index .lame-trust-banner:not(.lame-trust-banner--bleed) .lame-trust-banner__image,
-    body.template-index .lame-trust-banner--boxed .lame-trust-banner__image,
-    body.template-index .lame-trust-banner .lame-trust-banner__image,
-    body.template-index .lame-new-products .lame-flash-deal__title-image,
-    body.template-index .lame-new-products .lame-flash-deal__title-picture,
-    body.template-index .lame-new-products .lame-flash-deal__title-img {
-      aspect-ratio: 1920 / 238 !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      object-fit: cover !important;
-      object-position: center center !important;
-      border-radius: clamp(10px, 1.5vw, 16px) !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
-      overflow: hidden !important;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    body.template-index .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__wrap,
-    body.template-index .lame-trust-banner--mobile-boxed .lame-trust-banner__wrap,
-    body.template-index .lame-new-products .lame-flash-deal__header {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin-inline: auto !important;
-      padding-inline: var(--lame-flash-edge, clamp(0.75rem, 2vw, 1.25rem)) !important;
-      box-sizing: border-box !important;
-    }
-
-    body.template-index .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
-    body.template-index .lame-trust-banner--mobile-boxed .lame-trust-banner__image,
-    body.template-index .lame-new-products .lame-flash-deal__title-image,
-    body.template-index .lame-new-products .lame-flash-deal__title-picture,
-    body.template-index .lame-new-products .lame-flash-deal__title-img {
-      width: 100% !important;
-      max-width: 100% !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      aspect-ratio: 1024 / 216 !important;
-      border-radius: clamp(6px, 1.2vw, 12px) !important;
-      overflow: hidden !important;
-      object-fit: cover !important;
-      object-position: center center !important;
-      line-height: 0 !important;
-    }
-
-    /* Remove the huge white space gap in mobile view */
-    body.template-index .lame-new-products .lame-flash-deal__wrap {
-      padding-block-start: 8px !important;
-      padding-top: 8px !important;
-    }
-
-    body.template-index .lame-new-products .lame-flash-deal__header,
-    body.template-index .lame-new-products.lame-flash-deal--has-section-bg .lame-flash-deal__header {
-      margin-bottom: 0.65rem !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-    }
-
-    body.template-index .lame-new-products .lame-flash-deal__title-image {
-      min-height: 0 !important;
-      height: auto !important;
-      margin-bottom: 0 !important;
-    }
-
-    body.template-index .lame-new-products .lame-flash-deal__track {
-      padding-top: 0 !important;
-    }
-
-    body.template-index .lame-new-products .lame-flash-deal__carousel {
-      margin-top: 0 !important;
-      padding-top: 0 !important;
-      padding-inline: var(--lame-flash-mobile-gutter, 0.55rem) !important;
-    }
+  body.template-index .lame-trust-banner:not(.lame-trust-banner--bleed) .lame-trust-banner__image,
+  body.template-index .lame-trust-banner--boxed .lame-trust-banner__image,
+  body.template-index .lame-trust-banner .lame-trust-banner__image,
+  body.template-index .lame-new-products .lame-flash-deal__title-image,
+  body.template-index .lame-new-products .lame-flash-deal__title-picture,
+  body.template-index .lame-new-products .lame-flash-deal__title-img {
+    aspect-ratio: 1920 / 238 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
   }
 
   body.template-index .lame-trust-banner.lame-trust-banner--bleed .lame-trust-banner__image {
     border-radius: 0 !important;
     box-shadow: none !important;
   }
+}
 
-  body.template-index .shopify-section:has(.lame-promo-slideshow-section),
-  body.template-index .lame-promo-slideshow-section,
-  body.template-index .lame-promo-slideshow-section.section {
+/* 3. On mobile screens (< 750px) — unified side gutter across ALL sections */
+@media screen and (max-width: 749px) {
+  body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow,
+  body.template-index .lame-beauty-love__wrap,
+  body.template-index .lame-diwali-posters__header,
+  body.template-index .lame-diwali-posters__wrap,
+  body.template-index .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) > .lame-trust-banner__wrap,
+  body.template-index .lame-new-products .lame-flash-deal__header,
+  body.template-index .lame-new-products .lame-flash-deal__carousel,
+  body.template-index .lame-flash-deal .lame-flash-deal__header,
+  body.template-index .lame-flash-deal .lame-flash-deal__carousel,
+  body.template-index .lame-promo-slideshow__wrapper,
+  body.template-index .lame-home-offer-banners__wrap,
+  body.template-index .lame-signature .lame-signature__wrap,
+  body.template-index .lame-signature--showcase .lame-signature__wrap,
+  body.template-index .lame-delivery-pickup__wrap,
+  body.template-index .lame-home-youtube__wrap,
+  body.template-index .lame-home-video-spotlight__wrap,
+  body.template-index .lame-home-reviews__wrap,
+  body.template-index .lame-beauty-tips-banner__wrap,
+  body.template-index .lame-three-image-row__wrap,
+  body.template-index .shopify-section:has([class*="ai-gif-banner"]) > .section > *,
+  body.template-index .shopify-section:has([class*="gif-banner"]) > .section > * {
     width: 100% !important;
     max-width: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    display: block !important;
-  }
-
-  body.template-index .lame-promo-slideshow__wrapper {
-    width: 100% !important;
-    max-width: min(100%, var(--page-width, 1200px)) !important;
     margin-inline: auto !important;
-    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    padding-inline: var(--lame-flash-mobile-gutter, 0.55rem) !important;
     box-sizing: border-box !important;
   }
 
-  body.template-index .shopify-section:has(.lame-home-offer-banners),
-  body.template-index .lame-home-offer-banners,
-  body.template-index .lame-home-offer-banners.section {
+  body.template-index .lame-trust-banner:not(.lame-trust-banner--mobile-bleed) .lame-trust-banner__image,
+  body.template-index .lame-trust-banner--mobile-boxed .lame-trust-banner__image,
+  body.template-index .lame-new-products .lame-flash-deal__title-image,
+  body.template-index .lame-new-products .lame-flash-deal__title-picture,
+  body.template-index .lame-new-products .lame-flash-deal__title-img {
     width: 100% !important;
     max-width: 100% !important;
-    margin-inline: 0 !important;
-    padding-inline: 0 !important;
-    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: 1024 / 216 !important;
+    border-radius: clamp(6px, 1.2vw, 12px) !important;
+    overflow: hidden !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    line-height: 0 !important;
   }
 
-  body.template-index .lame-home-offer-banners__wrap {
-    width: 100% !important;
-    max-width: min(100%, var(--page-width, 1200px)) !important;
-    margin-inline: auto !important;
-    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
-    box-sizing: border-box !important;
+  /* Compact spacing for New Arrivals in mobile view */
+  body.template-index .lame-new-products .lame-flash-deal__wrap {
+    padding-block-start: 8px !important;
+    padding-top: 8px !important;
   }
 
+  body.template-index .lame-new-products .lame-flash-deal__header,
+  body.template-index .lame-new-products.lame-flash-deal--has-section-bg .lame-flash-deal__header {
+    margin-bottom: 0.65rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  body.template-index .lame-new-products .lame-flash-deal__title-image {
+    min-height: 0 !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  body.template-index .lame-new-products .lame-flash-deal__track {
+    padding-top: 0 !important;
+  }
+
+  body.template-index .lame-new-products .lame-flash-deal__carousel {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding-inline: var(--lame-flash-mobile-gutter, 0.55rem) !important;
+  }
+}
+
+@media screen and (min-width: 990px) {
   body.template-index .lame-signature--showcase {
     background: transparent !important;
-  }
-
-  body.template-index .lame-signature--showcase .lame-signature__wrap {
-    width: min(var(--lame-home-rail), calc(100% - 5rem));
-    max-width: var(--lame-home-rail);
-    margin-inline: auto;
-    background:
-      radial-gradient(ellipse 70% 55% at 12% 0%, rgb(45 74 34 / 0.07), transparent 55%),
-      radial-gradient(ellipse 55% 45% at 90% 100%, rgb(201 169 98 / 0.1), transparent 50%),
-      linear-gradient(180deg, #faf7f2 0%, #f3eee6 48%, #faf7f2 100%);
   }
 
   body.template-index .lame-flash-deal.section--page-width .lame-flash-deal__wrap,
   body.template-index .lame-flash-deal.section--full-width .lame-flash-deal__wrap {
     max-width: none;
-    padding-inline: 0;
-  }
-
-  body.template-index .lame-flash-deal .lame-flash-deal__carousel {
-    max-width: var(--page-width, 1200px);
-    margin-inline: auto;
     padding-inline: 0;
   }
 

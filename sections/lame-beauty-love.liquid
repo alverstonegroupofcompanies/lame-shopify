@@ -44,8 +44,6 @@
       <ul class="lame-beauty-love__grid" data-beauty-track role="list">
         {%- liquid
           assign rendered_brands = '|'
-          assign rendered_count = 0
-          assign cards_limit = section.settings.cards_to_show | default: 0
         -%}
         {%- for block in section.blocks -%}
           {%- liquid
@@ -69,13 +67,7 @@
                     if rendered_brands contains brand_token
                       continue
                     endif
-
-                    if cards_limit > 0 and rendered_count >= cards_limit
-                      break
-                    endif
-
                     assign rendered_brands = rendered_brands | append: brand_key | append: '|'
-                    assign rendered_count = rendered_count | plus: 1
 
                     assign brand_logo = block.settings.brand_logo
                     assign brand_text = block.settings.brand_text | strip
@@ -1528,18 +1520,7 @@
     {
       "type": "text",
       "id": "heading",
-      "label": "Heading",
-      "default": "Discover Beauty"
-    },
-    {
-      "type": "range",
-      "id": "cards_to_show",
-      "label": "Max cards to show",
-      "info": "Set to 9 to show 9 cards, or 0 to show all cards in this section.",
-      "min": 0,
-      "max": 24,
-      "step": 1,
-      "default": 0
+      "label": "Heading"
     },
     {
       "type": "text",

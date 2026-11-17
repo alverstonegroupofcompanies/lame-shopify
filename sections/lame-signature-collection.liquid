@@ -150,43 +150,70 @@
 
     {% if section.settings.layout == 'reel_split' %}
       {%- liquid
+        assign first_product_block = nil
+        assign total_product_blocks = 0
+        for block in section.blocks
+          if block.type == 'product'
+            assign total_product_blocks = total_product_blocks | plus: 1
+            if first_product_block == nil
+              assign first_product_block = block
+            endif
+          endif
+        endfor
+
         assign initial_hero_title = section.settings.hero_title
+        if initial_hero_title == blank and first_product_block != nil
+          assign initial_hero_title = first_product_block.settings.heading
+        endif
         if initial_hero_title == blank
-          assign initial_hero_title = section.settings.reel_product_title | default: 'Barqat'
+          assign initial_hero_title = 'Blue Mirage'
         endif
 
         assign initial_hero_eyebrow = section.settings.hero_eyebrow
+        if initial_hero_eyebrow == blank and first_product_block != nil
+          assign initial_hero_eyebrow = first_product_block.settings.category | default: 'Fragrance'
+        endif
         if initial_hero_eyebrow == blank
-          assign initial_hero_eyebrow = section.settings.reel_product_subtitle | default: 'LAMÉ Haute Parfumerie · 100ml'
+          assign initial_hero_eyebrow = 'Fragrance'
         endif
 
         assign initial_hero_desc = section.settings.hero_description
+        if initial_hero_desc == blank and first_product_block != nil
+          assign initial_hero_desc = first_product_block.settings.description
+        endif
         if initial_hero_desc == blank
-          assign initial_hero_desc = section.settings.reel_product_description | default: 'A regal oriental blend wrapped in golden warmth and smoky elegance. Handcrafted by LAMÉ for unforgettable distinction.'
+          assign initial_hero_desc = 'Deep oceanic notes with smoky sophistication.'
         endif
 
         assign initial_hero_btn_label = section.settings.hero_button_label
+        if initial_hero_btn_label == blank and first_product_block != nil
+          assign initial_hero_btn_label = first_product_block.settings.button_label
+        endif
         if initial_hero_btn_label == blank
-          assign initial_hero_btn_label = section.settings.reel_button_label | default: 'Discover Barqat'
+          assign initial_hero_btn_label = 'Shop Now'
         endif
 
         assign initial_hero_link = section.settings.hero_button_link
+        if initial_hero_link == blank and first_product_block != nil
+          assign initial_hero_link = first_product_block.settings.link
+          if initial_hero_link == blank and first_product_block.settings.product != blank
+            assign initial_hero_link = first_product_block.settings.product.url
+          endif
+        endif
         if initial_hero_link == blank
-          assign initial_hero_link = section.settings.reel_product_link
-          if initial_hero_link == blank and all_products['lame-barqat-eau-de-parfum-100ml'] != blank
-            assign initial_hero_link = all_products['lame-barqat-eau-de-parfum-100ml'].url
-          endif
-          if initial_hero_link == blank
-            assign initial_hero_link = '/collections/fragrance'
-          endif
+          assign initial_hero_link = '/collections/fragrance'
         endif
 
         assign overlay_opacity = section.settings.video_overlay_opacity | default: 65 | divided_by: 100.0
+        assign default_poster = 'lame-blue-mirage-hero.jpg' | asset_url
+        if section.settings.reel_poster != blank
+          assign default_poster = section.settings.reel_poster | image_url: width: 1920
+        endif
       -%}
 
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
       <div class="lame-signature__cinematic" data-cinematic-slider>
         {%- comment -%} Background Cinematic Video {%- endcomment -%}
@@ -221,7 +248,7 @@
               playsinline
               webkit-playsinline
               preload="auto"
-              {% if section.settings.reel_poster != blank %}poster="{{ section.settings.reel_poster | image_url: width: 1920 }}"{% endif %}
+              poster="{{ default_poster }}"
             >
               {%- if section.settings.reel_video != blank and section.settings.reel_video.sources.size > 0 -%}
                 {%- for source in section.settings.reel_video.sources -%}
@@ -237,180 +264,238 @@
               <source src="{{ 'lame-home-spotlight.mp4' | asset_url }}" type="video/mp4">
             </video>
           {% endif %}
+          <div class="lame-signature__cinematic-image-layer" data-cinematic-image-layer aria-hidden="true">
+            <img class="lame-signature__cinematic-animated-img" data-cinematic-animated-img src="" alt="" loading="eager">
+          </div>
           <div class="lame-signature__cinematic-overlay" style="--lame-cinematic-overlay-opacity: {{ overlay_opacity }};"></div>
         </div>
 
-        {%- comment -%} Top Bar: Section Title & Navigation link {%- endcomment -%}
-        {% if section.settings.heading_line_1 != blank or section.settings.heading_line_2 != blank %}
-          <header class="lame-signature__cinematic-topbar">
-            <div class="lame-signature__cinematic-badge">
-              <span class="lame-signature__cinematic-badge-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L14.2 8.8L21 11L14.2 13.2L12 20L9.8 13.2L3 11L9.8 8.8L12 2Z"/></svg>
-              </span>
-              {% if section.settings.heading_line_1 != blank %}
-                <span class="lame-signature__cinematic-badge-kicker">{{ section.settings.heading_line_1 }}</span>
-              {% endif %}
-              {% if section.settings.heading_line_2 != blank %}
-                <span class="lame-signature__cinematic-badge-sep" aria-hidden="true">•</span>
-                <span class="lame-signature__cinematic-badge-title">{{ section.settings.heading_line_2 }}</span>
-              {% endif %}
-            </div>
+        {%- comment -%} Center Translucent Play Button {%- endcomment -%}
+        <button
+          type="button"
+          class="lame-signature__cinematic-center-play"
+          data-cinematic-center-play
+          aria-label="Play or pause video"
+          title="Play / Pause"
+        >
+          <svg class="icon-center-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg class="icon-center-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;" aria-hidden="true">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+          </svg>
+        </button>
 
-            {% if section.settings.view_all_label != blank %}
-              <a href="{{ section.settings.view_all_link | default: routes.collections_url }}" class="lame-signature__cinematic-view-all">
-                <span class="lame-signature__cinematic-view-all-text lame-signature__cinematic-view-all-text--desktop">{{ section.settings.view_all_label }}</span>
-                <span class="lame-signature__cinematic-view-all-text lame-signature__cinematic-view-all-text--mobile">View All</span>
-                <span class="lame-signature__cinematic-view-all-arrow" aria-hidden="true">→</span>
-              </a>
-            {% endif %}
-          </header>
-        {% endif %}
-
-        {%- comment -%} Interactive Stage: Left Hero Story + Right Cards Slider {%- endcomment -%}
+        {%- comment -%} Interactive Stage: Left Hero Story + Right Vertical Pagination {%- endcomment -%}
         <div class="lame-signature__cinematic-stage">
           {%- comment -%} LEFT HERO STORY {%- endcomment -%}
           <div class="lame-signature__cinematic-hero">
-            <div class="lame-signature__cinematic-eyebrow-wrap">
-              <span class="lame-signature__cinematic-dash" aria-hidden="true">—</span>
-              <span class="lame-signature__cinematic-eyebrow" data-hero-eyebrow>{{ initial_hero_eyebrow }}</span>
+            <div class="lame-signature__cinematic-eyebrow" data-hero-eyebrow>
+              {{ initial_hero_eyebrow | upcase }}
             </div>
 
-            <h2 class="lame-signature__cinematic-title" data-hero-title>{{ initial_hero_title }}</h2>
+            <h2 class="lame-signature__cinematic-title" data-hero-title>
+              {{ initial_hero_title }}
+            </h2>
 
-            <p class="lame-signature__cinematic-desc" data-hero-desc>{{ initial_hero_desc }}</p>
+            <p class="lame-signature__cinematic-desc" data-hero-desc>
+              {{ initial_hero_desc }}
+            </p>
 
             <div class="lame-signature__cinematic-actions">
-              {% if section.settings.show_bookmark_button %}
-                <button
-                  type="button"
-                  class="lame-signature__cinematic-btn-icon"
-                  data-cinematic-bookmark
-                  aria-label="Save or explore {{ initial_hero_title }}"
-                  title="Save / Explore"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                  </svg>
-                </button>
-              {% endif %}
-
               <a
                 href="{{ initial_hero_link }}"
                 class="lame-signature__cinematic-btn-cta"
                 data-hero-link
               >
                 <span data-hero-btn-text>{{ initial_hero_btn_label }}</span>
+                <span class="lame-signature__cinematic-btn-arrow" aria-hidden="true">→</span>
               </a>
             </div>
           </div>
 
-          {%- comment -%} RIGHT FLOATING CARDS SLIDER {%- endcomment -%}
-          <div class="lame-signature__cinematic-cards-wrapper">
-            <div class="lame-signature__cinematic-cards-viewport" data-cinematic-viewport>
-              <div class="lame-signature__cinematic-cards-track" data-cinematic-track role="list">
-                {% for block in section.blocks %}
-                  {% if block.type == 'product' %}
-                    {%- liquid
-                      assign card_title = block.settings.heading | default: 'Barqat'
-                      assign card_cat = block.settings.category | default: block.settings.brand | default: 'Fragrance'
-                      assign card_desc = block.settings.description
-                      if card_desc == blank
-                        assign card_desc = initial_hero_desc
-                      endif
-                      assign card_link = block.settings.link
-                      if card_link == blank and block.settings.product != blank
-                        assign card_link = block.settings.product.url
-                      endif
-                      if card_link == blank
-                        assign card_link = initial_hero_link
-                      endif
-                      assign card_btn = block.settings.button_label | default: initial_hero_btn_label
-                      assign card_video = block.settings.slide_video
-                    -%}
-                    <div
-                      class="lame-signature__cinematic-card{% if forloop.first %} is-active{% endif %}"
-                      data-cinematic-card
-                      data-index="{{ forloop.index0 }}"
-                      data-title="{{ card_title | escape }}"
-                      data-eyebrow="— {{ card_cat | escape }}"
-                      data-desc="{{ card_desc | escape }}"
-                      data-link="{{ card_link }}"
-                      data-btn="{{ card_btn | escape }}"
-                      {% if card_video != blank %}data-video="{{ card_video }}"{% endif %}
-                      role="listitem"
-                      tabindex="0"
-                      {{ block.shopify_attributes }}
-                    >
-                      <div class="lame-signature__cinematic-card-media">
-                        {% if block.settings.image != blank %}
-                          {{
-                            block.settings.image
-                            | image_url: width: 600
-                            | image_tag:
-                              class: 'lame-signature__cinematic-card-img',
-                              loading: 'lazy',
-                              widths: '300,450,600',
-                              sizes: '(min-width: 990px) 200px, 160px',
-                              alt: card_title | escape
-                          }}
-                        {% elsif block.settings.image_asset != blank %}
-                          <img
-                            class="lame-signature__cinematic-card-img"
-                            src="{{ block.settings.image_asset | asset_url }}"
-                            alt="{{ card_title | escape }}"
-                            loading="lazy"
-                            width="600"
-                            height="850"
-                          >
-                        {% else %}
-                          {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-signature__cinematic-card-img placeholder-svg' }}
-                        {% endif %}
-                        <div class="lame-signature__cinematic-card-gradient"></div>
-                      </div>
+          {%- comment -%} RIGHT VERTICAL PAGINATION {%- endcomment -%}
+          <div class="lame-signature__cinematic-vnav">
+            <button
+              type="button"
+              class="lame-signature__cinematic-vnav-btn lame-signature__cinematic-vnav-btn--up"
+              data-cinematic-prev
+              aria-label="Previous fragrance"
+              title="Previous"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 15l-6-6-6 6"/>
+              </svg>
+            </button>
 
-                      <div class="lame-signature__cinematic-card-body">
-                        <span class="lame-signature__cinematic-card-cat">— {{ card_cat }}</span>
-                        <h3 class="lame-signature__cinematic-card-title">{{ card_title }}</h3>
-                      </div>
-                    </div>
-                  {% endif %}
-                {% endfor %}
-              </div>
+            <div class="lame-signature__cinematic-vnav-counter" data-cinematic-counter>
+              <span data-cinematic-current>01</span> / <span data-cinematic-total>{{ total_product_blocks | default: '03' }}</span>
             </div>
 
-            {%- comment -%} Navigation Controls (Arrows + Progress Scrubber + Counter) {%- endcomment -%}
-            <div class="lame-signature__cinematic-nav-row">
-              <div class="lame-signature__cinematic-nav-arrows">
-                <button
-                  type="button"
-                  class="lame-signature__cinematic-nav-btn lame-signature__cinematic-nav-btn--prev"
-                  data-cinematic-prev
-                  aria-label="Previous slide"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button
-                  type="button"
-                  class="lame-signature__cinematic-nav-btn lame-signature__cinematic-nav-btn--next"
-                  data-cinematic-next
-                  aria-label="Next slide"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-              </div>
-
-              <div class="lame-signature__cinematic-progress" aria-hidden="true">
-                <div class="lame-signature__cinematic-progress-bar" data-cinematic-progress-bar></div>
-              </div>
-
-              <div class="lame-signature__cinematic-counter" data-cinematic-counter>
-                01
-              </div>
-            </div>
+            <button
+              type="button"
+              class="lame-signature__cinematic-vnav-btn lame-signature__cinematic-vnav-btn--down"
+              data-cinematic-next
+              aria-label="Next fragrance"
+              title="Next"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
           </div>
         </div>
 
+        {%- comment -%} Hidden Slide Blocks Data Store {%- endcomment -%}
+        <div class="lame-signature__cinematic-slides-data" style="display:none;" aria-hidden="true">
+          {% for block in section.blocks %}
+            {% if block.type == 'product' %}
+              {%- liquid
+                assign card_title = block.settings.heading | default: 'Blue Mirage'
+                assign card_cat = block.settings.category | default: 'FRAGRANCE'
+                assign card_desc = block.settings.description | default: initial_hero_desc
+                assign card_link = block.settings.link
+                if card_link == blank and block.settings.product != blank
+                  assign card_link = block.settings.product.url
+                endif
+                if card_link == blank
+                  assign card_link = initial_hero_link
+                endif
+                assign card_btn = block.settings.button_label | default: 'Shop Now'
 
+                assign card_video_url = ''
+                if block.settings.video != blank and block.settings.video.sources.size > 0
+                  assign card_video_url = block.settings.video.sources[0].url
+                elsif card_title == 'Barqat' and section.settings.barqat_video != blank and section.settings.barqat_video.sources.size > 0
+                  assign card_video_url = section.settings.barqat_video.sources[0].url
+                elsif card_title == 'Barqat'
+                  assign card_video_url = 'Barqat AI reel 6.mp4' | file_url
+                elsif card_title == 'Blue Mirage' and section.settings.reel_video != blank and section.settings.reel_video.sources.size > 0
+                  assign card_video_url = section.settings.reel_video.sources[0].url
+                elsif card_title == 'Blue Mirage'
+                  assign card_video_url = 'Blue mirage for website 1.mp4' | file_url
+                elsif block.settings.slide_video != blank
+                  assign card_video_url = block.settings.slide_video
+                endif
+
+                assign card_poster = ''
+                if block.settings.image != blank
+                  assign card_poster = block.settings.image | image_url: width: 1920
+                elsif block.settings.image_asset != blank
+                  assign card_poster = block.settings.image_asset | asset_url
+                elsif card_title == 'Blue Mirage'
+                  assign card_poster = 'lame-blue-mirage-hero.jpg' | asset_url
+                elsif card_title == 'Barqat'
+                  assign card_poster = 'lame-coming-soon-barqat.png' | asset_url
+                elsif card_title == 'Mayscent'
+                  assign card_poster = 'WhatsApp_Image_2026-04-20_at_5.02.57_PM.jpg' | file_url
+                endif
+                if card_poster == blank and block.settings.product != blank and block.settings.product.featured_image != blank
+                  assign card_poster = block.settings.product.featured_image | image_url: width: 1920
+                endif
+              -%}
+              <div
+                data-slide-item
+                data-index="{{ forloop.index0 }}"
+                data-title="{{ card_title | escape }}"
+                data-eyebrow="{{ card_cat | escape }}"
+                data-desc="{{ card_desc | escape }}"
+                data-link="{{ card_link }}"
+                data-btn="{{ card_btn | escape }}"
+                data-video="{{ card_video_url }}"
+                data-poster="{{ card_poster }}"
+                data-image="{{ card_poster }}"
+                {{ block.shopify_attributes }}
+              >
+                {% if block.settings.video != blank and block.settings.video.sources.size > 0 %}
+                  {% for s in block.settings.video.sources %}
+                    <span data-src="{{ s.url }}" data-type="{{ s.mime_type }}"></span>
+                  {% endfor %}
+                {% elsif card_title == 'Barqat' and section.settings.barqat_video != blank and section.settings.barqat_video.sources.size > 0 %}
+                  {% for s in section.settings.barqat_video.sources %}
+                    <span data-src="{{ s.url }}" data-type="{{ s.mime_type }}"></span>
+                  {% endfor %}
+                {% elsif card_title == 'Barqat' %}
+                  <span data-src="{{ 'Barqat AI reel 6.mp4' | file_url }}" data-type="video/mp4"></span>
+                {% elsif card_title == 'Blue Mirage' and section.settings.reel_video != blank and section.settings.reel_video.sources.size > 0 %}
+                  {% for s in section.settings.reel_video.sources %}
+                    <span data-src="{{ s.url }}" data-type="{{ s.mime_type }}"></span>
+                  {% endfor %}
+                {% elsif card_title == 'Blue Mirage' %}
+                  <span data-src="{{ 'Blue mirage for website 1.mp4' | file_url }}" data-type="video/mp4"></span>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {%- comment -%} Bottom Playback Control Bar {%- endcomment -%}
+        <div class="lame-signature__cinematic-playback-bar" data-cinematic-playback-bar>
+          <button
+            type="button"
+            class="lame-signature__playback-btn lame-signature__playback-btn--play"
+            data-cinematic-play-toggle
+            aria-label="Play or pause"
+            title="Play / Pause"
+          >
+            <svg class="icon-playback-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="icon-playback-pause" viewBox="0 0 24 24" fill="currentColor" style="display: none;" aria-hidden="true">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+
+          <div class="lame-signature__playback-time" data-cinematic-time>
+            <span data-time-current>0:00</span> / <span data-time-duration>0:15</span>
+          </div>
+
+          <div
+            class="lame-signature__playback-scrub-track"
+            data-cinematic-scrub-track
+            role="slider"
+            aria-label="Video playback progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            tabindex="0"
+          >
+            <div class="lame-signature__playback-scrub-progress" data-cinematic-scrub-progress></div>
+            <div class="lame-signature__playback-scrub-thumb" data-cinematic-scrub-thumb></div>
+          </div>
+
+          <div class="lame-signature__playback-right-controls">
+            <button
+              type="button"
+              class="lame-signature__playback-btn lame-signature__playback-btn--sound"
+              data-cinematic-sound-toggle
+              aria-label="Mute or unmute sound"
+              title="Sound"
+            >
+              <svg class="icon-sound-on" viewBox="0 0 24 24" fill="currentColor" style="display:none;" aria-hidden="true">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+              <svg class="icon-sound-off" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="lame-signature__playback-btn lame-signature__playback-btn--fullscreen"
+              data-cinematic-fullscreen-toggle
+              aria-label="Toggle fullscreen"
+              title="Fullscreen"
+            >
+              <svg class="icon-fullscreen-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+              </svg>
+              <svg class="icon-fullscreen-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;" aria-hidden="true">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
     {% elsif section.settings.layout == 'reel_split_legacy' or section.settings.layout == 'reel_and_carousel' %}
@@ -915,6 +1000,15 @@
       if (!slider) return;
 
       const video = slider.querySelector('[data-cinematic-bg-video]');
+      const imageLayer = slider.querySelector('[data-cinematic-image-layer]');
+      const animatedImg = slider.querySelector('[data-cinematic-animated-img]');
+      const playbackBar = slider.querySelector('[data-cinematic-playback-bar]');
+      const centerPlayBtn = slider.querySelector('[data-cinematic-center-play]');
+      const bottomPlayBtn = slider.querySelector('[data-cinematic-play-toggle]');
+      const currentTimeEl = slider.querySelector('[data-time-current]');
+      const durationEl = slider.querySelector('[data-time-duration]');
+      const scrubTrack = slider.querySelector('[data-cinematic-scrub-track]');
+      const scrubProgress = slider.querySelector('[data-cinematic-scrub-progress]');
       const soundToggleBtn = slider.querySelector('[data-cinematic-sound-toggle]');
       const fullscreenBtn = slider.querySelector('[data-cinematic-fullscreen-toggle]');
 
@@ -924,15 +1018,74 @@
       const heroLink = slider.querySelector('[data-hero-link]');
       const heroBtnText = slider.querySelector('[data-hero-btn-text]');
 
-      const viewport = slider.querySelector('[data-cinematic-viewport]');
-      const track = slider.querySelector('[data-cinematic-track]');
-      const cards = slider.querySelectorAll('[data-cinematic-card]');
+      const slideItems = Array.from(slider.querySelectorAll('[data-slide-item]'));
       const prevBtn = slider.querySelector('[data-cinematic-prev]');
       const nextBtn = slider.querySelector('[data-cinematic-next]');
-      const progressBar = slider.querySelector('[data-cinematic-progress-bar]');
-      const counter = slider.querySelector('[data-cinematic-counter]');
+      const currentCounterEl = slider.querySelector('[data-cinematic-current]');
+      const totalCounterEl = slider.querySelector('[data-cinematic-total]');
 
       let currentIndex = 0;
+      const totalSlides = slideItems.length || 3;
+      if (totalCounterEl) {
+        totalCounterEl.textContent = String(totalSlides).padStart(2, '0');
+      }
+
+      const formatTime = (secs) => {
+        if (isNaN(secs) || secs < 0) return '0:00';
+        const mins = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return mins + ':' + String(s).padStart(2, '0');
+      };
+
+      // Play / Pause Sync
+      const updatePlayIcons = () => {
+        if (!video) return;
+        const isPaused = video.paused;
+
+        // Center play button
+        if (centerPlayBtn) {
+          const cPlay = centerPlayBtn.querySelector('.icon-center-play');
+          const cPause = centerPlayBtn.querySelector('.icon-center-pause');
+          if (cPlay) cPlay.style.display = isPaused ? '' : 'none';
+          if (cPause) cPause.style.display = isPaused ? 'none' : '';
+          centerPlayBtn.style.opacity = isPaused ? '1' : '0.45';
+        }
+
+        // Bottom playback button
+        if (bottomPlayBtn) {
+          const bPlay = bottomPlayBtn.querySelector('.icon-playback-play');
+          const bPause = bottomPlayBtn.querySelector('.icon-playback-pause');
+          if (bPlay) bPlay.style.display = isPaused ? '' : 'none';
+          if (bPause) bPause.style.display = isPaused ? 'none' : '';
+        }
+      };
+
+      if (centerPlayBtn) {
+        centerPlayBtn.addEventListener('mouseenter', () => {
+          centerPlayBtn.style.opacity = '1';
+        });
+        centerPlayBtn.addEventListener('mouseleave', () => {
+          if (video && !video.paused) {
+            centerPlayBtn.style.opacity = '0.45';
+          }
+        });
+      }
+
+      const togglePlay = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        if (!video) return;
+        if (video.paused) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      };
+
+      if (centerPlayBtn) centerPlayBtn.addEventListener('click', togglePlay);
+      if (bottomPlayBtn) bottomPlayBtn.addEventListener('click', togglePlay);
 
       // Video Controls & Autoplay Guarantee (Strictly Muted by Default)
       if (video) {
@@ -953,6 +1106,63 @@
         ['touchstart', 'click', 'keydown', 'scroll'].forEach((evt) => {
           window.addEventListener(evt, playVideo, { once: true, passive: true });
         });
+
+        video.addEventListener('play', updatePlayIcons);
+        video.addEventListener('pause', updatePlayIcons);
+
+        // Time and Progress Updates
+        const updateDuration = () => {
+          if (durationEl && video.duration && !isNaN(video.duration)) {
+            durationEl.textContent = formatTime(video.duration);
+          }
+        };
+        video.addEventListener('loadedmetadata', updateDuration);
+        video.addEventListener('durationchange', updateDuration);
+
+        video.addEventListener('timeupdate', () => {
+          if (currentTimeEl) {
+            currentTimeEl.textContent = formatTime(video.currentTime);
+          }
+          if (scrubProgress && video.duration) {
+            const pct = (video.currentTime / video.duration) * 100;
+            scrubProgress.style.width = Math.min(100, Math.max(0, pct)) + '%';
+            if (scrubTrack) {
+              scrubTrack.setAttribute('aria-valuenow', Math.round(pct));
+            }
+          }
+        });
+
+        // Scrubbing on track
+        if (scrubTrack) {
+          const seek = (e) => {
+            if (!video.duration) return;
+            const rect = scrubTrack.getBoundingClientRect();
+            const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            video.currentTime = pos * video.duration;
+          };
+
+          let isDragging = false;
+          scrubTrack.addEventListener('click', seek);
+          scrubTrack.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            seek(e);
+          });
+          window.addEventListener('mousemove', (e) => {
+            if (isDragging) seek(e);
+          });
+          window.addEventListener('mouseup', () => {
+            isDragging = false;
+          });
+
+          // Touch support for scrubbing
+          scrubTrack.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches[0]) {
+              const rect = scrubTrack.getBoundingClientRect();
+              const pos = Math.max(0, Math.min(1, (e.touches[0].clientX - rect.left) / rect.width));
+              if (video.duration) video.currentTime = pos * video.duration;
+            }
+          }, { passive: true });
+        }
 
         // Sound Toggle Controller
         if (soundToggleBtn) {
@@ -1001,7 +1211,6 @@
             e.preventDefault();
             e.stopPropagation();
 
-            // iOS Safari Native Fullscreen
             if (typeof video.webkitEnterFullscreen === 'function' && !document.fullscreenEnabled) {
               video.muted = false;
               video.defaultMuted = false;
@@ -1012,9 +1221,7 @@
             }
 
             const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-
             if (!isFull) {
-              // Unmute when playing fullscreen for rich immersion
               if (video.muted) {
                 video.muted = false;
                 video.defaultMuted = false;
@@ -1028,9 +1235,9 @@
                 }
               }
 
-              const target = video || slider;
+              const target = slider || video;
               if (target.requestFullscreen) {
-                target.requestFullscreen().catch(() => slider.requestFullscreen().catch(() => {}));
+                target.requestFullscreen().catch(() => {});
               } else if (target.webkitRequestFullscreen) {
                 target.webkitRequestFullscreen();
               } else if (target.msRequestFullscreen) {
@@ -1052,140 +1259,171 @@
           document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
           document.addEventListener('MSFullscreenChange', updateFullscreenIcon);
         }
+
+        updatePlayIcons();
       }
 
-      // Card Slider & Hero update
-      const activateCard = (idx, shouldScroll = true) => {
-        if (!cards.length) return;
-        currentIndex = (idx + cards.length) % cards.length;
-        const activeCard = cards[currentIndex];
-        if (!activeCard) return;
+      // Slide Navigation (01 / 03, 02 / 03, 03 / 03)
+      const activateSlide = (idx) => {
+        if (!slideItems.length) return;
+        currentIndex = (idx + totalSlides) % totalSlides;
+        const activeItem = slideItems[currentIndex];
+        if (!activeItem) return;
 
-        cards.forEach((card, i) => {
-          card.classList.toggle('is-active', i === currentIndex);
-          card.setAttribute('aria-selected', i === currentIndex ? 'true' : 'false');
-        });
+        // Animate Hero Content
+        const titleText = activeItem.dataset.title || 'Blue Mirage';
+        const eyebrowText = activeItem.dataset.eyebrow || 'FRAGRANCE';
+        const descText = activeItem.dataset.desc || '';
+        const linkHref = activeItem.dataset.link || '#';
+        const btnText = activeItem.dataset.btn || 'Shop Now';
 
-        // Update Hero Details with subtle transition
-        if (heroEyebrow && activeCard.dataset.eyebrow) {
-          heroEyebrow.textContent = activeCard.dataset.eyebrow.replace(/^—\s*/, '');
-        }
-        if (heroTitle && activeCard.dataset.title) {
+        if (heroTitle) {
           heroTitle.style.opacity = '0';
-          heroTitle.style.transform = 'translateY(6px)';
-          setTimeout(() => {
-            heroTitle.textContent = activeCard.dataset.title;
+          heroTitle.style.transform = 'translateY(5px)';
+        }
+        if (heroDesc) {
+          heroDesc.style.opacity = '0';
+          heroDesc.style.transform = 'translateY(5px)';
+        }
+        if (heroEyebrow) {
+          heroEyebrow.style.opacity = '0';
+        }
+
+        setTimeout(() => {
+          if (heroTitle) {
+            heroTitle.textContent = titleText;
             heroTitle.style.opacity = '1';
             heroTitle.style.transform = 'translateY(0)';
-          }, 140);
-        }
-        if (heroDesc && activeCard.dataset.desc) {
-          heroDesc.style.opacity = '0';
-          setTimeout(() => {
-            heroDesc.textContent = activeCard.dataset.desc;
-            heroDesc.style.opacity = '1';
-          }, 140);
-        }
-        if (heroLink && activeCard.dataset.link) {
-          heroLink.href = activeCard.dataset.link;
-        }
-        if (heroBtnText && activeCard.dataset.btn) {
-          heroBtnText.textContent = activeCard.dataset.btn;
-        }
-
-        // Switch custom video if specified for this card
-        if (video && activeCard.dataset.video) {
-          const newSrc = activeCard.dataset.video;
-          if (video.currentSrc !== newSrc) {
-            video.src = newSrc;
-            video.load();
-            video.play().catch(() => {});
           }
+          if (heroDesc) {
+            heroDesc.textContent = descText;
+            heroDesc.style.opacity = '1';
+            heroDesc.style.transform = 'translateY(0)';
+          }
+          if (heroEyebrow) {
+            heroEyebrow.textContent = eyebrowText.toUpperCase();
+            heroEyebrow.style.opacity = '1';
+          }
+          if (heroLink) {
+            heroLink.href = linkHref;
+          }
+          if (heroBtnText) {
+            heroBtnText.textContent = btnText;
+          }
+        }, 140);
+
+        // Update Counter
+        if (currentCounterEl) {
+          currentCounterEl.textContent = String(currentIndex + 1).padStart(2, '0');
         }
 
-        // Update Counter (2 digits: 01, 02, etc.)
-        if (counter) {
-          counter.textContent = String(currentIndex + 1).padStart(2, '0');
+        // Media Switcher: Video vs Animated Picture Layer (e.g. Mayscent)
+        const sources = activeItem.querySelectorAll('span[data-src]');
+        let newSrc = '';
+        if (sources.length > 0) {
+          newSrc = sources[0].dataset.src;
+        } else if (activeItem.dataset.video) {
+          newSrc = activeItem.dataset.video;
         }
+        const itemImage = activeItem.dataset.image || activeItem.dataset.poster || '';
 
-        // Update Progress Bar
-        if (progressBar) {
-          const percent = ((currentIndex + 1) / cards.length) * 100;
-          progressBar.style.width = `${percent}%`;
-        }
+        if (!newSrc) {
+          // No video assigned (e.g. Mayscent) -> Display animated luxury image
+          if (video) {
+            video.pause();
+            video.classList.add('is-hidden');
+          }
+          if (centerPlayBtn) {
+            centerPlayBtn.style.display = 'none';
+          }
+          if (playbackBar) {
+            playbackBar.style.display = 'none';
+          }
+          if (imageLayer && animatedImg) {
+            if (itemImage && animatedImg.getAttribute('src') !== itemImage) {
+              animatedImg.src = itemImage;
+              animatedImg.alt = titleText;
+            }
+            imageLayer.classList.add('is-active');
+          }
+        } else {
+          // Has video (e.g. Blue Mirage, Barqat) -> Reveal video and hide animated image layer
+          if (imageLayer) {
+            imageLayer.classList.remove('is-active');
+          }
+          if (centerPlayBtn) {
+            centerPlayBtn.style.display = '';
+          }
+          if (playbackBar) {
+            playbackBar.style.display = '';
+          }
+          if (video) {
+            video.classList.remove('is-hidden');
+            if (activeItem.dataset.poster) {
+              video.poster = activeItem.dataset.poster;
+            }
 
-        // Scroll track to active card
-        if (shouldScroll && viewport && activeCard) {
-          const offset = activeCard.offsetLeft - viewport.offsetLeft - 16;
-          viewport.scrollTo({ left: Math.max(0, offset), behavior: 'smooth' });
+            if (video.currentSrc !== newSrc && !video.currentSrc.endsWith(newSrc)) {
+              video.style.opacity = '0.35';
+              setTimeout(() => {
+                while (video.firstChild) {
+                  video.removeChild(video.firstChild);
+                }
+                if (sources.length > 0) {
+                  sources.forEach((s) => {
+                    const srcEl = document.createElement('source');
+                    srcEl.src = s.dataset.src;
+                    if (s.dataset.type) srcEl.type = s.dataset.type;
+                    video.appendChild(srcEl);
+                  });
+                } else {
+                  const srcEl = document.createElement('source');
+                  srcEl.src = newSrc;
+                  srcEl.type = 'video/mp4';
+                  video.appendChild(srcEl);
+                }
+                video.src = newSrc;
+                video.load();
+                video.play().catch(() => {});
+                setTimeout(() => {
+                  video.style.opacity = '1';
+                  updatePlayIcons();
+                }, 120);
+              }, 120);
+            } else {
+              if (video.paused) {
+                video.play().catch(() => {});
+              }
+              updatePlayIcons();
+            }
+          }
         }
       };
-
-      cards.forEach((card, idx) => {
-        card.addEventListener('click', () => activateCard(idx, true));
-        card.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            activateCard(idx, true);
-          }
-        });
-      });
 
       if (prevBtn) {
         prevBtn.addEventListener('click', (e) => {
           e.preventDefault();
-          activateCard(currentIndex - 1, true);
+          activateSlide(currentIndex - 1);
         });
       }
 
       if (nextBtn) {
         nextBtn.addEventListener('click', (e) => {
           e.preventDefault();
-          activateCard(currentIndex + 1, true);
+          activateSlide(currentIndex + 1);
         });
       }
 
-      const bookmarkBtn = slider.querySelector('[data-cinematic-bookmark]');
-      if (bookmarkBtn) {
-        bookmarkBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          bookmarkBtn.classList.toggle('is-saved');
-        });
-      }
-
-      // Sync active card on manual touch/wheel scroll
-      let scrollTimeout;
-      if (viewport) {
-        viewport.addEventListener('scroll', () => {
-          clearTimeout(scrollTimeout);
-          scrollTimeout = setTimeout(() => {
-            const scrollPos = viewport.scrollLeft;
-            let closestIdx = 0;
-            let minDiff = Infinity;
-            cards.forEach((c, i) => {
-              const diff = Math.abs((c.offsetLeft - viewport.offsetLeft) - scrollPos);
-              if (diff < minDiff) {
-                minDiff = diff;
-                closestIdx = i;
-              }
-            });
-            if (closestIdx !== currentIndex) {
-              activateCard(closestIdx, false);
-            }
-          }, 120);
-        }, { passive: true });
-      }
-
-      // Initialize initial state
-      activateCard(0, false);
+      // Initialize slide
+      activateSlide(0);
 
       // Listen for Shopify Block selection
       document.addEventListener('shopify:block:select', (e) => {
         if (!slider.contains(e.target)) return;
-        const targetCard = e.target.closest('[data-cinematic-card]');
-        if (targetCard) {
-          const idx = parseInt(targetCard.dataset.index, 10);
-          if (!isNaN(idx)) activateCard(idx, true);
+        const targetBlock = e.target.closest('[data-slide-item]');
+        if (targetBlock) {
+          const idx = parseInt(targetBlock.dataset.index, 10);
+          if (!isNaN(idx)) activateSlide(idx);
         }
       });
     }
@@ -3212,44 +3450,64 @@
   }
 
   /* ==========================================================================
-     CINEMATIC VIDEO SLIDER (NOW LAUNCHED · LAMÉ ESSENTIALS)
+     CINEMATIC FRAGRANCE VIDEO HERO (LUXURY PERFUMERY THEME)
      ========================================================================== */
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
 
-  /* Force Full-Bleed for Cinematic Section */
+  /* Contained Page Width for Fragrance Cinematic Section (Matches All Sections) */
+  body.template-index .shopify-section:has(.lame-signature--cinematic),
+  body.template-index .shopify-section:has(.lame-signature--cinematic) .section,
   body.template-index .lame-signature--cinematic,
   .lame-signature--cinematic {
     width: 100% !important;
     max-width: 100% !important;
     padding-inline: 0 !important;
     margin-inline: 0 !important;
-    background: #000000 !important;
-    overflow: hidden !important;
+    background: transparent !important;
+    display: block !important;
+    box-sizing: border-box !important;
   }
 
   body.template-index .lame-signature--cinematic .lame-signature__wrap,
-  .lame-signature--cinematic .lame-signature__wrap {
+  .lame-signature--cinematic .lame-signature__wrap,
+  .section--page-width .lame-signature--cinematic .lame-signature__wrap,
+  .section--full-width .lame-signature--cinematic .lame-signature__wrap {
     width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    max-width: min(100%, var(--page-width, 1200px)) !important;
+    margin-inline: auto !important;
+    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    box-sizing: border-box !important;
   }
 
-  /* Cinematic Container */
+  @media screen and (max-width: 749px) {
+    body.template-index .lame-signature--cinematic .lame-signature__wrap,
+    .lame-signature--cinematic .lame-signature__wrap,
+    .section--page-width .lame-signature--cinematic .lame-signature__wrap,
+    .section--full-width .lame-signature--cinematic .lame-signature__wrap {
+      padding-inline: var(--lame-flash-mobile-gutter, 0.55rem) !important;
+    }
+  }
+
+  /* Cinematic Container Frame */
   .lame-signature__cinematic {
     position: relative;
     width: 100%;
-    min-height: clamp(620px, 86vh, 920px);
+    min-height: 480px;
+    height: clamp(480px, 48vw, 620px);
+    max-height: 640px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     color: #ffffff;
-    font-family: 'Outfit', sans-serif;
-    overflow: hidden;
-    box-sizing: border-box;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    border-radius: clamp(10px, 1.5vw, 16px) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    background: #000000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
   }
 
-  /* Background Video and Cinematic Overlay */
+  /* Background Video and Subtle Cinematic Vignette */
   .lame-signature__cinematic-bg {
     position: absolute;
     inset: 0;
@@ -3265,8 +3523,58 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
-    transform: scale(1.02);
+    transform: scale(1.01);
     transition: opacity 0.5s ease;
+  }
+
+  .lame-signature__cinematic-video.is-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* Animated Picture Layer for Image-only Slides (Ken Burns Luxury Motion) */
+  .lame-signature__cinematic-image-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.7s ease;
+  }
+
+  .lame-signature__cinematic-image-layer.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .lame-signature__cinematic-animated-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transform-origin: center center;
+    will-change: transform, filter;
+    animation: lameCinematicKenBurns 20s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+  }
+
+  @keyframes lameCinematicKenBurns {
+    0% {
+      transform: scale(1.02) translate3d(0, 0, 0);
+      filter: brightness(0.92) contrast(1.02);
+    }
+    50% {
+      transform: scale(1.08) translate3d(-1%, -1.2%, 0);
+      filter: brightness(0.96) contrast(1.04);
+    }
+    100% {
+      transform: scale(1.13) translate3d(1%, -0.6%, 0);
+      filter: brightness(0.93) contrast(1.03);
+    }
   }
 
   .lame-signature__cinematic-video--iframe {
@@ -3286,709 +3594,418 @@
     width: 100%;
     height: 100%;
     background: 
-      linear-gradient(to right, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.52) 28%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.2) 76%, rgba(0, 0, 0, 0.65) 100%),
-      linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.22) 32%, transparent 55%),
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, transparent 25%);
-    opacity: var(--lame-cinematic-overlay-opacity, 0.65);
+      linear-gradient(to right, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.35) 32%, rgba(0, 0, 0, 0.04) 55%, rgba(0, 0, 0, 0.36) 100%),
+      linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.18) 28%, transparent 48%),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, transparent 22%);
     pointer-events: none;
+    z-index: 1;
   }
 
-  /* Top Bar */
-  .lame-signature__cinematic-topbar {
-    position: relative;
-    z-index: 5;
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    padding: clamp(1.1rem, 2.6vw, 1.85rem) clamp(1.5rem, 4.5vw, 4rem) 0;
-    flex-shrink: 0 !important;
-    width: 100%;
-    box-sizing: border-box;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  .lame-signature__cinematic-badge {
+  /* Center Translucent Play Button */
+  .lame-signature__cinematic-center-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.75);
+    background: rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 9999px;
-    padding: 0.4rem 1.15rem;
-    font-size: 0.8rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    font-weight: 600;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 4;
+    padding: 0;
+    outline: none !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, opacity 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .lame-signature__cinematic-badge-icon {
-    display: inline-flex;
-    align-items: center;
-    color: #f37021;
-    margin-right: 0.15rem;
-    flex-shrink: 0;
+  .lame-signature__cinematic-center-play:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: rgba(0, 0, 0, 0.42);
+    border-color: #ffffff;
   }
 
-  .lame-signature__cinematic-badge-icon svg {
-    width: 13px;
-    height: 13px;
+  .lame-signature__cinematic-center-play:active {
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+
+  .lame-signature__cinematic-center-play svg {
     display: block;
   }
 
-  .lame-signature__cinematic-badge-kicker {
-    color: #f37021;
+  .lame-signature__cinematic-center-play .icon-center-play {
+    width: 26px;
+    height: 26px;
+    margin-left: 3px;
   }
 
-  .lame-signature__cinematic-badge-sep {
-    opacity: 0.4;
-    font-size: 0.65rem;
+  .lame-signature__cinematic-center-play .icon-center-pause {
+    width: 24px;
+    height: 24px;
   }
 
-  .lame-signature__cinematic-badge-title {
-    color: #ffffff;
-  }
-
-  .lame-signature__cinematic-view-all {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.82);
-    text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    transition: color 0.25s ease, transform 0.25s ease;
-  }
-
-  .lame-signature__cinematic-view-all:hover {
-    color: #f37021;
-    transform: translateX(3px);
-  }
-
-  .lame-signature__cinematic-view-all-text--mobile {
-    display: none;
-  }
-
-  /* Interactive Stage (Hero on left, Cards slider docked at bottom right) */
+  /* Interactive Stage: Left Hero Story + Right Vertical Nav */
   .lame-signature__cinematic-stage {
     position: relative;
-    z-index: 2;
+    z-index: 3;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    flex: 1 1 auto;
-    min-height: 0;
-    gap: clamp(1.5rem, 3vw, 3.5rem);
-    padding: clamp(1rem, 2vw, 2rem) clamp(1.5rem, 4.5vw, 4rem) clamp(1.8rem, 3.2vw, 3rem);
+    align-items: center;
     width: 100%;
+    padding: 2rem clamp(1.5rem, 5vw, 4.5rem) 4.5rem;
     box-sizing: border-box;
   }
 
-  /* LEFT HERO STORY */
+  /* Left Hero Story */
   .lame-signature__cinematic-hero {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    max-width: clamp(320px, 28vw, 480px);
+    justify-content: center;
+    max-width: clamp(320px, 34vw, 500px);
     min-width: 0;
     flex-shrink: 0;
-    align-self: flex-end;
-    margin-bottom: 0.5rem;
   }
 
-  .lame-signature__cinematic-eyebrow-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 0.6rem;
-    font-size: clamp(0.78rem, 1.1vw, 0.95rem);
-    letter-spacing: 0.16em;
+  .lame-signature__cinematic-eyebrow {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 500;
-  }
-
-  .lame-signature__cinematic-dash {
-    color: #f37021;
-    font-weight: 700;
+    color: #c5a059;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+    transition: opacity 0.25s ease;
   }
 
   .lame-signature__cinematic-title {
-    margin: 0 0 1.15rem;
-    font-family: 'Bebas Neue', 'Oswald', sans-serif;
-    font-size: clamp(3.2rem, 6.8vw, 6.2rem);
-    line-height: 0.94;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
+    margin: 0 0 0.85rem;
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.4rem, 4.8vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
     color: #ffffff;
-    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
+    font-weight: 500;
+    text-shadow: 0 4px 25px rgba(0, 0, 0, 0.75);
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
 
   .lame-signature__cinematic-desc {
-    margin: 0 0 1.85rem;
+    margin: 0 0 1.65rem;
+    font-family: 'Outfit', sans-serif;
     font-size: clamp(0.9rem, 1.1vw, 1.02rem);
-    line-height: 1.65;
-    color: rgba(255, 255, 255, 0.78);
-    max-width: 480px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.86);
+    max-width: 440px;
     font-weight: 400;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
 
   .lame-signature__cinematic-actions {
     display: flex;
     align-items: center;
-    gap: 1.15rem;
-  }
-
-  .lame-signature__cinematic-btn-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: #f37021;
-    border: none;
-    color: #ffffff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(243, 112, 33, 0.45);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
-    flex-shrink: 0;
-  }
-
-  .lame-signature__cinematic-btn-icon:hover {
-    transform: scale(1.08);
-    box-shadow: 0 10px 28px rgba(243, 112, 33, 0.65);
-    background: #ff7d33;
-  }
-
-  .lame-signature__cinematic-btn-icon.is-saved {
-    background: #ffffff;
-    color: #f37021;
-    box-shadow: 0 10px 28px rgba(255, 255, 255, 0.45);
-  }
-
-  .lame-signature__cinematic-btn-icon svg {
-    width: 22px;
-    height: 22px;
+    gap: 1rem;
   }
 
   .lame-signature__cinematic-btn-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 2rem;
-    height: 52px;
+    gap: 0.55rem;
+    padding: 0.65rem 1.7rem;
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.7);
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     color: #ffffff;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(0.82rem, 0.95vw, 0.9rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-decoration: none;
-    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, color 0.25s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, color 0.25s ease;
   }
 
   .lame-signature__cinematic-btn-cta:hover {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.22);
     border-color: #ffffff;
-    color: #121212;
+    color: #ffffff;
     transform: translateY(-2px);
   }
 
-  /* RIGHT CARDS SLIDER (DOCKED AT BOTTOM RIGHT) */
-  .lame-signature__cinematic-cards-wrapper {
-    position: relative;
-    width: auto;
-    max-width: clamp(420px, 48vw, 620px);
-    min-width: 0;
+  .lame-signature__cinematic-btn-arrow {
+    display: inline-block;
+    font-size: 1.05em;
+    transition: transform 0.25s ease;
+  }
+
+  .lame-signature__cinematic-btn-cta:hover .lame-signature__cinematic-btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Right Vertical Navigation */
+  .lame-signature__cinematic-vnav {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    margin-left: auto;
-    align-self: flex-end;
+    align-items: center;
+    gap: 0.65rem;
     flex-shrink: 0;
-  }
-
-  .lame-signature__cinematic-cards-viewport {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    scroll-behavior: smooth;
-    padding: 0.5rem 0.25rem;
-  }
-
-  .lame-signature__cinematic-cards-viewport::-webkit-scrollbar {
-    display: none;
-  }
-
-  .lame-signature__cinematic-cards-track {
-    display: flex;
-    gap: clamp(0.75rem, 1.1vw, 1.15rem);
-    width: max-content;
-    align-items: stretch;
-    justify-content: flex-end;
-  }
-
-  /* PREVIEW CARD */
-  .lame-signature__cinematic-card {
-    position: relative;
-    width: clamp(135px, 10.5vw, 175px);
-    aspect-ratio: 1 / 1.38;
-    border-radius: 16px;
-    overflow: hidden;
-    cursor: pointer;
-    background: #181c19;
-    border: 1.5px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
     user-select: none;
-    flex-shrink: 0;
   }
 
-  .lame-signature__cinematic-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.45);
-    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.6);
+  .lame-signature__cinematic-vnav-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 0;
+    outline: none !important;
+    transition: all 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .lame-signature__cinematic-card.is-active {
-    border-color: #f37021;
-    box-shadow: 0 14px 36px rgba(243, 112, 33, 0.4), 0 0 0 2px rgba(243, 112, 33, 0.55);
-    transform: translateY(-3px);
+  .lame-signature__cinematic-vnav-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #ffffff;
+    transform: scale(1.1);
   }
 
-  .lame-signature__cinematic-card-media {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+  .lame-signature__cinematic-vnav-btn:active {
+    transform: scale(0.95);
   }
 
-  .lame-signature__cinematic-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  .lame-signature__cinematic-vnav-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
   }
 
-  .lame-signature__cinematic-card:hover .lame-signature__cinematic-card-img,
-  .lame-signature__cinematic-card.is-active .lame-signature__cinematic-card-img {
-    transform: scale(1.05);
+  .lame-signature__cinematic-vnav-counter {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.2rem 0;
+    text-align: center;
+    min-width: 54px;
   }
 
-  .lame-signature__cinematic-card-gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.45) 45%, transparent 70%);
-  }
-
-  .lame-signature__cinematic-card-body {
+  /* Bottom Playback Bar */
+  .lame-signature__cinematic-playback-bar {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 0.85rem 0.85rem;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .lame-signature__cinematic-card-cat {
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.72);
-    font-weight: 500;
-  }
-
-  .lame-signature__cinematic-card-title {
-    margin: 0;
-    font-family: 'Bebas Neue', 'Oswald', sans-serif;
-    font-size: clamp(1.05rem, 1.4vw, 1.35rem);
-    line-height: 1.05;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: #ffffff;
-  }
-
-  /* NAVIGATION ROW (ARROWS + SCRUBBER + COUNTER) */
-  .lame-signature__cinematic-nav-row {
+    z-index: 5;
     display: flex;
     align-items: center;
     gap: 1.15rem;
-    padding-inline: 0.35rem;
+    padding: 0 clamp(1.5rem, 5vw, 4.5rem) clamp(1rem, 1.8vw, 1.35rem);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.25) 60%, transparent 100%);
+    box-sizing: border-box;
+    width: 100%;
   }
 
-  .lame-signature__cinematic-nav-arrows {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .lame-signature__cinematic-nav-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: #ffffff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-
-  .lame-signature__cinematic-nav-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.6);
-    transform: scale(1.06);
-  }
-
-  .lame-signature__cinematic-nav-btn svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .lame-signature__cinematic-progress {
-    flex: 1;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.22);
-    border-radius: 2px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .lame-signature__cinematic-progress-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 33.33%;
-    background: #f37021;
-    border-radius: 2px;
-    box-shadow: 0 0 10px rgba(243, 112, 33, 0.6);
-    transition: width 0.35s ease;
-  }
-
-  .lame-signature__cinematic-counter {
-    font-family: 'Bebas Neue', 'Oswald', sans-serif;
-    font-size: 1.6rem;
-    line-height: 1;
-    color: rgba(255, 255, 255, 0.9);
-    letter-spacing: 0.05em;
-    min-width: 36px;
-    text-align: right;
-  }
-
-  /* BOTTOM PLAYBACK BAR (REMOVED) */
-  .lame-signature__cinematic-footer,
-  .lame-signature__cinematic-playback-right {
-    display: none !important;
-  }
-
-  .lame-signature__cinematic-sound-toggle-btn,
-  .lame-signature__cinematic-fullscreen-btn {
+  .lame-signature__playback-btn {
     background: none;
     border: none;
     outline: none !important;
     color: #ffffff;
     cursor: pointer;
-    padding: 0.45rem;
+    padding: 0.35rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease;
     -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
   }
 
-  .lame-signature__cinematic-sound-toggle-btn:focus,
-  .lame-signature__cinematic-sound-toggle-btn:focus-visible,
-  .lame-signature__cinematic-fullscreen-btn:focus,
-  .lame-signature__cinematic-fullscreen-btn:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
+  .lame-signature__playback-btn:hover {
+    transform: scale(1.15);
   }
 
-  .lame-signature__cinematic-sound-toggle-btn:hover,
-  .lame-signature__cinematic-fullscreen-btn:hover {
-    transform: scale(1.12);
-    color: #f37021;
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  .lame-signature__cinematic-sound-toggle-btn svg,
-  .lame-signature__cinematic-fullscreen-btn svg {
-    width: 22px;
-    height: 22px;
+  .lame-signature__playback-btn svg {
+    width: 18px;
+    height: 18px;
     display: block;
   }
 
-  /* RESPONSIVE DESIGN */
+  .lame-signature__playback-time {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .lame-signature__playback-scrub-track {
+    flex: 1;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: height 0.2s ease;
+  }
+
+  .lame-signature__playback-scrub-track:hover {
+    height: 5px;
+  }
+
+  .lame-signature__playback-scrub-progress {
+    height: 100%;
+    background: #ffffff;
+    border-radius: 2px;
+    width: 0%;
+    position: relative;
+    pointer-events: none;
+  }
+
+  .lame-signature__playback-scrub-thumb {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffffff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
+
+  .lame-signature__playback-scrub-track:hover .lame-signature__playback-scrub-thumb {
+    opacity: 1;
+  }
+
+  .lame-signature__playback-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Responsive Adjustments */
   @media (max-width: 990px) {
     .lame-signature__cinematic {
-      min-height: clamp(680px, 88vh, 920px);
+      min-height: 440px;
+      height: clamp(440px, 60vw, 540px);
     }
 
     .lame-signature__cinematic-stage {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex: 1 1 auto;
-      gap: 2rem;
-      padding-block: 1.5rem 1rem;
+      padding: 1.5rem 1.5rem 4rem;
     }
 
     .lame-signature__cinematic-hero {
-      max-width: 100%;
-      flex-shrink: 0;
-      margin-bottom: 0;
-    }
-
-    .lame-signature__cinematic-cards-wrapper {
-      margin-top: auto;
-      width: 100%;
-      max-width: 100%;
-    }
-
-    .lame-signature__cinematic-card {
-      width: 140px;
+      max-width: clamp(280px, 45vw, 400px);
     }
   }
 
-  @media (max-width: 749px) {
+  @media (max-width: 640px) {
     .lame-signature__cinematic {
-      min-height: 100svh;
-      min-height: -webkit-fill-available;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .lame-signature__cinematic-topbar {
-      padding-inline: 0.85rem;
-      padding-top: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.4rem;
-      flex-shrink: 0;
-    }
-
-    .lame-signature__cinematic-badge {
-      padding: 0.22rem 0.55rem;
-      font-size: 0.56rem;
-      gap: 0.3rem;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-      flex-shrink: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.2;
-    }
-
-    .lame-signature__cinematic-badge-icon {
-      margin-right: 0;
-    }
-
-    .lame-signature__cinematic-badge-icon svg {
-      width: 9px;
-      height: 9px;
-    }
-
-    .lame-signature__cinematic-badge-kicker {
-      font-weight: 700;
-    }
-
-    .lame-signature__cinematic-badge-sep {
-      font-size: 0.5rem;
-      opacity: 0.5;
-    }
-
-    .lame-signature__cinematic-badge-title {
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .lame-signature__cinematic-view-all {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-size: 0.56rem;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      padding: 0.22rem 0.55rem;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 9999px;
-      line-height: 1.2;
-    }
-
-    .lame-signature__cinematic-view-all-text--desktop {
-      display: none !important;
-    }
-
-    .lame-signature__cinematic-view-all-text--mobile {
-      display: inline !important;
-    }
-
-    .lame-signature__cinematic-view-all-arrow {
-      font-size: 0.62rem;
+      min-height: 400px;
+      height: clamp(400px, 78vw, 480px);
     }
 
     .lame-signature__cinematic-stage {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex: 1 1 auto;
-      width: 100%;
-      box-sizing: border-box;
-      padding-inline: 0.85rem;
-      padding-top: 0.75rem;
-      padding-bottom: 0.25rem;
-      gap: 1.25rem;
+      padding: 1.25rem 1rem 3.5rem;
     }
 
     .lame-signature__cinematic-hero {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 100%;
-      flex-shrink: 0;
+      max-width: 68%;
     }
 
-    .lame-signature__cinematic-eyebrow-wrap {
-      font-size: 0.65rem;
-      gap: 0.4rem;
-      margin-bottom: 0.3rem;
-      letter-spacing: 0.12em;
+    .lame-signature__cinematic-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.24em;
+      margin-bottom: 0.4rem;
     }
 
     .lame-signature__cinematic-title {
-      font-size: clamp(1.75rem, 7.5vw, 2.2rem);
-      line-height: 1;
-      margin: 0 0 0.45rem;
-      letter-spacing: 0.02em;
+      font-size: clamp(1.8rem, 7vw, 2.4rem);
+      margin-bottom: 0.5rem;
     }
 
     .lame-signature__cinematic-desc {
       font-size: 0.78rem;
-      line-height: 1.42;
-      margin: 0 0 0.95rem;
-      max-width: 95%;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .lame-signature__cinematic-actions {
-      gap: 0;
-    }
-
-    .lame-signature__cinematic-btn-icon {
-      display: none !important;
+      line-height: 1.4;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .lame-signature__cinematic-btn-cta {
-      height: 38px;
-      padding: 0 1.4rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
+      padding: 0.5rem 1.15rem;
+      font-size: 0.78rem;
     }
 
-    .lame-signature__cinematic-cards-wrapper {
-      margin-top: auto;
-      width: 100%;
-      gap: 0.65rem;
-      flex-shrink: 0;
+    .lame-signature__cinematic-center-play {
+      width: 50px;
+      height: 50px;
     }
 
-    .lame-signature__cinematic-cards-viewport {
-      padding: 0.25rem 0.15rem;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+    .lame-signature__cinematic-center-play .icon-center-play {
+      width: 20px;
+      height: 20px;
+      margin-left: 2px;
     }
 
-    .lame-signature__cinematic-cards-track {
-      gap: 0.65rem;
+    .lame-signature__cinematic-center-play .icon-center-pause {
+      width: 18px;
+      height: 18px;
     }
 
-    .lame-signature__cinematic-card {
-      width: 108px;
-      aspect-ratio: 1 / 1.38;
-      border-radius: 12px;
+    .lame-signature__cinematic-vnav-btn {
+      width: 28px;
+      height: 28px;
     }
 
-    .lame-signature__cinematic-card-body {
-      padding: 0.5rem 0.45rem;
-      gap: 0.12rem;
-    }
-
-    .lame-signature__cinematic-card-cat {
-      font-size: 0.52rem;
+    .lame-signature__cinematic-vnav-counter {
+      font-size: 0.75rem;
       letter-spacing: 0.08em;
     }
 
-    .lame-signature__cinematic-card-title {
-      font-size: 0.85rem;
-      line-height: 1.05;
-      letter-spacing: 0.02em;
+    .lame-signature__cinematic-playback-bar {
+      padding: 0 0.85rem 0.85rem;
+      gap: 0.65rem;
     }
 
-    .lame-signature__cinematic-nav-row {
-      gap: 0.85rem;
-      padding-inline: 0.25rem;
-      align-items: center;
+    .lame-signature__playback-time {
+      font-size: 0.72rem;
     }
 
-    .lame-signature__cinematic-nav-arrows {
-      gap: 0.45rem;
-    }
-
-    .lame-signature__cinematic-nav-btn {
-      width: 36px;
-      height: 36px;
-    }
-
-    .lame-signature__cinematic-nav-btn svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .lame-signature__cinematic-counter {
-      font-size: 1.55rem;
-      min-width: 30px;
-    }
-
-    .lame-signature__cinematic-footer {
-      padding-inline: 0.85rem;
-      padding-top: 0.2rem;
-      padding-bottom: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex-shrink: 0;
+    .lame-signature__playback-btn svg {
+      width: 16px;
+      height: 16px;
     }
   }
 {% endstylesheet %}
@@ -4041,6 +4058,12 @@
       "label": "Or theme asset video filename (fallback)",
       "default": "lame-home-spotlight.mp4",
       "info": "Filename in theme assets/ (e.g. lame-home-spotlight.mp4)"
+    },
+    {
+      "type": "video",
+      "id": "barqat_video",
+      "label": "Barqat video (Upload / Select from Shopify)",
+      "info": "Specific video for Barqat (e.g. Barqat AI reel 6.mp4). Will play when Barqat slide is active."
     },
     {
       "type": "image_picker",
@@ -4415,6 +4438,12 @@
         { "type": "text", "id": "scent_notes", "label": "Scent notes", "default": "FLORAL • FRUITY • MUSK" },
         { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop now" },
         { "type": "url", "id": "link", "label": "Link" },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Product video (Shopify Files)",
+          "info": "Specific video for this fragrance card (e.g. Barqat AI reel 6.mp4)"
+        },
         {
           "type": "text",
           "id": "slide_video",
