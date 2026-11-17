@@ -44,6 +44,8 @@
       <ul class="lame-beauty-love__grid" data-beauty-track role="list">
         {%- liquid
           assign rendered_brands = '|'
+          assign rendered_count = 0
+          assign cards_limit = section.settings.cards_to_show | default: 0
         -%}
         {%- for block in section.blocks -%}
           {%- liquid
@@ -67,7 +69,13 @@
                     if rendered_brands contains brand_token
                       continue
                     endif
+
+                    if cards_limit > 0 and rendered_count >= cards_limit
+                      break
+                    endif
+
                     assign rendered_brands = rendered_brands | append: brand_key | append: '|'
+                    assign rendered_count = rendered_count | plus: 1
 
                     assign brand_logo = block.settings.brand_logo
                     assign brand_text = block.settings.brand_text | strip
@@ -99,6 +107,12 @@
                       when 'product'
                         if block.settings.product != blank
                           assign card_link = block.settings.product.url
+                          if card_link == blank
+                            assign _p_lookup = all_products[block.settings.product]
+                            if _p_lookup != blank and _p_lookup.url != blank
+                              assign card_link = _p_lookup.url
+                            endif
+                          endif
                         endif
                       when 'collection'
                         if block.settings.collection != blank
@@ -133,6 +147,9 @@
 
                     if card_link == blank and block.settings.link != blank
                       assign card_link = block.settings.link
+                    endif
+                    if card_link == blank and link_type == 'product' and block.settings.product != blank
+                      assign card_link = '/products/' | append: block.settings.product
                     endif
                   -%}
 
@@ -208,6 +225,12 @@
                                   when 'product'
                                     if slide_block.settings.product != blank
                                       assign slide_link = slide_block.settings.product.url
+                                      if slide_link == blank
+                                        assign _sp_lookup = all_products[slide_block.settings.product]
+                                        if _sp_lookup != blank and _sp_lookup.url != blank
+                                          assign slide_link = _sp_lookup.url
+                                        endif
+                                      endif
                                     endif
                                   when 'collection'
                                     if slide_block.settings.collection != blank
@@ -241,6 +264,9 @@
                                 endcase
                                 if slide_link == blank and slide_block.settings.link != blank
                                   assign slide_link = slide_block.settings.link
+                                endif
+                                if slide_link == blank and slide_link_type == 'product' and slide_block.settings.product != blank
+                                  assign slide_link = '/products/' | append: slide_block.settings.product
                                 endif
                                 if slide_link == blank
                                   assign slide_link = card_link
@@ -346,19 +372,35 @@
                               assign slide_subtitle = slide_block.settings.subtitle | strip
                             -%}
                             {%- if slide_title != blank or slide_subtitle != blank -%}
-                              <div
-                                class="lame-beauty-love__copy{% if slide_index == 0 %} is-active{% endif %}"
-                                data-beauty-copy
-                                data-index="{{ slide_index }}"
-                                aria-hidden="{% if slide_index == 0 %}false{% else %}true{% endif %}"
-                              >
+                              {%- if slide_link != blank -%}
+                                <a
+                                  class="lame-beauty-love__copy{% if slide_index == 0 %} is-active{% endif %}"
+                                  href="{{ slide_link }}"
+                                  data-beauty-copy
+                                  data-index="{{ slide_index }}"
+                                  aria-hidden="{% if slide_index == 0 %}false{% else %}true{% endif %}"
+                                  {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}
+                                  style="text-decoration: none; color: inherit;"
+                                >
+                              {%- else -%}
+                                <div
+                                  class="lame-beauty-love__copy{% if slide_index == 0 %} is-active{% endif %}"
+                                  data-beauty-copy
+                                  data-index="{{ slide_index }}"
+                                  aria-hidden="{% if slide_index == 0 %}false{% else %}true{% endif %}"
+                                >
+                              {%- endif -%}
                                 {%- if slide_title != blank -%}
                                   <p class="lame-beauty-love__title">{{ slide_title | escape }}</p>
                                 {%- endif -%}
                                 {%- if slide_subtitle != blank -%}
                                   <p class="lame-beauty-love__subtitle">{{ slide_subtitle | escape }}</p>
                                 {%- endif -%}
-                              </div>
+                              {%- if slide_link != blank -%}
+                                </a>
+                              {%- else -%}
+                                </div>
+                              {%- endif -%}
                             {%- else -%}
                               <div
                                 class="lame-beauty-love__copy lame-beauty-love__copy--empty{% if slide_index == 0 %} is-active{% endif %}"
@@ -1488,6 +1530,16 @@
       "id": "heading",
       "label": "Heading",
       "default": "Discover Beauty"
+    },
+    {
+      "type": "range",
+      "id": "cards_to_show",
+      "label": "Max cards to show",
+      "info": "Set to 9 to show 9 cards, or 0 to show all cards in this section.",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "default": 0
     },
     {
       "type": "text",

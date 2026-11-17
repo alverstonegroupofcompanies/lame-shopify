@@ -13,14 +13,27 @@
       header.dataset.lameScroll = 'top';
       header.dataset.scrollDirection = 'top';
       header.dataset.lameScrollDir = 'top';
+      header.classList.remove('is-scrolled');
+      header.classList.add('is-at-top');
     } else {
       header.dataset.lameScroll = 'away';
+      header.classList.add('is-scrolled');
+      header.classList.remove('is-at-top');
       if (currentScrollY > lastScrollY + 5) {
         header.dataset.scrollDirection = 'down';
         header.dataset.lameScrollDir = 'down';
       } else if (currentScrollY < lastScrollY - 5) {
         header.dataset.scrollDirection = 'up';
         header.dataset.lameScrollDir = 'up';
+      }
+    }
+
+    const subnav = document.querySelector('[data-lame-mobile-subnav]');
+    if (subnav) {
+      if (currentScrollY > threshold) {
+        subnav.classList.add('is-scrolled');
+      } else {
+        subnav.classList.remove('is-scrolled');
       }
     }
 

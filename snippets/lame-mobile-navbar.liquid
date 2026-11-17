@@ -83,6 +83,31 @@
           activeCat.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         } catch (e) {}
       }
+
+      // Hide category subnav on scroll
+      var subnav = document.querySelector('[data-lame-mobile-subnav]');
+      if (subnav) {
+        var threshold = 15;
+        var ticking = false;
+        var onScroll = function () {
+          var y = Math.max(0, window.scrollY || window.pageYOffset || 0);
+          if (y > threshold) {
+            subnav.classList.add('is-scrolled');
+          } else {
+            subnav.classList.remove('is-scrolled');
+          }
+          ticking = false;
+        };
+
+        window.addEventListener('scroll', function () {
+          if (!ticking) {
+            window.requestAnimationFrame(onScroll);
+            ticking = true;
+          }
+        }, { passive: true });
+
+        onScroll();
+      }
     }
 
     if (document.readyState === 'loading') {
