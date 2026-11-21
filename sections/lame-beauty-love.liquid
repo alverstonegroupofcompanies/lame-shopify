@@ -60,7 +60,7 @@
                     endif
 
                     assign brand_key = block.settings.brand_text | strip | downcase
-                    if brand_key == blank
+                    if block.settings.standalone or brand_key == blank
                       assign brand_key = 'id-' | append: block.id
                     endif
                     assign brand_token = '|' | append: brand_key | append: '|'
@@ -84,7 +84,7 @@
                         endunless
                       endif
                       assign slide_brand = slide_block.settings.brand_text | strip | downcase
-                      if slide_brand == blank
+                      if slide_block.settings.standalone or slide_brand == blank
                         assign slide_brand = 'id-' | append: slide_block.id
                       endif
                       if slide_brand == brand_key
@@ -190,7 +190,7 @@
                                   endunless
                                 endif
                                 assign slide_brand = slide_block.settings.brand_text | strip | downcase
-                                if slide_brand == blank
+                                if slide_block.settings.standalone or slide_brand == blank
                                   assign slide_brand = 'id-' | append: slide_block.id
                                 endif
                                 unless slide_brand == brand_key
@@ -210,6 +210,7 @@
                                 assign slide_badge_bg = slide_block.settings.badge_color | default: '#8b6b5a'
                                 assign slide_title = slide_block.settings.title | strip
                                 assign slide_subtitle = slide_block.settings.subtitle | strip
+                                assign slide_cta_text = slide_block.settings.cta_text | strip
 
                                 assign slide_link_type = slide_block.settings.link_type | default: 'brand'
                                 assign slide_link = blank
@@ -354,7 +355,7 @@
                                 endunless
                               endif
                               assign slide_brand = slide_block.settings.brand_text | strip | downcase
-                              if slide_brand == blank
+                              if slide_block.settings.standalone or slide_brand == blank
                                 assign slide_brand = 'id-' | append: slide_block.id
                               endif
                               unless slide_brand == brand_key
@@ -362,8 +363,9 @@
                               endunless
                               assign slide_title = slide_block.settings.title | strip
                               assign slide_subtitle = slide_block.settings.subtitle | strip
+                              assign slide_cta_text = slide_block.settings.cta_text | strip
                             -%}
-                            {%- if slide_title != blank or slide_subtitle != blank -%}
+                            {%- if slide_title != blank or slide_subtitle != blank or slide_cta_text != blank -%}
                               {%- if slide_link != blank -%}
                                 <a
                                   class="lame-beauty-love__copy{% if slide_index == 0 %} is-active{% endif %}"
@@ -387,6 +389,9 @@
                                 {%- endif -%}
                                 {%- if slide_subtitle != blank -%}
                                   <p class="lame-beauty-love__subtitle">{{ slide_subtitle | escape }}</p>
+                                {%- endif -%}
+                                {%- if slide_cta_text != blank -%}
+                                  <span class="lame-beauty-love__cta-btn">{{ slide_cta_text | escape }}</span>
                                 {%- endif -%}
                               {%- if slide_link != blank -%}
                                 </a>
@@ -418,6 +423,7 @@
                         assign badge_bg = block.settings.badge_color | default: '#8b6b5a'
                         assign title = block.settings.title | strip
                         assign subtitle = block.settings.subtitle | strip
+                        assign cta_text = block.settings.cta_text | strip
                       -%}
 
                       {%- if card_link != blank -%}
@@ -482,13 +488,16 @@
                           {%- endif -%}
                         </div>
 
-                        {%- if title != blank or subtitle != blank -%}
+                        {%- if title != blank or subtitle != blank or cta_text != blank -%}
                           <div class="lame-beauty-love__copy">
                             {%- if title != blank -%}
                               <p class="lame-beauty-love__title">{{ title | escape }}</p>
                             {%- endif -%}
                             {%- if subtitle != blank -%}
                               <p class="lame-beauty-love__subtitle">{{ subtitle | escape }}</p>
+                            {%- endif -%}
+                            {%- if cta_text != blank -%}
+                              <span class="lame-beauty-love__cta-btn">{{ cta_text | escape }}</span>
                             {%- endif -%}
                           </div>
                         {%- endif -%}
@@ -1661,6 +1670,19 @@
           "type": "text",
           "id": "subtitle",
           "label": "Subtitle"
+        },
+        {
+          "type": "text",
+          "id": "cta_text",
+          "label": "CTA button label (optional)",
+          "info": "e.g. Shop now"
+        },
+        {
+          "type": "checkbox",
+          "id": "standalone",
+          "label": "Show as separate tile",
+          "info": "Display this card as its own tile instead of grouping with same brand cards.",
+          "default": false
         },
         {
           "type": "select",
