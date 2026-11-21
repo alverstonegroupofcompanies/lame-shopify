@@ -1,0 +1,541 @@
+/**
+ * LAMSTONE — Winter Sale Brand Banners & Relevant Products
+ * 4 winter-themed brand promotion banners (2x2 grid) with up to 12 relevant brand products below.
+ */
+
+.lame-winter-brands {
+  position: relative;
+  width: 100%;
+  padding-top: var(--padding-top, 16px);
+  padding-bottom: var(--padding-bottom, 28px);
+  box-sizing: border-box;
+}
+
+/* Background Variants */
+.lame-winter-brands--bg-frost {
+  background: linear-gradient(180deg, #f0f7fc 0%, #e6f3fa 50%, #f4f9fd 100%);
+}
+
+.lame-winter-brands--bg-white {
+  background: #ffffff;
+}
+
+.lame-winter-brands--bg-transparent {
+  background: transparent;
+}
+
+/* Page Width Container — Adapts to match all other homepage sections */
+.lame-winter-brands__wrap {
+  width: 100%;
+  max-width: var(--page-width, 1280px);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 2.5vw, 2rem);
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   1. Brand Banners Grid — Exactly 4 Banners (2x2 Grid)
+   ========================================================================== */
+.lame-winter-brands__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.8vw, 1.25rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.lame-winter-brands__item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.lame-winter-brands__card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--winter-card-radius, 14px);
+  overflow: hidden;
+  text-decoration: none;
+  background: #ffffff;
+  border: 1px solid rgba(224, 242, 254, 0.95);
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+.lame-winter-brands__card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(125, 211, 252, 0.85);
+  box-shadow: 0 12px 28px rgba(14, 116, 144, 0.14), 0 0 18px rgba(56, 189, 248, 0.16);
+}
+
+.lame-winter-brands__card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.lame-winter-brands__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  background: #f8fafc;
+  line-height: 0;
+  display: block;
+}
+
+.lame-winter-brands__img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lame-winter-brands__card:hover .lame-winter-brands__img {
+  transform: scale(1.028);
+}
+
+.lame-winter-brands__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(224, 242, 254, 0.45) 50%,
+    transparent 75%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.75s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lame-winter-brands__card:hover .lame-winter-brands__sheen {
+  transform: translateX(100%);
+}
+
+/* ==========================================================================
+   2. Relevant Products Section (Up to 12 Products Max)
+   ========================================================================== */
+.lame-winter-brands__products-section {
+  margin-top: clamp(1.5rem, 3.2vw, 2.5rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lame-winter-brands__products-header {
+  text-align: center;
+  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+}
+
+.lame-winter-brands__products-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.4rem, 2.6vw, 1.85rem);
+  font-weight: 700;
+  color: #12281e;
+  margin: 0 0 0.35rem;
+  line-height: 1.25;
+}
+
+.lame-winter-brands__products-subtitle {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.88rem;
+  color: #526058;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.lame-winter-brands__products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) and (min-width: 750px) {
+  .lame-winter-brands__products-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+}
+
+.lame-winter-brands__product-item {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Card Shell in Winter Brands Section */
+.lame-winter-brands__product-item .lame-flash-card {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lame-winter-brands__product-item .lame-flash-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Strict 1:1 Square Media */
+.lame-winter-brands__product-item .lame-flash-card__media {
+  position: relative !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: clamp(0.5rem, 1.2vw, 0.85rem) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  background: radial-gradient(circle at 50% 50%, #ffffff 60%, #fbfdfb 100%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-sizing: border-box !important;
+}
+
+.lame-winter-brands__product-item .lame-flash-card__media-link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  text-decoration: none !important;
+}
+
+.lame-winter-brands__product-item .lame-flash-card__image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: 0 !important;
+  transition: transform 0.35s ease;
+}
+
+.lame-winter-brands__product-item .lame-flash-card:hover .lame-flash-card__image {
+  transform: scale(1.05);
+}
+
+.lame-winter-brands__product-item .lame-flash-card__body {
+  position: relative !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0.75rem 0.8rem 0.9rem !important;
+  gap: 0.35rem !important;
+  background: #ffffff !important;
+  text-align: left !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+.lame-winter-brands__product-item .lame-flash-card__brand {
+  display: block !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: #76877d !important;
+  margin-bottom: 0.15rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.lame-winter-brands__product-item .lame-flash-card__title {
+  margin: 0 !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  width: 100% !important;
+  height: calc(1.35em * 2) !important;
+  min-height: calc(1.35em * 2) !important;
+  max-height: calc(1.35em * 2) !important;
+  overflow: hidden !important;
+}
+
+.lame-winter-brands__product-item .lame-flash-card__title a {
+  color: #1a251e !important;
+  text-decoration: none !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  height: calc(1.35em * 2) !important;
+}
+
+.lame-winter-brands__product-item .lame-flash-card__actions {
+  margin-top: auto !important;
+  padding-top: 0.55rem !important;
+  width: 100% !important;
+  display: flex !important;
+}
+
+/* ==========================================================================
+   BUTTON STYLES & WINTER POP COLOR PALETTE
+   ========================================================================== */
+.lame-winter-brands .lame-flash-card__atc {
+  width: 100% !important;
+  min-height: 2.35rem !important;
+  padding: 0.45rem 1rem !important;
+  border-radius: 999px !important;
+  border: 1px solid #0284c7 !important;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #ffffff !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.45rem !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  letter-spacing: 0.02em !important;
+}
+
+.lame-winter-brands .lame-flash-card__atc:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.45) !important;
+  transform: translateY(-1.5px) !important;
+}
+
+.lame-winter-brands .lame-flash-card__atc:active:not(:disabled) {
+  transform: scale(0.96) !important;
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+}
+
+/* 1. Default Winter Pop: Vivid Arctic Ice Blue */
+.lame-winter-brands--btn-arctic_blue .lame-flash-card__atc {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35) !important;
+}
+.lame-winter-brands--btn-arctic_blue .lame-flash-card__atc:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.45) !important;
+}
+
+/* 2. Electric Glacier Cyan */
+.lame-winter-brands--btn-glacier_cyan .lame-flash-card__atc {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;
+  border-color: #0891b2 !important;
+  box-shadow: 0 3px 12px rgba(8, 145, 178, 0.35) !important;
+}
+.lame-winter-brands--btn-glacier_cyan .lame-flash-card__atc:hover:not(:disabled) {
+  background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%) !important;
+  border-color: #22d3ee !important;
+  box-shadow: 0 6px 18px rgba(8, 145, 178, 0.45) !important;
+}
+
+/* 3. Frosted Cranberry Pop */
+.lame-winter-brands--btn-winter_berry .lame-flash-card__atc {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  border-color: #e11d48 !important;
+  box-shadow: 0 3px 12px rgba(225, 29, 72, 0.35) !important;
+}
+.lame-winter-brands--btn-winter_berry .lame-flash-card__atc:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%) !important;
+  border-color: #f43f5e !important;
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45) !important;
+}
+
+/* 4. Frosted Midnight Navy */
+.lame-winter-brands--btn-frost_navy .lame-flash-card__atc {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  border-color: #334155 !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.3) !important;
+}
+
+/* 5. Botanical Emerald */
+.lame-winter-brands--btn-botanical .lame-flash-card__atc {
+  background: #143e26 !important;
+  border-color: #143e26 !important;
+  box-shadow: 0 3px 10px rgba(20, 62, 38, 0.22) !important;
+}
+
+/* ==========================================================================
+   MOBILE SPECIFIC RULES (< 750px)
+   ========================================================================== */
+@media screen and (max-width: 749px) {
+  .lame-winter-brands {
+    padding-top: 0.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .lame-winter-brands__wrap {
+    padding-inline: 0.55rem !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 4 Brand Banners: Symmetrical 2x2 Grid */
+  .lame-winter-brands__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .lame-winter-brands__card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .lame-winter-brands__card:hover {
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  /* Products Grid: Symmetrical 2 Columns on Mobile */
+  .lame-winter-brands__products-section {
+    margin-top: 1.25rem !important;
+  }
+
+  .lame-winter-brands__products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card {
+    border-radius: 14px !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__media {
+    padding: 0.5rem !important;
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important;
+    line-height: 0 !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__body {
+    padding: 0.4rem 0.4rem 0.55rem !important;
+    gap: 0.2rem !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__brand {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.08em !important;
+    margin-bottom: 0.1rem !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__title {
+    margin: 0 !important;
+    font-size: 0.64rem !important;
+    line-height: 1.25 !important;
+    height: calc(1.25em * 2) !important;
+    min-height: calc(1.25em * 2) !important;
+    max-height: calc(1.25em * 2) !important;
+    overflow: hidden !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__title a {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    height: calc(1.25em * 2) !important;
+    min-height: calc(1.25em * 2) !important;
+    font-size: 0.64rem !important;
+    line-height: 1.25 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    color: #1a251e !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__price-row {
+    min-height: 1.2rem !important;
+    gap: 0.2rem 0.35rem !important;
+    display: flex !important;
+    align-items: baseline !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__price {
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__compare {
+    font-size: 0.64rem !important;
+    color: #dc2626 !important;
+    text-decoration: line-through !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__save-line {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.76rem !important;
+    font-weight: 700 !important;
+    color: #15803d !important;
+    line-height: 1.35 !important;
+    margin-top: 2px !important;
+    display: block !important;
+    min-height: 1.15rem !important;
+  }
+
+  .lame-winter-brands__product-item .lame-flash-card__actions {
+    margin-top: auto !important;
+    padding-top: 0.4rem !important;
+    width: 100% !important;
+  }
+
+  .lame-winter-brands .lame-flash-card__atc {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 2.15rem !important;
+    height: auto !important;
+    padding: 0.4rem 0.65rem !important;
+    border-radius: 999px !important;
+    border: 1.5px solid #143e26 !important;
+    background: #143e26 !important;
+    color: #ffffff !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    white-space: nowrap !important;
+    box-shadow: 0 2px 8px rgba(20, 62, 38, 0.28) !important;
+  }
+}

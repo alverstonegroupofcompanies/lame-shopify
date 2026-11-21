@@ -1,0 +1,440 @@
+{%- liquid
+  assign bg_style = section.settings.background_style | default: 'frost'
+  assign btn_theme = section.settings.button_color_style | default: 'arctic_blue'
+  assign card_radius = section.settings.card_radius | default: 14
+  assign products_url = '/collections/all'
+  if routes.all_products_collection_url != blank
+    assign products_url = routes.all_products_collection_url
+  endif
+
+  assign max_products = section.settings.max_products | default: 12
+  assign matched_count = 0
+  assign seen_handles = '||'
+  assign brand_tokens = 'plum,himalaya,bombay,rashel' | split: ','
+
+  assign search_col = section.settings.collection
+  if search_col == blank or search_col.products.size == 0
+    assign search_col = collections['all']
+  endif
+  if search_col == blank or search_col.products.size == 0
+    assign search_col = collections['our-products']
+  endif
+-%}
+
+{{ 'lame-flash-deal.css' | asset_url | stylesheet_tag }}
+{{ 'lame-winter-sale-posters.css' | asset_url | stylesheet_tag }}
+
+{%- capture matched_products_markup -%}
+  {%- if section.settings.curated_products != blank and section.settings.curated_products.count > 0 -%}
+    {%- for product in section.settings.curated_products limit: max_products -%}
+      {%- assign p_handle = '||' | append: product.handle | append: '||' -%}
+      {%- if seen_handles contains p_handle -%}{%- continue -%}{%- endif -%}
+      {%- assign seen_handles = seen_handles | append: product.handle | append: '||' -%}
+      <li class="lame-winter-brands__product-item">
+        {% render 'lame-flash-deal-card',
+          product: product,
+          add_to_cart_label: 'Add to cart',
+          sold_out_label: 'Sold out',
+          save_label_prefix: 'You save',
+          show_wishlist: false
+        %}
+      </li>
+      {%- assign matched_count = matched_count | plus: 1 -%}
+    {%- endfor -%}
+  {%- else -%}
+    {%- comment -%} 1. Primary collection scan for matching brand products {%- endcomment -%}
+    {%- if search_col != blank and search_col.products.size > 0 -%}
+      {%- for product in search_col.products -%}
+        {%- if matched_count >= max_products -%}{%- break -%}{%- endif -%}
+        {%- assign p_handle = '||' | append: product.handle | append: '||' -%}
+        {%- if seen_handles contains p_handle -%}{%- continue -%}{%- endif -%}
+
+        {%- assign p_vendor = product.vendor | downcase -%}
+        {%- assign p_title = product.title | downcase -%}
+        {%- assign is_match = false -%}
+
+        {%- for b in brand_tokens -%}
+          {%- if p_vendor contains b or p_title contains b -%}
+            {%- assign is_match = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if is_match -%}
+          {%- assign seen_handles = seen_handles | append: product.handle | append: '||' -%}
+          <li class="lame-winter-brands__product-item">
+            {% render 'lame-flash-deal-card',
+              product: product,
+              add_to_cart_label: 'Add to cart',
+              sold_out_label: 'Sold out',
+              save_label_prefix: 'You save',
+              show_wishlist: false
+            %}
+          </li>
+          {%- assign matched_count = matched_count | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- comment -%} 2. Cross-category scan to reach up to 12 products if needed {%- endcomment -%}
+    {%- if matched_count < max_products -%}
+      {%- assign extra_cols = 'skin-care,bath-body,our-products,baby-mom' | split: ',' -%}
+      {%- for col_name in extra_cols -%}
+        {%- if matched_count >= max_products -%}{%- break -%}{%- endif -%}
+        {%- assign extra_c = collections[col_name] -%}
+        {%- if extra_c != blank and extra_c.products.size > 0 -%}
+          {%- for product in extra_c.products -%}
+            {%- if matched_count >= max_products -%}{%- break -%}{%- endif -%}
+            {%- assign p_handle = '||' | append: product.handle | append: '||' -%}
+            {%- if seen_handles contains p_handle -%}{%- continue -%}{%- endif -%}
+
+            {%- assign p_vendor = product.vendor | downcase -%}
+            {%- assign p_title = product.title | downcase -%}
+            {%- assign is_match = false -%}
+
+            {%- for b in brand_tokens -%}
+              {%- if p_vendor contains b or p_title contains b -%}
+                {%- assign is_match = true -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if is_match -%}
+              {%- assign seen_handles = seen_handles | append: product.handle | append: '||' -%}
+              <li class="lame-winter-brands__product-item">
+                {% render 'lame-flash-deal-card',
+                  product: product,
+                  add_to_cart_label: 'Add to cart',
+                  sold_out_label: 'Sold out',
+                  save_label_prefix: 'You save',
+                  show_wishlist: false
+                %}
+              </li>
+              {%- assign matched_count = matched_count | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+<section
+  id="WinterBrands-{{ section.id }}"
+  class="lame-winter-brands lame-winter-brands--bg-{{ bg_style }} lame-winter-brands--btn-{{ btn_theme }} spacing-style"
+  style="--winter-card-radius: {{ card_radius }}px; --padding-top: {{ section.settings.padding-block-start | default: 16 }}px; --padding-bottom: {{ section.settings.padding-block-end | default: 28 }}px;"
+  {{ section.shopify_attributes }}
+>
+  <div class="lame-winter-brands__wrap">
+    {%- comment -%} 1. Four Winter Brand Banners (2x2 Grid) {%- endcomment -%}
+    <div class="lame-winter-brands__grid" data-winter-brands-grid>
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign brand_name = block.settings.brand | strip
+          assign brand_other = block.settings.brand_other | strip
+          if brand_name == 'other' and brand_other != blank
+            assign brand_name = brand_other
+          elsif brand_name == 'custom'
+            assign brand_name = ''
+          endif
+
+          assign target_link = block.settings.link
+          if target_link == blank and brand_name != blank
+            assign target_link = products_url | append: '?filter.p.vendor=' | append: brand_name | url_encode
+          endif
+          if target_link == blank
+            assign target_link = products_url
+          endif
+
+          assign alt_text = block.settings.alt | default: brand_name | default: 'Winter Sale Brand Offer'
+          assign img = block.settings.image
+          assign fallback_asset = block.settings.fallback_asset | strip
+        -%}
+
+        <div class="lame-winter-brands__item" {{ block.shopify_attributes }}>
+          <a
+            href="{{ target_link }}"
+            class="lame-winter-brands__card"
+            aria-label="{{ alt_text | escape }}"
+          >
+            <div class="lame-winter-brands__media">
+              {%- if img != blank -%}
+                {{
+                  img
+                  | image_url: width: 1400
+                  | image_tag:
+                    class: 'lame-winter-brands__img',
+                    loading: 'lazy',
+                    widths: '400, 600, 800, 1024, 1400',
+                    sizes: '(min-width: 990px) 48vw, (min-width: 750px) 48vw, 100vw',
+                    alt: alt_text
+                }}
+              {%- elsif fallback_asset != blank -%}
+                <img
+                  class="lame-winter-brands__img"
+                  src="{{ fallback_asset | asset_url }}"
+                  alt="{{ alt_text | escape }}"
+                  width="1024"
+                  height="512"
+                  loading="lazy"
+                  decoding="async"
+                >
+              {%- else -%}
+                {{ 'collection-1' | placeholder_svg_tag: 'lame-winter-brands__img placeholder-svg' }}
+              {%- endif -%}
+            </div>
+            <span class="lame-winter-brands__sheen" aria-hidden="true"></span>
+          </a>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} 2. Relevant Brand Products (Up to 12 Max) {%- endcomment -%}
+    {%- if matched_count > 0 -%}
+      <div class="lame-winter-brands__products-section">
+        {%- if section.settings.products_heading != blank or section.settings.products_subheading != blank -%}
+          <div class="lame-winter-brands__products-header">
+            {%- if section.settings.products_heading != blank -%}
+              <h2 class="lame-winter-brands__products-title">{{ section.settings.products_heading | escape }}</h2>
+            {%- endif -%}
+            {%- if section.settings.products_subheading != blank -%}
+              <p class="lame-winter-brands__products-subtitle">{{ section.settings.products_subheading | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <ul class="lame-winter-brands__products-grid" role="list">
+          {{ matched_products_markup }}
+        </ul>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{%- if matched_count > 0 -%}
+<script>
+  (function() {
+    const section = document.getElementById('WinterBrands-{{ section.id }}');
+    if (!section) return;
+
+    section.querySelectorAll('[data-lame-home-atc]').forEach((form) => {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        if (button?.disabled) return;
+        const formData = new FormData(form);
+        try {
+          if (button) button.disabled = true;
+          const response = await fetch('{{ routes.cart_add_url }}.js', {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formData,
+          });
+          const data = await response.json();
+          if (!response.ok || data?.status) throw new Error(data?.message);
+          const cartResponse = await fetch('{{ routes.cart_url }}.js', { headers: { Accept: 'application/json' } });
+          const cartData = await cartResponse.json();
+          document.dispatchEvent(
+            new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: { resource: cartData, sourceId: '{{ section.id }}', data: { source: 'winter-brands-atc' } },
+            })
+          );
+        } catch (error) {
+          console.error('Winter brands ATC failed', error);
+        } finally {
+          if (button) button.disabled = false;
+        }
+      });
+    });
+  })();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Winter Sale Brands",
+  "tag": "section",
+  "class": "section-wrapper",
+  "enabled_on": {
+    "templates": ["index", "collection"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "background_style",
+      "label": "Background style",
+      "options": [
+        { "value": "frost", "label": "Subtle Frosty Glow" },
+        { "value": "white", "label": "Pure White" },
+        { "value": "transparent", "label": "Transparent" }
+      ],
+      "default": "frost"
+    },
+    {
+      "type": "select",
+      "id": "button_color_style",
+      "label": "Button winter pop color",
+      "options": [
+        { "value": "arctic_blue", "label": "Vivid Arctic Ice Blue (Default Winter Pop)" },
+        { "value": "glacier_cyan", "label": "Electric Glacier Cyan" },
+        { "value": "winter_berry", "label": "Frosted Cranberry Berry Pop" },
+        { "value": "frost_navy", "label": "Midnight Navy Frost" },
+        { "value": "botanical", "label": "Botanical Emerald" }
+      ],
+      "default": "arctic_blue"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Banner corner radius",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "Maximum products to display",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "default": 12
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Source collection for products",
+      "info": "Defaults to All Products."
+    },
+    {
+      "type": "product_list",
+      "id": "curated_products",
+      "label": "Manually selected products (optional)",
+      "limit": 12,
+      "info": "Overrides automatic brand matching with specific chosen products."
+    },
+    {
+      "type": "text",
+      "id": "products_heading",
+      "label": "Products section title (optional)"
+    },
+    {
+      "type": "text",
+      "id": "products_subheading",
+      "label": "Products section subtitle (optional)"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand_banner",
+      "name": "Brand Banner",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Banner image (Upload in Shopify)"
+        },
+        {
+          "type": "text",
+          "id": "fallback_asset",
+          "label": "Fallback asset name",
+          "info": "e.g. winter-brand-plum.jpg"
+        },
+        {
+          "type": "select",
+          "id": "brand",
+          "label": "Brand / Vendor",
+          "options": [
+            { "value": "custom", "label": "Custom (Use Link URL below)" },
+            { "value": "Plum", "label": "Plum" },
+            { "value": "Himalaya", "label": "Himalaya" },
+            { "value": "Bombay Shaving Company", "label": "Bombay Shaving Company" },
+            { "value": "DR.RASHEL", "label": "DR.RASHEL" },
+            { "value": "other", "label": "Other brand (type below)" }
+          ],
+          "default": "Plum"
+        },
+        {
+          "type": "text",
+          "id": "brand_other",
+          "label": "Other brand name"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Custom link URL (optional)",
+          "info": "Leave blank to auto-link to the selected brand's collection."
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Alt text for SEO & accessibility"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Winter Sale Brands",
+      "category": "Promotions",
+      "blocks": [
+        {
+          "type": "brand_banner",
+          "settings": {
+            "fallback_asset": "winter-brand-plum.jpg",
+            "brand": "Plum",
+            "alt": "Plum Winter Sale Deals"
+          }
+        },
+        {
+          "type": "brand_banner",
+          "settings": {
+            "fallback_asset": "winter-brand-himalaya.jpg",
+            "brand": "Himalaya",
+            "alt": "Himalaya Winter Skin Protection"
+          }
+        },
+        {
+          "type": "brand_banner",
+          "settings": {
+            "fallback_asset": "winter-brand-bombay-shaving.jpg",
+            "brand": "Bombay Shaving Company",
+            "alt": "Bombay Shaving Company Winter Essentials"
+          }
+        },
+        {
+          "type": "brand_banner",
+          "settings": {
+            "fallback_asset": "winter-brand-dr-rashel.jpg",
+            "brand": "DR.RASHEL",
+            "alt": "DR.RASHEL Winter Glow Specials"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
