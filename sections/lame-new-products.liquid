@@ -25,7 +25,179 @@
   if new_collection == blank
     assign new_collection = collections.all
   endif
-%}
+
+  assign sc_prod_1 = nil
+  assign sc_prod_2 = nil
+  assign sc_prod_3 = nil
+
+  assign frag_col = collections.fragrance
+  if frag_col == blank or frag_col.products.size == 0
+    assign frag_col = collections['our-products']
+  endif
+  if frag_col == blank or frag_col.products.size == 0
+    assign frag_col = collections['all']
+  endif
+
+  if section.settings.featured_products.count >= 3
+    assign sc_prod_1 = section.settings.featured_products[0]
+    assign sc_prod_2 = section.settings.featured_products[1]
+    assign sc_prod_3 = section.settings.featured_products[2]
+  elsif frag_col != blank and frag_col.products.size > 0
+    for p in frag_col.products
+      assign v_down = p.vendor | downcase | strip
+      assign t_down = p.title | downcase
+      assign is_target = false
+      if v_down contains 'lame' or v_down contains 'lamé' or v_down contains 'lamstone'
+        assign is_target = true
+      elsif t_down contains 'lamé' or t_down contains 'lame ' or t_down contains 'mayscent' or t_down contains 'mirage' or t_down contains 'barqat'
+        assign is_target = true
+      endif
+
+      if is_target
+        if sc_prod_1 == nil
+          assign sc_prod_1 = p
+        elsif sc_prod_2 == nil and p.id != sc_prod_1.id
+          assign sc_prod_2 = p
+        elsif sc_prod_3 == nil and p.id != sc_prod_1.id and p.id != sc_prod_2.id
+          assign sc_prod_3 = p
+          break
+        endif
+      endif
+    endfor
+
+    if sc_prod_1 == nil and frag_col.products.size > 0
+      assign sc_prod_1 = frag_col.products[0]
+    endif
+    if sc_prod_2 == nil and frag_col.products.size > 1
+      assign sc_prod_2 = frag_col.products[1]
+    endif
+    if sc_prod_3 == nil and frag_col.products.size > 2
+      assign sc_prod_3 = frag_col.products[2]
+    endif
+  endif
+
+  assign slide_1_product = nil
+  assign slide_2_product = nil
+  assign slide_3_product = nil
+
+  assign p_mayscent = all_products['lame-mayscent-eau-de-parfum-100ml']
+  assign p_blue = all_products['lame-blue-mirage-eau-de-parfum-100ml']
+  assign p_barqat = all_products['lame-barqat-eau-de-parfum-100ml']
+
+  if section.settings.featured_products.count >= 3
+    assign slide_1_product = section.settings.featured_products[0]
+    assign slide_2_product = section.settings.featured_products[1]
+    assign slide_3_product = section.settings.featured_products[2]
+  else
+    if p_mayscent != empty and p_mayscent != blank
+      assign slide_1_product = p_mayscent
+    elsif sc_prod_1 != nil
+      assign slide_1_product = sc_prod_1
+    endif
+
+    if p_blue != empty and p_blue != blank
+      assign slide_2_product = p_blue
+    elsif sc_prod_2 != nil
+      assign slide_2_product = sc_prod_2
+    endif
+
+    if p_barqat != empty and p_barqat != blank
+      assign slide_3_product = p_barqat
+    elsif sc_prod_3 != nil
+      assign slide_3_product = sc_prod_3
+    endif
+  endif
+
+  comment
+    Slide 1: Mayscent
+  endcomment
+  assign s1_title = 'Mayscent'
+  assign s1_eyebrow = 'LAMÉ HAUTE PARFUMERIE • NO. 01'
+  assign s1_subtitle = 'EAU DE PARFUM 100ML'
+  assign s1_desc = 'A luminous golden symphony. Fresh citrus brightness unfolding into sparkling bergamot and radiant warmth, anchored by sensual golden amber.'
+  assign s1_notes = 'CITRUS, BERGAMOT, GOLDEN AMBER'
+  assign s1_price = '₹899'
+  assign s1_link = '/products/lame-mayscent-eau-de-parfum-100ml'
+  assign s1_img = 'WhatsApp_Image_2026-04-20_at_5.02.57_PM.jpg' | file_url
+  assign s1_var_id = ''
+  assign s1_avail = true
+
+  if slide_1_product != nil
+    assign s1_title = slide_1_product.title
+    assign s1_price = slide_1_product.price | money
+    assign s1_link = slide_1_product.url
+    assign s1_avail = slide_1_product.available
+    if slide_1_product.first_available_variant != blank
+      assign s1_var_id = slide_1_product.first_available_variant.id
+    endif
+    if slide_1_product.featured_image != blank
+      assign s1_img = slide_1_product.featured_image | image_url: width: 900
+    endif
+    if slide_1_product.description != blank
+      assign s1_desc = slide_1_product.description | strip_html | truncatewords: 24
+    endif
+  endif
+
+  comment
+    Slide 2: Blue Mirage
+  endcomment
+  assign s2_title = 'Blue Mirage'
+  assign s2_eyebrow = 'LAMÉ HAUTE PARFUMERIE • NO. 02'
+  assign s2_subtitle = 'EAU DE PARFUM 100ML'
+  assign s2_desc = 'Deep oceanic intensity intertwined with crisp aquatic notes, aromatic cedarwood, and an enigmatic veil of smoky sophistication.'
+  assign s2_notes = 'AQUATIC, CEDARWOOD, SMOKY MUSK'
+  assign s2_price = '₹899'
+  assign s2_link = '/products/lame-blue-mirage-eau-de-parfum-100ml'
+  assign s2_img = 'lame-blue-mirage-hero.jpg' | asset_url
+  assign s2_var_id = ''
+  assign s2_avail = true
+
+  if slide_2_product != nil
+    assign s2_title = slide_2_product.title
+    assign s2_price = slide_2_product.price | money
+    assign s2_link = slide_2_product.url
+    assign s2_avail = slide_2_product.available
+    if slide_2_product.first_available_variant != blank
+      assign s2_var_id = slide_2_product.first_available_variant.id
+    endif
+    if slide_2_product.featured_image != blank
+      assign s2_img = slide_2_product.featured_image | image_url: width: 900
+    endif
+    if slide_2_product.description != blank
+      assign s2_desc = slide_2_product.description | strip_html | truncatewords: 24
+    endif
+  endif
+
+  comment
+    Slide 3: Barqat
+  endcomment
+  assign s3_title = 'Barqat'
+  assign s3_eyebrow = 'LAMÉ ROYAL RESERVE • NO. 03'
+  assign s3_subtitle = 'EAU DE PARFUM 100ML'
+  assign s3_desc = 'A regal oriental blend wrapped in golden warmth. Rare Cambodian oud accented with spiced velvety damask rose and royal amber.'
+  assign s3_notes = 'ROYAL OUD, SPICED ROSE, AMBER'
+  assign s3_price = '₹999'
+  assign s3_link = '/products/lame-barqat-eau-de-parfum-100ml'
+  assign s3_img = 'lame-coming-soon-barqat.png' | asset_url
+  assign s3_var_id = ''
+  assign s3_avail = true
+
+  if slide_3_product != nil
+    assign s3_title = slide_3_product.title
+    assign s3_price = slide_3_product.price | money
+    assign s3_link = slide_3_product.url
+    assign s3_avail = slide_3_product.available
+    if slide_3_product.first_available_variant != blank
+      assign s3_var_id = slide_3_product.first_available_variant.id
+    endif
+    if slide_3_product.featured_image != blank
+      assign s3_img = slide_3_product.featured_image | image_url: width: 900
+    endif
+    if slide_3_product.description != blank
+      assign s3_desc = slide_3_product.description | strip_html | truncatewords: 24
+    endif
+  endif
+-%}
 
 {% capture arrival_products_markup %}
   {%- if section.settings.featured_products.count > 0 -%}
@@ -273,44 +445,47 @@
   }
   #shopify-section-{{ section.id }} .lame-flash-deal__header {
     width: 100% !important;
-    max-width: min(100%, var(--page-width, 1200px)) !important;
-    margin-inline: auto !important;
-    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
     box-sizing: border-box !important;
   }
   #shopify-section-{{ section.id }} .lame-new-products__header-row,
   #shopify-section-{{ section.id }} .lame-flash-deal__title-image {
     width: 100% !important;
     max-width: 100% !important;
-    margin-inline: auto !important;
+    margin-inline: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
   }
   #shopify-section-{{ section.id }} .lame-flash-deal__carousel {
-    max-width: min(100%, var(--page-width, 1200px)) !important;
-    margin-inline: auto !important;
-    padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
     box-sizing: border-box !important;
   }
 
-  /* Desktop height and aspect ratio: match Exclusive Offers banner identically */
+  /* Desktop height and aspect ratio: match all homepage title banners consistently */
   @media screen and (min-width: 750px) {
     #shopify-section-{{ section.id }} .lame-flash-deal__title-image,
     #shopify-section-{{ section.id }} .lame-flash-deal__title-picture,
     #shopify-section-{{ section.id }} .lame-flash-deal__title-img {
-      aspect-ratio: 1920 / 238 !important;
-      height: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: clamp(160px, 14vw, 220px) !important;
       min-height: 0 !important;
       max-height: none !important;
-      object-fit: cover !important;
+      object-fit: contain !important;
       object-position: center center !important;
-      border-radius: clamp(10px, 1.5vw, 16px) !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+      border-radius: clamp(10px, 1.4vw, 16px) !important;
+      border: none !important;
+      box-shadow: none !important;
       overflow: hidden !important;
     }
   }
 
-  /* Mobile: remove white space after banner, match Exclusive Offers width/height, normal tight gap to cards */
+  /* Mobile: full width tight gap to cards, object-fit contain */
   @media screen and (max-width: 749px) {
     #shopify-section-{{ section.id }} .lame-flash-deal__wrap {
       padding-block-start: 8px !important;
@@ -319,27 +494,23 @@
     #shopify-section-{{ section.id }} .lame-flash-deal__header {
       width: 100% !important;
       max-width: 100% !important;
-      margin-inline: auto !important;
+      margin-inline: 0 !important;
       margin-bottom: 0.65rem !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-      padding-inline: var(--lame-flash-edge, clamp(0.75rem, 2vw, 1.25rem)) !important;
+      padding: 0 !important;
     }
     #shopify-section-{{ section.id }} .lame-flash-deal__title-image,
     #shopify-section-{{ section.id }} .lame-flash-deal__title-picture,
     #shopify-section-{{ section.id }} .lame-flash-deal__title-img {
       width: 100% !important;
       max-width: 100% !important;
-      height: auto !important;
+      height: clamp(90px, 22vw, 140px) !important;
       min-height: 0 !important;
       max-height: none !important;
-      aspect-ratio: 1024 / 216 !important;
-      border-radius: clamp(6px, 1.2vw, 12px) !important;
-      overflow: hidden !important;
-      object-fit: cover !important;
+      object-fit: contain !important;
       object-position: center center !important;
-      line-height: 0 !important;
-      margin-bottom: 0 !important;
+      border-radius: 8px !important;
+      border: none !important;
+      box-shadow: none !important;
     }
     #shopify-section-{{ section.id }} .lame-flash-deal__track {
       padding-top: 0 !important;
@@ -350,12 +521,594 @@
       padding-inline: var(--lame-flash-mobile-gutter, 0.55rem) !important;
     }
   }
+
+  /* =========================================================
+     LUXURY SPLIT SHOWCASE BANNER (Image one side + Animated text)
+     ========================================================= */
+  #shopify-section-{{ section.id }} .lame-new-showcase {
+    position: relative;
+    width: 100%;
+    margin-top: clamp(0.75rem, 1.8vw, 1.4rem);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(254, 246, 236, 0.75) 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(220, 185, 140, 0.35);
+    border-radius: clamp(14px, 1.8vw, 24px);
+    box-shadow: 0 14px 38px -10px rgba(110, 65, 20, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+    padding: clamp(1rem, 2.8vw, 2.2rem);
+    overflow: hidden;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__stage {
+    position: relative;
+    width: 100%;
+    min-height: 440px;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(1.5rem, 3.5vw, 3.5rem);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s ease;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Media Side alignment support */
+  #shopify-section-{{ section.id }} .lame-new-showcase--media-right .lame-new-showcase__slide-media {
+    order: 2;
+  }
+  #shopify-section-{{ section.id }} .lame-new-showcase--media-right .lame-new-showcase__slide-text {
+    order: 1;
+  }
+
+  /* MEDIA SIDE STYLING */
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 400px;
+    padding: 1rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__media-frame {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__media-aura {
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--slide-glow, rgba(235, 175, 75, 0.32)) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(30px);
+    z-index: 1;
+    pointer-events: none;
+    transition: background 0.6s ease;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__media-pedestal {
+    position: absolute;
+    bottom: 22px;
+    width: 220px;
+    height: 38px;
+    background: radial-gradient(ellipse at center, rgba(100, 55, 20, 0.22) 0%, rgba(100, 55, 20, 0) 72%);
+    border-radius: 50%;
+    z-index: 1;
+    filter: blur(5px);
+    pointer-events: none;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__media-link {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    outline: none;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__media-img {
+    max-width: 100%;
+    max-height: 360px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 26px rgba(45, 30, 15, 0.16));
+    transform-origin: center bottom;
+    display: block;
+  }
+
+  /* Image float animation on active slide */
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-new-showcase__media-img {
+    animation: lameShowcaseScaleIn 0.75s cubic-bezier(0.16, 1, 0.3, 1) both,
+               lameShowcaseFloat 4.2s ease-in-out 0.75s infinite alternate;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__media-badge {
+    position: absolute;
+    bottom: 0;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(200, 160, 110, 0.3);
+    padding: 0.38rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #4a3622;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #d4af37;
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
+  }
+
+  /* TEXT SIDE STYLING */
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(0.75rem, 2vw, 2rem);
+    z-index: 2;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__content-wrap {
+    max-width: 540px;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9c6c38;
+    margin-bottom: 0.55rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__eyebrow-accent {
+    width: 22px;
+    height: 2px;
+    background: #d4af37;
+    border-radius: 2px;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__title {
+    font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2.1rem, 3.6vw, 3.3rem);
+    font-weight: 700;
+    line-height: 1.12;
+    color: #1a1612;
+    margin: 0 0 0.85rem 0;
+    letter-spacing: -0.01em;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__title a:hover {
+    color: #9c6c38;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__note-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(210, 175, 130, 0.35);
+    border-radius: 24px;
+    padding: 0.32rem 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #58412b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__chip-icon {
+    width: 10px;
+    height: 10px;
+    color: #d4af37;
+    flex-shrink: 0;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__desc {
+    font-size: clamp(0.92rem, 1.05vw, 1.02rem);
+    line-height: 1.62;
+    color: #4a3e33;
+    margin: 0 0 1.25rem 0;
+    font-weight: 400;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 0.85rem 1.1rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(220, 190, 150, 0.3);
+    border-radius: 14px;
+    margin-bottom: 1.3rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__price-box {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__price-label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8c7864;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__price {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #1a1612;
+    line-height: 1.1;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__divider-v {
+    width: 1px;
+    height: 34px;
+    background: rgba(200, 165, 125, 0.3);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__stock-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__stock-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #2b6127;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__stock-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2b6127;
+    box-shadow: 0 0 6px rgba(43, 97, 39, 0.5);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__size-spec {
+    font-size: 0.74rem;
+    color: #726252;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__form {
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn--primary {
+    background: linear-gradient(135deg, #1f2d20 0%, #131c14 100%);
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 16px rgba(25, 38, 26, 0.22);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn--primary:hover {
+    background: linear-gradient(135deg, #2d422f 0%, #1a271c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(25, 38, 26, 0.3);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn--secondary {
+    background: rgba(255, 255, 255, 0.85);
+    color: #2b2118 !important;
+    border: 1px solid rgba(190, 150, 100, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn--secondary:hover {
+    background: #fff;
+    border-color: #d4af37;
+    color: #9c6c38 !important;
+    transform: translateY(-2px);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn-arrow {
+    font-size: 1.05rem;
+    transition: transform 0.25s ease;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__btn--secondary:hover .lame-new-showcase__btn-arrow {
+    transform: translateX(4px);
+  }
+
+  /* STAGGERED TEXT REVEAL KEYFRAME ANIMATIONS */
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-anim-eyebrow {
+    animation: lameShowcaseSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+  }
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-anim-title {
+    animation: lameShowcaseSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+  }
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-anim-notes {
+    animation: lameShowcaseSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.23s both;
+  }
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-anim-desc {
+    animation: lameShowcaseSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.32s both;
+  }
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-anim-meta {
+    animation: lameShowcaseSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.41s both;
+  }
+  #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active .lame-anim-cta {
+    animation: lameShowcaseSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+  }
+
+  @keyframes lameShowcaseSlideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes lameShowcaseScaleIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.93) translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes lameShowcaseFloat {
+    0% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    100% {
+      transform: translateY(-8px) rotate(0.4deg);
+    }
+  }
+
+  /* BOTTOM NAVIGATION & TABS */
+  #shopify-section-{{ section.id }} .lame-new-showcase__nav {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(210, 175, 130, 0.25);
+    gap: 1rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tabs {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 1.8vw, 1.5rem);
+    flex-wrap: wrap;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.45rem 0.2rem 0.65rem 0.2rem;
+    font-family: inherit;
+    color: #7d6b58;
+    transition: color 0.25s ease;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab:hover,
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab.is-active {
+    color: #1a1612;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab-index {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #9c6c38;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2.5px;
+    background: rgba(180, 140, 90, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__tab-progress {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #9c6c38);
+    border-radius: 3px;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__arrows {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__arrow {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(200, 165, 120, 0.35);
+    color: #4a3622;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__arrow:hover {
+    background: #fff;
+    border-color: #d4af37;
+    color: #1a1612;
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(120, 70, 20, 0.12);
+  }
+
+  #shopify-section-{{ section.id }} .lame-new-showcase__arrow svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  /* RESPONSIVE MOBILE STYLING */
+  @media screen and (max-width: 899px) {
+    #shopify-section-{{ section.id }} .lame-new-showcase__stage {
+      min-height: auto;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__slide {
+      position: relative;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__slide.is-active {
+      display: flex;
+      flex-direction: column;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__slide-media {
+      min-height: 260px;
+      padding: 0.5rem 0;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__media-img {
+      max-height: 230px;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__slide-text {
+      padding: 0.5rem 0.2rem;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__meta-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__divider-v {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__nav {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.85rem;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__tabs {
+      justify-content: center;
+    }
+    #shopify-section-{{ section.id }} .lame-new-showcase__arrows {
+      justify-content: center;
+    }
+  }
 </style>
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <section
   class="section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} lame-flash-deal lame-new-products lame-category--new-arrivals{% if title_full_width %} lame-flash-deal--title-full-width{% endif %}{% if title_mobile_full_width %} lame-flash-deal--title-mobile-full-width{% endif %}{% if content_bg != blank %} lame-flash-deal--has-content-bg{% endif %}{% if whole_section_bg != blank %} lame-flash-deal--has-section-bg{% endif %}"
   data-flash-deal-carousel
-  style="--lame-flash-visible-count: {{ products_shown | at_least: 1 | at_most: products_to_show }};{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }} !important; --lame-flash-bg: {{ whole_section_bg }};{% endif %}"
+  style="--lame-flash-visible-count: 6;{% if whole_section_bg != blank %} background-color: {{ whole_section_bg }} !important; --lame-flash-bg: {{ whole_section_bg }};{% endif %}"
   {{ section.shopify_attributes }}
 >
   <div class="lame-flash-deal__wrap spacing-style" style="{% render 'spacing-padding', settings: section.settings %}">
@@ -429,62 +1182,296 @@
       </div>
     </header>
 
-    <div class="lame-flash-deal__body"{% if content_bg != blank %} style="background-color: {{ content_bg }};"{% endif %}>
-      <div class="lame-flash-deal__carousel">
-        <button
-          type="button"
-          class="lame-flash-deal__nav lame-flash-deal__nav--prev"
-          data-flash-prev
-          aria-label="{{ section.settings.prev_label }}"
-        >
-          <span aria-hidden="true">&#8249;</span>
-        </button>
+        <div class="lame-flash-deal__body"{% if content_bg != blank %} style="background-color: {{ content_bg }};"{% endif %}>
+      {% if section.settings.presentation_style == 'cards_carousel' %}
+        <div class="lame-flash-deal__carousel">
+          <button
+            type="button"
+            class="lame-flash-deal__nav lame-flash-deal__nav--prev"
+            data-flash-prev
+            aria-label="{{ section.settings.prev_label }}"
+          >
+            <span aria-hidden="true">&#8249;</span>
+          </button>
 
-        <div class="lame-flash-deal__viewport" data-flash-viewport>
-          <ul class="lame-flash-deal__track" role="list" data-flash-track>
-            {% if products_shown > 0 %}
-              {{ arrival_products_markup }}
-            {% else %}
-              {% for i in (1..products_to_show) %}
-                <li class="lame-flash-deal__item" data-lame-reveal>
-                  <article class="lame-flash-card">
-                    <div class="lame-flash-card__media">
-                      <span class="lame-flash-card__badge">{{ section.settings.badge_label | default: 'NEW' }}</span>
-                      <a href="#" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
-                        {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
-                      </a>
-                    </div>
-                    <div class="lame-flash-card__body">
-                      <h3 class="lame-flash-card__title">
-                        <a href="#">{{ section.settings.placeholder_title }}</a>
-                      </h3>
-                      <div class="lame-flash-card__price-row">
-                        <span class="lame-flash-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</span>
+          <div class="lame-flash-deal__viewport" data-flash-viewport>
+            <ul class="lame-flash-deal__track" role="list" data-flash-track>
+              {% if products_shown > 0 %}
+                {{ arrival_products_markup }}
+              {% else %}
+                {% for i in (1..products_to_show) %}
+                  <li class="lame-flash-deal__item" data-lame-reveal>
+                    <article class="lame-flash-card">
+                      <div class="lame-flash-card__media">
+                        <span class="lame-flash-card__badge">{{ section.settings.badge_label | default: 'NEW' }}</span>
+                        <a href="#" class="lame-flash-card__media-link" tabindex="-1" aria-hidden="true">
+                          {{ 'product-apparel-1' | placeholder_svg_tag: 'lame-flash-card__image placeholder-svg' }}
+                        </a>
                       </div>
-                      <div class="lame-flash-card__actions">
-                        <form class="lame-flash-card__form">
-                          <button type="button" class="lame-flash-card__atc" disabled>
-                            {{ section.settings.add_to_cart_label }}
+                      <div class="lame-flash-card__body">
+                        <h3 class="lame-flash-card__title">
+                          <a href="#">{{ section.settings.placeholder_title }}</a>
+                        </h3>
+                        <div class="lame-flash-card__price-row">
+                          <span class="lame-flash-card__price">{{ section.settings.placeholder_price | default: '₹899' }}</span>
+                        </div>
+                        <div class="lame-flash-card__actions">
+                          <form class="lame-flash-card__form">
+                            <button type="button" class="lame-flash-card__atc" disabled>
+                              {{ section.settings.add_to_cart_label }}
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </article>
+                  </li>
+                {% endfor %}
+              {% endif %}
+            </ul>
+          </div>
+
+          <button
+            type="button"
+            class="lame-flash-deal__nav lame-flash-deal__nav--next"
+            data-flash-next
+            aria-label="{{ section.settings.next_label }}"
+          >
+            <span aria-hidden="true">&#8250;</span>
+          </button>
+        </div>
+      {% else %}
+        {%- comment -%} LUXURY SPLIT SHOWCASE BANNER (Image one side + Animated Text other end) {%- endcomment -%}
+        <div
+          class="lame-new-showcase lame-new-showcase--media-{{ section.settings.banner_media_side | default: 'left' }}"
+          data-lame-showcase
+          data-autoplay="{{ section.settings.showcase_autoplay_interval | default: 6 }}"
+        >
+          <div class="lame-new-showcase__stage">
+            {%- for i in (0..2) -%}
+              {%- liquid
+                assign s_active = false
+                if i == 0
+                  assign s_active = true
+                endif
+
+                if i == 0
+                  assign cur_title = s1_title
+                  assign cur_eyebrow = s1_eyebrow
+                  assign cur_subtitle = s1_subtitle
+                  assign cur_desc = s1_desc
+                  assign cur_notes = s1_notes
+                  assign cur_price = s1_price
+                  assign cur_link = s1_link
+                  assign cur_img = s1_img
+                  assign cur_var = s1_var_id
+                  assign cur_avail = s1_avail
+                  assign cur_glow = 'rgba(235, 175, 75, 0.32)'
+                  assign cur_bg_hue = 'rgba(255, 246, 230, 0.85)'
+                elsif i == 1
+                  assign cur_title = s2_title
+                  assign cur_eyebrow = s2_eyebrow
+                  assign cur_subtitle = s2_subtitle
+                  assign cur_desc = s2_desc
+                  assign cur_notes = s2_notes
+                  assign cur_price = s2_price
+                  assign cur_link = s2_link
+                  assign cur_img = s2_img
+                  assign cur_var = s2_var_id
+                  assign cur_avail = s2_avail
+                  assign cur_glow = 'rgba(75, 145, 235, 0.28)'
+                  assign cur_bg_hue = 'rgba(240, 247, 255, 0.85)'
+                else
+                  assign cur_title = s3_title
+                  assign cur_eyebrow = s3_eyebrow
+                  assign cur_subtitle = s3_subtitle
+                  assign cur_desc = s3_desc
+                  assign cur_notes = s3_notes
+                  assign cur_price = s3_price
+                  assign cur_link = s3_link
+                  assign cur_img = s3_img
+                  assign cur_var = s3_var_id
+                  assign cur_avail = s3_avail
+                  assign cur_glow = 'rgba(205, 133, 63, 0.32)'
+                  assign cur_bg_hue = 'rgba(255, 246, 238, 0.85)'
+                endif
+              -%}
+
+              <article
+                class="lame-new-showcase__slide{% if s_active %} is-active{% endif %}"
+                data-showcase-slide="{{ i }}"
+                aria-hidden="{% if s_active %}false{% else %}true{% endif %}"
+                style="--slide-glow: {{ cur_glow }}; --slide-hue: {{ cur_bg_hue }};"
+              >
+                {%- comment -%} MEDIA SIDE: Bottle Showcase with Pedestal and Ambient Glow {%- endcomment -%}
+                <div class="lame-new-showcase__slide-media">
+                  <div class="lame-new-showcase__media-frame">
+                    <div class="lame-new-showcase__media-aura" aria-hidden="true"></div>
+                    <div class="lame-new-showcase__media-pedestal" aria-hidden="true"></div>
+
+                    <a href="{{ cur_link }}" class="lame-new-showcase__media-link" tabindex="-1" aria-label="{{ cur_title | escape }}">
+                      <img
+                        src="{{ cur_img }}"
+                        alt="{{ cur_title | escape }}"
+                        class="lame-new-showcase__media-img"
+                        loading="lazy"
+                        width="800"
+                        height="800"
+                      >
+                    </a>
+
+                    <div class="lame-new-showcase__media-badge">
+                      <span class="lame-new-showcase__badge-dot" aria-hidden="true"></span>
+                      <span>{{ cur_subtitle | default: 'EAU DE PARFUM • 100ML' }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {%- comment -%} TEXT SIDE: Animated Staggered Typography, Fragrance Notes & Actions {%- endcomment -%}
+                <div class="lame-new-showcase__slide-text">
+                  <div class="lame-new-showcase__content-wrap">
+                    <div class="lame-new-showcase__eyebrow lame-anim-eyebrow">
+                      <span class="lame-new-showcase__eyebrow-accent"></span>
+                      <span class="lame-new-showcase__eyebrow-text">{{ cur_eyebrow }}</span>
+                    </div>
+
+                    <h3 class="lame-new-showcase__title lame-anim-title">
+                      <a href="{{ cur_link }}">{{ cur_title }}</a>
+                    </h3>
+
+                    {%- if cur_notes != blank -%}
+                      <div class="lame-new-showcase__notes lame-anim-notes" aria-label="Scent Notes">
+                        {%- assign notes_array = cur_notes | split: ',' -%}
+                        {%- for note in notes_array -%}
+                          <span class="lame-new-showcase__note-chip">
+                            <svg class="lame-new-showcase__chip-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                              <polygon points="8,1 10,6 15,8 10,10 8,15 6,10 1,8 6,6"/>
+                            </svg>
+                            {{ note | strip }}
+                          </span>
+                        {%- endfor -%}
+                      </div>
+                    {%- endif -%}
+
+                    <p class="lame-new-showcase__desc lame-anim-desc">
+                      {{ cur_desc }}
+                    </p>
+
+                    <div class="lame-new-showcase__meta-row lame-anim-meta">
+                      <div class="lame-new-showcase__price-box">
+                        <span class="lame-new-showcase__price-label">Price</span>
+                        <span class="lame-new-showcase__price">{{ cur_price }}</span>
+                      </div>
+                      <div class="lame-new-showcase__divider-v" aria-hidden="true"></div>
+                      <div class="lame-new-showcase__stock-box">
+                        <span class="lame-new-showcase__stock-pill">
+                          <span class="lame-new-showcase__stock-dot"></span>
+                          {% if cur_avail %}In Stock & Ready to Ship{% else %}Limited Batch / Pre-Order{% endif %}
+                        </span>
+                        <span class="lame-new-showcase__size-spec">100ml / 3.4 FL. OZ. • Spray Vaporisateur</span>
+                      </div>
+                    </div>
+
+                    <div class="lame-new-showcase__actions lame-anim-cta">
+                      {% if cur_var != blank and cur_avail %}
+                        <form method="post" action="{{ routes.cart_add_url }}" data-lame-home-atc class="lame-new-showcase__form">
+                          <input type="hidden" name="id" value="{{ cur_var }}">
+                          <input type="hidden" name="quantity" value="1">
+                          <button type="submit" class="lame-new-showcase__btn lame-new-showcase__btn--primary">
+                            <svg class="lame-new-showcase__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                              <line x1="3" y1="6" x2="21" y2="6"></line>
+                              <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                            <span>Add to Bag • {{ cur_price }}</span>
                           </button>
                         </form>
-                      </div>
-                    </div>
-                  </article>
-                </li>
-              {% endfor %}
-            {% endif %}
-          </ul>
-        </div>
+                      {% else %}
+                        <a href="{{ cur_link }}" class="lame-new-showcase__btn lame-new-showcase__btn--primary">
+                          <svg class="lame-new-showcase__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                          </svg>
+                          <span>Shop Now • {{ cur_price }}</span>
+                        </a>
+                      {% endif %}
 
-        <button
-          type="button"
-          class="lame-flash-deal__nav lame-flash-deal__nav--next"
-          data-flash-next
-          aria-label="{{ section.settings.next_label }}"
-        >
-          <span aria-hidden="true">&#8250;</span>
-        </button>
-      </div>
+                      <a href="{{ cur_link }}" class="lame-new-showcase__btn lame-new-showcase__btn--secondary">
+                        <span>Explore Scent</span>
+                        <span class="lame-new-showcase__btn-arrow" aria-hidden="true">→</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            {%- endfor -%}
+          </div>
+
+          {%- comment -%} INTERACTIVE 3-PRODUCT SELECTOR TABS & ARROWS {%- endcomment -%}
+          <div class="lame-new-showcase__nav">
+            <div class="lame-new-showcase__tabs" role="tablist" aria-label="Fragrance selector">
+              <button
+                type="button"
+                class="lame-new-showcase__tab is-active"
+                data-showcase-tab="0"
+                role="tab"
+                aria-selected="true"
+              >
+                <span class="lame-new-showcase__tab-index">01</span>
+                <span class="lame-new-showcase__tab-title">{{ s1_title }}</span>
+                <span class="lame-new-showcase__tab-bar"><span class="lame-new-showcase__tab-progress"></span></span>
+              </button>
+
+              <button
+                type="button"
+                class="lame-new-showcase__tab"
+                data-showcase-tab="1"
+                role="tab"
+                aria-selected="false"
+              >
+                <span class="lame-new-showcase__tab-index">02</span>
+                <span class="lame-new-showcase__tab-title">{{ s2_title }}</span>
+                <span class="lame-new-showcase__tab-bar"><span class="lame-new-showcase__tab-progress"></span></span>
+              </button>
+
+              <button
+                type="button"
+                class="lame-new-showcase__tab"
+                data-showcase-tab="2"
+                role="tab"
+                aria-selected="false"
+              >
+                <span class="lame-new-showcase__tab-index">03</span>
+                <span class="lame-new-showcase__tab-title">{{ s3_title }}</span>
+                <span class="lame-new-showcase__tab-bar"><span class="lame-new-showcase__tab-progress"></span></span>
+              </button>
+            </div>
+
+            <div class="lame-new-showcase__arrows">
+              <button
+                type="button"
+                class="lame-new-showcase__arrow lame-new-showcase__arrow--prev"
+                data-showcase-prev
+                aria-label="Previous fragrance"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="lame-new-showcase__arrow lame-new-showcase__arrow--next"
+                data-showcase-next
+                aria-label="Next fragrance"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -583,6 +1570,128 @@
         }
       });
     });
+  
+    // Luxury Split Showcase Controller
+    function initShowcaseBanner() {
+      const showcase = section.querySelector('[data-lame-showcase]');
+      if (!showcase) return;
+
+      const slides = showcase.querySelectorAll('[data-showcase-slide]');
+      const tabs = showcase.querySelectorAll('[data-showcase-tab]');
+      const prevBtn = showcase.querySelector('[data-showcase-prev]');
+      const nextBtn = showcase.querySelector('[data-showcase-next]');
+      const durationSec = parseFloat(showcase.dataset.autoplay) || 6;
+      const durationMs = durationSec * 1000;
+
+      let currentIndex = 0;
+      let startTime = performance.now();
+      let rafId = null;
+      let isPaused = false;
+      let lastTimestamp = performance.now();
+
+      function updateSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        currentIndex = index;
+
+        slides.forEach((s, idx) => {
+          const active = idx === currentIndex;
+          s.classList.remove('is-active');
+          if (active) {
+            void s.offsetWidth; // trigger reflow to cleanly restart animations
+            s.classList.add('is-active');
+            s.setAttribute('aria-hidden', 'false');
+          } else {
+            s.setAttribute('aria-hidden', 'true');
+          }
+        });
+
+        tabs.forEach((t, idx) => {
+          const active = idx === currentIndex;
+          t.classList.toggle('is-active', active);
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+          const bar = t.querySelector('.lame-new-showcase__tab-progress');
+          if (bar) bar.style.width = '0%';
+        });
+
+        startProgress();
+      }
+
+      function startProgress() {
+        if (rafId) cancelAnimationFrame(rafId);
+        startTime = performance.now();
+        lastTimestamp = performance.now();
+
+        function step(timestamp) {
+          if (isPaused) {
+            startTime += (timestamp - lastTimestamp);
+          }
+          lastTimestamp = timestamp;
+
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(100, (elapsed / durationMs) * 100);
+
+          const activeBar = showcase.querySelector('.lame-new-showcase__tab.is-active .lame-new-showcase__tab-progress');
+          if (activeBar) {
+            activeBar.style.width = progress + '%';
+          }
+
+          if (progress < 100) {
+            rafId = requestAnimationFrame(step);
+          } else {
+            updateSlide(currentIndex + 1);
+          }
+        }
+
+        rafId = requestAnimationFrame(step);
+      }
+
+      tabs.forEach((tab, idx) => {
+        tab.addEventListener('click', () => {
+          updateSlide(idx);
+        });
+      });
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          updateSlide(currentIndex - 1);
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          updateSlide(currentIndex + 1);
+        });
+      }
+
+      showcase.addEventListener('mouseenter', () => {
+        isPaused = true;
+      });
+      showcase.addEventListener('mouseleave', () => {
+        isPaused = false;
+      });
+
+      // Touch swipe gestures on mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      showcase.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        isPaused = true;
+      }, { passive: true });
+      showcase.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        isPaused = false;
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 40) {
+          if (diff < 0) updateSlide(currentIndex + 1);
+          else updateSlide(currentIndex - 1);
+        }
+      }, { passive: true });
+
+      startProgress();
+    }
+
+    initShowcaseBanner();
+
   })();
 </script>
 
@@ -593,6 +1702,38 @@
   "class": "section-wrapper",
   "enabled_on": { "templates": ["index"] },
   "settings": [
+    {
+      "type": "select",
+      "id": "presentation_style",
+      "label": "Presentation style",
+      "options": [
+        { "value": "showcase_banner", "label": "Luxury Split Showcase Banner" },
+        { "value": "cards_carousel", "label": "Product Cards Carousel" }
+      ],
+      "default": "showcase_banner",
+      "info": "Choose between the animated split showcase banner for Lamé signature fragrances or the cards carousel."
+    },
+    {
+      "type": "select",
+      "id": "banner_media_side",
+      "label": "Banner image side (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left side" },
+        { "value": "right", "label": "Right side" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "showcase_autoplay_interval",
+      "label": "Banner slide rotation (seconds)",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 6,
+      "unit": "s"
+    },
+
     { "type": "text", "id": "heading", "label": "Heading", "default": "New Arrivals", "info": "Used as image alt text when a title image is set." },
     {
       "type": "image_picker",
@@ -677,9 +1818,9 @@
       "id": "products_to_show",
       "label": "Products to show",
       "min": 2,
-      "max": 12,
+      "max": 24,
       "step": 1,
-      "default": 8
+      "default": 12
     },
     {
       "type": "range",

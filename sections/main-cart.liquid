@@ -53,10 +53,12 @@
         </div>
 
         {%- unless cart.empty? -%}
-          {% liquid
-            assign free_ship_threshold = section.settings.free_shipping_threshold | default: 999 | times: 100
-          %}
-          {% render 'lame-cart-free-shipping-banner', threshold_cents: free_ship_threshold %}
+          {%- if section.settings.show_free_shipping_banner and section.settings.free_shipping_threshold > 0 -%}
+            {% liquid
+              assign free_ship_threshold = section.settings.free_shipping_threshold | times: 100
+            %}
+            {% render 'lame-cart-free-shipping-banner', threshold_cents: free_ship_threshold %}
+          {%- endif -%}
         {%- endunless -%}
       </div>
 
@@ -189,10 +191,16 @@
       "default": "Review your items and proceed to checkout."
     },
     {
+      "type": "checkbox",
+      "id": "show_free_shipping_banner",
+      "label": "Show free shipping threshold banner",
+      "default": false
+    },
+    {
       "type": "number",
       "id": "free_shipping_threshold",
-      "label": "Free shipping threshold (store currency, e.g. 999 for ₹999)",
-      "default": 999
+      "label": "Free shipping threshold",
+      "default": 0
     },
     {
       "type": "select",

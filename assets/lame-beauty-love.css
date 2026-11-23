@@ -45,10 +45,11 @@
   }
 }
 
-.section--full-width .lame-beauty-love__wrap {
-  max-width: min(100%, var(--page-width, 1200px)) !important;
+.section--full-width .lame-beauty-love__wrap,
+.template-index .lame-beauty-love__wrap {
+  max-width: 100% !important;
   margin-inline: auto !important;
-  padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+  padding-inline: 0 !important;
 }
 
 .lame-beauty-love__header {
@@ -348,40 +349,15 @@ a.lame-beauty-love__copy {
   border-radius: var(--lame-bl-radius);
 }
 
-@media screen and (min-width: 750px) {
+/* Tablet: 3 columns */
+@media screen and (min-width: 750px) and (max-width: 989px) {
   .lame-beauty-love {
     --lame-bl-gap: 0.9rem;
-    --lame-bl-radius: 10px;
+    --lame-bl-col-gap: 0.9rem;
+    --lame-bl-radius: 12px;
     --lame-bl-max-cols: 3;
   }
 
-  /* Discover Beauty (3-column layout): hide incomplete last row if not full */
-  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(1):nth-child(3n + 1) {
-    display: none !important;
-  }
-
-  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(2):nth-child(3n + 1),
-  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(2):nth-child(3n + 1) ~ .lame-beauty-love__item {
-    display: none !important;
-  }
-}
-
-@media screen and (min-width: 990px) {
-  .lame-beauty-love {
-    --lame-bl-max-cols: 3;
-  }
-}
-
-@media screen and (min-width: 1200px) {
-  .lame-beauty-love--category .lame-beauty-love__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: calc((100% - 2 * var(--lame-bl-col-gap)) * 2 / 3 + var(--lame-bl-col-gap));
-    margin-inline: auto;
-  }
-}
-
-/* Tablet: wrapping grid so every card is on the page */
-@media screen and (min-width: 750px) and (max-width: 1199px) {
   .lame-beauty-love__viewport {
     overflow: visible;
   }
@@ -400,82 +376,133 @@ a.lame-beauty-love__copy {
     max-width: none;
     min-width: 0;
   }
+
+  /* Discover Beauty (3-column layout on tablet): hide incomplete last row if not full */
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(1):nth-child(3n + 1) {
+    display: none !important;
+  }
+
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(2):nth-child(3n + 1),
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 4):nth-last-child(2):nth-child(3n + 1) ~ .lame-beauty-love__item {
+    display: none !important;
+  }
 }
 
+/* Desktop: Exactly 4 in a row */
 @media screen and (min-width: 990px) {
   .lame-beauty-love {
-    --lame-bl-gap: 1.25rem;
-    --lame-bl-col-gap: 1.25rem;
+    --lame-bl-gap: clamp(1rem, 1.5vw, 1.35rem);
+    --lame-bl-col-gap: clamp(0.75rem, 1.2vw, 1.15rem);
     --lame-bl-radius: 14px;
-    --lame-bl-max-cols: 3;
+    --lame-bl-max-cols: 4;
+  }
+
+  .lame-beauty-love__grid,
+  .lame-beauty-love--category .lame-beauty-love__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
+  .lame-beauty-love__item {
+    width: auto;
+    max-width: none;
+    min-width: 0;
   }
 
   .lame-beauty-love__card {
-    gap: 0.7rem;
+    gap: 0.65rem;
   }
 
   .lame-beauty-love__brand {
-    max-width: min(75%, 12rem);
-    padding: 0.35rem 0.75rem;
+    max-width: min(72%, 9rem);
+    padding: 0.28rem 0.55rem;
     border-radius: 0 0 0.55rem 0;
     background: rgb(255 255 255 / 0.94);
     box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
   }
 
+  .lame-beauty-love__brand-image {
+    max-width: 3.5rem;
+    max-height: 1.25rem;
+  }
+
   .lame-beauty-love__brand-text {
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
+    font-size: clamp(0.66rem, 0.8vw, 0.74rem);
+    letter-spacing: 0.05em;
     font-weight: 700;
   }
 
   .lame-beauty-love__badge {
-    bottom: 0.75rem;
-    padding: 0.35rem 0.85rem;
-    font-size: 0.76rem;
+    bottom: 0.65rem;
+    padding: 0.28rem 0.65rem;
+    font-size: clamp(0.6rem, 0.75vw, 0.7rem);
     border-radius: 0.45rem;
   }
 
   .lame-beauty-love__title {
-    font-size: 1.05rem;
+    font-size: clamp(0.85rem, 1.05vw, 0.98rem);
   }
 
   .lame-beauty-love__subtitle {
-    font-size: 0.86rem;
+    font-size: clamp(0.72rem, 0.86vw, 0.8rem);
+  }
+
+  .lame-beauty-love__cta-btn {
+    font-size: clamp(0.62rem, 0.74vw, 0.7rem);
+    padding: 0.26rem 0.8rem;
+  }
+
+  /* Discover Beauty (4-column layout): hide incomplete last row if not full (1, 2, or 3 leftovers) */
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 5):nth-last-child(1):nth-child(4n + 1) {
+    display: none !important;
+  }
+
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 5):nth-last-child(2):nth-child(4n + 1),
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 5):nth-last-child(2):nth-child(4n + 1) ~ .lame-beauty-love__item {
+    display: none !important;
+  }
+
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 5):nth-last-child(3):nth-child(4n + 1),
+  .lame-beauty-love:not(.lame-beauty-love--category) .lame-beauty-love__grid > .lame-beauty-love__item:nth-child(n + 5):nth-last-child(3):nth-child(4n + 1) ~ .lame-beauty-love__item {
+    display: none !important;
   }
 }
 
 @media screen and (min-width: 1200px) {
   .lame-beauty-love {
-    --lame-bl-gap: 1.4rem;
-    --lame-bl-col-gap: 1.4rem;
+    --lame-bl-gap: 1.35rem;
+    --lame-bl-col-gap: 1.15rem;
     --lame-bl-radius: 16px;
-    --lame-bl-max-cols: 3;
+    --lame-bl-max-cols: 4;
   }
 
   .lame-beauty-love__brand {
-    max-width: min(80%, 13.5rem);
-    padding: 0.42rem 0.88rem;
+    max-width: min(76%, 10.5rem);
+    padding: 0.35rem 0.65rem;
     border-radius: 0 0 0.65rem 0;
   }
 
   .lame-beauty-love__brand-text {
-    font-size: 0.82rem;
-    letter-spacing: 0.07em;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
   }
 
   .lame-beauty-love__badge {
-    bottom: 0.85rem;
-    padding: 0.38rem 0.95rem;
-    font-size: 0.8rem;
+    bottom: 0.75rem;
+    padding: 0.32rem 0.75rem;
+    font-size: 0.72rem;
     border-radius: 0.5rem;
   }
 
   .lame-beauty-love__title {
-    font-size: 1.12rem;
+    font-size: 1.02rem;
   }
 
   .lame-beauty-love__subtitle {
-    font-size: 0.92rem;
+    font-size: 0.84rem;
   }
 }
 

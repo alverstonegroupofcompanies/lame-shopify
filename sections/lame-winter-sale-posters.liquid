@@ -8,9 +8,29 @@
   endif
 
   assign max_products = section.settings.max_products | default: 12
+  assign total_pool_limit = 120
   assign matched_count = 0
   assign seen_handles = '||'
-  assign brand_tokens = 'plum,himalaya,bombay,rashel,vaseline,sirona,nivea,sebamed,cetaphil,jovees' | split: ','
+
+  assign filter_brands = ''
+  for block in section.blocks
+    assign b_name = block.settings.brand | strip
+    assign b_other = block.settings.brand_other | strip
+    if b_name == 'other' and b_other != blank
+      assign b_name = b_other
+    elsif b_name == 'custom'
+      assign b_name = ''
+    endif
+    if b_name != blank
+      assign b_match = b_name | append: '::'
+      unless filter_brands contains b_match
+        assign filter_brands = filter_brands | append: b_name | append: '::'
+      endunless
+    endif
+  endfor
+  assign filter_brands_array = filter_brands | split: '::'
+
+  assign b_token_map = 'Plum:plum:plum|Himalaya:himalaya:himalaya|Bombay Shaving Company:bombay-shaving-company:bombay|DR.RASHEL:dr-rashel:rashel|Vaseline:vaseline:vaseline|Sirona:sirona:sirona|NIVEA:nivea:nivea|SebaMed:sebamed:sebamed|Cetaphil:cetaphil:cetaphil|Jovees Herbal:jovees-herbal:jovees' | split: '|'
 
   assign search_col = section.settings.collection
   if search_col == blank or search_col.products.size == 0
@@ -26,11 +46,42 @@
 
 {%- capture matched_products_markup -%}
   {%- if section.settings.curated_products != blank and section.settings.curated_products.count > 0 -%}
-    {%- for product in section.settings.curated_products limit: max_products -%}
+    {%- for product in section.settings.curated_products limit: total_pool_limit -%}
       {%- assign p_handle = '||' | append: product.handle | append: '||' -%}
       {%- if seen_handles contains p_handle -%}{%- continue -%}{%- endif -%}
       {%- assign seen_handles = seen_handles | append: product.handle | append: '||' -%}
-      <li class="lame-winter-brands__product-item">
+
+      {%- assign p_vendor = product.vendor | downcase -%}
+      {%- assign p_title = product.title | downcase -%}
+      {%- assign p_tags = product.tags | join: ' ' | downcase -%}
+      {%- assign p_matched_brands = '' -%}
+
+      {%- for entry in b_token_map -%}
+        {%- assign parts = entry | split: ':' -%}
+        {%- assign b_name = parts[0] | downcase -%}
+        {%- assign b_handle = parts[1] -%}
+        {%- assign b_token = parts[2] -%}
+        {%- if p_vendor contains b_name or p_title contains b_name or p_tags contains b_name or p_vendor contains b_token or p_title contains b_token -%}
+          {%- assign p_matched_brands = p_matched_brands | append: b_handle | append: ' ' -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- for fb in filter_brands_array -%}
+        {%- assign fb_down = fb | downcase -%}
+        {%- assign fb_h = fb | handleize -%}
+        {%- unless p_matched_brands contains fb_h -%}
+          {%- if p_vendor contains fb_down or p_title contains fb_down or p_tags contains fb_down -%}
+            {%- assign p_matched_brands = p_matched_brands | append: fb_h | append: ' ' -%}
+          {%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+
+      <li class="lame-winter-brands__product-item"
+          data-winter-item
+          data-brands="{{ p_matched_brands | strip }}"
+          data-vendor="{{ product.vendor | downcase | escape }}"
+          data-title="{{ product.title | downcase | escape }}"
+      >
         {% render 'lame-flash-deal-card',
           product: product,
           add_to_cart_label: 'Add to cart',
@@ -41,28 +92,54 @@
       </li>
       {%- assign matched_count = matched_count | plus: 1 -%}
     {%- endfor -%}
-  {%- else -%}
-    {%- comment -%} 1. Primary collection scan for matching brand products {%- endcomment -%}
-    {%- if search_col != blank and search_col.products.size > 0 -%}
-      {%- for product in search_col.products -%}
-        {%- if matched_count >= max_products -%}{%- break -%}{%- endif -%}
+  {%- endif -%}
+
+  {%- assign scan_cols = 'all,our-products,skin-care,bath-body,baby-mom,fragrance,wellness,make-up,hair-care' | split: ',' -%}
+  {%- for col_name in scan_cols -%}
+    {%- if matched_count >= total_pool_limit -%}{%- break -%}{%- endif -%}
+    {%- assign extra_c = collections[col_name] -%}
+    {%- if extra_c != blank and extra_c.products.size > 0 -%}
+      {%- for product in extra_c.products -%}
+        {%- if matched_count >= total_pool_limit -%}{%- break -%}{%- endif -%}
         {%- assign p_handle = '||' | append: product.handle | append: '||' -%}
         {%- if seen_handles contains p_handle -%}{%- continue -%}{%- endif -%}
 
         {%- assign p_vendor = product.vendor | downcase -%}
         {%- assign p_title = product.title | downcase -%}
+        {%- assign p_tags = product.tags | join: ' ' | downcase -%}
+        {%- assign p_matched_brands = '' -%}
         {%- assign is_match = false -%}
 
-        {%- for b in brand_tokens -%}
-          {%- if p_vendor contains b or p_title contains b -%}
+        {%- for entry in b_token_map -%}
+          {%- assign parts = entry | split: ':' -%}
+          {%- assign b_name = parts[0] | downcase -%}
+          {%- assign b_handle = parts[1] -%}
+          {%- assign b_token = parts[2] -%}
+          {%- if p_vendor contains b_name or p_title contains b_name or p_tags contains b_name or p_vendor contains b_token or p_title contains b_token -%}
             {%- assign is_match = true -%}
-            {%- break -%}
+            {%- assign p_matched_brands = p_matched_brands | append: b_handle | append: ' ' -%}
           {%- endif -%}
+        {%- endfor -%}
+
+        {%- for fb in filter_brands_array -%}
+          {%- assign fb_down = fb | downcase -%}
+          {%- assign fb_h = fb | handleize -%}
+          {%- unless p_matched_brands contains fb_h -%}
+            {%- if p_vendor contains fb_down or p_title contains fb_down or p_tags contains fb_down -%}
+              {%- assign is_match = true -%}
+              {%- assign p_matched_brands = p_matched_brands | append: fb_h | append: ' ' -%}
+            {%- endif -%}
+          {%- endunless -%}
         {%- endfor -%}
 
         {%- if is_match -%}
           {%- assign seen_handles = seen_handles | append: product.handle | append: '||' -%}
-          <li class="lame-winter-brands__product-item">
+          <li class="lame-winter-brands__product-item"
+              data-winter-item
+              data-brands="{{ p_matched_brands | strip }}"
+              data-vendor="{{ product.vendor | downcase | escape }}"
+              data-title="{{ product.title | downcase | escape }}"
+          >
             {% render 'lame-flash-deal-card',
               product: product,
               add_to_cart_label: 'Add to cart',
@@ -75,48 +152,7 @@
         {%- endif -%}
       {%- endfor -%}
     {%- endif -%}
-
-    {%- comment -%} 2. Cross-category scan to reach up to 12 products if needed {%- endcomment -%}
-    {%- if matched_count < max_products -%}
-      {%- assign extra_cols = 'skin-care,bath-body,our-products,baby-mom' | split: ',' -%}
-      {%- for col_name in extra_cols -%}
-        {%- if matched_count >= max_products -%}{%- break -%}{%- endif -%}
-        {%- assign extra_c = collections[col_name] -%}
-        {%- if extra_c != blank and extra_c.products.size > 0 -%}
-          {%- for product in extra_c.products -%}
-            {%- if matched_count >= max_products -%}{%- break -%}{%- endif -%}
-            {%- assign p_handle = '||' | append: product.handle | append: '||' -%}
-            {%- if seen_handles contains p_handle -%}{%- continue -%}{%- endif -%}
-
-            {%- assign p_vendor = product.vendor | downcase -%}
-            {%- assign p_title = product.title | downcase -%}
-            {%- assign is_match = false -%}
-
-            {%- for b in brand_tokens -%}
-              {%- if p_vendor contains b or p_title contains b -%}
-                {%- assign is_match = true -%}
-                {%- break -%}
-              {%- endif -%}
-            {%- endfor -%}
-
-            {%- if is_match -%}
-              {%- assign seen_handles = seen_handles | append: product.handle | append: '||' -%}
-              <li class="lame-winter-brands__product-item">
-                {% render 'lame-flash-deal-card',
-                  product: product,
-                  add_to_cart_label: 'Add to cart',
-                  sold_out_label: 'Sold out',
-                  save_label_prefix: 'You save',
-                  show_wishlist: false
-                %}
-              </li>
-              {%- assign matched_count = matched_count | plus: 1 -%}
-            {%- endif -%}
-          {%- endfor -%}
-        {%- endif -%}
-      {%- endfor -%}
-    {%- endif -%}
-  {%- endif -%}
+  {%- endfor -%}
 {%- endcapture -%}
 
 <section
@@ -191,17 +227,91 @@
 
     {%- comment -%} 2. Relevant Brand Products (Up to 12 Max) {%- endcomment -%}
     {%- if matched_count > 0 -%}
+      {%- liquid
+        assign p_heading = section.settings.products_heading | default: 'Winter Care Essentials'
+        assign p_subheading = section.settings.products_subheading | default: 'Curated cold-weather hydration & barrier repair from our top featured brands'
+        assign p_banner_img = section.settings.products_banner_image
+      -%}
+
       <div class="lame-winter-brands__products-section">
-        {%- if section.settings.products_heading != blank or section.settings.products_subheading != blank -%}
-          <div class="lame-winter-brands__products-header">
-            {%- if section.settings.products_heading != blank -%}
-              <h2 class="lame-winter-brands__products-title">{{ section.settings.products_heading | escape }}</h2>
-            {%- endif -%}
-            {%- if section.settings.products_subheading != blank -%}
-              <p class="lame-winter-brands__products-subtitle">{{ section.settings.products_subheading | escape }}</p>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
+        <!-- Campaign Title Banner ("Made Like Image Instead" - Nykaa Style Transition) -->
+        <div class="lame-winter-brands__banner-wrap">
+          {%- if p_banner_img != blank -%}
+            <div class="lame-winter-brands__custom-banner">
+              {{ p_banner_img | image_url: width: 1400 | image_tag:
+                class: 'lame-winter-brands__custom-banner-img',
+                loading: 'lazy',
+                alt: p_heading | escape
+              }}
+            </div>
+          {%- else -%}
+            <div class="lame-winter-brands__graphic-banner" role="region" aria-label="{{ p_heading | escape }}">
+              <!-- Floating Frost Crystals & Sparkles -->
+              <svg class="lame-winter-brands__banner-snowflake lame-winter-brands__banner-snowflake--top-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"></line>
+              </svg>
+              <svg class="lame-winter-brands__banner-snowflake lame-winter-brands__banner-snowflake--top-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"></line>
+              </svg>
+              <svg class="lame-winter-brands__banner-snowflake lame-winter-brands__banner-snowflake--bottom-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"></line>
+              </svg>
+              <svg class="lame-winter-brands__banner-snowflake lame-winter-brands__banner-snowflake--bottom-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"></line>
+              </svg>
+
+              <span class="lame-winter-brands__banner-kicker">
+                <span class="lame-winter-brands__banner-kicker-dot"></span>
+                COLD-WEATHER CURATION &bull; EXCLUSIVE WINTER EDIT
+                <span class="lame-winter-brands__banner-kicker-dot"></span>
+              </span>
+
+              {%- if p_heading != blank -%}
+                <h2 class="lame-winter-brands__banner-title">
+                  {{ p_heading | escape }}
+                </h2>
+              {%- endif -%}
+
+              {%- if p_subheading != blank -%}
+                <p class="lame-winter-brands__banner-subtitle">
+                  {{ p_subheading | escape }}
+                </p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          <!-- Smooth Seamless Blend to Product Grid -->
+          <div class="lame-winter-brands__blend-fade" aria-hidden="true"></div>
+
+          {%- if filter_brands_array.size > 0 -%}
+            <div class="lame-winter-brands__chips-container">
+              <div class="lame-winter-brands__chips-scroll" data-winter-chips-scroll role="tablist" aria-label="Winter brand filters">
+                <button type="button" class="lame-winter-brands__chip is-active" data-winter-filter-chip="all">
+                  All Brands ({{ matched_count }})
+                </button>
+                {%- for fb in filter_brands_array -%}
+                  {%- if fb != blank -%}
+                    <button type="button" class="lame-winter-brands__chip" data-winter-filter-chip="{{ fb | handleize }}">
+                      {{ fb }}
+                    </button>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
 
         <ul class="lame-winter-brands__products-grid" role="list">
           {{ matched_products_markup }}
@@ -247,6 +357,113 @@
         }
       });
     });
+
+    // Nykaa-style brand filter chips & Randomizer
+    const grid = section.querySelector('.lame-winter-brands__products-grid');
+    const chips = Array.from(section.querySelectorAll('[data-winter-filter-chip]'));
+    const allItems = Array.from(section.querySelectorAll('[data-winter-item]'));
+    if (!grid || chips.length === 0 || allItems.length === 0) return;
+
+    const maxVisible = parseInt('{{ max_products | default: 12 }}', 10) || 12;
+
+    // Helper: checks if a product item matches target brand
+    function matchesBrand(item, target) {
+      if (target === 'all') return true;
+      const brands = (item.dataset.brands || '').toLowerCase().split(/\s+/).filter(Boolean);
+      if (brands.includes(target)) return true;
+
+      const vendor = (item.dataset.vendor || '').toLowerCase();
+      const title = (item.dataset.title || '').toLowerCase();
+      const cleanTarget = target.replace(/-/g, ' ');
+
+      if (vendor.includes(cleanTarget) || title.includes(cleanTarget)) return true;
+
+      const parts = target.split('-');
+      for (const p of parts) {
+        if (p.length >= 4 && (vendor.includes(p) || title.includes(p))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Fisher-Yates random shuffle
+    function shuffle(array) {
+      const arr = array.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+      }
+      return arr;
+    }
+
+    // Filter & display products randomly on every click or refresh
+    function filterProducts(targetChip) {
+      const target = (targetChip || 'all').toLowerCase().trim();
+
+      // Find all matching items
+      let matching = allItems.filter((item) => matchesBrand(item, target));
+
+      // Truly randomize matching items on EVERY click
+      matching = shuffle(matching);
+
+      // Select up to maxVisible
+      const visible = matching.slice(0, maxVisible);
+
+      // Hide all items safely
+      allItems.forEach((item) => {
+        item.hidden = true;
+        item.classList.add('is-hidden');
+        item.style.display = 'none';
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(6px)';
+      });
+
+      // Show selected items with smooth fade-in
+      visible.forEach((item, idx) => {
+        item.hidden = false;
+        item.classList.remove('is-hidden');
+        item.style.display = '';
+        grid.appendChild(item);
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            item.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+          }, idx * 18);
+        });
+      });
+
+      // Empty state handler
+      let emptyMsg = grid.querySelector('.lame-winter-brands__empty-notice');
+      if (visible.length === 0) {
+        if (!emptyMsg) {
+          emptyMsg = document.createElement('div');
+          emptyMsg.className = 'lame-winter-brands__empty-notice';
+          emptyMsg.style.cssText = 'grid-column: 1 / -1; text-align: center; padding: 48px 20px; color: #64748b; font-size: 15px; font-weight: 500;';
+          grid.appendChild(emptyMsg);
+        }
+        emptyMsg.textContent = 'Curated winter products for this brand will be available shortly.';
+        emptyMsg.style.display = '';
+      } else if (emptyMsg) {
+        emptyMsg.style.display = 'none';
+      }
+    }
+
+    // Attach click listeners to chips
+    chips.forEach((chip) => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        chips.forEach((c) => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        filterProducts(chip.dataset.winterFilterChip);
+      });
+    });
+
+    // Initial shuffle and render on page load
+    filterProducts('all');
   })();
 </script>
 {%- endif -%}
@@ -298,9 +515,9 @@
       "type": "range",
       "id": "max_products",
       "label": "Maximum products to display",
-      "min": 4,
-      "max": 16,
-      "step": 2,
+      "min": 6,
+      "max": 30,
+      "step": 6,
       "default": 12
     },
     {
@@ -317,14 +534,22 @@
       "info": "Overrides automatic brand matching with specific chosen products."
     },
     {
+      "type": "image_picker",
+      "id": "products_banner_image",
+      "label": "Custom title banner image (optional)",
+      "info": "Upload a promotional banner image (e.g. Nykaa campaign strip). If left blank, the built-in winter graphic banner will be displayed."
+    },
+    {
       "type": "text",
       "id": "products_heading",
-      "label": "Products section title (optional)"
+      "label": "Products section title",
+      "default": "Winter Care Essentials"
     },
     {
       "type": "text",
       "id": "products_subheading",
-      "label": "Products section subtitle (optional)"
+      "label": "Products section subtitle",
+      "default": "Curated cold-weather hydration & barrier repair from our top featured brands"
     },
     {
       "type": "range",

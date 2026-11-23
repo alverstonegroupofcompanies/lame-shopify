@@ -101,7 +101,7 @@
 {%- if show_section -%}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>
   <section
-    class="section section--page-width color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }} lame-home-hero--fit-{{ image_fit }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
+    class="section section--{{ section.settings.section_width | default: 'full-width' }} color-{{ section.settings.color_scheme }} lame-home-hero lame-home-hero--{{ hero_height }} lame-home-hero--mobile-{{ hero_height_mobile }} lame-home-hero--fit-{{ image_fit }}{% if has_mobile_carousel %} lame-home-hero--has-mobile-banners{% endif %}"
     data-testid="hero-slideshow"
     style="--lame-hero-height: {{ lame_hero_h }}; --lame-hero-height-desktop: {{ lame_hero_h_desktop }}; --lame-hero-height-mobile: {{ lame_hero_h_mobile }}; --lame-hero-desktop-ratio: {{ desktop_banner_ratio }}; --lame-hero-mobile-ratio: {{ mobile_banner_ratio }};"
     {{ section.shopify_attributes }}
@@ -408,8 +408,19 @@
     background: transparent;
   }
 
-  .lame-home-hero.section.section--page-width,
   .lame-home-hero.section.section--full-width {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .lame-home-hero.section.section--page-width {
     display: block !important;
     width: 100% !important;
     max-width: var(--page-width, 1200px) !important;
@@ -809,6 +820,16 @@
       "id": "accessibility_label",
       "label": "Accessibility label",
       "default": "Homepage hero banner"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Section width",
+      "options": [
+        { "value": "page-width", "label": "Page width" },
+        { "value": "full-width", "label": "Full width" }
+      ],
+      "default": "full-width"
     },
     {
       "type": "header",

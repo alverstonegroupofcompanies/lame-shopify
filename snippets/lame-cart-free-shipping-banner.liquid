@@ -1,16 +1,20 @@
 {%- doc -%}
   Free-shipping progress banner for cart page.
-  @param {number} [threshold_cents] - Free shipping threshold in cents (default 99900 = ₹999)
+  @param {number} [threshold_cents] - Free shipping threshold in cents
 {%- enddoc -%}
 
 {%- liquid
-  assign threshold = threshold_cents | default: 99900
+  assign threshold = threshold_cents | default: 0
   assign cart_total = cart.total_price
   assign remaining = threshold | minus: cart_total
   if remaining < 0
     assign remaining = 0
   endif
-  assign progress = cart_total | times: 100 | divided_by: threshold
+  if threshold > 0
+    assign progress = cart_total | times: 100 | divided_by: threshold
+  else
+    assign progress = 100
+  endif
   if progress > 100
     assign progress = 100
   endif
@@ -23,7 +27,7 @@
   endif
 -%}
 
-{%- unless cart.empty? -%}
+{%- if threshold > 0 and cart.empty? == false -%}
   <div
     class="lame-cart-shipping-banner{% if unlocked %} lame-cart-shipping-banner--unlocked{% endif %}"
     role="status"
@@ -81,4 +85,4 @@
       </div>
     </div>
   </div>
-{%- endunless -%}
+{%- endif -%}

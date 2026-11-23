@@ -49,9 +49,9 @@ body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero.sectio
 
 body.template-index .shopify-section:has(.lame-home-hero) .lame-home-hero__slideshow {
   width: 100% !important;
-  max-width: min(100%, var(--page-width, 1200px)) !important;
-  margin-inline: auto !important;
-  padding-inline: var(--lame-flash-edge, clamp(1rem, 2.5vw, 2rem)) !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
   box-sizing: border-box !important;
 }
 
@@ -133,7 +133,7 @@ body.template-index .shopify-section:has([class*="gif-banner"]) {
   margin-inline: 0 !important;
   padding-inline: 0 !important;
   margin-top: 0 !important;
-  margin-bottom: 0 !important;
+  margin-bottom: var(--lame-homepage-section-gap, clamp(44px, 4.8vw, 60px)) !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   overflow-x: clip;
@@ -177,8 +177,8 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
   display: block !important;
 }
 
-body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is([class*="ai-gif-banner-image"], img),
-body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-gif-banner-image"], img) {
+body.template-index .shopify-section:has([class*="ai-gif-banner"]) :is([class*="ai-gif-banner-image"], img:not(.lame-oy-card__graphic-img)),
+body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-gif-banner-image"], img:not(.lame-oy-card__graphic-img)) {
   width: 100% !important;
   height: auto !important;
   max-width: 100% !important;
@@ -194,78 +194,48 @@ body.template-index .shopify-section:has([class*="gif-banner"]) :is([class*="ai-
   object-position: center !important;
 }
 
-/* GIF banner starts flush after header when it is the first section */
+/* Nykaa spacing above hero banner below navbar */
 .template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]):first-child,
 .template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]):first-child {
-  margin-top: 0 !important;
-  margin-block-start: 0 !important;
-  padding-top: 0 !important;
-  padding-block-start: 0 !important;
+  margin-top: clamp(16px, 2.5vw, 32px) !important;
+  margin-block-start: clamp(16px, 2.5vw, 32px) !important;
   border-top: none !important;
 }
 
-/* Flush GIF banner with following section (Home hero banner) — eliminates blank space below */
+/* Nykaa-Style Section Gaps: Consistent 52px breathing room below banner */
 .template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]),
 .template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) {
-  margin-bottom: 0 !important;
-  margin-block-end: 0 !important;
+  margin-bottom: var(--lame-homepage-section-gap, clamp(44px, 4.8vw, 60px)) !important;
   padding-bottom: 0 !important;
   padding-block-end: 0 !important;
 }
 
 .template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]) + .shopify-section,
-.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) + .shopify-section,
-.template-index .content-for-layout > .shopify-section:has([class*="ai-gif-banner"]) + .shopify-section:has(.lame-home-hero),
-.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) + .shopify-section:has(.lame-home-hero) {
+.template-index .content-for-layout > .shopify-section:has([class*="gif-banner"]) + .shopify-section {
   margin-top: 0 !important;
   margin-block-start: 0 !important;
-  padding-top: 0 !important;
-  padding-block-start: 0 !important;
 }
 
-/* PC: minimum breathing room between sections below the hero */
+/* PC: Consistent Nykaa section gap & 100px side margin for all homepage sections */
 @media screen and (min-width: 990px) {
+  :root,
   .template-index {
-    --lame-home-section-min-gap: clamp(2.25rem, 3.2vw, 3.5rem);
+    --lame-homepage-side-margin: 100px !important;
+    --lame-home-section-min-gap: var(--lame-homepage-section-gap, clamp(44px, 4.8vw, 60px));
   }
 
-  .template-index .content-for-layout > .shopify-section:not(:has(.lame-home-hero)):not(:has([class*="ai-gif-banner"])):not(:has([class*="gif-banner"])) + .shopify-section {
-    margin-top: var(--lame-home-section-min-gap);
+  body.template-index #MainContent {
+    padding-inline: 100px !important;
   }
 
-  .template-index .content-for-layout > .shopify-section:has(.lame-discount-tiles) {
-    margin-top: 1.25rem;
-  }
-
-  .template-index .content-for-layout > .shopify-section:has(.lame-discount-tiles) + .shopify-section {
-    margin-top: 1.25rem;
-  }
-
-  /* When sections have background colors, eliminate margins so they touch seamlessly at the mid seam */
-  .template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg),
-  .template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg) + .shopify-section,
-  .template-index .content-for-layout > .shopify-section:has(.lame-new-products) + .shopify-section,
-  .template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-flash-deal--has-section-bg),
-  .template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-new-products) {
-    margin-top: 0 !important;
-    margin-block-start: 0 !important;
+  .template-index .content-for-layout > .shopify-section:not(:last-child) {
+    margin-bottom: var(--lame-homepage-section-gap, clamp(44px, 4.8vw, 60px)) !important;
   }
 }
 
-/* Sections with full background color: touch seamlessly at mid with 0px whitespace across all viewports */
-.template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg),
-.template-index .content-for-layout > .shopify-section:has(.lame-new-products.lame-flash-deal--has-section-bg) {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  margin-block: 0 !important;
-}
-
-.template-index .content-for-layout > .shopify-section:has(.lame-flash-deal--has-section-bg) + .shopify-section,
-.template-index .content-for-layout > .shopify-section:has(.lame-new-products) + .shopify-section,
-.template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-flash-deal--has-section-bg),
-.template-index .content-for-layout > .shopify-section + .shopify-section:has(.lame-new-products) {
-  margin-top: 0 !important;
-  margin-block-start: 0 !important;
+/* Sections maintain clean Nykaa spacing across all viewports */
+.template-index .content-for-layout > .shopify-section:not(:last-child) {
+  margin-bottom: var(--lame-homepage-section-gap, clamp(44px, 4.8vw, 60px)) !important;
 }
 
 /* Hero fills width: full bleed edge to edge */
