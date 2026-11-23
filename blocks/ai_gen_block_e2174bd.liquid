@@ -25,15 +25,35 @@
     assign valid_slides_count = valid_slides_count | plus: 1
   endif
 
+  assign enable_elite_overlay = block.settings.enable_elite_pro_overlay
+  if enable_elite_overlay == nil
+    assign enable_elite_overlay = true
+  endif
+
   assign img_3 = block.settings.third_banner_image
+  if block.settings.elite_pro_custom_bg != blank
+    assign img_3 = block.settings.elite_pro_custom_bg
+  endif
+
   assign link_3 = block.settings.third_banner_link
   if link_3 == blank or link_3 == '/products/elite-pro-6-months'
     assign link_3 = '/pages/elite-pro'
   endif
-  if img_3 != blank and block.settings.enable_third_banner != false
-    assign valid_slides_count = valid_slides_count | plus: 1
-  else
-    assign img_3 = blank
+
+  assign has_slide_3 = false
+  if block.settings.enable_third_banner != false
+    if enable_elite_overlay
+      if img_3 != blank
+        assign elite_bg_asset = img_3 | image_url: width: 2400
+      else
+        assign elite_bg_asset = 'lame-elite-pro-bg.jpg' | asset_url
+      endif
+      assign valid_slides_count = valid_slides_count | plus: 1
+      assign has_slide_3 = true
+    elsif img_3 != blank
+      assign valid_slides_count = valid_slides_count | plus: 1
+      assign has_slide_3 = true
+    endif
   endif
 
   assign img_4 = block.settings.fourth_banner_image
@@ -78,9 +98,25 @@
     assign card_radius = 0
   endif
   assign img_fit = block.settings.image_fit | default: 'cover'
+
+  assign maintain_ratio_mb = block.settings.maintain_aspect_ratio_mobile
+  if maintain_ratio_mb == nil
+    assign maintain_ratio_mb = true
+  endif
+
+  assign banner_aspect_ratio = block.settings.mobile_aspect_ratio
+  if banner_aspect_ratio == blank or banner_aspect_ratio == 'auto'
+    if img_1 != blank and img_1.aspect_ratio != blank and img_1.aspect_ratio > 0
+      assign banner_aspect_ratio = img_1.aspect_ratio
+    elsif img_2 != blank and img_2.aspect_ratio != blank and img_2.aspect_ratio > 0
+      assign banner_aspect_ratio = img_2.aspect_ratio
+    else
+      assign banner_aspect_ratio = '1024 / 411'
+    endif
+  endif
 -%}
 
-<div class="ai-gif-banner-{{ ai_gen_id }} lame-oy-banner-section" style="--oy-banner-height-desktop: {{ banner_h_desktop }}px; --oy-banner-height-mobile: {{ banner_h_mobile }}px; --oy-slide-width-desktop: {{ slide_width_pct }}%; --oy-card-radius: {{ card_radius }}px; --oy-image-fit: {{ img_fit }}; --oy-slide-gap: 20px;">
+<div class="ai-gif-banner-{{ ai_gen_id }} lame-oy-banner-section" style="--oy-banner-height-desktop: {{ banner_h_desktop }}px; --oy-banner-height-mobile: {{ banner_h_mobile }}px; --oy-slide-width-desktop: {{ slide_width_pct }}%; --oy-card-radius: {{ card_radius }}px; --oy-image-fit: {{ img_fit }}; --oy-slide-gap: 20px; --oy-banner-aspect-ratio: {{ banner_aspect_ratio }}; --oy-maintain-aspect-ratio-mobile: {% if maintain_ratio_mb %}1{% else %}0{% endif %};">
   {%- if valid_slides_count > 0 -%}
     <div class="lame-oy-carousel" id="LameOYCarousel-{{ ai_gen_id }}" data-autoplay="{{ slide_interval_s }}" data-slides-count="{{ valid_slides_count }}" role="region" aria-roledescription="carousel" aria-label="Featured Offers">
       <div class="lame-oy-viewport" data-oy-viewport>
@@ -155,35 +191,29 @@
             {%- assign cur_idx = cur_idx | plus: 1 -%}
           {%- endif -%}
 
-          {%- if img_3 != blank -%}
-            <div class="lame-oy-slide" data-oy-slide data-index="{{ cur_idx }}" role="group" aria-roledescription="slide" aria-label="{{ cur_idx | plus: 1 }} of {{ valid_slides_count }}">
-              <div class="lame-oy-card">
-                <a href="{{ link_3 }}" class="lame-oy-card__link" aria-label="{{ img_3.alt | default: 'Featured Banner' | escape }}">
-                  <div class="lame-oy-card__graphic-fill">
-                    <img
-                      src="{{ img_3 | image_url: width: 2400 }}"
-                      alt="{{ img_3.alt | default: 'Featured Banner' | escape }}"
-                      class="lame-oy-card__graphic-img"
-                      loading="lazy"
-                      decoding="async"
-                      width="{{ img_3.width | default: 2400 }}"
-                      height="{{ img_3.height | default: 800 }}"
-                    >
-                    {%- if block.settings.show_overlay -%}
-                      <div class="lame-oy-card__overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | default: 30 | divided_by: 100.0 }};" aria-hidden="true"></div>
-                    {%- endif -%}
-                    {%- if block.settings.show_content and block.settings.heading != blank or block.settings.subheading != blank -%}
-                      <div class="lame-oy-card__content-layer">
-                        {%- if block.settings.heading != blank -%}
-                          <h2 class="lame-oy-card__heading" style="color: {{ block.settings.text_color | default: '#ffffff' }}; font-size: {{ block.settings.heading_size | default: 48 }}px;">{{ block.settings.heading | escape }}</h2>
-                        {%- endif -%}
-                        {%- if block.settings.subheading != blank -%}
-                          <p class="lame-oy-card__subheading" style="color: {{ block.settings.text_color | default: '#ffffff' }}; font-size: {{ block.settings.subheading_size | default: 18 }}px;">{{ block.settings.subheading | escape }}</p>
-                        {%- endif -%}
-                      </div>
-                    {%- endif -%}
-                  </div>
-                </a>
+          {%- if has_slide_3 -%}
+            <div class="lame-oy-slide lame-oy-slide--elite-pro" data-oy-slide data-index="{{ cur_idx }}" role="group" aria-roledescription="slide" aria-label="{{ cur_idx | plus: 1 }} of {{ valid_slides_count }}">
+              <div class="lame-oy-card lame-oy-card--elite-pro">
+                {%- if enable_elite_overlay -%}
+                  {% render 'lame-elite-pro-banner-slide', block: block, link: link_3, bg_image: elite_bg_asset %}
+                {%- else -%}
+                  <a href="{{ link_3 }}" class="lame-oy-card__link" aria-label="{{ img_3.alt | default: 'Featured Banner' | escape }}">
+                    <div class="lame-oy-card__graphic-fill">
+                      <img
+                        src="{{ img_3 | image_url: width: 2400 }}"
+                        alt="{{ img_3.alt | default: 'Featured Banner' | escape }}"
+                        class="lame-oy-card__graphic-img"
+                        loading="lazy"
+                        decoding="async"
+                        width="{{ img_3.width | default: 2400 }}"
+                        height="{{ img_3.height | default: 800 }}"
+                      >
+                      {%- if block.settings.show_overlay -%}
+                        <div class="lame-oy-card__overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | default: 30 | divided_by: 100.0 }};" aria-hidden="true"></div>
+                      {%- endif -%}
+                    </div>
+                  </a>
+                {%- endif -%}
               </div>
             </div>
             {%- assign cur_idx = cur_idx | plus: 1 -%}
@@ -420,6 +450,8 @@
     overflow: hidden !important;
     background-color: #f8fafc;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    container-type: inline-size;
+    container-name: lame-card;
   }
 
   @media (min-width: 750px) and (max-width: 989px) {
@@ -431,9 +463,21 @@
   @media (max-width: 749px) {
     .lame-oy-card {
       width: 100% !important;
-      height: var(--oy-banner-height-mobile, 260px) !important;
       border-radius: 0 !important;
       box-shadow: none !important;
+      min-height: 0 !important;
+      max-height: none !important;
+    }
+
+    .lame-oy-banner-section[style*="--oy-maintain-aspect-ratio-mobile: 1"] .lame-oy-card,
+    .lame-oy-card {
+      height: auto !important;
+      aspect-ratio: var(--oy-banner-aspect-ratio, 1024 / 411) !important;
+    }
+
+    .lame-oy-banner-section[style*="--oy-maintain-aspect-ratio-mobile: 0"] .lame-oy-card {
+      height: var(--oy-banner-height-mobile, 260px) !important;
+      aspect-ratio: unset !important;
     }
   }
 
@@ -501,6 +545,31 @@
     line-height: 1.35;
   }
 
+  @media screen and (max-width: 749px) {
+    .lame-oy-card__content-layer {
+      padding: clamp(8px, 2.5cqi, 16px) clamp(10px, 3cqi, 20px) !important;
+    }
+    .lame-oy-card__heading {
+      font-size: clamp(14px, 4.2cqi, 22px) !important;
+      line-height: 1.15 !important;
+      margin-bottom: 3px !important;
+    }
+    .lame-oy-card__subheading {
+      font-size: clamp(9px, 2.4cqi, 12px) !important;
+      line-height: 1.25 !important;
+    }
+    .lame-oy-controls {
+      margin-top: 8px !important;
+    }
+    .lame-oy-dot {
+      width: 14px;
+      height: 3px;
+    }
+    .lame-oy-dot.is-active {
+      width: 34px;
+    }
+  }
+
   /* Frosted Glass Floating Navigation Arrows — Hidden per request */
   .lame-oy-nav {
     display: none !important;
@@ -564,6 +633,494 @@
 
   .lame-oy-counter {
     display: none !important;
+  }
+
+  /* ==========================================================================
+     Elite Pro Membership Interactive Banner Overlay
+     ========================================================================== */
+  .lame-elite-hero {
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden !important;
+  }
+
+  .lame-elite-hero__bg-hitarea {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  .lame-elite-hero__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .lame-elite-hero__img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: left center !important;
+    display: block !important;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .lame-oy-card--elite-pro:hover .lame-elite-hero__img {
+    transform: scale(1.02);
+  }
+
+  .lame-elite-hero__veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(186, 0, 106, 0) 0%,
+      rgba(186, 0, 106, 0.1) 32%,
+      rgba(152, 0, 88, 0.55) 48%,
+      rgba(126, 0, 75, 0.85) 70%,
+      rgba(102, 0, 62, 0.95) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .lame-elite-hero__content {
+    position: relative;
+    z-index: 2;
+    width: 58%;
+    max-width: 640px;
+    padding: 24px 36px 24px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    color: #ffffff;
+    box-sizing: border-box;
+    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .lame-elite-hero__header {
+    margin-bottom: 8px;
+  }
+
+  .lame-elite-hero__title {
+    margin: 0;
+    font-family: 'Playfair Display', 'Prata', 'Cormorant Garamond', Georgia, serif !important;
+    font-size: clamp(26px, 2.9vw, 38px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+  }
+
+  .lame-elite-hero__tagline {
+    margin: 5px 0 0 0;
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+    font-size: clamp(13px, 1.2vw, 15.5px);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Special Access Pass - Unboxed / Open Modern Layout (No Enclosing Box) */
+  .lame-elite-hero__offer-bar {
+    position: relative;
+    z-index: 2;
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 12px 0 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: nowrap;
+  }
+
+  .lame-elite-hero__offer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .lame-elite-hero__badge-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lame-elite-hero__crown-icon {
+    display: inline-flex;
+    align-items: center;
+    color: #ffdc69;
+  }
+
+  .lame-elite-hero__badge {
+    font-family: 'Outfit', 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #ffdc69;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .lame-elite-hero__price {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: clamp(18px, 1.85vw, 24px);
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+  }
+
+  .lame-elite-hero__btn {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #ffffff;
+    color: #88004f;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
+  }
+
+  .lame-elite-hero__btn:hover {
+    background: #ffeb85;
+    color: #52002f;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.3);
+  }
+
+  .lame-elite-hero__btn-arrow {
+    transition: transform 0.25s ease;
+  }
+
+  .lame-elite-hero__btn:hover .lame-elite-hero__btn-arrow {
+    transform: translateX(3px);
+  }
+
+  .lame-elite-hero__desc {
+    margin: 0 0 14px 0;
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+    font-size: clamp(12px, 1vw, 13.5px);
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Desktop Benefits Grid */
+  .lame-elite-hero__benefits--desktop {
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    padding-top: 12px;
+    margin-top: 2px;
+  }
+
+  .lame-elite-hero__benefits-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .lame-elite-hero__benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px 14px;
+  }
+
+  .lame-elite-hero__benefit-card {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #ffffff;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .lame-elite-hero__benefit-card:hover {
+    transform: translateX(2px);
+    color: #ffdc69;
+  }
+
+  .lame-elite-hero__benefit-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffdc69;
+    flex-shrink: 0;
+  }
+
+  .lame-elite-hero__benefit-name {
+    white-space: normal;
+  }
+
+  .lame-elite-hero__benefits-mobile {
+    display: none;
+  }
+
+  /* ==========================================================================
+     Text Entrance Animations (When Slide is Active)
+     ========================================================================== */
+  .lame-elite-hero__title,
+  .lame-elite-hero__tagline,
+  .lame-elite-hero__offer-bar,
+  .lame-elite-hero__desc,
+  .lame-elite-hero__benefits,
+  .lame-elite-hero__benefits-mobile {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+
+  .lame-oy-slide.is-active .lame-elite-hero__title {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.12s;
+  }
+
+  .lame-oy-slide.is-active .lame-elite-hero__tagline {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.22s;
+  }
+
+  .lame-oy-slide.is-active .lame-elite-hero__offer-bar {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.32s;
+  }
+
+  .lame-oy-slide.is-active .lame-elite-hero__desc {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.42s;
+  }
+
+  .lame-oy-slide.is-active .lame-elite-hero__benefits,
+  .lame-oy-slide.is-active .lame-elite-hero__benefits-mobile {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.52s;
+  }
+
+  /* ==========================================================================
+     Mobile View (< 750px): Minimal & Responsive Scaling
+     ========================================================================== */
+  @media screen and (max-width: 749px) {
+    .lame-elite-hero {
+      container-type: inline-size;
+      container-name: elite-hero;
+    }
+
+    .lame-elite-hero__veil {
+      background: linear-gradient(
+        90deg,
+        rgba(186, 0, 106, 0) 0%,
+        rgba(186, 0, 106, 0.12) 26%,
+        rgba(152, 0, 88, 0.58) 46%,
+        rgba(126, 0, 75, 0.88) 68%,
+        rgba(95, 0, 58, 0.98) 100%
+      );
+    }
+
+    .lame-elite-hero__content {
+      width: clamp(62%, 64cqi, 68%);
+      max-width: 100%;
+      height: 100%;
+      padding: clamp(5px, 1.4cqi, 9px) clamp(8px, 2.4cqi, 14px) clamp(5px, 1.4cqi, 9px) 0;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+
+    .lame-elite-hero__header {
+      margin-bottom: clamp(1px, 0.3cqi, 3px);
+    }
+
+    .lame-elite-hero__title {
+      font-size: clamp(11.5px, 3.4cqi, 15px) !important;
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+    }
+
+    .lame-elite-hero__tagline {
+      font-size: clamp(7.5px, 2.0cqi, 9.5px);
+      line-height: 1.15;
+      margin: clamp(1px, 0.3cqi, 2px) 0 0 0;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .lame-elite-hero__offer-bar {
+      margin: clamp(2px, 0.7cqi, 4px) 0;
+      gap: clamp(4px, 1.4cqi, 8px);
+      align-items: center;
+    }
+
+    .lame-elite-hero__badge-line {
+      gap: 3px;
+    }
+
+    .lame-elite-hero__crown-icon svg {
+      width: clamp(8px, 2.2cqi, 10px);
+      height: clamp(8px, 2.2cqi, 10px);
+    }
+
+    .lame-elite-hero__badge {
+      font-size: clamp(6.5px, 1.7cqi, 8px);
+      letter-spacing: 0.08em;
+    }
+
+    .lame-elite-hero__price {
+      font-size: clamp(9.5px, 2.8cqi, 12.5px);
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    .lame-elite-hero__btn {
+      padding: clamp(3px, 0.9cqi, 4.5px) clamp(7px, 2.0cqi, 11px);
+      font-size: clamp(7.5px, 2.1cqi, 9.5px);
+      gap: 3px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .lame-elite-hero__btn-arrow {
+      width: clamp(8px, 2.2cqi, 10px);
+      height: clamp(8px, 2.2cqi, 10px);
+    }
+
+    .lame-elite-hero__desc {
+      font-size: clamp(6.5px, 1.8cqi, 8px);
+      line-height: 1.2;
+      margin: clamp(1px, 0.3cqi, 2px) 0 clamp(2px, 0.5cqi, 3px) 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Hide heavy desktop grid on mobile */
+    .lame-elite-hero__benefits--desktop {
+      display: none !important;
+    }
+
+    /* Minimal mobile perks ticker */
+    .lame-elite-hero__benefits-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      padding-top: clamp(2px, 0.5cqi, 3px);
+      margin-top: 1px;
+      width: 100%;
+    }
+
+    .lame-elite-hero__mobile-perks-head {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .lame-elite-hero__mobile-perks-tag {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(6px, 1.6cqi, 7.5px);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+    }
+
+    .lame-elite-hero__mobile-ticker {
+      position: relative;
+      height: clamp(13px, 3.8cqi, 16px);
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .lame-elite-hero__ticker-pill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Outfit', 'Inter', sans-serif;
+      font-size: clamp(7.5px, 2.0cqi, 9px);
+      font-weight: 600;
+      color: #ffffff;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      pointer-events: none;
+    }
+
+    .lame-elite-hero__ticker-pill.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .lame-elite-hero__ticker-icon {
+      color: #ffdc69;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .lame-elite-hero__ticker-icon svg {
+      width: clamp(8px, 2.2cqi, 10px);
+      height: clamp(8px, 2.2cqi, 10px);
+    }
+
+    .lame-elite-hero__ticker-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lame-elite-hero__title,
+    .lame-elite-hero__tagline,
+    .lame-elite-hero__offer-bar,
+    .lame-elite-hero__desc,
+    .lame-elite-hero__benefits,
+    .lame-elite-hero__benefits-mobile,
+    .lame-elite-hero__ticker-pill {
+      transform: none !important;
+      transition: opacity 0.3s ease !important;
+    }
   }
 </style>
 
@@ -859,6 +1416,19 @@
         }, 100);
       });
 
+      // Elite Pro mobile perks ticker
+      var mobileTickers = container.querySelectorAll('[data-elite-mobile-ticker]');
+      mobileTickers.forEach(function(ticker) {
+        var pills = Array.from(ticker.querySelectorAll('.lame-elite-hero__ticker-pill'));
+        if (pills.length <= 1) return;
+        var pIdx = 0;
+        setInterval(function() {
+          pills[pIdx].classList.remove('is-active');
+          pIdx = (pIdx + 1) % pills.length;
+          pills[pIdx].classList.add('is-active');
+        }, 2600);
+      });
+
       // Initial Render
       updatePosition(false);
       startAutoplay();
@@ -1030,6 +1600,41 @@
       "default": 220
     },
     {
+      "type": "checkbox",
+      "id": "maintain_aspect_ratio_mobile",
+      "label": "Maintain same banner ratio on mobile",
+      "default": true,
+      "info": "Keeps mobile banner at true panoramic ratio (matching desktop), scaling down all contents proportionally."
+    },
+    {
+      "type": "select",
+      "id": "mobile_aspect_ratio",
+      "label": "Mobile aspect ratio preset",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto (Match banner image ratio - 2.49:1)"
+        },
+        {
+          "value": "1024 / 411",
+          "label": "Panoramic (2.49:1 / 1024x411)"
+        },
+        {
+          "value": "1024 / 353",
+          "label": "Ultra-Wide (2.90:1 / 1024x353)"
+        },
+        {
+          "value": "16 / 7",
+          "label": "Cinematic (16:7)"
+        },
+        {
+          "value": "16 / 9",
+          "label": "Landscape (16:9)"
+        }
+      ],
+      "default": "auto"
+    },
+    {
       "type": "range",
       "id": "desktop_width_percent",
       "label": "Desktop slide width",
@@ -1170,6 +1775,141 @@
       "step": 2,
       "unit": "px",
       "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Elite Pro Membership Overlay"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_elite_pro_overlay",
+      "label": "Enable Elite Pro text overlay",
+      "default": true,
+      "info": "Displays rich animated text & benefits over the membership banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "elite_pro_custom_bg",
+      "label": "Custom Elite Pro background image",
+      "info": "Optional custom background. Defaults to clean beauty products banner."
+    },
+    {
+      "type": "text",
+      "id": "elite_heading",
+      "label": "Main heading",
+      "default": "MyLamstone Elite Pro Membership"
+    },
+    {
+      "type": "text",
+      "id": "elite_tagline",
+      "label": "Tagline",
+      "default": "Shop More. Save More. Feel Special."
+    },
+    {
+      "type": "text",
+      "id": "elite_badge",
+      "label": "Membership offer badge",
+      "default": "SPECIAL ACCESS PASS"
+    },
+    {
+      "type": "text",
+      "id": "elite_offer_text",
+      "label": "Membership offer text",
+      "default": "Join for ₹199 / 6 months"
+    },
+    {
+      "type": "text",
+      "id": "elite_btn_text",
+      "label": "Button text",
+      "default": "Join Elite Pro →"
+    },
+    {
+      "type": "url",
+      "id": "elite_btn_link",
+      "label": "Button link",
+      "info": "Defaults to /pages/elite-pro"
+    },
+    {
+      "type": "textarea",
+      "id": "elite_description",
+      "label": "Description",
+      "default": "Privileges curated exclusively to elevate your beauty & wellness shopping experience."
+    },
+    {
+      "type": "header",
+      "content": "Member Benefits"
+    },
+    {
+      "type": "text",
+      "id": "elite_b1_title",
+      "label": "Benefit 1 title",
+      "default": "Free Gifts on Orders Above ₹899"
+    },
+    {
+      "type": "text",
+      "id": "elite_b1_desc",
+      "label": "Benefit 1 description",
+      "default": "Delight in complimentary luxury beauty miniatures and gifts on eligible orders."
+    },
+    {
+      "type": "text",
+      "id": "elite_b2_title",
+      "label": "Benefit 2 title",
+      "default": "Refer & Reward"
+    },
+    {
+      "type": "text",
+      "id": "elite_b2_desc",
+      "label": "Benefit 2 description",
+      "default": "Invite friends and earn exciting reward points when they place their first order."
+    },
+    {
+      "type": "text",
+      "id": "elite_b3_title",
+      "label": "Benefit 3 title",
+      "default": "Welcome Gift"
+    },
+    {
+      "type": "text",
+      "id": "elite_b3_desc",
+      "label": "Benefit 3 description",
+      "default": "A special welcome treat credited right upon your Elite Pro membership activation."
+    },
+    {
+      "type": "text",
+      "id": "elite_b4_title",
+      "label": "Benefit 4 title",
+      "default": "Easy Cash on Delivery"
+    },
+    {
+      "type": "text",
+      "id": "elite_b4_desc",
+      "label": "Benefit 4 description",
+      "default": "Seamless, reliable cash on delivery with zero hassle and priority verification."
+    },
+    {
+      "type": "text",
+      "id": "elite_b5_title",
+      "label": "Benefit 5 title",
+      "default": "Member-Only Offers"
+    },
+    {
+      "type": "text",
+      "id": "elite_b5_desc",
+      "label": "Benefit 5 description",
+      "default": "Enjoy exclusive deals, special discounts and privileges available only to Elite Pro members."
+    },
+    {
+      "type": "text",
+      "id": "elite_b6_title",
+      "label": "Benefit 6 title",
+      "default": "Birthday Treat"
+    },
+    {
+      "type": "text",
+      "id": "elite_b6_desc",
+      "label": "Benefit 6 description",
+      "default": "Celebrate your special day with a delightful birthday surprise from MyLamstone."
     }
   ],
   "presets": [

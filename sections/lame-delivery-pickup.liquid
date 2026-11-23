@@ -88,7 +88,23 @@
           ======================================================== {%- endcomment -%}
 
       {%- if section.settings.delivery_enabled -%}
-        <article class="lame-editorial-banner">
+        {%- liquid
+          assign banner_h_dt = section.settings.banner_min_height | default: 640
+          assign banner_h_mb = section.settings.banner_min_height_mobile | default: 480
+          assign banner_pos_dt = section.settings.banner_image_position | default: 'center 10%'
+          assign banner_pos_mb = section.settings.banner_image_position_mobile | default: 'center 8%'
+          assign banner_fit = section.settings.banner_image_fit | default: 'cover'
+        -%}
+        <article
+          class="lame-editorial-banner"
+          style="
+            --banner-min-height: {{ banner_h_dt }}px;
+            --banner-min-height-mobile: {{ banner_h_mb }}px;
+            --banner-image-position: {{ banner_pos_dt }};
+            --banner-image-position-mobile: {{ banner_pos_mb }};
+            --banner-image-fit: {{ banner_fit }};
+          "
+        >
           <div class="lame-editorial-banner__media">
             {%- if section.settings.delivery_image != blank -%}
               {{
@@ -837,6 +853,59 @@
       "type": "url",
       "id": "delivery_button_link",
       "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "banner_min_height",
+      "label": "Delivery banner height (Desktop)",
+      "min": 420,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "default": 640
+    },
+    {
+      "type": "range",
+      "id": "banner_min_height_mobile",
+      "label": "Delivery banner height (Mobile)",
+      "min": 340,
+      "max": 750,
+      "step": 10,
+      "unit": "px",
+      "default": 480
+    },
+    {
+      "type": "select",
+      "id": "banner_image_position",
+      "label": "Banner image focus position",
+      "options": [
+        { "value": "center top", "label": "Top (Shows heads completely)" },
+        { "value": "center 10%", "label": "Upper Center (Recommended)" },
+        { "value": "center 20%", "label": "Center-Top (20%)" },
+        { "value": "center center", "label": "Center" }
+      ],
+      "default": "center 10%"
+    },
+    {
+      "type": "select",
+      "id": "banner_image_position_mobile",
+      "label": "Banner image focus position (Mobile)",
+      "options": [
+        { "value": "center top", "label": "Top (Shows heads completely)" },
+        { "value": "center 8%", "label": "Upper Center (Recommended)" },
+        { "value": "center center", "label": "Center" }
+      ],
+      "default": "center 8%"
+    },
+    {
+      "type": "select",
+      "id": "banner_image_fit",
+      "label": "Banner image sizing",
+      "options": [
+        { "value": "cover", "label": "Cover (Fill entire banner)" },
+        { "value": "contain", "label": "Contain (Show whole image)" }
+      ],
+      "default": "cover"
     },
     {
       "type": "header",
