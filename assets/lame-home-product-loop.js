@@ -29,11 +29,10 @@
 
     const items = () => [...track.querySelectorAll(':scope > .lame-flash-deal__item')];
 
-    const mobileNewArrivals = () =>
-      section.classList.contains('lame-new-products') && window.matchMedia('(max-width: 749px)').matches;
+    const isMobile = () => window.matchMedia('(max-width: 749px)').matches;
 
     const pageSize = () => {
-      if (!mobileNewArrivals()) return 1;
+      if (!isMobile()) return 1;
       const cards = items();
       if (cards.length < 2) return 1;
       const cardWidth = cards[0].offsetWidth + gapOf(track);

@@ -389,16 +389,26 @@
   }
 
   @media (max-width: 749px) {
+    .lame-oy-carousel,
+    .lame-oy-viewport {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
     .lame-oy-track {
-      gap: 12px;
+      gap: 0px !important;
     }
     .lame-oy-slide {
-      flex: 0 0 86%;
-      width: 86%;
-      max-width: 86%;
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      opacity: 1 !important;
+      box-sizing: border-box !important;
     }
     .lame-oy-slide.is-active {
-      opacity: 1;
+      opacity: 1 !important;
     }
   }
 
@@ -420,8 +430,10 @@
 
   @media (max-width: 749px) {
     .lame-oy-card {
+      width: 100% !important;
       height: var(--oy-banner-height-mobile, 260px) !important;
-      border-radius: var(--oy-card-radius, 0px) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
     }
   }
 
@@ -626,14 +638,16 @@
         var viewportWidth = viewport.clientWidth;
         var slideWidth = allSlides[0].getBoundingClientRect().width;
         var computedGap = parseFloat(getComputedStyle(track).gap);
-        var gap = isNaN(computedGap) ? 24 : computedGap;
+        var isMobile = window.innerWidth <= 749;
+        var gap = isNaN(computedGap) ? (isMobile ? 0 : 20) : computedGap;
 
         var targetOffset = - (currentDomIndex * (slideWidth + gap));
 
         if (animate === false) {
           track.style.transition = 'none';
         } else {
-          track.style.transition = 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)';
+          var speed = isMobile ? '0.5s' : '0.85s';
+          track.style.transition = 'transform ' + speed + ' cubic-bezier(0.22, 1, 0.36, 1)';
         }
 
         track.style.transform = 'translate3d(' + targetOffset + 'px, 0, 0)';

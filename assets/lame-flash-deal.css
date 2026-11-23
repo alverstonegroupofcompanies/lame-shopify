@@ -1206,19 +1206,20 @@
 
 @media screen and (max-width: 749px) {
   .lame-flash-deal {
-    --lame-flash-mobile-gap: 0.4rem;
-    --lame-flash-mobile-gutter: 0.55rem;
-    --lame-flash-card-width: calc((100vw - 2.4rem) / 2);
+    --lame-flash-mobile-gap: 8px;
+    --lame-flash-mobile-gutter: 8px;
+    --lame-flash-gap: 8px;
+    --lame-flash-card-width: calc((100vw - 24px) / 2);
     overflow-x: visible;
   }
 
   .lame-flash-deal__carousel {
     grid-template-columns: 1fr;
     gap: 0;
-    padding-inline: var(--lame-flash-mobile-gutter);
+    padding-inline: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
-
-
 
   .lame-flash-deal__nav {
     display: none;
@@ -1230,6 +1231,9 @@
     width: 100%;
     padding-inline: 0;
     scroll-padding-inline: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
   }
 
   .lame-flash-deal__track,
@@ -1241,15 +1245,27 @@
     grid-template-columns: none !important;
     padding: 0.35rem 0 0.75rem;
     align-items: stretch;
-    gap: var(--lame-flash-mobile-gap);
+    gap: 8px !important;
   }
 
   .lame-flash-deal__item,
   .lame-flash-deal__viewport.is-centered .lame-flash-deal__item {
-    flex: 0 0 calc((100cqi - var(--lame-flash-mobile-gap)) / 2) !important;
-    width: calc((100cqi - var(--lame-flash-mobile-gap)) / 2) !important;
-    min-width: calc((100cqi - var(--lame-flash-mobile-gap)) / 2) !important;
-    max-width: none !important;
+    flex: 0 0 calc((100vw - 24px) / 2) !important;
+    width: calc((100vw - 24px) / 2) !important;
+    min-width: calc((100vw - 24px) / 2) !important;
+    max-width: calc((100vw - 24px) / 2) !important;
+    box-sizing: border-box !important;
+    scroll-snap-align: start;
+  }
+
+  @supports (width: 1cqi) {
+    .lame-flash-deal__item,
+    .lame-flash-deal__viewport.is-centered .lame-flash-deal__item {
+      flex: 0 0 calc((100cqi - 8px) / 2) !important;
+      width: calc((100cqi - 8px) / 2) !important;
+      min-width: calc((100cqi - 8px) / 2) !important;
+      max-width: calc((100cqi - 8px) / 2) !important;
+    }
   }
 
   .lame-flash-card {
@@ -1624,27 +1640,91 @@
   .template-index .lame-new-products,
   .template-index .lame-best-sellers {
     --lame-flash-gap: 8px;
-    --lame-flash-card-width: calc((100% - 8px) / 2) !important;
+    --lame-flash-mobile-gap: 8px;
+    --lame-flash-mobile-gutter: 8px;
+    --lame-flash-card-width: calc((100vw - 24px) / 2) !important;
   }
 
-  .lame-flash-deal__track {
+  .lame-flash-deal__carousel,
+  .template-index .lame-flash-deal.section--page-width .lame-flash-deal__carousel,
+  .template-index .lame-flash-deal.section--full-width .lame-flash-deal__carousel,
+  .template-index .lame-flash-deal .lame-flash-deal__carousel,
+  .template-index .lame-new-products .lame-flash-deal__carousel,
+  .template-index .lame-best-sellers .lame-flash-deal__carousel {
+    padding-inline: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .lame-flash-deal__viewport,
+  .template-index .lame-flash-deal .lame-flash-deal__viewport,
+  .template-index .lame-new-products .lame-flash-deal__viewport,
+  .template-index .lame-best-sellers .lame-flash-deal__viewport {
+    container-type: inline-size;
+    container-name: flash-viewport;
+    width: 100% !important;
+    padding-inline: 0 !important;
+    scroll-padding-inline: 0 !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lame-flash-deal__track,
+  .template-index .lame-flash-deal .lame-flash-deal__track,
+  .template-index .lame-new-products .lame-flash-deal__track,
+  .template-index .lame-best-sellers .lame-flash-deal__track {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: max-content !important;
+    max-width: none !important;
     gap: 8px !important;
+    padding: 0.35rem 0 0.75rem !important;
+    align-items: stretch !important;
   }
 
   .lame-flash-deal__item,
   .template-index .lame-flash-deal .lame-flash-deal__item,
   .template-index .lame-new-products .lame-flash-deal__item,
   .template-index .lame-best-sellers .lame-flash-deal__item {
-    flex: 0 0 calc((100% - 8px) / 2) !important;
-    width: calc((100% - 8px) / 2) !important;
-    max-width: calc((100% - 8px) / 2) !important;
+    flex: 0 0 calc((100vw - 24px) / 2) !important;
+    width: calc((100vw - 24px) / 2) !important;
+    min-width: calc((100vw - 24px) / 2) !important;
+    max-width: calc((100vw - 24px) / 2) !important;
     box-sizing: border-box !important;
+    scroll-snap-align: start !important;
   }
 
-  .lame-flash-deal__viewport.is-centered .lame-flash-deal__track {
+  @supports (width: 1cqi) {
+    .lame-flash-deal__item,
+    .template-index .lame-flash-deal .lame-flash-deal__item,
+    .template-index .lame-new-products .lame-flash-deal__item,
+    .template-index .lame-best-sellers .lame-flash-deal__item {
+      flex: 0 0 calc((100cqi - 8px) / 2) !important;
+      width: calc((100cqi - 8px) / 2) !important;
+      min-width: calc((100cqi - 8px) / 2) !important;
+      max-width: calc((100cqi - 8px) / 2) !important;
+    }
+  }
+
+  .lame-flash-deal__viewport.is-centered .lame-flash-deal__track,
+  .template-index .lame-flash-deal .lame-flash-deal__viewport.is-centered .lame-flash-deal__track,
+  .template-index .lame-new-products .lame-flash-deal__viewport.is-centered .lame-flash-deal__track,
+  .template-index .lame-best-sellers .lame-flash-deal__viewport.is-centered .lame-flash-deal__track {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px !important;
     width: 100% !important;
+  }
+
+  .lame-flash-deal__viewport.is-centered .lame-flash-deal__item,
+  .template-index .lame-flash-deal .lame-flash-deal__viewport.is-centered .lame-flash-deal__item,
+  .template-index .lame-new-products .lame-flash-deal__viewport.is-centered .lame-flash-deal__item,
+  .template-index .lame-best-sellers .lame-flash-deal__viewport.is-centered .lame-flash-deal__item {
+    flex: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
 }
