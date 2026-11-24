@@ -298,13 +298,33 @@
           {%- if filter_brands_array.size > 0 -%}
             <div class="lame-winter-brands__chips-container">
               <div class="lame-winter-brands__chips-scroll" data-winter-chips-scroll role="tablist" aria-label="Winter brand filters">
-                <button type="button" class="lame-winter-brands__chip is-active" data-winter-filter-chip="all">
-                  All Brands ({{ matched_count }})
+                <button type="button" class="lame-winter-brands__chip lame-winter-brands__chip--all is-active" data-winter-filter-chip="all" title="All Brands" aria-label="All Brands">
+                  <span class="lame-winter-brands__chip-all-icon" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+                      <rect x="2" y="2" width="5" height="5" rx="1.2" />
+                      <rect x="9" y="2" width="5" height="5" rx="1.2" />
+                      <rect x="2" y="9" width="5" height="5" rx="1.2" />
+                      <rect x="9" y="9" width="5" height="5" rx="1.2" />
+                    </svg>
+                  </span>
+                  <span class="lame-winter-brands__chip-all-text">All Brands</span>
                 </button>
                 {%- for fb in filter_brands_array -%}
                   {%- if fb != blank -%}
-                    <button type="button" class="lame-winter-brands__chip" data-winter-filter-chip="{{ fb | handleize }}">
-                      {{ fb }}
+                    {%- assign fb_handle = fb | handleize -%}
+                    {%- assign fb_block = nil -%}
+                    {%- for block in section.blocks -%}
+                      {%- assign b_name = block.settings.brand | strip -%}
+                      {%- assign b_other = block.settings.brand_other | strip -%}
+                      {%- if b_name == 'other' and b_other != blank -%}{%- assign b_name = b_other -%}{%- endif -%}
+                      {%- if b_name == fb -%}
+                        {%- assign fb_block = block -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    <button type="button" class="lame-winter-brands__chip lame-winter-brands__chip--brand" data-winter-filter-chip="{{ fb_handle }}" title="{{ fb | escape }}" aria-label="{{ fb | escape }}">
+                      <span class="visually-hidden">{{ fb }}</span>
+                      {% render 'lame-winter-brand-logo', brand: fb, block: fb_block %}
                     </button>
                   {%- endif -%}
                 {%- endfor -%}
@@ -587,6 +607,11 @@
           "id": "fallback_asset",
           "label": "Fallback asset name",
           "info": "e.g. winter-brand-plum.jpg"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_image",
+          "label": "Brand logo image (Optional override for filter chip)"
         },
         {
           "type": "select",

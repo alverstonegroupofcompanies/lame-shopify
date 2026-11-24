@@ -1,0 +1,103 @@
+{%- comment -%}
+  Renders authentic brand typography wordmarks (or merchant uploaded logo image) for Winter Brand Filter chips.
+  Uses similar/exact brand typography (font-family, weight, casing, letter-spacing, brand colors).
+  Never uses replicated/synthetic cartoon drawings.
+
+  @param {string} brand - Brand name or handle
+  @param {object} [block] - Shopify block object with optional logo_image setting
+{%- endcomment -%}
+
+{%- liquid
+  assign brand_raw = brand | default: '' | strip
+  assign brand_key = brand_raw | downcase | replace: ' ', '-' | replace: '.', '' | replace: '·', '' | replace: "'", '' | replace: '’', ''
+  assign custom_logo = block.settings.logo_image
+-%}
+
+{%- if custom_logo != blank -%}
+  <span class="lame-winter-brand-logo" aria-hidden="true">
+    {{
+      custom_logo
+      | image_url: width: 240
+      | image_tag:
+        class: 'lame-winter-brand-logo__img',
+        loading: 'lazy',
+        widths: '120, 180, 240',
+        sizes: '90px',
+        alt: brand_raw
+    }}
+  </span>
+{%- else -%}
+  {%- case brand_key -%}
+    {%- when 'plum' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--plum" aria-hidden="true">plum</span>
+
+    {%- when 'himalaya' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--himalaya" aria-hidden="true">Himalaya</span>
+
+    {%- when 'bombay-shaving-company', 'bombay-shaving', 'bombay' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--bombay" aria-hidden="true">Bombay Shaving Co.</span>
+
+    {%- when 'dr-rashel', 'drrashel' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--dr-rashel" aria-hidden="true">DR<span class="lame-winter-brand-wordmark__dot">·</span>RASHEL</span>
+
+    {%- when 'vaseline' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--vaseline" aria-hidden="true">Vaseline.</span>
+
+    {%- when 'sirona' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--sirona" aria-hidden="true">sirona</span>
+
+    {%- when 'nivea' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--nivea" aria-hidden="true">NIVEA</span>
+
+    {%- when 'sebamed' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--sebamed" aria-hidden="true">sebamed</span>
+
+    {%- when 'cetaphil' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--cetaphil" aria-hidden="true">Cetaphil</span>
+
+    {%- when 'jovees', 'jovees-herbal' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--jovees" aria-hidden="true">Jovees Herbal</span>
+
+    {%- when 'dove' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--dove" aria-hidden="true">Dove</span>
+
+    {%- when 'ponds', 'pond-s' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--ponds" aria-hidden="true">POND'S</span>
+
+    {%- when 'pears' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--pears" aria-hidden="true">Pears</span>
+
+    {%- when 'femisafe', 'femi-safe' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--femisafe" aria-hidden="true">FemiSafe</span>
+
+    {%- when 'dot-key', 'dot-and-key' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--dot-key" aria-hidden="true">dot &amp; key</span>
+
+    {%- when 'mamaearth' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--mamaearth" aria-hidden="true">mamaearth</span>
+
+    {%- when 'minimalist', 'be-minimalist' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--minimalist" aria-hidden="true">Be Minimalist.</span>
+
+    {%- when 'lakme' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--lakme" aria-hidden="true">LAKMÉ</span>
+
+    {%- when 'loreal', 'l-oreal' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--loreal" aria-hidden="true">L'ORÉAL</span>
+
+    {%- when 'maybelline' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--maybelline" aria-hidden="true">MAYBELLINE</span>
+
+    {%- when 'biotique' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--biotique" aria-hidden="true">BIOTIQUE</span>
+
+    {%- when 'kama', 'kama-ayurveda' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--kama" aria-hidden="true">KAMA AYURVEDA</span>
+
+    {%- when 'nykaa', 'nykaa-cosmetics' -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--nykaa" aria-hidden="true">NYKAA</span>
+
+    {%- else -%}
+      <span class="lame-winter-brand-wordmark lame-winter-brand-wordmark--default" aria-hidden="true">{{ brand_raw }}</span>
+  {%- endcase -%}
+{%- endif -%}
