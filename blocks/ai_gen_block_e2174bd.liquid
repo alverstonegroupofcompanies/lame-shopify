@@ -16,18 +16,34 @@
     assign valid_slides_count = valid_slides_count | plus: 1
   endif
 
+  assign has_slide_2 = false
+  if block.settings.enable_second_banner != false
+    assign has_slide_2 = true
+    assign valid_slides_count = valid_slides_count | plus: 1
+  endif
+
   assign img_2 = block.settings.second_banner_image
   assign link_2 = block.settings.second_banner_link
   if link_2 == blank
-    assign link_2 = '/collections/all'
+    assign link_2 = '/pages/elite-pro'
   endif
+
+  assign fallback_banner_2 = 'lame-elite-pro-winter-banner.jpg' | asset_url
+  assign banner_2_src = fallback_banner_2
+  assign banner_2_alt = 'MyLamstone Elite Pro Membership'
+  assign banner_2_width = 1024
+  assign banner_2_height = 341
+
   if img_2 != blank
-    assign valid_slides_count = valid_slides_count | plus: 1
+    assign banner_2_src = img_2 | image_url: width: 2400
+    assign banner_2_alt = img_2.alt | default: 'Featured Banner' | escape
+    assign banner_2_width = img_2.width | default: 2400
+    assign banner_2_height = img_2.height | default: 800
   endif
 
   assign enable_elite_overlay = block.settings.enable_elite_pro_overlay
   if enable_elite_overlay == nil
-    assign enable_elite_overlay = true
+    assign enable_elite_overlay = false
   endif
 
   assign img_3 = block.settings.third_banner_image
@@ -36,17 +52,12 @@
   endif
 
   assign link_3 = block.settings.third_banner_link
-  if link_3 == blank or link_3 == '/products/elite-pro-6-months'
-    assign link_3 = '/pages/elite-pro'
-  endif
-
-  assign elite_banner_asset = 'lame-elite-pro-winter-banner.jpg' | asset_url
-  if img_3 != blank
-    assign elite_banner_asset = img_3 | image_url: width: 2400
+  if link_3 == blank
+    assign link_3 = '/collections/all'
   endif
 
   assign has_slide_3 = false
-  if block.settings.enable_third_banner != false
+  if img_3 != blank and block.settings.enable_third_banner != false
     assign valid_slides_count = valid_slides_count | plus: 1
     assign has_slide_3 = true
   endif
@@ -152,56 +163,22 @@
             {%- assign cur_idx = cur_idx | plus: 1 -%}
           {%- endif -%}
 
-          {%- if img_2 != blank -%}
+          {%- if has_slide_2 -%}
             <div class="lame-oy-slide" data-oy-slide data-index="{{ cur_idx }}" role="group" aria-roledescription="slide" aria-label="{{ cur_idx | plus: 1 }} of {{ valid_slides_count }}">
               <div class="lame-oy-card">
-                <a href="{{ link_2 }}" class="lame-oy-card__link" aria-label="{{ img_2.alt | default: 'Featured Banner' | escape }}">
-                  <div class="lame-oy-card__graphic-fill">
-                    <img
-                      src="{{ img_2 | image_url: width: 2400 }}"
-                      alt="{{ img_2.alt | default: 'Featured Banner' | escape }}"
-                      class="lame-oy-card__graphic-img"
-                      loading="lazy"
-                      decoding="async"
-                      width="{{ img_2.width | default: 2400 }}"
-                      height="{{ img_2.height | default: 800 }}"
-                    >
-                    {%- if block.settings.show_overlay -%}
-                      <div class="lame-oy-card__overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | default: 30 | divided_by: 100.0 }};" aria-hidden="true"></div>
-                    {%- endif -%}
-                    {%- if block.settings.show_content and block.settings.heading != blank or block.settings.subheading != blank -%}
-                      <div class="lame-oy-card__content-layer">
-                        {%- if block.settings.heading != blank -%}
-                          <h2 class="lame-oy-card__heading" style="color: {{ block.settings.text_color | default: '#ffffff' }}; font-size: {{ block.settings.heading_size | default: 48 }}px;">{{ block.settings.heading | escape }}</h2>
-                        {%- endif -%}
-                        {%- if block.settings.subheading != blank -%}
-                          <p class="lame-oy-card__subheading" style="color: {{ block.settings.text_color | default: '#ffffff' }}; font-size: {{ block.settings.subheading_size | default: 18 }}px;">{{ block.settings.subheading | escape }}</p>
-                        {%- endif -%}
-                      </div>
-                    {%- endif -%}
-                  </div>
-                </a>
-              </div>
-            </div>
-            {%- assign cur_idx = cur_idx | plus: 1 -%}
-          {%- endif -%}
-
-          {%- if has_slide_3 -%}
-            <div class="lame-oy-slide lame-oy-slide--elite-pro" data-oy-slide data-index="{{ cur_idx }}" role="group" aria-roledescription="slide" aria-label="{{ cur_idx | plus: 1 }} of {{ valid_slides_count }}">
-              <div class="lame-oy-card lame-oy-card--elite-pro">
-                {%- if enable_elite_overlay -%}
-                  {% render 'lame-elite-pro-banner-slide', block: block, link: link_3, bg_image: elite_banner_asset %}
+                {%- if enable_elite_overlay and img_2 == blank -%}
+                  {% render 'lame-elite-pro-banner-slide', block: block, link: link_2, bg_image: banner_2_src %}
                 {%- else -%}
-                  <a href="{{ link_3 }}" class="lame-oy-card__link" aria-label="MyLamstone Elite Pro Membership">
+                  <a href="{{ link_2 }}" class="lame-oy-card__link" aria-label="{{ banner_2_alt | escape }}">
                     <div class="lame-oy-card__graphic-fill">
                       <img
-                        src="{{ elite_banner_asset }}"
-                        alt="MyLamstone Elite Pro Membership"
+                        src="{{ banner_2_src }}"
+                        alt="{{ banner_2_alt | escape }}"
                         class="lame-oy-card__graphic-img"
                         loading="lazy"
                         decoding="async"
-                        width="1024"
-                        height="341"
+                        width="{{ banner_2_width }}"
+                        height="{{ banner_2_height }}"
                       >
                       {%- if block.settings.show_overlay -%}
                         <div class="lame-oy-card__overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | default: 30 | divided_by: 100.0 }};" aria-hidden="true"></div>
@@ -209,6 +186,30 @@
                     </div>
                   </a>
                 {%- endif -%}
+              </div>
+            </div>
+            {%- assign cur_idx = cur_idx | plus: 1 -%}
+          {%- endif -%}
+
+          {%- if has_slide_3 -%}
+            <div class="lame-oy-slide" data-oy-slide data-index="{{ cur_idx }}" role="group" aria-roledescription="slide" aria-label="{{ cur_idx | plus: 1 }} of {{ valid_slides_count }}">
+              <div class="lame-oy-card">
+                <a href="{{ link_3 }}" class="lame-oy-card__link" aria-label="{{ img_3.alt | default: 'Featured Banner' | escape }}">
+                  <div class="lame-oy-card__graphic-fill">
+                    <img
+                      src="{{ img_3 | image_url: width: 2400 }}"
+                      alt="{{ img_3.alt | default: 'Featured Banner' | escape }}"
+                      class="lame-oy-card__graphic-img"
+                      loading="lazy"
+                      decoding="async"
+                      width="{{ img_3.width | default: 2400 }}"
+                      height="{{ img_3.height | default: 800 }}"
+                    >
+                    {%- if block.settings.show_overlay -%}
+                      <div class="lame-oy-card__overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | default: 30 | divided_by: 100.0 }};" aria-hidden="true"></div>
+                    {%- endif -%}
+                  </div>
+                </a>
               </div>
             </div>
             {%- assign cur_idx = cur_idx | plus: 1 -%}
@@ -1394,16 +1395,22 @@
       "info": "Optional link when clicking the first banner"
     },
     {
+      "type": "checkbox",
+      "id": "enable_second_banner",
+      "label": "Enable second banner",
+      "default": true
+    },
+    {
       "type": "image_picker",
       "id": "second_banner_image",
       "label": "Banner image 2",
-      "info": "Optional second banner image"
+      "info": "Upload or select your second banner image. If empty, the default Elite Pro banner is shown."
     },
     {
       "type": "url",
       "id": "second_banner_link",
       "label": "Banner 2 link",
-      "info": "Optional link when clicking the second banner"
+      "info": "Optional link when clicking the second banner (defaults to /pages/elite-pro)"
     },
     {
       "type": "image_picker",
