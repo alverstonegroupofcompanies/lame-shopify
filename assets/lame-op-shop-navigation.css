@@ -79,9 +79,10 @@
    ========================================================================== */
 .lame-op-categories-band {
   width: 100%;
-  background-color: var(--lame-blush);
+  /* Light warm tint — pairs with the orange brands band below */
+  background-color: #fff4ec;
   padding: clamp(1.4rem, 2.5vw, 2.2rem) 0;
-  border-bottom: 1px solid rgba(74, 31, 70, 0.06);
+  border-bottom: 1px solid rgba(255, 87, 34, 0.12);
 }
 
 .lame-op-categories-nav {
@@ -257,8 +258,9 @@
    ========================================================================== */
 .lame-op-brands-band {
   width: 100%;
-  background-color: var(--lame-plum);
-  color: var(--lame-off-white);
+  /* Orange theme band (matches Add to cart / site accent) */
+  background: linear-gradient(135deg, #ff7a33 0%, #ff5722 55%, #f04a14 100%);
+  color: #ffffff;
   padding: clamp(2rem, 3.8vw, 3.25rem) 0;
   overflow: hidden;
 }
@@ -281,7 +283,7 @@
   font-size: clamp(2rem, 4vw, 3.2rem);
   font-weight: 400;
   line-height: 1.05;
-  color: var(--lame-off-white);
+  color: #ffffff;
   text-transform: none; /* Sentence case */
   letter-spacing: -0.01em;
 }
@@ -291,7 +293,7 @@
   font-family: var(--lame-font-body);
   font-size: clamp(0.85rem, 1.2vw, 1rem);
   font-weight: 400;
-  color: rgba(253, 250, 248, 0.82);
+  color: rgba(255, 255, 255, 0.92);
   text-transform: none;
   line-height: 1.4;
 }
@@ -308,9 +310,9 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  border: 1px solid rgba(253, 250, 248, 0.28);
-  background: rgba(253, 250, 248, 0.08);
-  color: var(--lame-off-white);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -331,10 +333,10 @@
 
 .lame-op-brands-arrow:hover {
   background: #ffffff;
-  color: var(--lame-plum);
+  color: #ff5722;
   border-color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(43, 26, 46, 0.35);
+  box-shadow: 0 4px 12px rgba(150, 40, 0, 0.3);
 }
 
 .lame-op-brands-arrow:focus-visible {
@@ -366,15 +368,15 @@
   width: max-content;
 }
 
-/* Brand Tile — Remove White Background & Enable Luminous Contrast on Deep Plum */
+/* Brand Tile — solid WHITE card so every logo shows in its original colours on the orange band */
 .lame-brand-tile {
   flex: 0 0 auto;
   width: clamp(140px, 14vw, 175px);
   height: clamp(86px, 9vw, 104px);
-  background: rgba(255, 255, 255, 0.08); /* White card background removed */
+  background: #ffffff;
   border-radius: 20px; /* 20px rounded tiles */
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 16px rgba(150, 40, 0, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -385,8 +387,6 @@
   scroll-snap-align: start;
   cursor: pointer;
   outline: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   transition:
     transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
     background-color 0.24s ease,
@@ -417,8 +417,9 @@
   height: auto;
   object-fit: contain;
   transition: transform 0.22s ease;
-  filter: invert(1) contrast(150%) brightness(1.25);
-  mix-blend-mode: screen;
+  /* No filters / blend modes: logos keep their real colours on the white tile */
+  filter: none;
+  mix-blend-mode: normal;
 }
 
 .lame-brand-tile__wordmark {
@@ -428,15 +429,15 @@
   letter-spacing: -0.02em;
   text-align: center;
   line-height: 1.2;
-  color: #ffffff;
+  color: #1c1c1c;
 }
 
 /* Hover: Tile lifts and Shop now slides up */
 .lame-brand-tile:hover {
   transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 12px 26px rgba(150, 40, 0, 0.32);
 }
 
 .lame-brand-tile:hover .lame-brand-tile__img {
@@ -451,8 +452,8 @@
   opacity: 0;
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--lame-plum);
-  background: var(--lame-blush);
+  color: #ffffff;
+  background: #ff5722;
   padding: 2px 10px;
   border-radius: 999px;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1300,23 +1301,36 @@
     height: 13px !important;
   }
 
-  /* Discount badge shrinks to tiny tag showing only percentage (e.g. 15%) at top left */
-  .lame-cat-card__badges,
-  .lame-cat-card__badges .lame-cat-card__badge--discount,
-  .lame-discount-badge,
-  .lame-op-discount-badge {
+  /* Discount badge: tiny orange tag at top-left (percentage only).
+     NOTE: the .lame-cat-card__badges WRAPPER must stay transparent — styling it
+     (as before) painted an empty green bar on every card. */
+  .lame-cat-card__badges {
     position: absolute !important;
     top: 6px !important;
     left: 6px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    z-index: 5 !important;
+  }
+
+  .lame-cat-card__badges:empty {
+    display: none !important;
+  }
+
+  .lame-cat-card__badges .lame-cat-card__badge--discount,
+  .lame-discount-badge,
+  .lame-op-discount-badge {
+    position: static !important;
     padding: 2px 5px !important;
     border-radius: 4px !important;
-    background: #008945 !important;
+    background: #ff5722 !important;
     color: #ffffff !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     line-height: 1.1 !important;
     letter-spacing: 0 !important;
-    z-index: 5 !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
     display: inline-flex !important;
     align-items: center !important;
