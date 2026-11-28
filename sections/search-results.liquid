@@ -4,6 +4,8 @@
   fetchpriority="low"
 ></script>
 
+{{ 'lame-category-shop.css' | asset_url | stylesheet_tag }}
+{{ 'lame-op-page.css' | asset_url | stylesheet_tag }}
 {{ 'lame-shop-product-card.css' | asset_url | stylesheet_tag }}
 {{ 'lame-search-page.css' | asset_url | stylesheet_tag }}
 
@@ -24,7 +26,6 @@
 
     {% paginate search.results by products_per_page %}
       {% if search.results_count > 0 %}
-        {% content_for 'block', type: 'filters', id: 'filters', results: search, results_size: search.results_count %}
         {% assign products = search.results | where: 'object_type', 'product' %}
       {% else %}
         {% assign collection = settings.empty_state_collection | default: collections.all %}
@@ -37,7 +38,7 @@
         {% for product in products %}
           <li
             id="{{ section.id }}-{{ product.id }}"
-            class="product-grid__item product-grid__item--{{ forloop.index0 }}"
+            class="lame-category-shop__item product-grid__item product-grid__item--{{ forloop.index0 }}"
             data-page="{{ paginate.current_page }}"
             data-product-id="{{ product.id }}"
             ref="cards[]"
@@ -58,7 +59,8 @@
         products: products,
         paginate: paginate,
         enable_infinite_scroll: section.settings.enable_infinite_scroll,
-        title: title
+        title: title,
+        category_shop_grid: true
       %}
     {% endpaginate %}
   </div>

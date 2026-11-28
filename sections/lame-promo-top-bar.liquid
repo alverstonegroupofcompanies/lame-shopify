@@ -15,6 +15,28 @@
   aria-label="{{ section.settings.accessibility_label | default: 'Offers and Elite Pro announcements' | escape }}"
   style="--topbar-bg: {{ bg_color }}; --topbar-text: {{ text_color }};"
 >
+  {%- if section.settings.enable_holiday_flight != false -%}
+    <!-- Festive Snowfall Stage (Behind Text - Gentle continuous snowfall) -->
+    <div class="lame-santa-stage" id="LameSantaStage-{{ section.id }}" aria-hidden="true">
+      <div class="lame-santa-snow-wrap">
+        <span class="lame-snowflake" style="--left: 2%; --delay: 0s; --size: 4px; --dur: 2.2s;"></span>
+        <span class="lame-snowflake" style="--left: 8%; --delay: 0.7s; --size: 5px; --dur: 1.8s;"></span>
+        <span class="lame-snowflake" style="--left: 15%; --delay: 0.2s; --size: 3px; --dur: 2.4s;"></span>
+        <span class="lame-snowflake" style="--left: 22%; --delay: 1.1s; --size: 6px; --dur: 2.1s;"></span>
+        <span class="lame-snowflake" style="--left: 30%; --delay: 0.4s; --size: 4px; --dur: 1.9s;"></span>
+        <span class="lame-snowflake" style="--left: 38%; --delay: 1.4s; --size: 5px; --dur: 2.3s;"></span>
+        <span class="lame-snowflake" style="--left: 45%; --delay: 0.1s; --size: 3px; --dur: 2.6s;"></span>
+        <span class="lame-snowflake" style="--left: 53%; --delay: 0.8s; --size: 5px; --dur: 2s;"></span>
+        <span class="lame-snowflake" style="--left: 61%; --delay: 1.3s; --size: 4px; --dur: 1.9s;"></span>
+        <span class="lame-snowflake" style="--left: 70%; --delay: 0.3s; --size: 6px; --dur: 2.5s;"></span>
+        <span class="lame-snowflake" style="--left: 78%; --delay: 0.9s; --size: 4px; --dur: 2.1s;"></span>
+        <span class="lame-snowflake" style="--left: 86%; --delay: 0.5s; --size: 5px; --dur: 2.0s;"></span>
+        <span class="lame-snowflake" style="--left: 93%; --delay: 1.2s; --size: 3px; --dur: 2.3s;"></span>
+        <span class="lame-snowflake" style="--left: 98%; --delay: 0.6s; --size: 4px; --dur: 1.9s;"></span>
+      </div>
+    </div>
+  {%- endif -%}
+
   <div class="lame-promo-top-bar__inner">
     <div
       class="lame-promo-top-bar__track"
@@ -80,9 +102,9 @@
     border-bottom: 1px solid #e5e7eb !important;
     border-block-end: 1px solid #e5e7eb !important;
     color: #111827 !important;
-    height: 38px;
-    min-height: 38px;
-    max-height: 38px;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
     width: 100%;
     position: relative;
     z-index: 5;
@@ -105,6 +127,66 @@
     position: relative;
     gap: 16px;
     box-sizing: border-box;
+    z-index: 3;
+  }
+
+  /* Festive Snowfall Animation (Behind Text - Gentle continuous snowfall) */
+  .lame-santa-stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .lame-santa-snow-wrap {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .lame-snowflake {
+    position: absolute;
+    top: -10px;
+    left: var(--left, 50%);
+    width: var(--size, 4px);
+    height: var(--size, 4px);
+    background: radial-gradient(circle, #ffffff 30%, #7dd3fc 70%, #0284c7 100%);
+    border-radius: 50%;
+    opacity: 0.85;
+    box-shadow: 0 0 4px rgba(56, 189, 248, 0.6), 0 0 1px rgba(2, 132, 199, 0.8);
+    pointer-events: none;
+    animation: lameSnowFall var(--dur, 2.2s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  @keyframes lameSnowFall {
+    0% {
+      transform: translate3d(0, 0, 0) scale(0.8);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.95;
+    }
+    85% {
+      opacity: 0.85;
+    }
+    100% {
+      transform: translate3d(-18px, 48px, 0) scale(1.15);
+      opacity: 0;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .lame-snowflake {
+      box-shadow: 0 0 2px rgba(56, 189, 248, 0.5);
+    }
   }
 
   /* Pill removed per request */
@@ -127,6 +209,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    z-index: 3;
   }
 
   .lame-promo-top-bar__slide {
@@ -145,6 +228,7 @@
     transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
                 visibility 0.35s ease;
+    z-index: 3;
   }
 
   .lame-promo-top-bar__slide.is-active,
@@ -179,6 +263,8 @@
     white-space: nowrap;
     line-height: 1.25;
     transition: opacity 0.2s ease;
+    position: relative;
+    z-index: 4;
   }
 
   .lame-promo-top-bar__link:hover {
@@ -196,6 +282,8 @@
     text-overflow: ellipsis;
     text-shadow: none !important;
     letter-spacing: 0.015em;
+    position: relative;
+    z-index: 4;
   }
 
   .lame-promo-top-bar strong,
@@ -235,9 +323,9 @@
     }
 
     .lame-promo-top-bar {
-      height: 33px;
-      min-height: 33px;
-      max-height: 33px;
+      height: 35px;
+      min-height: 35px;
+      max-height: 35px;
     }
 
     .lame-promo-top-bar__inner {
@@ -427,6 +515,13 @@
     "groups": ["header"]
   },
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_holiday_flight",
+      "label": "Enable Festive Snowfall",
+      "default": true,
+      "info": "Displays gentle falling snowflakes across the top announcement bar"
+    },
     {
       "type": "range",
       "id": "slide_seconds",
