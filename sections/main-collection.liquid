@@ -137,34 +137,33 @@
         <div class="lame-op-page">
           <div class="lame-op-page__shell">
             <div
-              class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout lame-collection-layout--sidebar-left collection-wrapper--grid-full-width{% if lame_has_promo_images %} lame-op-page__layout--has-promo{% endif %}"
+              class="lame-op-page__layout collection-wrapper grid gap-style lame-collection-layout collection-wrapper--grid-full-width{% if lame_has_promo_images %} lame-op-page__layout--has-promo{% endif %}"
               {% if lame_has_promo_images %}
                 style="--lame-op-promo-width: {{ section.settings.promo_column_width }}px; --lame-op-promo-gap: {{ section.settings.promo_image_gap }}px;"
               {% endif %}
             >
       {% else %}
       <div
-        class="collection-wrapper grid gap-style lame-collection-layout{% unless lame_category_shop_page %} lame-collection-layout--sidebar-left{% endunless %}{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
+        class="collection-wrapper grid gap-style lame-collection-layout{% if section.settings.product_grid_width == 'full-width' or lame_cosmetic_collection or lame_category_shop_page %} collection-wrapper--grid-full-width{% endif %}"
       >
       {% endif %}
-        {% unless lame_category_shop_page or lame_our_products_op_cards %}
-          {% content_for 'block',
-            type: 'filters',
-            id: 'filters',
-            results: collection,
-            results_size: collection.products_count
-          %}
-        {% endunless %}
+        {% comment %}
+          Static block declarations. Shopify registers the static blocks that templates
+          reference ("filters", "product-card") by finding these content_for calls in the
+          section file. They never render here (flag is never set) because the custom
+          sticky filter bar + lame-category-product-card handle the UI, but removing them
+          makes the theme editor reject templates with
+          "Invalid value for type in block 'product-card'".
+        {% endcomment %}
+        {% if lame_render_static_theme_blocks %}
+          {% # theme-check-disable %}
+          {% content_for 'block', type: 'filters', id: 'filters', results: collection, results_size: collection.products_count %}
+          {% # theme-check-enable %}
+        {% endif %}
         {% liquid
           assign group_by_brand = section.settings.group_products_by_brand
-          if lame_category_shop_page
+          if lame_category_shop_page or lame_our_products_op_cards or lame_cosmetic_collection
             assign group_by_brand = false
-          elsif lame_cosmetic_collection
-            if section.settings.group_products_by_brand_our_products
-              assign group_by_brand = true
-            else
-              assign group_by_brand = false
-            endif
           endif
         %}
         {% if lame_our_products_op_cards %}
@@ -175,36 +174,10 @@
               heading: section.settings.our_products_heading,
               subtitle: section.settings.our_products_subtitle
             %}
-            {% liquid
-              assign lame_filters_block = section.blocks['filters']
-              assign lame_enable_sorting = false
-              assign lame_enable_grid_density = false
-              if lame_filters_block != blank
-                assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
-                assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
-              endif
-            %}
-            {% render 'lame-our-products-toolbar',
-              collection: collection,
-              paginate: paginate,
-              section: section,
-              enable_sorting: lame_enable_sorting,
-              enable_grid_density: lame_enable_grid_density
-            %}
           {% endif %}
           {% if lame_has_promo_images %}
             {% render 'lame-our-products-promo-images', section: section %}
           {% endif %}
-          {% unless lame_category_shop_page %}
-            <aside class="lame-op-page__sidebar lame-op-page__filters">
-              {% content_for 'block',
-                type: 'filters',
-                id: 'filters',
-                results: collection,
-                results_size: collection.products_count
-              %}
-            </aside>
-          {% endunless %}
         <main class="lame-op-page__main lame-collection-products-column" data-lame-products-scroll>
         {% else %}
         <div class="lame-collection-products-column" data-lame-products-scroll>
@@ -264,23 +237,6 @@
 
           {% if lame_category_shop_page %}
             {% render 'lame-category-price-sort', collection: collection, paginate: paginate %}
-          {% elsif lame_cosmetic_collection and lame_our_products_op_cards == false and section.settings.show_our_products_header %}
-            {% liquid
-              assign lame_filters_block = section.blocks['filters']
-              assign lame_enable_sorting = false
-              assign lame_enable_grid_density = false
-              if lame_filters_block != blank
-                assign lame_enable_sorting = lame_filters_block.settings.enable_sorting
-                assign lame_enable_grid_density = lame_filters_block.settings.enable_grid_density
-              endif
-            %}
-            {% render 'lame-our-products-toolbar',
-              collection: collection,
-              paginate: paginate,
-              section: section,
-              enable_sorting: lame_enable_sorting,
-              enable_grid_density: lame_enable_grid_density
-            %}
           {% endif %}
 
         {% if lame_category_shop_page %}
@@ -303,6 +259,8 @@
                 data-vendor="{{ product.vendor | strip | escape }}"
                 data-brand-slug="{{ product_slug_capture | strip }}"
                 data-discount-percent="{{ discount_percent_capture | strip }}"
+                data-price="{{ product.price | divided_by: 100.0 }}"
+                data-available="{{ product.available }}"
               >
                 {% render 'lame-category-product-card',
                   product: product,
@@ -454,15 +412,12 @@
                   data-vendor="{{ product.vendor | strip | escape }}"
                   data-brand-slug="{{ product_brand_slug }}"
                   data-discount-percent="{{ product_discount_percent }}"
+                  data-price="{{ product.price | divided_by: 100.0 }}"
+                  data-available="{{ product.available }}"
                   ref="cards[]"
                 >
                   {% if lame_category_shop_page or lame_our_products_op_cards or lame_cosmetic_collection %}
-                    {% render 'lame-category-product-card',
-                      product: product,
-                      section: section,
-                      collection_handle: collection.handle,
-                      show_wishlist: section.settings.show_wishlist
-                    %}
+                    {% render 'lame-category-product-card', product: product, section: section, collection_handle: collection.handle, show_wishlist: section.settings.show_wishlist %}
                   {% else %}
                     {% # theme-check-disable %}
                     {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}

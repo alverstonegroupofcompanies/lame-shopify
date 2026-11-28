@@ -40,20 +40,15 @@
     assign link_3 = '/pages/elite-pro'
   endif
 
+  assign elite_banner_asset = 'lame-elite-pro-winter-banner.jpg' | asset_url
+  if img_3 != blank
+    assign elite_banner_asset = img_3 | image_url: width: 2400
+  endif
+
   assign has_slide_3 = false
   if block.settings.enable_third_banner != false
-    if enable_elite_overlay
-      if img_3 != blank
-        assign elite_bg_asset = img_3 | image_url: width: 2400
-      else
-        assign elite_bg_asset = 'lame-elite-pro-bg.jpg' | asset_url
-      endif
-      assign valid_slides_count = valid_slides_count | plus: 1
-      assign has_slide_3 = true
-    elsif img_3 != blank
-      assign valid_slides_count = valid_slides_count | plus: 1
-      assign has_slide_3 = true
-    endif
+    assign valid_slides_count = valid_slides_count | plus: 1
+    assign has_slide_3 = true
   endif
 
   assign img_4 = block.settings.fourth_banner_image
@@ -89,10 +84,10 @@
     assign img_6 = blank
   endif
 
-  assign slide_interval_s = block.settings.slide_duration | default: 8
+  assign slide_interval_s = block.settings.slide_duration | default: 3
   assign banner_h_desktop = block.settings.banner_height | default: 480
   assign banner_h_mobile = block.settings.mobile_banner_height | default: 260
-  assign slide_width_pct = block.settings.desktop_width_percent | default: 60
+  assign slide_width_pct = 100
   assign card_radius = block.settings.border_radius
   if card_radius == nil or card_radius == blank
     assign card_radius = 0
@@ -116,7 +111,7 @@
   endif
 -%}
 
-<div class="ai-gif-banner-{{ ai_gen_id }} lame-oy-banner-section" style="--oy-banner-height-desktop: {{ banner_h_desktop }}px; --oy-banner-height-mobile: {{ banner_h_mobile }}px; --oy-slide-width-desktop: {{ slide_width_pct }}%; --oy-card-radius: {{ card_radius }}px; --oy-image-fit: {{ img_fit }}; --oy-slide-gap: 20px; --oy-banner-aspect-ratio: {{ banner_aspect_ratio }}; --oy-maintain-aspect-ratio-mobile: {% if maintain_ratio_mb %}1{% else %}0{% endif %};">
+<div class="ai-gif-banner-{{ ai_gen_id }} lame-oy-banner-section" style="--oy-banner-height-desktop: {{ banner_h_desktop }}px; --oy-banner-height-mobile: {{ banner_h_mobile }}px; --oy-slide-width-desktop: 100%; --oy-card-radius: 0px; --oy-image-fit: {{ img_fit }}; --oy-slide-gap: 0px; --oy-banner-aspect-ratio: {{ banner_aspect_ratio }}; --oy-maintain-aspect-ratio-mobile: {% if maintain_ratio_mb %}1{% else %}0{% endif %};">
   {%- if valid_slides_count > 0 -%}
     <div class="lame-oy-carousel" id="LameOYCarousel-{{ ai_gen_id }}" data-autoplay="{{ slide_interval_s }}" data-slides-count="{{ valid_slides_count }}" role="region" aria-roledescription="carousel" aria-label="Featured Offers">
       <div class="lame-oy-viewport" data-oy-viewport>
@@ -195,18 +190,18 @@
             <div class="lame-oy-slide lame-oy-slide--elite-pro" data-oy-slide data-index="{{ cur_idx }}" role="group" aria-roledescription="slide" aria-label="{{ cur_idx | plus: 1 }} of {{ valid_slides_count }}">
               <div class="lame-oy-card lame-oy-card--elite-pro">
                 {%- if enable_elite_overlay -%}
-                  {% render 'lame-elite-pro-banner-slide', block: block, link: link_3, bg_image: elite_bg_asset %}
+                  {% render 'lame-elite-pro-banner-slide', block: block, link: link_3, bg_image: elite_banner_asset %}
                 {%- else -%}
-                  <a href="{{ link_3 }}" class="lame-oy-card__link" aria-label="{{ img_3.alt | default: 'Featured Banner' | escape }}">
+                  <a href="{{ link_3 }}" class="lame-oy-card__link" aria-label="MyLamstone Elite Pro Membership">
                     <div class="lame-oy-card__graphic-fill">
                       <img
-                        src="{{ img_3 | image_url: width: 2400 }}"
-                        alt="{{ img_3.alt | default: 'Featured Banner' | escape }}"
+                        src="{{ elite_banner_asset }}"
+                        alt="MyLamstone Elite Pro Membership"
                         class="lame-oy-card__graphic-img"
                         loading="lazy"
                         decoding="async"
-                        width="{{ img_3.width | default: 2400 }}"
-                        height="{{ img_3.height | default: 800 }}"
+                        width="1024"
+                        height="352"
                       >
                       {%- if block.settings.show_overlay -%}
                         <div class="lame-oy-card__overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | default: 30 | divided_by: 100.0 }};" aria-hidden="true"></div>
@@ -348,11 +343,14 @@
 
 <style>
   body.template-index .shopify-section:has(.lame-oy-banner-section),
-  .shopify-section:has(.lame-oy-banner-section) {
+  .shopify-section:has(.lame-oy-banner-section),
+  .shopify-section:has(.lame-oy-banner-section) .section,
+  .shopify-section:has(.lame-oy-banner-section) .custom-section-content,
+  .shopify-section:has(.lame-oy-banner-section) .section-content-wrapper {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
     overflow-x: clip !important;
   }
 
@@ -371,50 +369,55 @@
 
   .lame-oy-carousel {
     position: relative;
-    width: 100%;
-    overflow: hidden;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
     touch-action: pan-y pinch-zoom;
   }
 
   .lame-oy-viewport {
     position: relative;
-    width: 100%;
-    overflow: hidden;
-    padding: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .lame-oy-track {
     display: flex;
     align-items: center;
-    gap: var(--oy-slide-gap, 20px);
+    gap: 0px !important;
     width: 100%;
     will-change: transform;
     transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lame-oy-slide {
-    flex: 0 0 var(--oy-slide-width-desktop, 82%);
-    width: var(--oy-slide-width-desktop, 82%);
-    max-width: var(--oy-slide-width-desktop, 82%);
-    box-sizing: border-box;
-    transition: opacity 0.6s ease, transform 0.6s ease;
-    opacity: 0.88;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    transition: opacity 0.6s ease;
+    opacity: 1 !important;
     cursor: pointer;
   }
 
   .lame-oy-slide.is-active {
-    opacity: 1;
+    opacity: 1 !important;
     cursor: default;
   }
 
   @media (min-width: 750px) and (max-width: 989px) {
     .lame-oy-track {
-      gap: 16px;
+      gap: 0px !important;
     }
     .lame-oy-slide {
-      flex: 0 0 84%;
-      width: 84%;
-      max-width: 84%;
+      flex: 0 0 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
     }
   }
 
@@ -446,7 +449,8 @@
     position: relative;
     width: 100% !important;
     height: var(--oy-banner-height-desktop, 480px) !important;
-    border-radius: var(--oy-card-radius, 0px) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     overflow: hidden !important;
     background-color: #f8fafc;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -1483,7 +1487,7 @@
       "max": 20,
       "step": 1,
       "unit": "s",
-      "default": 8
+      "default": 3
     },
     {
       "type": "select",

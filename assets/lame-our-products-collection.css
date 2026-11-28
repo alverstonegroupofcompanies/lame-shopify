@@ -128,11 +128,17 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 }
 
 .collection-template-our-products .lame-op-page__shell {
-  width: min(1180px, calc(100% - clamp(2.5rem, 8vw, 6rem))) !important;
-  max-width: 1180px !important;
-  margin-inline: auto !important;
-  padding-inline: 0 !important;
-  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+  padding-inline: clamp(24px, 3.5vw, 40px) !important;
+  box-sizing: border-box !important;
+}
+
+@media screen and (max-width: 749px) {
+  .collection-template-our-products .lame-op-page__shell {
+    padding-inline: 16px !important;
+  }
 }
 
 /* Legacy page head inside shell (category-cards mode) */
@@ -445,7 +451,7 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   }
 
   /* Direct sibling of facets (legacy / non-op layout) */
-  .collection-template-our-products .lame-collection-products-column {
+  .collection-template-our-products:has(.facets-block-wrapper--vertical:not(.hidden)) .lame-collection-products-column {
     grid-column: 2 !important;
     grid-row: 1 !important;
     padding: 0 !important;
@@ -457,12 +463,22 @@ body.template-collection-our-products .collection-template-our-products.lame-our
     grid-row: 1 !important;
   }
 
+  .collection-template-our-products:not(:has(.facets-block-wrapper--vertical:not(.hidden))):not(:has(.lame-op-page__sidebar)) .lame-collection-products-column,
+  .collection-template-our-products:not(:has(.facets-block-wrapper--vertical:not(.hidden))):not(:has(.lame-op-page__sidebar)) .lame-op-page__layout .lame-op-page__content,
+  .collection-template-our-products .lame-collection-products-column {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   /*
     Our Products op-page: products live inside .lame-op-page__content.
-    Putting grid-column:2 on the nested products column created an empty
-    implicit track (huge middle gap + crushed cards on tablet/medium).
+    Putting grid-column:2 only when sidebar is genuinely present.
   */
-  .collection-template-our-products .lame-op-page__layout .lame-op-page__content {
+  .collection-template-our-products:has(.lame-op-page__sidebar) .lame-op-page__layout .lame-op-page__content {
     grid-column: 2 !important;
     grid-row: 1 !important;
     min-width: 0;
@@ -1438,29 +1454,24 @@ body.template-collection-our-products .collection-template-our-products.lame-our
   --product-grid-gap-desktop: unset;
 }
 
-/* iPad Mini / tablet: keep 2-up beside filters (3-up was crushing cards) */
-@media screen and (min-width: 750px) and (max-width: 1099px) {
+/* Tablet & Mobile: 3 cards in a row */
+@media screen and (max-width: 989px) {
   .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
     :is(.lame-collection-brand-section__grid, .product-grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     justify-content: stretch !important;
     justify-items: stretch !important;
-    gap: 16px !important;
+    gap: 8px !important;
   }
 }
 
-@media screen and (min-width: 1100px) {
+/* PC Desktop: 6 cards in a row */
+@media screen and (min-width: 990px) {
   .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
     :is(.lame-collection-brand-section__grid, .product-grid) {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
     align-items: stretch !important;
-  }
-}
-
-@media screen and (max-width: 359px) {
-  .collection-template-our-products.lame-our-products-card-scope .lame-collection-products-column
-    :is(.lame-collection-brand-section__grid, .product-grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(0.5rem, 0.85vw, 0.75rem) !important;
   }
 }
 
@@ -1797,8 +1808,8 @@ body.template-collection-our-products .collection-template-our-products.lame-our
 
   .collection-template-our-products.lame-our-products--category-cards .product-grid.lame-category-shop__grid,
   .collection-template-our-products.lame-our-products--category-cards .lame-collection-brand-section__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.5rem !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
   }
 
   .collection-template-our-products .lame-cat-card {
@@ -2094,9 +2105,18 @@ body.template-collection-our-products .lame-our-products-page > .lame-collection
 
   .collection-template-our-products .lame-op-page__shell,
   body.template-collection-our-products .lame-op-page__shell {
-    width: min(1180px, calc(100% - clamp(2.5rem, 8vw, 6rem))) !important;
-    max-width: 1180px !important;
-    margin-inline: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-inline: 0 !important;
+    padding-inline: clamp(24px, 3.5vw, 40px) !important;
+    box-sizing: border-box !important;
+  }
+
+  @media screen and (max-width: 749px) {
+    .collection-template-our-products .lame-op-page__shell,
+    body.template-collection-our-products .lame-op-page__shell {
+      padding-inline: 16px !important;
+    }
   }
 }
 
@@ -2598,8 +2618,8 @@ body.template-collection-our-products .content-for-layout {
   body.template-collection-our-products .lame-our-products-card-scope .product-grid,
   body.template-collection-our-products .lame-our-products-card-scope .lame-collection-products-column :is(.product-grid, .lame-collection-brand-section__grid),
   body.template-collection-our-products .lame-collection-products-column :is(.product-grid, .lame-collection-brand-section__grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.5rem !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
   }
 
   body.template-collection-our-products .lame-op-page__sidebar {
@@ -2886,8 +2906,8 @@ body.template-collection-our-products .content-for-layout {
   body.template-collection-our-products .lame-our-products-card-scope .product-grid,
   body.template-collection-our-products .lame-our-products-card-scope .lame-collection-products-column :is(.product-grid, .lame-collection-brand-section__grid),
   body.template-collection-our-products .lame-collection-products-column :is(.product-grid, .lame-collection-brand-section__grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 0.4rem !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
   }
 
   body.template-collection-our-products .lame-op-page__sidebar .facets__summary,

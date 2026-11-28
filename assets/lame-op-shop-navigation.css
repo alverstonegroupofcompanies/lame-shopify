@@ -1,0 +1,1741 @@
+/* ==========================================================================
+   LAME OP SHOP NAVIGATION — 3-BAND FULL-WIDTH REDESIGN
+   Band 1: Soft Blush Categories Arch Row
+   Band 2: Deep Plum Top Brands Carousel
+   Band 3: Off-White Sticky Filter Bar (Desktop Dropdowns + Mobile Bottom Sheet)
+   Palette: plum #4a1f46, blush #fbe9ee, sage #d9efe4, butter #fbeccf,
+            ink #2b1a2e, off-white #fdfaf8, coral #ff6b5e (selected states only)
+   Type: Bricolage Grotesque (interface) + Instrument Serif (headings)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+  --lame-plum: #4a1f46;
+  --lame-plum-dark: #371434;
+  --lame-blush: #fbe9ee;
+  --lame-blush-soft: #fdf3f5;
+  --lame-sage: #d9efe4;
+  --lame-butter: #fbeccf;
+  --lame-ink: #2b1a2e;
+  --lame-off-white: #fdfaf8;
+  --lame-coral: #ff6b5e;
+  --lame-coral-hover: #fa5748;
+  --lame-shadow-plum-sm: 0 4px 14px rgba(74, 31, 70, 0.08);
+  --lame-shadow-plum-md: 0 8px 24px rgba(74, 31, 70, 0.14);
+  --lame-shadow-plum-lg: 0 16px 36px rgba(74, 31, 70, 0.18);
+  --lame-font-heading: 'Instrument Serif', Georgia, serif;
+  --lame-font-body: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Root Section Wrapper — Edge to edge across the whole viewport
+   -------------------------------------------------------------------------- */
+.shopify-section.lame-op-shop-nav-section {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 15 !important;
+}
+
+.lame-op-shop-nav {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--lame-font-body);
+  color: var(--lame-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Site's main grid container alignment */
+.lame-op-grid-container {
+  width: 100%;
+  max-width: 100% !important;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 1.8vw, 28px);
+  box-sizing: border-box;
+}
+
+@media screen and (min-width: 990px) {
+  .lame-op-grid-container {
+    padding-inline: clamp(16px, 1.8vw, 28px) !important;
+  }
+  .lame-op-brands-viewport {
+    padding-inline: clamp(16px, 1.8vw, 28px) !important;
+  }
+}
+
+/* ==========================================================================
+   BAND 1: CATEGORIES (Soft Blush Strip)
+   ========================================================================== */
+.lame-op-categories-band {
+  width: 100%;
+  background-color: var(--lame-blush);
+  padding: clamp(1.4rem, 2.5vw, 2.2rem) 0;
+  border-bottom: 1px solid rgba(74, 31, 70, 0.06);
+}
+
+.lame-op-categories-nav {
+  width: 100%;
+}
+
+.lame-op-categories-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(0.6rem, 1.5vw, 1.35rem);
+  justify-items: center;
+  align-items: start;
+}
+
+/* Category item link */
+.lame-op-cat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-decoration: none;
+  color: var(--lame-ink);
+  width: 100%;
+  max-width: 96px;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  animation: lameCatReveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered gentle reveal on load */
+.lame-op-cat-item:nth-child(1) { animation-delay: 0.04s; }
+.lame-op-cat-item:nth-child(2) { animation-delay: 0.08s; }
+.lame-op-cat-item:nth-child(3) { animation-delay: 0.12s; }
+.lame-op-cat-item:nth-child(4) { animation-delay: 0.16s; }
+.lame-op-cat-item:nth-child(5) { animation-delay: 0.20s; }
+.lame-op-cat-item:nth-child(6) { animation-delay: 0.24s; }
+.lame-op-cat-item:nth-child(7) { animation-delay: 0.28s; }
+.lame-op-cat-item:nth-child(8) { animation-delay: 0.32s; }
+
+@keyframes lameCatReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tall arch shape */
+.lame-op-cat-arch {
+  width: clamp(60px, 6.5vw, 78px);
+  height: clamp(86px, 9.5vw, 114px);
+  border-radius: 999px 999px 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(74, 31, 70, 0.07);
+  transition:
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.24s ease;
+  overflow: hidden;
+}
+
+/* Category pastel tints */
+.lame-op-cat-arch--all        { background-color: var(--lame-butter); }
+.lame-op-cat-arch--skincare   { background-color: var(--lame-sage); }
+.lame-op-cat-arch--makeup     { background-color: #f9d8e2; }
+.lame-op-cat-arch--haircare   { background-color: #fae5cb; }
+.lame-op-cat-arch--bath-body  { background-color: #d4f0e7; }
+.lame-op-cat-arch--fragrance  { background-color: #f0e1f7; }
+.lame-op-cat-arch--baby-care  { background-color: #dcedf9; }
+.lame-op-cat-arch--wellness   { background-color: #e0f2d8; }
+
+/* Custom Line Icon */
+.lame-op-cat-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--lame-ink);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lame-op-cat-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+/* Category Label beneath arch */
+.lame-op-cat-label {
+  margin-top: 0.55rem;
+  font-size: clamp(0.72rem, 1vw, 0.82rem);
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--lame-ink);
+  text-transform: none; /* Sentence case throughout */
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+/* Selected Dot */
+.lame-op-cat-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--lame-coral);
+  margin: 3px auto 0;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover: arch lifts slightly */
+.lame-op-cat-item:hover .lame-op-cat-arch {
+  transform: translateY(-4px);
+  box-shadow: var(--lame-shadow-plum-md);
+}
+
+.lame-op-cat-item:hover .lame-op-cat-label {
+  font-weight: 600;
+}
+
+/* Playful micro-movements on hover */
+.lame-op-cat-item--haircare:hover .lame-op-cat-icon   { transform: rotate(-14deg) scale(1.04); }
+.lame-op-cat-item--makeup:hover .lame-op-cat-icon     { transform: translateY(-3px) scale(1.05); }
+.lame-op-cat-item--skincare:hover .lame-op-cat-icon   { transform: rotate(10deg); }
+.lame-op-cat-item--fragrance:hover .lame-op-cat-icon  { transform: scale(1.08) translateY(-2px); }
+.lame-op-cat-item--bath-body:hover .lame-op-cat-icon  { transform: translateY(-3px); }
+.lame-op-cat-item--wellness:hover .lame-op-cat-icon   { transform: scale(1.12); }
+.lame-op-cat-item--all:hover .lame-op-cat-icon        { transform: rotate(15deg); }
+.lame-op-cat-item--baby-care:hover .lame-op-cat-icon  { transform: rotate(12deg); }
+
+/* Selected State */
+.lame-op-cat-item.is-selected .lame-op-cat-arch {
+  box-shadow: 0 0 0 2px var(--lame-coral), var(--lame-shadow-plum-md);
+  transform: translateY(-2px);
+}
+
+.lame-op-cat-item.is-selected .lame-op-cat-label {
+  font-weight: 700;
+  color: var(--lame-ink);
+}
+
+.lame-op-cat-item.is-selected .lame-op-cat-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Keyboard focus */
+.lame-op-cat-item:focus-visible .lame-op-cat-arch {
+  outline: 2px solid var(--lame-plum);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   BAND 2: TOP BRANDS (Deep Plum Band)
+   ========================================================================== */
+.lame-op-brands-band {
+  width: 100%;
+  background-color: var(--lame-plum);
+  color: var(--lame-off-white);
+  padding: clamp(2rem, 3.8vw, 3.25rem) 0;
+  overflow: hidden;
+}
+
+.lame-op-brands-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: clamp(1.25rem, 2.2vw, 1.85rem);
+}
+
+.lame-op-brands-heading-wrap {
+  text-align: left;
+}
+
+.lame-op-brands-title {
+  margin: 0;
+  font-family: var(--lame-font-heading);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--lame-off-white);
+  text-transform: none; /* Sentence case */
+  letter-spacing: -0.01em;
+}
+
+.lame-op-brands-sub {
+  margin: 0.35rem 0 0;
+  font-family: var(--lame-font-body);
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  font-weight: 400;
+  color: rgba(253, 250, 248, 0.82);
+  text-transform: none;
+  line-height: 1.4;
+}
+
+/* Carousel Buttons */
+.lame-op-brands-nav-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.lame-op-brands-arrow {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(253, 250, 248, 0.28);
+  background: rgba(253, 250, 248, 0.08);
+  color: var(--lame-off-white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.lame-op-brands-arrow svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lame-op-brands-arrow:hover {
+  background: #ffffff;
+  color: var(--lame-plum);
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(43, 26, 46, 0.35);
+}
+
+.lame-op-brands-arrow:focus-visible {
+  outline: 2px solid var(--lame-coral);
+  outline-offset: 2px;
+}
+
+/* Full-bleed Carousel Viewport & Track */
+.lame-op-brands-viewport {
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-block: 0.5rem 0.75rem;
+  padding-inline: clamp(1.25rem, 4.5vw, 3.5rem);
+  box-sizing: border-box;
+}
+
+.lame-op-brands-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.lame-op-brands-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.9rem, 1.8vw, 1.4rem);
+  width: max-content;
+}
+
+/* Brand Tile — Remove White Background & Enable Luminous Contrast on Deep Plum */
+.lame-brand-tile {
+  flex: 0 0 auto;
+  width: clamp(140px, 14vw, 175px);
+  height: clamp(86px, 9vw, 104px);
+  background: rgba(255, 255, 255, 0.08); /* White card background removed */
+  border-radius: 20px; /* 20px rounded tiles */
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 0.85rem 1.15rem;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  cursor: pointer;
+  outline: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.24s ease,
+    box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.22s ease;
+}
+
+.lame-brand-tile:focus-visible {
+  outline: 2px solid var(--lame-coral);
+  outline-offset: 3px;
+}
+
+/* Tile Image & Wordmark — Make sure logos are clearly visible against plum */
+.lame-brand-tile__img-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.lame-brand-tile__img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.22s ease;
+  filter: invert(1) contrast(150%) brightness(1.25);
+  mix-blend-mode: screen;
+}
+
+.lame-brand-tile__wordmark {
+  font-family: var(--lame-font-body);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  text-align: center;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+/* Hover: Tile lifts and Shop now slides up */
+.lame-brand-tile:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
+}
+
+.lame-brand-tile:hover .lame-brand-tile__img {
+  transform: scale(0.96);
+}
+
+.lame-brand-tile__shop-now {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  opacity: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--lame-plum);
+  background: var(--lame-blush);
+  padding: 2px 10px;
+  border-radius: 999px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: -0.01em;
+  z-index: 3;
+}
+
+.lame-brand-tile:hover .lame-brand-tile__shop-now {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Selected check badge in Coral #ff6b5e */
+.lame-brand-tile__check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--lame-coral);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(255, 107, 94, 0.45);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.lame-brand-tile__check svg {
+  width: 12px;
+  height: 12px;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lame-brand-tile.is-selected {
+  background: rgba(255, 107, 94, 0.16);
+  border-color: var(--lame-coral);
+  box-shadow: 0 0 0 2px var(--lame-coral), 0 8px 22px rgba(255, 107, 94, 0.35);
+}
+
+.lame-brand-tile.is-selected .lame-brand-tile__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ==========================================================================
+   BAND 3: FILTERS (Full-Width Sticky Bar in Off-White)
+   ========================================================================== */
+.lame-op-filters-band {
+  width: 100%;
+  background-color: var(--lame-off-white);
+  border-bottom: 1px solid rgba(74, 31, 70, 0.08);
+  position: sticky;
+  top: var(--sticky-header-offset, var(--header-group-height, var(--header-height, 0px)));
+  z-index: 45;
+  box-shadow: 0 4px 16px rgba(74, 31, 70, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.lame-op-filters-inner {
+  padding-block: 0.85rem;
+}
+
+/* Desktop row: pill dropdowns + clear all */
+.lame-op-filters-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lame-op-filters-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+/* Individual Filter Pill Dropdown Component */
+.lame-filter-dropdown {
+  position: relative;
+}
+
+.lame-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px; /* full pill */
+  background: #ffffff;
+  border: 1.5px solid rgba(74, 31, 70, 0.16);
+  color: var(--lame-ink);
+  font-family: var(--lame-font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  outline: none;
+}
+
+.lame-filter-pill:hover {
+  border-color: var(--lame-plum);
+  background: #fdfaf8;
+}
+
+.lame-filter-pill:focus-visible {
+  outline: 2px solid var(--lame-plum);
+  outline-offset: 2px;
+}
+
+.lame-filter-pill__chevron {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+
+.lame-filter-dropdown.is-open .lame-filter-pill__chevron {
+  transform: rotate(180deg);
+}
+
+.lame-filter-dropdown.is-open .lame-filter-pill {
+  border-color: var(--lame-plum);
+  box-shadow: 0 0 0 1px var(--lame-plum);
+}
+
+.lame-filter-pill.has-active {
+  border-color: var(--lame-coral);
+  color: var(--lame-plum);
+  font-weight: 600;
+  background: #fff8f7;
+}
+
+/* Dropdown Menu Popover */
+.lame-filter-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  max-width: 280px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(74, 31, 70, 0.1);
+  box-shadow: var(--lame-shadow-plum-lg);
+  padding: 0.75rem 0.5rem;
+  z-index: 100;
+  display: none;
+  animation: lameMenuFade 0.18s ease both;
+}
+
+.lame-filter-dropdown.is-open .lame-filter-popover {
+  display: block;
+}
+
+@keyframes lameMenuFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lame-filter-popover__search {
+  width: 100%;
+  padding: 0.4rem 0.65rem;
+  margin-bottom: 0.5rem;
+  font-family: var(--lame-font-body);
+  font-size: 0.78rem;
+  border: 1px solid rgba(74, 31, 70, 0.16);
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.lame-filter-popover__search:focus {
+  border-color: var(--lame-plum);
+}
+
+.lame-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--lame-ink);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.lame-filter-option:hover {
+  background: var(--lame-blush-soft);
+}
+
+.lame-filter-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(74, 31, 70, 0.28);
+  border-radius: 4px;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+}
+
+.lame-filter-checkbox:checked {
+  background: var(--lame-coral);
+  border-color: var(--lame-coral);
+}
+
+.lame-filter-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.lame-filter-option__text {
+  flex: 1 1 auto;
+}
+
+.lame-filter-option__count {
+  font-size: 0.72rem;
+  color: rgba(43, 26, 46, 0.5);
+}
+
+/* Price Range Inputs */
+.lame-filter-price-wrap {
+  padding: 0.25rem 0.4rem;
+}
+
+.lame-filter-price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.lame-filter-price-input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid rgba(74, 31, 70, 0.18);
+  border-radius: 8px;
+  font-family: var(--lame-font-body);
+  font-size: 0.78rem;
+  box-sizing: border-box;
+}
+
+.lame-filter-price-btn {
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 8px;
+  background: var(--lame-plum);
+  color: #ffffff;
+  border: none;
+  font-family: var(--lame-font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Clear All Button */
+.lame-filter-clear-all {
+  background: transparent;
+  border: none;
+  color: rgba(43, 26, 46, 0.5);
+  font-family: var(--lame-font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  outline: none;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.lame-filter-clear-all:enabled,
+.lame-filter-clear-all.is-enabled {
+  opacity: 1;
+  pointer-events: auto;
+  color: var(--lame-coral);
+  font-weight: 600;
+}
+
+.lame-filter-clear-all:enabled:hover,
+.lame-filter-clear-all.is-enabled:hover {
+  text-decoration: underline;
+  color: var(--lame-coral-hover);
+}
+
+/* Applied Filter Removable Chips */
+.lame-op-active-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(74, 31, 70, 0.12);
+}
+
+.lame-op-active-chips:empty {
+  display: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.lame-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--lame-blush);
+  color: var(--lame-plum);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.lame-active-chip__remove {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lame-active-chip__remove:hover {
+  opacity: 1;
+  color: var(--lame-coral);
+}
+
+/* ==========================================================================
+   MOBILE FILTER BAR & BOTTOM SHEET
+   ========================================================================== */
+.lame-op-filters-mobile {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lame-mobile-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1.5px solid rgba(74, 31, 70, 0.2);
+  color: var(--lame-ink);
+  font-family: var(--lame-font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.lame-mobile-filter-trigger svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.lame-mobile-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--lame-coral);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.lame-mobile-count-badge[hidden] {
+  display: none !important;
+}
+
+/* Mobile Bottom Sheet Modal */
+.lame-bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 26, 46, 0.52);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.lame-bottom-sheet-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lame-bottom-sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  background: var(--lame-off-white);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 36px rgba(43, 26, 46, 0.28);
+  z-index: 1001;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lame-bottom-sheet-backdrop.is-visible .lame-bottom-sheet {
+  transform: translateY(0);
+}
+
+.lame-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.25rem 0.85rem;
+  border-bottom: 1px solid rgba(74, 31, 70, 0.08);
+}
+
+.lame-sheet-title {
+  margin: 0;
+  font-family: var(--lame-font-heading);
+  font-size: 1.55rem;
+  font-weight: 400;
+  color: var(--lame-ink);
+}
+
+.lame-sheet-close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--lame-ink);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.lame-sheet-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+}
+
+.lame-sheet-accordion {
+  border-bottom: 1px solid rgba(74, 31, 70, 0.08);
+  padding-block: 0.75rem;
+}
+
+.lame-sheet-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--lame-font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--lame-ink);
+  cursor: pointer;
+  padding-block: 0.25rem;
+}
+
+.lame-sheet-accordion-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.lame-sheet-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(74, 31, 70, 0.08);
+  background: #ffffff;
+}
+
+.lame-sheet-apply-btn {
+  flex: 1 1 auto;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--lame-plum);
+  color: #ffffff;
+  border: none;
+  font-family: var(--lame-font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(74, 31, 70, 0.25);
+  transition: background 0.2s ease;
+}
+
+.lame-sheet-apply-btn:hover {
+  background: var(--lame-plum-dark);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Tablets & Mobile Phones)
+   ========================================================================== */
+@media screen and (max-width: 989px) {
+  .lame-op-categories-list {
+    gap: 0.65rem;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  /* Full-width bands use 12px side padding so everything lines up */
+  .lame-op-categories-band {
+    padding: 1.15rem 0;
+  }
+
+  .lame-op-categories-nav {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-inline: 12px !important;
+    box-sizing: border-box;
+  }
+
+  .lame-op-categories-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lame-op-categories-list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.85rem;
+    width: max-content;
+  }
+
+  .lame-op-cat-item {
+    scroll-snap-align: start;
+    max-width: none;
+    flex: 0 0 auto;
+  }
+
+  .lame-op-cat-arch {
+    width: 62px;
+    height: 88px;
+    border-radius: 999px 999px 12px 12px;
+  }
+
+  .lame-op-cat-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .lame-op-cat-label {
+    font-size: 0.72rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Band 2: Brands Carousel with 12px side padding */
+  .lame-op-brands-band {
+    padding: 1.85rem 0;
+  }
+
+  .lame-op-brands-header {
+    padding-inline: 12px !important;
+  }
+
+  .lame-op-brands-title {
+    font-size: 1.85rem;
+  }
+
+  .lame-op-brands-sub {
+    font-size: 0.82rem;
+  }
+
+  .lame-op-brands-viewport {
+    padding-inline: 12px !important;
+  }
+
+  .lame-brand-tile {
+    width: 130px;
+    height: 78px;
+    border-radius: 16px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  /* Band 3: Filter bar collapses on mobile with 12px side padding */
+  .lame-op-filters-inner {
+    padding-inline: 12px !important;
+  }
+
+  .lame-op-filters-desktop {
+    display: none;
+  }
+
+  .lame-op-filters-mobile {
+    display: flex;
+  }
+
+  /* Applied filters appear as small chips in a horizontally scrolling row beneath the button */
+  .lame-op-active-chips {
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 0.5rem 0 0.25rem !important;
+    margin-top: 0.5rem !important;
+    border-top: 1px dashed rgba(74, 31, 70, 0.12) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+  }
+
+  .lame-op-active-chips::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .lame-active-chip {
+    flex-shrink: 0 !important;
+    padding: 0.2rem 0.6rem !important;
+    font-size: 0.7rem !important;
+  }
+}
+
+/* ==========================================================================
+   PRODUCT GRID RESPONSIVE BREAKPOINTS (Desktop, Tablet, Mobile)
+   ========================================================================== */
+/* 6 columns on PC (>= 990px) matching homepage grid */
+@media screen and (min-width: 990px) {
+  .product-grid,
+  .lame-category-shop__grid,
+  .lame-collection-brand-section__grid,
+  .lame-collection-grouped-products .product-grid,
+  .lame-our-products-card-scope .product-grid,
+  body.template-collection-our-products .product-grid,
+  .collection-template-our-products .product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: clamp(0.5rem, 0.85vw, 0.75rem) !important;
+    align-items: stretch !important;
+  }
+}
+
+/* 3 columns on tablet (750px - 989px) */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .product-grid,
+  .lame-category-shop__grid,
+  .lame-collection-brand-section__grid,
+  .lame-collection-grouped-products .product-grid,
+  .lame-our-products-card-scope .product-grid,
+  body.template-collection-our-products .product-grid,
+  .collection-template-our-products .product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.65rem !important;
+    align-items: stretch !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE 3-COLUMN COMPACT CARDS & 12PX PADDING ALIGNMENT (< 750px)
+   ========================================================================== */
+@media screen and (max-width: 749px) {
+  /* Product grid container uses 12px side padding to match header bands */
+  /* Zero out compounding nested wrapper paddings on mobile */
+  .collection-template-our-products,
+  .lame-our-products-page,
+  .lame-op-page,
+  .lame-op-page__shell,
+  .lame-op-page__main,
+  .lame-collection-products-column,
+  .lame-collection-shell,
+  .main-collection-grid,
+  .product-grid-container {
+    padding-inline: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 3 columns on tablet and mobile phones (including 320px, 360px, 390px) */
+  .product-grid,
+  .lame-category-shop__grid,
+  .lame-collection-brand-section__grid,
+  .lame-collection-grouped-products .product-grid,
+  .lame-our-products-card-scope .product-grid,
+  body.template-collection-our-products .product-grid,
+  .collection-template-our-products .product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding-inline: 6px !important;
+    padding-block: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    list-style: none !important;
+    align-items: stretch !important;
+  }
+
+  .product-grid > li,
+  .product-grid__item,
+  .lame-category-shop__item {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Card container: full-width inside grid, clean radius, equal height */
+  .lame-cat-card,
+  .lame-op-card,
+  .lame-op-card__inner,
+  .product-card,
+  .lame-flash-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border-radius: 9px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(74, 31, 70, 0.08) !important;
+    box-shadow: 0 1px 4px rgba(74, 31, 70, 0.04) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  /* Tinted image area with square aspect ratio (1:1) */
+  .lame-cat-card__media,
+  .lame-op-card .card-gallery,
+  .lame-cat-card__media-link,
+  .product-card__figure,
+  .card-gallery {
+    aspect-ratio: 1 / 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    border-radius: 10px !important;
+    background: #fdfaf8 !important; /* warm blush/off-white tint */
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 0 6px 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lame-cat-card__image,
+  .card-gallery img,
+  .product-media__image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+  }
+
+  /* Wishlist heart: smaller 28px circle with 44px tap area, top right */
+  .lame-cat-wishlist-btn,
+  .lame-op-wishlist-btn,
+  [data-lame-wishlist-toggle] {
+    position: absolute !important;
+    top: 6px !important;
+    right: 6px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 6px rgba(74, 31, 70, 0.12) !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    z-index: 5 !important;
+    cursor: pointer !important;
+  }
+
+  /* 44px invisible tap area */
+  .lame-cat-wishlist-btn::before,
+  .lame-op-wishlist-btn::before,
+  [data-lame-wishlist-toggle]::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: -8px !important;
+    width: 44px !important;
+    height: 44px !important;
+    pointer-events: auto !important;
+  }
+
+  .lame-cat-wishlist-btn svg,
+  .lame-op-wishlist-btn svg,
+  .lame-cat-wishlist-btn__svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* Discount badge shrinks to tiny tag showing only percentage (e.g. 15%) at top left */
+  .lame-cat-card__badges,
+  .lame-cat-card__badges .lame-cat-card__badge--discount,
+  .lame-discount-badge,
+  .lame-op-discount-badge {
+    position: absolute !important;
+    top: 6px !important;
+    left: 6px !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+    background: #008945 !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0 !important;
+    z-index: 5 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .lame-discount-badge__off {
+    display: none !important;
+  }
+
+  .lame-cat-card__badge--soldout {
+    position: absolute !important;
+    top: 6px !important;
+    left: 6px !important;
+    font-size: 9px !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+  }
+
+  /* Card Body */
+  .lame-cat-card__body,
+  .lame-op-card__body {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    gap: 2px !important;
+  }
+
+  /* Brand name: 10px, muted, truncated to one line */
+  .lame-cat-card__label,
+  .lame-op-card__brand,
+  .product-card__vendor {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    color: #76877d !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin: 0 0 1px 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Product name: 12px, limited to two lines with ellipsis. Size/volume on 2nd line */
+  .lame-cat-card__title,
+  .lame-op-card__title,
+  .product-card__title,
+  .product-title {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
+    color: var(--lame-ink, #2b1a2e) !important;
+    margin: 0 0 2px 0 !important;
+    padding: 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    height: calc(1.25em * 2) !important;
+    max-height: calc(1.25em * 2) !important;
+    min-height: calc(1.25em * 2) !important;
+    word-break: break-word !important;
+  }
+
+  .lame-cat-card__title a,
+  .lame-op-card__title a,
+  .product-card__title a {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    display: inline !important;
+  }
+
+  .lame-cat-card__title-size {
+    font-weight: 400 !important;
+    color: #76877d !important;
+  }
+
+  /* Rating: single star with number only (e.g. 4.5), review count hidden */
+  .lame-cat-card__rating,
+  .lame-card-rating {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: var(--lame-ink, #2b1a2e) !important;
+    line-height: 1 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .lame-cat-card__rating-star {
+    color: #f59e0b !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+
+  .lame-cat-card__rating-score {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+  }
+
+  .lame-cat-card__rating-count {
+    display: none !important;
+  }
+
+  /* Price: 12px bold. Crossed-out price sits below it in smaller size. "Save 15%" hidden */
+  .lame-cat-card__price,
+  .lame-op-card__price,
+  .price,
+  .product-price {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 1px !important;
+    margin: 0 0 4px 0 !important;
+    min-height: 24px !important;
+    white-space: nowrap !important;
+  }
+
+  .lame-cat-card__price .price,
+  .lame-cat-card__price .price__sale,
+  .lame-cat-card__price .price-item--sale,
+  .lame-cat-card__price .price-item--regular,
+  .lame-cat-card__price .price-item {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: var(--lame-ink, #2b1a2e) !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+  }
+
+  .lame-cat-card__price .compare-at-price,
+  .lame-cat-card__price .price__sale .price-item--regular,
+  .lame-cat-card__price .price-item--regular:not(:only-child) {
+    font-size: 9.5px !important;
+    color: #888888 !important;
+    text-decoration: line-through !important;
+    font-weight: 400 !important;
+    line-height: 1.1 !important;
+    order: 2 !important;
+    margin-top: 1px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Hide "Save X%" text since badge already shows it */
+  .lame-flash-card__save-line,
+  .price__badge-sale,
+  .lame-cat-card__price .lame-op-discount-badge,
+  .unit-price,
+  .volume-pricing-note {
+    display: none !important;
+  }
+
+  /* Actions / Add to cart button */
+  .lame-cat-card__actions,
+  .lame-op-card__actions {
+    margin-top: auto !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .lame-cat-card__action-row,
+  .lame-cat-card__form {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Compact full-width button: 36px high, bag icon + "Add", 44px tap target */
+  .lame-cat-card__btn,
+  .lame-op-card__btn,
+  .add-to-cart-button {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    width: 100% !important;
+    border-radius: 999px !important;
+    padding: 0 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    background: #1a4d2e !important;
+    color: #ffffff !important;
+    border: none !important;
+    cursor: pointer !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    transition: background 0.18s ease, transform 0.1s ease !important;
+  }
+
+  /* 44px tap target via invisible border/margin */
+  .lame-cat-card__btn::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: -4px 0 !important;
+    pointer-events: auto !important;
+  }
+
+  .lame-cat-card__btn-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lame-cat-card__btn-icon svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .lame-cat-card__btn-label--desktop {
+    display: none !important;
+  }
+
+  .lame-cat-card__btn-label--mobile {
+    display: inline !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Click check feedback animation */
+  .lame-cat-card__btn-check {
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lame-cat-card__btn.is-added {
+    background: #008945 !important;
+  }
+
+  .lame-cat-card__btn.is-added .lame-cat-card__btn-icon {
+    display: none !important;
+  }
+
+  .lame-cat-card__btn.is-added .lame-cat-card__btn-check {
+    display: inline-flex !important;
+  }
+
+  .lame-cat-card__btn.is-added .lame-cat-card__btn-label--mobile::before {
+    content: 'Added' !important;
+  }
+
+  .lame-cat-card__btn.is-added .lame-cat-card__btn-label--mobile {
+    font-size: 0 !important;
+  }
+
+  .lame-cat-card__btn.is-added .lame-cat-card__btn-label--mobile::before {
+    font-size: 11px !important;
+  }
+
+  /* Out of stock: small "Notify" button */
+  .lame-cat-card__btn--notify,
+  .lame-cat-card__btn--outline {
+    background: #fdfaf8 !important;
+    border: 1.5px solid rgba(74, 31, 70, 0.22) !important;
+    color: var(--lame-ink, #2b1a2e) !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+  }
+
+  .lame-cat-card__btn--notify:hover {
+    background: rgba(74, 31, 70, 0.05) !important;
+    border-color: var(--lame-plum, #4a1f46) !important;
+  }
+
+  /* ========================================================================
+     MOBILE RESULTS HEADER & HIDE GRID DENSITY TOGGLE
+     ======================================================================== */
+  /* Hide the grid density toggle on mobile since the grid is fixed at 3 columns */
+  .facets-grid-density,
+  .grid-density-toggle,
+  .grid-density-controls,
+  [data-grid-density-toggle],
+  .lame-our-products-toolbar__grid-density {
+    display: none !important;
+  }
+
+  /* The results header stacks: brand heading & product count on left, compact Sort on right */
+  .facets-controls-wrapper,
+  .lame-our-products-toolbar,
+  .facets.facets--horizontal.facets-controls-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-inline: 0 !important;
+    margin-block: 0.5rem 0.75rem !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+
+  .products-count-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    text-align: left !important;
+  }
+
+  .products-count-wrapper span {
+    font-size: 0.75rem !important;
+    color: #76877d !important;
+    font-weight: 500 !important;
+  }
+
+  .sorting-filter,
+  .sorting-filter-component,
+  .sorting-filter-component .select,
+  .sorting-filter .select {
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: 0.75rem !important;
+    padding: 0 0.75rem !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(74, 31, 70, 0.16) !important;
+    color: var(--lame-ink, #2b1a2e) !important;
+  }
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .lame-op-cat-item,
+  .lame-op-cat-arch,
+  .lame-op-cat-icon,
+  .lame-brand-tile,
+  .lame-brand-tile__shop-now,
+  .lame-brand-tile__check,
+  .lame-bottom-sheet {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Sort Pill Dropdown & Radio Options
+   ========================================================================== */
+.lame-filter-dropdown--sort .lame-filter-popover {
+  left: auto;
+  right: 0;
+  min-width: 200px;
+}
+
+.lame-filter-pill__sort-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--lame-coral, #ff6b5e);
+}
+
+.lame-filter-option--sort {
+  padding: 0.45rem 0.65rem;
+}
+
+.lame-filter-sort-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(74, 31, 70, 0.28);
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.16s ease;
+  margin: 0;
+}
+
+.lame-filter-sort-radio:checked {
+  background: var(--lame-coral, #ff6b5e);
+  border-color: var(--lame-coral, #ff6b5e);
+}
+
+.lame-filter-sort-radio:checked::after {
+  content: '';
+  position: absolute;
+  top: 3.5px;
+  left: 3.5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.lame-filter-results-count {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: rgba(43, 26, 46, 0.65);
+  white-space: nowrap;
+}
+
+.lame-filter-clear-all.is-enabled {
+  opacity: 1 !important;
+  cursor: pointer !important;
+  color: var(--lame-coral, #ff6b5e) !important;
+  border-color: rgba(255, 107, 94, 0.3) !important;
+}
+
+.lame-filter-option__count {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: rgba(43, 26, 46, 0.5);
+}

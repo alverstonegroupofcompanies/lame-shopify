@@ -132,11 +132,21 @@
         {%- else -%}
           {%- assign slide_index = 0 -%}
           {%- for block in slide_blocks -%}
-            {%- if block.settings.image == blank and block.settings.image_mobile == blank -%}{% continue %}{%- endif -%}
+            {%- assign slide_desktop_img = block.settings.image | default: block.settings.image_mobile -%}
+            {%- assign fallback_img_asset = blank -%}
+            {%- if slide_desktop_img == blank -%}
+              {%- if block.id == 'slide_2' or forloop.index == 2 -%}
+                {%- assign fallback_img_asset = 'lame-elite-pro-winter-banner.jpg' | asset_url -%}
+              {%- else -%}
+                {%- continue -%}
+              {%- endif -%}
+            {%- endif -%}
             {%- liquid
               assign image_alt = block.settings.image_alt | default: section.settings.image_alt | default: 'Our Products'
               assign slide_link = block.settings.link
-              assign slide_desktop_img = block.settings.image | default: block.settings.image_mobile
+              if slide_link == blank and fallback_img_asset != blank
+                assign slide_link = '/pages/elite-pro'
+              endif
             -%}
             <div
               class="lame-op-mini-banner__slide{% if slide_index == 0 %} is-active{% endif %}"
@@ -148,6 +158,16 @@
                 <a class="lame-op-mini-banner__link" href="{{ slide_link }}" aria-label="{{ image_alt | escape }}">
               {%- endif -%}
               <div class="lame-op-mini-banner__surface">
+                {%- if fallback_img_asset != blank -%}
+                  <img
+                    class="lame-op-mini-banner__image"
+                    src="{{ fallback_img_asset }}"
+                    alt="{{ image_alt | escape }}"
+                    width="1024"
+                    height="352"
+                    loading="lazy"
+                  >
+                {%- else -%}
                 <picture class="lame-op-mini-banner__picture">
                   {%- if block.settings.image_mobile != blank -%}
                     <source
@@ -187,6 +207,7 @@
                     }}
                   {%- endif -%}
                 </picture>
+                {%- endif -%}
               </div>
               {%- if slide_link != blank -%}
                 </a>
