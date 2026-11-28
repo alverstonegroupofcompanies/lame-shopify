@@ -16,16 +16,21 @@
     assign valid_slides_count = valid_slides_count | plus: 1
   endif
 
-  assign has_slide_2 = false
-  if block.settings.enable_second_banner != false
-    assign has_slide_2 = true
-    assign valid_slides_count = valid_slides_count | plus: 1
-  endif
-
   assign img_2 = block.settings.second_banner_image
   assign link_2 = block.settings.second_banner_link
   if link_2 == blank
     assign link_2 = '/pages/elite-pro'
+  endif
+
+  assign has_slide_2 = false
+  if block.settings.enable_second_banner != false
+    if img_2 != blank
+      assign has_slide_2 = true
+      assign valid_slides_count = valid_slides_count | plus: 1
+    elsif block.settings.use_default_second_banner != false
+      assign has_slide_2 = true
+      assign valid_slides_count = valid_slides_count | plus: 1
+    endif
   endif
 
   assign fallback_banner_2 = 'lame-elite-pro-winter-banner.jpg' | asset_url
@@ -1375,7 +1380,7 @@
 
 {% schema %}
 {
-  "name": "GIF banner",
+  "name": "Hero Banner Slideshow",
   "tag": null,
   "settings": [
     {
@@ -1395,16 +1400,27 @@
       "info": "Optional link when clicking the first banner"
     },
     {
+      "type": "header",
+      "content": "Second Banner (Slide 2)"
+    },
+    {
       "type": "checkbox",
       "id": "enable_second_banner",
-      "label": "Enable second banner",
+      "label": "Enable second banner (Slide 2)",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "use_default_second_banner",
+      "label": "Show default Elite Pro banner if no image uploaded",
+      "default": true,
+      "info": "Shows the default membership banner when no custom image is selected. To remove slide 2 completely, uncheck this or uncheck 'Enable second banner'."
     },
     {
       "type": "image_picker",
       "id": "second_banner_image",
       "label": "Banner image 2",
-      "info": "Upload or select your second banner image. If empty, the default Elite Pro banner is shown."
+      "info": "Upload any custom image. To change it, click 'Change'. To delete, click 'Remove'."
     },
     {
       "type": "url",
