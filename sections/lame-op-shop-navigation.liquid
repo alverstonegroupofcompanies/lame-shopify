@@ -527,6 +527,10 @@
                 <span class="lame-filter-pill__sort-label" data-sort-current-label>
                   {%- liquid
                     case current_sort
+                      when 'recommended'
+                        echo '· For you'
+                      when 'random'
+                        echo '· Random'
                       when 'price-ascending'
                         echo '· Price: Low to high'
                       when 'price-descending'
@@ -536,7 +540,7 @@
                       when 'best-selling'
                         echo '· Best selling'
                       else
-                        echo '· Featured'
+                        echo '· For you'
                     endcase
                   -%}
                 </span>
@@ -545,8 +549,12 @@
               <div class="lame-filter-popover lame-filter-popover--sort" role="dialog" aria-label="Sort by">
                 <div class="lame-filter-popover__options">
                   <label class="lame-filter-option lame-filter-option--sort">
-                    <input type="radio" class="lame-filter-sort-radio" name="sort_by" value="manual" {% if current_sort == 'manual' or current_sort == blank or current_sort == 'title-ascending' %}checked{% endif %}>
-                    <span class="lame-filter-option__text">Featured</span>
+                    <input type="radio" class="lame-filter-sort-radio" name="sort_by" value="recommended" {% if current_sort == 'recommended' or current_sort == 'manual' or current_sort == blank or current_sort == 'title-ascending' %}checked{% endif %}>
+                    <span class="lame-filter-option__text">Recommended for you</span>
+                  </label>
+                  <label class="lame-filter-option lame-filter-option--sort">
+                    <input type="radio" class="lame-filter-sort-radio" name="sort_by" value="random" {% if current_sort == 'random' %}checked{% endif %}>
+                    <span class="lame-filter-option__text">Random shuffle</span>
                   </label>
                   <label class="lame-filter-option lame-filter-option--sort">
                     <input type="radio" class="lame-filter-sort-radio" name="sort_by" value="best-selling" {% if current_sort == 'best-selling' %}checked{% endif %}>
@@ -570,6 +578,24 @@
           </div>
 
           <div class="lame-op-filters-desktop-right" style="display: flex; align-items: center; gap: 0.85rem;">
+            <!-- Shuffle / Surprise Me button -->
+            <button
+              type="button"
+              class="lame-filter-shuffle-btn"
+              data-filter-shuffle
+              title="Shuffle products to see fresh & different recommendations"
+              aria-label="Shuffle products"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="16 3 21 3 21 8"></polyline>
+                <line x1="4" y1="20" x2="21" y2="3"></line>
+                <polyline points="21 16 21 21 16 21"></polyline>
+                <line x1="15" y1="15" x2="21" y2="21"></line>
+                <line x1="4" y1="4" x2="9" y2="9"></line>
+              </svg>
+              <span>Shuffle</span>
+            </button>
+
             <!-- Live Results Count -->
             <span class="lame-filter-results-count" data-results-count>{{ collection.products_count | default: 0 }} products</span>
 
@@ -598,6 +624,23 @@
             </svg>
             <span>Filters</span>
             <span class="lame-mobile-count-badge" data-mobile-total-count hidden>0</span>
+          </button>
+
+          <button
+            type="button"
+            class="lame-filter-shuffle-btn lame-filter-shuffle-btn--mobile"
+            data-filter-shuffle
+            title="Shuffle products"
+            aria-label="Shuffle products"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="16 3 21 3 21 8"></polyline>
+              <line x1="4" y1="20" x2="21" y2="3"></line>
+              <polyline points="21 16 21 21 16 21"></polyline>
+              <line x1="15" y1="15" x2="21" y2="21"></line>
+              <line x1="4" y1="4" x2="9" y2="9"></line>
+            </svg>
+            <span>Shuffle</span>
           </button>
 
           <span class="lame-filter-results-count" data-results-count>{{ collection.products_count | default: 0 }} products</span>
@@ -636,8 +679,12 @@
           </div>
           <div class="lame-sheet-accordion-options" style="display: flex; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0.2rem;">
             <label class="lame-filter-option">
-              <input type="radio" class="lame-filter-sort-radio" name="sheet.sort_by" value="manual" {% if current_sort == 'manual' or current_sort == blank or current_sort == 'title-ascending' %}checked{% endif %}>
-              <span class="lame-filter-option__text">Featured</span>
+              <input type="radio" class="lame-filter-sort-radio" name="sheet.sort_by" value="recommended" {% if current_sort == 'recommended' or current_sort == 'manual' or current_sort == blank or current_sort == 'title-ascending' %}checked{% endif %}>
+              <span class="lame-filter-option__text">Recommended for you</span>
+            </label>
+            <label class="lame-filter-option">
+              <input type="radio" class="lame-filter-sort-radio" name="sheet.sort_by" value="random" {% if current_sort == 'random' %}checked{% endif %}>
+              <span class="lame-filter-option__text">Random shuffle</span>
             </label>
             <label class="lame-filter-option">
               <input type="radio" class="lame-filter-sort-radio" name="sheet.sort_by" value="best-selling" {% if current_sort == 'best-selling' %}checked{% endif %}>
@@ -941,13 +988,15 @@
       const sortLabelEl = root.querySelector('[data-sort-current-label]');
       if (sortLabelEl) {
         const labels = {
-          'manual': '· Featured',
+          'recommended': '· For you',
+          'random': '· Random',
+          'manual': '· For you',
           'best-selling': '· Best selling',
           'price-ascending': '· Price: Low to high',
           'price-descending': '· Price: High to low',
           'created-descending': '· Newest'
         };
-        sortLabelEl.textContent = labels[state.sortBy] || '· Featured';
+        sortLabelEl.textContent = labels[state.sortBy] || '· For you';
       }
 
       // 4. Price inputs in popover
@@ -1184,6 +1233,9 @@
 
         // Filter cards in DOM to ensure immediate client accuracy & live counts
         filterCardsInDOM();
+        if (window.LameSmartCollection && typeof window.LameSmartCollection.sort === 'function') {
+          window.LameSmartCollection.sort();
+        }
       } catch (err) {
         console.error('Error fetching collection results, falling back to full reload:', err);
         try {
@@ -1195,6 +1247,9 @@
           const curGrid = document.querySelector('#ResultsList') || document.querySelector('.product-grid');
           if (newGrid && curGrid) curGrid.innerHTML = newGrid.innerHTML;
           filterCardsInDOM();
+          if (window.LameSmartCollection && typeof window.LameSmartCollection.sort === 'function') {
+            window.LameSmartCollection.sort();
+          }
         } catch (fullErr) {
           window.location.href = url;
         }
